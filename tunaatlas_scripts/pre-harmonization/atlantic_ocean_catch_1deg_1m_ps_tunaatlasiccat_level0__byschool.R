@@ -19,7 +19,7 @@
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 #get data from geoflow current job dir
-filename <- "t2ce_PS91-16_bySchool.csv"
+filename <- entity$data$source[[1]]
 path_to_raw_dataset <- entity$getJobDataResource(config, filename)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 #----------------------------------------------------------------------------------------------------------------------------
