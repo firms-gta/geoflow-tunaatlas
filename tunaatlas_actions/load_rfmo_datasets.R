@@ -5,5 +5,10 @@ load_rfmo_datasets <- function(entity, config, options){
 		config$logger.error(errMsg)
 		stop(errMsg)
 	}
+	
+	#get entity as data.frame to make easier mapping with DBMS metadata table
+	entity_df <- entity$asDataFrame()
 
+	
+	
 }
