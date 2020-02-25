@@ -20,7 +20,7 @@ CREATE TABLE "metadata"."metadata_DCMI"
   "Format" text, 
   "Data" text,
    geometry geometry(GEOMETRY,4326),
-  CONSTRAINT metadata_pkey PRIMARY KEY ("id_metadata")
+  CONSTRAINT "metadata_DCMI_pkey" PRIMARY KEY ("id_metadata")
 ) 
 WITH (
   OIDS=FALSE
