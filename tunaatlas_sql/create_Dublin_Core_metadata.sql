@@ -31,7 +31,7 @@ ALTER TABLE "metadata"."metadataDCMI" OWNER TO "%db_admin%";
 GRANT SELECT ON TABLE "metadata"."metadataDCMI" TO "%db_admin%";
 GRANT ALL ON TABLE "metadata"."metadataDCMI" TO "%db_admin%";
 
-CREATE INDEX "metadata_geometry_session_geom_idx" ON "metadata"."metadataDCMI" USING GIST ("geometry");
+CREATE INDEX "metadataDCMI_geometry_session_geom_idx" ON "metadata"."metadataDCMI" USING GIST ("geometry");
 
 COMMENT ON TABLE "metadata"."metadataDCMI" IS 'Table containing the metadata on all the datasets available in the database using DCMI Metadata Terms (https://www.dublincore.org/specifications/dublin-core/dcmi-terms)';
 COMMENT ON COLUMN "metadata"."metadataDCMI"."id_metadata" IS '"id_metadata" is a Serial (integer) which can be used as another primary key to identify each dataset within the database model';
