@@ -36,8 +36,8 @@
       "run": false
     },
 	{
-      "id": "load_rfmo_datasets",
-	  "script": "D:/sandbox-geoflow/tunaatlas_actions/load_rfmo_datasets.R",
+      "id": "load_dataset",
+	  "script": "D:/sandbox-geoflow/tunaatlas_actions/load_dataset.R",
       "run": false
     }
   ]
