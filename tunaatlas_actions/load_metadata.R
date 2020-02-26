@@ -10,28 +10,28 @@ load_metadata <- function(entity, config, options){
   con_database <- config$software$output$dbi
   user_database <- config$software$output$dbi_config$parameters$user
   
-  # entity <- config$metadata$content$entities[[1]]$asDataFrame()
-  # patch to fit with DCMI data structure
+  #get entity as data.frame to make easier mapping with DBMS metadata table
   entity_df <- entity$asDataFrame()
+  # temporary patch to fit with DCMI data structure
   entity_df$Format <- "SQL"
   entity_df$Source <- "RFMOs"
-  # create_table <- options$
-    create_table <- FALSE
-    if(create_table==TRUE){
+  #check how this specific option should be get from "options" paramater of this function
+  create_table <- config$src_config$actions[[1]]$options$create_table
+  cat(create_table)
+  
+  if(create_table==TRUE){
     query_create_table_metadata <- paste(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_Dublin_Core_metadata.sql"), collapse=" ")
     query_create_table_metadata <- gsub("%db_admin%",user_database,query_create_table_metadata)
-    # create_table_metadata <- dbGetQuery(con_database,query_create_table_metadata)
     create_table_metadata <- dbSendQuery(con_database,query_create_table_metadata)
-    }
+  }
   
-	#get entity as data.frame to make easier mapping with DBMS metadata table
+  #check if there is a better way to specify the name of the schema the table is part of
   table_id <- c("metadata","metadataDCMI")
-  
   load_table_metadata <- dbWriteTable(conn = con_database,
                                       name =  table_id,
                                       value = entity_df[,c(1,3,2,4,5,6,7,9,10,8,11,12,16,13,15,14)],
                                       row.names=FALSE,
                                       overwrite=FALSE,
                                       append=TRUE)
-	# update_geometry <- dbGetQuery(con_database, paste0('UPDATE "metadata"."metadata_DCMI" SET geometry = ST_GeomFromText("SpatialCoverage",4326);'))
+	# update_geometry <- dbSendQuery(con_database, paste0('UPDATE "metadata"."metadata_DCMI" SET geometry = ST_GeomFromText("SpatialCoverage",4326);'))
 }
