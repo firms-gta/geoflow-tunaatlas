@@ -1,4 +1,4 @@
-load_metadata <- function(entity, config, create_table=FALSE){
+load_metadata <- function(entity, config, options){
 
 	#create and load metadata table with entities as dataframe
 	if(dir.exists("errors_mappings")){
@@ -12,20 +12,24 @@ load_metadata <- function(entity, config, create_table=FALSE){
   
   # entity <- config$metadata$content$entities[[1]]$asDataFrame()
   # patch to fit with DCMI data structure
-  entity$Format <- "SQL"
-  entity$Source <- "RFMOs"
-  
-  if(create_table==TRUE){
+  entity_df <- entity$asDataFrame()
+  entity_df$Format <- "SQL"
+  entity_df$Source <- "RFMOs"
+  # create_table <- options$
+    create_table <- FALSE
+    if(create_table==TRUE){
     query_create_table_metadata <- paste(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_Dublin_Core_metadata.sql"), collapse=" ")
     query_create_table_metadata <- gsub("%db_admin%",user_database,query_create_table_metadata)
-    create_table_metadata <- dbGetQuery(con_database,query_create_table_metadata)
+    # create_table_metadata <- dbGetQuery(con_database,query_create_table_metadata)
+    create_table_metadata <- dbSendQuery(con_database,query_create_table_metadata)
     }
   
 	#get entity as data.frame to make easier mapping with DBMS metadata table
   table_id <- c("metadata","metadataDCMI")
+  
   load_table_metadata <- dbWriteTable(conn = con_database,
                                       name =  table_id,
-                                      value = entity[,c(1,3,2,4,5,6,7,9,10,8,11,12,16,13,15,14)],
+                                      value = entity_df[,c(1,3,2,4,5,6,7,9,10,8,11,12,16,13,15,14)],
                                       row.names=FALSE,
                                       overwrite=FALSE,
                                       append=TRUE)
