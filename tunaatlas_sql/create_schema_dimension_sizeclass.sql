@@ -62,4 +62,4 @@ CREATE TRIGGER trigg_sizeclass_calc_size_max
   FOR EACH ROW
   EXECUTE PROCEDURE sizeclass.sizeclass_calc_size_max();
   
-  INSERT INTO sizeclass.sizeclass(size_min,size_step) VALUES (1,0)
+  INSERT INTO sizeclass.sizeclass(size_min,size_step) VALUES (1,0);
