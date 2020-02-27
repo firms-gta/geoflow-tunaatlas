@@ -1,4 +1,3 @@
-DROP SCHEMA IF EXISTS area CASCADE;
 CREATE TABLE area.area_wkt
 (
   code text NOT NULL,
