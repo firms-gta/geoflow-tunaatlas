@@ -23,12 +23,12 @@ deploy_database_model <- function(config, software, software_config){
 	outsql <- paste(outsql, '-- 1A/ METADATA Legacy table', sep = "\n")
 	fileName <- paste(repository_sql_scripts_database_deployement,"create_schema_metadata.sql",sep="/")
 	sql_deploy_metadata <- paste(readLines(fileName), collapse="\n")
-	outsql <- paste(outsql, sql_deploy_metadata, collapse="\n")
+	outsql <- paste(outsql, sql_deploy_metadata, sep="\n")
 	# METADATA DCMI table (NEW)
 	outsql <- paste(outsql, '-- 1A/ METADATA DCMI table', sep = "\n")
 	fileName <- paste(repository_sql_scripts_database_deployement,"create_Dublin_Core_metadata.sql",sep="/")
 	sql_deploy_metadata <- paste(readLines(fileName), collapse="\n")
-	outsql <- paste(outsql, sql_deploy_metadata, collapse="\n")
+	outsql <- paste(outsql, sql_deploy_metadata, sep="\n")
 	
 	## 2) Deploy dimensions
 	outsql <- paste(outsql, '-- 2/ DIMENSIONS', sep = "\n")
