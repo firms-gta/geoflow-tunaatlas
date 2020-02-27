@@ -1,3 +1,4 @@
+DROP SCHEMA IF EXISTS %dimension_name% CASCADE;
 
 CREATE SCHEMA %dimension_name%
   AUTHORIZATION "%db_admin%";

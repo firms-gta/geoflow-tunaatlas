@@ -1,4 +1,4 @@
-
+DROP SCHEMA IF EXISTS "time" CASCADE;
 CREATE SCHEMA "time"
   AUTHORIZATION "%db_admin%";
 

@@ -1,4 +1,4 @@
-
+DROP SCHEMA IF EXISTS "metadata" CASCADE;
 CREATE SCHEMA metadata
   AUTHORIZATION "%db_admin%";
 

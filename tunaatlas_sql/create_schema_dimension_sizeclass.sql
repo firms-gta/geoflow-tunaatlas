@@ -1,3 +1,4 @@
+DROP SCHEMA IF EXISTS sizeclass CASCADE;
 CREATE SCHEMA sizeclass
   AUTHORIZATION "%db_admin%";
 
