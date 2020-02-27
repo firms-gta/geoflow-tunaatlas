@@ -57,7 +57,7 @@ CREATE TABLE metadata.metadata_mapping
 ALTER TABLE metadata.metadata_mapping
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE metadata.metadata_mapping TO "%db_admin%";
-
+DROP SCHEMA IF EXISTS fact_tables CASCADE;
 CREATE SCHEMA fact_tables
   AUTHORIZATION "%db_admin%";
 
