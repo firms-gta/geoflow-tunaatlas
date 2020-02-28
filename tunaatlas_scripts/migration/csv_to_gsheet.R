@@ -90,7 +90,7 @@ sardara_to_geoflow_metadata <- function(geoflow_metadata,sardara_metadata_csv,se
   publisher  <- paste0("publisher:", gsub("\n", ",", sardara_metadata_csv$contact_publisher[i]))
   processor  <- paste0("processor:", gsub("\n", ",", sardara_metadata_csv$contact_processor[i]))
   # Creator <- paste(owner,originator,metadata,PointOfContact,PrincipalInvestigator,publisher,processor,sep=sep)
-  Creator <- paste(owner,metadata,PointOfContact,PrincipalInvestigator,publisher,processor,sep=sep)
+  Creator <- paste(owner,metadata,PointOfContact,PrincipalInvestigator,publisher,sep=sep)
   
   if(!is.na(sardara_metadata_csv$contact_data_structure_definition[i])){
     data_structure_definition  <- paste0("dsd:", gsub("\n", ",", sardara_metadata_csv$contact_data_structure_definition[i]))
@@ -134,7 +134,12 @@ sardara_to_geoflow_metadata <- function(geoflow_metadata,sardara_metadata_csv,se
   cat("################################## RIGHTS SOURCE  PROVENANCE DATA ##################################\n")
   Rights <- paste0(sardara_metadata_csv$rights[i])
   Source <- paste0(sardara_metadata_csv$source[i])
-  Provenance <- paste(paste("statement:Data management workflow",sardara_metadata_csv$lineage[i],sep=sep),processor,sep=sep)
+  
+  count <-str_count(pattern = "process",string = sardara_metadata_csv$lineage[i])
+  for(c in 1:count-1){
+    toto <- paste0(processor,gsub("processor:",",",toto))
+  }
+  Provenance <- paste(paste("statement:Data management workflow",sardara_metadata_csv$lineage[i],sep=sep),paste0(processor,toto),sep=sep)
 
   # database_table_name & database_view_name not used for now
   # database_table_name  <- paste0("view:", gsub("\n", ",", sardara_metadata_csv$database_table_name[i]))
