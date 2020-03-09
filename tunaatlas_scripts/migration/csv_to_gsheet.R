@@ -54,7 +54,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		cat(paste0(Identifier,"\n"))  
 		Title <- paste0(sardara_metadata_csv$title[i])
 		cat("################################## DESCRIPTION  ##################################\n")
-		Description <- gsub("[0-9]+","year",sardara_metadata_csv$description[i])
+		Description <- gsub(" \\d{4}"," year",sardara_metadata_csv$description[i])
 		Description <- gsub("year to year+","%temporal_extent:start% - %temporal_extent:end%",Description)
 		if(!is.na(sardara_metadata_csv$supplemental_information[i])){
 			Description <- paste0("abstract:",Description,"\n", sardara_metadata_csv$supplemental_information[i])
@@ -90,7 +90,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		# Date  <- as.Date(sardara_metadata_csv$Year[i],"%Y")
 		cat("################################## FORMAT TYPE LANGUAGE COVERAGE##################################\n")
 		Format <- sardara_metadata_csv$format[i]
-		Type <- paste0(sardara_metadata_csv$dataset_type[i])
+		Type <- "dataset" #paste0(sardara_metadata_csv$dataset_type[i])
   
 		if(!is.na(sardara_metadata_csv$langage[i])){
 			Language <- paste0(sardara_metadata_csv$langage[i])
