@@ -180,14 +180,16 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 			#codelist dataset --> DATA
 			path_to_dataset <- sardara_metadata_csv$path_to_dataset[i]
 			if(!is.na(path_to_dataset)) if(path_to_dataset!=""){
-				Data <- paste0(Data,"source:codelist.csv@", path_to_dataset)
+				Data <- paste0(Data,"source:",sardara_metadata_csv$database_table_name[i],"@", path_to_dataset, sep)
+				Data <- paste0(Data, "uploadType:dbtable")
 			}
 		#else if codelist mapping
 		}else{
-			#codelist dataset --> DATA
+			#mapping dataset --> DATA
 			path_to_dataset <- sardara_metadata_csv$path_to_dataset[i]
 			if(!is.na(path_to_dataset)) if(path_to_dataset != ""){
-				Data <- paste0(Data,"source:mapping.csv@", path_to_dataset)
+				Data <- paste0(Data,"source:",sardara_metadata_csv$database_table_name[i],"@", path_to_dataset, sep)
+				Data <- paste0(Data, "uploadType:dbtable")
 			}
 		}
 		
