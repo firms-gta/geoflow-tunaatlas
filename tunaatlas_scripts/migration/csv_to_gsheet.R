@@ -30,7 +30,9 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 	sep <- geoflow::get_line_separator()
 	
 	sardara_metadata_csv$title <- gsub("year_","temporal_extent:",sardara_metadata_csv$title)
-    sardara_metadata_csv$lineage <- gsub("step","process",sardara_metadata_csv$lineage)
+    sardara_metadata_csv$lineage <- gsub("\nstep",paste0(sep,"process"),sardara_metadata_csv$lineage)
+	sardara_metadata_csv$lineage <- gsub("step","process",sardara_metadata_csv$lineage)
+	sardara_metadata_csv$lineage <- gsub("process: ", "process:", sardara_metadata_csv$lineage) #doesn't work
     sardara_metadata_csv$lineage <- gsub("[0-9]+","",sardara_metadata_csv$lineage)
 	
 	out <- do.call("rbind", lapply(1:nrow(sardara_metadata_csv), function(i) {
@@ -38,15 +40,15 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		Identifier <- NULL
 		Title <- NULL
 		Description <- NULL
-		# Subject <- NULL
-		# Creator <- NULL
-		# Date <- NULL
-		# Format <- NULL
-		# Type <- NULL
-		# Language <- NULL
+		Subject <- NULL
+		Creator <- NULL
+		Date <- NULL
+		Format <- NULL
+		Type <- NULL
+		Language <- NULL
 		Relation  <- NULL
 		Rights <- NULL
-		# Source <- NULL
+		Source <- NULL
 		Provenance <- NULL
 		Data <- NULL
     
@@ -54,8 +56,8 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		cat(paste0(Identifier,"\n"))  
 		Title <- paste0(sardara_metadata_csv$title[i])
 		cat("################################## DESCRIPTION  ##################################\n")
-		Description <- gsub(" \\d{4}"," year",sardara_metadata_csv$description[i])
-		Description <- gsub("year to year+","%temporal_extent:start% - %temporal_extent:end%",Description)
+		Description <- sardara_metadata_csv$description[i]
+		Description <- gsub("\\d{4} to \\d{4}","%temporal_extent:start% - %temporal_extent:end%",Description)
 		if(!is.na(sardara_metadata_csv$supplemental_information[i])){
 			Description <- paste0("abstract:",Description,"\n", sardara_metadata_csv$supplemental_information[i])
 		}else{
@@ -65,7 +67,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		if(!is.na(sardara_metadata_csv$subject[i])){
 			Subject <- paste0("th:",sardara_metadata_csv$subject[i])
 		}else{
-			Subject <- "th:no keywords"
+			Subject <- "" # leave empty for now - "th:no keywords"
 		}
 		cat("################################## CREATOR  ##################################\n")
 		owner  <- paste0("owner:", gsub("\n", ",", sardara_metadata_csv$contact_owner[i]),",",sardara_metadata_csv$contact_originator[i])
@@ -73,20 +75,31 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		metadata  <- paste0("metadata:", gsub("\n", ",", sardara_metadata_csv$contact_metadata[i]))
 		PointOfContact  <- paste0("pointOfContact:", gsub("\n", ",", sardara_metadata_csv$contact_PointOfContact[i]))
 		PrincipalInvestigator  <- paste0("principalInvestigator:", gsub("\n", ",", sardara_metadata_csv$contact_PrincipalInvestigator[i]))
-		publisher  <- paste0("publisher:", gsub("\n", ",", sardara_metadata_csv$contact_publisher[i]))
+		#publisher  <- paste0("publisher:", gsub("\n", ",", sardara_metadata_csv$contact_publisher[i]))
 		processor  <- paste0("processor:", gsub("\n", ",", sardara_metadata_csv$contact_processor[i]))
 		# Creator <- paste(owner,originator,metadata,PointOfContact,PrincipalInvestigator,publisher,processor,sep=sep)
-		Creator <- paste(owner,metadata,PointOfContact,PrincipalInvestigator,publisher,sep=sep)
+		Creator <- paste(owner,metadata,PointOfContact,PrincipalInvestigator,sep=sep)
   
 		if(!is.na(sardara_metadata_csv$contact_data_structure_definition[i])){
 			data_structure_definition  <- paste0("dsd:", gsub("\n", ",", sardara_metadata_csv$contact_data_structure_definition[i]))
 			Creator <- paste(Creator,data_structure_definition,sep=sep)
 		}
 		cat("################################## DATE  ##################################\n")
-		date_publication  <- paste0("publication:", gsub("\n", ",", sardara_metadata_csv$date_publication[i]))
-		date_download  <- paste0("access:", gsub("\n", ",", sardara_metadata_csv$date_publication[i]))
-  
-		Date <- paste(date_publication,date_download,sep=sep)
+		Date <- ""
+		if(!is.na(sardara_metadata_csv$date_publication[i])) if(sardara_metadata_csv$date_publication[i] != ""){
+			date_publication  <- paste0("publication:", gsub("\n", ",", sardara_metadata_csv$date_publication[i]))
+			date_publication <- gsub(" ", "", date_publication)
+			Date <- date_publication
+		}
+		if(!is.na(sardara_metadata_csv$date_publication[i])) if(sardara_metadata_csv$date_publication[i] != ""){
+			date_download  <- paste0("access:", gsub("\n", ",", sardara_metadata_csv$date_publication[i]))	
+			date_download <- gsub(" ", "", date_download)
+			if(Date == ""){
+				Date <- date_download
+			}else{
+				Date <- paste(Date, date_download, sep = sep)
+			}
+		}
 		# Date  <- as.Date(sardara_metadata_csv$Year[i],"%Y")
 		cat("################################## FORMAT TYPE LANGUAGE COVERAGE##################################\n")
 		Format <- sardara_metadata_csv$format[i]
@@ -99,7 +112,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		TemporalCoverage  <- ""
   
 		cat("################################## RIGHTS SOURCE  PROVENANCE ##################################\n")
-		Rights <- paste0(sardara_metadata_csv$rights[i])
+		Rights <- "" #paste0(sardara_metadata_csv$rights[i])
 		Source <- paste0(sardara_metadata_csv$source[i])
   
 		count <-str_count(pattern = "process",string = sardara_metadata_csv$lineage[i])
@@ -110,53 +123,91 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 		Provenance <- paste(paste("statement:Data management workflow",sardara_metadata_csv$lineage[i],sep=sep),paste("processor:",sub(",","",list_processor)),sep=sep)
   
 		cat("################################## RELATION  & DATA ##################################\n")
-		if(!is.na(sardara_metadata_csv$relation_source_download[i])){Relation <- paste0("http:website[Source_download website]@",sardara_metadata_csv$relation_source_download[i])}
+		#source website --> RELATION
+		path_source_download <- sardara_metadata_csv$relation_source_download[i]
+		if(!is.na(path_source_download)) if(path_source_download != ""){
+			if(!is.null(Relation)) Relation <- paste0(Relation, sep)
+			Relation <- paste0("http:website[Source website]@", path_source_download)
+		}
 		# cat(paste0(sardara_metadata_csv$relation_source_dataset[i],"\n"))
-		if(!is.na(sardara_metadata_csv$relation_source_dataset[i])){Relation <- paste(Relation,paste0("http:data[Source dataset]@", sardara_metadata_csv$relation_source_dataset[i]),sep=sep)}
+		#Source dataset --> RELATION
+		path_source_dataset <- sardara_metadata_csv$relation_source_dataset[i]
+		if(!is.na(path_source_dataset)) if(path_source_dataset != ""){
+			if(!is.null(Relation)) Relation <- paste0(Relation, sep)
+			Relation <- paste0(Relation,paste0("http:data[Source dataset]@", path_source_dataset))
+		}
 
 		#if dataset
 		if(!"path_to_dataset" %in% names(sardara_metadata_csv)){
-			if(sardara_metadata_csv$relation_source_metadata[i]!=""){Relation <- paste(Relation,paste0("http:metadata[Source metadata]@", sardara_metadata_csv$relation_source_metadata[i]),sep=sep)}
-			if(sardara_metadata_csv$path_to_codelists_used_in_dataset[i]!=""){Relation <- paste(Relation,paste0("http:codelists_used_in_dataset[codelists_used_in_dataset]@", sardara_metadata_csv$path_to_codelists_used_in_dataset[i]),sep=sep)}
-			if(sardara_metadata_csv$path_to_script_dataset_generation[i]!=""){Relation <- paste(Relation,paste0("http:dataset_generation[dataset_generation]@", sardara_metadata_csv$path_to_script_dataset_generation[i]),sep=sep)}
-			if(sardara_metadata_csv$parameter_path_to_raw_dataset[i]!=""){Relation <- paste(Relation,paste0("http:raw_dataset[raw datase path]@", sardara_metadata_csv$parameter_path_to_raw_dataset[i]),sep=sep)}
-			if(sardara_metadata_csv$parameter_path_to_effort_dataset[i]!=""){Relation <- paste(Relation,paste0("http:effort_dataset[effort dataset path]@", sardara_metadata_csv$parameter_path_to_effort_dataset[i]),sep=sep)}
-			if(sardara_metadata_csv$parameter_spatial_stratification[i]!=""){Relation <- paste0(Relation,"http:spatial_stratification[spatial_stratification]@",sardara_metadata_csv$parameter_spatial_stratification[i])}
+			#metadata --> RELATION
+			path_md <- sardara_metadata_csv$relation_source_metadata[i]
+			if(!is.na(path_md)) if(path_md != ""){
+				if(!is.null(Relation)) Relation <- paste0(Relation, sep)
+				Relation <- paste0(Relation,paste0("http:metadata[Source metadata]@", path_md))
+			}
+			#codelist --> RELATION
+			path_cl <- sardara_metadata_csv$path_to_codelists_used_in_dataset[i]
+			if(!is.na(path_cl)) if(path_cl != ""){
+				if(!is.null(Relation)) Relation <- paste0(Relation, sep)
+				Relation <- paste0(Relation,paste0("http:codelists[Source codelists]@", path_cl))
+			}
+			#raw_dataset --> DATA
+			path_raw_dataset <- sardara_metadata_csv$parameter_path_to_raw_dataset[i]
+			if(!is.na(path_raw_dataset)) if(path_raw_dataset!= ""){
+				if(!is.null(Data)) Data <- paste0(Data, sep)
+				Data <- paste0(Relation,paste0("source:TOBEDONE@", path_raw_dataset))
+			}
+			#effort_dataset (assumes there is already a path raw dataset) --> DATA
+			path_effort_dataset <- sardara_metadata_csv$parameter_path_to_effort_dataset[i]
+			if(!is.na(path_effort_dataset)) if(path_effort_dataset != ""){
+				Data <- paste(Data,paste0("TOBEDONE@", path_effort_dataset),sep=",")
+			}
+			#script --> DATA
+			path_script <- sardara_metadata_csv$path_to_script_dataset_generation[i]
+			if(!is.na(path_script)) if(path_script != ""){
+				if(!is.null(Data)) Data <- paste0(Data, sep)
+				Data <- paste0(Data,paste0("action:TOBEDONE[Description]@", path_script))
+				Data <- paste0(Data, sep, "run:true")
+			}
 		#else if codelist
 		}else if("relation_source_metadata" %in% names(sardara_metadata_csv)){
-			if(sardara_metadata_csv$path_to_dataset[i]!=""){Relation <- paste(Relation,"http:path_to_dataset[path_to_dataset]@", sardara_metadata_csv$path_to_dataset[i],sep=sep)}
-			if(sardara_metadata_csv$relation_source_metadata[i]!=""){Relation <- paste(Relation,"http:metadata[Source metadata]@", sardara_metadata_csv$relation_source_metadata[i])}
-			#else if codelist mapping
-		}else{Relation <- paste0(Relation,"http:path_to_dataset[path_to_dataset]@", sardara_metadata_csv$path_to_dataset[i])}
-  
-
-
-		# database_table_name & database_view_name not used for now
-		# database_table_name  <- paste0("view:", gsub("\n", ",", sardara_metadata_csv$database_table_name[i]))
-		# database_view_name  <- paste0("table:", gsub("\n", ",", sardara_metadata_csv$database_view_name[i]))
-		run <- "run:false"
-		#if dataset
-		if(!"path_to_dataset" %in% names(sardara_metadata_csv)){
-			source  <- paste0(gsub("t2ce_PS91-16_bySchool.csv","TO BE DONE","source:t2ce_PS91-16_bySchool.csv@"), sardara_metadata_csv$path_to_codelists_used_in_dataset[i])
-			if(sardara_metadata_csv$path_to_script_dataset_generation[i]!=""){action  <- paste0(gsub("atlantic_ocean_catch_1deg_1m_ps_tunaatlasiccat_level0__byschool.R",sardara_metadata_csv$path_to_script_dataset_generation[i],"action:atlantic_ocean_catch_1deg_1m_ps_tunaatlasiccat_level0__byschool.R[R harmonization script]@"), sardara_metadata_csv$path_to_script_dataset_generation[i])}
-			Data <- paste(source,action,run,sep=sep)
-		}else if("relation_source_metadata" %in% names(sardara_metadata_csv)){
-			source  <- paste("source:TO_BE_DONE@", sardara_metadata_csv$path_to_dataset[i],sep=sep)
-			action  <- "TO BE DONE"
-			Data <- paste(source,run,sep=sep)
-			if(sardara_metadata_csv$relation_source_metadata[i]!=""){Relation <- paste(Relation,"http:metadata[Source metadata]@", sardara_metadata_csv$relation_source_metadata[i])}
-			#else if codelist mapping
+			#codelist metadata --> RELATION
+			path_md <- sardara_metadata_csv$relation_source_metadata[i]
+			if(!is.na(path_md)) if(path_md != ""){
+				if(!is.null(Relation)) Relation <- paste0(Relation, sep)
+				Relation <- paste0(Relation,"http:metadata[Source metadata]@", path_md)
+			}
+			#codelist dataset --> DATA
+			path_to_dataset <- sardara_metadata_csv$path_to_dataset[i]
+			if(!is.na(path_to_dataset)) if(path_to_dataset!=""){
+				Data <- paste0(Data,"source:codelist.csv@", path_to_dataset)
+			}
+		#else if codelist mapping
 		}else{
-			source  <- paste("source:TO_BE_DONE@", sardara_metadata_csv$path_to_dataset[i],sep=sep)
-			action  <- "TO BE DONE"
-			Data <- paste(source,run,sep=sep)
+			#codelist dataset --> DATA
+			path_to_dataset <- sardara_metadata_csv$path_to_dataset[i]
+			if(!is.na(path_to_dataset)) if(path_to_dataset != ""){
+				Data <- paste0(Data,"source:mapping.csv@", path_to_dataset)
+			}
 		}
-  
+		
+		if(is.null(Identifier)) Identifier <- ""
+		if(is.null(Title)) Title <- ""
+		if(is.null(Description)) Description <- ""
+		if(is.null(Subject)) Subject <- ""
+		if(is.null(Creator)) Creator <- ""
+		if(is.null(Date)) Date <- ""
+		if(is.null(Format)) Format <- ""
+		if(is.null(Type)) Type <- ""
+		if(is.null(Language)) Language <- ""
+		if(is.null(Relation)) Relation <- ""
+		if(is.null(Rights)) Rights <- ""
+		if(is.null(Source)) Source <- ""
+		if(is.null(Provenance)) Provenance <- ""
+		if(is.null(Data)) Data <- ""
     
 		cat("################################## BIND NEW ROW  ##################################\n")
-		# columns not used so far: "parameter_spatial_stratification", database_table_name, database_view_name
-  
-		newRow <- data.frame(Identifier=Identifier,Title=Title,Description=Description, Subject=Subject, Creator=Creator,Date=Date,Type=Type,Language=Language,SpatialCoverage=SpatialCoverage, TemporalCoverage=TemporalCoverage, Relation=Relation, Rights=Rights, Provenance=Provenance, Data=Data, Source=Source)
+		newRow <- data.frame(Identifier=Identifier,Title=Title,Description=Description, Subject=Subject, Creator=Creator,Date=Date,Type=Type,Language=Language,SpatialCoverage=SpatialCoverage, TemporalCoverage=TemporalCoverage, Relation=Relation, Rights=Rights, Provenance=Provenance, Data=Data)
 		return(newRow)
 	}))
 	return(out)
