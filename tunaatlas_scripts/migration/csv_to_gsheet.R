@@ -2,6 +2,7 @@
 require(stringr)
 library(googledrive)
 library(geoflow)
+library(writexl)
 
 #PARAMS
 #---------------------------------------------------------------------------------------------
@@ -205,13 +206,14 @@ if(datasets){
 #conversion to geoflow
 geoflow_metadata <- sardara_to_geoflow_metadata(sardara_datasets)
 
-file_name <-"geoflow_metadata.csv"
-write.csv(geoflow_metadata,file = file_name,row.names = F)
+file_name <-"geoflow_metadata"
+write.csv(geoflow_metadata,file = paste0(file_name,".csv"),row.names = F)
+write_xlsx(geoflow_metadata, paste0(file_name, ".xlsx"))
 
 #testing google drive
 if(upload){
 	google_drive_path <- drive_get(id= "1SQpBH3nYEQH1MzG29JsNmhLXYvAfxfuc")
 	google_drive_path
-	upload_file_on_drive_repository(google_drive_path,file_name)
+	upload_file_on_drive_repository(google_drive_path, paste0(file_name, ".csv"))
 	sardara_metadata_csv <- NULL
 }
