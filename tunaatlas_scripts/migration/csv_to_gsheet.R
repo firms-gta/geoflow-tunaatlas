@@ -205,12 +205,11 @@ if(datasets){
 #conversion to geoflow
 geoflow_metadata <- sardara_to_geoflow_metadata(sardara_datasets)
 
+file_name <-"geoflow_metadata.csv"
+write.csv(geoflow_metadata,file = file_name,row.names = F)
+
 #testing google drive
 if(upload){
-	file_name <-"geoflow_metadata.csv"
-	write.csv(geoflow_metadata,file = file_name,row.names = F)
-	file_name <-"geoflow_metadata.csv"
-	write.csv(geoflow_metadata,file = file_name,row.names = F)
 	google_drive_path <- drive_get(id= "1SQpBH3nYEQH1MzG29JsNmhLXYvAfxfuc")
 	google_drive_path
 	upload_file_on_drive_repository(google_drive_path,file_name)
