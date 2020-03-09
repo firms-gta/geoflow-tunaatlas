@@ -3,6 +3,9 @@ require(stringr)
 library(googledrive)
 library(geoflow)
 
+#PARAMS
+#---------------------------------------------------------------------------------------------
+
 #workspace
 user <- "eblondel"
 wd <- switch(user,
@@ -12,37 +15,13 @@ wd <- switch(user,
 setwd(file.path(wd, "geoflow-tunaatlas"))
 
 #params (dataset to include in conversion or not)
-codelists <- TRUE
-mappings <- FALSE
-datasets <- FALSE
+codelists <- TRUE #include codelists
+mappings <- FALSE #include mappings 
+datasets <- FALSE #include primary datasets
+upload <- FALSE #upload to google drive?
 
-saradara_datasets <- NULL
-# metadata_and_parameterization_primary_datasets_2017.csv
-sardara_datasets <- NULL
-if(codelists){
-	sardara_codelists_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_codelists_2017.csv")
-	sardara_datasets <- rbind(sardara_datasets, sardara_codelists_csv)
-}
-if(mappings){
-	sardara_mappings_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_mappings_2017.csv")
-	sardara_datasets <- rbind(sardara_datasets, sardara_mappings_csv)
-}
-if(datasets){
-	sardara_datasets_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_and_parameterization_primary_datasets_2017.csv")
-	sardara_datasets <- rbind(sardara_datasets, sardara_datasets_csv)
-}
-
-#conversion to geoflow
-geoflow_metadata <- sardara_to_geoflow_metadata(sardara_datasets)
-
-
-#testing google drive
-file_name <-"geoflow_metadata.csv"
-write.csv(geoflow_metadata,file = file_name,row.names = F)
-google_drive_path <- drive_get(id="1SQpBH3nYEQH1MzG29JsNmhLXYvAfxfuc")
-google_drive_path
-upload_file_on_drive_repository(google_drive_path,file_name)
-sardara_metadata_csv <- NULL
+#FUNCTIONS
+#---------------------------------------------------------------------------------------------
 
 #sardara_to_geoflow_metadata
 sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
@@ -205,3 +184,35 @@ upload_file_on_drive_repository <- function(google_drive_path,file_name){
   return(file_id)
 }
 
+#BUSINESS CODE
+#---------------------------------------------------------------------------------------------
+
+#read metadata from metadata_and_parameterization_primary_datasets_2017.csv
+sardara_datasets <- NULL
+if(codelists){
+	sardara_codelists_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_codelists_2017.csv")
+	sardara_datasets <- rbind(sardara_datasets, sardara_codelists_csv)
+}
+if(mappings){
+	sardara_mappings_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_mappings_2017.csv")
+	sardara_datasets <- rbind(sardara_datasets, sardara_mappings_csv)
+}
+if(datasets){
+	sardara_datasets_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_and_parameterization_primary_datasets_2017.csv")
+	sardara_datasets <- rbind(sardara_datasets, sardara_datasets_csv)
+}
+
+#conversion to geoflow
+geoflow_metadata <- sardara_to_geoflow_metadata(sardara_datasets)
+
+#testing google drive
+if(upload){
+	file_name <-"geoflow_metadata.csv"
+	write.csv(geoflow_metadata,file = file_name,row.names = F)
+	file_name <-"geoflow_metadata.csv"
+	write.csv(geoflow_metadata,file = file_name,row.names = F)
+	google_drive_path <- drive_get(id= "1SQpBH3nYEQH1MzG29JsNmhLXYvAfxfuc")
+	google_drive_path
+	upload_file_on_drive_repository(google_drive_path,file_name)
+	sardara_metadata_csv <- NULL
+}
