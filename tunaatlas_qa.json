@@ -31,7 +31,7 @@
 		"parameters": {
 			"drv": "PostgreSQL",
 			"user": "postgres",
-			"password": "postgres4ever",
+			"password": "postgres",
 			"host": "localhost",
 			"port": "5432",
 			"dbname": "geoflow"
@@ -48,7 +48,7 @@
 	{
 		"id": "load_codelist",
 		"script": "D:/geoflow-tunaatlas/tunaatlas_actions/load_codelist.R",
-		"run": true	
+		"run": true
 	}
   ]
 }
