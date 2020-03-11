@@ -136,20 +136,22 @@ load_codelist <- function(entity, config, options){
   
 	### DATA
 	#------------------------------------------------------------------------------------------------------------------------
-	config$logger.info("Loading codelist data into DB")
+	config$logger.info("Managing codelist data into DB")
 	### Add code list table in the DB, with constraints (data types and primary key) and triggers
 	#First create table ...
+	config$logger.info("Creating codelist data table into DB")
 	sql<- paste("CREATE TABLE ",table_name,"()",sep="")
 	dbSendQuery(CON, sql)
 	for (i in 1:ncol(df_to_load)){
 		# columns are all set to "text" type.
 		#sql<- paste("ALTER TABLE ",dimension_name,".",codelist_pid," ADD COLUMN ",tolower(colnames(df_input)[i])," ",df_inputColumnsDataTypes[i],sep="")
-		sql<- paste("ALTER TABLE ",table_name," ADD COLUMN ",tolower(colnames(df_to_load)[i])," text",sep="")
+		column <- colnames(df_to_load)[i]
+		sql<- paste("ALTER TABLE ",table_name," ADD COLUMN ",tolower(column)," text",sep="")
 		dbSendQuery(CON, sql)
 	}
 	sql<- paste("ALTER TABLE ",table_name," ADD CONSTRAINT ",codelist_pid,"_pkey PRIMARY KEY (code)",sep="")
 	dbSendQuery(CON, sql)
-  
+	
 	## Add codes and labels in the table metadata.df_inputs_codes_labels_column_names
 	#df_inputPKattributeName="code"
 	#if ( !(any(names(df_to_load)=="label")) ) {
@@ -158,16 +160,16 @@ load_codelist <- function(entity, config, options){
 	#df_inputLabelattributeName="label"
 	#sql<-paste0("INSERT INTO metadata.codelists_codes_labels_column_names(database_table_name,code_column,label_column) VALUES ('",table_name,"','",df_inputPKattributeName,"','",df_inputLabelattributeName,"')")
 	#dbSendQuery(CON, sql)
-
+	config$logger.info("Creating triggers...")
 	# Create triggers to automatically fill and update the link dimension table
 	sql_trigg_fill_link_dimension_table<-paste("CREATE OR REPLACE FUNCTION ",dimension_name,".func_add_new_record_in_link_table_",codelist_pid,"() RETURNS trigger AS $BODY$ BEGIN INSERT INTO ",dimension_name,".",dimension_name," ( codesource_",dimension_name,",tablesource_",dimension_name,") VALUES (NEW.code,'",codelist_pid,"') ; RETURN NEW; END; $BODY$ LANGUAGE 'plpgsql' VOLATILE;",sep="")
 	dbSendQuery(CON, sql_trigg_fill_link_dimension_table)
-  
 	sql_trigg_fill_link_dimension_table<-paste("CREATE TRIGGER trig_add_new_record_in_link_table_",codelist_pid," BEFORE INSERT ON ",table_name," FOR EACH ROW EXECUTE PROCEDURE ",dimension_name,".func_add_new_record_in_link_table_",codelist_pid,"();",sep="")
 	dbSendQuery(CON, sql_trigg_fill_link_dimension_table)
   
 	# ... Then fill table
 	#code inherited from rtunaatlas::FUNUploadDatasetToTableInDB
+	config$logger.info("Loading codelist data into DB")
 	InputDataset <- df_to_load
 	InputDataset[is.na(InputDataset)] <- "NA"
     sql4 <- paste0("COPY  ", table_name, "(", 
