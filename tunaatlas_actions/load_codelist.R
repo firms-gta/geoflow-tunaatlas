@@ -122,7 +122,6 @@ load_codelist <- function(entity, config, options){
 	# Add metadata in metadata tables
 	#code inherited from rtunaatlas::FUNUploadDatasetToTableInDB
 	config$logger.info("Loading codelist metadata entry into DB")
-	config$logger.info(InputMetadataset)
     sql4 <- paste0("COPY  metadata.metadata (", paste0(names(InputMetadataset), collapse = ", "), ") FROM STDIN NULL 'NA' ")
     postgresqlpqExec(CON, sql4)
     postgresqlCopyInDataframe(CON, InputMetadataset)
@@ -146,7 +145,9 @@ load_codelist <- function(entity, config, options){
 		# columns are all set to "text" type.
 		#sql<- paste("ALTER TABLE ",dimension_name,".",codelist_pid," ADD COLUMN ",tolower(colnames(df_input)[i])," ",df_inputColumnsDataTypes[i],sep="")
 		column <- colnames(df_to_load)[i]
-		sql<- paste("ALTER TABLE ",table_name," ADD COLUMN ",tolower(column)," text",sep="")
+		type <- "text"
+		if(column == "geom") type <- "geometry"
+		sql<- paste("ALTER TABLE ",table_name," ADD COLUMN ",tolower(column),paste0(" ",type),sep="")
 		dbSendQuery(CON, sql)
 	}
 	sql<- paste("ALTER TABLE ",table_name," ADD CONSTRAINT ",codelist_pid,"_pkey PRIMARY KEY (code)",sep="")
@@ -191,15 +192,21 @@ load_codelist <- function(entity, config, options){
 	# Add a column geometry if geospatial code list. For now: must be a polygon or multipolygon with SRID=4326
 	if (dimension_name=="area"){
 		config$logger.info("Adding geometry...")
-		# Add the column
-		sql<-paste("ALTER TABLE ",table_name," ADD COLUMN geom GEOMETRY(MultiPolygon,4326);",sep="")
-		dbSendQuery(CON, sql)
-		# Calculate the column    
-		sql<-paste("UPDATE ",table_name," SET geom=ST_Multi(ST_GeomFromText(geom_wkt,4326));",sep="")
-		dbSendQuery(CON, sql)
-		# Remove the column geom_wkt
-		sql<-paste("ALTER TABLE ",table_name," DROP COLUMN geom_wkt;",sep="")
-		dbSendQuery(CON, sql)
+		
+		if(!"geom" %in% colnames(df_to_load)){
+			# Add the column
+			config$logger.info("Adding 'geom' column...")
+			sql<-paste("ALTER TABLE ",table_name," ADD COLUMN geom GEOMETRY(MultiPolygon,4326);",sep="")
+			dbSendQuery(CON, sql)
+			# Calculate the column
+			config$logger.info("Update 'geom' column from WKT...")
+			sql<-paste("UPDATE ",table_name," SET geom=ST_Multi(ST_GeomFromText(geom_wkt,4326));",sep="")
+			dbSendQuery(CON, sql)
+			# Remove the column geom_wkt
+			config$logger.info("Drop 'geom_wkt'...")
+			sql<-paste("ALTER TABLE ",table_name," DROP COLUMN geom_wkt;",sep="")
+			dbSendQuery(CON, sql)
+		}
 	}
   
 	### Updates the view that gives the labels, with the new code list just inserted 

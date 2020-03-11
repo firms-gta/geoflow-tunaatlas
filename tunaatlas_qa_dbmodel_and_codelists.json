@@ -16,7 +16,7 @@
   "metadata": {
     "entities": {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1AGqXnPJvkqUzyhAxLLQ2xH36zfiLLpW6MOPbPlYlyis/edit#gid=0"
+      "source": "https://docs.google.com/spreadsheets/d/1AGqXnPJvkqUzyhAxLLQ2xH36zfiLLpW6MOPbPlYlyis/edit?usp=sharing"
     },
     "contacts" : {
       "handler": "gsheet",
