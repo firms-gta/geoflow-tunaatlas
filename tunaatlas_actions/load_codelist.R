@@ -142,7 +142,6 @@ load_codelist <- function(entity, config, options){
 	config$logger.info("Creating codelist data table into DB")
 	sql<- paste("CREATE TABLE ",table_name,"()",sep="")
 	dbSendQuery(CON, sql)
-	colnames(df_to_load)[colnames(df_to_load)=="nombre_común"] <- "label_es" #never use accents in column names, useless
 	for (i in 1:ncol(df_to_load)){
 		# columns are all set to "text" type.
 		#sql<- paste("ALTER TABLE ",dimension_name,".",codelist_pid," ADD COLUMN ",tolower(colnames(df_input)[i])," ",df_inputColumnsDataTypes[i],sep="")
