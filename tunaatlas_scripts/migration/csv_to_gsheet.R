@@ -3,12 +3,13 @@ require(stringr)
 library(googledrive)
 library(geoflow)
 library(writexl)
+library(httr)
 
 #PARAMS
 #---------------------------------------------------------------------------------------------
 
 #workspace
-user <- "eblondel"
+user <- "juldebar"
 wd <- switch(user,
 	"eblondel" = "D:/",
 	"juldebar" = "/home/juldebar/Bureau/CODES"
@@ -16,10 +17,10 @@ wd <- switch(user,
 setwd(file.path(wd, "geoflow-tunaatlas"))
 
 #params (dataset to include in conversion or not)
-codelists <- TRUE #include codelists
+codelists <- FALSE #include codelists
 mappings <- FALSE #include mappings 
-datasets <- FALSE #include primary datasets
-upload <- FALSE #upload to google drive?
+datasets <- TRUE #include primary datasets
+upload <- TRUE #upload to google drive?
 
 #FUNCTIONS
 #---------------------------------------------------------------------------------------------
@@ -30,10 +31,10 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 	sep <- geoflow::get_line_separator()
 	
 	sardara_metadata_csv$title <- gsub("year_","temporal_extent:",sardara_metadata_csv$title)
-    sardara_metadata_csv$lineage <- gsub("\nstep",paste0(sep,"process"),sardara_metadata_csv$lineage)
+	sardara_metadata_csv$lineage <- gsub("\nstep",paste0(sep,"process"),sardara_metadata_csv$lineage)
 	sardara_metadata_csv$lineage <- gsub("step","process",sardara_metadata_csv$lineage)
 	sardara_metadata_csv$lineage <- gsub("process: ", "process:", sardara_metadata_csv$lineage) #doesn't work
-    sardara_metadata_csv$lineage <- gsub("[0-9]+","",sardara_metadata_csv$lineage)
+	sardara_metadata_csv$lineage <- gsub("[0-9]+","",sardara_metadata_csv$lineage)
 	
 	out <- do.call("rbind", lapply(1:nrow(sardara_metadata_csv), function(i) {
     
@@ -155,7 +156,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 			path_raw_dataset <- sardara_metadata_csv$parameter_path_to_raw_dataset[i]
 			if(!is.na(path_raw_dataset)) if(path_raw_dataset!= ""){
 				if(!is.null(Data)) Data <- paste0(Data, sep)
-				Data <- paste0(Relation,paste0("source:TOBEDONE@", path_raw_dataset))
+				Data <- paste0(Data,paste0("source:","to be done","@", path_raw_dataset))
 			}
 			#effort_dataset (assumes there is already a path raw dataset) --> DATA
 			path_effort_dataset <- sardara_metadata_csv$parameter_path_to_effort_dataset[i]
@@ -166,7 +167,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
 			path_script <- sardara_metadata_csv$path_to_script_dataset_generation[i]
 			if(!is.na(path_script)) if(path_script != ""){
 				if(!is.null(Data)) Data <- paste0(Data, sep)
-				Data <- paste0(Data,paste0("action:TOBEDONE[Description]@", path_script))
+				Data <- paste0(Data,paste0("action:","To be done","[Description]@",path_script))
 				Data <- paste0(Data, sep, "run:true")
 			}
 		#else if codelist
@@ -242,26 +243,30 @@ upload_file_on_drive_repository <- function(google_drive_path,file_name){
   return(file_id)
 }
 
-#BUSINESS CODE
+#BUSINESS CODEsardara_datasets <- N
 #---------------------------------------------------------------------------------------------
 
 #read metadata from metadata_and_parameterization_primary_datasets_2017.csv
 sardara_datasets <- NULL
 if(codelists){
-	sardara_codelists_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_codelists_2017.csv")
-	sardara_datasets <- rbind(sardara_datasets, sardara_codelists_csv)
+  sardara_codelists_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_codelists_2017.csv")
+  sardara_codelists_csv <- sardara_to_geoflow_metadata(sardara_codelists_csv)
+  sardara_datasets <- rbind(sardara_datasets, sardara_codelists_csv)
 }
 if(mappings){
 	sardara_mappings_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_mappings_2017.csv")
+	sardara_mappings_csv <- sardara_to_geoflow_metadata(sardara_mappings_csv)
 	sardara_datasets <- rbind(sardara_datasets, sardara_mappings_csv)
 }
 if(datasets){
 	sardara_datasets_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_and_parameterization_primary_datasets_2017.csv")
+	sardara_datasets_csv <- sardara_to_geoflow_metadata(sardara_datasets_csv)
 	sardara_datasets <- rbind(sardara_datasets, sardara_datasets_csv)
 }
 
 #conversion to geoflow
-geoflow_metadata <- sardara_to_geoflow_metadata(sardara_datasets)
+# geoflow_metadata <- sardara_to_geoflow_metadata(sardara_datasets)
+geoflow_metadata <- sardara_datasets
 
 file_name <-"geoflow_metadata"
 write.csv(geoflow_metadata,file = paste0(file_name,".csv"),row.names = F)
