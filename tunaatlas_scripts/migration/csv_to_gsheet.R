@@ -28,6 +28,7 @@ upload <- TRUE #upload to google drive?
 #sardara_to_geoflow_metadata
 sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
   
+  
   sep <- geoflow::get_line_separator()
   
   sardara_metadata_csv$title <- gsub("year_","temporal_extent:",sardara_metadata_csv$title)
@@ -62,6 +63,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
     if(!is.na(sardara_metadata_csv$supplemental_information[i])){
       Description <- paste0("abstract:",Description,"\n", sardara_metadata_csv$supplemental_information[i])
     }else{
+      if(Description==""){Description <- "To be done"}
       Description <- paste0("abstract:",Description)
     }
     cat("################################## SUBJECT  ##################################\n")
@@ -156,18 +158,33 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
       path_raw_dataset <- sardara_metadata_csv$parameter_path_to_raw_dataset[i]
       if(!is.na(path_raw_dataset)) if(path_raw_dataset!= ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
-        Data <- paste0(Data,paste0("source:","to be done","@", path_raw_dataset))
+        Data <- paste0(Data,paste0("source:","raw_dataset","@", path_raw_dataset))
       }
       #effort_dataset (assumes there is already a path raw dataset) --> DATA
       path_effort_dataset <- sardara_metadata_csv$parameter_path_to_effort_dataset[i]
       if(!is.na(path_effort_dataset)) if(path_effort_dataset != ""){
-        Data <- paste(Data,paste0("TOBEDONE@", path_effort_dataset),sep=",")
+        Data <- paste(Data,paste0("effort_dataset@", path_effort_dataset),sep=",")
       }
+      
+      # name of table to load the database in --> DATA
+      database_table_name <- sardara_metadata_csv$database_table_name[i]
+      if(!is.na(database_table_name)) if(database_table_name != ""){
+        Data <- paste0(Data, sep, "sourceType:other", sep) #new in geoflow, we define type of source
+        Data <- paste0(Data, "uploadSource:", sardara_metadata_csv$database_table_name[i], sep) #new in geoflow, we define the uploadSource (this is our db table)
+        Data <- paste0(Data, "uploadType:dbtable") #we define the uploadType
+      }
+      
+      database_view_name <- sardara_metadata_csv$database_view_name[i]
+      if(!is.na(database_view_name)) if(database_view_name != ""){
+        Data <- paste0(Data,sep, "dbview:",database_view_name) #we define the uploadType
+      }
+      
       #script --> DATA
       path_script <- sardara_metadata_csv$path_to_script_dataset_generation[i]
       if(!is.na(path_script)) if(path_script != ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
-        Data <- paste0(Data,paste0("action:","To be done","[Description]@",path_script))
+        # url <- as.character(strsplit(x =path_script,split = "/")[[1]][length(strsplit(x =path_script,split = "/")[[1]])])
+        Data <- paste0(Data,paste0("action:","dataset","[R harmonization script]]@",path_script))
         Data <- paste0(Data, sep, "run:true")
       }
       #else if codelist
