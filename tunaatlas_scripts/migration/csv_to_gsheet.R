@@ -17,8 +17,8 @@ wd <- switch(user,
 setwd(file.path(wd, "geoflow-tunaatlas"))
 
 #params (dataset to include in conversion or not)
-codelists <- TRUE #include codelists
-mappings <- FALSE #include mappings 
+codelists <- FALSE #include codelists
+mappings <- TRUE #include mappings 
 datasets <- FALSE #include primary datasets
 upload <- FALSE #upload to google drive?
 
@@ -107,6 +107,9 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
     cat("################################## FORMAT TYPE LANGUAGE COVERAGE##################################\n")
     Format <- sardara_metadata_csv$format[i]
     Type <- "dataset"
+	if(sardara_metadata_csv$dataset_type[i] %in% c("mapping", "codelist")){
+		Type <- paste0(Type, "_", sardara_metadata_csv$dataset_type[i])
+	}
     
     if(!is.na(sardara_metadata_csv$langage[i])){
       Language <- paste0(sardara_metadata_csv$langage[i])
@@ -271,7 +274,7 @@ if(codelists){
 if(mappings){
 	mappings_drive <- getGoogleDriveResources ("~/geoflow_tunaatlas/data/mappings", "csv", "path_to_dataset_drive")
 	sardara_mappings_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_mappings_2017.csv")
-	sardara_codelists_csv <- merge(sardara_codelists_csv, mappings_drive, all.x = TRUE, all.y = TRUE, by.x = "persistent_identifier", by.y = "pid")
+	sardara_mappings_csv <- merge(sardara_mappings_csv, mappings_drive, all.x = TRUE, all.y = TRUE, by.x = "persistent_identifier", by.y = "pid")
 	sardara_mappings_csv <- sardara_to_geoflow_metadata(sardara_mappings_csv)
 	sardara_datasets <- rbind(sardara_datasets, sardara_mappings_csv)
 }

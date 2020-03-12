@@ -1,5 +1,7 @@
 load_mapping<-function(entity, config, options){
   
+  options(stringsAsFactors = FALSE)
+  
   #connection to database
   con = config$software$input$dbi
   
@@ -46,15 +48,17 @@ load_mapping<-function(entity, config, options){
   trg_codingsystem_table_name$database_table_name<-gsub(".*\\.","",trg_codingsystem_table_name$database_table_name)
   
   # Get the PK of the two tables (DBToTableName and DBFromTableName)
-  sql<- paste("SELECT id_",DBDimensionName,",codesource_",DBDimensionName,
+  sql1<- paste("SELECT id_",DBDimensionName,",codesource_",DBDimensionName,
               " FROM ",DBDimensionName,".",DBDimensionName,
               " WHERE tablesource_",DBDimensionName,"='",src_codingsystem_table_name$database_table_name,"'",sep="")   
-  FromTable<-dbGetQuery(con, sql)
+  FromTable<-dbGetQuery(con, sql1)
+  if("codesource_flag" %in% colnames(FromTable)) Encoding(FromTable$codesource_flag) <- "UTF-8" #required on Windows OS
+  if("codesource_species" %in% colnames(FromTable)) Encoding(FromTable$codesource_species) <- "UTF-8" #required on Windows OS
   
-  sql<- paste("SELECT id_",DBDimensionName,",codesource_",DBDimensionName,
+  sql2<- paste("SELECT id_",DBDimensionName,",codesource_",DBDimensionName,
               " FROM ",DBDimensionName,".",DBDimensionName,
               " WHERE tablesource_",DBDimensionName,"='",trg_codingsystem_table_name$database_table_name,"'",sep="")   
-  ToTable<-dbGetQuery(con, sql)
+  ToTable<-dbGetQuery(con, sql2)
   
   # Make mapping
   
@@ -62,11 +66,11 @@ load_mapping<-function(entity, config, options){
   
   MapFinal<-merge(MapFromTableWithMappingTable,ToTable,by.y=paste("codesource_",DBDimensionName,sep=""),by.x="trg_code",all.x=T,all.y=F)
   
-  
-  MapFinal <- MapFinal[c(paste0("id_",DBDimensionName,".x"),paste0("id_",DBDimensionName,".y"))]
+  MapFinal <- MapFinal[,c(paste0("id_",DBDimensionName,".x"),paste0("id_",DBDimensionName,".y"))]
   MapFinal$mapping_relation_type<-"NA"
   colnames(MapFinal)<-c(paste0(DBDimensionName,"_mapping_id_from"),paste0(DBDimensionName,"_mapping_id_to"),paste0(DBDimensionName,"_mapping_relation_type"))
-  
+  MapFinal <- MapFinal[!is.na(MapFinal[,1]),]
+  MapFinal <- MapFinal[!is.na(MapFinal[,2]),]
   
   # Load metadata with FUNUploadDatasetToTableInDB function
   # https://github.com/ptaconet/rtunaatlas/blob/0c819c0262f1abab58ec7307ca6e2e4601d97946/R/functions_load_dataset_in_db.R
@@ -106,7 +110,6 @@ load_mapping<-function(entity, config, options){
   # Add metadata in metadata tables
   #code inherited from rtunaatlas::FUNUploadDatasetToTableInDB
   config$logger.info("Loading codelist metadata entry into DB")
-  config$logger.info(InputMetadataset)
   sql4 <- paste0("COPY  metadata.metadata (", paste0(names(InputMetadataset), collapse = ", "), ") FROM STDIN NULL 'NA' ")
   postgresqlpqExec(con, sql4)
   postgresqlCopyInDataframe(con, InputMetadataset)
@@ -125,7 +128,6 @@ load_mapping<-function(entity, config, options){
   PK_metadata<-as.integer(PK_metadata$max[1])
   
   MapFinal$id_metadata<-PK_metadata
-  
   
   # Insert mapping into mapping table
   dbWriteTable(con, c(DBDimensionName, paste(DBDimensionName,"_mapping",sep="")), value = MapFinal,row.names=FALSE,append=TRUE)
