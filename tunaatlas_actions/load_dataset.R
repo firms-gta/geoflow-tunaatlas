@@ -6,70 +6,39 @@ load_dataset <- function(entity, config, options){
 		config$logger.error(errMsg)
 		stop(errMsg)
 	}
+
+	#db
+	con = config$software$input$dbi
+	user_postgres <- config$software$input$dbi_config$parameters$user
 	
+	#identifiers
+	dataset_pid <- entity$identifiers[["id"]]
+
 	#enrich entity with id_version
-	id_parts <- unlist(strsplit(entity$identifiers[["id"]], "_tuna"))
+	id_parts <- unlist(strsplit(dataset_pid, "_tuna"))
 	id_version <- paste0(id_parts[1], "_", gsub("-","_", format(entity$temporal_extent$start, "%Y-%m-%d")),"_", gsub("-","_", format(entity$temporal_extent$end, "%Y-%m-%d")), "_tuna", id_parts[2], "_", format(Sys.Date(),"%Y"))
 	entity$setIdentifier("id_version", id_version)
 	print(entity$identifiers[["id_version"]])
 	entity$enrichWithMetadata()
-	
-	#################################################################
-	# Julien for test only
-	require(geoflow)
-	setwd("~/Bureau/CODES/geoflow-tunaatlas")
-	config=initWorkflow("tunaatlas_julien_datasets.json")
-	jobdir <- initWorkflowJob(config)
-	config$job <- jobdir
-	entities = config$getEntities()
-	entity = entities[[15]]
-	entity$copyDataToJobDir(config, jobdir)
-	# Julien for test only
-	#################################################################
-	
-	con = config$software$input$dbi
-	user_postgres <- config$software$input$dbi_config$parameters$user
-	
+
 	#----------------------------------------------------------------------------------------------------------------------------
-	#@geoflow --> with this script 2 objects are pre-loaded
-	#config --> the global config of the workflow
-	#entity --> the entity you are managing
-	#get data from geoflow current job dir
-	dataset_pid <- entity$identifiers[["id"]]
-	filename <- entity$data$source[[1]]
-	path_to_dataset <- entity$getJobDataResource(config, filename)
-	path_to_raw_dataset	<- path_to_dataset
-	# path_to_effort_dataset	<- "to be done"
-	# spatial_stratification	<- "to be done"
-	geoflow_local_action <-entity$data$actions[[1]]$script
+	#resources
+	path_to_dataset	<- entity$resources$harmonized
+	path_to_codelists <- entity$resources$codelists
+	#read sources
+	df_to_load <- read.csv(path_to_dataset)
+	df_codelists <- read.csv(path_to_codelists)
 	
-	# system(paste0("mv ",filename," ",paste0(dataset_pid,".csv")))
-	#----------------------------------------------------------------------------------------------------------------------------
-	
+	#names
 	table_name <- entity$data$uploadSource[[1]]
 	dimension_name <- sub('\\..*', '', table_name)
-	# begin patch julien
 	schema_name_for_view <- dimension_name
 	database_view_name <- dataset_pid
-	# end patch julien
 	
 	config$logger.info(sprintf("Dataset '%s' will be loaded in table '%s'",dataset_pid, table_name))
 	config$logger.info(sprintf("Load dataset from jobdir file '%s'", path_to_dataset))
-	df_to_load <- read.csv(path_to_raw_dataset)
-	#set parameters to run geoflow local action: R script set in the "Data" column
-	# see details in https://github.com/ptaconet/rtunaatlas_scripts/blob/72c03473910b111bf8e78812cf761a7f493d6924/workflow_etl/scripts/generate_dataset.R
-	source(geoflow_local_action)
-	df_to_load <- dataset
 	
-	if(!(exists("additional_metadata"))){
-	  additional_metadata<-NULL
-	}
-	if(!(exists("df_codelists"))){
-	  df_codelists<-NULL
-	}
-	
-	
-	### METADATA => replace / set df_metadata with geoflow current entity
+	### METADATA => replace / set InputMetadataset with geoflow current entity
 	#------------------------------------------------------------------------------------------------------------------------
 	#get geoflow entity as data.frame representation to make easier mapping with DBMS metadata table
 	geoflow_df <- entity$asDataFrame()
@@ -101,23 +70,14 @@ load_dataset <- function(entity, config, options){
 	)
 	InputMetadataset[is.na(InputMetadataset)] <- "NA"
 	
-	df_metadata <- InputMetadataset
-	
-	metadata_and_parameterization <- df_metadata
-	
-	
-	
 	# julien => should be taken from data dictionnary embedded in the database and used for 19110 ?
 	db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
 	
-	variable_name<-gsub("fact_tables.","",df_metadata$database_table_name)
+	variable_name<-gsub("fact_tables.","",InputMetadataset$database_table_name)
 	
 	dimensions<-list_variable_available_dimensions(con,variable_name)
 	
-	# temporary patch julien for test purpose
-	df_codelists_input <- read.csv("http://data.d4science.org/b1VSdHp1YUJrd0dZdFBua3lVbFNXRUdpRkpWSDlBd25HbWJQNStIS0N6Yz0")
-	# Set df_inputs to use
-	df_codelists_input<-df_codelists_input[which(df_codelists_input$dimension %in% dimensions),]
+	df_codelists_input<-df_codelists[which(df_codelists$dimension %in% dimensions),]
 	
 	# convert columns that are not character to character and ensure that the column "value" is a numeric
 	cols<-setdiff(colnames(df_to_load),"value")
@@ -154,9 +114,7 @@ load_dataset <- function(entity, config, options){
 	  #}
 	}
 	
-	
-	
-	
+
 	# One by one, merge the dimensions
 	
 	#Initialize TablesToUpdateInDB and missingCodesInTableInDB. These vectors will be used to advise the user on the codes that are missing inside the DB
@@ -171,7 +129,7 @@ load_dataset <- function(entity, config, options){
 	    #Retrieve the name of the code list to use
 	    index<-which(df_codelists_input$dimension==db_df_inputlike_dimensions_parameters$dimension[i])
 	    db_df_inputstouse<-df_codelists_input$code_list_identifier[index]
-	    
+		
 	    # Merge the dimension 
 	    df_to_load<-FUNMergeDimensions_CodeListLike(
 	      con,
@@ -209,17 +167,16 @@ load_dataset <- function(entity, config, options){
 	  df_to_load <- df_to_load[!varsToDelete]
 	  
 	}
-	
-	
+		
 	# These are the codes that are missing in the tables within the DB. The tables of the DB have to be filled with these values before the dataset is uploaded in the DB.
-	missingCodes_dataframe<- data.frame(TablesToUpdateInDB,missingCodesInTableInDB)
-	missingCodes_dataframe<-missingCodes_dataframe[! (missingCodes_dataframe$missingCodesInTableInDB %in% c("ALL","UNK")),]
+	#missingCodes_dataframe<- data.frame(TablesToUpdateInDB,missingCodesInTableInDB)
+	#missingCodes_dataframe<-missingCodes_dataframe[! (missingCodes_dataframe$missingCodesInTableInDB %in% c("ALL","UNK")),]
 	
-	if (nrow(missingCodes_dataframe)>0){
-	  missingCodes_dataframe<-missingCodes_dataframe[!is.na(missingCodes_dataframe$missingCodesInTableInDB),]
-	  print(missingCodes_dataframe)
-	  stop("Some code(s) exist in the dataset to upload but do not exist in the corresponding code list. You should update the tables of Sardara with these code(s) (and the mapping if relevant) before uploading the dataset in Sardara.")
-	} else {
+	#if (nrow(missingCodes_dataframe)>0){
+	#  missingCodes_dataframe<-missingCodes_dataframe[!is.na(missingCodes_dataframe$missingCodesInTableInDB),]
+	#  print(missingCodes_dataframe)
+	#  stop("Some code(s) exist in the dataset to upload but do not exist in the corresponding code list. You should update the tables of Sardara with these code(s) (and the mapping if relevant) before uploading the dataset in Sardara.")
+	#} else {
 	  
 	  #replace NA by 'NA'. These values will be set to NULL in the DB. These values are the ones that were set to "ALL" in the dataset to upload
 	  #df_to_load<-replace(df_to_load, is.na(df_to_load), "NA") 
@@ -337,7 +294,7 @@ load_dataset <- function(entity, config, options){
 	  
 	  
 	  # Load metadata
-	  rs<-FUNUploadDatasetToTableInDB(con,df_metadata,"metadata.metadata")
+	  rs<-FUNUploadDatasetToTableInDB(con,InputMetadataset,"metadata.metadata")
 	  cat("Metadata loaded\n")
 	  
 	  # Retrieve the PK of the metadata for the line just inserted
@@ -364,7 +321,7 @@ load_dataset <- function(entity, config, options){
 	  
 	  # Upload file to database
 	  
-	  rs<-FUNUploadDatasetToTableInDB(con,df_to_load,df_metadata$database_table_name)
+	  rs<-FUNUploadDatasetToTableInDB(con,df_to_load,InputMetadataset$database_table_name)
 	  
 	  cat("Data loaded in the DB\n")
 	  
@@ -376,14 +333,14 @@ load_dataset <- function(entity, config, options){
 	  # }
 	  
 	  # sql_query_dataset_extraction
-	  df_metadata$id_metadata<-PK_metadata
-	  sql_query_dataset_extraction<-getSQLSardaraQueries(con,df_metadata)
-	  dbSendQuery(con,paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",gsub("'","''",sql_query_dataset_extraction$query_CSV_with_labels),"' WHERE identifier='",df_metadata$identifier,"'"))
+	  InputMetadataset$id_metadata<-PK_metadata
+	  sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
+	  dbSendQuery(con,paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",gsub("'","''",sql_query_dataset_extraction$query_CSV_with_labels),"' WHERE identifier='",InputMetadataset$identifier,"'"))
 	  
 	  # spatial coverage
-	  sp_extent_sql<-paste0("SELECT st_astext(ST_Extent(geom)) FROM ",df_metadata$database_table_name," c LEFT JOIN area.area_labels USING (id_area) WHERE id_metadata='",PK_metadata,"'")
+	  sp_extent_sql<-paste0("SELECT st_astext(ST_Extent(geom)) FROM ",InputMetadataset$database_table_name," c LEFT JOIN area.area_labels USING (id_area) WHERE id_metadata='",PK_metadata,"'")
 	  sp_extent<-dbGetQuery(con,sp_extent_sql)$st_astext
-	  dbSendQuery(con,paste0("UPDATE metadata.metadata SET spatial_coverage='",sp_extent,"' WHERE identifier='",df_metadata$identifier,"'"))
+	  dbSendQuery(con,paste0("UPDATE metadata.metadata SET spatial_coverage='",sp_extent,"' WHERE identifier='",InputMetadataset$identifier,"'"))
 	  
 	  
 	  # metadata_mapping
@@ -413,10 +370,10 @@ load_dataset <- function(entity, config, options){
 	    # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
 	    dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";
                              CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV_with_labels,";
-                             COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",df_metadata$title,"'"))
+                             COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"'"))
 	  }
 	  
-	}
+	#}
 	
 	
 	
