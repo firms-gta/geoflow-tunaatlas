@@ -158,7 +158,7 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
       path_raw_dataset <- sardara_metadata_csv$parameter_path_to_raw_dataset[i]
       if(!is.na(path_raw_dataset)) if(path_raw_dataset!= ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
-        Data <- paste0(Data,paste0("source:","raw_dataset","@", path_raw_dataset))
+        Data <- paste0(Data,paste0("source:","raw_dataset.csv","@", path_raw_dataset))
       }
       #effort_dataset (assumes there is already a path raw dataset) --> DATA
       path_effort_dataset <- sardara_metadata_csv$parameter_path_to_effort_dataset[i]
@@ -184,7 +184,8 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
       if(!is.na(path_script)) if(path_script != ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
         # url <- as.character(strsplit(x =path_script,split = "/")[[1]][length(strsplit(x =path_script,split = "/")[[1]])])
-        Data <- paste0(Data,paste0("action:","dataset","[R harmonization script]]@",path_script))
+        list_parameters <- NULL
+        Data <- paste0(Data,paste0("action:","dataset","[R harmonization script]@",path_script))
         Data <- paste0(Data, sep, "run:true")
       }
       #else if codelist
