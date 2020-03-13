@@ -181,3 +181,6 @@ write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename, paste0(unlist(strsplit(filename,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
 write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
 #----------------------------------------------------------------------------------------------------------------------------  
+entity$addResource("source", path_to_raw_dataset)
+entity$addResource("harmonized", output_name_dataset)
+entity$addResource("codelists", output_name_codelists)

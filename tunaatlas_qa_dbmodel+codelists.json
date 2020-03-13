@@ -16,7 +16,7 @@
   "metadata": {
     "entities": {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1rMQn3JVvSyeTFkDTe4YN6MiT92IaYqJ9rPJioFKCeN8/edit?usp=sharing"
+      "source": "https://docs.google.com/spreadsheets/d/1AGqXnPJvkqUzyhAxLLQ2xH36zfiLLpW6MOPbPlYlyis/edit?usp=sharing"
     },
     "contacts" : {
       "handler": "gsheet",
@@ -36,13 +36,18 @@
 			"port": "5432",
 			"dbname": "geoflow"
 		},
-		"properties" : {}
+		"properties" : {
+			"onstart_r": {
+				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/deploy_database_model.R",
+				"fun": "deploy_database_model"
+			}
+		}
 	}
   ],
   "actions": [
 	{
-		"id": "load_mapping",
-		"script": "D:/geoflow-tunaatlas/tunaatlas_actions/load_mapping.R",
+		"id": "load_codelist",
+		"script": "D:/geoflow-tunaatlas/tunaatlas_actions/load_codelist.R",
 		"run": true
 	}
   ]
