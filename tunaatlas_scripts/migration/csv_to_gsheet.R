@@ -195,7 +195,8 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
       if(!is.na(path_script)) if(path_script != ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
         # url <- as.character(strsplit(x =path_script,split = "/")[[1]][length(strsplit(x =path_script,split = "/")[[1]])])
-        Data <- paste0(Data,paste0("action:","dataset","[R harmonization script]]@",path_script))
+        list_parameters <- NULL
+        Data <- paste0(Data,paste0("action:","dataset","[R harmonization script]@",path_script))
         Data <- paste0(Data, sep, "run:true")
       }
       #else if codelist
