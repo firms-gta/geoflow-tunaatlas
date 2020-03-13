@@ -164,12 +164,12 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
       path_raw_dataset <- sardara_metadata_csv$parameter_path_to_raw_dataset[i]
       if(!is.na(path_raw_dataset)) if(path_raw_dataset!= ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
-        Data <- paste0(Data,paste0("source:","raw_dataset","@", path_raw_dataset))
+        Data <- paste0(Data,paste0("source:","raw_dataset.csv","@", path_raw_dataset))
       }
       #effort_dataset (assumes there is already a path raw dataset) --> DATA
       path_effort_dataset <- sardara_metadata_csv$parameter_path_to_effort_dataset[i]
       if(!is.na(path_effort_dataset)) if(path_effort_dataset != ""){
-        Data <- paste(Data,paste0("effort_dataset@", path_effort_dataset),sep=",")
+        Data <- paste(Data,paste0("effort_dataset.csv@", path_effort_dataset),sep=",")
       }
       
       # name of table to load the database in --> DATA
@@ -187,6 +187,11 @@ sardara_to_geoflow_metadata <- function(sardara_metadata_csv){
       
       #script --> DATA
       path_script <- sardara_metadata_csv$path_to_script_dataset_generation[i]
+	  path_script <- gsub(
+		"ptaconet/rtunaatlas_scripts/master/tunaatlas_world/transform",
+		"eblondel/geoflow-tunaatlas/blob/master/tunaatlas_scripts/pre-harmonization",
+		path_script
+	  )
       if(!is.na(path_script)) if(path_script != ""){
         if(!is.null(Data)) Data <- paste0(Data, sep)
         # url <- as.character(strsplit(x =path_script,split = "/")[[1]][length(strsplit(x =path_script,split = "/")[[1]])])
@@ -268,11 +273,28 @@ upload_file_on_drive_repository <- function(google_drive_path,file_name){
 
 
 #google drive rep
-getGoogleDriveResources <- function(folder, mimeType = "csv", fieldname){
-	res <- as.data.frame(drive_ls(folder, type = drive_mime_type(mimeType)))
+getGoogleDriveResources <- function(folder, mimeType = NULL, fieldname = NULL){
+	drive_ls_res <- NULL
+	if(!is.null(mimeType)){
+		drive_ls_res <- drive_ls(folder, type = drive_mime_type(mimeType))
+	}else{
+		drive_ls_res <- drive_ls(folder)
+	}
+	res <- as.data.frame(drive_ls_res)
 	res$pid = sapply(res$name, function(x){unlist(strsplit(x,paste0(".",mimeType)))[1]})
 	res$id <- sapply(res$id, function(x){sprintf("https://drive.google.com/open?id=%s", x)})
-	colnames(res)[colnames(res) == "id"] <- fieldname
+	
+	res[,"path_to_dataset_drive"] <- NA #for codelists and mappings
+	res[,"parameter_path_to_raw_dataset_drive"] <- NA #for datasets
+	res[,"parameter_path_to_effort_dataset_drive"] <- NA #for datasets
+	res[,"path_to_codelists_used_in_dataset_drive"] <- NA #for datasets
+	if(regexpr("codelists", folder)>0){
+		res[,"path_to_dataset_drive"] <- res$id
+	}else if(regexpr("mappings", folder)>0){
+		res[,"path_to_dataset_drive"] <- res$id
+	}else{
+		res[,"parameter_path_to_raw_dataset_drive"] <- res$id
+	}
 	return(res)
 }
 
@@ -296,7 +318,24 @@ if(mappings){
 	sardara_datasets <- rbind(sardara_datasets, sardara_mappings_csv)
 }
 if(datasets){
+	datasets_drive_iattc <- getGoogleDriveResources ("~/geoflow_tunaatlas/data/datasets/IATTC")
+	datasets_drive_iotc <- getGoogleDriveResources ("~/geoflow_tunaatlas/data/datasets/IOTC")
+	datasets_drive_iccat <- getGoogleDriveResources ("~/geoflow_tunaatlas/data/datasets/ICCAT")
+	datasets_drive_wcpfc <- getGoogleDriveResources ("~/geoflow_tunaatlas/data/datasets/WCPFC")
+	datasets_drive_ccsbt <- getGoogleDriveResources ("~/geoflow_tunaatlas/data/datasets/CCSBT")
+	dataset_drive <- rbind(
+		datasets_drive_iattc,
+		datasets_drive_iotc,
+		datasets_drive_iccat,
+		datasets_drive_wcpfc,
+		datasets_drive_ccsbt
+	)
+	dataset_drive_dimensions <- getGoogleDriveResources("~/geoflow_tunaatlas/data/dimensions")
 	sardara_datasets_csv <- read.csv("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/metadata_and_parameterization_files/metadata_and_parameterization_primary_datasets_2017.csv")
+	#for the time being we restrain our effort to catch datasets (we exclude 'effort' and 'catch_at_size')
+	sardara_datasets_csv <- sardara_datasets_csv[regexpr("effort", sardara_datasets_csv$persistent_identifier) <0,]
+	sardara_datasets_csv <- sardara_datasets_csv[regexpr("catch_at_size", sardara_datasets_csv$persistent_identifier) <0,]
+	
 	sardara_datasets_csv <- sardara_to_geoflow_metadata(sardara_datasets_csv)
 	sardara_datasets <- rbind(sardara_datasets, sardara_datasets_csv)
 }
