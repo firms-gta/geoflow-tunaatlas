@@ -152,5 +152,5 @@ write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResources("codelists", output_name_codelists)
+entity$addResource("codelists", output_name_codelists)
 
