@@ -1,8 +1,8 @@
 load_codelist <- function(entity, config, options){
 
 	#connection to database
-	CON = config$software$input$dbi
-
+  CON = config$software$output$dbi
+  
 	#packages
 	if(!require(rtunaatlas)){
 	  if(!require(devtools)){
