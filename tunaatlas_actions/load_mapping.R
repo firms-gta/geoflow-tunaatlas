@@ -69,8 +69,8 @@ load_mapping<-function(entity, config, options){
   MapFinal <- MapFinal[,c(paste0("id_",DBDimensionName,".x"),paste0("id_",DBDimensionName,".y"))]
   MapFinal$mapping_relation_type<-"NA"
   colnames(MapFinal)<-c(paste0(DBDimensionName,"_mapping_id_from"),paste0(DBDimensionName,"_mapping_id_to"),paste0(DBDimensionName,"_mapping_relation_type"))
-  MapFinal <- MapFinal[!is.na(MapFinal[,1]),]
-  MapFinal <- MapFinal[!is.na(MapFinal[,2]),]
+  if(any(is.na(MapFinal[,1]))) MapFinal <- MapFinal[!is.na(MapFinal[,1]),]
+  if(any(is.na(MapFinal[,2]))) MapFinal <- MapFinal[!is.na(MapFinal[,2]),]
   
   # Load metadata with FUNUploadDatasetToTableInDB function
   # https://github.com/ptaconet/rtunaatlas/blob/0c819c0262f1abab58ec7307ca6e2e4601d97946/R/functions_load_dataset_in_db.R
@@ -120,12 +120,6 @@ load_mapping<-function(entity, config, options){
   PK_metadata <- dbGetQuery(con, sql)
   PK_metadata<-as.integer(PK_metadata$max[1])
   config$logger.info(sprintf("Retrieving internal metadata ID from DB: %s", PK_metadata))
-  
-  
-  # Retrieve the PK of the metadata for the line just inserted
-  sql<- "SELECT max(id_metadata) FROM metadata.metadata"
-  PK_metadata <- dbGetQuery(con, sql)
-  PK_metadata<-as.integer(PK_metadata$max[1])
   
   MapFinal$id_metadata<-PK_metadata
   

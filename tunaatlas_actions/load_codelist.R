@@ -13,6 +13,11 @@ load_codelist <- function(entity, config, options){
 	  require(rtunaatlas)
 	}
 	
+	if(!require(readr)){
+	  install.packages("readr")
+	  require(readr)
+	}
+	
 	if(!require(dplyr)){
 	  install.packages("dplyr")
 	  require(dplyr)
@@ -33,7 +38,7 @@ load_codelist <- function(entity, config, options){
 	
 	config$logger.info(sprintf("Load codelist '%s' as table '%s'",codelist_pid, table_name))
 	config$logger.info(sprintf("Load codelist from jobdir file '%s'", path_to_dataset))
-	df_to_load <- read.csv(path_to_dataset)
+	df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
 	
 	#below code inherited from https://github.com/ptaconet/rtunaatlas/blob/master/R/load_datasets_in_db.R#L394
 	#all the codes have been migrated and adapted to geoflow logic except rtunaatlas::getSQLSardaraQueries

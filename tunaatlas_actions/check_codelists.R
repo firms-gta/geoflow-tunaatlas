@@ -1,5 +1,11 @@
 check_codelists <- function(entity, config, options){
 	
+		
+	if(!require(readr)){
+	  install.packages("readr")
+	  require(readr)
+	}
+	
 	CON = config$software$input$dbi
 	config$logger.info("Action to check codelists updateness from datasets")
 	
@@ -8,7 +14,7 @@ check_codelists <- function(entity, config, options){
 	filename <- unlist(strsplit(filename, "\\."))[1]
 	#data
 	dataset_name <- entity$getJobDataResource(config, paste0(filename,"_harmonized.csv"))
-	dataset <- read.csv(dataset_name, stringsAsFactors = FALSE)
+	dataset <- as.data.frame(readr::read_csv(dataset_name))
 	
 	#testing
 	#dataset <- rbind(dataset, data.frame(flag = "Fake", gear = "NEW", time_start = "2009-08-01", time_end = "2009-08-31", geographic_identifier = "999999", schooltype="blabla", species = "TTH", catchtype = "C", unit = "MT", value = 999, source_authority = "ICCAT"))
@@ -16,7 +22,7 @@ check_codelists <- function(entity, config, options){
 	
 	#codelists
 	codelists_name <- entity$getJobDataResource(config, paste0(filename,"_codelists.csv"))
-	codelists <- read.csv(codelists_name, stringsAsFactors = FALSE)
+	codelists <- as.data.frame(readr::read_csv(codelists_name, guess_max=0))
 	codelists <- codelists[codelists$dimension != "source_authority",] #there is no codelist for the source_authority!!
 	
 	#we iterate on each codelist, and we inspect entity harmonized dataset to see if they are missing codelist entries
