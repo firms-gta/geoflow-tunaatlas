@@ -16,36 +16,36 @@ get_rfmos_datasets_level0 <- function (con, rfmo, variable, year_tunaatlas, iatt
             "unit", "value")
     }
     if (rfmo == "IOTC") {
-        datasets_permanent_identifiers = paste0("'indian_ocean_", 
-            variable, "_ll_tunaatlasiotc_level0','indian_ocean_", 
-            variable, "_tunaatlasiotc_level0__coastal','indian_ocean_", 
-            variable, "_tunaatlasiotc_level0__surface'")
+        datasets_permanent_identifiers = paste0("'indian_", 
+            variable, "_ll_iotc_level0','indian_", 
+            variable, "_iotc_level0__coastal','indian_", 
+            variable, "_iotc_level0__surface'")
     }
     else if (rfmo == "WCPFC") {
-        datasets_permanent_identifiers = paste0("'west_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlaswcpfc_level0__1950to1970','west_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlaswcpfc_level0__1990to2000','west_pacific_ocean_", 
-            variable, "_5deg_1m_tunaatlaswcpfc_level0__driftnet','west_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlaswcpfc_level0__2000','west_pacific_ocean_", 
-            variable, "_5deg_1m_bb_tunaatlaswcpfc_level0','west_pacific_ocean_", 
-            variable, "_5deg_1m_ps_tunaatlaswcpfc_level0','west_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlaswcpfc_level0__1970to1980','west_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlaswcpfc_level0__1980to1990'")
+        datasets_permanent_identifiers = paste0("'west_pacific_", 
+            variable, "_5deg_1m_ll_wcpfc_level0__1950to1970','west_pacific_", 
+            variable, "_5deg_1m_ll_wcpfc_level0__1990to2000','west_pacific_", 
+            variable, "_5deg_1m_wcpfc_level0__driftnet','west_pacific_", 
+            variable, "_5deg_1m_ll_wcpfc_level0__2000','west_pacific_", 
+            variable, "_5deg_1m_bb_wcpfc_level0','west_pacific_", 
+            variable, "_5deg_1m_ps_wcpfc_level0','west_pacific_", 
+            variable, "_5deg_1m_ll_wcpfc_level0__1970to1980','west_pacific_", 
+            variable, "_5deg_1m_ll_wcpfc_level0__1980to1990'")
     }
     else if (rfmo == "CCSBT") {
-        datasets_permanent_identifiers = paste0("'southern_hemisphere_oceans_", 
-            variable, "_1deg_1m_tunaatlasccsbt_level0__surface','southern_hemisphere_oceans_", 
-            variable, "_5deg_1m_ll_tunaatlasccsbt_level0'")
+        datasets_permanent_identifiers = paste0("'southern_hemispheres_", 
+            variable, "_1deg_1m_ccsbt_level0__surface','southern_hemispheres_", 
+            variable, "_5deg_1m_ll_ccsbt_level0'")
     }
     else if (rfmo == "IATTC") {
-        datasets_permanent_identifiers = paste0("'east_pacific_ocean_", 
-            variable, "_1deg_1m_bb_tunaatlasiattc_level0__tuna_byflag','east_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlasiattc_level0__tuna_billfish','east_pacific_ocean_", 
-            variable, "_5deg_1m_ll_tunaatlasiattc_level0__shark'")
+        datasets_permanent_identifiers = paste0("'east_pacific_", 
+            variable, "_1deg_1m_bb_iattc_level0__tuna_byflag','east_pacific_", 
+            variable, "_5deg_1m_ll_iattc_level0__tuna_billfish','east_pacific_", 
+            variable, "_5deg_1m_ll_iattc_level0__shark'")
     }
     else if (rfmo == "ICCAT") {
-        datasets_permanent_identifiers = paste0("'atlantic_ocean_", 
-            variable, "_tunaatlasiccat_level0__noschool'")
+        datasets_permanent_identifiers = paste0("'atlantic_", 
+            variable, "_iccat_level0__noschool'")
     }
     metadata_datasets <- dbGetQuery(con, paste0("SELECT * from metadata.metadata where persistent_identifier IN (", 
         datasets_permanent_identifiers, ") and identifier LIKE '%__", 
@@ -54,8 +54,8 @@ get_rfmos_datasets_level0 <- function (con, rfmo, variable, year_tunaatlas, iatt
         columns_to_keep)
     if (rfmo == "ICCAT" && iccat_ps_include_type_of_school == 
         TRUE) {
-        datasets_permanent_identifiers = paste0("'atlantic_ocean_", 
-            variable, "_1deg_1m_ps_tunaatlasiccat_level0__byschool'")
+        datasets_permanent_identifiers = paste0("'atlantic_", 
+            variable, "_1deg_1m_ps_iccat_level0__byschool'")
         metadata_datasets_WithSchooltypeInfo <- dbGetQuery(con, 
             paste0("SELECT * from metadata.metadata where persistent_identifier IN (", 
                 datasets_permanent_identifiers, ") and identifier LIKE '%__", 
@@ -76,40 +76,40 @@ get_rfmos_datasets_level0 <- function (con, rfmo, variable, year_tunaatlas, iatt
     if (rfmo == "IATTC") {
         df_level0 <- unique(df_level0)
         metadata_dataset_PSSetType_tuna_catch <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__tuna_byschool' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_catch_1deg_1m_ps_iattc_level0__tuna_byschool' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSFlag_tuna_catch <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__tuna_byflag' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_catch_1deg_1m_ps_iattc_level0__tuna_byflag' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSSetType_billfish_catch <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__billfish_byschool' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_catch_1deg_1m_ps_iattc_level0__billfish_byschool' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSFlag_billfish_catch <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__billfish_byflag' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_catch_1deg_1m_ps_iattc_level0__billfish_byflag' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSSetType_shark_catch <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__shark_byschool' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_catch_1deg_1m_ps_iattc_level0__shark_byschool' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSFlag_shark_catch <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__shark_byflag' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_catch_1deg_1m_ps_iattc_level0__shark_byflag' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSSetType_tuna_effort <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_effort_1deg_1m_ps_tunaatlasiattc_level0__tuna_byschool' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_effort_1deg_1m_ps_iattc_level0__tuna_byschool' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSFlag_tuna_effort <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_effort_1deg_1m_ps_tunaatlasiattc_level0__tuna_byflag' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_effort_1deg_1m_ps_iattc_level0__tuna_byflag' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSSetType_billfish_effort <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_effort_1deg_1m_ps_tunaatlasiattc_level0__billfish_byschool' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_effort_1deg_1m_ps_iattc_level0__billfish_byschool' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSFlag_billfish_effort <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_effort_1deg_1m_ps_tunaatlasiattc_level0__billfish_byflag' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_effort_1deg_1m_ps_iattc_level0__billfish_byflag' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSSetType_shark_effort <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_effort_1deg_1m_ps_tunaatlasiattc_level0__shark_byschool' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_effort_1deg_1m_ps_iattc_level0__shark_byschool' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         metadata_dataset_PSFlag_shark_effort <- dbGetQuery(con, 
-            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_ocean_effort_1deg_1m_ps_tunaatlasiattc_level0__shark_byflag' and identifier LIKE '%__", 
+            paste0("SELECT * from metadata.metadata where persistent_identifier='east_pacific_effort_1deg_1m_ps_iattc_level0__shark_byflag' and identifier LIKE '%__", 
                 year_tunaatlas, "%'"))
         columns_to_keep_effort = c("source_authority", 
             "gear", "flag", "schooltype", "time_start", 
