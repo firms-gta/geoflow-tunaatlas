@@ -83,8 +83,8 @@ get_rfmos_datasets_level0<-function(
   } else if (rfmo=="WCPFC"){
     datasets_permanent_identifiers=paste0("'west_pacific_",variable,"_5deg_1m_ll_wcpfc_level0__1950to1970','west_pacific_",variable,"_5deg_1m_ll_wcpfc_level0__1990to2000','west_pacific_",variable,"_5deg_1m_wcpfc_level0__driftnet','west_pacific_",variable,"_5deg_1m_ll_wcpfc_level0__2000','west_pacific_",variable,"_5deg_1m_bb_wcpfc_level0','west_pacific_",variable,"_5deg_1m_ps_wcpfc_level0','west_pacific_",variable,"_5deg_1m_ll_wcpfc_level0__1970to1980','west_pacific_",variable,"_5deg_1m_ll_wcpfc_level0__1980to1990'")
   } else if (rfmo=="CCSBT"){
-    # retrieves 2 lines. CCSBT level0 is only the combination of the 2 CCSBT catch-and-effort datasets: southern_hemispheres_catch_1deg_1m_ccsbt_level0__surface , southern_hemispheres_catch_5deg_1m_ll_ccsbt_level0
-    datasets_permanent_identifiers=paste0("'southern_hemispheres_",variable,"_1deg_1m_ccsbt_level0__surface','southern_hemispheres_",variable,"_5deg_1m_ll_ccsbt_level0'")
+    # retrieves 2 lines. CCSBT level0 is only the combination of the 2 CCSBT catch-and-effort datasets: southern_hemisphere_catch_1deg_1m_ccsbt_level0__surface , southern_hemisphere_catch_5deg_1m_ll_ccsbt_level0
+    datasets_permanent_identifiers=paste0("'southern_hemisphere_",variable,"_1deg_1m_ccsbt_level0__surface','southern_hemisphere_",variable,"_5deg_1m_ll_ccsbt_level0'")
   } else if (rfmo=="IATTC"){
     # The data that are not Purse Seine do not suffer any correction for level 0. They are taken as distributed by IATTC.
     datasets_permanent_identifiers=paste0("'east_pacific_",variable,"_1deg_1m_bb_iattc_level0__tuna_byflag','east_pacific_",variable,"_5deg_1m_ll_iattc_level0__tuna_billfish','east_pacific_",variable,"_5deg_1m_ll_iattc_level0__shark'")
