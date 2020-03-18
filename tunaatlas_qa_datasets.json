@@ -16,7 +16,7 @@
   "metadata": {
     "entities": {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1D42xjUKT2ZFkAdbTAoBHXEwaRiUSlmOCvL6Orga8PAo/edit#gid=0"
+      "source": "https://docs.google.com/spreadsheets/d/1D42xjUKT2ZFkAdbTAoBHXEwaRiUSlmOCvL6Orga8PAo/edit?usp=sharing"
     },
     "contacts" : {
       "handler": "gsheet",
@@ -26,7 +26,7 @@
   "software": [
 	{
 		"id": "my-database-write",
-		"type": "input",
+		"type": "output",
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
