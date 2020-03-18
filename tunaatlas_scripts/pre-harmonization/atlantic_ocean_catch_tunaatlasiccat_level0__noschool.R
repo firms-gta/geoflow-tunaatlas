@@ -45,18 +45,10 @@ if(!require(dplyr)){
 }
 
 #----------------------------------------------------------------------------------------------------------------------------
-#@geoflow - add DBI/odbx for Windows OS , keep using Hmisc for Linux OS
-if(!require(Hmisc)){
-  install.packages("Hmisc")
-  require(Hmisc) # install mdb tools (http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/mdb.get.html)
-}
+
 if(!require(DBI)){
   install.packages("DBI")
   require(DBI)
-}
-if(!require(odbc)){
-  install.packages("odbc")
-  require(odbc)
 }
 #----------------------------------------------------------------------------------------------------------------------------
 
@@ -127,6 +119,11 @@ if(OS == "Windows"){
 	options(opts)
 	DBI::dbDisconnect(CON)
 }else if(OS == "Linux"){
+  #@geoflow - add DBI/odbx for Windows OS , keep using Hmisc for Linux OS
+  if(!require(Hmisc)){
+    install.packages("Hmisc")
+    require(Hmisc) # install mdb tools (http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/mdb.get.html)
+  }
 	t2ce <- mdb.get(path_to_raw_dataset,tables='t2ce',stringsAsFactors=FALSE,strip.white=TRUE)
 	Flags <- mdb.get(path_to_raw_dataset,tables='Flags',stringsAsFactors=FALSE,strip.white=TRUE)	
 }
