@@ -15,6 +15,11 @@ load_mapping<-function(entity, config, options){
     require(rtunaatlas)
   }
   
+  if(!require(readr)){
+	install.packages("readr")
+	require(readr)
+  }
+  
   if(!require(dplyr)){
     install.packages("dplyr")
     require(dplyr)
@@ -29,7 +34,7 @@ load_mapping<-function(entity, config, options){
   
   config$logger.info(sprintf("Load mapping '%s' as table '%s'",codelist_pid, table_name))
   config$logger.info(sprintf("Load mapping from jobdir file '%s'", path_to_dataset))
-  df_to_load <- read.csv(path_to_dataset)
+  df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
   # df_to_load<read.csv(strsplit(x=CFG$src_entities$Data[1],split = "@")[[1]][2])
   
   # df_metadata <- entity
