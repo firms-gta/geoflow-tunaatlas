@@ -100,7 +100,7 @@ load_mapping<-function(entity, config, options){
     source = NA, #TODO ?
     lineage = geoflow_df$Provenance,
     supplemental_information = NA, #this is now managed within description
-    dataset_type = "codelist",
+    dataset_type = "mapping",
     sql_query_dataset_extraction = NA, #filled below with R code
     database_table_name = table_name,
     database_view_name = NA, #not applicable for codelits

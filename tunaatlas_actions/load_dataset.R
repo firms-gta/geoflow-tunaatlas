@@ -62,7 +62,7 @@ load_dataset <- function(entity, config, options){
 	  source = NA, #TODO ?
 	  lineage = geoflow_df$Provenance,
 	  supplemental_information = NA, #this is now managed within description
-	  dataset_type = "codelist",
+	  dataset_type = "dataset",
 	  sql_query_dataset_extraction = NA, #filled below with R code
 	  database_table_name = table_name,
 	  database_view_name = NA, #not applicable for codelits
@@ -293,21 +293,26 @@ load_dataset <- function(entity, config, options){
 	  cat("Data merged with code lists of database\n")
 	  
 	  
-	  # Load metadata
-	  rs<-FUNUploadDatasetToTableInDB(con,InputMetadataset,"metadata.metadata")
-	  cat("Metadata loaded\n")
-	  
+	  # Load metadata	  
 	  # Retrieve the PK of the metadata for the line just inserted
-	  sql<- "SELECT max(id_metadata) FROM metadata.metadata"
-	  PK_metadata <- dbGetQuery(con, sql)
-	  PK_metadata<-as.integer(PK_metadata$max[1])
+	  sql<- sprintf("SELECT * FROM metadata.metadata where identifier = '%s'", dataset_pid)
+	  dataset_metadata <- dbGetQuery(con, sql)
+	  if(nrow(dataset_metadata)==0){
+		config$logger.info(sprintf("Loading metadata for dataset '%s'", dataset_pid))
+		rs<-FUNUploadDatasetToTableInDB(con,InputMetadataset,"metadata.metadata")
+		config$logger.info(sprintf("Metadata loaded for dataset '%s'", dataset_pid))
+	  }else{
+		config$logger.info(sprintf("Metadata already existing in DB for dataset '%s'. Skipping metadata insert...", dataset_pid))
+		#TODO update
+	  }
+	  dataset_metadata <- dbGetQuery(con, sql)
+	  PK_metadata<-as.integer(dataset_metadata$id_metadata)
 	  
 	  df_to_load$id_metadata<-PK_metadata
 	  
 	  # For the dataset to upload, keep only rows that are in the database table (i.e. remove all other columns)  (is it really necessary? TO CHECK)
 	  # This first line is to change the metric column name
 	  # colnames(df_to_load)[which(colnames(df_to_load) == metric_colname_dftoupload)] <- metric_colname_db
-	  
 	  query_get_colnames<-paste("select column_name from information_schema.columns where table_name='",variable_name,"' and table_schema='fact_tables' and column_default is null",sep="")
 	  column_names<-dbGetQuery(con, query_get_colnames)
 	  column_names_to_keep<-column_names$column_name
@@ -329,17 +334,25 @@ load_dataset <- function(entity, config, options){
 	  ## Update some metadata elements
 	  # first drop materialized view
 	  # if(!is.null(database_view_name)){
-	    dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";")))
+		config$logger.info(sprintf("Droping materialized view '%s'", dataset_pid))
+		dataset_drop_view_sql <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";"))
+		config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
+	    dbSendQuery(con, dataset_drop_view_sql)
 	  # }
 	  
 	  # sql_query_dataset_extraction
 	  InputMetadataset$id_metadata<-PK_metadata
 	  sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
-	  dbSendQuery(con,paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",gsub("'","''",sql_query_dataset_extraction$query_CSV_with_labels),"' WHERE identifier='",InputMetadataset$identifier,"'"))
+	  config$logger.info(sprintf("Update metadata s'ql_query_dataset_extraction' field for '%s'",dataset_pid))
+	  dataset_update_meta_sql <- paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",gsub("'","''",sql_query_dataset_extraction$query_CSV_with_labels),"' WHERE identifier='",InputMetadataset$identifier,"'")
+	  config$logger.info(sprintf("SQL: %s", dataset_update_meta_sql))
+	  dbSendQuery(con, dataset_update_meta_sql)
 	  
 	  # spatial coverage
 	  sp_extent_sql<-paste0("SELECT st_astext(ST_Extent(geom)) FROM ",InputMetadataset$database_table_name," c LEFT JOIN area.area_labels USING (id_area) WHERE id_metadata='",PK_metadata,"'")
 	  sp_extent<-dbGetQuery(con,sp_extent_sql)$st_astext
+	  #TODO --> update geoflow entity?
+	  #TODO --> update new metadataDCMI table?
 	  dbSendQuery(con,paste0("UPDATE metadata.metadata SET spatial_coverage='",sp_extent,"' WHERE identifier='",InputMetadataset$identifier,"'"))
 	  
 	  
@@ -357,15 +370,19 @@ load_dataset <- function(entity, config, options){
 	  
 	  # Create the materialized view if set in the metadata
 	  if(!is.na(database_view_name)){
-	    cat(paste0("Creating materialized view ",paste0(schema_name_for_view,".",database_view_name)," (with codes and labels)\n"))
+	    config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",
+									paste0(schema_name_for_view,".",database_view_name))
 	    # Check if schema exists
-	    list_of_schemas<-dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
+	    list_of_schemas <- dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
 	    # Get schema name where to store the materialized view
 	    # schema_name_for_view<-sub('\\..*', '', database_view_name)
 	    # Create the schema if it does not exist
-	    
+	    #TODO --> IF fact_tables is used now, then this piece of of code is probably useless and we can remove it
 	    if (!(schema_name_for_view %in% list_of_schemas)){
-	      dbSendQuery(con,paste0("CREATE SCHEMA ",schema_name_for_view,"; GRANT USAGE ON SCHEMA ",schema_name_for_view," TO ",user_postgres,";ALTER DEFAULT PRIVILEGES IN SCHEMA ",schema_name_for_view," GRANT SELECT ON TABLES TO ",user_postgres,";"))
+		  config$logger.info(sprintf("Schema '%s' doesn't exist. Creating it...", schema_name_for_view))
+		  schema_create_sql <- paste0("CREATE SCHEMA ",schema_name_for_view,"; GRANT USAGE ON SCHEMA ",schema_name_for_view," TO ",user_postgres,";ALTER DEFAULT PRIVILEGES IN SCHEMA ",schema_name_for_view," GRANT SELECT ON TABLES TO ",user_postgres,";")
+		  config$logger.info(sprintf("SQL: %s", schema_create_sql))
+	      dbSendQuery(con,schema_create_sql)
 	    }
 	    # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
 	    dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";
