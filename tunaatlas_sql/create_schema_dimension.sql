@@ -17,7 +17,7 @@ CREATE TABLE %dimension_name%.%dimension_name%
   CONSTRAINT %dimension_name%_pkey PRIMARY KEY (id_%dimension_name%),
   CONSTRAINT %dimension_name%_id_metadata_fkey FOREIGN KEY (id_metadata)
       REFERENCES metadata.metadata (id_metadata) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
+      ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT %dimension_name%_codesource_%dimension_name%_tablesource_%dimension_name%_key UNIQUE (codesource_%dimension_name%, tablesource_%dimension_name%)
 );
 
@@ -40,7 +40,7 @@ CREATE TABLE %dimension_name%.%dimension_name%_mapping
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT %dimension_name%_mapping_id_metadata_fkey FOREIGN KEY (id_metadata)
       REFERENCES metadata.metadata (id_metadata) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
+      ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 ALTER TABLE %dimension_name%.%dimension_name%_mapping
