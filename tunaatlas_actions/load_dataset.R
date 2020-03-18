@@ -8,8 +8,8 @@ load_dataset <- function(entity, config, options){
 	}
 
 	#db
-	con = config$software$input$dbi
-	user_postgres <- config$software$input$dbi_config$parameters$user
+	con = config$software$output$dbi
+	user_postgres <- config$software$output$dbi_config$parameters$user
 	
 	#identifiers
 	dataset_pid <- entity$identifiers[["id"]]
