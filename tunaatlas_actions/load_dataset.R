@@ -62,10 +62,10 @@ load_dataset <- function(entity, config, options){
 	  source = NA, #TODO ?
 	  lineage = geoflow_df$Provenance,
 	  supplemental_information = NA, #this is now managed within description
-	  dataset_type = "dataset",
+	  dataset_type = "raw_dataset",
 	  sql_query_dataset_extraction = NA, #filled below with R code
 	  database_table_name = table_name,
-	  database_view_name = NA, #not applicable for codelits
+	  database_view_name = dataset_pid,
 	  stringsAsFactors = FALSE
 	)
 	InputMetadataset[is.na(InputMetadataset)] <- "NA"
@@ -307,7 +307,7 @@ load_dataset <- function(entity, config, options){
 	  }
 	  dataset_metadata <- dbGetQuery(con, sql)
 	  PK_metadata<-as.integer(dataset_metadata$id_metadata)
-	  
+	  InputMetadataset$id_metadata <- PK_metadata
 	  df_to_load$id_metadata<-PK_metadata
 	  
 	  # For the dataset to upload, keep only rows that are in the database table (i.e. remove all other columns)  (is it really necessary? TO CHECK)
@@ -341,7 +341,6 @@ load_dataset <- function(entity, config, options){
 	  # }
 	  
 	  # sql_query_dataset_extraction
-	  InputMetadataset$id_metadata<-PK_metadata
 	  sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
 	  config$logger.info(sprintf("Update metadata s'ql_query_dataset_extraction' field for '%s'",dataset_pid))
 	  dataset_update_meta_sql <- paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",gsub("'","''",sql_query_dataset_extraction$query_CSV_with_labels),"' WHERE identifier='",InputMetadataset$identifier,"'")
