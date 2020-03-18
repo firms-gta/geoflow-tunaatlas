@@ -371,7 +371,7 @@ load_dataset <- function(entity, config, options){
 	  # Create the materialized view if set in the metadata
 	  if(!is.na(database_view_name)){
 	    config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",
-									paste0(schema_name_for_view,".",database_view_name))
+									paste0(schema_name_for_view,".",database_view_name)))
 	    # Check if schema exists
 	    list_of_schemas <- dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
 	    # Get schema name where to store the materialized view
