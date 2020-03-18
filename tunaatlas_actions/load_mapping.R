@@ -3,7 +3,7 @@ load_mapping<-function(entity, config, options){
   options(stringsAsFactors = FALSE)
   
   #connection to database
-  con = config$software$input$dbi
+  con = config$software$output$dbi
   
   #packages
   if(!require(rtunaatlas)){
