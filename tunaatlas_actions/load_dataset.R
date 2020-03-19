@@ -1,5 +1,11 @@
 load_dataset <- function(entity, config, options){
 
+	  
+	if(!require(readr)){
+		install.packages("readr")
+		require(readr)
+	}
+
 	#control to check that everything is ok on mappings side, if not we stop the workflow until mappings are fixed/updated
 	if(dir.exists("errors_mappings")){
 		errMsg <- "Hum, It seems they are still missing codelist mappings! Cannot proceed with loading datasets. Aborting workflow..."
@@ -26,8 +32,8 @@ load_dataset <- function(entity, config, options){
 	path_to_codelists <- entity$resources$codelists
 	
 	#read sources
-	df_to_load <- as.data.frame(read_csv(path_to_dataset, guess_max=0))
-	df_codelists <- as.data.frame(read_csv(path_to_codelists, guess_max=0))
+	df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
+	df_codelists <- as.data.frame(readr::read_csv(path_to_codelists, guess_max=0))
 	
 	#names
 	table_name <- entity$data$uploadSource[[1]]
