@@ -485,19 +485,30 @@ if (options$raising_georef_to_nominal) {
 } 
 
 
-# TODO --> ADAPT R CODE
+
 #### 6) Spatial Aggregation / Disaggregation of data
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 ## 6.1 Aggregate data on 5° resolution quadrants
 if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
-  source(paste0(url_scripts_create_own_tuna_atlas,"aggregate_on_5deg_data_with_resolution_inferior_to_5deg.R"))
-  georef_dataset<-function_aggregate_on_5deg_data_with_resolution_inferior_to_5deg(con,georef_dataset)
-  metadata$description<-paste0(metadata$description,georef_dataset$description)
-  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-  georef_dataset<-georef_dataset$dataset
+ 
+	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+	georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+	georef_dataset<-georef_dataset$df
+
+	# fill metadata elements
+	lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
+	aggregate_step = geoflow_process$new()
+	aggregate_step$setRationale(lineage)
+	aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
+	entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
+	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
+
+	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+
 } 
 
+# TODO --> ADAPT R CODE
 ## 6.2 Disggregate data on 5° resolution quadrants
 if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
   source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
@@ -507,6 +518,7 @@ if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("d
   georef_dataset<-georef_dataset$dataset
 }
 
+# TODO --> ADAPT R CODE
 ## 6.3 Disggregate data on 1° resolution quadrants
 if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
   source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
@@ -528,16 +540,56 @@ if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
   georef_dataset<-georef_dataset$dataset
 }
 
-# TODO --> ADAPT R CODE
+
 #### 8) Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlapping_zone_iattc_wcpfc_data_to_keep)){
-  source(paste0(url_scripts_create_own_tuna_atlas,"overlapping_zone_iattc_wcpfc_data_to_keep.R"))
-  georef_dataset<-function_overlapping_zone_iattc_wcpfc_data_to_keep(con,overlapping_zone_iattc_wcpfc_data_to_keep,georef_dataset)
-  metadata$description<-paste0(metadata$description,georef_dataset$description)
-  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-  georef_dataset<-georef_dataset$dataset
+ 
+	overlapping_zone_iattc_wcpfc_data_to_keep <- options$overlapping_zone_iattc_wcpfc_data_to_keep
+	config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
+	# query Sardara to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
+	query_areas_overlapping_zone_iattc_wcpfc <- "SELECT codesource_area from
+	(WITH iattc_area_of_competence AS (
+			 SELECT rfmos_convention_areas_fao.geom
+			   FROM area.rfmos_convention_areas_fao
+			  WHERE code::text = 'IATTC'::text
+			), wcpfc_area_of_competence AS (
+			 SELECT rfmos_convention_areas_fao.geom
+			   FROM area.rfmos_convention_areas_fao
+			  WHERE code::text = 'WCPFC'::text
+			), geom_iattc_wcpfc_intersection AS (
+			 SELECT st_collectionextract(st_intersection(iattc_area_of_competence.geom, wcpfc_area_of_competence.geom), 3) AS geom
+			   FROM iattc_area_of_competence,
+				wcpfc_area_of_competence
+			)
+	 SELECT area_labels.id_area,
+		area_labels.codesource_area
+	   FROM area.area_labels,
+		geom_iattc_wcpfc_intersection
+	  WHERE area_labels.tablesource_area = 'cwp_grid'::text AND st_within(area_labels.geom, geom_iattc_wcpfc_intersection.geom))tab;
+	"
+
+	overlapping_zone_iattc_wcpfc <- dbGetQuery(con, query_areas_overlapping_zone_iattc_wcpfc)
+
+	if (overlapping_zone_iattc_wcpfc_data_to_keep=="IATTC"){
+	  # If we choose to keep the data of the overlapping zone from the IATTC, we remove the data of the overlapping zone from the WCPFC dataset.
+	  georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% overlapping_zone_iattc_wcpfc$codesource_area & georef_dataset$source_authority == "WCPFC")), ]
+	} else if (overlapping_zone_iattc_wcpfc_data_to_keep=="WCPFC"){
+	  # If we choose to keep the data of the overlapping zone from the WCPFC, we remove the data of the overlapping zone from the IATTC dataset
+	  georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% overlapping_zone_iattc_wcpfc$codesource_area & georef_dataset$source_authority == "IATTC")), ]
+	}
+
+	# fill metadata elements
+	overlap_lineage<-paste0("Concerns IATTC and WCPFC data. IATTC and WCPFC have an overlapping area in their respective area of competence. Data from both RFMOs may be redundant in this overlapping zone. In the overlapping area, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept.	Information regarding the data in the IATTC / WCPFC overlapping area: after the eventual other corrections applied, e.g. raisings, catch units conversions, etc., the ratio between the catches from IATTC and those from WCPFC was of: ratio_iattc_wcpf_mt for the catches expressed in weight and ratio_iattc_wcpf_no for the catches expressed in number.")
+	overlap_step <- geoflow_process$new()
+	overlap_step$setRationale(overlap_lineage)
+	overlap_step$setProcessor(firms_contact)  #TODO define who's the processor
+	entity$provenance$processes <- c(entity$provenance$processes, overlap_step)	
+	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
+
+	config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
+  
   }
 
 
@@ -557,7 +609,7 @@ if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_
 	lineage<-paste0("Concerns Southern Bluefin Tuna (SBF) data: SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Data from CCSBT and the other RFMOs may be redundant. For the Southern Bluefin Tuna, only data from ",options$SBF_data_rfmo_to_keep," were kept.	Information regarding the SBF data: after the potential other corrections applied, e.g. raisings, units conversions, etc., the ratio between the catches from CCSBT and those from the other RFMOs for SBF was of: ratio_ccsbt_otherrfmos_mt for the catches expressed in weight. A total of catches_sbf_ccsbt_no fishes were available in the CCSBT datasets - while no data in number were available in the other RFMOs datasets.\n")
 	sbf_step <- geoflow_process$new()
 	sbf_step$setRationale(lineage)
-	sbf_step$setProcessor(firms_contact)
+	sbf_step$setProcessor(firms_contact)  #TODO define who's the processor
 	entity$provenance$processes <- c(entity$provenance$processes, sbf_step)
 	
 	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- For the Southern Bluefin Tuna, only data from ",options$SBF_data_rfmo_to_keep," were kept")
