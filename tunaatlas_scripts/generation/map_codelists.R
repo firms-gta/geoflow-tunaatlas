@@ -1,5 +1,5 @@
 #re-written from https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/create_own_tuna_atlas/sourced_scripts/map_code_lists.R
-map_codelists <- function(fact, mapping_dataset,dataset_to_map, mapping_keep_src_code = FALSE){
+map_codelists <- function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_src_code = FALSE){
 
   
   # Get the dimensions to map from the mapping_dataset

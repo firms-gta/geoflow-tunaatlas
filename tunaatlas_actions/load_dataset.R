@@ -18,16 +18,16 @@ load_dataset <- function(entity, config, options){
 	id_parts <- unlist(strsplit(dataset_pid, "_tuna"))
 	id_version <- paste0(id_parts[1], "_", gsub("-","_", format(entity$temporal_extent$start, "%Y-%m-%d")),"_", gsub("-","_", format(entity$temporal_extent$end, "%Y-%m-%d")), "_tuna", id_parts[2], "_", format(Sys.Date(),"%Y"))
 	entity$setIdentifier("id_version", id_version)
-	print(entity$identifiers[["id_version"]])
 	entity$enrichWithMetadata()
 
 	#----------------------------------------------------------------------------------------------------------------------------
 	#resources
-	path_to_dataset	<- entity$resources$harmonized
+	path_to_dataset <- entity$resources$harmonized
 	path_to_codelists <- entity$resources$codelists
+	
 	#read sources
-	df_to_load <- read.csv(path_to_dataset)
-	df_codelists <- read.csv(path_to_codelists)
+	df_to_load <- as.data.frame(read_csv(path_to_dataset, guess_max=0))
+	df_codelists <- as.data.frame(read_csv(path_to_codelists, guess_max=0))
 	
 	#names
 	table_name <- entity$data$uploadSource[[1]]

@@ -233,7 +233,7 @@ if (options$raising_georef_to_nominal){
 	# For ICCAT Nominal catch, we need to map flag code list, because flag code list used in nominal catch dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
 	if (options$include_ICCAT){
 	  # extract mapping
-	  df_mapping<-rtunaatlas::extract_dataset(con,list_metadata_datasets(con,identifier="codelist_mapping_flag_iccat_from_ncandcas_flag_iccat"))
+	  df_mapping<-rtunaatlas::extract_dataset(con,rtunaatlas::list_metadata_datasets(con,identifier="codelist_mapping_flag_iccat_from_ncandcas_flag_iccat"))
 	  df_mapping$source_authority<-"ICCAT"
 	  
 	  nominal_catch_iccat<-nominal_catch %>% filter (source_authority=="ICCAT")
@@ -347,7 +347,7 @@ if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists)
   if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
   
   config$logger.info("Mapping code lists of georeferenced datasets...")
-  output <- map_codelists("catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
+  output <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
   config$logger.info("Mapping code lists of georeferenced datasets OK")
   
   #dataset mapped with codelists
@@ -369,7 +369,7 @@ if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists)
   
   if(!is.null(options$raising_georef_to_nominal)) if(options$raising_georef_to_nominal){
     config$logger.info("Mapping code lists of nominal catch datasets...")
-    nominal_catch <- map_codelists("catch", mapping_dataset, nominal_catch, mapping_keep_src_code)$dataset
+    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)$dataset
     config$logger.info("Mapping code lists of nominal catch datasets OK")
   }
 }
