@@ -42,7 +42,7 @@
   "actions": [
 	{
 		"id": "load_mapping",
-		"script": "D:/geoflow-tunaatlas/tunaatlas_actions/load_mapping.R",
+		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_mapping.R",
 		"run": true
 	}
   ]

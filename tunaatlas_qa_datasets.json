@@ -42,7 +42,7 @@
   "actions": [
 	{
 		"id": "load_dataset",
-		"script": "D:/geoflow-tunaatlas/tunaatlas_actions/load_dataset.R",
+		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
 		"run": true
 	}
   

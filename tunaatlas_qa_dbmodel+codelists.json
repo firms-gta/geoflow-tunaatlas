@@ -47,7 +47,7 @@
   "actions": [
 	{
 		"id": "load_codelist",
-		"script": "D:/geoflow-tunaatlas/tunaatlas_actions/load_codelist.R",
+		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_codelist.R",
 		"run": true
 	}
   ]
