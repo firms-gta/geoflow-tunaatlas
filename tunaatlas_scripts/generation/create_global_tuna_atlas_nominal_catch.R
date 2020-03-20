@@ -169,4 +169,4 @@ entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
 
 #### END
-config$logger.info("End: Your tuna atlas dataset has been created!)
+config$logger.info("End: Your tuna atlas dataset has been created!")
