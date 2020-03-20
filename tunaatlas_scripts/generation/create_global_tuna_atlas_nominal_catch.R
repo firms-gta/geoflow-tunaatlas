@@ -63,7 +63,7 @@ entity$provenance$processes <- c(entity$provenance$processes, merge_step)
 
 #### 2) Map code lists 
 
-if (!is.null(options$mapping_map_code_lists)) (options$mapping_map_code_lists){
+if (!is.null(options$mapping_map_code_lists)){
  
 	config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
 	filename <- entity$data$source[[1]]
@@ -73,7 +73,7 @@ if (!is.null(options$mapping_map_code_lists)) (options$mapping_map_code_lists){
 	if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
   
 	config$logger.info("Mapping code lists of georeferenced datasets...")
-	output <- <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
+	output <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
 	config$logger.info("Mapping code lists of georeferenced datasets OK")
  
 	#dataset mapped with codelists
