@@ -46,7 +46,7 @@ con <- config$software$output$dbi
 #scripts
 url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
 source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
-source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch"))
+source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
 
 #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
 config$logger.info("Retrieving RFMOs nominal catch...")
