@@ -1,8 +1,8 @@
 load_all_dataset <- function(entity, config, options){
   
-  source("/home/juldebar/Bureau/CODES/geoflow-tunaatlas/tunaatlas_actions/load_codelist.R")
-  source("/home/juldebar/Bureau/CODES/geoflow-tunaatlas/tunaatlas_actions/load_dataset.R")
-  source("/home/juldebar/Bureau/CODES/geoflow-tunaatlas/tunaatlas_actions/load_mapping.R")
+  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_codelist.R")
+  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R")
+  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_mapping.R")
   codelist_pid <- entity$identifiers[["id"]]
   
   if(!grepl(pattern = "mapping",x=codelist_pid) && !grepl(pattern = "level0", x=codelist_pid)){
