@@ -4,6 +4,9 @@ retrieve_nominal_catch <- function(entity, config, include_IOTC, include_IATTC, 
 	
 	con <- config$software$output$dbi
 	
+	firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "firms-secretariat@fao.org"})][[1]]
+	firms_contact$setRole("processor")
+	
 	include_rfmo<-c(include_IOTC,include_IATTC,include_WCPFC,include_CCSBT,include_ICCAT)
 
 	# There are 2 ICCAT datasets for nominal catch: one that provides the stratification by Sampling areas, and one that provides the stratification by Stock areas. For nominal catch, the user decides as input parameter which one he wants to keep.
