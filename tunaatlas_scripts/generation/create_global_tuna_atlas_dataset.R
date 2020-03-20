@@ -43,19 +43,18 @@ if(!require(rtunaatlas)){
   }
   require(devtools)
   install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
 }
 
 if(!require(dplyr)){
   install.packages("dplyr")
+  require(dplyr)
 }
 
 if(!require(data.table)){
   install.packages("data.table")
+  require(data.table)
 }
-
-require(rtunaatlas)
-require(dplyr)
-require(data.table)
 
 #scripts
 url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
@@ -188,75 +187,15 @@ dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 georef_dataset<-dataset
 rm(dataset)
 
-#TODO --> TEST (code already adapted)
 ### 1.2 If data will be raised, retrieve nominal catch datasets
 #-------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------
 if (options$raising_georef_to_nominal){
   
 	config$logger.info("Retrieving RFMOs nominal catch...")
-
-	include_rfmo<-c(options$include_IOTC,options$include_IATTC,options$include_WCPFC,options$include_CCSBT,options$include_ICCAT)
-
-	# There are 2 ICCAT datasets for nominal catch: one that provides the stratification by Sampling areas, and one that provides the stratification by Stock areas. For nominal catch, the user decides as input parameter which one he wants to keep.
-	if (options$iccat_nominal_catch_spatial_stratification){
-	  if (options$iccat_nominal_catch_spatial_stratification=="sampling_area"){
-		iccat_nominal_catch_dataset_permanent_identifier<-"atlantic_nominal_catch_iccat_level0__bysamplingarea"
-	  } else if (options$iccat_nominal_catch_spatial_stratification=="stock_area"){
-		iccat_nominal_catch_dataset_permanent_identifier<-"atlantic_nominal_catch_iccat_level0__bystockarea"
-	  }
-	} else { iccat_nominal_catch_dataset_permanent_identifier<-"atlantic_nominal_catch_iccat_level0__bysamplingarea" }
-
-	rfmo<-c("IOTC","IATTC","WCPFC","CCSBT","ICCAT")
-	nominal_catch_datasets_permanent_identifiers<-c("indian_nominal_catch_iotc_level0","east_pacific_nominal_catch_iattc_level0","west_pacific_nominal_catch_wcpfc_level0","southern_hemisphere_nominal_catch_ccsbt_level0__bygear",iccat_nominal_catch_dataset_permanent_identifier)
-	nominal_catch_contact_originators<-c("fabio.fiorellato@iotc.org","nvogel@iattc.org","peterw@spc.int","cmillar@ccsbt.org","carlos.palma@iccat.int")
-	nominal_catch_datasets_permanent_identifiers_to_keep<-NULL
-	for (i in 1:length(include_rfmo)){
-	  if (include_rfmo[i]=="TRUE"){
-		nominal_catch_datasets_permanent_identifiers_to_keep<-paste0(nominal_catch_datasets_permanent_identifiers_to_keep,",'",nominal_catch_datasets_permanent_identifiers[i],"'")
-		
-		# fill metadata elements
-		rfmo_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == nominal_catch_contact_originators[i]})][[1]]
-		rfmo_contact$setRole("originator")
-		rfmo_step <- geoflow_process$new()
-		rfmo_step$setRationale("Public domain datasets from ",rfmo[i]," were collated through the RFMO website. Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-		rfmo_step$setProcessor(firms_contact) #TODO define who's the processor
-		entity$addContact(rfmo_contact)
-		entity$provenance$processes <- c(entity$provenance$processes, rfmo_step)
-	  }
-	}
-	nominal_catch_datasets_permanent_identifiers_to_keep<-substring(nominal_catch_datasets_permanent_identifiers_to_keep, 2)
-
-	rfmo_nominal_catch_metadata<-dbGetQuery(con,paste0("SELECT * from metadata.metadata where persistent_identifier IN (",nominal_catch_datasets_permanent_identifiers_to_keep,")"))
-	nominal_catch<-rtunaatlas::extract_and_merge_multiple_datasets(con,rfmo_nominal_catch_metadata,columns_to_keep=c("source_authority","species","gear","flag","time_start","time_end","geographic_identifier","unit","value"))
-
-	# For ICCAT Nominal catch, we need to map flag code list, because flag code list used in nominal catch dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
-	if (options$include_ICCAT){
-	  # extract mapping
-	  df_mapping<-rtunaatlas::extract_dataset(con,rtunaatlas::list_metadata_datasets(con,identifier="codelist_mapping_flag_iccat_from_ncandcas_flag_iccat"))
-	  df_mapping$source_authority<-"ICCAT"
-	  
-	  nominal_catch_iccat<-nominal_catch %>% filter (source_authority=="ICCAT")
-	  nominal_catch_other_rfmos<-nominal_catch %>% filter (source_authority!="ICCAT")
-	  
-	  nominal_catch_iccat<-rtunaatlas::map_codelist(nominal_catch_iccat,df_mapping,"flag")$df 
-	  
-	  nominal_catch<-rbind(nominal_catch_other_rfmos,nominal_catch_iccat)
-	  
-	  # fill metadata elements
-	  iccat_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "carlos.palma@iccat.int"})][[1]]
-	  iccat_contact$setRole("originator")
-	  iccat_step <- geoflow_process$new()
-	  iccat_step$setRationale("Public domain datasets from ICCAT were collated through the RFMO website (www.iccat.int). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-	  iccat_step$setProcessor(firms_contact) #TODO define who's the processor
-	  entity$addContact(iccat_contact)
-	  entity$provenance$processes <- c(entity$provenance$processes, iccat_step)
-	  
-	}
-
-	nominal_catch$time_start<-substr(as.character(nominal_catch$time_start), 1, 10)
-	nominal_catch$time_end<-substr(as.character(nominal_catch$time_end), 1, 10)
-
+	nominal_catch <-retrive_nominal_catch(entity, config, 
+										  options$include_IOTC,options$include_IATTC,options$include_WCPFC,options$include_CCSBT,options$include_ICCAT,
+										  options$iccat_nominal_catch_spatial_stratification)
 	config$logger.info("Retrieving RFMOs nominal catch OK")
   
 }
@@ -650,23 +589,6 @@ if(length(cl_relations)>0){
 	}else{
 		df_codelists <- read.csv(cl_relations[[1]]$link)
 	}
-	
-	#df_codelists <- do.call("rbind",lapply(df_codelists$url_df_codelist, function(x){
-	#	out_cl <- NULL
-	#	if(startsWith(x, googledrive_baseurl)){
-	#		#managing download through google drive
-	#		drive_id <- unlist(strsplit(x, "id="))[2]
-	#		drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-	#		tmp <- tempfile(fileext = ".csv")
-	#		googledrive::drive_download(file = googledrive::as_id(drive_id), path = tmp)
-	#		out_cl <- read.csv(tmp)
-	#		unlink(tmp)
-	#	}else{
-	#		out_cl <- read.csv(x)
-	#	}
-	#	return(out_cl)
-	#}))
-	
 }
 #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
 dataset <- list(
@@ -690,4 +612,4 @@ entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
 
 #### END
-config$logger.info("End: Your tuna atlas dataset has been created! Your output data.frame is called 'dataset' \n")
+config$logger.info("End: Your tuna atlas dataset has been created!")
