@@ -6,6 +6,8 @@ CREATE SCHEMA %dimension_name%
 GRANT ALL ON SCHEMA %dimension_name% TO "%db_admin%";
 GRANT USAGE ON SCHEMA %dimension_name% TO "%db_read%";
 ALTER DEFAULT PRIVILEGES IN SCHEMA %dimension_name% GRANT SELECT ON TABLES TO "%db_read%";
+COMMENT ON SCHEMA %dimension_name% IS 'Schema containing the %dimension_name% code lists (i.e. reference data) used in the datasets';
+
 
 
 CREATE TABLE %dimension_name%.%dimension_name%
@@ -24,6 +26,13 @@ CREATE TABLE %dimension_name%.%dimension_name%
 ALTER TABLE %dimension_name%.%dimension_name%
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE %dimension_name%.%dimension_name% TO "%db_admin%";
+COMMENT ON TABLE  %dimension_name%.%dimension_name%  IS '"%dimension_name%.%dimension_name%" is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table ';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%"."id_%dimension_name%" IS '"id_%dimension_name%"  column identifies (primary key) the %dimension_name% with a numeric code (integer)';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%"."codesource_%dimension_name%" IS '"codesource_%dimension_name%" indicates what is the label in the dataset where this code comes from.';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%"."tablesource_%dimension_name%" IS '"tablesource_%dimension_name%" gives the name of the dataset from which dataset this code comes ';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%"."id_metadata" IS '"id_metadata" indicates from which dataset this code comes from by pointing the identifier (foreign key) of the related metadata in the metadata table';
+
+
 
 CREATE TABLE %dimension_name%.%dimension_name%_mapping
 (
@@ -45,10 +54,14 @@ CREATE TABLE %dimension_name%.%dimension_name%_mapping
 
 ALTER TABLE %dimension_name%.%dimension_name%_mapping
   OWNER TO "%db_admin%";
-GRANT ALL ON TABLE %dimension_name%.%dimension_name%_mapping TO "%db_admin%";
+GRANT ALL ON TABLE "%dimension_name%"."%dimension_name%_mapping" TO "%db_admin%";
+COMMENT ON TABLE  "%dimension_name%"."%dimension_name%_mapping"  IS '"%dimension_name%"."%dimension_name%_mapping" enables to swicth from a codification system to another. For example, this table is required to generate global datasets from regional datasets which use specific code lists.';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%_mapping"."%dimension_name%_mapping_id_from" IS '"%dimension_name%_mapping_id_from"  is the identifier (foreign key) of the code which is translated by this mapping relationship into another codification system';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%_mapping"."%dimension_name%_mapping_id_to" IS '"%dimension_name%_mapping_id_to" gives the identifier (foreign key) of the code which results from the mapping';
+COMMENT ON COLUMN "%dimension_name%"."%dimension_name%_mapping"."%dimension_name%_mapping_relation_type" IS '"%dimension_name%_mapping_relation_type" specifies the kind / semantic of the relationship: same as, generalizes..';
+
 
 INSERT INTO %dimension_name%.%dimension_name%(id_%dimension_name%,codesource_%dimension_name%) VALUES (0,'UNK');
-
 INSERT INTO %dimension_name%.%dimension_name%_mapping(%dimension_name%_mapping_id_from,%dimension_name%_mapping_id_to,%dimension_name%_mapping_relation_type) VALUES (0,0,'equal');
 
 
@@ -59,6 +72,14 @@ CREATE VIEW %dimension_name%.%dimension_name%_labels AS
     'Unknown'::character varying AS source_label,
     'Inconnu'::character varying AS source_french_label,
     'Desconocido'::character varying AS source_spanish_label;
+    
+    
+COMMENT ON VIEW %dimension_name%.%dimension_name%_labels IS 'View gathering the codes and labels of all the code lists available under the schema %dimension_name%';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_labels.id_%dimension_name% IS '"id_%dimension_name%" name of the dimension';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_labels.codesource_%dimension_name% IS '"codesource_%dimension_name%" the label of the code in the dataset where this code comes from';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_labels.tablesource_%dimension_name% IS '"tablesource_%dimension_name%" the name of the dataset from which dataset this code comes';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_labels.source_label IS '"source_label" the label of the code in the dataset where this code comes from';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_labels.source_spanish_label IS '"source_spanish_label" the spanish label of the code in the dataset where this code comes from';
     
 
 CREATE VIEW %dimension_name%.%dimension_name%_mapping_view AS 
@@ -88,6 +109,11 @@ JOIN metadata.metadata ON metadata.id_metadata = %dimension_name%.id_metadata
 ) sub2 ON sub1.db_idsource = sub2.db_idsource
 ORDER BY sub1.db_tablesource,sub1.codesource,sub2.db_tabletarget;
 
-COMMENT ON SCHEMA %dimension_name% IS 'Schema containing the %dimension_name% code lists (i.e. reference data) used in the datasets';
 COMMENT ON VIEW %dimension_name%.%dimension_name%_mapping_view IS 'View gathering all the mappings (i.e. corresondances) between code lists available for the dimension %dimension_name%';
-COMMENT ON VIEW %dimension_name%.%dimension_name%_labels IS 'View gathering the codes and labels of all the code lists available under the schema %dimension_name%';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.db_idsource IS '"db_idsource" name of the dimension';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.db_idtarget IS '"db_idtarget" identifier of the code resulting from the mapping';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.src_code IS '"src_code" the label of the code in the dataset where this code comes from';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.trg_code IS '"trg_code" the label of the code which results from the mapping';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.src_codingsystem IS '"src_codingsystem" the name of the dataset from which dataset this code comes';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.trg_codingsystem IS '"trg_codingsystem" the name of the standard codelist which is the ouput of the mapping';
+COMMENT ON COLUMN %dimension_name%.%dimension_name%_mapping_view.trg_codingsystem IS '"relation_type" the kind of relationship betweend these two codes: same as, generalizes..';

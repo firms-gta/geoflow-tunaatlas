@@ -7,13 +7,19 @@ CREATE TABLE area.area_wkt
 WITH (
   OIDS=FALSE
 );
+
 ALTER TABLE area.area_wkt
   OWNER TO "%db_admin%";
-GRANT ALL ON TABLE area.area_wkt TO "%db_admin%";
+  
+GRANT ALL ON TABLE "area"."area_wkt" TO "%db_admin%";
+COMMENT ON TABLE  "area"."area_wkt" IS '"area  " blabla ';
+COMMENT ON COLUMN "area"."area_wkt"."code" IS '"code"  blabla';
+COMMENT ON COLUMN "area"."area_wkt"."geom" IS '"geom"  blabla';
+
 
 CREATE OR REPLACE FUNCTION area.func_add_new_record_in_link_table_area_wkt()
   RETURNS trigger AS
-$BODY$ BEGIN INSERT INTO area.area ( codesource_area,tablesource_area) VALUES (NEW.code,'area_wkt') ; RETURN NEW; END; $BODY$
+$BODY$ BEGIN INSERT INTO area.area (codesource_area,tablesource_area) VALUES (NEW.code,'area_wkt') ; RETURN NEW; END; $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
 ALTER FUNCTION area.func_add_new_record_in_link_table_area_wkt()

@@ -26,8 +26,19 @@ CREATE TABLE "time"."time"
 ALTER TABLE "time"."time"
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE "time"."time" TO "%db_admin%";
+COMMENT ON TABLE "time"."time" IS '"time"."time" is the temporal dimension of the data warehouse which stores dates and periods';
+COMMENT ON COLUMN "time"."time".id_time IS '"id_time" numeric (integer) identifier (primary key) of the timestamp / period';
+COMMENT ON COLUMN "time"."time".time_start IS '"time_start" beginning of the periode';
+COMMENT ON COLUMN "time"."time".time_end IS '"time_end" end of the period';
+COMMENT ON COLUMN "time"."time".time_period IS '"time_period" ??? ';
+COMMENT ON COLUMN "time"."time".month IS '"month" in number';
+COMMENT ON COLUMN "time"."time".quarter IS '"quarter" ';
+COMMENT ON COLUMN "time"."time".semester IS '"semester" ';
+COMMENT ON COLUMN "time"."time".year IS '"year" ';
+COMMENT ON COLUMN "time"."time".decade IS '"decade" ';
+COMMENT ON COLUMN "time"."time".month_name IS '"month_name" in letters';
 
-
+    
 
 CREATE OR REPLACE FUNCTION time.time_calc_decade()
   RETURNS trigger AS

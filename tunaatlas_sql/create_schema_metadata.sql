@@ -37,6 +37,7 @@ database_view_name text,
 ALTER TABLE metadata.metadata
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE metadata.metadata TO "%db_admin%";
+COMMENT ON TABLE metadata.metadata IS 'Table containing the metadata on all the datasets available in the database';
 
 
 CREATE TABLE metadata.metadata_mapping
@@ -57,6 +58,15 @@ CREATE TABLE metadata.metadata_mapping
 ALTER TABLE metadata.metadata_mapping
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE metadata.metadata_mapping TO "%db_admin%";
+COMMENT ON TABLE metadata.metadata_mapping IS 'Table containing the genealogy of the datasets, i.e. the list of datasets used as input of each dataset available in the database';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_from IS '"metadata_mapping_id_from" identifier of the dataset which is the Subject of the relationship';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_to IS '"metadata_mapping_id_to" identifier of the dataset which is the Predicate of the relationship';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_relation_type IS '"metadata_mapping_relation_type" the kind of relationship between these two datasets: is made of, is source of.. ';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_description IS '"metadata_mapping_description" details of the relationship';
+
+
+
+
 DROP SCHEMA IF EXISTS fact_tables CASCADE;
 CREATE SCHEMA fact_tables
   AUTHORIZATION "%db_admin%";
@@ -67,6 +77,3 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA fact_tables GRANT SELECT ON TABLES TO "%db_re
 
 COMMENT ON SCHEMA fact_tables IS 'Schema containing the time series datasets stored as integer values';
 COMMENT ON SCHEMA metadata IS 'Schema containing the metadata on all the datasets available in the database';
-COMMENT ON TABLE metadata.metadata IS 'Table containing the metadata on all the datasets available in the database';
-COMMENT ON TABLE metadata.metadata_mapping IS 'Table containing the genealogy of the datasets, i.e. the list of datasets used as input of each dataset available in the database';
-
