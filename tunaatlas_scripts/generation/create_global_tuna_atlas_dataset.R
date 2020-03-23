@@ -60,6 +60,7 @@ if(!require(data.table)){
 url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
 source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
 source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
+source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modified for geoflow
 
 # connect to Tuna atlas database
 con <- config$software$output$dbi
