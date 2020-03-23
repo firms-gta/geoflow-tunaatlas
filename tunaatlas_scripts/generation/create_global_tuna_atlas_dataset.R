@@ -333,17 +333,16 @@ if (!is.null(options$gear_filter)){
 
 }
 
-# TODO --> ADAPT R CODE
+# TODO --> TEST ( conversion seems not working)
 #### 4) Convert units
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){ 
-  source(paste0(url_scripts_create_own_tuna_atlas,"unit_conversion_convert.R"))
-  georef_dataset<-function_unit_conversion_convert(con,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists,georef_dataset)
-  metadata$description<-paste0(metadata$description,georef_dataset$description)
-  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-  metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
-  georef_dataset<-georef_dataset$dataset
+if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
+	mapping_map_code_lists <- TRUE
+	if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
+	if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
+	if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
+	georef_dataset<- do_unit_conversion(entity, config, fact, unit_conversion_csv_conversion_factor_url, unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
 }
 
 
