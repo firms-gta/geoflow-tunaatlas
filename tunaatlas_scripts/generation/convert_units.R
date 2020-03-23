@@ -1,5 +1,7 @@
 do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset){
   
+	con <- config$software$output$dbi
+  
 	config$logger.info("Converting units of georef_dataset...\n")
 
 	config$logger.info("Reading the conversion factors dataset\n")
