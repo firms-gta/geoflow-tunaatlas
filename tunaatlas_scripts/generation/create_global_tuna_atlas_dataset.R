@@ -343,7 +343,7 @@ if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_conver
 	if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 	if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 	if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-	georef_dataset<- do_unit_conversion(entity, config, fact, unit_conversion_csv_conversion_factor_url, unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
+	georef_dataset<- do_unit_conversion(entity, config, fact, options$unit_conversion_csv_conversion_factor_url, options$unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
 }
 
 
