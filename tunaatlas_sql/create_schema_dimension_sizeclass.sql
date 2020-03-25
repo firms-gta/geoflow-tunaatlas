@@ -19,7 +19,13 @@ CREATE TABLE sizeclass.sizeclass
 ALTER TABLE sizeclass.sizeclass
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE sizeclass.sizeclass TO "%db_admin%";
-
+COMMENT ON TABLE sizeclass.sizeclass IS '"sizeclass.sizeclass" table stores the characterstics of the different size class used in the database which are lenght intervalls (fork length), minimal value included, maximal value excluded' ;
+COMMENT ON COLUMN sizeclass.sizeclass.id_sizeclass IS '"id_sizeclass" identifier of this size class';
+COMMENT ON COLUMN sizeclass.sizeclass.size_min IS '"size_min" the minimal size of this intervall';
+COMMENT ON COLUMN sizeclass.sizeclass.size_step IS '"size_step" the width of the intervall which can be different (1cm, 2cm..)';
+COMMENT ON COLUMN sizeclass.sizeclass.size_max IS '"size_max" the maximal size of this intervall';
+COMMENT ON COLUMN sizeclass.sizeclass.size_avg IS '"size_avg" average size';
+    
 
 CREATE OR REPLACE FUNCTION sizeclass.sizeclass_calc_size_avg()
   RETURNS trigger AS
