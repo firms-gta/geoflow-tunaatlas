@@ -25,11 +25,11 @@ deploy_database_model <- function(config, software, software_config){
 	sql_deploy_metadata <- paste(readLines(fileName), collapse="\n")
 	outsql <- paste(outsql, sql_deploy_metadata, sep="\n")
 	# METADATA DCMI table (NEW)
-	outsql <- paste(outsql, '-- 1A/ METADATA DCMI table', sep = "\n")
+	outsql <- paste(outsql, '-- 1B/ METADATA DCMI table', sep = "\n")
 	fileName <- paste(repository_sql_scripts_database_deployement,"create_Dublin_Core_metadata.sql",sep="/")
 	sql_deploy_metadata <- paste(readLines(fileName), collapse="\n")
 	outsql <- paste(outsql, sql_deploy_metadata, sep="\n")
-	
+
 	## 2) Deploy dimensions
 	outsql <- paste(outsql, '-- 2/ DIMENSIONS', sep = "\n")
 	# Create vector of dimensions to deploy
