@@ -7,7 +7,7 @@ CREATE TABLE "metadata"."metadataDCMI"
   "Description" text,
   "Title" text,
   "Subject" text,
-  "Contact" text,
+  "Creator" text,
   "Date" text, 
   "Type" text,
   "SpatialCoverage" text,
