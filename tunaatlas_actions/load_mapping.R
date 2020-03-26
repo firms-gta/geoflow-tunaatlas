@@ -92,7 +92,7 @@ load_mapping<-function(entity, config, options){
     identifier = entity$identifiers[["id"]],
     persistent_identifier = entity$identifiers[["id"]],
     title = entity$title,
-    contacts_and_roles = geoflow_df$Contact,
+    contacts_and_roles = geoflow_df$Creator,
     subject = geoflow_df$Subject,
     description = geoflow_df$Description,
     date = geoflow_df$Date,
