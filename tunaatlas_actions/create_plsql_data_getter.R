@@ -35,7 +35,7 @@ create_plsql_data_getter <- function(entity, config, options){
 		"DECLARE
 			count_month integer := 12;  
 			count_quarter integer := 4;
-			count_year integer := 0;
+			count_year integer := 1;
 			count_yeartime integer := 0;
 		")
 	#begin block
@@ -84,7 +84,7 @@ create_plsql_data_getter <- function(entity, config, options){
 				RAISE notice 'Running query with aggregation method: %', input_aggregation_method;
 				SELECT INTO count_year COUNT(*) FROM regexp_split_to_table(regexp_replace(input_year,' ', '+', 'g'),E'\\\\+');
 				SELECT INTO count_yeartime (DATE_PART('year', input_time_end::date) - DATE_PART('year', input_time_start::date));
-				IF count_yeartime < count_year THEN
+				IF count_yeartime < count_year AND count_yeartime > 0 THEN
 					count_year = count_yeartime;
 				END IF;
 				IF input_aggregation_method = 'avg_by_month' THEN
