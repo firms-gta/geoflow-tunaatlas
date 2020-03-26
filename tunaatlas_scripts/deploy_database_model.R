@@ -65,7 +65,7 @@ deploy_database_model <- function(config, software, software_config){
 	  
 	}
 	
-	## 3) Deploy variable tables
+	## 3) Deploy variable / fact tables of the data warehouse
 	outsql <- paste(outsql, '-- 3/ VARIABLES', sep = "\n")
 	#Create of vector of variables to deploy
 	facts <- strsplit(db_variables_and_associated_dimensions, "@")[[1]]
