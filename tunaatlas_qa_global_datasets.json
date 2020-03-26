@@ -44,6 +44,16 @@
 		"id": "load_dataset",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
 		"run": true
-	}
+	},
+	{
+		"id": "enrich_db_for_services",
+		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
+		"run": true
+	},
+	{
+		"id": "load_metadata",
+		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
+		"run": true
+	}	
  ]
 }
