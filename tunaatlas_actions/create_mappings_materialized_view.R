@@ -30,8 +30,8 @@ create_mappings_materialized_view <- function(entity, config, options){
       config$logger.info(sprintf("\n Add comments for view '%s'",views$table_name[v]))
       
       for(c in 1:nrow(view_columns_comments)){
-        config$logger.info(sprintf("\n Add comment '%s'",view_columns_comments$description[c]))
         sql_comment <- paste0("COMMENT ON COLUMN ",view_columns_comments$column_name[c]," IS '",view_columns_comments$description[c],"';")
+        config$logger.info(sprintf("\n %s",sql_comment))
         dbGetQuery(CON,sql_comment)
       }
     }
