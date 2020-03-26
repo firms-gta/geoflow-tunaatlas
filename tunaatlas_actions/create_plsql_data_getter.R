@@ -11,7 +11,7 @@ create_plsql_data_getter <- function(entity, config, options){
 	df_codelists <- as.data.frame(readr::read_csv(entity$resources$codelists, guess_max=0))
 	dimensions <- c(df_codelists[df_codelists$dimension != "area", "dimension"], "time_start", "time_end", "month", "quarter", "year", "aggregation_method")
 
-	fact <- unlist(strsplit(entity$data$uploadSource, "\\."))[2]
+	fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
 	sql_params <- paste0("schema_name varchar, pid varchar,", paste0(paste0("input_", dimensions, " varchar"), collapse = ","))
 	sql_drop <- sprintf("DROP FUNCTION public.get_fact_dataset_%s(%s)", fact, paste0(rep("varchar", length(dimensions)+2),collapse=","))
 	sql_create <- sprintf("CREATE OR REPLACE FUNCTION public.get_fact_dataset_%s(%s) \n", fact, sql_params)
