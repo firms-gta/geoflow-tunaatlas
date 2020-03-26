@@ -269,10 +269,10 @@ load_codelist <- function(entity, config, options){
   
 	# View of labels for geometry is a bit special since there is the geom. CODE BELOW TO IMPROVE!!!!
 	if (dimension_name=="area"){
-		pattern="CREATE OR REPLACE VIEW area.area_labels AS  WITH vue AS (.*?) SELECT vue.id_area"
-		query_create_view_label<-regmatches(query_create_view_label,regexec(pattern,query_create_view_label))[[1]][1]
-		query_create_view_label<-gsub(")\n SELECT vue.id_area","",query_create_view_label)
-		query_create_view_label<-paste0(query_create_view_label,sql_query_for_view_label_new_codelist," )
+	  pattern="CREATE OR REPLACE VIEW area.area_labels AS  WITH vue AS (.*?) SELECT vue.id_area"
+	  query_create_view_label<-regmatches(query_create_view_label,regexec(pattern,query_create_view_label))[[1]][1]
+	  query_create_view_label<-gsub(")\n SELECT vue.id_area","",query_create_view_label)
+	  query_create_view_label<-paste0(query_create_view_label,sql_query_for_view_label_new_codelist," )
 										SELECT vue.id_area,
 										vue.codesource_area,
 										vue.tablesource_area,
@@ -281,9 +281,9 @@ load_codelist <- function(entity, config, options){
 										vue.source_spanish_label,
 										st_setsrid(vue.geom, 4326) AS geom
 										FROM vue")
-		query_create_view_label<-gsub(";","",query_create_view_label)
-		query_create_view_label<-gsub("CREATE OR REPLACE VIEW","DROP MATERIALIZED VIEW area.area_labels; CREATE MATERIALIZED VIEW",query_create_view_label)
-    }
+	  query_create_view_label<-gsub(";","",query_create_view_label)
+	  query_create_view_label<-gsub("CREATE OR REPLACE VIEW","DROP MATERIALIZED VIEW area.area_labels; CREATE MATERIALIZED VIEW",query_create_view_label)
+	}
   
 	#finally send the query to recreate the view for the labels with the new code list inserted
 	dbSendQuery(CON,query_create_view_label)

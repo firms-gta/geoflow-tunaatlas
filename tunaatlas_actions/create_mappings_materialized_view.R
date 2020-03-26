@@ -15,14 +15,23 @@ create_mappings_materialized_view <- function(entity, config, options){
     
     for(v in 1:nrow(views)){
       config$logger.info(sprintf("\n Case of schema '%s' ",views$table_name[v]))
+      
       this_view <- paste0(views$table_schema[v],".",views$table_name[v])
       view_def <- dbGetQuery(CON,paste0("SELECT definition FROM (select pg_get_viewdef('",this_view,"', true) AS definition) AS view_def"))
       view_comment <- dbGetQuery(CON,paste0("select c.relname table_name, pg_catalog.obj_description(c.oid) as comment from pg_catalog.pg_class c where c.relname = '",views$table_name[v],"';"))
-      view_columns_comments <- dbGetQuery(CON,paste0("SELECT c.column_name, pgd.description FROM pg_catalog.pg_statio_all_tables as st inner join pg_catalog.pg_description pgd on (pgd.objoid=st.relid) inner join information_schema.columns c on (pgd.objsubid=c.ordinal_position and c.table_schema=st.schemaname and c.table_name=st.relname and c.table_name = '",views$table_name[v],"' and c.table_schema = '",views$table_schema[v],"');"))
+      sql_columns_comments <- paste0("SELECT a.attname As column_name,  d.description
+   FROM pg_class As c
+    INNER JOIN pg_attribute As a ON c.oid = a.attrelid
+   LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+   LEFT JOIN pg_tablespace t ON t.oid = c.reltablespace
+   LEFT JOIN pg_description As d ON (d.objoid = c.oid AND d.objsubid = a.attnum)
+   WHERE  c.relkind IN('r', 'v') AND  n.nspname = '",views$table_schema[v],"' AND c.relname = '",views$table_name[v],"'
+   ORDER BY n.nspname, c.relname, a.attname ;")
+      view_columns_comments <- dbGetQuery(CON,sql_columns_comments)
+      
       dbGetQuery(CON,paste0("DROP VIEW IF EXISTS ",this_view,";"))
       
       config$logger.info(sprintf("\n Replace view '%s' by materialized view",views$table_name[v]))
-      
       sql_mat_view <- paste0("CREATE MATERIALIZED VIEW ",this_view," AS ",view_def$definition)
       config$logger.info(sprintf("\n SQL mat view '%s' ",sql_mat_view))
       create_materialized_view <- dbGetQuery(CON,sql_mat_view) 
@@ -30,10 +39,12 @@ create_mappings_materialized_view <- function(entity, config, options){
       config$logger.info(sprintf("\n Add comments for view '%s'",views$table_name[v]))
       
       for(c in 1:nrow(view_columns_comments)){
-        sql_comment <- paste0("COMMENT ON COLUMN ",view_columns_comments$column_name[c]," IS '",view_columns_comments$description[c],"';")
+        this_column <-paste0(this_view,".",view_columns_comments$column_name[c])
+        sql_comment <- paste0("COMMENT ON COLUMN ",this_column," IS '",view_columns_comments$description[c],"';")
         config$logger.info(sprintf("\n %s",sql_comment))
         dbGetQuery(CON,sql_comment)
       }
+      
     }
   }else{
     config$logger.info(sprintf("\n Waiting for last entity to launch this action '%s' ",dataset_pid))
