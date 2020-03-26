@@ -10,7 +10,7 @@ create_mappings_materialized_view <- function(entity, config, options){
   if(dataset_pid == last_entity$identifiers[["id"]]){
     
     config$logger.info(sprintf("\n Last entity, action create_mappings_materialized_view will be launched '%s' ",dataset_pid))
-    views<-dbGetQuery(CON, "SELECT * FROM information_schema.tables WHERE table_type='VIEW' AND table_name LIKE '%_mapping_view';")
+    views<-dbGetQuery(CON, "SELECT * FROM information_schema.tables WHERE table_type='VIEW' AND table_name LIKE '%_mapping_view' and table_schema NOT IN('pg_catalog','public');")
     config$logger.info(sprintf("\n List views => '%s' ",views))
     
     for(v in 1:nrow(views)){
