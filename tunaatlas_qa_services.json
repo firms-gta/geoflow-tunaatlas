@@ -1,0 +1,63 @@
+{
+  "id": "tuna-atlas",
+  "profile": {
+	"project": "FIRMS Tuna Atlas",
+	"organization": "FIRMS Tuna Atlas",
+	"logos": [
+		"http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+		"http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+		"http://www.umr-marbec.fr/images/logo-ird-en.png"
+	]
+  },
+  "options": {
+	"line_separator": "_\n"
+  },
+  "mode": "entity",
+  "metadata": {
+    "entities": {
+      "handler": "dbi",
+      "source": "SELECT * FROM metadata.metadata_dcmi"
+    },
+    "contacts" : {
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+    }
+  },
+  "software": [
+	{
+		"id": "my-database-read",
+		"type": "input",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "postgres",
+			"password": "postgres",
+			"host": "localhost",
+			"port": "5432",
+			"dbname": "geoflow"
+		},
+		"properties" : {}
+	},
+	{
+		"id": "my-geoserver",
+		"type": "output",
+		"software_type": "geoserver",
+		"parameters": {
+			"url": "http://localhost:8080/geoserver",
+			"user": "admin",
+			"pwd": "geoserver",
+			"logger": "DEBUG"
+		},
+		"properties" : {
+			"workspace": "geoflow",
+			"datastore": "geoflow_dbi"
+		}
+	}
+  ],
+  "actions": [
+	{
+	  "id": "geosapi-publish-ogc-services",
+	  "run": true
+	}  
+ ]
+}
