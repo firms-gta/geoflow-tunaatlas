@@ -30,7 +30,7 @@ enrich_db_for_services <- function(entity, config, options){
 			"^[\\w +]+$"
 		)
 		defaultValue <-switch(dimension,
-			"time_start" = as.character(entity$temporal_extent$start),
+			"time_start" = as.character(entity$temporal_extent$end),
 			"time_end" = as.character(entity$temporal_extent$end),
 			"aggregation_method" = "none",
 			"month" = paste(1:12, collapse="+"),
