@@ -269,10 +269,10 @@ load_codelist <- function(entity, config, options){
   
 	# View of labels for geometry is a bit special since there is the geom. CODE BELOW TO IMPROVE!!!!
 	if (dimension_name=="area"){
-	  pattern="CREATE OR REPLACE VIEW area.area_labels AS  WITH vue AS (.*?) SELECT vue.id_area"
-	  query_create_view_label<-regmatches(query_create_view_label,regexec(pattern,query_create_view_label))[[1]][1]
-	  query_create_view_label<-gsub(")\n SELECT vue.id_area","",query_create_view_label)
-	  query_create_view_label<-paste0(query_create_view_label,sql_query_for_view_label_new_codelist," )
+		pattern="CREATE OR REPLACE VIEW area.area_labels AS WITH vue AS (.*?) SELECT vue.id_area"
+		query_create_view_label<-regmatches(query_create_view_label,regexec(pattern,query_create_view_label))[[1]][1]
+		query_create_view_label<-gsub(")\n SELECT vue.id_area","",query_create_view_label)
+		query_create_view_label<-paste0(query_create_view_label,sql_query_for_view_label_new_codelist," )
 										SELECT vue.id_area,
 										vue.codesource_area,
 										vue.tablesource_area,
@@ -281,9 +281,19 @@ load_codelist <- function(entity, config, options){
 										vue.source_spanish_label,
 										st_setsrid(vue.geom, 4326) AS geom
 										FROM vue")
-	  query_create_view_label<-gsub(";","",query_create_view_label)
-	  query_create_view_label<-gsub("CREATE OR REPLACE VIEW","DROP MATERIALIZED VIEW area.area_labels; CREATE MATERIALIZED VIEW",query_create_view_label)
-	}
+		query_create_view_label<-gsub(";","",query_create_view_label)
+		query_create_view_label<-gsub("CREATE OR REPLACE VIEW","DROP MATERIALIZED VIEW area.area_labels; CREATE MATERIALIZED VIEW",query_create_view_label)
+		query_create_view_label <- paste0(query_create_view_label,";
+COMMENT ON VIEW \"area\".\"area_labels\" IS '\"area\".\"area_labels\" is a 'materialized view which fasters the access to information often needed in data access queries. View gathering all the codes and labels of the code lists available for the dimension area (spatial code lists).';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"id_area\" IS '\"id_area\" is the identifier (primary key)  ';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"codesource_area\" IS '\"codesource_area\" gives the geometry of the area as text (WKT format)  ';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"tablesource_area\" IS '\"tablesource_area\" gives the name of the physical table in the schema where this area is taken from ';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"source_label\" IS '\"source_label\" gives the label as it is delivered by the orginal dataset';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"source_french_label\" IS '\"source_french_label\"  gives the label of the area in french ';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"source_spanish_label\" IS '\"source_spanish_label\" gives the label of the area in spanish';
+COMMENT ON COLUMN \"area\".\"area_labels\".\"geom\" IS '\"geom\" is the geometry stored by Postgis (SFS format)';
+		                              ")
+    }
   
 	#finally send the query to recreate the view for the labels with the new code list inserted
 	dbSendQuery(CON,query_create_view_label)
