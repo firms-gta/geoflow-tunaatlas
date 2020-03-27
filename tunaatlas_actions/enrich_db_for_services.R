@@ -15,11 +15,12 @@ enrich_db_for_services <- function(entity, config, options){
 	
 	#entity management
 	pid <- entity$identifiers[["id"]]
+	fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
 	entity$data$run <- FALSE #deactivate local action (harmonization/generation)
 	entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling data services
 	entity$data$layername <- pid
 	#geoserver sql view properties
-	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", options$fact, schema, pid, paste0("'%", dimensions,"%'", collapse=",")))
+	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=",")))
 	entity$data$setGeometryField("the_geom")
 	entity$data$setGeometryType("Polygon")
 	for(dimension in dimensions){
@@ -30,7 +31,7 @@ enrich_db_for_services <- function(entity, config, options){
 			"^[\\w +]+$"
 		)
 		defaultValue <-switch(dimension,
-			"time_start" = as.character(entity$temporal_extent$end),
+			"time_start" = paste0(substr(as.character(entity$temporal_extent$end), 1, 4),"-01-01"),
 			"time_end" = as.character(entity$temporal_extent$end),
 			"aggregation_method" = "none",
 			"month" = paste(1:12, collapse="+"),

@@ -1,16 +1,21 @@
 create_plsql_data_getter <- function(entity, config, options){
 	
+	if(!require(readr)){
+		install.packages("readr")
+		require(readr)
+	}
+	
 	con <- config$software$output$dbi
 
 	#set information required for (meta)data services
-	df_codelists <- read.csv(entity$resources$codelists)
-	dimensions <- c(df_codelists$dimension [df_codelists$dimension != "area"], "time_start", "time_end", "month", "quarter", "year", "aggregation_method")
+	df_codelists <- as.data.frame(readr::read_csv(entity$resources$codelists, guess_max=0))
+	dimensions <- c(df_codelists[df_codelists$dimension != "area", "dimension"], "time_start", "time_end", "month", "quarter", "year", "aggregation_method")
 
-	fact <- options$fact
-	sql_params <- paste0("schema_name varchar, pid varchar,", paste0("input_", dimensions, " varchar", collapse = ","))
+	fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
+	sql_params <- paste0("schema_name varchar, pid varchar,", paste0(paste0("input_", dimensions, " varchar"), collapse = ","))
 	sql_drop <- sprintf("DROP FUNCTION public.get_fact_dataset_%s(%s)", fact, paste0(rep("varchar", length(dimensions)+2),collapse=","))
 	sql_create <- sprintf("CREATE OR REPLACE FUNCTION public.get_fact_dataset_%s(%s) \n", fact, sql_params)
-
+	
 	sql_table_columns <- c(dimensions[dimensions != "aggregation_method"], "value", "geographic_identifier", "geom")
 	sql_table_columns <- paste0(sapply(sql_table_columns, function(x){
 		type <- switch(x,
@@ -30,7 +35,7 @@ create_plsql_data_getter <- function(entity, config, options){
 		"DECLARE
 			count_month integer := 12;  
 			count_quarter integer := 4;
-			count_year integer := 0;
+			count_year integer := 1;
 			count_yeartime integer := 0;
 		")
 	#begin block
@@ -78,8 +83,8 @@ create_plsql_data_getter <- function(entity, config, options){
 			ELSE
 				RAISE notice 'Running query with aggregation method: %', input_aggregation_method;
 				SELECT INTO count_year COUNT(*) FROM regexp_split_to_table(regexp_replace(input_year,' ', '+', 'g'),E'\\\\+');
-				SELECT INTO count_yeartime (DATE_PART('year', input_time_end::date) - DATE_PART('year', input_time_start::date));
-				IF count_yeartime < count_year THEN
+				SELECT INTO count_yeartime (DATE_PART('year', input_time_end::date) - DATE_PART('year', input_time_start::date) + 1);
+				IF count_yeartime < count_year AND count_yeartime > 0 THEN
 					count_year = count_yeartime;
 				END IF;
 				IF input_aggregation_method = 'avg_by_month' THEN
