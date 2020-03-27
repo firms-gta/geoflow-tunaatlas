@@ -80,18 +80,24 @@ deploy_database_model <- function(config, software, software_config){
 	  sql_deploy_fact_table<-paste0("CREATE TABLE fact_tables.",fact_name,"(
 								   id_",fact_name," SERIAL PRIMARY KEY,
 								   id_metadata INTEGER REFERENCES metadata.metadata(id_metadata),")
+	  column_comment <-paste0("COMMENT ON COLUMN fact_tables.",fact_name,".id_",fact_name," IS 'identifier (primary key)  of this measure';
+	                          COMMENT ON COLUMN fact_tables.",fact_name,".id_metadata IS 'identifier (foreign key) of related dataset described in metadata table';")
+	  
 	  for (j in 1:length(dimensions_for_fact)){
 		sql_deploy_fact_table<-paste0(sql_deploy_fact_table,"id_",dimensions_for_fact[j], " INTEGER REFERENCES ",dimensions_for_fact[j],".",dimensions_for_fact[j],"(id_",dimensions_for_fact[j],"),")
+	  column_comment <-paste0(column_comment,"COMMENT ON COLUMN fact_tables.",fact_name,".id_",dimensions_for_fact[j]," IS 'identifier (foreign key) of related ",dimensions_for_fact[j], " dimension';")
 	  }
 	  sql_deploy_fact_table<-paste0(sql_deploy_fact_table,"value numeric(12,2) NOT NULL);ALTER TABLE metadata.metadata
+
+
 	  OWNER TO \"",software_config$parameters$user,"\";
 	  GRANT ALL ON TABLE fact_tables.",fact_name," TO \"",software_config$parameters$user,"\";
 
 	  CREATE INDEX id_metadata_",fact_name,"_idx
 	  ON fact_tables.",fact_name,"
 	  USING btree
-	  (id_metadata);")
-	  outsql <- paste(outsql, sql_deploy_fact_table, sep = "\n")
+	  (id_metadata); COMMENT ON TABLE fact_tables.",fact_name," IS 'one of the fact table of the data ware house';")
+	  outsql <- paste(outsql, sql_deploy_fact_table, column_comment, sep = "\n")
 	}
 
 
