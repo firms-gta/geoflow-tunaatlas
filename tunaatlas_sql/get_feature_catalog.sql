@@ -31,7 +31,7 @@ SELECT
 	LEFT JOIN pg_tablespace t ON t.oid = c.reltablespace
 	LEFT JOIN pg_description As d ON (d.objoid = c.oid AND d.objsubid = a.attnum)
    WHERE  
-	c.relkind IN('r') 
+	c.relkind IN('r','v','m') 
 	AND  
 	n.nspname NOT IN  ('information_schema', 'pg_catalog', 'topology','public')
    ORDER BY 
