@@ -3,11 +3,15 @@ SELECT
             WHEN table_type='m' THEN 'materialized view'
             WHEN table_type='r' THEN 'table'
             ELSE 'autres'
-       END AS table_type,
-       schema_name, 
-       view_name AS attribute_featureType, 
-       toto.column_name AS attribute_code, 
-       description AS attribute_definition,
+       END AS "TableType",
+       schema_name AS "SchemaName", 
+       view_name AS "FeatureType", 
+       toto.column_name AS "MemberCode", 
+       CASE WHEN toto.column_name='catch' THEN 'variable'
+            WHEN toto.column_name='effort' THEN 'variable'
+            ELSE 'attribute'
+       END AS "MemberType",
+       description AS "Definition",
        data_type AS attribute_valueType,
        max_length,
        is_nullable 
@@ -27,7 +31,7 @@ SELECT
 	LEFT JOIN pg_tablespace t ON t.oid = c.reltablespace
 	LEFT JOIN pg_description As d ON (d.objoid = c.oid AND d.objsubid = a.attnum)
    WHERE  
-	c.relkind IN('r', 'v','m') 
+	c.relkind IN('r') 
 	AND  
 	n.nspname NOT IN  ('information_schema', 'pg_catalog', 'topology','public')
    ORDER BY 
