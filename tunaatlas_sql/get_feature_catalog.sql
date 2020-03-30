@@ -1,4 +1,16 @@
-SELECT schema_name, view_name AS attribute_featureType, toto.column_name AS attribute_code, description AS attribute_definition, data_type AS attribute_valueType, max_length, is_nullable 
+SELECT 
+       CASE WHEN table_type='v' THEN 'view'
+            WHEN table_type='m' THEN 'materialized view'
+            WHEN table_type='r' THEN 'table'
+            ELSE 'autres'
+       END AS table_type,
+       schema_name, 
+       view_name AS attribute_featureType, 
+       toto.column_name AS attribute_code, 
+       description AS attribute_definition,
+       data_type AS attribute_valueType,
+       max_length,
+       is_nullable 
 
 	FROM
 
@@ -6,7 +18,8 @@ SELECT schema_name, view_name AS attribute_featureType, toto.column_name AS attr
 	n.nspname, 
 	c.relname, 
 	a.attname As column_name, 
-	d.description 
+	d.description,
+	c.relkind as table_type
    FROM 
 	pg_class As c
 	INNER JOIN pg_attribute As a ON c.oid = a.attrelid
@@ -37,8 +50,6 @@ JOIN
 		on t.table_schema = c.table_schema 
 		and t.table_name = c.table_name
 	   WHERE   
-		table_type = 'VIEW' 
-		AND 
 		t.table_schema not in ('information_schema', 'pg_catalog', 'topology') 
 	   ORDER BY 
 		schema_name,
