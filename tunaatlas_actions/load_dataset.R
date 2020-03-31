@@ -429,11 +429,27 @@ load_dataset <- function(entity, config, options){
 	             "unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit_label" )," IS 'unit_label.';")
 	      )
 	      column_comments <- paste0(column_comments,new_comment)
-	  }
+	    }
 	    dbSendQuery(con,column_comments)
 	    
-	    
-	    }
+		#store SQL files on job dir google drive
+		config$logger.info("Write SQL queries (view/data) to job directory")
+		sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
+		file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
+		sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
+		file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
+		writeLines(sql_view, file.path("data", file_sql_view)
+		writeLines(sql_data, file.path("data", file_sql_data)
+		
+		config$logger.info("Upload SQL queries (view/data) to Google Drive")
+		target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
+		id_sql_view <- drive_upload(file_sql_view, as_id(target_folder_id))$id
+		id_sql_data <- drive_upload(file_sql_view, as_id(target_folder_id))$id
+	    drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
+
+		
+		
+	  }
 	#}
 	
 	
