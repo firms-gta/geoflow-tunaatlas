@@ -375,8 +375,7 @@ load_dataset <- function(entity, config, options){
 	  
 	  # Create the materialized view if set in the metadata
 	  if(!is.na(database_view_name)){
-	    config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",
-									paste0(schema_name_for_view,".",database_view_name)))
+	    config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
 	    # Check if schema exists
 	    list_of_schemas <- dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
 	    # Get schema name where to store the materialized view
@@ -392,9 +391,49 @@ load_dataset <- function(entity, config, options){
 	    # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
 	    dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";
                              CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV_with_labels,";
-                             COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"'"))
+                             COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
+	    
+	    this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
+	    column_names <- colnames(this_view)
+	    column_comments <-NULL
+	    for(i in 1:length(column_names)){
+	      new_comment <- switch(column_names[i],
+	             "source_authority" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority"),"  IS 'Flagging country of the fishing vessels. Data are generally reported by country but some data can be reported at a sub-level, e.g. catch from Reunion Island longliners are reported under the REU flag and not FRA. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "flag" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".flag"),"  IS 'Flagging country of the fishing vessels. Data are generally reported by country but some data can be reported at a sub-level, e.g. catch from Reunion Island longliners are reported under the REU flag and not FRA. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "gear" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear"),"  IS 'Fishing gear used. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "gear_group" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group"),"  IS 'Fishing gear used. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "species" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species"),"  IS 'Species captured. The main tuna species are available in all the RFMOs Depending on the RFMO, some non-target species (e.g. some sharks or turtles) are also reported. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "schooltype" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".schooltype"),"  IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
+	             "time" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time"),"  IS 'Dating of the fact. In Sardara, the dating is provided as two columns: time_start gives the first date of availability of the measure (included) and time_end gives the last date of availability of the measure (not included). The data in Sardara are mainly defined over the following time steps: 1) Nominal catch are mostly defined on 1 year resolution. 2) Georeferenced catch-and-effort and catch-at-size are mostly defined on 1 month resolution.  This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "time_start" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_start")," IS 'Start time of the fact.';"),
+	             "time_end" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_end")," IS 'End time of the fact.';"),
+	             "month" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".month")," IS 'Month.';"),
+	             "quarter" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".quarter")," IS 'Quarter.';"),
+	             "year" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".year")," IS 'Year.';"),
+	             "time_period" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_period")," IS 'time_period.';"),
+	             "id_area" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".id_area")," IS 'Spatial area (zone) where the fact has taken place. The data in Sardara are mainly defined on the following areas: 1) Nominal catch are mostly defined on the areas of competence of the RFMOs. For some RFMOs, the spatial stratification can be thinner: IOTC gives nominal catch at the FAO areas scale and ICCAT gives it at the sampling area scale. 2) Georeferenced catch and effort and catch-at-size are mostly defined on 1° or 5° square resolution. In some cases irregular areas are also used (e.g. in IOTC). This may happen when the reporting country/institution does not provide the data at 1°/5° resolution. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "geographic_identifier" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier")," IS 'geographic_identifier.';"),
+	             "geom_wkt" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geom_wkt")," IS 'WKT .';"),
+	             "longitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".longitude" )," IS 'longitude.';"),
+	             "latitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".latitude")," IS 'latitude.';"),
+	             "catchtype" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype"),"  IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	             "unit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit")," IS 'unit.';"),
+	             "source_authority_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority_label")," IS 'source_authority_label.';"),
+	             "flag_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".flag_label")," IS 'flag_label.';"),
+	             "gear_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_label")," IS 'gear_label.';"),
+	             "gear_group_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group_label")," IS 'gear_group_label.';"),
+	             "species_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species_label")," IS 'species_label.';"),
+	             "schooltype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".schooltype_label")," IS 'schooltype_label.';"),
+	             "geographic_identifier_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier_label")," IS 'geographic_identifier_label.';"),
+	             "catchtype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype_label")," IS 'catchtype_label.';"),
+	             "unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit_label" )," IS 'unit_label.';")
+	      )
+	      column_comments <- paste0(column_comments,new_comment)
 	  }
-	  
+	    dbSendQuery(con,column_comments)
+	    
+	    
+	    }
 	#}
 	
 	
