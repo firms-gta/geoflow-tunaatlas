@@ -14,6 +14,10 @@
   },
   "mode": "entity",
   "metadata": {
+	"dictionary" : {
+	  "handler": "gsheet",
+	  "source": "https://docs.google.com/spreadsheets/d/166f_fIB9ctwdsRI8MCqKmfYtyh6DPbipHp8_qVjrIs8/edit#gid=0"
+	},
     "entities": {
       "handler": "dbi",
       "source": "SELECT * FROM metadata.metadata_dcmi"
@@ -56,8 +60,15 @@
   ],
   "actions": [
 	{
+	  "id": "geometa-create-iso-19110",
+	  "run": true,
+	  "options" : {
+		"exclude_values_for": "geographic_identifier"
+	  }
+	},
+	{
 	  "id": "geosapi-publish-ogc-services",
-	  "run": true
+	  "run": false
 	}  
  ]
 }
