@@ -458,8 +458,9 @@ load_dataset <- function(entity, config, options){
       #                         # "xmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmax" )," IS 'xmax';"),
       #                         # "xmin" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmin" )," IS 'xmin';")
       #   )
-        column_comments <- paste0(column_comments,new_comment)
-      }
+      #   column_comments <- paste0(column_comments,new_comment)
+      # }
+      column_comments <- NULL
     }
     # dbSendQuery(con,column_comments)
     
