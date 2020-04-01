@@ -5,6 +5,11 @@ load_dataset <- function(entity, config, options){
 		install.packages("readr")
 		require(readr)
 	}
+	
+	if(!require(googledrive)){
+		install.packages("googledrive")
+		require(googledrive)
+	}
 
 	#control to check that everything is ok on mappings side, if not we stop the workflow until mappings are fixed/updated
 	if(dir.exists("errors_mappings")){
@@ -396,8 +401,23 @@ load_dataset <- function(entity, config, options){
 	    this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
 	    column_names <- colnames(this_view)
 	    column_comments <-NULL
-	    for(i in 1:length(column_names)){
-	      new_comment <- switch(column_names[i],
+		
+		dictionary <- config$getDictionary()
+		if(!is.null(dictionary)){
+			ft <- dictionary$getFeatureTypeById(options$fact)
+			for(i in 1:length(column_names)){
+				member <- ft$getMemberById(column_names[i])
+				if(!is.null(member)){
+					config$logger.info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
+					new_comment <- paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".", column_names[i]),"  IS '",member$def,"';")
+					column_comments <- paste0(column_comments,new_comment)
+				}else{
+					config$logger.warn(sprintf("No dictionary definition for column '%s'. Skip adding comment to materialized view column", column_names[i]))
+				}
+			}
+		}else{
+			for(i in 1:length(column_names)){
+				new_comment <- switch(column_names[i],
 	             "source_authority" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority"),"  IS 'Flagging country of the fishing vessels. Data are generally reported by country but some data can be reported at a sub-level, e.g. catch from Reunion Island longliners are reported under the REU flag and not FRA. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
 	             "flag" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".flag"),"  IS 'Flagging country of the fishing vessels. Data are generally reported by country but some data can be reported at a sub-level, e.g. catch from Reunion Island longliners are reported under the REU flag and not FRA. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
 	             "gear" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear"),"  IS 'Fishing gear used. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
@@ -427,9 +447,10 @@ load_dataset <- function(entity, config, options){
 	             "geographic_identifier_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier_label")," IS 'geographic_identifier_label.';"),
 	             "catchtype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype_label")," IS 'catchtype_label.';"),
 	             "unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit_label" )," IS 'unit_label.';")
-	      )
-	      column_comments <- paste0(column_comments,new_comment)
-	    }
+				)
+				column_comments <- paste0(column_comments,new_comment)
+			}
+		}
 	    dbSendQuery(con,column_comments)
 	    
 		#store SQL files on job dir google drive
@@ -443,8 +464,8 @@ load_dataset <- function(entity, config, options){
 		
 		config$logger.info("Upload SQL queries (view/data) to Google Drive")
 		target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
-		id_sql_view <- drive_upload(file_sql_view, as_id(target_folder_id))$id
-		id_sql_data <- drive_upload(file_sql_view, as_id(target_folder_id))$id
+		id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
+		id_sql_data <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
 	    drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
 		entity$data$source <- list("view.sql", "data.sql")
 		attr(entity$data$source[[1]], "uri") <- drive_urls[1]
