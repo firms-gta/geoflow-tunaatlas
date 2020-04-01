@@ -465,22 +465,24 @@ load_dataset <- function(entity, config, options){
     dbSendQuery(con,column_comments)
     
     #store SQL files on job dir google drive
-    # config$logger.info("Write SQL queries (view/data) to job directory")
-    # sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
-    # file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
-    # sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
-    # file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
-    # writeLines(sql_view, file.path("data", file_sql_view))
-    # writeLines(sql_data, file.path("data", file_sql_data))
-    # 
-    # config$logger.info("Upload SQL queries (view/data) to Google Drive")
+    config$logger.info("Write SQL queries (view/data) to job directory")
+    sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
+    file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
+    sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
+    file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
+    writeLines(sql_view, file.path("data", file_sql_view))
+    writeLines(sql_data, file.path("data", file_sql_data))
+    
+    config$logger.info("Upload SQL queries (view/data) to Google Drive")
     # target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
-    # id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
-    # id_sql_data <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
-    # drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
-    # entity$data$source <- list("view.sql", "data.sql")
-    # attr(entity$data$source[[1]], "uri") <- drive_urls[1]
-    # attr(entity$data$source[[2]], "uri") <- drive_urls[2]
+    target_folder_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+    
+    id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
+    id_sql_data <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
+    drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
+    entity$data$source <- list("view.sql", "data.sql")
+    attr(entity$data$source[[1]], "uri") <- drive_urls[1]
+    attr(entity$data$source[[2]], "uri") <- drive_urls[2]
   }
   #}
   
