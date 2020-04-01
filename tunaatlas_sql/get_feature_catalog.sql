@@ -4,8 +4,8 @@ SELECT
             WHEN table_type='r' THEN 'table'
             ELSE 'autres'
        END AS "TableType",
-       schema_name AS "SchemaName", 
-       view_name AS "FeatureType", 
+       toto.nspname AS "SchemaName", 
+       toto.relname AS "FeatureType", 
        toto.column_name AS "MemberCode", 
        CASE WHEN toto.column_name='catch' THEN 'variable'
             WHEN toto.column_name='effort' THEN 'variable'
@@ -18,7 +18,8 @@ SELECT
 
 	FROM
 
-  (SELECT  
+  (
+  SELECT  
 	n.nspname, 
 	c.relname, 
 	a.attname As column_name, 
@@ -34,14 +35,17 @@ SELECT
 	c.relkind IN('r','v','m') 
 	AND  
 	n.nspname NOT IN  ('information_schema', 'pg_catalog', 'topology','public')
+	AND  
+	a.attname NOT IN  ('cmin', 'cmax', 'xmin','xmax','ctid','tableoid')
    ORDER BY 
 	n.nspname, c.relname, a.attname
 	) AS toto 
 
-JOIN 
+LEFT JOIN 
+
 	(SELECT
 		t.table_schema as schema_name,
-		t.table_name as view_name,
+		t.table_name as table_name,
 		c.column_name,
 		c.data_type,
 		case when c.character_maximum_length is not null
@@ -54,12 +58,14 @@ JOIN
 		on t.table_schema = c.table_schema 
 		and t.table_name = c.table_name
 	   WHERE   
-		t.table_schema not in ('information_schema', 'pg_catalog', 'topology') 
+		t.table_schema NOT IN  ('information_schema', 'pg_catalog', 'topology','public')
 	   ORDER BY 
 		schema_name,
-		view_name 
+		table_name 
 	) AS tutu 
 
 ON	 
 
-tutu.schema_name=toto.nspname AND tutu.view_name=toto.relname AND tutu.column_name=toto.column_name
+tutu.schema_name=toto.nspname AND tutu.table_name=toto.relname AND tutu.column_name=toto.column_name 
+
+ORDER BY "TableType", "SchemaName", "FeatureType", "MemberCode"
