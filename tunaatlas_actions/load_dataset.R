@@ -438,8 +438,8 @@ load_dataset <- function(entity, config, options){
 		file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
 		sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
 		file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
-		writeLines(sql_view, file.path("data", file_sql_view)
-		writeLines(sql_data, file.path("data", file_sql_data)
+		writeLines(sql_view, file.path("data", file_sql_view))
+		writeLines(sql_data, file.path("data", file_sql_data))
 		
 		config$logger.info("Upload SQL queries (view/data) to Google Drive")
 		target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
