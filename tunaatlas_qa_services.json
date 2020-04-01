@@ -60,6 +60,16 @@
   ],
   "actions": [
 	{
+      "id": "geometa-create-iso-19115",
+      "run": true,
+	  "options": {
+		"logo": true,
+		"doi": false,
+		"doi_thumbnail": false,
+		"addfeatures": false
+	  }
+    },
+	{
 	  "id": "geometa-create-iso-19110",
 	  "run": true,
 	  "options" : {
@@ -68,7 +78,7 @@
 	},
 	{
 	  "id": "geosapi-publish-ogc-services",
-	  "run": false
+	  "run": true
 	}  
  ]
 }

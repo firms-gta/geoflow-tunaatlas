@@ -12,14 +12,16 @@ enrich_db_for_services <- function(entity, config, options){
 	source(file.path(url_scripts_create_own_tuna_atlas, "create_plsql_data_getter.R"))
 	create_plsql_data_getter(entity, config, options) #create pl/sql function in DB to get fact dataset (generic function, one function per fact)
 	
-	
 	#entity management
 	pid <- entity$identifiers[["id"]]
 	fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
 	entity$data$run <- FALSE #deactivate local action (harmonization/generation)
-	entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling data services
-	entity$data$layername <- pid
+	entity$data$sourceType <- "dbquery" #set dbquery as source 
+	entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling geoserver sql view data services
+	#feature catalogue / dictionary property
+	entity$data$featuretype <- entity$data$actions[[1]]$options$fact
 	#geoserver sql view properties
+	entity$data$layername <- pid
 	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=",")))
 	entity$data$setGeometryField("the_geom")
 	entity$data$setGeometryType("Polygon")
