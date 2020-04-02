@@ -102,3 +102,23 @@ register_unit_effort <- function(config){
 	return(out)		
 }
 
+#register_month
+register_month <- function(config){
+	out <- data.frame(
+		code = as.character(1:12),
+		uri = NA,
+		label = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"),
+		definition = NA
+	)
+	return(out)		
+}
+
+#register_aggregation_method
+register_aggregation_method <- function(config){
+	out <- data.frame(
+		code = c("none","sum", "avg_by_month", "avg_by_quarter", "avg_by_year"),
+		uri = NA,
+		label = c("None", "Sum", "Monthly average", "Quarterly average", "Yearly average"),
+		definition = NA
+	)
+}
