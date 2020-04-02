@@ -478,7 +478,7 @@ load_dataset <- function(entity, config, options){
     target_folder_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
     
     id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
-    id_sql_data <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
+    id_sql_data <- drive_upload(file.path("data", file_sql_data), as_id(target_folder_id), overwrite = TRUE)$id
     drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
     entity$data$source <- list("view.sql", "data.sql")
     attr(entity$data$source[[1]], "uri") <- drive_urls[1]
