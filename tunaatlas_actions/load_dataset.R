@@ -440,7 +440,7 @@ load_dataset <- function(entity, config, options){
                               "id_area" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".id_area")," IS 'Spatial area (zone) where the fact has taken place. The data in Sardara are mainly defined on the following areas: 1) Nominal catch are mostly defined on the areas of competence of the RFMOs. For some RFMOs, the spatial stratification can be thinner: IOTC gives nominal catch at the FAO areas scale and ICCAT gives it at the sampling area scale. 2) Georeferenced catch and effort and catch-at-size are mostly defined on 1° or 5° square resolution. In some cases irregular areas are also used (e.g. in IOTC). This may happen when the reporting country/institution does not provide the data at 1°/5° resolution. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
                               "geographic_identifier" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier")," IS 'String-based Geographic identifier (conventional code name, grid code, transect identifier, location code, etc).';"),
                               "geographic_identifier_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier_label")," IS 'geographic_identifier_label.';"),
-                              "geom_wkt" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geom_wkt")," IS 'WKT .';"),
+                              # "geom_wkt" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geom_wkt")," IS 'WKT .';"),
                               "the_geom" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".the_geom" )," IS 'Geometry in one of the standard data formats (e.g. GML, WKT).';"),
                               "longitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".longitude" )," IS 'Longitude of the centroid of the pixel or point location (EPSG:4326).';"),
                               "latitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".latitude")," IS 'Latitude of the centroid of the pixel or point location (EPSG:4326).';"),
@@ -460,6 +460,7 @@ load_dataset <- function(entity, config, options){
         )
         column_comments <- paste0(column_comments,new_comment)
       }
+      
     }
     dbSendQuery(con,column_comments)
     
@@ -473,7 +474,9 @@ load_dataset <- function(entity, config, options){
     writeLines(sql_data, file.path("data", file_sql_data))
     
     config$logger.info("Upload SQL queries (view/data) to Google Drive")
-    target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
+    # target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
+    target_folder_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+    
     id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
     id_sql_data <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
     drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
