@@ -1,3 +1,4 @@
+-- metadata schema
 DROP SCHEMA IF EXISTS metadata CASCADE;
 CREATE SCHEMA metadata
   AUTHORIZATION "%db_admin%";
@@ -6,7 +7,7 @@ GRANT ALL ON SCHEMA metadata TO "%db_admin%";
 GRANT USAGE ON SCHEMA metadata TO "%db_read%";
 ALTER DEFAULT PRIVILEGES IN SCHEMA metadata GRANT SELECT ON TABLES TO "%db_read%";
 
-
+-- metadata table
 CREATE TABLE metadata.metadata
 (
   id_metadata serial NOT NULL,
@@ -39,7 +40,7 @@ ALTER TABLE metadata.metadata
 GRANT ALL ON TABLE metadata.metadata TO "%db_admin%";
 COMMENT ON TABLE metadata.metadata IS 'Table containing the metadata on all the datasets available in the database';
 
-
+-- metadata_mapping table
 CREATE TABLE metadata.metadata_mapping
 (
   metadata_mapping_id_from integer NOT NULL,
@@ -64,9 +65,7 @@ COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_to IS '"metadata
 COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_relation_type IS '"metadata_mapping_relation_type" the kind of relationship between these two datasets: is made of, is source of.. ';
 COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_description IS '"metadata_mapping_description" details of the relationship';
 
-
-
-
+-- fact table schema
 DROP SCHEMA IF EXISTS fact_tables CASCADE;
 CREATE SCHEMA fact_tables
   AUTHORIZATION "%db_admin%";
