@@ -38,7 +38,7 @@ database_view_name text,
 ALTER TABLE metadata.metadata
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE metadata.metadata TO "%db_admin%";
-COMMENT ON TABLE metadata.metadata IS 'Table containing the metadata on all the datasets available in the database';
+COMMENT ON TABLE metadata.metadata IS 'Table containing the metadata on all the datasets available in the database. Paul: This table contains the metadata associated to the dataset stored in the data warehouse. One row provides the metadata for one dataset. The metadata are mainly Dublin Core metadata extended with ISO 19115 metadata (for datasets with a spatial component).';
 
 -- metadata_mapping table
 CREATE TABLE metadata.metadata_mapping
@@ -59,11 +59,11 @@ CREATE TABLE metadata.metadata_mapping
 ALTER TABLE metadata.metadata_mapping
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE metadata.metadata_mapping TO "%db_admin%";
-COMMENT ON TABLE metadata.metadata_mapping IS 'Table containing the genealogy of the datasets, i.e. the list of datasets used as input of each dataset available in the database';
-COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_from IS '"metadata_mapping_id_from" identifier of the dataset which is the Subject of the relationship';
-COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_to IS '"metadata_mapping_id_to" identifier of the dataset which is the Predicate of the relationship';
-COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_relation_type IS '"metadata_mapping_relation_type" the kind of relationship between these two datasets: is made of, is source of.. ';
-COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_description IS '"metadata_mapping_description" details of the relationship';
+COMMENT ON TABLE metadata.metadata_mapping IS 'Table containing the genealogy of the datasets, i.e. the list of datasets used as input of each dataset available in the database. Paul: This table enables to establish relationships between the datasets stored in the data warehouse (e.g. "was used to generate", "is a reference dataset", etc.';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_from IS '"metadata_mapping_id_from" identifier of the dataset which is the Subject of the relationship. Paul : Foreign key - References the table metadata. id_metadata (from the table metadata) of the source dataset.';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_id_to IS '"metadata_mapping_id_to" identifier of the dataset which is the Predicate of the relationship. Paul: Foreign key - References the table metadata. id_metadata (from the table metadata) of the target dataset.';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_relation_type IS '"metadata_mapping_relation_type" the kind of relationship between these two datasets: is made of, is source of.. Paul: Type of relation that exists between the source dataset and the target dataset (e.g. "is input of").';
+COMMENT ON COLUMN metadata.metadata_mapping.metadata_mapping_description IS '"metadata_mapping_description" details of the relationship. Paul: Description of the type of relation that exists between the source dataset and the target dataset.';
 
 -- fact table schema
 DROP SCHEMA IF EXISTS fact_tables CASCADE;

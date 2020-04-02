@@ -61,7 +61,8 @@ deploy_database_model <- function(config, software, software_config){
 		sql_deploy_view_area_labels <- paste(readLines(paste(repository_sql_scripts_database_deployement,"create_view_area_labels.sql",sep="/")), collapse="\n")
 		outsql <- paste(outsql, sql_deploy_view_area_labels, sep = "\n")
 	  }
-	 
+	  
+	  #Julien => merge with other comments 
 	  dimensionTableComment <- switch(dimension,
 	                                  "catch" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of fish  (in number or weight / biomass) harvested in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
 	                                  "effort" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of effort (expressed in a given unit such as number of sets, number of fishing hours, number of hooks, etc.) exerted in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
