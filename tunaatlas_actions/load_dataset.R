@@ -474,7 +474,7 @@ load_dataset <- function(entity, config, options){
     writeLines(sql_data, file.path("data", file_sql_data))
     
     config$logger.info("Upload SQL queries (view/data) to Google Drive")
-    # target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id
+    # target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
     target_folder_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
     
     id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
