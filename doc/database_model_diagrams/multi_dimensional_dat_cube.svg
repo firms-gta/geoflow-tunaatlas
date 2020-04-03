@@ -11,8 +11,8 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.0"
-   width="1773.0476"
-   height="903.422"
+   width="2997.6238"
+   height="1090.9805"
    id="svg2"
    inkscape:version="0.91 r13725"
    sodipodi:docname="multi_dimensional_dat_cube.svg">
@@ -41,13 +41,13 @@
      inkscape:window-height="1056"
      id="namedview87"
      showgrid="false"
-     inkscape:zoom="0.472"
-     inkscape:cx="606.18514"
-     inkscape:cy="646.14696"
+     inkscape:zoom="0.236"
+     inkscape:cx="1354.3445"
+     inkscape:cy="805.86885"
      inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2"
+     inkscape:current-layer="g3-3"
      showguides="false"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -58,44 +58,47 @@
     <marker
        inkscape:stockid="Arrow1Lend"
        orient="auto"
-       refY="0.0"
-       refX="0.0"
+       refY="0"
+       refX="0"
        id="marker5217"
-       style="overflow:visible;"
+       style="overflow:visible"
        inkscape:isstock="true">
       <path
          id="path5219"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         style="fill-rule:evenodd;stroke:#ee0000;stroke-width:1pt;stroke-opacity:1;fill:#ee0000;fill-opacity:1"
-         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#ee0000;fill-opacity:1;fill-rule:evenodd;stroke:#ee0000;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
     </marker>
     <marker
        inkscape:stockid="Arrow1Lstart"
        orient="auto"
-       refY="0.0"
-       refX="0.0"
+       refY="0"
+       refX="0"
        id="Arrow1Lstart"
        style="overflow:visible"
        inkscape:isstock="true">
       <path
          id="path4817"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         style="fill-rule:evenodd;stroke:#ee0000;stroke-width:1pt;stroke-opacity:1;fill:#ee0000;fill-opacity:1"
-         transform="scale(0.8) translate(12.5,0)" />
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill:#ee0000;fill-opacity:1;fill-rule:evenodd;stroke:#ee0000;stroke-width:1pt;stroke-opacity:1"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
     </marker>
     <marker
        inkscape:stockid="Arrow1Lend"
        orient="auto"
-       refY="0.0"
-       refX="0.0"
+       refY="0"
+       refX="0"
        id="Arrow1Lend"
-       style="overflow:visible;"
+       style="overflow:visible"
        inkscape:isstock="true">
       <path
          id="path4820"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;"
-         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 Z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         inkscape:connector-curvature="0" />
     </marker>
     <radialGradient
        cx="353.37662"
@@ -627,7 +630,7 @@
        inkscape:collect="always" />
   </defs>
   <g
-     transform="translate(1049.3693,120.14924)"
+     transform="translate(2273.9455,199.65681)"
      id="layer1">
     <g
        transform="matrix(1.2538374,0,0,1.2538374,118.41927,7.3869241)"
@@ -883,7 +886,7 @@
     </g>
   </g>
   <g
-     transform="matrix(1.8146479,0,0,1.7598297,-13.493965,2.7128672)"
+     transform="matrix(1.8146479,0,0,1.7598297,-13.493965,41.966201)"
      style="overflow:visible"
      id="g3">
     <g
@@ -906,7 +909,7 @@
       </radialGradient>
       <polygon
          style="opacity:0.7;fill:url(#XMLID_13_)"
-         points="333.7,190.3 333.7,332.1 241.5,386.8 241.5,245 "
+         points="241.5,386.8 241.5,245 333.7,190.3 333.7,332.1 "
          id="polygon12" />
       <g
          style="opacity:0.7"
@@ -1016,7 +1019,7 @@
       </radialGradient>
       <polygon
          style="opacity:0.7;fill:url(#radialGradient4089)"
-         points="333.7,190.3 241.5,245 99.7,245 192,190.3 "
+         points="99.7,245 192,190.3 333.7,190.3 241.5,245 "
          id="polygon47" />
       <g
          style="opacity:0.7"
@@ -1127,7 +1130,7 @@
       </radialGradient>
       <polygon
          style="opacity:0.7;fill:url(#XMLID_15_)"
-         points="333.7,48.6 333.7,190.3 241.5,245 241.5,103.3 "
+         points="241.5,245 241.5,103.3 333.7,48.6 333.7,190.3 "
          id="polygon82" />
       <g
          style="opacity:0.7"
@@ -1222,7 +1225,7 @@
        id="g110">
       <polygon
          style="opacity:0.7;fill:url(#radialGradient4091)"
-         points="475.5,190.3 383.2,245 241.5,245 333.7,190.3 "
+         points="241.5,245 333.7,190.3 475.5,190.3 383.2,245 "
          id="polygon112" />
       <g
          style="opacity:0.7"
@@ -1643,7 +1646,7 @@
        id="g243">
       <polygon
          style="opacity:0.7;fill:url(#radialGradient4099)"
-         points="241.5,245 149.2,299.8 7.5,299.8 99.7,245 "
+         points="7.5,299.8 99.7,245 241.5,245 149.2,299.8 "
          id="polygon245" />
       <g
          style="opacity:0.7"
@@ -1869,7 +1872,7 @@
       </radialGradient>
       <polygon
          style="opacity:0.7;fill:url(#XMLID_22_)"
-         points="241.5,103.3 241.5,245 149.2,299.7 149.2,158 "
+         points="149.2,299.7 149.2,158 241.5,103.3 241.5,245 "
          id="polygon318" />
       <g
          style="opacity:0.7"
@@ -1980,7 +1983,7 @@
       </radialGradient>
       <polygon
          style="opacity:0.7;fill:url(#XMLID_23_)"
-         points="241.5,245 241.5,386.8 149.2,441.4 149.2,299.7 "
+         points="149.2,441.4 149.2,299.7 241.5,245 241.5,386.8 "
          id="polygon353" />
       <g
          style="opacity:0.7"
@@ -2092,7 +2095,7 @@
        id="g389">
       <polygon
          style="opacity:0.7;fill:url(#radialGradient4103)"
-         points="383.2,245 291,299.8 149.2,299.8 241.5,245 "
+         points="149.2,299.8 241.5,245 383.2,245 291,299.8 "
          id="polygon391" />
       <g
          style="opacity:0.7"
@@ -2251,46 +2254,446 @@
        id="text447"
        x="21.791374"
        y="353.20654">Area</text>
+    <text
+       style="font-style:italic;font-size:36px;font-family:'Nimbus Roman No9 L', Times, serif;overflow:visible"
+       id="text445-6"
+       x="802.21533"
+       y="-0.30273968">Time</text>
   </g>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="504.2373"
-     y="902.57239"
+     x="976.69489"
+     y="1090.1309"
      id="text3980"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan3982"
-       x="504.2373"
-       y="902.57239"
-       style="font-size:60px">A three dimensionsal data cube</tspan></text>
+       x="976.69489"
+       y="1090.1309"
+       style="font-size:60px">A three dimensional data cube</tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="711.86438"
-     y="864.43683"
+     x="1936.4406"
+     y="943.9444"
      id="text3984"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan3986"
-       x="711.86438"
-       y="864.43683"></tspan></text>
+       x="1936.4406"
+       y="943.9444"></tspan></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     x="927.96613"
-     y="55.964375"
+     x="2152.5422"
+     y="135.47194"
      id="text4007"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan4009"
-       x="927.96613"
-       y="55.964375"
+       x="2152.5422"
+       y="135.47194"
        style="font-size:45px;fill:#ee0000;fill-opacity:1">Catch(species=s,time=t,area=a)</tspan></text>
   <path
      style="fill:none;fill-rule:evenodd;stroke:#ee0000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5217)"
-     d="M 976.69492,83.506743 C 1010.1783,207.71701 914.23652,407.95003 1207.6271,386.47284"
+     d="m 2201.2711,163.01432 c 33.4834,124.21026 -62.4584,324.44328 230.9322,302.96609"
      id="path4011"
      inkscape:connector-curvature="0"
      sodipodi:nodetypes="cc" />
-</svg>
+  <g
+     transform="matrix(1.5678861,0,0,1.5678861,1062.143,-27.322079)"
+     id="g3-3">
+    <defs
+       id="defs5" />
+    <!-- The reference planes: -->
+    <g
+       style="fill:#d7ebc8;fill-opacity:0.5;stroke:#b9cdaa"
+       id="g7">
+      <polygon
+         points="421.4,222.7 320,300 320,482.9 415.4,392.2 "
+         id="polygon9" />
+      <polygon
+         points="143.7,251.6 320,300 320,482.9 154.5,426.2 "
+         id="polygon11" />
+      <polygon
+         points="191.9,397.7 320,300 320,482.9 201.3,595.7 "
+         id="polygon13" />
+      <polygon
+         points="522.8,355.7 320,300 320,482.9 508.6,547.4 "
+         id="polygon15" />
+      <polygon
+         points="3.4,336.2 412.7,469.7 608.4,267 256.4,183.6 "
+         id="polygon17" />
+      <polygon
+         points="421.4,222.7 320,300 320,89.7 428.2,30.6 "
+         id="polygon19" />
+      <polygon
+         points="143.7,251.6 320,300 320,89.7 131.4,52.6 "
+         id="polygon21" />
+      <polygon
+         points="191.9,397.7 320,300 320,89.7 180.9,165.7 "
+         id="polygon23" />
+      <polygon
+         points="522.8,355.7 320,300 320,89.7 539.2,132.8 "
+         id="polygon25" />
+    </g>
+    <!-- The X axis: -->
+    <path
+       style="stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="M 320,300 162.1,420.4"
+       id="path27" />
+    <g
+       style="fill:#000000;stroke:#000000"
+       id="g29">
+      <circle
+         cx="296.79999"
+         cy="317.70001"
+         r="1"
+         id="circle31" />
+      <circle
+         cx="272.5"
+         cy="336.20001"
+         r="1"
+         id="circle33" />
+      <circle
+         cx="247"
+         cy="355.70001"
+         r="1"
+         id="circle35" />
+      <circle
+         cx="220.2"
+         cy="376.10001"
+         r="1"
+         id="circle37" />
+      <circle
+         cx="191.89999"
+         cy="397.70001"
+         r="1"
+         id="circle39" />
+    </g>
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 174.5,415.4 -4.4,-5.6 3.9,-3 4.4,5.7"
+       id="path41" />
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 162.1,420.4 8,-10.6 8.3,2.7"
+       id="path43" />
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 162.1,420.4 12.4,-5 -0.5,-8.6"
+       id="path45" />
+    <text
+       style="text-anchor:end;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="152.10001"
+       y="443.39999"
+       id="text47">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan49">X</tspan>
+    </text>
+    <!-- The Y axis: -->
+    <path
+       style="stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 320,300 247.1,67.8"
+       id="path55" />
+    <g
+       style="fill:#000000;stroke:#000000"
+       id="g57">
+      <circle
+         cx="358.29999"
+         cy="310.5"
+         r="1"
+         id="circle59" />
+      <circle
+         cx="397.60001"
+         cy="321.29999"
+         r="1"
+         id="circle61" />
+      <circle
+         cx="438.10001"
+         cy="332.39999"
+         r="1"
+         id="circle63" />
+      <circle
+         cx="479.79999"
+         cy="343.89999"
+         r="1"
+         id="circle65" />
+      <circle
+         cx="522.79999"
+         cy="355.70001"
+         r="1"
+         id="circle67" />
+    </g>
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 551.1,360.9 -2.3,6.2 -1.5,-2.2 2.2,-6.1"
+       id="path69" />
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 567.1,367.8 -18.3,-0.7 0.7,-8.3"
+       id="path71" />
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 567.1,367.8 -16,-6.9 -3.8,4"
+       id="path73" />
+    <text
+       style="text-anchor:start;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="572.09998"
+       y="362.79999"
+       id="text75">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan77">Y</tspan>
+    </text>
+    <!-- The Z axis: -->
+    <path
+       style="stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="M 320,300 320,43.8"
+       id="path83" />
+    <g
+       style="fill:#000000;stroke:#000000"
+       id="g85">
+      <circle
+         cx="320"
+         cy="260.29999"
+         r="1"
+         id="circle87" />
+      <circle
+         cx="320"
+         cy="219.5"
+         r="1"
+         id="circle89" />
+      <circle
+         cx="320"
+         cy="177.5"
+         r="1"
+         id="circle91" />
+      <circle
+         cx="320"
+         cy="134.2"
+         r="1"
+         id="circle93" />
+      <circle
+         cx="320"
+         cy="89.699997"
+         r="1"
+         id="circle95" />
+    </g>
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 315.9,61.6 6.5,-0.5 1.7,2 -6.6,0.5"
+       id="path97" />
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 320,43.8 2.4,17.3 -4.9,2.5"
+       id="path99" />
+    <path
+       style="fill:#000000;stroke:#000000"
+       inkscape:connector-curvature="0"
+       d="m 320,43.8 -4.1,17.8 8.2,1.5"
+       id="path101" />
+    <text
+       style="text-anchor:end;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="313"
+       y="66.800003"
+       id="text103">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan105">Z</tspan>
+    </text>
+    <text
+       style="text-anchor:end;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="315"
+       y="295"
+       id="text111">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan113">O</tspan>
+    </text>
+    <text
+       style="text-anchor:end;fill:#000000;stroke:none"
+       x="315"
+       y="295"
+       id="text115">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan117">O</tspan>
+    </text>
+    <path
+       style="stroke:#c80064"
+       inkscape:connector-curvature="0"
+       d="m 320,300 -47.5,36.2"
+       id="path119" />
+    <text
+       style="text-anchor:start;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="299.29999"
+       y="340.10001"
+       id="text121">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan123">x</tspan>
+    </text>
+    <text
+       style="text-anchor:start;fill:#000000;stroke:none"
+       x="299.29999"
+       y="340.10001"
+       id="text125">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan127">a</tspan>
+    </text>
+    <path
+       style="stroke:#c80064"
+       inkscape:connector-curvature="0"
+       d="m 272.5,336.2 122,35.8"
+       id="path129" />
+    <text
+       style="text-anchor:end;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="332.10001"
+       y="376.89999"
+       id="text131">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan133">y</tspan>
+    </text>
+    <text
+       style="text-anchor:end;fill:#000000;stroke:none"
+       x="332.10001"
+       y="376.89999"
+       id="text135">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan137">s</tspan>
+    </text>
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="M 272.5,336.2 269.6,164.1"
+       id="path139" />
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="M 438.1,332.4 394.5,372"
+       id="path141" />
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="M 438.1,332.4 445.4,161"
+       id="path143" />
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="m 320,134.2 -50.4,29.9"
+       id="path145" />
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="M 320,134.2 445.4,161"
+       id="path147" />
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="m 445.4,161 -46,32.8"
+       id="path149" />
+    <path
+       style="stroke:#000000;stroke-dasharray:3, 4;stroke-dashoffset:9"
+       inkscape:connector-curvature="0"
+       d="m 269.6,164.1 129.8,29.7"
+       id="path151" />
+    <path
+       style="stroke:#c80064"
+       inkscape:connector-curvature="0"
+       d="m 394.5,372 4.9,-178.2"
+       id="path153" />
+    <text
+       style="text-anchor:start;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="401.89999"
+       y="301"
+       id="text155">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan157">z</tspan>
+    </text>
+    <text
+       style="text-anchor:start;fill:#000000;stroke:none"
+       x="401.89999"
+       y="301"
+       id="text159">
+      <tspan
+         style="font-style:italic"
+         font-style="italic"
+         id="tspan161">t</tspan>
+    </text>
+    <circle
+       style="fill:#000000;stroke:#000000"
+       cx="399.39999"
+       cy="193.8"
+       r="5.2662678"
+       id="circle163" />
+    <text
+       style="text-anchor:start;fill:none;stroke:#ffffff;stroke-width:3px"
+       x="419.39999"
+       y="202.8"
+       id="text165">(<tspan
+   style="font-style:italic"
+   font-style="italic"
+   id="tspan169">x</tspan>
+,<tspan
+   style="font-style:italic"
+   font-style="italic"
+   id="tspan173">yz</tspan>
+)</text>
+    <text
+       style="text-anchor:start;fill:#000000;stroke:none"
+       x="419.39999"
+       y="202.8"
+       id="text181">(a,s,t)</text>
+    <text
+       y="389.34506"
+       x="576.94745"
+       transform="scale(1.0154554,0.98477983)"
+       style="font-style:italic;font-size:41.03170013px;font-family:'Nimbus Roman No9 L', Times, serif;overflow:visible"
+       id="text443-7">Species</text>
+    <text
+       transform="scale(1.0154554,0.98477983)"
+       style="font-style:italic;font-size:41.03170013px;font-family:'Nimbus Roman No9 L', Times, serif;overflow:visible"
+       id="text447-5"
+       x="75.668701"
+       y="490.76892">Area</text>
+  </g>
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot6697"
+     style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     transform="translate(1224.5762,79.507571)"><flowRegion
+       id="flowRegion6699"><rect
+         id="rect6701"
+         width="1213.983"
+         height="1091.1017"
+         x="-211.86441"
+         y="-198.27292" /></flowRegion><flowPara
+       id="flowPara6703"></flowPara></flowRoot></svg>
