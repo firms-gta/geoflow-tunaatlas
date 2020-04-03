@@ -18,8 +18,6 @@ enrich_db_for_services <- function(entity, config, options){
 	entity$data$run <- FALSE #deactivate local action (harmonization/generation)
 	entity$data$sourceType <- "dbquery" #set dbquery as source 
 	entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling geoserver sql view data services
-	#feature catalogue / dictionary property
-	entity$data$featuretype <- entity$data$actions[[1]]$options$fact
 	#geoserver sql view properties
 	entity$data$layername <- pid
 	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=",")))

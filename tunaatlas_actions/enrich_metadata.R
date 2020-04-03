@@ -6,7 +6,7 @@ enrich_metadata <- function(entity, config, options){
 	config$logger.info("Enrich entity with subjects")
 	dictionary <- config$getDictionary()
 	if(!is.null(dictionary)){
-		ft <- dictionary$getFeatureTypeById(options$fact)
+		ft <- dictionary$getFeatureTypeById(entity$data$featureType)
 		this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0("fact_tables.",entity$identifiers[["id"]])," LIMIT 1;"))
 		column_names <- colnames(this_view)
 		column_names <- column_names[!column_names %in% c("id_area", "longitude", "latitude", "geom_wkt", "geographic_identifier", "year", "month", "quarter", "time_start", "time_end", "time_period", "aggregation_method", "value", "gear_group", "species_group")]
