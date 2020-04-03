@@ -46,7 +46,7 @@ Multiple options can be considered to manage these kinds of data, eg :
 * Binary data formats like NetCDF / HDF widely used to manage model outputs, remote sensing and in situ sensors data 
 * SQL multi-dimensional data warehouse which enable to gather aggregated data within a single database
 
-The CDL language used to formally describe the data structure in the headers of NetCDF files use the following syntactic convention to define what dimensions are used by a variables : **variable**(*dimension_1, dimension_2, ..dimension_n**). Eg of variables for tuna fisheries: 
+The CDL language used to formally describe the data structure in the headers of NetCDF files use the following syntactic convention to define what dimensions are used by a variables : **variable**(*dimension_1, dimension_2, ..dimension_n*). Eg of variables for tuna fisheries: 
 
 * **catch**(*schooltype,species,time,area,gear,flag,catchtype,unit,source*)
 * **effort**(*schooltype,time,area,gear,flag,unit,source*)
@@ -89,7 +89,7 @@ The model used is a classical **data warehouse** model:
 **Figure 3**:  catch and effort facts (variables) have most of dimensions in common and generates a typical **constellation schema**.
 
 
-## Management of variables
+## Management of facts (variables)
 
 The implementation of the conceptual model described in section XX generates **a table for each variable / fact** (even if one table might contain data for all varianles). This **fact table** is made of following columns:
 
@@ -107,7 +107,7 @@ fact<-dbGetQuery(con_output, sql_fact)
 kable(fact, caption = "Sample of catch fact table")  %>%  kable_styling(bootstrap_options = "striped", full_width = F)
 ```
 
-To make it human readable queries have to be made to join the content of dimensions tables where codes and labels are stored.
+To make it human readable queries have to be made to join the content of dimensions tables where codes and labels are stored. See Table XX in next section.
 
 ## Management of dimensions
 
