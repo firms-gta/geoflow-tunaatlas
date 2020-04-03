@@ -118,7 +118,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	georef_dataset<-georef_dataset$df
 	
 	#filter by unit MT
-	georef_dataset <- georef_dataset$df[georef_dataset$df$unit == "MT", ]
+	georef_dataset <- georef_dataset[georef_dataset$unit == "MT", ]
 
 	if (mapping_map_code_lists=="FALSE"){
 	  # resetting gear coding system to primary gear coding system
