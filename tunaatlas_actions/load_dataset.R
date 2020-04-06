@@ -20,6 +20,7 @@ load_dataset <- function(entity, config, options){
   
   #options
   create_materialized_view <- if(!is.null(options$create_materialized_view)) options$create_materialized_view else FALSE
+  add_sql_comments <- if(!is.null(options$add_sql_comments)) options$add_sql_comments else FALSE
   upload_to_googledrive <- if(!is.null(options$upload_to_googledrive)) options$upload_to_googledrive else FALSE
   
   #db
@@ -398,30 +399,33 @@ load_dataset <- function(entity, config, options){
       dbSendQuery(con,schema_create_sql)
     }
     # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
-    dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";
-                           CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV_with_labels,";
-                           COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
-    
-    this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
-    column_names <- colnames(this_view)
-    column_comments <-NULL
-    
-    dictionary <- config$getDictionary()
-    if(!is.null(dictionary)){
-      ft <- dictionary$getFeatureTypeById(variable_name)
-      for(i in 1:length(column_names)){
-        member <- ft$getMemberById(column_names[i])
-        if(!is.null(member)){
-          config$logger.info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
-          new_comment <- paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".", column_names[i]),"  IS '",member$def,"';")
-          column_comments <- paste0(column_comments,new_comment)
-        }else{
-          config$logger.warn(sprintf("No dictionary definition for column '%s'. Skip adding comment to materialized view column", column_names[i]))
-        }
-      }
-    }else{
-      for(i in 1:length(column_names)){
-        new_comment <- switch(column_names[i],
+    if(create_materialized_view){
+		dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";"))
+		dbSendQuery(con,paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV_with_labels,";"))
+		dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
+    }
+	
+	if(add_sql_comments){
+		this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
+		column_names <- colnames(this_view)
+		column_comments <-NULL
+		
+		dictionary <- config$getDictionary()
+		if(!is.null(dictionary)){
+		  ft <- dictionary$getFeatureTypeById(variable_name)
+		  for(i in 1:length(column_names)){
+			member <- ft$getMemberById(column_names[i])
+			if(!is.null(member)){
+			  config$logger.info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
+			  new_comment <- paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".", column_names[i]),"  IS '",member$def,"';")
+			  column_comments <- paste0(column_comments,new_comment)
+			}else{
+			  config$logger.warn(sprintf("No dictionary definition for column '%s'. Skip adding comment to materialized view column", column_names[i]))
+			}
+		  }
+		}else{
+			for(i in 1:length(column_names)){
+				new_comment <- switch(column_names[i],
                               "source_authority" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority"),"  IS 'Source authority in charge of producing the source statistics collated and harmonized.';"),
                               "source_authority_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority_label")," IS 'source_authority_label.';"),
                               "flag" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".flag"),"  IS 'Flagging country of the fishing vessels. Flagging country of fishing vessel OR The flag State is the state under whose laws the fishing vessel is registered or licensed. It has responsibility under international law for controlling the fishing activities of a vessel, no matter where the vessel operates. Data are generally reported by country but some data can be reported at a sub-level, e.g. catch from Reunion Island longliners are reported under the REU flag and not FRA. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
@@ -461,12 +465,12 @@ load_dataset <- function(entity, config, options){
                               # "tableoid" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".tableoid" )," IS 'tableoid';"),
                               # "xmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmax" )," IS 'xmax';"),
                               # "xmin" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmin" )," IS 'xmin';")
-        )
-        column_comments <- paste0(column_comments,new_comment)
-      }
-      
+				)
+				column_comments <- paste0(column_comments,new_comment)
+			}
+		}
+		dbSendQuery(con,column_comments)
     }
-    dbSendQuery(con,column_comments)
 	
 	#upload dataset to Google drive
 	if(upload_to_googledrive){
