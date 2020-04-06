@@ -450,7 +450,7 @@ load_dataset <- function(entity, config, options){
                               "latitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".latitude")," IS 'Latitude of the centroid of the pixel or point location (EPSG:4326).';"),
                               "catchtype" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype"),"  IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
                               "catchtype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype_label")," IS 'catchtype_label.';"),
-                              "value" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".value" )," IS 'Measure.';"),
+                              "value" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".value" )," IS 'the measure of the fact (variable).';"),
                               "unit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit")," IS 'unit.';"),
                               "unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit_label" )," IS 'unit_label.';")
                               # "catchunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchunit")," IS 'Unit of catch.';"),
