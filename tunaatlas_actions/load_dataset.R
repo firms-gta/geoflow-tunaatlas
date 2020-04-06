@@ -18,6 +18,10 @@ load_dataset <- function(entity, config, options){
     stop(errMsg)
   }
   
+  #options
+  create_materialized_view <- if(!is.null(options$create_materialized_view)) options$create_materialized_view else FALSE
+  upload_to_googledrive <- if(!is.null(options$upload_to_googledrive)) options$upload_to_googledrive else FALSE
+  
   #db
   con = config$software$output$dbi
   user_postgres <- config$software$output$dbi_config$parameters$user
@@ -404,7 +408,7 @@ load_dataset <- function(entity, config, options){
     
     dictionary <- config$getDictionary()
     if(!is.null(dictionary)){
-      ft <- dictionary$getFeatureTypeById(options$fact)
+      ft <- dictionary$getFeatureTypeById(variable_name)
       for(i in 1:length(column_names)){
         member <- ft$getMemberById(column_names[i])
         if(!is.null(member)){
@@ -463,22 +467,31 @@ load_dataset <- function(entity, config, options){
       
     }
     dbSendQuery(con,column_comments)
-    
-    #store SQL files on job dir google drive
-    config$logger.info("Write SQL queries (view/data) to job directory")
-    sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
-    file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
-    sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
-    file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
-    writeLines(sql_view, file.path("data", file_sql_view))
-    writeLines(sql_data, file.path("data", file_sql_data))
-    
+	
+	#upload dataset to Google drive
+	if(upload_to_googledrive){
+		config$logger.info("Upload dataset (CSV) to Google Drive")
+		# folder_datasets_id <- drive_get("~/geoflow_tunaatlas/data/outputs/datasets")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
+		folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+		path_to_dataset_new <- file.path(getwd(), "data", paste0(entity$identifiers[["id"]], ".csv"))
+		file.rename(from = path_to_dataset, to = path_to_dataset_new)
+		id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
+		
+		#store SQL files on job dir google drive
+		config$logger.info("Write SQL queries (view/data) to job directory")
+		sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
+		file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
+		sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
+		file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
+		writeLines(sql_view, file.path("data", file_sql_view))
+		writeLines(sql_data, file.path("data", file_sql_data))
+    }
+	
     config$logger.info("Upload SQL queries (view/data) to Google Drive")
-    # target_folder_id <- drive_get("~/geoflow_tunaatlas/data/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
-    target_folder_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
-    
-    id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(target_folder_id), overwrite = TRUE)$id
-    id_sql_data <- drive_upload(file.path("data", file_sql_data), as_id(target_folder_id), overwrite = TRUE)$id
+    # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
+    folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+    id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)$id
+    id_sql_data <- drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)$id
     drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
     entity$data$source <- list("view.sql", "data.sql")
     attr(entity$data$source[[1]], "uri") <- drive_urls[1]
