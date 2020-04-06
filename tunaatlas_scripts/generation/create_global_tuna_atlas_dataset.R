@@ -31,11 +31,6 @@
 # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter fact is set to 'catch' and parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
 
-firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "firms-secretariat@fao.org"})][[1]]
-firms_contact$setRole("processor")
-ird_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "paul.taconet@ird.fr"})][[1]]
-ird_contact$setRole("processor")
-
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -59,219 +54,38 @@ if(!require(data.table)){
 #scripts
 url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
 source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
 source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
 source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modified for geoflow
 
 # connect to Tuna atlas database
 con <- config$software$output$dbi
 
-#TODO --> initialize metadata elements
-metadata<-NULL
-metadata$contact_originator<-NULL
-metadata$lineage<-NULL
-metadata$description<-"The main processes applied to generate this dataset are the followings:\n"
-metadata$supplemental_information<-NULL
-
 #### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
 config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
 
-### 1.1 Retrieve georeferenced catch or effort
-#-------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------------------------------------------------------------
-dataset<-NULL 
 fact <- options$fact
-  
-## IOTC
-#-------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_IOTC){
-  config$logger.info("Retrieving IOTC georeferenced dataset from the Tuna atlas database...")
-  rfmo_dataset <- get_rfmos_datasets_level0(con, "IOTC", fact)
-  dataset<-rbind(dataset,rfmo_dataset)
-  rm(rfmo_dataset)
-  
-  # fill metadata elements
-  iotc_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "fabio.fiorellato@iotc.org"})][[1]]
-  iotc_contact$setRole("originator")
-  iotc_step <- geoflow_process$new()
-  iotc_step$setRationale("Public domain datasets from IOTC were collated through the RFMO website (www.iotc.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-  iotc_step$setProcessor(firms_contact) #TODO define who's the processor
-  entity$addContact(iotc_contact)
-  entity$provenance$processes <- c(entity$provenance$processes, iotc_step)
-  config$logger.info("Retrieving IOTC georeferenced dataset from the Tuna atlas database OK")
-}
 
-## WCPFC
+### 1.1 Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)
 #-------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_WCPFC){
-  config$logger.info("Retrieving WCPFC georeferenced dataset from the Tuna atlas database...")
-  rfmo_dataset <- get_rfmos_datasets_level0(con, "WCPFC", fact)
-  dataset<-rbind(dataset,rfmo_dataset)
-  rm(rfmo_dataset)
-  
-  # fill metadata elements
-  wcpfc_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "peterw@spc.int"})][[1]]
-  wcpfc_contact$setRole("originator")
-  wcpfc_step <- geoflow_process$new()
-  wcpfc_step$setRationale("Public domain datasets from WCPFC were collated through the RFMO website (www.wcpfc.int). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-  wcpfc_step$setProcessor(firms_contact) #TODO define who's the processor
-  entity$addContact(wcpfc_contact)
-  entity$provenance$processes <- c(entity$provenance$processes, wcpfc_step)
-  config$logger.info("Retrieving WCPFC georeferenced dataset from the Tuna atlas database OK")
-}
-
-## CCSBT
 #-------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_CCSBT){
-  config$logger.info("Retrieving CCSBT georeferenced dataset from the Tuna atlas database...")
-  rfmo_dataset <- get_rfmos_datasets_level0(con, "CCSBT", fact)
-  dataset<-rbind(dataset,rfmo_dataset)
-  rm(rfmo_dataset)
-  
-  # fill metadata elements
-  ccsbt_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "cmillar@ccsbt.org"})][[1]]
-  ccsbt_contact$setRole("originator")
-  ccsbt_step <- geoflow_process$new()
-  ccsbt_step$setRationale("Public domain datasets from CCSBT were collated through the RFMO website (www.ccsbt.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-  ccsbt_step$setProcessor(firms_contact) #TODO define who's the processor
-  entity$addContact(ccsbt_contact)
-  entity$provenance$processes <- c(entity$provenance$processes, ccsbt_step)
-  config$logger.info("Retrieving CCSBT georeferenced dataset from the Tuna atlas database OK")
-}
-
-## IATTC
-#-------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_IATTC){
-  config$logger.info("Retrieving IATTC georeferenced dataset from the Tuna atlas database...")
-  rfmo_dataset <- get_rfmos_datasets_level0(con, "IATTC",
-											fact,
-											iattc_ps_raise_flags_to_schooltype= options$iattc_ps_raise_flags_to_schooltype,
-											iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype = options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-											iattc_ps_catch_billfish_shark_raise_to_effort = options$iattc_ps_catch_billfish_shark_raise_to_effort)
-  dataset<-rbind(dataset,rfmo_dataset)
-  rm(rfmo_dataset)
-  
-  # fill metadata elements
-  iattc_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "nvogel@iattc.org"})][[1]]
-  iattc_contact$setRole("originator")
-  iattc_step <- geoflow_process$new()
-  iattc_step$setRationale("Public domain datasets from IATTC were collated through the RFMO website (www.iattc.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-  iattc_step$setProcessor(firms_contact) #TODO define who's the processor
-  entity$addContact(iattc_contact)
-  entity$provenance$processes <- c(entity$provenance$processes, iattc_step)
-  config$logger.info("Retrieving IATTC georeferenced dataset from the Tuna atlas database OK")
-}
-
-## ICCAT
-#-------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_ICCAT){
-  config$logger.info("Retrieving ICCAT georeferenced dataset from the Tuna atlas database...")
-  rfmo_dataset<-get_rfmos_datasets_level0(con, "ICCAT",
-										  fact,
-										  iccat_ps_include_type_of_school=options$iccat_ps_include_type_of_school)
-  dataset<-rbind(dataset,rfmo_dataset)
-  rm(rfmo_dataset)
-  
-  # fill metadata elements
-  iccat_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "carlos.palma@iccat.int"})][[1]]
-  iccat_contact$setRole("originator")
-  iccat_step <- geoflow_process$new()
-  iccat_step$setRationale("Public domain datasets from ICCAT were collated through the RFMO website (www.iccat.int). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database.")
-  iccat_step$setProcessor(firms_contact) #TODO define who's the processor
-  entity$addContact(iccat_contact)
-  entity$provenance$processes <- c(entity$provenance$processes, iccat_step)
-  config$logger.info("Retrieving ICCAT georeferenced dataset from the Tuna atlas database OK")
-}
-
+dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
 dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
 dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
-
 georef_dataset<-dataset
+class(georef_dataset$value) <- "numeric"
 rm(dataset)
 
-### 1.2 If data will be raised, retrieve nominal catch datasets
+### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
 #-------------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------------------------------------------------------------
-if (options$raising_georef_to_nominal){
-  
+if (options$raising_georef_to_nominal){  
 	config$logger.info("Retrieving RFMOs nominal catch...")
-	nominal_catch <-retrive_nominal_catch(entity, config, 
-										  options$include_IOTC,options$include_IATTC,options$include_WCPFC,options$include_CCSBT,options$include_ICCAT,
-										  options$iccat_nominal_catch_spatial_stratification)
+	nominal_catch <-retrive_nominal_catch(entity, config, options)
 	config$logger.info("Retrieving RFMOs nominal catch OK")
-  
 }
 
-config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK\n")
-
-
-# fill some metadata elements
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_ICCAT){
-  lineage_iccat <- ""
-  if(options$iccat_ps_include_type_of_school){
-    lineage_iccat <- "Both datasets were combined to produce a dataset that covers the whole time period, with fishing mode information (Fad | free school)."
-  } else {
-    lineage_iccat <- "Only the dataset without the type of school was used. Hence, the output dataset does not have the information on fishing mode for ICCAT Purse seine data."
-  }
-  iccat_step2 <- geoflow_process$new()
-  iccat_step2$setRationale(paste0("Concerns ICCAT purse seine datasets. ICCAT delivers two catch-and-efforts datasets for purse seiners: one that gives the detail of the type of school (Fad|Free school) for purse seine fisheries and that starts in 1994 (called Task II catch|effort by operation mode Fad|Free school) and one that does not give the information of the type of school and that covers all the time period (from 1950) (called Task II catch|effort). These data are redundant (i.e. the data from the dataset Task II catch|effort by operation mode are also available in the dataset Task II catch|effort) but in the latter, the information on the type of school is not available. ",lineage_iccat))
-  iccat_step2$setProcessor(firms_contact) #TODO define who's the processor
-  entity$provenance$processes <- c(entity$provenance$processes, iccat_step2)
-}
-
-if (options$include_IATTC){
-  lineage_iattc <- ""
-  if (options$iattc_ps_raise_flags_to_schooltype){
-  
-	info_iattc <-paste0("- For confidentiality policies, information on flag and school type for the geo-referenced ",fact," is available in separate files for East Pacific Ocean Purse seine datasets collated from the IATTC. For each stratum, the ",fact," from the flag-detailed dataset was raised to the ",fact," from the school type-detailed dataset to get an estimation of the ",fact," by flag and school type in each stratum.\n")
-	if(is.null(entity$descriptions[["info"]])){
-		entity$setDescription("info", info_iattc)
-	}else{
-		entity$descriptions[["info"]] <- paste0(entitydescriptions[["info"]], "\n", info_iattc)
-	}
-  
-    lineage_iattc <- paste0("For each stratum, the ",fact," coming from the flag-detailed dataset was raised to the ",fact," coming from the school type-detailed dataset to get an estimation of the ",fact," by flag and school type in each stratum.")
-	
-  } else {
-    if(!is.null(options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype)) {
-	  if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=="flag"){
-		lineage_iattc <- "Only the dataset with the information on the fishing country was used. Hence, the output dataset does not have the information on fishing mode for IATTC Purse seine data."
-	  } else if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=="schooltype"){
-		lineage_iattc <- "Only the dataset with the information on the fishing mode was used. Hence, the output dataset does not have the information on fishing country for IATTC Purse seine data."
-	  }	 
-	}
-  }
-  
-  iattc_step2 <- geoflow_process$new()
-  iattc_step2$setRationale(paste0("Concerns IATTC purse seine datasets: For confidentiality policies, information on flag and school type for the geo-referenced catches is available in separate files for the eastern Pacific Ocean purse seine datasets. ",lineage_iattc))
-  iccat_step2$setProcessor(firms_contact) #TODO define who's the processor
-  entity$provenance$processes <- c(entity$provenance$processes, iattc_step2)
-
-  lineage_iattc <- "Concerns IATTC purse seine datasets: IATTC Purse seine catch-and-effort are available in 3 separate files according to the group of species: tuna, billfishes, sharks. This is due to the fact that PS data is collected from 2 sources: observer and fishing vessel logbooks. Observer records are used when available, and for unobserved trips logbooks are used. Both sources collect tuna data but only observers collect shark and billfish data. As an example, a strata may have observer effort and the number of sets from the observed trips would be counted for tuna and shark and billfish. But there may have also been logbook data for unobserved sets in the same strata so the tuna catch and number of sets for a cell would be added. This would make a higher total number of sets for tuna catch than shark or billfish. Efforts in the billfish and shark datasets might hence represent only a proportion of the total effort allocated in some strata since it is the observed effort, i.e. for which there was an observer onboard."
-  
-  if (fact=="catch" && options$iattc_ps_catch_billfish_shark_raise_to_effort){
-    iattc_step_catch <- geoflow_process$new()
-    iattc_step_catch$setRationale(paste0(lineage_iattc," As a result, catch in the billfish and shark datasets might represent only a proportion of the total catch allocated in some strata. Hence, shark and billfish catch were raised to the fishing effort reported in the tuna dataset."))
-	iattc_step_catch$setProcessor(firms_contact) #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, iattc_step_catch)
-  }
-  
-  if (fact=="effort"){
-    iattc_step_effort <- geoflow_process$new()
-    iattc_step_effort$setRationale(paste0(lineage_iattc," Only efforts from the Tuna dataset were kept."))
-	iattc_step_effort$setProcessor(firms_contact) #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, iattc_step_effort)
-  }
-}
-
-final_step <- geoflow_process$new()
-final_step$setRationale("All the datasets were merged")
-final_step$setProcessor(firms_contact) #TODO define who's the processor
-entity$provenance$processes <- c(entity$provenance$processes, final_step)
-
-
-more_desc <- paste0("- Strata described by all the dimensions of interest (i.e. species, flag, gear, school association, year, month, area) were re-assembled from multiple data sets of aggregated ",fact,"\n")
-entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", more_desc)
+config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
 
 
 #### 2) Map code lists 
@@ -280,36 +94,18 @@ entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "
 if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
   
   config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-  filename <- entity$data$source[[1]]
-  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, filename)
+  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
   mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
   mapping_keep_src_code <- FALSE
   if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
   
   config$logger.info("Mapping code lists of georeferenced datasets...")
-  output <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
+  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
   config$logger.info("Mapping code lists of georeferenced datasets OK")
-  
-  #dataset mapped with codelists
-  georef_dataset <- output$dataset
-
-  #more metadata
-  entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", output$abstract)
-  if(!is.null(entity$descriptions[["info"]])){
-	entity$setDescription("info", output$info)
-  }else{
-	entity$descriptions[["info"]] <- paste0(entity$descriptions[["info"]], output$info)
-  }
-  lineage_step <- geoflow_process$new()
-  lineage_step$setRationale(output$lineage)
-  lineage_step$setProcessor(firms_contact) #TODO define who's the processor
-  entity$provenance$processes <- c(entity$provenance$processes, lineage_step)
-  
-  rm(output)
-  
+   
   if(!is.null(options$raising_georef_to_nominal)) if(options$raising_georef_to_nominal){
     config$logger.info("Mapping code lists of nominal catch datasets...")
-    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)$dataset
+    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
     config$logger.info("Mapping code lists of nominal catch datasets OK")
   }
 }
@@ -319,19 +115,9 @@ if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists)
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 if (!is.null(options$gear_filter)){
 	gear_filter<-unlist(strsplit(options$gear_filter, split=","))
-	config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))
-	
+	config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 	georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
-
-	# fill metadata elements
-	lineage<-"Only data from purse seiners and pole-and-liners were kept. These data are overall defined on 1° quadrant spatial resolutions in the source datasets. So as to keep only data from purse seiners and pole-and-liners, the following gears from the ISSCFG code list (resulting from the code list mapping stated above) were kept:  09.1 (Handlines and hand-operated pole-and-lines), 09.2 (Mechanized lines and pole-and-lines), 01.1 (Purse seines), 01.2 (Surrounding nets without purse lines)."
-	filter_step <- geoflow_process$new()
-	filter_step$setRationale(lineage)
-	filter_step$setProcessor(firms_contact) #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, filter_step)	
-	
 	config$logger.info("Filtering gears OK")
-
 }
 
 #### 4) Convert units
@@ -346,7 +132,7 @@ if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_conver
 }
 
 
-# TODO --> ADAPT R CODE
+# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 #### 5) Raise georeferenced to total (nominal) dataset
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -419,7 +205,7 @@ if (options$raising_georef_to_nominal) {
     metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
     metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
     georef_dataset<-georef_dataset$dataset
-    
+  
 } 
 
 
@@ -446,7 +232,7 @@ if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
 
 } 
 
-# TODO --> ADAPT R CODE
+# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 ## 6.2 Disggregate data on 5° resolution quadrants
 if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
   source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
@@ -456,7 +242,7 @@ if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("d
   georef_dataset<-georef_dataset$dataset
 }
 
-# TODO --> ADAPT R CODE
+# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 ## 6.3 Disggregate data on 1° resolution quadrants
 if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
   source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
@@ -535,35 +321,18 @@ if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlappi
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
-  
 	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
 	if (options$SBF_data_rfmo_to_keep=="CCSBT"){
 	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
 	} else {
 	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
 	}
-
-	# fill metadata elements
-	lineage<-paste0("Concerns Southern Bluefin Tuna (SBF) data: SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Data from CCSBT and the other RFMOs may be redundant. For the Southern Bluefin Tuna, only data from ",options$SBF_data_rfmo_to_keep," were kept.	Information regarding the SBF data: after the potential other corrections applied, e.g. raisings, units conversions, etc., the ratio between the catches from CCSBT and those from the other RFMOs for SBF was of: ratio_ccsbt_otherrfmos_mt for the catches expressed in weight. A total of catches_sbf_ccsbt_no fishes were available in the CCSBT datasets - while no data in number were available in the other RFMOs datasets.\n")
-	sbf_step <- geoflow_process$new()
-	sbf_step$setRationale(lineage)
-	sbf_step$setProcessor(firms_contact)  #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, sbf_step)
-	
-	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- For the Southern Bluefin Tuna, only data from ",options$SBF_data_rfmo_to_keep," were kept")
-
 	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
-
 }
 
 #final step
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
 dataset<-data.frame(dataset)
-
-## fill some metadata elements
-entity$descriptions[["abstract"]]<-paste0(entity$descriptions[["abstract"]],"\n More details on the processes are provided in the supplemental information and in the lineage section.")
-entity$descriptions[["info"]]<-paste0(entity$descriptions[["info"]], "\n", "- Note that some data can be expressed at temporal resolutions greater than 1 month.\n")
-
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
