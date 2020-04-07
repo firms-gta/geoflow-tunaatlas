@@ -110,15 +110,28 @@ if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists)
   }
 }
 
-#### 3) Filter data by groups of gears
+#### 3) Filters
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+#### 3.1 Filter data by groups of gears
 if (!is.null(options$gear_filter)){
 	gear_filter<-unlist(strsplit(options$gear_filter, split=","))
 	config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 	georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
 	config$logger.info("Filtering gears OK")
 }
+
+#### 3.2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
+if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
+	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+	if (options$SBF_data_rfmo_to_keep=="CCSBT"){
+	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
+	} else {
+	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
+	}
+	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
+}
+
 
 #### 4) Convert units
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -316,19 +329,6 @@ if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlappi
   
   }
 
-
-#### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
-	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-	if (options$SBF_data_rfmo_to_keep=="CCSBT"){
-	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
-	} else {
-	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
-	}
-	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
-}
 
 #final step
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
