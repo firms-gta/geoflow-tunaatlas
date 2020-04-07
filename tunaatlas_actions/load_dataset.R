@@ -400,8 +400,15 @@ load_dataset <- function(entity, config, options){
     }
     # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
     if(create_materialized_view){
-		dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";"))
-		dbSendQuery(con,paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV_with_labels,";"))
+		config$logger.info(sprintf("Dropping materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+		sql_drop_materialized_view <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";")
+		config$logger.info(sprintf("SQL: %s", sql_drop_materialized_view))
+		dbSendQuery(con, sql_drop_materialized_view)
+		
+		config$logger.info(sprintf("Creating materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+		sql_create_materialized_view <- paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV,";")
+		config$logger.info(sprintf("SQL: %s", sql_create_materialized_view))
+		dbSendQuery(con, sql_create_materialized_view)
     }
 	
 	if(add_sql_comments){
