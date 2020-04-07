@@ -42,6 +42,16 @@
 				"fun": "deploy_database_model"
 			}
 		}
+	},
+	{
+		"id": "googledrive",
+		"type": "input",
+		"software_type": "googledrive",
+		"parameters": {
+			"email": "<email>",
+			"token": "<token>"
+		},
+		"properties" : {}
 	}
   ],
   "actions": [
