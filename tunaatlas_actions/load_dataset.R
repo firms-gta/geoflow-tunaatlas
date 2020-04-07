@@ -402,10 +402,10 @@ load_dataset <- function(entity, config, options){
     if(create_materialized_view){
 		dbSendQuery(con,paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";"))
 		dbSendQuery(con,paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV_with_labels,";"))
-		dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
     }
 	
 	if(add_sql_comments){
+		dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
 		this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
 		column_names <- colnames(this_view)
 		column_comments <-NULL
