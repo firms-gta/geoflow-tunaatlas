@@ -19,8 +19,9 @@
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 #get data from geoflow current job dir
-filename <- entity$data$source[[1]]
-path_to_raw_dataset <- entity$getJobDataResource(config, filename)
+filename1 <- entity$data$source[[1]] #data
+filename2 <- entity$data$source[[2]] #structure
+path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
 options(encoding = "UTF-8")
@@ -72,63 +73,48 @@ if(!require(dplyr)){
   # 1984  1  40S 175W     88     ALB   966         NO    ALL        DAYS    D
 
 
-  ##Catches
-  
-  ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-  catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
-  catches_pivot_WCPFC$Gear<-"L"
-  
-  print(head(catches_pivot_WCPFC))
-  print(setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits")))
-  print(head(group_by_(catches_pivot_WCPFC,.dots=setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits")))))
-  
-  # Catchunits
-  # Check data that exist both in number and weight
-  
-  number_of_units_by_strata<- dplyr::summarise(group_by_(catches_pivot_WCPFC,.dots=setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits"))), count = n())
-  
-  strata_in_number_and_weight<-number_of_units_by_strata[number_of_units_by_strata$count>1,]
-  
-  catches_pivot_WCPFC<-left_join (catches_pivot_WCPFC,strata_in_number_and_weight,by=setdiff(colnames(strata_in_number_and_weight),"count"))
-  
-  index.catchinweightandnumber <- which(catches_pivot_WCPFC[,"count"]==2 & catches_pivot_WCPFC[,"CatchUnits"]=="N")
-  catches_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="NOMT"
-  
-  index.catchinweightandnumber <- which(catches_pivot_WCPFC[,"count"]==2 & catches_pivot_WCPFC[,"CatchUnits"]=="C")
-  catches_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="MTNO"
-  
-  index.catchinweightonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="C")
-  catches_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="MT"
-  
-  index.catchinnumberonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="N")
-  catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="NO"
-  
-  # School
-  catches_pivot_WCPFC$School<-"ALL"
-  
-  ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
-  colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-  catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
-  
-  colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
-  catches$source_authority<-"WCPFC"
-  dataset<-catches
-  
-### Compute metadata
-#if (path_to_metadata_file!="NULL"){
-#  source("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/transform/compute_metadata.R")
-#} else {
-#  df_metadata<-NULL
-#  df_codelists<-NULL
-#}
-  
-  
-  ## To check the outputs:
-  # str(dataset)
-  # str(df_metadata)
-  # str(df_codelists)
-  
-  
+##Catches
+
+### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
+catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
+catches_pivot_WCPFC$Gear<-"L"
+
+print(head(catches_pivot_WCPFC))
+print(setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits")))
+print(head(group_by_(catches_pivot_WCPFC,.dots=setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits")))))
+
+# Catchunits
+# Check data that exist both in number and weight
+
+number_of_units_by_strata<- dplyr::summarise(group_by_(catches_pivot_WCPFC,.dots=setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits"))), count = n())
+
+strata_in_number_and_weight<-number_of_units_by_strata[number_of_units_by_strata$count>1,]
+
+catches_pivot_WCPFC<-left_join (catches_pivot_WCPFC,strata_in_number_and_weight,by=setdiff(colnames(strata_in_number_and_weight),"count"))
+
+index.catchinweightandnumber <- which(catches_pivot_WCPFC[,"count"]==2 & catches_pivot_WCPFC[,"CatchUnits"]=="N")
+catches_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="NOMT"
+
+index.catchinweightandnumber <- which(catches_pivot_WCPFC[,"count"]==2 & catches_pivot_WCPFC[,"CatchUnits"]=="C")
+catches_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="MTNO"
+
+index.catchinweightonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="C")
+catches_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="MT"
+
+index.catchinnumberonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="N")
+catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="NO"
+
+# School
+catches_pivot_WCPFC$School<-"ALL"
+
+### Reach the catches harmonized DSD using a function in WCPFC_functions.R
+colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
+
+colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+catches$source_authority<-"WCPFC"
+dataset<-catches
+
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
@@ -137,24 +123,12 @@ catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(as.character(min(catches$time_start)), as.character(max(catches$time_end)), sep = "/")
 entity$setTemporalExtent(dataset_temporal_extent)
-#if there is any entity relation with name 'codelists' we read the file
-df_codelists <- NULL
-cl_relations <- entity$relations[sapply(entity$relations, function(x){x$name=="codelists"})]
-if(length(cl_relations)>0){
-	config$logger.info("Appending codelists to pre-harmonization action output")
-	df_codelists <- read.csv(cl_relations[[1]]$link)
-}
-#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-dataset <- list(
-	dataset = catches, 
-	additional_metadata = NULL, #nothing here
-	codelists = df_codelists #in case the entity was provided with a link to codelists
-)
+
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename, paste0(unlist(strsplit(filename,".mdb"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename, paste0(unlist(strsplit(filename,".mdb"))[1], "_codelists.csv"), path_to_raw_dataset)
-write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
+output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_harmonized.csv"), path_to_raw_dataset)
+write.csv(catches, output_name_dataset, row.names = FALSE)
+output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_codelists.csv"), path_to_raw_dataset)
+file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)

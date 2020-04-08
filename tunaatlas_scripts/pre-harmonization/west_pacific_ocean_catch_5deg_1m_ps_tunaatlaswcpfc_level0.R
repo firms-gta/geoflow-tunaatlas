@@ -18,8 +18,9 @@
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 #get data from geoflow current job dir
-filename <- entity$data$source[[1]]
-path_to_raw_dataset <- entity$getJobDataResource(config, filename)
+filename1 <- entity$data$source[[1]] #data
+filename2 <- entity$data$source[[2]] #structure
+path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
 options(encoding = "UTF-8")
@@ -89,21 +90,6 @@ catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKee
 
 colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"WCPFC"
-#dataset<-catches
-
-### Compute metadata
-#if (path_to_metadata_file!="NULL"){
-#  source("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/transform/compute_metadata.R")
-#} else {
-#  df_metadata<-NULL
-#  df_codelists<-NULL
-#}
-
-## To check the outputs:
-# str(dataset)
-# str(df_metadata)
-# str(df_codelists)
-
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
@@ -112,24 +98,12 @@ catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(as.character(min(catches$time_start)), as.character(max(catches$time_end)), sep = "/")
 entity$setTemporalExtent(dataset_temporal_extent)
-#if there is any entity relation with name 'codelists' we read the file
-df_codelists <- NULL
-cl_relations <- entity$relations[sapply(entity$relations, function(x){x$name=="codelists"})]
-if(length(cl_relations)>0){
-	config$logger.info("Appending codelists to pre-harmonization action output")
-	df_codelists <- read.csv(cl_relations[[1]]$link)
-}
-#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-dataset <- list(
-	dataset = catches, 
-	additional_metadata = NULL, #nothing here
-	codelists = df_codelists #in case the entity was provided with a link to codelists
-)
+
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename, paste0(unlist(strsplit(filename,".mdb"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename, paste0(unlist(strsplit(filename,".mdb"))[1], "_codelists.csv"), path_to_raw_dataset)
-write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
+output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_harmonized.csv"), path_to_raw_dataset)
+write.csv(catches, output_name_dataset, row.names = FALSE)
+output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_codelists.csv"), path_to_raw_dataset)
+file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
