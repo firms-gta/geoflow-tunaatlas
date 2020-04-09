@@ -89,7 +89,7 @@ switch(DATA_LEVEL,
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		if (options$raising_georef_to_nominal){  
+		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 			config$logger.info("Retrieving RFMOs nominal catch...")
 			nominal_catch <-retrive_nominal_catch(entity, config, options)
 			config$logger.info("Retrieving RFMOs nominal catch OK")
@@ -146,7 +146,7 @@ switch(DATA_LEVEL,
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		## Aggregate data on 5° resolution quadrants
-		if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
+		if(!is.null(options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
 		 
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
 			georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
