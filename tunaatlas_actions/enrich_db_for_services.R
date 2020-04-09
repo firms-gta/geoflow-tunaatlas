@@ -18,11 +18,15 @@ enrich_db_for_services <- function(entity, config, options){
 	entity$data$run <- FALSE #deactivate local action (harmonization/generation)
 	entity$data$sourceType <- "dbquery" #set dbquery as source 
 	entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling geoserver sql view data services
+	#for feature catalogue / dictionnary
+	entity$data$featureType <- fact
 	#geoserver sql view properties
 	entity$data$layername <- pid
 	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=",")))
 	entity$data$setGeometryField("the_geom")
 	entity$data$setGeometryType("Polygon")
+	
+	default_values <- list()
 	for(dimension in dimensions){
 		regexpValue <- switch(dimension,
 			"time_start" = "^(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])$",
@@ -43,7 +47,16 @@ enrich_db_for_services <- function(entity, config, options){
 		print(dimension)
 		print(regexpValue)
 		print(defaultValue)
+		default_values <- c(default_values, defaultValue)
 		entity$data$setParameter(dimension, dimension, regexpValue, defaultValue)
 	}
-
+	
+	config$logger.info("Upload SQL main query (based on PL/SQL function to query data) to Google Drive")
+	# folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
+	folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+	mainSource <- sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'", default_values,"'", collapse=","))
+	file_sql_query <- paste0(entity$identifiers[["id"]], "_query.sql")
+	writeLines(mainSource, file.path("data", file_sql_query))
+	entity$data$source <- c(file_sql_query, entity$data$source)
+	drive_upload(file.path("data", file_sql_query), as_id(folder_views_id), overwrite = TRUE)
 }

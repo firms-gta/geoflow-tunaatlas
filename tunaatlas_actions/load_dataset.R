@@ -509,21 +509,17 @@ load_dataset <- function(entity, config, options){
 			config$logger.info("Upload SQL queries (view/data) to Google Drive")
 			# folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
 			folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+			entity$data$access <- "googledrive"
 			if(create_materialized_view){
 				writeLines(sql_view, file.path("data", file_sql_view))
 				writeLines(sql_data, file.path("data", file_sql_data))
-				id_sql_view <- drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)$id
-				id_sql_data <- drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)$id
-				drive_urls <- paste0("https://drive.google.com/open?id=", c(id_sql_view, id_sql_data))
-				entity$data$source <- list("view.sql", "data.sql")
-				attr(entity$data$source[[1]], "uri") <- drive_urls[1]
-				attr(entity$data$source[[2]], "uri") <- drive_urls[2]
+				drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
+				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
+				entity$data$source <- list(file_sql_view, file_sql_data)
 			}else{
 				writeLines(sql_data, file.path("data", file_sql_data))
-				id_sql_data <- drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)$id
-				drive_urls <- paste0("https://drive.google.com/open?id=", id_sql_data)
-				entity$data$source <- list("data.sql")
-				attr(entity$data$source[[1]], "uri") <- drive_urls[1]
+				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
+				entity$data$source <- list(file_sql_data)
 			}
 			
 		}
