@@ -428,7 +428,8 @@ dataset <- list(
 	codelists = df_codelists #in case the entity was provided with a link to codelists
 )
 
-if (fact=="effort" & !options$mapping_map_code_lists & options$unit_conversion_convert){
+
+if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated 
   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
 }
