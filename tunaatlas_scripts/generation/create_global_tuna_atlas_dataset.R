@@ -66,269 +66,332 @@ config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
 
 fact <- options$fact
 
-### 1.1 Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)
-#-------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------------------------------------------------------------
-dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
-dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
-dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
-georef_dataset<-dataset
-class(georef_dataset$value) <- "numeric"
-rm(dataset)
+#LEVEL
+DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 
-### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
-#-------------------------------------------------------------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------------------------------------------------------------
-if (options$raising_georef_to_nominal){  
-	config$logger.info("Retrieving RFMOs nominal catch...")
-	nominal_catch <-retrive_nominal_catch(entity, config, options)
-	config$logger.info("Retrieving RFMOs nominal catch OK")
-}
+switch(DATA_LEVEL,
 
-config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	#LEVEL 0
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	"0" = {
+
+		### 1.1 Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)
+		#-------------------------------------------------------------------------------------------------------------------------------------
+		#-------------------------------------------------------------------------------------------------------------------------------------
+		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
+		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
+		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
+		georef_dataset<-dataset
+		class(georef_dataset$value) <- "numeric"
+		rm(dataset)
+
+		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
+		#-------------------------------------------------------------------------------------------------------------------------------------
+		#-------------------------------------------------------------------------------------------------------------------------------------
+		if (options$raising_georef_to_nominal){  
+			config$logger.info("Retrieving RFMOs nominal catch...")
+			nominal_catch <-retrive_nominal_catch(entity, config, options)
+			config$logger.info("Retrieving RFMOs nominal catch OK")
+		}
+
+		config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
 
 
-#### 2) Map code lists 
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
-  
-  config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
-  mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
-  mapping_keep_src_code <- FALSE
-  if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
-  
-  config$logger.info("Mapping code lists of georeferenced datasets...")
-  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
-  config$logger.info("Mapping code lists of georeferenced datasets OK")
-   
-  if(!is.null(options$raising_georef_to_nominal)) if(options$raising_georef_to_nominal){
-    config$logger.info("Mapping code lists of nominal catch datasets...")
-    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
-    config$logger.info("Mapping code lists of nominal catch datasets OK")
-  }
-}
+		#### 2) Map code lists 
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
+		  
+		  config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
+		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
+		  mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
+		  mapping_keep_src_code <- FALSE
+		  if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
+		  
+		  config$logger.info("Mapping code lists of georeferenced datasets...")
+		  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
+		  config$logger.info("Mapping code lists of georeferenced datasets OK")
+		   
+		  if(!is.null(options$raising_georef_to_nominal)) if(options$raising_georef_to_nominal){
+			config$logger.info("Mapping code lists of nominal catch datasets...")
+			nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
+			config$logger.info("Mapping code lists of nominal catch datasets OK")
+		  }
+		}
 
-#### 3) Filters
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#### 3.1 Filter data by groups of gears
-if (!is.null(options$gear_filter)){
-	gear_filter<-unlist(strsplit(options$gear_filter, split=","))
-	config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
-	georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
-	config$logger.info("Filtering gears OK")
-}
+		#### 3) Filters
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#### 3.1 Filter data by groups of gears
+		if (!is.null(options$gear_filter)){
+			gear_filter<-unlist(strsplit(options$gear_filter, split=","))
+			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
+			georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
+			config$logger.info("Filtering gears OK")
+		}
 
-#### 3.2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
-if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
-	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-	if (options$SBF_data_rfmo_to_keep=="CCSBT"){
-	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
-	} else {
-	  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
+		#### 3.2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
+		if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
+			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+			if (options$SBF_data_rfmo_to_keep=="CCSBT"){
+			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
+			} else {
+			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
+			}
+			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
+		}
+		
+		#### 4) Aggregates
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		## Aggregate data on 5° resolution quadrants
+		if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
+		 
+			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+			georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+			georef_dataset<-georef_dataset$df
+		
+			# fill metadata elements
+			lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
+			aggregate_step = geoflow_process$new()
+			aggregate_step$setRationale(lineage)
+			aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
+			entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
+			entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
+		
+			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+		
+		}
+
+		#### 5) Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlapping_zone_iattc_wcpfc_data_to_keep)) {
+		 
+			overlapping_zone_iattc_wcpfc_data_to_keep <- options$overlapping_zone_iattc_wcpfc_data_to_keep
+			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
+			# query Sardara to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
+			query_areas_overlapping_zone_iattc_wcpfc <- "SELECT codesource_area from
+			(WITH iattc_area_of_competence AS (
+					 SELECT rfmos_convention_areas_fao.geom
+					   FROM area.rfmos_convention_areas_fao
+					  WHERE code::text = 'IATTC'::text
+					), wcpfc_area_of_competence AS (
+					 SELECT rfmos_convention_areas_fao.geom
+					   FROM area.rfmos_convention_areas_fao
+					  WHERE code::text = 'WCPFC'::text
+					), geom_iattc_wcpfc_intersection AS (
+					 SELECT st_collectionextract(st_intersection(iattc_area_of_competence.geom, wcpfc_area_of_competence.geom), 3) AS geom
+					   FROM iattc_area_of_competence,
+						wcpfc_area_of_competence
+					)
+			 SELECT area_labels.id_area,
+				area_labels.codesource_area
+			   FROM area.area_labels,
+				geom_iattc_wcpfc_intersection
+			  WHERE area_labels.tablesource_area = 'cwp_grid'::text AND st_within(area_labels.geom, geom_iattc_wcpfc_intersection.geom))tab;
+			"
+
+			overlapping_zone_iattc_wcpfc <- dbGetQuery(con, query_areas_overlapping_zone_iattc_wcpfc)
+
+			if (overlapping_zone_iattc_wcpfc_data_to_keep=="IATTC"){
+			  # If we choose to keep the data of the overlapping zone from the IATTC, we remove the data of the overlapping zone from the WCPFC dataset.
+			  georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% overlapping_zone_iattc_wcpfc$codesource_area & georef_dataset$source_authority == "WCPFC")), ]
+			} else if (overlapping_zone_iattc_wcpfc_data_to_keep=="WCPFC"){
+			  # If we choose to keep the data of the overlapping zone from the WCPFC, we remove the data of the overlapping zone from the IATTC dataset
+			  georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% overlapping_zone_iattc_wcpfc$codesource_area & georef_dataset$source_authority == "IATTC")), ]
+			}
+
+			# fill metadata elements
+			overlap_lineage<-paste0("Concerns IATTC and WCPFC data. IATTC and WCPFC have an overlapping area in their respective area of competence. Data from both RFMOs may be redundant in this overlapping zone. In the overlapping area, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept.	Information regarding the data in the IATTC / WCPFC overlapping area: after the eventual other corrections applied, e.g. raisings, catch units conversions, etc., the ratio between the catches from IATTC and those from WCPFC was of: ratio_iattc_wcpf_mt for the catches expressed in weight and ratio_iattc_wcpf_no for the catches expressed in number.")
+			overlap_step <- geoflow_process$new()
+			overlap_step$setRationale(overlap_lineage)
+			overlap_step$setProcessor(firms_contact)  #TODO define who's the processor
+			entity$provenance$processes <- c(entity$provenance$processes, overlap_step)	
+			entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
+
+			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
+		  
+		}
+
+	},
+	
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	#LEVEL 1
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	"1" = {
+		
+		#### 1) Read Level 0 dataset
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
+		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
+		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
+		georef_dataset<-dataset
+		class(georef_dataset$value) <- "numeric"
+		rm(dataset)
+		
+		#### 2) Convert units
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
+			mapping_map_code_lists <- TRUE
+			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
+			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
+			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
+			georef_dataset <- do_unit_conversion(entity, config, fact, options$unit_conversion_csv_conversion_factor_url, options$unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
+		}
+		
+	},
+	
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	#LEVEL 2 - TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	"2" = {
+	
+		#### 1) Read Level 1 dataset
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
+		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
+		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
+		georef_dataset<-dataset
+		class(georef_dataset$value) <- "numeric"
+		rm(dataset)
+
+
+		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+		#### 5) Raise georeferenced to total (nominal) dataset
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if (options$raising_georef_to_nominal) {   
+		  source(paste0(url_scripts_create_own_tuna_atlas,"raising_georef_to_nominal.R"))
+		  
+		  if (fact=="catch"){
+			dataset_to_compute_rf=georef_dataset
+			x_raising_dimensions=c("flag","gear","species","year","source_authority")
+		  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
+			cat("Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n")
+			dataset_catch<-NULL
+			if (include_IOTC=="TRUE"){
+			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IOTC","catch",datasets_year_release)
+			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_WCPFC=="TRUE"){
+			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("WCPFC","catch",datasets_year_release)
+			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_CCSBT=="TRUE"){
+			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("CCSBT","catch",datasets_year_release)
+			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_IATTC=="TRUE"){
+			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IATTC",
+																  "catch",
+																  datasets_year_release,
+																  iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
+																  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
+																  iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
+			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_ICCAT=="TRUE"){
+			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("ICCAT",
+																  "catch",
+																  datasets_year_release,
+																  iccat_ps_include_type_of_school=iccat_ps_include_type_of_school)
+			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			
+			
+			if (mapping_map_code_lists=="TRUE"){
+			  dataset_catch<-function_map_code_lists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset
+			}
+			
+			if (!is.null(gear_filter)){
+			  dataset_catch<-function_gear_filter(gear_filter,dataset_catch)$dataset
+			}
+			dataset_catch$time_start<-substr(as.character(dataset_catch$time_start), 1, 10)
+			dataset_catch$time_end<-substr(as.character(dataset_catch$time_end), 1, 10)
+			if (unit_conversion_convert=="TRUE"){ 
+			  # We use our conversion factors (IRD). This should be an input parameter of the script
+			  dataset_catch<-function_unit_conversion_convert(con,fact="catch",unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",mapping_map_code_lists,dataset_catch)$dataset
+			}
+			
+			dataset_to_compute_rf=dataset_catch
+			rm(dataset_catch)
+			x_raising_dimensions=c("flag","gear","year","source_authority")
+		  }
+			
+			georef_dataset<-function_raising_georef_to_nominal(fact,georef_dataset,dataset_to_compute_rf,nominal_catch,x_raising_dimensions,raising_do_not_raise_wcfpc_data,raising_raise_only_for_PS_LL)
+			rm(dataset_to_compute_rf)
+			metadata$description<-paste0(metadata$description,georef_dataset$description)
+			metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+			metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+			georef_dataset<-georef_dataset$dataset
+		  
+		} 
+
+		#### 6) Spatial Aggregation / Disaggregation of data
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		## 6.1 Aggregate data on 5° resolution quadrants
+		#if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
+		# 
+		#	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+		#	georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+		#	georef_dataset<-georef_dataset$df
+		#
+		#	# fill metadata elements
+		#	lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
+		#	aggregate_step = geoflow_process$new()
+		#	aggregate_step$setRationale(lineage)
+		#	aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
+		#	entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
+		#	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
+		#
+		#	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+		#
+		#} 
+
+		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+		## 6.2 Disggregate data on 5° resolution quadrants
+		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
+		  source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,5,disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		}
+
+		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+		## 6.3 Disggregate data on 1° resolution quadrants
+		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
+		  source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,1,disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		} 
+
+		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+		#### 7) Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension "geographic_identifier" set to "UNK/IND" or NA)
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
+		  source(paste0(url_scripts_create_own_tuna_atlas,"spatial_curation_data_mislocated.R"))
+		  georef_dataset<-function_spatial_curation_data_mislocated(con,georef_dataset,spatial_curation_data_mislocated)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		}
 	}
-	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
-}
-
-
-#### 4) Convert units
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
-	mapping_map_code_lists <- TRUE
-	if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
-	if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
-	if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-	georef_dataset <- do_unit_conversion(entity, config, fact, options$unit_conversion_csv_conversion_factor_url, options$unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
-}
-
-
-# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-#### 5) Raise georeferenced to total (nominal) dataset
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if (options$raising_georef_to_nominal) {   
-  source(paste0(url_scripts_create_own_tuna_atlas,"raising_georef_to_nominal.R"))
-  
-  if (fact=="catch"){
-    dataset_to_compute_rf=georef_dataset
-    x_raising_dimensions=c("flag","gear","species","year","source_authority")
-  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
-    cat("Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n")
-    dataset_catch<-NULL
-    if (include_IOTC=="TRUE"){
-      rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IOTC","catch",datasets_year_release)
-      dataset_catch<-rbind(dataset_catch,rfmo_dataset)
-      rm(rfmo_dataset)
-    }
-    if (include_WCPFC=="TRUE"){
-      rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("WCPFC","catch",datasets_year_release)
-      dataset_catch<-rbind(dataset_catch,rfmo_dataset)
-      rm(rfmo_dataset)
-    }
-    if (include_CCSBT=="TRUE"){
-      rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("CCSBT","catch",datasets_year_release)
-      dataset_catch<-rbind(dataset_catch,rfmo_dataset)
-      rm(rfmo_dataset)
-    }
-    if (include_IATTC=="TRUE"){
-      rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IATTC",
-                                                          "catch",
-                                                          datasets_year_release,
-                                                          iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
-                                                          iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-                                                          iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
-      dataset_catch<-rbind(dataset_catch,rfmo_dataset)
-      rm(rfmo_dataset)
-    }
-    if (include_ICCAT=="TRUE"){
-      rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("ICCAT",
-                                                          "catch",
-                                                          datasets_year_release,
-                                                          iccat_ps_include_type_of_school=iccat_ps_include_type_of_school)
-      dataset_catch<-rbind(dataset_catch,rfmo_dataset)
-      rm(rfmo_dataset)
-    }
-    
-    
-    if (mapping_map_code_lists=="TRUE"){
-      dataset_catch<-function_map_code_lists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset
-    }
-    
-    if (!is.null(gear_filter)){
-      dataset_catch<-function_gear_filter(gear_filter,dataset_catch)$dataset
-    }
-    dataset_catch$time_start<-substr(as.character(dataset_catch$time_start), 1, 10)
-    dataset_catch$time_end<-substr(as.character(dataset_catch$time_end), 1, 10)
-    if (unit_conversion_convert=="TRUE"){ 
-      # We use our conversion factors (IRD). This should be an input parameter of the script
-      dataset_catch<-function_unit_conversion_convert(con,fact="catch",unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",mapping_map_code_lists,dataset_catch)$dataset
-    }
-    
-    dataset_to_compute_rf=dataset_catch
-    rm(dataset_catch)
-    x_raising_dimensions=c("flag","gear","year","source_authority")
-  }
-    
-    georef_dataset<-function_raising_georef_to_nominal(fact,georef_dataset,dataset_to_compute_rf,nominal_catch,x_raising_dimensions,raising_do_not_raise_wcfpc_data,raising_raise_only_for_PS_LL)
-    rm(dataset_to_compute_rf)
-    metadata$description<-paste0(metadata$description,georef_dataset$description)
-    metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-    metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
-    georef_dataset<-georef_dataset$dataset
-  
-} 
-
-
-
-#### 6) Spatial Aggregation / Disaggregation of data
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-## 6.1 Aggregate data on 5° resolution quadrants
-if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
- 
-	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-	georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
-	georef_dataset<-georef_dataset$df
-
-	# fill metadata elements
-	lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
-	aggregate_step = geoflow_process$new()
-	aggregate_step$setRationale(lineage)
-	aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
-	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
-
-	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-
-} 
-
-# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-## 6.2 Disggregate data on 5° resolution quadrants
-if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
-  source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,5,disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
-  metadata$description<-paste0(metadata$description,georef_dataset$description)
-  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-  georef_dataset<-georef_dataset$dataset
-}
-
-# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-## 6.3 Disggregate data on 1° resolution quadrants
-if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
-  source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,1,disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
-  metadata$description<-paste0(metadata$description,georef_dataset$description)
-  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-  georef_dataset<-georef_dataset$dataset
-} 
-
-# TODO --> ADAPT R CODE
-#### 7) Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension "geographic_identifier" set to "UNK/IND" or NA)
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
-  source(paste0(url_scripts_create_own_tuna_atlas,"spatial_curation_data_mislocated.R"))
-  georef_dataset<-function_spatial_curation_data_mislocated(con,georef_dataset,spatial_curation_data_mislocated)
-  metadata$description<-paste0(metadata$description,georef_dataset$description)
-  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-  georef_dataset<-georef_dataset$dataset
-}
-
-
-#### 8) Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlapping_zone_iattc_wcpfc_data_to_keep)){
- 
-	overlapping_zone_iattc_wcpfc_data_to_keep <- options$overlapping_zone_iattc_wcpfc_data_to_keep
-	config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
-	# query Sardara to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
-	query_areas_overlapping_zone_iattc_wcpfc <- "SELECT codesource_area from
-	(WITH iattc_area_of_competence AS (
-			 SELECT rfmos_convention_areas_fao.geom
-			   FROM area.rfmos_convention_areas_fao
-			  WHERE code::text = 'IATTC'::text
-			), wcpfc_area_of_competence AS (
-			 SELECT rfmos_convention_areas_fao.geom
-			   FROM area.rfmos_convention_areas_fao
-			  WHERE code::text = 'WCPFC'::text
-			), geom_iattc_wcpfc_intersection AS (
-			 SELECT st_collectionextract(st_intersection(iattc_area_of_competence.geom, wcpfc_area_of_competence.geom), 3) AS geom
-			   FROM iattc_area_of_competence,
-				wcpfc_area_of_competence
-			)
-	 SELECT area_labels.id_area,
-		area_labels.codesource_area
-	   FROM area.area_labels,
-		geom_iattc_wcpfc_intersection
-	  WHERE area_labels.tablesource_area = 'cwp_grid'::text AND st_within(area_labels.geom, geom_iattc_wcpfc_intersection.geom))tab;
-	"
-
-	overlapping_zone_iattc_wcpfc <- dbGetQuery(con, query_areas_overlapping_zone_iattc_wcpfc)
-
-	if (overlapping_zone_iattc_wcpfc_data_to_keep=="IATTC"){
-	  # If we choose to keep the data of the overlapping zone from the IATTC, we remove the data of the overlapping zone from the WCPFC dataset.
-	  georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% overlapping_zone_iattc_wcpfc$codesource_area & georef_dataset$source_authority == "WCPFC")), ]
-	} else if (overlapping_zone_iattc_wcpfc_data_to_keep=="WCPFC"){
-	  # If we choose to keep the data of the overlapping zone from the WCPFC, we remove the data of the overlapping zone from the IATTC dataset
-	  georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% overlapping_zone_iattc_wcpfc$codesource_area & georef_dataset$source_authority == "IATTC")), ]
-	}
-
-	# fill metadata elements
-	overlap_lineage<-paste0("Concerns IATTC and WCPFC data. IATTC and WCPFC have an overlapping area in their respective area of competence. Data from both RFMOs may be redundant in this overlapping zone. In the overlapping area, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept.	Information regarding the data in the IATTC / WCPFC overlapping area: after the eventual other corrections applied, e.g. raisings, catch units conversions, etc., the ratio between the catches from IATTC and those from WCPFC was of: ratio_iattc_wcpf_mt for the catches expressed in weight and ratio_iattc_wcpf_no for the catches expressed in number.")
-	overlap_step <- geoflow_process$new()
-	overlap_step$setRationale(overlap_lineage)
-	overlap_step$setProcessor(firms_contact)  #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, overlap_step)	
-	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
-
-	config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
-  
-  }
-
+)
 
 #final step
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
