@@ -5,7 +5,7 @@ enrich_db_for_services <- function(entity, config, options){
 
 	#set information required for (meta)data services
 	df_codelists <- read.csv(entity$resources$codelists)
-	dimensions <- c(df_codelists$dimension [df_codelists$dimension != "area"], "time_start", "time_end", "month", "quarter", "year", "aggregation_method")
+	dimensions <- c(df_codelists$dimension [df_codelists$dimension != "area"], "time_start", "time_end", "year", "quarter", "month", "aggregation_method")
 	
 	#scripts
 	url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions"
@@ -38,9 +38,9 @@ enrich_db_for_services <- function(entity, config, options){
 			"time_start" = as.character(entity$temporal_extent$start), #paste0(substr(as.character(entity$temporal_extent$end), 1, 4),"-01-01"),
 			"time_end" = as.character(entity$temporal_extent$end),
 			"aggregation_method" = "none",
-			"month" = paste(1:12, collapse="+"),
-			"quarter" = paste(1:4, collapse="+"),
 			"year" = paste(as.integer(format(entity$temporal_extent$start, "%Y")):as.integer(format(entity$temporal_extent$end, "%Y")), collapse="+"),
+			"quarter" = paste(1:4, collapse="+"),
+			"month" = paste(1:12, collapse="+"),
 			paste(dbGetQuery(con, sprintf("select distinct %s from %s.%s",dimension, schema, pid, dimension))[,1], collapse="+")
 		)
 		print("--------------")
