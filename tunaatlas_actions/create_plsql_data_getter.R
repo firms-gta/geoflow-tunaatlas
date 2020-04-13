@@ -73,7 +73,7 @@ create_plsql_data_getter <- function(entity, config, options){
 		if(x %in% c("time_start", "time_end"))  type_cast <- "timestamp"
 		if(x %in% c("year", "quarter", "month")) type_cast <- "integer"
 		#out <- sprintf("CAST('''||input_%s||''' AS %s)", x, type_cast)
-		out <- sprintf("CAST(NULL AS %s)", x, type_cast)
+		out <- sprintf("CAST(NULL AS %s)", type_cast)
 		return(out)
 	}), collapse=", ")
 	
