@@ -58,7 +58,7 @@ create_plsql_data_getter <- function(entity, config, options){
 	#sql query for raw data
 	sql_query_raw_select_columns <- paste0(sapply(dimensions[dimensions != "aggregation_method"], function(x){
 		out <- paste0("dataset.", x)
-		if(x %in% c("year", "quarter", "month")) out <- paste0("CAST(", out, " AS text)")
+		#if(x %in% c("year", "quarter", "month")) out <- paste0("CAST(", out, " AS text)")
 		return(out)
 	}), collapse=", ")
 	
@@ -69,9 +69,11 @@ create_plsql_data_getter <- function(entity, config, options){
 	
 	#sql query for aggregate data
 	sql_query_agg_select_columns <- paste0(sapply(dimensions[dimensions != "aggregation_method"], function(x){
-		type_cast <- "text"
-		if(x %in% c("time_start", "time_end"))  type_cast <- "timestamp"
-		out <- sprintf("CAST('''||input_%s||''' AS %s)", x, type_cast)
+		#type_cast <- "text"
+		#if(x %in% c("time_start", "time_end"))  type_cast <- "timestamp"
+		#out <- sprintf("CAST('''||input_%s||''' AS %s)", x, type_cast)
+		#if(x %in% c("year", "quarter", "month")) out <- "NULL"
+		out <- "NULL"
 		return(out)
 	}), collapse=", ")
 	
