@@ -9,7 +9,7 @@ create_plsql_data_getter <- function(entity, config, options){
 
 	#set information required for (meta)data services
 	df_codelists <- as.data.frame(readr::read_csv(entity$resources$codelists, guess_max=0))
-	dimensions <- c(df_codelists[df_codelists$dimension != "area", "dimension"], "time_start", "time_end", "month", "quarter", "year", "aggregation_method")
+	dimensions <- c(df_codelists[df_codelists$dimension != "area", "dimension"], "time_start", "time_end", "year", "quarter", "month", "aggregation_method")
 
 	fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
 	sql_params <- paste0("schema_name varchar, pid varchar,", paste0(paste0("input_", dimensions, " varchar"), collapse = ","))
@@ -23,6 +23,9 @@ create_plsql_data_getter <- function(entity, config, options){
 			"time_end" = "timestamp",
 			"value" = "numeric",
 			"geom" = "geometry",
+			"year" =  "integer",
+			"quarter" = "integer",
+			"month" = "integer",
 			"text"
 		)
 		return(paste(x, type))
