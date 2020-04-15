@@ -30,7 +30,7 @@ retrieve_nominal_catch <- function(entity, config, options){
 	# For ICCAT Nominal catch, we need to map flag code list, because flag code list used in nominal catch dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
 	if (options$include_ICCAT){
 		# extract mapping
-		df_mapping <- as.data.frame(readr::read_csv("global_nominal_catch_ird_level0_other_codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv", guess_max = 0))
+		df_mapping <- as.data.frame(readr::read_csv("codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv", guess_max = 0))
 		df_mapping$source_authority <- "ICCAT"
 	  
 		nominal_catch_other_rfmos <- nominal_catch %>% filter (source_authority != "ICCAT")
