@@ -266,7 +266,8 @@ switch(DATA_LEVEL,
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$raising_georef_to_nominal) {   
-		  source(paste0(url_scripts_create_own_tuna_atlas,"raising_georef_to_nominal.R"))
+		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
+		  
 		  
 		  if (fact=="catch"){
 			dataset_to_compute_rf=georef_dataset
@@ -362,7 +363,8 @@ switch(DATA_LEVEL,
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		## 6.2 Disggregate data on 5° resolution quadrants
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
-		  source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R")) #modified for geoflow
+		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,5,disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
@@ -372,7 +374,8 @@ switch(DATA_LEVEL,
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		## 6.3 Disggregate data on 1° resolution quadrants
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
-		  source(paste0(url_scripts_create_own_tuna_atlas,"disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R")) #modified for geoflow
+		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,1,disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
@@ -384,7 +387,8 @@ switch(DATA_LEVEL,
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
-		  source(paste0(url_scripts_create_own_tuna_atlas,"spatial_curation_data_mislocated.R"))
+		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
+		  
 		  georef_dataset<-function_spatial_curation_data_mislocated(con,georef_dataset,spatial_curation_data_mislocated)
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
