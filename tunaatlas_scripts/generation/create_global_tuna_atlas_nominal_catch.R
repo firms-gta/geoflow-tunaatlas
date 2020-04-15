@@ -50,9 +50,7 @@ source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
 
 #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
 config$logger.info("Retrieving RFMOs nominal catch...")
-nominal_catch <-retrieve_nominal_catch(entity, config, 
-									  options$include_IOTC,options$include_IATTC,options$include_WCPFC,options$include_CCSBT,options$include_ICCAT,
-									  options$iccat_nominal_catch_spatial_stratification)
+nominal_catch <-retrieve_nominal_catch(entity, config, options)
 config$logger.info("Retrieving RFMOs nominal catch OK")
 
 entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]],"\n- The primary nominal (also called total) catch datasets released by the tuna RFMOs were merged.\n")
