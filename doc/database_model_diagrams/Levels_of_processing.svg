@@ -1,113 +1,135 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="436" version="1.1" width="1452" xmlns="http://www.w3.org/2000/svg">
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="158" x="14" y="134"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="158" x="14" y="134"/>
-<text font-family="Dialog" font-size="12" x="19" y="147">
+<svg height="532" version="1.1" width="1476" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="158" x="14" y="110"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="158" x="14" y="110"/>
+<text font-family="Dialog" font-size="12" x="19" y="123">
 RFMOs_primary_dataset</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="158" x="14" y="157"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="158" x="14" y="178"/>
-<polygon fill="#c8ffff" points="598,15 940,15 940,38 989,38 989,421 598,421 598,15" stroke="#c8ffff" stroke-width="1"/>
-<rect fill="none" height="23" stroke="#000000" stroke-width="1" width="342" x="598" y="15"/>
-<text font-family="Dialog" font-size="12" x="603" y="28">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="158" x="14" y="133"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="158" x="14" y="154"/>
+<polygon fill="#c8ffff" points="622,103 964,103 964,126 1013,126 1013,509 622,509 622,103" stroke="#c8ffff" stroke-width="1"/>
+<rect fill="none" height="23" stroke="#000000" stroke-width="1" width="342" x="622" y="103"/>
+<text font-family="Dialog" font-size="12" x="627" y="116">
 Level_1</text>
-<rect fill="none" height="383" stroke="#000000" stroke-width="1" width="391" x="598" y="38"/>
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="153" x="654" y="55"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="153" x="654" y="55"/>
-<text font-family="Dialog" font-size="12" x="659" y="68">
+<rect fill="none" height="383" stroke="#000000" stroke-width="1" width="391" x="622" y="126"/>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="153" x="678" y="143"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="153" x="678" y="143"/>
+<text font-family="Dialog" font-size="12" x="683" y="156">
 global_catch_ird_level1</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="654" y="78"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="654" y="99"/>
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="216" x="742" y="191"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="216" x="742" y="191"/>
-<text font-family="Dialog" font-size="12" x="747" y="204">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="678" y="166"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="678" y="187"/>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="216" x="766" y="279"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="216" x="766" y="279"/>
+<text font-family="Dialog" font-size="12" x="771" y="292">
 global_catch_5deg_1m_ird_level1</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="742" y="214"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="742" y="235"/>
-<polyline fill="none" points="754,121 754,191" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="747" x2="754" y1="179" y2="191"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="761" x2="754" y1="179" y2="191"/>
-<text font-family="Dialog" font-size="12" x="780" y="161">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="766" y="302"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="766" y="323"/>
+<polyline fill="none" points="778,209 778,279" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="771" x2="778" y1="267" y2="279"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="785" x2="778" y1="267" y2="279"/>
+<text font-family="Dialog" font-size="12" x="804" y="249">
 is_input_of</text>
-<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="259" x="670" y="319"/>
-<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="259" x="670" y="319"/>
-<text font-family="Dialog" font-size="12" x="675" y="332">
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="259" x="694" y="407"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="259" x="694" y="407"/>
+<text font-family="Dialog" font-size="12" x="699" y="420">
 global_catch_1deg_1m_ps_bb_ird_level1</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="670" y="342"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="670" y="364"/>
-<polyline fill="none" points="682,121 682,319" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="675" x2="682" y1="307" y2="319"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="689" x2="682" y1="307" y2="319"/>
-<text font-family="Dialog" font-size="12" x="608" y="146">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="694" y="430"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="694" y="452"/>
+<polyline fill="none" points="706,209 706,407" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="699" x2="706" y1="395" y2="407"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="713" x2="706" y1="395" y2="407"/>
+<text font-family="Dialog" font-size="12" x="632" y="234">
 is_input_of</text>
-<polygon fill="#ffffc8" points="278,14 500,14 500,37 549,37 549,357 278,357 278,14" stroke="#ffffc8" stroke-width="1"/>
-<rect fill="none" height="23" stroke="#000000" stroke-width="1" width="222" x="278" y="14"/>
-<text font-family="Dialog" font-size="12" x="283" y="27">
+<polygon fill="#ffffc8" points="254,14 548,14 548,37 597,37 597,517 254,517 254,14" stroke="#ffffc8" stroke-width="1"/>
+<rect fill="none" height="23" stroke="#000000" stroke-width="1" width="294" x="254" y="14"/>
+<text font-family="Dialog" font-size="12" x="259" y="27">
 Level_0</text>
-<rect fill="none" height="320" stroke="#000000" stroke-width="1" width="271" x="278" y="37"/>
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="208" x="302" y="214"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="208" x="302" y="214"/>
-<text font-family="Dialog" font-size="12" x="307" y="227">
+<rect fill="none" height="480" stroke="#000000" stroke-width="1" width="343" x="254" y="37"/>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="208" x="286" y="54"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="208" x="286" y="54"/>
+<text font-family="Dialog" font-size="12" x="291" y="67">
 global_nominal_catch_ird_level0</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="208" x="302" y="237"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="208" x="302" y="258"/>
-<polyline fill="none" points="171,200 302,214" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="289" x2="302" y1="219" y2="214"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="290" x2="302" y1="205" y2="214"/>
-<text font-family="Dialog" font-size="12" x="177" y="187">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="208" x="286" y="77"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="208" x="286" y="98"/>
+<polyline fill="none" points="171,120 286,120" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="274" x2="286" y1="127" y2="120"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="274" x2="286" y1="113" y2="120"/>
+<text font-family="Dialog" font-size="12" x="166" y="100">
 is_input_of</text>
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="153" x="310" y="54"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="153" x="310" y="54"/>
-<text font-family="Dialog" font-size="12" x="315" y="67">
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="153" x="294" y="150"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="153" x="294" y="150"/>
+<text font-family="Dialog" font-size="12" x="299" y="163">
 global_catch_ird_level0</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="310" y="77"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="310" y="98"/>
-<polyline fill="none" points="462,88 654,88" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="642" x2="654" y1="95" y2="88"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="642" x2="654" y1="81" y2="88"/>
-<text font-family="Dialog" font-size="12" x="496" y="68">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="294" y="173"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="294" y="194"/>
+<polyline fill="none" points="446,174 678,174" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="666" x2="678" y1="181" y2="174"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="666" x2="678" y1="167" y2="174"/>
+<text font-family="Dialog" font-size="12" x="500" y="154">
 is_input_of</text>
-<polyline fill="none" points="171,134 310,120" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="298" x2="310" y1="128" y2="120"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="297" x2="310" y1="114" y2="120"/>
-<text font-family="Dialog" font-size="12" x="194" y="109">
+<polyline fill="none" points="171,176 294,176" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="282" x2="294" y1="183" y2="176"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="282" x2="294" y1="169" y2="176"/>
+<text font-family="Dialog" font-size="12" x="188" y="156">
 is_input_of</text>
-<polygon fill="#c8c8ff" points="1054,15 1388,15 1388,38 1437,38 1437,421 1054,421 1054,15" stroke="#c8c8ff" stroke-width="1"/>
-<rect fill="none" height="23" stroke="#000000" stroke-width="1" width="334" x="1054" y="15"/>
-<text font-family="Dialog" font-size="12" x="1059" y="28">
+<polygon fill="#c8c8ff" points="1078,103 1412,103 1412,126 1461,126 1461,509 1078,509 1078,103" stroke="#c8c8ff" stroke-width="1"/>
+<rect fill="none" height="23" stroke="#000000" stroke-width="1" width="334" x="1078" y="103"/>
+<text font-family="Dialog" font-size="12" x="1083" y="116">
 Level_2</text>
-<rect fill="none" height="383" stroke="#000000" stroke-width="1" width="383" x="1054" y="38"/>
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="259" x="1126" y="311"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="259" x="1126" y="311"/>
-<text font-family="Dialog" font-size="12" x="1131" y="324">
+<rect fill="none" height="383" stroke="#000000" stroke-width="1" width="383" x="1078" y="126"/>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="259" x="1150" y="399"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="259" x="1150" y="399"/>
+<text font-family="Dialog" font-size="12" x="1155" y="412">
 global_catch_1deg_1m_ps_bb_ird_level2</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="1126" y="334"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="1126" y="355"/>
-<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="216" x="1198" y="191"/>
-<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="216" x="1198" y="191"/>
-<text font-family="Dialog" font-size="12" x="1203" y="204">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="1150" y="422"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="1150" y="443"/>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="216" x="1222" y="279"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="216" x="1222" y="279"/>
+<text font-family="Dialog" font-size="12" x="1227" y="292">
 global_catch_5deg_1m_ird_level2</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="1198" y="214"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="1198" y="235"/>
-<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="153" x="1142" y="55"/>
-<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="153" x="1142" y="55"/>
-<text font-family="Dialog" font-size="12" x="1147" y="68">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="1222" y="302"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="1222" y="323"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="153" x="1166" y="143"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="153" x="1166" y="143"/>
+<text font-family="Dialog" font-size="12" x="1171" y="156">
 global_catch_ird_level2</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="1142" y="78"/>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="1142" y="100"/>
-<polyline fill="none" points="1154,123 1154,311" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="1147" x2="1154" y1="299" y2="311"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="1161" x2="1154" y1="299" y2="311"/>
-<text font-family="Dialog" font-size="12" x="1061" y="182">
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="1166" y="166"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="153" x="1166" y="188"/>
+<polyline fill="none" points="1178,211 1178,399" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="1171" x2="1178" y1="387" y2="399"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="1185" x2="1178" y1="387" y2="399"/>
+<text font-family="Dialog" font-size="12" x="1085" y="270">
 is_input_of</text>
-<polyline fill="none" points="1210,123 1210,191" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="1203" x2="1210" y1="179" y2="191"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="1217" x2="1210" y1="179" y2="191"/>
-<text font-family="Dialog" font-size="12" x="1234" y="153">
+<polyline fill="none" points="1234,211 1234,279" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="1227" x2="1234" y1="267" y2="279"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="1241" x2="1234" y1="267" y2="279"/>
+<text font-family="Dialog" font-size="12" x="1258" y="241">
 is_input_of</text>
-<polyline fill="none" points="806,86 1142,86" stroke="#000000" stroke-width="1"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="1130" x2="1142" y1="93" y2="86"/>
-<line fill="#000000" stroke="#000000" stroke-width="1" x1="1130" x2="1142" y1="79" y2="86"/>
-<text font-family="Dialog" font-size="12" x="912" y="66">
+<polyline fill="none" points="830,174 1166,174" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="1154" x2="1166" y1="181" y2="174"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="1154" x2="1166" y1="167" y2="174"/>
+<text font-family="Dialog" font-size="12" x="936" y="154">
+is_input_of</text>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="259" x="318" y="414"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="259" x="318" y="414"/>
+<text font-family="Dialog" font-size="12" x="323" y="427">
+global_catch_1deg_1m_ps_bb_ird_level0</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="318" y="437"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="259" x="318" y="458"/>
+<rect fill="#ffffff" height="67" stroke="#ffffff" stroke-width="1" width="216" x="366" y="294"/>
+<rect fill="none" height="67" stroke="#000000" stroke-width="1" width="216" x="366" y="294"/>
+<text font-family="Dialog" font-size="12" x="371" y="307">
+global_catch_5deg_1m_ird_level0</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="366" y="317"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="216" x="366" y="338"/>
+<polyline fill="none" points="414,216 414,294" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="407" x2="414" y1="282" y2="294"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="421" x2="414" y1="282" y2="294"/>
+<text font-family="Dialog" font-size="12" x="417" y="260">
+is_input_of</text>
+<polyline fill="none" points="334,216 334,414" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="327" x2="334" y1="402" y2="414"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="341" x2="334" y1="402" y2="414"/>
+<text font-family="Dialog" font-size="12" x="258" y="273">
 is_input_of</text>
 </svg>
