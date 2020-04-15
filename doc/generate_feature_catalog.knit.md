@@ -342,6 +342,14 @@ A rich sequence of post-processing steps can be applied to generate global datas
 * **Level 1**: from this level, additionnal post processing are only applied to geospatial catch in order to improve their quality and scientific use: eg rising is applied to fit the total catch (reported in nominal catch).
 * **Level 2**:
 
+
+The Figure XX illustrates the dataflow from a level to another and, within a level, from a product to another.
+
+[<img src="https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/doc/database_model_diagrams/Levels_of_processing.svg?sanitize=true" width="800">](https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/doc/database_model_diagrams/Levels_of_processing.svg?sanitize=true)
+
+
+
+
 ### FIRMS products
 
 A choice has to be made to select what datasets are official FIRMS products.
