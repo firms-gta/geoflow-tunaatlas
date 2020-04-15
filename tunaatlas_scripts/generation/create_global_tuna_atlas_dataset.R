@@ -154,13 +154,13 @@ switch(DATA_LEVEL,
 			georef_dataset<-georef_dataset$df
 		
 			# fill metadata elements
-			lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
-			aggregate_step = geoflow_process$new()
-			aggregate_step$setRationale(lineage)
-			aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
-			entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
-			entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
-		
+			# lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
+			# aggregate_step = geoflow_process$new()
+			# aggregate_step$setRationale(lineage)
+			# aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
+			# entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
+			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
+			# 
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
 		
 		}
@@ -205,12 +205,12 @@ switch(DATA_LEVEL,
 			}
 
 			# fill metadata elements
-			overlap_lineage<-paste0("Concerns IATTC and WCPFC data. IATTC and WCPFC have an overlapping area in their respective area of competence. Data from both RFMOs may be redundant in this overlapping zone. In the overlapping area, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept.	Information regarding the data in the IATTC / WCPFC overlapping area: after the eventual other corrections applied, e.g. raisings, catch units conversions, etc., the ratio between the catches from IATTC and those from WCPFC was of: ratio_iattc_wcpf_mt for the catches expressed in weight and ratio_iattc_wcpf_no for the catches expressed in number.")
-			overlap_step <- geoflow_process$new()
-			overlap_step$setRationale(overlap_lineage)
-			overlap_step$setProcessor(firms_contact)  #TODO define who's the processor
-			entity$provenance$processes <- c(entity$provenance$processes, overlap_step)	
-			entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
+			# overlap_lineage<-paste0("Concerns IATTC and WCPFC data. IATTC and WCPFC have an overlapping area in their respective area of competence. Data from both RFMOs may be redundant in this overlapping zone. In the overlapping area, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept.	Information regarding the data in the IATTC / WCPFC overlapping area: after the eventual other corrections applied, e.g. raisings, catch units conversions, etc., the ratio between the catches from IATTC and those from WCPFC was of: ratio_iattc_wcpf_mt for the catches expressed in weight and ratio_iattc_wcpf_no for the catches expressed in number.")
+			# overlap_step <- geoflow_process$new()
+			# overlap_step$setRationale(overlap_lineage)
+			# overlap_step$setProcessor(firms_contact)  #TODO define who's the processor
+			# entity$provenance$processes <- c(entity$provenance$processes, overlap_step)	
+			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
 
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
 		  
