@@ -39,7 +39,7 @@ Multiple options can be considered to manage these kinds of data, eg :
 * Binary data formats like NetCDF / HDF widely used to manage model outputs, remote sensing and in situ sensors data 
 * SQL multi-dimensional data warehouse which enable to gather aggregated data within a single database
 
-The CDL language used to formally describe the data structure in the headers of NetCDF files use the following syntactic convention to define what dimensions are used by a variables : **variable**(*dimension_1, dimension_2, ..dimension_n**). Eg of variables for tuna fisheries: 
+The CDL language used to formally describe the data structure in the headers of NetCDF files use the following syntactic convention to define what dimensions are used by a variables : **variable**(*dimension_1, dimension_2, ..dimension_n*). Eg of variables for tuna fisheries: 
 
 * **catch**(*schooltype,species,time,area,gear,flag,catchtype,unit,source*)
 * **effort**(*schooltype,time,area,gear,flag,unit,source*)
@@ -82,7 +82,7 @@ The model used is a classical **data warehouse** model:
 **Figure 3**:  catch and effort facts (variables) have most of dimensions in common and generates a typical **constellation schema**.
 
 
-## Management of variables
+## Management of facts (variables)
 
 The implementation of the conceptual model described in section XX generates **a table for each variable / fact** (even if one table might contain data for all varianles). This **fact table** is made of following columns:
 
@@ -114,8 +114,8 @@ The fact table is this the most important table but it only contains numbers (se
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:right;"> 13451114 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 2 </td>
@@ -128,8 +128,8 @@ The fact table is this the most important table but it only contains numbers (se
    <td style="text-align:right;"> 35.00 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451115 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12641 </td>
    <td style="text-align:right;"> 2 </td>
@@ -142,8 +142,8 @@ The fact table is this the most important table but it only contains numbers (se
    <td style="text-align:right;"> 407.00 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451116 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12638 </td>
    <td style="text-align:right;"> 2 </td>
@@ -156,98 +156,98 @@ The fact table is this the most important table but it only contains numbers (se
    <td style="text-align:right;"> 12.00 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451117 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12639 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 563 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 12.10 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451118 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 4 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 520 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 9.33 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451119 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 520 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 5.62 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451120 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 520 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 2.34 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451121 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 8 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 520 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 21.60 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451122 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 8 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 520 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
    <td style="text-align:right;"> 8.60 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> 13451123 </td>
-   <td style="text-align:right;"> 154 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 106 </td>
    <td style="text-align:right;"> 5 </td>
    <td style="text-align:right;"> 12640 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:right;"> 33443 </td>
    <td style="text-align:right;"> 98 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 520 </td>
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:right;"> 6 </td>
@@ -256,7 +256,7 @@ The fact table is this the most important table but it only contains numbers (se
 </tbody>
 </table>
 
-To make it human readable queries have to be made to join the content of dimensions tables where codes and labels are stored.
+To make it human readable queries have to be made to join the content of dimensions tables where codes and labels are stored. See Table XX in next section.
 
 ## Management of dimensions
 
@@ -330,6 +330,25 @@ The datasets to be loaded in the data  warehouse are listed in tables complying 
 
 This data structure complies with Dublin Core Metadata Initiative and adopt syntactic rules for valuation in order to enrich the core metadata elements. By doing so, we can automate the creation of FAIR services to foster data discovery, access and reuse.
 
+### Levels of processing
+
+Tuna data, as delievered by RFMOs, are declarative data provided by different countries with a high heterogeneity of quality and data structure. Moreover, Tuna RFMOs are still providing harmonized regional datasets which differ from a RFMO to another. Getting global datasets thus requires some additional work to harmonize the data structure of tuna RFMOs datasets. In addition scientists expertise can be used to correct and improve the quality of data delivered by countries.
+
+A rich sequence of post-processing steps can be applied to generate global datasets from raw tuna RFMOs datasets. As done with remote sensing products, we suggest different levels of processing to transform the raw data (signal) into a more intepreted one which is expected to better fit the observed reality and the basic needs of scientists. Indeed very few scientists need (or can deal with) low levels of processing and prefer *on the shelf **products** * delivered by real domain experts:
+
+* **Level 0**: Level 0 means that the number of post-processing steps is kept as low as possible to stick with original charateristics of data delivered by tuna RFMOS (eg remove duplicates). At this level, data are known to be below observed catches and still mix different unit of measures or spatial resolution.
+    - **Nominal catch**: closer from reality but with a very low spatial resolution since each measure is given per RFMO management area (basically per ocean) which makes some scientific studies impossible (eg spatial dynamics of fisheries).
+    - **Geolocated catch**: is another kind of catch data delivered by RFMOs with the same data structure but at a much higher spatial resolution (most of the time 1 or 5 degrees squares). However these data are not as complete as nominal catch and represents only a sample of the total catch (eg XX% of the total of nominal catch).
+* **Level 1**: from this level, additionnal post processing are only applied to geospatial catch in order to improve their quality and scientific use: eg rising is applied to fit the total catch (reported in nominal catch).
+* **Level 2**:
+
+### FIRMS products
+
+A choice has to be made to select what datasets are official FIRMS products.
+* what levels of processing are possible and what products for each level of processing.
+* what species or groups of species should be kept
+
+
 ## Infrastructures, interoperability and FAIR services
 The model of the data warehouse, which includes metadata tables, is meant to deliver FAIR data services to make its content widely used by relying on standards to foster interoperability:
 
@@ -366,6 +385,7 @@ Interoperabiliy enables multiple users to access the data with a lot of clients 
 Web:
 
 * Tuna Atlas workflow [github repository](https://github.com/eblondel/geoflow-tunaatlas/tree/master/tunaatlas_sql)
+* Tuna Atlas workflow [FIRMS and Blue Cloud Work plan](https://docs.google.com/document/d/172LnJQ62J8lj0TtnAxdjeAPmoNg1apkhzkxFeva2RcY/edit?usp=sharing)
 
 Reports / data papers: 
 
@@ -383,8 +403,7 @@ Biblio:
 ## Feature catalog
 
 
-It is also very easy to make tables with knitr's `kable` function:
-
+Below is the data dictionnary defining the structure of SQL data warehourse tables and related columns as well as views and materialized views.
 <!-- Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot. -->
 
 <table class="table table-striped" style="margin-left: auto; margin-right: auto;">
@@ -449,6 +468,62 @@ It is also very easy to make tables with knitr's `kable` function:
   </tr>
 </tbody>
 </table>
+
+
+## Code review and migration
+
+
+Below is the detail of the original codes as inherited from Paul Taconet github repositories and migration in new geoflow-tunaatlas github repository.
+<!-- Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot. -->
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<caption>Migration of codes from previous github repositories.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Github_repository </th>
+   <th style="text-align:left;"> Path </th>
+   <th style="text-align:left;"> file_name </th>
+   <th style="text-align:left;"> geoflow_tunaatlas_mapping </th>
+   <th style="text-align:left;"> modification </th>
+   <th style="text-align:left;"> needed_for_FIRMS_workflow </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> rtunaatlas_scripts </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 2cm; font-weight: bold;"> deploy_database_model.R </td>
+   <td style="text-align:left;"> deploy_database_model.R </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 5cm; background-color: yellow !important;"> NA </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rtunaatlas_scripts </td>
+   <td style="text-align:left;"> datawarehouse_model </td>
+   <td style="text-align:left;width: 2cm; font-weight: bold;"> dw_conceptual_model.xml </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 5cm; background-color: yellow !important;"> FALSE </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rtunaatlas_scripts </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 2cm; font-weight: bold;"> dw_logical_model_dimension.xml </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 5cm; background-color: yellow !important;"> FALSE </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rtunaatlas_scripts </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 2cm; font-weight: bold;"> dw_logical_model_fact.xml </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;"> NA </td>
+   <td style="text-align:left;width: 5cm; background-color: yellow !important;"> FALSE </td>
+  </tr>
+</tbody>
+</table>
+
 
 
 <!-- rmarkdown::render("~/Bureau/CODES/geoflow-tunaatlas/doc/generate_feature_catalog.Rmd", clean = FALSE) -->
