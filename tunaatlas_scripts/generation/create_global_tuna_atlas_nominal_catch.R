@@ -117,8 +117,8 @@ if (!is.null(options$SBF_data_rfmo_to_keep)){
 }
 
 #final step
-ag_param <- setdiff(colnames(nominal_catch),"value")
-config$logger.info(paste0(" Final step for paramas: ",ag_param)) 
+ag_param <- colnames(nominal_catch)
+config$logger.info(paste0(" Final step for params: ",ag_param)) 
 
 dataset<-nominal_catch %>% group_by_(.dots = ag_param) %>% dplyr::summarise(value=sum(value))
 dataset<-data.frame(dataset)
