@@ -117,7 +117,8 @@ if (!is.null(options$SBF_data_rfmo_to_keep)){
 }
 
 #final step
-dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"value")) %>% dplyr::summarise(value=sum(value))
+# dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"value")) %>% dplyr::summarise(value=sum(value))
+dataset<-nominal_catch
 dataset<-data.frame(dataset)
 
 
