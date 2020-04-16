@@ -76,8 +76,9 @@ if (!is.null(options$mapping_map_code_lists)){
 	config$logger.info("Mapping code lists of georeferenced datasets OK")
  
 	#dataset mapped with codelists
-	nominal_catch <- output$dataset
-
+	# nominal_catch <- output$dataset
+	nominal_catch <- output
+	
 	#more metadata
 	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", output$abstract)
 	if(!is.null(entity$descriptions[["info"]])){
