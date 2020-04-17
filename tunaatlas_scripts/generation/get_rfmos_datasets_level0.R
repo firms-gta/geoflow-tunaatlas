@@ -93,7 +93,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 					# We need to map flag code list, because flag code list used in iccat task2 by operation mode dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
 					cl_filename <- "codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv"
 					cl_id <- googledrive::drive_get(cl_filename)$id
-					googledrive::drive_download(googledrive::as_id(cl_id), cl_filename)
+					googledrive::drive_download(googledrive::as_id(cl_id), cl_filename, overwrite = TRUE)
 					flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0))
 					
 					iccat_ce_WithSchooltypeInfo <- rtunaatlas::map_codelist(iccat_ce_WithSchooltypeInfo, flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat, "flag")[[1]]
