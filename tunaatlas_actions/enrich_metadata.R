@@ -9,13 +9,14 @@ enrich_metadata <- function(entity, config, options){
 		ft <- dictionary$getFeatureTypeById(entity$data$featureType)
 		this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0("fact_tables.",entity$identifiers[["id"]])," LIMIT 1;"))
 		column_names <- colnames(this_view)
-		column_names <- column_names[!column_names %in% c("id_area", "longitude", "latitude", "geom_wkt", "geographic_identifier", "year", "month", "quarter", "time_start", "time_end", "time_period", "aggregation_method", "value", "gear_group", "species_group")]
+		column_names <- column_names[!column_names %in% c("id_area", "longitude", "latitude", "geom_wkt", "geographic_identifier", "year", "month", "quarter", "time_start", "time_end", "time_period", "aggregation_method", "value", "gear_group", "species_group", "the_geom")]
 		column_names <- column_names[!sapply(column_names, endsWith, "_label")]
 		for(colname in column_names){	
 			subject <- NULL
 			#query distinct values
 			values <- dbGetQuery(con, sprintf("SELECT DISTINCT %s FROM %s ORDER BY %s", colname, paste0("fact_tables.",entity$identifiers[["id"]]), colname))
 			values <- values[[colname]]
+			values <- values[!is.na(values)]
 			#check member availability in dictionary
 			member <- ft$getMemberById(colname)
 			if(!is.null(member)){
