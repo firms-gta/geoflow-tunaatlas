@@ -21,7 +21,8 @@ load_dataset <- function(entity, config, options){
   #options
   upload_to_db <- if(!is.null(options$upload_to_db)) options$upload_to_db else TRUE
   create_materialized_view <- if(!is.null(options$create_materialized_view)) options$create_materialized_view else TRUE
-  add_sql_comments <- if(!is.null(options$add_sql_comments)) options$add_sql_comments else FALSE
+  create_indexes <- if(!is.null(options$create_indexes)) options$create_indexes else TRUE
+  add_sql_comments <- if(!is.null(options$add_sql_comments)) options$add_sql_comments else TRUE
   upload_to_googledrive <- if(!is.null(options$upload_to_googledrive)) options$upload_to_googledrive else TRUE
   
   #db
@@ -419,6 +420,20 @@ load_dataset <- function(entity, config, options){
 		config$logger.info(sprintf("SQL: %s", sql_create_materialized_view))
 		dbSendQuery(con, sql_create_materialized_view)
 	
+		#create indexes for main columns
+		if(create_indexes){
+			config$logger.info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+			this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
+			column_names <- colnames(this_view)
+			columns_to_index <- column_names[column_names %in% dimensions]
+			for(column_name in columns_to_index){
+				create_index_sql <- sprintf("CREATE INDEX %s_%s_idx  ON %s.%s (%s);", database_view_name, column_name, schema_name_for_view, database_view_name, column_name)
+				config$logger.info(sprintf("SQL: %s", create_index_sql))
+				dbSendQuery(con, create_index_sql)
+			}
+		}
+		
+		#comment DB materialized view columns
 		if(add_sql_comments){
 			dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
 			this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
