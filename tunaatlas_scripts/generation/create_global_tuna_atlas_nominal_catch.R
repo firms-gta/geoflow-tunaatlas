@@ -15,11 +15,6 @@
 # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL, data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
 
-firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "firms-secretariat@fao.org"})][[1]]
-firms_contact$setRole("processor")
-ird_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "paul.taconet@ird.fr"})][[1]]
-ird_contact$setRole("processor")
-
 
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -53,13 +48,6 @@ config$logger.info("Retrieving RFMOs nominal catch...")
 nominal_catch <-retrieve_nominal_catch(entity, config, options)
 config$logger.info("Retrieving RFMOs nominal catch OK")
 
-entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]],"\n- The primary nominal (also called total) catch datasets released by the tuna RFMOs were merged.\n")
-merge_step <- geoflow_process$new();
-merge_step$setRationale("All the datasets were merged")
-merge_step$setProcessor(firms_contact)
-entity$provenance$processes <- c(entity$provenance$processes, merge_step)
-
-
 #### 2) Map code lists 
 
 if (!is.null(options$mapping_map_code_lists)){
@@ -72,24 +60,8 @@ if (!is.null(options$mapping_map_code_lists)){
 	if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
   
 	config$logger.info("Mapping code lists of georeferenced datasets...")
-	output <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
+	nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
 	config$logger.info("Mapping code lists of georeferenced datasets OK")
- 
-	#dataset mapped with codelists
-	# nominal_catch <- output$dataset
-	nominal_catch <- output
-	
-	#more metadata
-	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", output$abstract)
-	if(!is.null(entity$descriptions[["info"]])){
-	entity$setDescription("info", output$info)
-	}else{
-	entity$descriptions[["info"]] <- paste0(entity$descriptions[["info"]], output$info)
-	}
-	lineage_step <- geoflow_process$new()
-	lineage_step$setRationale(output$lineage)
-	lineage_step$setProcessor(firms_contact) #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, lineage_step)
  
 }
 
@@ -104,29 +76,12 @@ if (!is.null(options$SBF_data_rfmo_to_keep)){
 	} else {
 		nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
 	}
-
-	# fill metadata elements
-	lineage<-paste0("Concerns Southern Bluefin Tuna (SBF) data: SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Data from CCSBT and the other RFMOs may be redundant. For the Southern Bluefin Tuna, only data from ",options$SBF_data_rfmo_to_keep," were kept.	Information regarding the SBF data: after the potential other corrections applied, e.g. raisings, units conversions, etc., the ratio between the catches from CCSBT and those from the other RFMOs for SBF was of: ratio_ccsbt_otherrfmos_mt for the catches expressed in weight. A total of catches_sbf_ccsbt_no fishes were available in the CCSBT datasets - while no data in number were available in the other RFMOs datasets.")
-	sbf_step <- geoflow_process$new()
-	sbf_step$setRationale(lineage)
-	sbf_step$setProcessor(firms_contact)  #TODO define who's the processor
-	entity$provenance$processes <- c(entity$provenance$processes, sbf_step)
-
-	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- For the Southern Bluefin Tuna, only data from ",options$SBF_data_rfmo_to_keep," were kept")
-
 	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
 }
 
 #final step
 dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"value")) %>% dplyr::summarise(value=sum(value))
 dataset<-data.frame(dataset)
-
-
-## fill some metadata elements
-entity$setDescription("info", paste0("- Catches in the Pacific ocean are over-estimated. In fact, IATTC and WCPFC, who report the data for the Eastern Pacific and Western-Central Pacific ocean, respectively, have an overlapping area in their respective area of competence. Data from both RFMOs may be redundant in this overlapping zone.
-- Geographical stratification in this dataset is: major FAO fishing area for the Indian ocean (IOTC), ",options$iccat_nominal_catch_spatial_stratification," for the Atlantic ocean (ICCAT), whole areas of competence of the respective RFMOs for the Pacific ocean (IATTC and WCPFC), area of competence of the CCSBT for the Southern Bluefin tuna."))
-entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n More details on the processes are provided in the supplemental information and in the lineage section.")
-
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support

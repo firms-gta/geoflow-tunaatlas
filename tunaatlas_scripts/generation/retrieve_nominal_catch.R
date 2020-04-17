@@ -4,8 +4,8 @@ retrieve_nominal_catch <- function(entity, config, options){
 	con <- config$software$output$dbi
 	
 	#list of dataset files (from entity data sources)
-	dataset_files <- sapply(entity$data$source[2:length(entity$data$source)], function(x){ entity$getJobDataResource(config, x) })
-	names(dataset_files) <- entity$data$source[2:length(entity$data$source)]
+	dataset_files <- sapply(entity$data$source[3:length(entity$data$source)], function(x){ entity$getJobDataResource(config, x) })
+	names(dataset_files) <- entity$data$source[3:length(entity$data$source)]
 	dataset_files_nominal_catch <- dataset_files[regexpr("nominal", names(dataset_files)) > 0]
 	
 	# There are 2 ICCAT datasets for nominal catch: one that provides the stratification by Sampling areas, and one that provides the stratification by Stock areas. For nominal catch, the user decides as input parameter which one he wants to keep.
@@ -30,7 +30,9 @@ retrieve_nominal_catch <- function(entity, config, options){
 	# For ICCAT Nominal catch, we need to map flag code list, because flag code list used in nominal catch dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
 	if (options$include_ICCAT){
 		# extract mapping
-		df_mapping <- as.data.frame(readr::read_csv("data/global_nominal_catch_ird_level0_other_codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv", guess_max = 0))
+		df_mapping_source <- entity$data$source[[2]]
+		df_mapping_file <- entity$getJobDataResource(config, df_mapping_source)
+		df_mapping <- as.data.frame(readr::read_csv(df_mapping_file, guess_max = 0))
 		df_mapping$source_authority <- "ICCAT"
 	  
 		nominal_catch_other_rfmos <- nominal_catch %>% filter (source_authority != "ICCAT")
