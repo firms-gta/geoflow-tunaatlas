@@ -32,7 +32,7 @@ enrich_db_for_services <- function(entity, config, options){
 			"time_start" = "^(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])$",
 			"time_end" = "^(19|20)\\d\\d([- /.])(0[1-9]|1[012])\\2(0[1-9]|[12][0-9]|3[01])$",
 			"aggregation_method" = "^[none|avg_by_year|avg_by_quarter|avg_by_month|sum]+$",
-			"^[\\w +]+$"
+			"^[\\w. +]+$"
 		)
 		defaultValue <-switch(dimension,
 			"time_start" = as.character(entity$temporal_extent$start), #paste0(substr(as.character(entity$temporal_extent$end), 1, 4),"-01-01"),
