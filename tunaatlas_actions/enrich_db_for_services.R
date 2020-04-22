@@ -26,9 +26,6 @@ enrich_db_for_services <- function(entity, config, options){
 	entity$data$setGeometryField("the_geom")
 	entity$data$setGeometryType("Polygon")
 	
-	oneline <- dbGetQuery(con, sprintf("SELECT * FROM %s.%s LIMIT 1;", schema, pid))
-	dimensions <- dimensions[dimensions %in% colnames(oneline)]
-	
 	default_values <- list()
 	for(dimension in dimensions){
 		regexpValue <- switch(dimension,
