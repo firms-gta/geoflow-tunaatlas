@@ -50,7 +50,7 @@ config$logger.info("Retrieving RFMOs nominal catch OK")
 
 #### 2) Map code lists 
 
-if (!is.null(options$mapping_map_code_lists)){
+if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
  
 	config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
 	filename <- entity$data$source[[1]]
