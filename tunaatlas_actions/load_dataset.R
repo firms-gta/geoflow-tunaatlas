@@ -523,6 +523,7 @@ load_dataset <- function(entity, config, options){
 			config$logger.info("Write SQL queries (view/data) to job directory")
 			sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
 			file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
+			file_csv_view <- paste0(entity$identifiers[["id"]],"_view.csv")
 			sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
 			file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
 			
@@ -533,17 +534,19 @@ load_dataset <- function(entity, config, options){
 			if(create_materialized_view){
 				writeLines(sql_view, file.path("data", file_sql_view))
 				writeLines(sql_data, file.path("data", file_sql_data))
+				this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name),";"))
+				write.csv(this_view, file.path("data", file_csv_view), row.names = FALSE)
 				drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
+				drive_upload(file.path("data", file_csv_view), as_id(folder_views_id), overwrite = TRUE)
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
-				entity$data$source <- list(path_to_dataset_new, file_sql_view, file_sql_data)
+				
+				entity$data$source <- list(file_csv_view, file_sql_view, file_sql_data)
 			}else{
 				writeLines(sql_data, file.path("data", file_sql_data))
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
-				entity$data$source <- list(path_to_dataset_new, file_sql_data)
+				entity$data$source <- list(file_sql_data)
 			}
 			
-		}else{
-			entity$data$source <- list(path_to_dataset_new)
 		}
 	}
   }
