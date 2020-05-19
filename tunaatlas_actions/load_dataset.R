@@ -535,13 +535,15 @@ load_dataset <- function(entity, config, options){
 				writeLines(sql_data, file.path("data", file_sql_data))
 				drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
-				entity$data$source <- list(file_sql_view, file_sql_data)
+				entity$data$source <- list(path_to_dataset_new, file_sql_view, file_sql_data)
 			}else{
 				writeLines(sql_data, file.path("data", file_sql_data))
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
-				entity$data$source <- list(file_sql_data)
+				entity$data$source <- list(path_to_dataset_new, file_sql_data)
 			}
 			
+		}else{
+			entity$data$source <- list(path_to_dataset_new)
 		}
 	}
   }
