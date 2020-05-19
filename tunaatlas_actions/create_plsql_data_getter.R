@@ -40,6 +40,7 @@ create_plsql_data_getter <- function(entity, config, options){
 			count_quarter integer := 4;
 			count_year integer := 1;
 			count_yeartime integer := 0;
+			query varchar := '';
 		")
 	#begin block
 	
@@ -84,7 +85,9 @@ create_plsql_data_getter <- function(entity, config, options){
 
 			IF input_aggregation_method = 'none' THEN
 				RAISE notice 'Running query without aggregation';
-				RETURN QUERY EXECUTE '",sql_query_raw,"'; 
+				query = '",sql_query_raw,"';
+				RAISE notice 'SQL: %', query;
+				RETURN QUERY EXECUTE query; 
 			ELSE
 				RAISE notice 'Running query with aggregation method: %', input_aggregation_method;
 				SELECT INTO count_year COUNT(*) FROM regexp_split_to_table(regexp_replace(input_year,' ', '+', 'g'),E'\\\\+');
@@ -101,8 +104,9 @@ create_plsql_data_getter <- function(entity, config, options){
 				ELSIF input_aggregation_method = 'avg_by_year' THEN
 					RAISE notice 'Average on % years', count_year;
 				END IF;
-			
-				RETURN QUERY EXECUTE '",sql_query_agg,"';
+				query = '",sql_query_agg,"';
+				RAISE notice 'SQL: %', query;
+				RETURN QUERY EXECUTE query;
 			END IF;
 		END; $$ 
 	LANGUAGE plpgsql;")
