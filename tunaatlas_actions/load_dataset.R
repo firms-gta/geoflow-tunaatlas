@@ -429,7 +429,8 @@ load_dataset <- function(entity, config, options){
 			config$logger.info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
 			this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
 			column_names <- colnames(this_view)
-			columns_to_index <- column_names[column_names %in% dimensions]
+			time_dimensions <- c("time_start", "time_end", "year", "quarter", "month")
+			columns_to_index <- c(column_names[column_names %in% dimensions], time_dimensions)
 			for(column_name in columns_to_index){
 				create_index_sql <- sprintf("CREATE INDEX %s_%s_idx  ON %s.%s (%s);", database_view_name, column_name, schema_name_for_view, database_view_name, column_name)
 				config$logger.info(sprintf("SQL: %s", create_index_sql))
