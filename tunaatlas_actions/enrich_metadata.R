@@ -59,11 +59,11 @@ enrich_metadata <- function(entity, config, options){
 	
 	#relations
 	#add sql view materialized view
-	sql_rel <- geoflow_relation$new()
-	sql_rel$setKey("http")
-	sql_rel$setLink(attr(entity$data$source[[2]], "uri"))
-	sql_rel$setName(paste0(entity$identifiers[["id"]], "_view.sql"))
-	sql_rel$setDescription("SQL dataset query")
-	entity$addRelation(sql_rel)
+	#sql_rel <- geoflow_relation$new()
+	#sql_rel$setKey("http")
+	#sql_rel$setLink(attr(entity$data$source[[2]], "uri"))
+	#sql_rel$setName(paste0(entity$identifiers[["id"]], "_view.sql"))
+	#sql_rel$setDescription("SQL dataset query")
+	#entity$addRelation(sql_rel)
 	
 }

@@ -16,7 +16,7 @@ enrich_db_for_services <- function(entity, config, options){
 	pid <- entity$identifiers[["id"]]
 	fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
 	entity$data$run <- FALSE #deactivate local action (harmonization/generation)
-	entity$data$sourceType <- "dbquery" #set dbquery as source 
+	entity$data$sourceType <- "csv"
 	entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling geoserver sql view data services
 	#for feature catalogue / dictionnary
 	entity$data$featureType <- fact
