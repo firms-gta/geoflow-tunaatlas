@@ -57,6 +57,6 @@ enrich_db_for_services <- function(entity, config, options){
 	mainSource <- sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'", default_values,"'", collapse=","))
 	file_sql_query <- paste0(entity$identifiers[["id"]], "_query.sql")
 	writeLines(mainSource, file.path("data", file_sql_query))
-	entity$data$source <- c(file_sql_query, entity$data$source)
+	#entity$data$source <- c(file_sql_query, entity$data$source)
 	drive_upload(file.path("data", file_sql_query), as_id(folder_views_id), overwrite = TRUE)
 }
