@@ -1,7 +1,7 @@
 #deploy_database_model
 deploy_database_model <- function(config, software, software_config){
 
-	db_read <- software_config$parameters$user #TO BE REPLACE BY ACTUAL READ-ONLY USER
+	db_read <- software_config$properties$user_readonly
 	repository_sql_scripts_database_deployement <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql"
 	db_dimensions <- "area,catchtype,unit,flag,gear,schooltype,sex,sizeclass,species,time,source"
 	db_variables_and_associated_dimensions <- "catch=schooltype,species,time,area,gear,flag,catchtype,unit,source@effort=schooltype,time,area,gear,flag,unit,source@catch_at_size=schooltype,species,time,area,gear,flag,catchtype,sex,unit,sizeclass,source"
