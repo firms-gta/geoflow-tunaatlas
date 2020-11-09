@@ -30,6 +30,7 @@ options(encoding = "UTF-8")
 
 if(!require(dplyr)){
   install.packages("dplyr")
+  require(dplyr)
 }
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -37,10 +38,9 @@ if(!require(rtunaatlas)){
   }
   require(devtools)
   install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
 }
 
-require(dplyr)
-require(rtunaatlas)
 
   
   # Input data sample:
@@ -70,8 +70,7 @@ require(rtunaatlas)
 
   #require(readxl) # devtools::install_github("hadley/readxl") 
 # NC<-read_excel(path_to_raw_dataset, sheet = "Catches_Captures", col_names = TRUE, col_types = NULL,na = "")  
-
- NC <- read.csv(path_to_raw_dataset , header=TRUE, stringsAsFactors=FALSE, strip.white=TRUE)
+NC <- read.csv(path_to_raw_dataset , header=TRUE, stringsAsFactors=FALSE, strip.white=TRUE)
 
 colToKeep_NC<-c("FlCde","ArCde","Year.An","GrCde","SpCde","Catch.Capture.t.")
 NC_harm_IOTC<-NC[,colToKeep_NC]
