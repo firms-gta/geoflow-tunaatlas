@@ -33,14 +33,12 @@ if(!require(rtunaatlas)){
   }
   require(devtools)
   install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
 }
 if(!require(reshape)){
   install.packages("reshape")
+  require(reshape)
 }
-
-require(rtunaatlas)
-require(reshape)
-
 
 ##Catches
   
@@ -64,19 +62,13 @@ require(reshape)
   #  ALL Gill Net 1987-01-01 1988-01-01    CCSBT    ALL     SBF       ALL         MT    87
   #  ALL Gill Net 1988-01-01 1989-01-01    CCSBT    ALL     SBF       ALL         MT   234
   
-  require(reshape)
+require(readxl)
+CCSBT_NC<-read_excel(path_to_raw_dataset, sheet = "Catch by Gear", col_names = TRUE, col_types = NULL,na = "",skip=7)
+colnames(CCSBT_NC)<-gsub("\r\n", "_", colnames(CCSBT_NC))
+colnames(CCSBT_NC)<-gsub(" ", "_", colnames(CCSBT_NC)) 
 
-  
-#library(readxl) # devtools::install_github("hadley/readxl") 
-  #CCSBT_NC<-read_excel(path_to_raw_dataset, sheet = "Catch by Gear", col_names = TRUE, col_types = NULL,na = "",skip=7)
-  
-  CCSBT_NC<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
-  #colnames(CCSBT_NC)<-gsub("\r\n", " ", colnames(CCSBT_NC))
-  #colnames(CCSBT_NC)<-gsub(" ", "_", colnames(CCSBT_NC))
-
-  #CCSBT_NC<-as.data.frame(CCSBT_NC)
-
-CCSBT_NC<-melt(CCSBT_NC, id.vars="Calendar_Year") 
+CCSBT_NC<-as.data.frame(CCSBT_NC)
+CCSBT_NC<-reshape::melt(CCSBT_NC, id.vars="Calendar_Year") 
 CCSBT_NC$variable<-as.character(CCSBT_NC$variable)
 
 CCSBT_NC$variable<-gsub("_", " ", CCSBT_NC$variable)

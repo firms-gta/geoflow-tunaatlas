@@ -35,8 +35,13 @@ if(!require(rtunaatlas)){
   }
   require(devtools)
   install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
 }
-require(rtunaatlas)
+
+if(!require(readxl)){
+	install.packages("readxl")
+	require(readxl)
+}
 
   # Input data sample (after importing as data.frame in R):
   # YEAR MONTH COUNTRY_CODE GEAR_CODE CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOURS_SEARCHED WEIGHT_(Kg)_OF_SBT_RETAINED
@@ -57,24 +62,17 @@ require(rtunaatlas)
   #   AU   BB 1976-12-01 1977-01-01  6334134    ALL     SBT       ALL         MT  56.5
   #   AU   BB 1976-12-01 1977-01-01  6334135    ALL     SBT       ALL         MT  37.0
   
+RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
+colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
+colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
+colnames(RFMO_CE)<-gsub("\\(", "", colnames(RFMO_CE))
+colnames(RFMO_CE)<-gsub("\\)", "", colnames(RFMO_CE))
+RFMO_CE<-as.data.frame(RFMO_CE)
 
-  #library(readxl) # devtools::install_github("hadley/readxl") 
-#RFMO_CE<-read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
-
-##Catches
-
-### Reach the catches pivot DSD using a function stored in ICCAT_functions.R
-
-  RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
-  #colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
-  #colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
-
-  #RFMO_CE<-as.data.frame(RFMO_CE)
 #Remove lines that are read in the Excel but that are not real
 RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
 RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
 RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
-
 
 #Flag
 RFMO_CE$Flag<-RFMO_CE$COUNTRY_CODE
