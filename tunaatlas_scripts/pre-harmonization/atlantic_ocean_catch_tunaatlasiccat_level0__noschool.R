@@ -45,14 +45,7 @@ if(!require(dplyr)){
   require(dplyr)
 }
 
-#----------------------------------------------------------------------------------------------------------------------------
-
-if(!require(DBI)){
-  install.packages("DBI")
-  require(DBI)
-}
-#----------------------------------------------------------------------------------------------------------------------------
-
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------
   # Input data sample: No sample. Miscrosoft Acces DB. However after the commands that read the input DB the sample is the following:
   # StrataID DSetID FleetID GearGrpCode GearCode FileTypeCode YearC TimePeriodID SquareTypeCode QuadID Lat Lon Eff1 Eff1Type Eff2 Eff2Type DSetTypeID CatchUnit ALB BET     BFT BUM
   #         1      1 021ES00          TP     TRAP       OF-REP  1950           17            1x1      4  36   5    4 NO.TRAPS   NA                  nw        kg   0   0 6725000   0
@@ -78,66 +71,21 @@ if(!require(DBI)){
   
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
-  #  ARG   LL 1960-01-01 1960-02-01  6320020    ALL     ALB         C       MTNO 107.1
-  #  ARG   LL 1960-01-01 1960-02-01  6320020    ALL     SWO         C       MTNO  46.6
-  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     ALB         C       MTNO   7.1
-  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     BET         C       MTNO  27.6
-  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     SWO         C       MTNO   1.4
-  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     YFT         C       MTNO   0.4
+  # flag gear time_start   time_end geographic_identifier schooltype species catchtype catchunits value source_authority
+  #  ARG   LL 1960-01-01 1960-02-01  6320020    ALL     ALB         C       MTNO 107.1	ICCAT
+  #  ARG   LL 1960-01-01 1960-02-01  6320020    ALL     SWO         C       MTNO  46.6	ICCAT
+  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     ALB         C       MTNO   7.1	ICCAT
+  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     BET         C       MTNO  27.6	ICCAT
+  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     SWO         C       MTNO   1.4	ICCAT
+  #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     YFT         C       MTNO   0.4	ICCAT
 
 ##Catches
 
-## download database
-#working_directory_init=getwd()
-#setwd(working_directory_init)
-#cat("Downloading database...\n")
-#cat("The harmonization of this dataset might take a long time\n")
-#download.file(path_to_raw_dataset, paste0(working_directory_init,"/db.mdb"))
+t2ce <- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
 
+ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 
-# Requires library(Hmisc)
-# Open the tables directly from the access database  
-#t2ce<-mdb.get(paste0(working_directory_init,"/db.mdb"),tables='t2ce',stringsAsFactors=FALSE,strip.white=TRUE)
-#Flags<-mdb.get(paste0(working_directory_init,"/db.mdb"),tables='Flags',stringsAsFactors=FALSE,strip.white=TRUE)
-
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@geoflow make the R code less plateform dependent
-#rely on standard DBI / ODBC on Windows, and keep Hmisc for Linux OS
-t2ce <- NULL
-Flags <- NULL
-OS <- Sys.info()[1]
-if(OS == "Windows"){
-	CON <- DBI::dbConnect(odbc::odbc(),
-		Driver = "Microsoft Access Driver (*.mdb, *.accdb)",
-		DBQ = path_to_raw_dataset
-	)
-	opts <- options()
-	options(stringsAsFactors = FALSE)
-	t2ce <- DBI::dbReadTable(CON, 't2ce')
-	Flags <- DBI::dbReadTable(CON, 'Flags')
-	options(opts)
-	DBI::dbDisconnect(CON)
-}else if(OS == "Linux"){
-  #@geoflow - add DBI/odbx for Windows OS , keep using Hmisc for Linux OS
-  if(!require(Hmisc)){
-    install.packages("Hmisc")
-    require(Hmisc) # install mdb tools (http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/mdb.get.html)
-  }
-	t2ce <- mdb.get(path_to_raw_dataset,tables='t2ce',stringsAsFactors=FALSE,strip.white=TRUE)
-	Flags <- mdb.get(path_to_raw_dataset,tables='Flags',stringsAsFactors=FALSE,strip.white=TRUE)	
-}
-#----------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
-
-ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit"))
-
-catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(data_pivot_ICCAT,ICCAT_CE_species_colnames)
+catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(t2ce,ICCAT_CE_species_colnames)
 
 #School
 catches_pivot_ICCAT$School<-"ALL"
@@ -160,6 +108,8 @@ catches_pivot_ICCAT[index.kgnr,"CatchUnits"]<- "MTNO"
 index.nrkg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_ICCAT[,"DSetTypeID"] == "nw" )
 catches_pivot_ICCAT[index.nrkg,"CatchUnits"]<- "NOMT"            
 
+if(any(catches_pivot_ICCAT$value == "NULL")) catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$value <- 0
+class(catches_pivot_ICCAT$value) = "numeric"
 
 ### Reach the catches harmonized DSD using a function in ICCAT_functions.R
   
@@ -173,11 +123,6 @@ colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School
 catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT,colToKeep_captures)
 colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"ICCAT"
-
-#dataset<-catches
-# remove incoherent cwp grid codes TO REMOVE AFTER!!!!
-#dataset<-dataset %>% filter (!(geographic_identifier %in% c("1410045","6425013","6428016","6454045","7405050","7410045")))
-catches <- catches[!catches$geographic_identifier %in% c("1410045","6425013","6428016","6454045","7405050","7410045"),]
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
