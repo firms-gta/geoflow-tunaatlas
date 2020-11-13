@@ -67,6 +67,29 @@ colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
 catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
+#202-11-13 @eblondel changes for Tuna atlas updates
+#Changes
+#	- change from dbf to csv
+#	- switch to upper colnames
+#	- toupper applied to Species/CatchUnits
+#--------------------------------------------------
+DF <- read.csv(path_to_raw_dataset)
+colnames(DF) <- toupper(colnames(DF))
+DF <- melt(DF, id = c(colnames(DF[1:5])))
+DF <- DF %>% filter(!value %in% 0) %>% filter(!is.na(value))
+DF$variable <- as.character(DF$variable)
+colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+DF$Species <- toupper(DF$Species) #@eblondel added
+DF$Species <- sub("_C", "", DF$Species)
+DF$Species <- sub("_N", "", DF$Species)
+DF$School <- "OTH"
+DF$EffortUnits <- colnames(DF[5])
+colnames(DF)[5] <- "Effort"
+#--------------------------------------------------
+catches_pivot_WCPFC <- DF; rm(DF)
+
+#Gear
 catches_pivot_WCPFC$Gear<-"D"
 
 # Catchunits
