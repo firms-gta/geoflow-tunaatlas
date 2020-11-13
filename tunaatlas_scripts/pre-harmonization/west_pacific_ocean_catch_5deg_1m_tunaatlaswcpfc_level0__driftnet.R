@@ -66,7 +66,7 @@ if(!require(foreign)){
 colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
+#catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
 #202-11-13 @eblondel changes for Tuna atlas updates
 #Changes
 #	- change from dbf to csv
