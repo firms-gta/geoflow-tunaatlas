@@ -58,50 +58,34 @@ if(!require(reshape)){
 
 
 ### Nominal catches
-
-#NC<-read_excel(path_to_raw_dataset,col_names = TRUE)
-NC<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
-
-# normalize 
-NC<-melt(NC, id=c("yy","gear","flag","fleet"))
+NC<-readxl::read_excel(path_to_raw_dataset,col_names = TRUE)
 NC <- as.data.frame(NC)
 
-NC$value<-as.numeric(NC$value)
+colnames(NC)[colnames(NC) == "YY"] <- "Year"
+colnames(NC)[colnames(NC) == "FLAG_CODE"] <- "Flag"
+colnames(NC)[colnames(NC) == "GEAR_CODE"] <- "Gear"
+colnames(NC)[colnames(NC) == "SP_CODE"] <- "Species"
+colnames(NC)[colnames(NC) == "SP_MT"] <- "Catch"
+NC$Catch<-as.numeric(NC$Catch)
+NC <- NC[!is.na(NC$Catch),]
+NC <- NC[NC$Catch != 0,]
+NC$CatchUnits <- "MT"
+NC$SP_NAME <- NULL
+NC$FLEET_CODE <- NULL
 
-#NC <- NC  %>% 
-#  filter( ! value %in% 0 ) %>%
-#  filter( ! is.na(value)) 
-# remove 0 and NA values 
-NC <- NC[!is.na(NC$value),]
-NC <- NC[NC$value != 0,]
+NC$AreaName<-"WCPFC"
+NCAreaCWPgrid<-NA
+NC$School<-"ALL"
+NC$CatchType<-"ALL"
+NC$CatchUnits<-"MT"
+NC$RFMO<-"WCPFC"
+NC$Ocean<-"PAC_W"
 
-
-NC$variable<-as.character(NC$variable)
-NC$variable <- gsub("_mt", "", NC$variable)
-NC$variable <- toupper(NC$variable)
-
-
-
-colToKeep_NC<-c("yy","flag","gear","variable","value")
-NC_harm_WCPFC<-NC[,colToKeep_NC]
-colnames(NC_harm_WCPFC)<-c("Year", "Flag","Gear","Species","Catch")
-
-NC_harm_WCPFC$AreaName<-"WCPFC"
-NC_harm_WCPFC$AreaCWPgrid<-NA
-NC_harm_WCPFC$School<-"ALL"
-NC_harm_WCPFC$CatchType<-"ALL"
-NC_harm_WCPFC$CatchUnits<-"MT"
-NC_harm_WCPFC$RFMO<-"WCPFC"
-NC_harm_WCPFC$Ocean<-"PAC_W"
-
-NC_harm_WCPFC$MonthStart<-1
-NC_harm_WCPFC$Period<-12
+NC$MonthStart<-1
+NC$Period<-12
 #Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
-NC_harm_WCPFC<-format_time_db_format(NC_harm_WCPFC)
-
-NC <- NC_harm_WCPFC[NC_harm_WCPFC$Catch !=0 ,]
-
-rm(NC_harm_WCPFC)
+NC<-format_time_db_format(NC)
+NC <- NC[NC$Catch !=0 ,] #not sure if needed
 
 NC <-NC[c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")]
 
