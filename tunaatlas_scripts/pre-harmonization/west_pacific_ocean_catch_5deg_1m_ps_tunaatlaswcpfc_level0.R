@@ -78,7 +78,33 @@ if(!require(foreign)){
 ##Catches
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_Purse_Seine_2016 (path_to_raw_dataset)
+#catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_Purse_Seine_2016 (path_to_raw_dataset)
+#2020-11-13 @eblondel for Tuna atlas update
+#Changes
+#	- change from dbf to csv
+#	- remove cwp_grid code
+#	- to upper colnames
+#-----------------------------------------------------------
+DF <- read.csv(path_to_raw_dataset)
+colnames(DF) <- toupper(colnames(DF))
+DF$CWP_GRID <- NULL
+DF <- melt(DF, id = c(colnames(DF[1:10])))
+DF <- DF %>% filter(!value %in% 0) %>% filter(!is.na(value))
+DF$variable <- as.character(DF$variable)
+colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+DF$School <- substr(DF$Species, 7, nchar(DF$Species))
+DF$Species <- sub("_C_UNA", "", DF$Species)
+DF$Species <- sub("_C_LOG", "", DF$Species)
+DF$Species <- sub("_C_DFAD", "", DF$Species)
+DF$Species <- sub("_C_AFAD", "", DF$Species)
+DF$Species <- sub("_C_OTH", "", DF$Species)
+DF$CatchUnits <- "MT"
+DF$EffortUnits <- colnames(DF[5])
+colnames(DF)[5] <- "Effort"
+catches_pivot_WCPFC <- DF; rm(DF)
+
+#-----------------------------------------------------------
+#Gear
 catches_pivot_WCPFC$Gear<-"S"
 
 # Catchunits
