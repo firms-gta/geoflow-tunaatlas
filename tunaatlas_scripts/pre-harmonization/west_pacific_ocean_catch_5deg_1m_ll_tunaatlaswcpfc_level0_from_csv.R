@@ -148,6 +148,8 @@ catches <- catches %>% group_by(Flag, Gear, time_start, time_end,
 	summarise(Catch = sum(Catch))
 catches <- as.data.frame(catches)
 
+print("debugging")
+print(head(catches))
 
 colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"WCPFC"
