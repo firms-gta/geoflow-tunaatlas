@@ -41,7 +41,6 @@ if(!require(data.table)){
   require(data.table)
 }
 
-
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
@@ -69,11 +68,19 @@ if(!require(dplyr)){
 
 
 ##Catches
-
 DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
+#2020-11-13 @eblondel
+#Changes
+#	- Flag column added add UNK where missing
+#	- Change id upper index for melting
+#---------------------------------------
+if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+
+#---------------------------------------
+
 DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)<-toupper(colnames(DF))
-DF<-melt(DF, id=c(colnames(DF[1:5]))) 
+DF<-melt(DF, id=c(colnames(DF[1:6]))) 
 
 DF<- DF %>% 
   filter( ! value %in% 0 ) %>%
@@ -88,8 +95,8 @@ DF$Species<-sub('_N', '', DF$Species)
 
 DF$School<-"OTH"
 
-DF$EffortUnits<-colnames(DF[5])    
-colnames(DF)[5]<-"Effort"
+DF$EffortUnits<-colnames(DF[6])    
+colnames(DF)[6]<-"Effort"
 
 
 catches_pivot_WCPFC=DF
@@ -121,7 +128,29 @@ catches_pivot_WCPFC$School<-"ALL"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
+#catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
+#2020-11-13 @eblondel
+catches_pivot_WCPFC$RFMO <- "WCPFC"
+catches_pivot_WCPFC$Ocean <- "PAC_W"
+catches_pivot_WCPFC$Flag <- catches_pivot_WCPFC$FLAG_ID #@eblondel added
+catches_pivot_WCPFC <- rtunaatlas::harmo_time_2(catches_pivot_WCPFC, 
+	"YY", "MM")
+catches_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(catches_pivot_WCPFC, 
+	"LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+catches_pivot_WCPFC$CatchType <- "ALL"
+catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
+catches <- catches_pivot_WCPFC[colToKeep_captures]
+rm(catches_pivot_WCPFC)
+catches[, c("AreaName", "Flag")] <- as.data.frame(apply(catches[, 
+	c("AreaName", "Flag")], 2, function(x) {
+	gsub(" *$", "", x)
+}), stringsAsFactors = FALSE)
+catches <- catches %>% filter(!Catch %in% 0) %>% filter(!is.na(Catch))
+catches <- catches %>% group_by(Flag, Gear, time_start, time_end, 
+	AreaName, School, Species, CatchType, CatchUnits) %>% 
+	summarise(Catch = sum(Catch))
+catches <- as.data.frame(catches)
+
 
 colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"WCPFC"
