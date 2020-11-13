@@ -35,13 +35,15 @@ if(!require(rtunaatlas)){
   }
   require(devtools)
   install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
 }
 if(!require(foreign)){
   install.packages("foreign")
+  require(foreign)
 }
 
-require(rtunaatlas)
-require(foreign)
+
+
 
 #wd<-getwd()
 #download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
@@ -80,7 +82,33 @@ require(foreign)
 ##Catches
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
+#catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
+#-------------
+#2020-22-13 @eblondel - pickup code from rtunaatlas::FUN_catches_WCPFC_CE_allButPurseSeine
+#Changes:
+#	- switch to csv
+#	- switch to upper colnames
+#	- CWP grid (removed for the timebeing to apply rtunaatlas codes)
+#	- toupper applied to Species/CatchUnits
+DF <- read.csv(path_to_raw_dataset)
+colnames(DF) <- toupper(colnames(DF))
+DF$CWP_GRID <- NULL #@eblondel CWP grid (removed for the timebeing to apply rtunaatlas codes)
+DF <- melt(DF, id = c(colnames(DF[1:5])))
+DF <- DF %>% filter(!value %in% 0) %>% filter(!is.na(value))
+DF$variable <- as.character(DF$variable)
+colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+DF$CatchUnits <- toupper(DF$CatchUnits) #@eblondel to upper
+DF$Species <- toupper(DF$Species) #@eblondel to upper
+DF$Species <- sub("_C", "", DF$Species)
+DF$Species <- sub("_N", "", DF$Species)
+DF$School <- "OTH"
+DF$EffortUnits <- colnames(DF[5])
+colnames(DF)[5] <- "Effort"
+catches_pivot_WCPFC <- DF; rm(DF)
+#-------------
+
+#Gear
 catches_pivot_WCPFC$Gear<-"P"
 
 # Catchunits
@@ -92,6 +120,7 @@ catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "NO"
 
 # School
 catches_pivot_WCPFC$School<-"ALL"
+
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
