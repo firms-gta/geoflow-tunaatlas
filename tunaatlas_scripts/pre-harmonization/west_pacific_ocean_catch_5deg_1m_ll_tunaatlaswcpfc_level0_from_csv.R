@@ -143,13 +143,21 @@ catches[, c("AreaName", "Flag")] <- as.data.frame(apply(catches[,
 	gsub(" *$", "", x)
 }), stringsAsFactors = FALSE)
 catches <- catches %>% filter(!Catch %in% 0) %>% filter(!is.na(Catch))
-catches <- catches %>% group_by(Flag, Gear, time_start, time_end, 
-	AreaName, School, Species, CatchType, CatchUnits) %>% 
-	summarise(Catch = sum(Catch))
 catches <- as.data.frame(catches)
-
-print("debugging")
-print(head(catches))
+catches <- aggregate(catches$Catch,
+	by = list(
+		Flag = catches$Flag,
+		Gear = catches$Gear,
+		time_start = catches$time_start,
+		time_end = catches$time_end,
+		AreaName = catches$AreaName,
+		School = catches$School,
+		Species = catches$Species,
+		CatchType = catches$CatchType,
+		CatchUnits = catches$CatchUnits
+	),
+	FUN = sum)
+colnames(catches)[colnames(catches)=="x"] <- "Catch"
 
 colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"WCPFC"
