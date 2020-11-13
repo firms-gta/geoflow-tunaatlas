@@ -74,12 +74,9 @@ DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FAL
 #	- Flag column added add UNK where missing
 #	- Change id upper index for melting
 #---------------------------------------
-if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
-
-#---------------------------------------
-
 DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)<-toupper(colnames(DF))
+if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
 DF<-melt(DF, id=c(colnames(DF[1:6]))) 
 
 DF<- DF %>% 
