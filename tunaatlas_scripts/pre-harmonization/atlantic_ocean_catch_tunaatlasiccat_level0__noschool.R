@@ -87,6 +87,8 @@ ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID
 
 catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(t2ce,ICCAT_CE_species_colnames)
 
+
+
 #School
 catches_pivot_ICCAT$School<-"ALL"
 
@@ -96,10 +98,10 @@ catches_pivot_ICCAT$Flag<-catches_pivot_ICCAT$FlagCode
 #CatchUnits
 catches_pivot_ICCAT$CatchUnits<-catches_pivot_ICCAT$CatchUnit
 
-index.kg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == "-w" )
+index.kg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == ".w" )
 catches_pivot_ICCAT[index.kg,"CatchUnits"]<- "MT"
 
-index.nr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_ICCAT[,"DSetTypeID"] == "n-" )
+index.nr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_ICCAT[,"DSetTypeID"] == "n." )
 catches_pivot_ICCAT[index.nr,"CatchUnits"]<- "NO"               
 
 index.kgnr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == "nw" )
@@ -108,7 +110,10 @@ catches_pivot_ICCAT[index.kgnr,"CatchUnits"]<- "MTNO"
 index.nrkg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_ICCAT[,"DSetTypeID"] == "nw" )
 catches_pivot_ICCAT[index.nrkg,"CatchUnits"]<- "NOMT"            
 
-if(any(catches_pivot_ICCAT$value == "NULL")) catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$value <- 0
+if(any(catches_pivot_ICCAT$value == "NULL")) {
+	catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$CatchUnits <- "MT"
+	catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$value <- 0
+}
 class(catches_pivot_ICCAT$value) = "numeric"
 
 ### Reach the catches harmonized DSD using a function in ICCAT_functions.R
