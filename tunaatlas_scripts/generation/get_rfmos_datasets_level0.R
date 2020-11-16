@@ -22,7 +22,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 			if(options$include_IOTC){
 				config$logger.info(sprintf("Get %s data", rfmo))
 				dataset_files_iotc <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-													startsWith(names(dataset_files), "indian")]
+													regexpr("iotc", names(dataset_files)) > 0]
 				iotc_data <- do.call("rbind", lapply(dataset_files_iotc, readr::read_csv, guess_max = 0))
 				iotc_data <- as.data.frame(iotc_data)
 				class(iotc_data$value) <- "numeric"
@@ -39,7 +39,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 			if(options$include_WCPFC){
 				config$logger.info(sprintf("Get %s data", rfmo))
 				dataset_files_wcpfc <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-													 startsWith(names(dataset_files), "west_pacific")]
+													 regexpr("wcpfc", names(dataset_files)) > 0]
 				wcpfc_data <- do.call("rbind", lapply(dataset_files_wcpfc, readr::read_csv, guess_max = 0))
 				wcpfc_data <- as.data.frame(wcpfc_data)
 				class(wcpfc_data$value) <- "numeric"
@@ -56,7 +56,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 			if(options$include_CCSBT){
 				config$logger.info(sprintf("Get %s data", rfmo))
 				dataset_files_ccsbt <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-													 startsWith(names(dataset_files), "southern_hemisphere")]
+													 regexpr("ccsbt", names(dataset_files)) > 0]
 				ccsbt_data <- do.call("rbind", lapply(dataset_files_ccsbt, readr::read_csv, guess_max = 0))
 				ccsbt_data <- as.data.frame(ccsbt_data)
 				class(ccsbt_data$value) <- "numeric"
@@ -74,7 +74,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 				config$logger.info(sprintf("Get %s data", rfmo))
 				dataset_files_iccat <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
 													 regexpr("byschool", names(dataset_files)) < 0 &
-													 startsWith(names(dataset_files), "atlantic")]
+													 regexpr("iccat", names(dataset_files)) > 0]
 				iccat_data <- do.call("rbind", lapply(dataset_files_iccat, readr::read_csv, guess_max = 0))
 				iccat_data <- as.data.frame(iccat_data)
 				class(iccat_data$value) <- "numeric"
@@ -84,7 +84,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 					config$logger.info("Option 'iccat_ps_include_type_of_school' is TRUE. Include Type of school...")
 					dataset_iccat_byschool_file <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
 																 regexpr("byschool", names(dataset_files)) > 0 &
-																 startsWith(names(dataset_files), "atlantic")]
+																 regexpr("iccat", names(dataset_files)) > 0]
 					iccat_ce_WithSchooltypeInfo <- readr::read_csv(dataset_iccat_byschool_file, guess_max = 0)
 					iccat_ce_WithSchooltypeInfo <- as.data.frame(iccat_ce_WithSchooltypeInfo)
 					iccat_ce_WithSchooltypeInfo <- iccat_ce_WithSchooltypeInfo[, columns_to_keep]
@@ -118,7 +118,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 				dataset_files_iattc <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
 													 regexpr("ps", names(dataset_files)) < 0 & 
 													 regexpr("effort", names(dataset_files)) < 0 &
-													 startsWith(names(dataset_files), "east_pacific")]
+													 regexpr("iattc", names(dataset_files)) > 0]
 				iattc_data <- do.call("rbind", lapply(dataset_files_iattc, readr::read_csv, guess_max = 0))
 				iattc_data <- as.data.frame(iattc_data)
 				
@@ -139,20 +139,20 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 				columns_to_keep_effort=c("source_authority","gear","flag","schooltype","time_start","time_end","geographic_identifier","unit","value")
 
 				# Get metadata of Catch datasets (for tuna, billfish and shark, and stratified by flag and then by type of school)
-				dataset_file_PSSetType_tuna_catch <- "east_pacific_catch_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
-				dataset_file_PSSetType_billfish_catch<- "east_pacific_catch_1deg_1m_ps_iattc_level0__billfish_byschool.csv"
-				dataset_file_PSSetType_shark_catch <- "east_pacific_catch_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-				dataset_file_PSFlag_tuna_catch <- "east_pacific_catch_1deg_1m_ps_iattc_level0__tuna_byflag.csv"
-				dataset_file_PSFlag_billfish_catch <- "east_pacific_catch_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
-				dataset_file_PSFlag_shark_catch <- "east_pacific_catch_1deg_1m_ps_iattc_level0__shark_byflag.csv"
+				dataset_file_PSSetType_tuna_catch <- "catch_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
+				dataset_file_PSSetType_billfish_catch<- "catch_1deg_1m_ps_iattc_level0__billfish_byschool.csv"
+				dataset_file_PSSetType_shark_catch <- "catch_1deg_1m_ps_iattc_level0__shark_byschool.csv"
+				dataset_file_PSFlag_tuna_catch <- "catch_1deg_1m_ps_iattc_level0__tuna_byflag.csv"
+				dataset_file_PSFlag_billfish_catch <- "catch_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
+				dataset_file_PSFlag_shark_catch <- "catch_1deg_1m_ps_iattc_level0__shark_byflag.csv"
 				
 				# Get metadata of Effort datasets (for tuna, billfish and shark, and stratified by flag and then by type of school)
-				dataset_file_PSSetType_tuna_effort <- "east_pacific_effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
-				dataset_file_PSSetType_billfish_effort <- "east_pacific_effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv"
-				dataset_file_PSSetType_shark_effort <- "east_pacific_effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-				dataset_file_PSFlag_tuna_effort <- "east_pacific_effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv"
-				dataset_file_PSFlag_billfish_effort <- "east_pacific_effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
-				dataset_file_PSFlag_shark_effort <- "east_pacific_effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
+				dataset_file_PSSetType_tuna_effort <- "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
+				dataset_file_PSSetType_billfish_effort <- "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv"
+				dataset_file_PSSetType_shark_effort <- "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
+				dataset_file_PSFlag_tuna_effort <- "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv"
+				dataset_file_PSFlag_billfish_effort <- "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
+				dataset_file_PSFlag_shark_effort <- "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
 					
 				#for catch fact
 				if(variable == "catch") {
@@ -268,14 +268,14 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 				}else if (variable=="effort"){
 				
 					dataset_file_effort_flag <- switch(options$iattc_ps_effort_to_extract,
-						"tuna" = "east_pacific_effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
-						"billfish" = "east_pacific_effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
-						"shark" = "east_pacific_effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
+						"tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
+						"billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
+						"shark" = "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
 					)
 					dataset_file_effort_settype <- switch(options$iattc_ps_effort_to_extract,
-						"tuna" = "east_pacific_effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
-						"billfish" = "metadata_dataset_PSSetType_billfish_effort.csv",
-						"shark" = "east_pacific_effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
+						"tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
+						"billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv",
+						"shark" = "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
 					)
 				
 					# For the effort data, we keep only effort from one of the files (tuna or billfishes or shark). This is driven by the parameter "iattc_ps_effort_to_extract"
