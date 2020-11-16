@@ -171,7 +171,7 @@ switch(DATA_LEVEL,
 		 
 			overlapping_zone_iattc_wcpfc_data_to_keep <- options$overlapping_zone_iattc_wcpfc_data_to_keep
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
-			# query Sardara to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
+			# query the database to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
 			query_areas_overlapping_zone_iattc_wcpfc <- "SELECT codesource_area from
 			(WITH iattc_area_of_competence AS (
 					 SELECT rfmos_convention_areas_fao.geom
@@ -214,7 +214,12 @@ switch(DATA_LEVEL,
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
 		  
 		}
-
+		
+		
+		### Units harmonization
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if(any(georef_dataset$unit == "MTNO")) georef_dataset[georef_dataset$unit == "MTNO", ]$unit <- "MT"
+		if(any(georef_dataset$unit == "NOMT")) georef_dataset[georef_dataset$unit == "NOMT", ]$unit <- "NO"
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
