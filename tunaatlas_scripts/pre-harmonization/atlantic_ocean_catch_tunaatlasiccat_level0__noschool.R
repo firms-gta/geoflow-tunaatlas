@@ -81,7 +81,7 @@ if(!require(dplyr)){
 
 ##Catches
 
-t2ce <- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
+t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 
 ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 
