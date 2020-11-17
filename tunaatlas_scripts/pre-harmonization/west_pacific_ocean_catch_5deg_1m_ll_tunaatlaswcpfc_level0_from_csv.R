@@ -46,6 +46,10 @@ if(!require(dplyr)){
   require(dplyr)
 }
 
+if(!require(reshape)){
+  install.packages("reshape")
+  require(reshape)
+}
 
 
 # Input data sample:

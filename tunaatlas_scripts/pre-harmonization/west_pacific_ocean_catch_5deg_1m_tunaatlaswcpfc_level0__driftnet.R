@@ -36,7 +36,10 @@ if(!require(foreign)){
   require(foreign)
 }
 
-
+if(!require(reshape)){
+  install.packages("reshape")
+  require(reshape)
+}
 
 #wd<-getwd()
 #download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))

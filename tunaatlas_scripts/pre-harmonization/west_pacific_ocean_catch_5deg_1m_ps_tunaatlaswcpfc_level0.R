@@ -40,7 +40,10 @@ if(!require(foreign)){
   require(foreign)
 }
 
-
+if(!require(reshape)){
+  install.packages("reshape")
+  require(reshape)
+}
 
 
 #wd<-getwd()
