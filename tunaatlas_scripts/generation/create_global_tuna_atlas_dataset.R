@@ -142,6 +142,11 @@ switch(DATA_LEVEL,
 			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
 		}
 		
+		#### 3.3 Grid spatial resolution filter
+		if (!is.null(options$resolution_filter)){
+			georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, options$resolution_filter),]
+		}
+		
 		#### 4) Aggregates
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
