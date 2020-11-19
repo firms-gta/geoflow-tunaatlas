@@ -52,7 +52,7 @@ COMMENT ON COLUMN "area"."area_labels"."geom" IS '"geom" is the geometry stored 
 
 
 CREATE MATERIALIZED VIEW area.grid_area_labels AS
-SELECT * FROM area.area_labels WHERE tablesource_area = 'cwp_grid';
+SELECT * FROM area.area_labels WHERE tablesource_area = 'areas_tuna_rfmos_task2';
 
 CREATE INDEX grid_area_labels_id_area_idx  ON area.grid_area_labels  (id_area);
-CREATE INDEX grid_area_labels_codesource_area_idx  ON area.grid_area_labels  (codesource_area);
+CREATE INDEX grid_area_labels_codesource_area_idx  ON area.grid_area_labels (codesource_area);
