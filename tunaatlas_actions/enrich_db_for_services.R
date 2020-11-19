@@ -4,6 +4,9 @@ enrich_db_for_services <- function(entity, config, options){
 	schema <- "fact_tables"
 
 	#set information required for (meta)data services
+	geom_table <- "area.area_labels"
+	if(!is.null(options$geom_table)) geom_table <- options$geom_table
+	
 	df_codelists <- read.csv(entity$resources$codelists)
 	dimensions <- c(df_codelists$dimension [df_codelists$dimension != "area"], "time_start", "time_end", "year", "quarter", "month", "aggregation_method")
 	
@@ -22,7 +25,7 @@ enrich_db_for_services <- function(entity, config, options){
 	entity$data$featureType <- fact
 	#geoserver sql view properties
 	entity$data$layername <- pid
-	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=",")))
+	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s, '%s')", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=","), geom_table))
 	entity$data$setGeometryField("the_geom")
 	entity$data$setGeometryType("Polygon")
 	
@@ -54,7 +57,7 @@ enrich_db_for_services <- function(entity, config, options){
 	config$logger.info("Upload SQL main query (based on PL/SQL function to query data) to Google Drive")
 	# folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
 	folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
-	mainSource <- sprintf("select * from get_fact_dataset_%s('%s', '%s', %s)", fact, schema, pid, paste0("'", default_values,"'", collapse=","))
+	mainSource <- sprintf("select * from get_fact_dataset_%s('%s', '%s', %s, '%s')", fact, schema, pid, paste0("'", default_values,"'", collapse=","),geom_table)
 	file_sql_query <- paste0(entity$identifiers[["id"]], "_query.sql")
 	writeLines(mainSource, file.path("data", file_sql_query))
 	#entity$data$source <- c(file_sql_query, entity$data$source)
