@@ -1,7 +1,7 @@
 ######################################################################
 ##### 52North WPS annotations ##########
 ######################################################################
-# wps.des: id = indian_ocean_catch_tunaatlasiotc_level0__surface, title = Harmonize data structure of IOTC Surface catch datasets, abstract = Harmonize the structure of IOTC catch-and-effort datasets: 'Surface' (pid of output file = indian_ocean_catch_tunaatlasiotc_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
+# wps.des: id = catch_iotc_level0__surface, title = Harmonize data structure of IOTC Surface catch datasets, abstract = Harmonize the structure of IOTC catch-and-effort datasets: 'Surface' (pid of output file = indian_ocean_catch_tunaatlasiotc_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
 # wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/bSsmaK, value = "https://goo.gl/bSsmaK";
 # wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
@@ -13,35 +13,6 @@
 #' @keywords Indian Ocean Tuna Commission IOTC tuna RFMO Sardara Global database on tuna fishieries
 #'
 #' @seealso \code{\link{convertDSD_iotc_ce_LonglineCoastal}} to convert IOTC task 2 CECoastal and CELongline data structure, \code{\link{convertDSD_iotc_nc}} to convert IOTC nominal catch data structure
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@geoflow --> with this script 2 objects are pre-loaded
-#config --> the global config of the workflow
-#entity --> the entity you are managing
-#get data from geoflow current job dir
-filename1 <- entity$data$source[[1]] #data
-filename2 <- entity$data$source[[2]] #structure
-path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
-opts <- options()
-options(encoding = "UTF-8")
-#----------------------------------------------------------------------------------------------------------------------------
-
-
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-if(!require(data.table)){
-  install.packages("data.table")
-}
-
-require(rtunaatlas)
-require(data.table)
-
   
   # Input data sample:
   # Fleet Gear Year MonthStart MonthEnd      iGrid    Grid Effort EffortUnits QualityCode Source CatchUnits YFT.FS YFT.LS YFT.UNCL BET.FS BET.LS BET.UNCL SKJ.FS SKJ.LS SKJ.UNCL ALB.FS ALB.LS ALB.UNCL SBF.FS SBF.LS
@@ -75,8 +46,35 @@ require(data.table)
   #  AUS   BB 1992-02-01 1992-03-01  6235115    ALL     SBF       ALL         MT   2.5
   #  AUS   BB 1992-03-01 1992-04-01  6230130    ALL     ALB       ALL         MT   3.0
 
+#packages
+if(!require(rtunaatlas)){
+  if(!require(devtools)){
+    install.packages("devtools")
+  }
+  require(devtools)
+  install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
+}
+if(!require(data.table)){
+  install.packages("data.table")
+  require(data.table)
+}
+
+#----------------------------------------------------------------------------------------------------------------------------
+#@geoflow --> with this script 2 objects are pre-loaded
+#config --> the global config of the workflow
+#entity --> the entity you are managing
+#get data from geoflow current job dir
+filename1 <- entity$data$source[[1]] #data
+filename2 <- entity$data$source[[2]] #structure
+path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+opts <- options()
+options(encoding = "UTF-8")
+#----------------------------------------------------------------------------------------------------------------------------
+
   
-  ##Catches
+##Catches
   
 ### Reach the catches pivot DSD using a function stored in IOTC_functions.R
 catches_pivot_IOTC<-FUN_catches_IOTC_CE(path_to_raw_dataset,last_column_not_catch_value=12,"Surface")
@@ -94,7 +92,11 @@ catches$source_authority<-"IOTC"
 catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(as.character(min(catches$time_start)), as.character(max(catches$time_end)), sep = "/")
+dataset_temporal_extent <- paste(
+	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+	paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+	sep = "/"
+)
 entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv

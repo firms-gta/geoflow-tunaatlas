@@ -1,7 +1,7 @@
 ######################################################################
 ##### 52North WPS annotations ##########
 ######################################################################
-# wps.des: id = southern_hemisphere_oceans_catch_1deg_1m_tunaatlasccsbt_level0__surface, title = Harmonize data structure of CCSBT Surface catch datasets, abstract = Harmonize the structure of CCSBT catch-and-effort datasets: 'Surface' (pid of output file = southern_hemisphere_oceans_catch_1deg_1m_tunaatlasccsbt_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
+# wps.des: id = catch_1deg_1m_ccsbt_level0__surface, title = Harmonize data structure of CCSBT Surface catch datasets, abstract = Harmonize the structure of CCSBT catch-and-effort datasets: 'Surface' (pid of output file = southern_hemisphere_oceans_catch_1deg_1m_tunaatlasccsbt_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
 # wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/TokY4i, value = "https://goo.gl/TokY4i";
 # wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
@@ -14,34 +14,6 @@
 #' @keywords Commission for the Conservation of Southern Bluefin Tuna CCSBT tuna RFMO Sardara Global database on tuna fishieries
 #'
 #' @seealso \code{\link{convertDSD_ccsbt_ce_Longline}} to convert CCSBT task 2 Longline data structure, \code{\link{convertDSD_ccsbt_nc_annual_catches_by_gear}} to convert CCSBT nominal catch data structure
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@geoflow --> with this script 2 objects are pre-loaded
-#config --> the global config of the workflow
-#entity --> the entity you are managing
-#get data from geoflow current job dir
-filename1 <- entity$data$source[[1]] #data
-filename2 <- entity$data$source[[2]] #structure
-path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
-opts <- options()
-options(encoding = "UTF-8")
-#----------------------------------------------------------------------------------------------------------------------------
-
-  
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
-
-if(!require(readxl)){
-	install.packages("readxl")
-	require(readxl)
-}
 
   # Input data sample (after importing as data.frame in R):
   # YEAR MONTH COUNTRY_CODE GEAR_CODE CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOURS_SEARCHED WEIGHT_(Kg)_OF_SBT_RETAINED
@@ -61,6 +33,34 @@ if(!require(readxl)){
   #   AU   BB 1976-12-01 1977-01-01  6333134    ALL     SBT       ALL         MT  35.6
   #   AU   BB 1976-12-01 1977-01-01  6334134    ALL     SBT       ALL         MT  56.5
   #   AU   BB 1976-12-01 1977-01-01  6334135    ALL     SBT       ALL         MT  37.0
+  
+#packages
+if(!require(rtunaatlas)){
+  if(!require(devtools)){
+    install.packages("devtools")
+  }
+  require(devtools)
+  install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
+}
+
+if(!require(readxl)){
+	install.packages("readxl")
+	require(readxl)
+}
+
+#----------------------------------------------------------------------------------------------------------------------------
+#@geoflow --> with this script 2 objects are pre-loaded
+#config --> the global config of the workflow
+#entity --> the entity you are managing
+#get data from geoflow current job dir
+filename1 <- entity$data$source[[1]] #data
+filename2 <- entity$data$source[[2]] #structure
+path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+opts <- options()
+options(encoding = "UTF-8")
+#----------------------------------------------------------------------------------------------------------------------------  
   
 RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
 colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
@@ -148,7 +148,11 @@ catches$source_authority<-"CCSBT"
 catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(as.character(min(catches$time_start)), as.character(max(catches$time_end)), sep = "/")
+dataset_temporal_extent <- paste(
+	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+	paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+	sep = "/"
+)
 entity$setTemporalExtent(dataset_temporal_extent)
 #@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)

@@ -1,7 +1,7 @@
 ######################################################################
 ##### 52North WPS annotations ##########
 ######################################################################
-# wps.des: id = atlantic_ocean_catch_tunaatlasiccat_level0__noschool, title = Harmonize data structure of ICCAT catch dataset, abstract = Harmonize the structure of ICCAT catch-and-effort datasets: (pid of output file = atlantic_ocean_catch_tunaatlasiccat_level0__noschool). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
+# wps.des: id = catch_iccat_level0__noschool, title = Harmonize data structure of ICCAT catch dataset, abstract = Harmonize the structure of ICCAT catch-and-effort datasets: (pid of output file = atlantic_ocean_catch_tunaatlasiccat_level0__noschool). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
 # wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize (Miscroft Access (.mdb)). The input database being voluminous, the execution of the function might take long time. Input file must be structured as follow: https://goo.gl/A6qVhb, value = "https://goo.gl/A6qVhb";
 # wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
 # wps.in: id = keep_fleet_instead_of_flag, type = Boolean, title = By default the column "flag" is kept. By setting this argument to TRUE the column "fleet" will be kept (and "flag" will be removed), value = FALSE;
@@ -12,38 +12,6 @@
 #' @keywords Internal Commission for the Conservation of Atlantic Tuna tuna RFMO Sardara Global database on tuna fishieries
 #'
 #' @seealso \code{\link{convertDSD_iccat_ce_task2_ByOperationMode}} to convert ICCAT task 2 "by operation mode", \code{\link{convertDSD_iccat_nc}} to convert ICCAT nominal catch data structure
-
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@geoflow --> with this script 2 objects are pre-loaded
-#config --> the global config of the workflow
-#entity --> the entity you are managing
-#get data from geoflow current job dir
-filename1 <- entity$data$source[[1]] #data
-filename2 <- entity$data$source[[2]] #structure
-path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
-#----------------------------------------------------------------------------------------------------------------------------
-
-
-keep_fleet_instead_of_flag=FALSE
-
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
-if(!require(data.table)){
-  install.packages("data.table")
-  require(data.table)
-}
-if(!require(dplyr)){
-  install.packages("dplyr")
-  require(dplyr)
-}
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------
   # Input data sample: No sample. Miscrosoft Acces DB. However after the commands that read the input DB the sample is the following:
@@ -79,6 +47,37 @@ if(!require(dplyr)){
   #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     SWO         C       MTNO   1.4	ICCAT
   #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     YFT         C       MTNO   0.4	ICCAT
 
+#packages
+if(!require(rtunaatlas)){
+  if(!require(devtools)){
+    install.packages("devtools")
+  }
+  require(devtools)
+  install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
+}
+if(!require(data.table)){
+  install.packages("data.table")
+  require(data.table)
+}
+if(!require(dplyr)){
+  install.packages("dplyr")
+  require(dplyr)
+}
+
+#----------------------------------------------------------------------------------------------------------------------------
+#@geoflow --> with this script 2 objects are pre-loaded
+#config --> the global config of the workflow
+#entity --> the entity you are managing
+#get data from geoflow current job dir
+filename1 <- entity$data$source[[1]] #data
+filename2 <- entity$data$source[[2]] #structure
+path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+#----------------------------------------------------------------------------------------------------------------------------
+
+keep_fleet_instead_of_flag=FALSE  
+  
 ##Catches
 
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
@@ -134,7 +133,11 @@ catches$source_authority<-"ICCAT"
 catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(as.character(min(catches$time_start)), as.character(max(catches$time_end)), sep = "/")
+dataset_temporal_extent <- paste(
+	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+	paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+	sep = "/"
+)
 entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv
