@@ -38,6 +38,9 @@ ALTER TABLE area.area_labels
   OWNER TO "%db_admin%";
 GRANT ALL ON TABLE area.area_labels TO "%db_admin%";
 
+CREATE INDEX area_labels_id_area_idx  ON area.area_labels  (id_area);
+CREATE INDEX area_labels_codesource_area_idx  ON area.area_labels  (codesource_area);
+
 COMMENT ON MATERIALIZED VIEW "area"."area_labels" IS '"area_labels" materialized view which fasters the access to information often needed in data access queries. View gathering all the codes and labels of the code lists available for the dimension area (spatial code lists). View gathering all the codes and labels of the code lists available for the dimension area (spatial code lists)';
 COMMENT ON COLUMN "area"."area_labels"."id_area" IS '"id_area" is the identifier (primary key) of the area.';
 COMMENT ON COLUMN "area"."area_labels"."codesource_area" IS '"codesource_area" gives the geometry of the area as text (WKT format).';
@@ -46,3 +49,10 @@ COMMENT ON COLUMN "area"."area_labels"."source_label" IS '"source_label" gives t
 COMMENT ON COLUMN "area"."area_labels"."source_french_label" IS '"source_french_label" gives the label of the area in french.';
 COMMENT ON COLUMN "area"."area_labels"."source_spanish_label" IS '"source_spanish_label" gives the label of the area in spanish.';
 COMMENT ON COLUMN "area"."area_labels"."geom" IS '"geom" is the geometry stored by Postgis (SFS format).';
+
+
+CREATE MATERIALIZED VIEW area.grid_area_labels AS
+SELECT * FROM area.area_labels WHERE tablesource_area = 'cwp_grid';
+
+CREATE INDEX grid_area_labels_id_area_idx  ON area.grid_area_labels  (id_area);
+CREATE INDEX grid_area_labels_codesource_area_idx  ON area.grid_area_labels  (codesource_area);
