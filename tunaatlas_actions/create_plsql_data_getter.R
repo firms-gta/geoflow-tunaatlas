@@ -76,7 +76,7 @@ create_plsql_data_getter <- function(entity, config, options){
 				query = concat(query, '%s'); 
 				filtering = true;
 			END IF;",
-			dimension, dimension, dimension, sql_filter
+			x, x, x, sql_filter
 		)
 		return(plsql)	
 	}), collapse="\n")
