@@ -65,19 +65,17 @@ create_plsql_data_getter <- function(entity, config, options){
 		if(x == "time_end") sql_filter <- sprintf("%s <= '''||input_%s||'''", x, x)
 		
 		#plsql code
-		plsql = sprintf(
-			"IF char_length(input_%s) > 0 THEN
-				RAISE notice 'Adding filter - %s: %', input_%s;
+		plsql = paste0(
+			"IF char_length(input_",x,") > 0 THEN
+				RAISE notice 'Adding filter - ",x,": %', input_",x,";
 				IF filtering = false THEN 
 					query = concat(query, ' WHERE '); 
 				ELSE 
 					query = concat(query, ' AND ');
 				END IF;
-				query = concat(query, '%s'); 
+				query = concat(query, '",sql_filter,"'); 
 				filtering = true;
-			END IF;",
-			x, x, x, sql_filter
-		)
+			END IF;")
 		return(plsql)	
 	}), collapse="\n")
 	
