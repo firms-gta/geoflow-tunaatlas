@@ -40,21 +40,46 @@ create_plsql_data_getter <- function(entity, config, options){
 			count_quarter integer := 4;
 			count_year integer := 1;
 			count_yeartime integer := 0;
+			filtering := false;
 			query varchar := '';
 		")
 	#begin block
 	
 	#filters
-	sql_query_filters <- sapply(dimensions[dimensions != "aggregation_method"], function(x){
+	#sql_query_filters <- sapply(dimensions[dimensions != "aggregation_method"], function(x){
+	#	cast <- ""
+	#	if(x %in% c("month", "quarter", "year")) cast <- "::numeric"
+	#	sql_filter <- sprintf("%s IN( select regexp_split_to_table(regexp_replace('''||input_%s||''','' '', ''+'', ''g''),E''\\\\+'')%s )", x, x, cast)
+	#	if(x == "time_start") sql_filter <- sprintf("%s >= '''||input_%s||'''", x, x)
+	#	if(x == "time_end") sql_filter <- sprintf("%s <= '''||input_%s||'''", x, x)
+	#	return(sql_filter)
+	#})	
+	#sql_query_filters <- paste0(sql_query_filters, collapse = " AND ")
+	sql_query_filters_plsql <- paste0(sapply(dimensions[dimensions != "aggregation_method"], function(x){
+		
+		#sql_filter
 		cast <- ""
 		if(x %in% c("month", "quarter", "year")) cast <- "::numeric"
 		sql_filter <- sprintf("%s IN( select regexp_split_to_table(regexp_replace('''||input_%s||''','' '', ''+'', ''g''),E''\\\\+'')%s )", x, x, cast)
-		
 		if(x == "time_start") sql_filter <- sprintf("%s >= '''||input_%s||'''", x, x)
 		if(x == "time_end") sql_filter <- sprintf("%s <= '''||input_%s||'''", x, x)
-		return(sql_filter)
-	})	
-	sql_query_filters <- paste0(sql_query_filters, collapse = " AND ")
+		
+		#plsql code
+		plsql = sprintf(
+			"IF char_length(input_%s) > 0 THEN
+				RAISE notice 'Adding filter - %s: %', input_%s;
+				IF filtering = false THEN 
+					query = concat(query, ' WHERE '); 
+				ELSE 
+					query = concat(query, ' AND ');
+				END IF;
+				query = concat(query, '%s'); 
+				filtering = true;
+			END IF;",
+			dimension, dimension, dimension, sql_filter
+		)
+		return(plsql)	
+	}), collapse="\n")
 	
 	#sql query for raw data
 	sql_query_raw_select_columns <- paste0(sapply(dimensions[dimensions != "aggregation_method"], function(x){
@@ -64,8 +89,8 @@ create_plsql_data_getter <- function(entity, config, options){
 	}), collapse=", ")
 	
 	sql_query_raw <- paste0("SELECT ", sql_query_raw_select_columns, ", dataset.value, tab_geom.codesource_area as geographic_identifier, tab_geom.geom as the_geom FROM '||schema_name||'.' || pid || ' dataset LEFT OUTER JOIN '||geom_table||' tab_geom USING (id_area) \n")
-	sql_query_raw <- paste0(sql_query_raw, "WHERE \n")	
-	sql_query_raw <- paste0(sql_query_raw, sql_query_filters, ";")
+	#sql_query_raw <- paste0(sql_query_raw, "WHERE \n")	
+	#sql_query_raw <- paste0(sql_query_raw, sql_query_filters, ";")
 	
 	
 	#sql query for aggregate data
@@ -78,14 +103,15 @@ create_plsql_data_getter <- function(entity, config, options){
 		return(out)
 	}), collapse=", ")
 	
-	sql_query_agg <- paste0("SELECT ", sql_query_agg_select_columns, ", CAST(dataset.value AS numeric), tab_geom.codesource_area as geographic_identifier,tab_geom.geom as the_geom from ( SELECT CASE '''|| input_aggregation_method ||''' WHEN ''sum'' THEN sum(value) WHEN ''avg_by_year'' THEN sum(value)/'|| count_year ||' WHEN ''avg_by_quarter'' THEN sum(value)/'|| count_year * count_quarter ||' WHEN ''avg_by_month'' THEN sum(value)/'|| count_year * count_month ||' END as value, id_area FROM '|| schema_name ||'.'|| pid ||' WHERE ", sql_query_filters," GROUP BY id_area) dataset LEFT OUTER JOIN '||geom_table||' tab_geom USING (id_area) ;")
+	sql_query_agg <- paste0("SELECT ", sql_query_agg_select_columns, ", CAST(dataset.value AS numeric), tab_geom.codesource_area as geographic_identifier,tab_geom.geom as the_geom from ( SELECT CASE '''|| input_aggregation_method ||''' WHEN ''sum'' THEN sum(value) WHEN ''avg_by_year'' THEN sum(value)/'|| count_year ||' WHEN ''avg_by_quarter'' THEN sum(value)/'|| count_year * count_quarter ||' WHEN ''avg_by_month'' THEN sum(value)/'|| count_year * count_month ||' END as value, id_area FROM '|| schema_name ||'.'|| pid ||'")
 	
 	sql_create <- paste(sql_create,
 		"BEGIN
 
 			IF input_aggregation_method = 'none' THEN
 				RAISE notice 'Running query without aggregation';
-				query = '",sql_query_raw,"';
+				query = '",sql_query_raw,"';",
+				sql_query_filters_plsql,"
 				RAISE notice 'SQL: %', query;
 				RETURN QUERY EXECUTE query; 
 			ELSE
@@ -104,7 +130,9 @@ create_plsql_data_getter <- function(entity, config, options){
 				ELSIF input_aggregation_method = 'avg_by_year' THEN
 					RAISE notice 'Average on % years', count_year;
 				END IF;
-				query = '",sql_query_agg,"';
+				query = '",sql_query_agg,"';",
+				sql_query_filters_plsql,"
+				query = concat(query,' GROUP BY id_area) dataset LEFT OUTER JOIN '||geom_table||' tab_geom USING (id_area)');
 				RAISE notice 'SQL: %', query;
 				RETURN QUERY EXECUTE query;
 			END IF;
