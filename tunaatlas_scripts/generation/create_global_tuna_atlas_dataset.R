@@ -223,8 +223,10 @@ switch(DATA_LEVEL,
 		
 		### Units harmonization
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if(any(georef_dataset$unit == "MTNO")) georef_dataset[georef_dataset$unit == "MTNO", ]$unit <- "MT"
-		if(any(georef_dataset$unit == "NOMT")) georef_dataset[georef_dataset$unit == "NOMT", ]$unit <- "NO"
+		if(any(georef_dataset$unit == "MT")) georef_dataset[georef_dataset$unit == "MT", ]$unit <- "t"
+		if(any(georef_dataset$unit == "NO")) georef_dataset[georef_dataset$unit == "NO", ]$unit <- "no"
+		if(any(georef_dataset$unit == "MTNO")) georef_dataset[georef_dataset$unit == "MTNO", ]$unit <- "t"
+		if(any(georef_dataset$unit == "NOMT")) georef_dataset[georef_dataset$unit == "NOMT", ]$unit <- "no"
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
