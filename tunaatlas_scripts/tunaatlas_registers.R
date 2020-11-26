@@ -81,9 +81,9 @@ register_unit_catch <- function(config){
 	con <- config$software$input$dbi
 	fetched <- dbGetQuery(con, "SELECT * FROM unit.unit_labels where tablesource_unit = 'catchunit_rfmos'")
 	out <- data.frame(
-		code = fetched$codesource_unit,
+		code = c(fetched$codesource_unit, "t", "no"),
 		uri = NA,
-		label = fetched$source_label,
+		label = c(fetched$source_label, "metric tons", "number of fishes")
 		definition = NA
 	)
 	return(out)		
