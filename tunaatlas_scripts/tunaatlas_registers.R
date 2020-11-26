@@ -83,7 +83,7 @@ register_unit_catch <- function(config){
 	out <- data.frame(
 		code = c(fetched$codesource_unit, "t", "no"),
 		uri = NA,
-		label = c(fetched$source_label, "metric tons", "number of fishes")
+		label = c(fetched$source_label, "metric tons", "number of fishes"),
 		definition = NA
 	)
 	return(out)		
