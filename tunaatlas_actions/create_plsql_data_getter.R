@@ -40,7 +40,7 @@ create_plsql_data_getter <- function(entity, config, options){
 			count_quarter integer := 4;
 			count_year integer := 1;
 			count_yeartime integer := 0;
-			filtering := false;
+			filtering boolean := false;
 			query varchar := '';
 		")
 	#begin block
