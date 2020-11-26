@@ -122,6 +122,7 @@ write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+entity$addResource("geom_table", options$geom_table)
 
 #### END
 config$logger.info("End: Your tuna atlas dataset has been created!")
