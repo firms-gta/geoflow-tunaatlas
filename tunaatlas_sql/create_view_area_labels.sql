@@ -56,3 +56,12 @@ SELECT * FROM area.area_labels WHERE tablesource_area = 'areas_tuna_rfmos_task2'
 
 CREATE INDEX grid_area_labels_id_area_idx  ON area.grid_area_labels  (id_area);
 CREATE INDEX grid_area_labels_codesource_area_idx  ON area.grid_area_labels (codesource_area);
+
+
+create materialized view area.grid_5deg_area_labels as SELECT * FROM area.grid_area_labels where codesource_area like '6%';
+CREATE INDEX grid_area_5deg_labels_id_area_idx  ON area.grid_5deg_area_labels  (id_area);
+CREATE INDEX grid_area_5deg_labels_codesource_area_idx  ON area.grid_5deg_area_labels (codesource_area);
+
+create materialized view area.grid_1deg_area_labels as SELECT * FROM area.grid_area_labels where codesource_area like '5%';
+CREATE INDEX grid_area_1deg_labels_id_area_idx  ON area.grid_1deg_area_labels  (id_area);
+CREATE INDEX grid_area_1deg_labels_codesource_area_idx  ON area.grid_1deg_area_labels (codesource_area);
