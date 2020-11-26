@@ -23,7 +23,7 @@ enrich_metadata <- function(entity, config, options){
 				
 				reg <- dictionary$getRegisterById(member$registerId)
 				if(!is.null(reg)){
-					config$logger.info(sprintf("Enrich entity with subject for column '%s' - using register data", colname))
+					config$logger.info(sprintf("Enrich entity with subject for column '%s' - using register data", colname))	
 					values <- reg$data[reg$data$code %in% values,]
 					subject <- geoflow_subject$new()
 					subject$setName(member$name)
@@ -33,6 +33,7 @@ enrich_metadata <- function(entity, config, options){
 						if(!is.null(def_name)) subject$setName(def_name)
 						if(!is.null(def_uri)) subject$setUri(def_uri)
 					}
+					print(values)
 					for(i in 1:nrow(values)){
 						value <- values[i,]
 						if(is.na(value$uri)){
