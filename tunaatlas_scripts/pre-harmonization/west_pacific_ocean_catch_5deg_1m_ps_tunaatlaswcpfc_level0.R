@@ -81,8 +81,7 @@ options(encoding = "UTF-8")
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
 DF$CWP_GRID <- NULL
-# DF <- melt(DF, id = c(colnames(DF[1:10])))
-# DF <- melt(DF, id = c(colnames(DF[1:5]))) #@juldebar error with melt function from reshape package
+# DF <- melt(DF, id = c(colnames(DF[1:10])))  #@juldebar error with melt function from reshape package
 # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:10])))
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
 
