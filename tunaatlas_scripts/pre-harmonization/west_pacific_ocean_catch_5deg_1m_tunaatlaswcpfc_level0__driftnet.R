@@ -70,6 +70,7 @@ colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School
 #	- switch to upper colnames
 #	- toupper applied to Species/CatchUnits
 #--------------------------------------------------
+
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
 # DF <- melt(DF, id = c(colnames(DF[1:5]))) #@juldebar error with melt function from reshape package
