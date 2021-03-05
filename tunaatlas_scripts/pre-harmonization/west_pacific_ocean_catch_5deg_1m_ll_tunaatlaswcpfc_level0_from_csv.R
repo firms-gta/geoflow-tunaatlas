@@ -72,7 +72,6 @@ options(encoding = "UTF-8")
 
 
 ##Catches
-# path_to_raw_dataset <-"~/Downloads/WCPFC_L_PUBLIC_BY_FLAG_MON.CSV"
 DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
 
 #2020-11-13 @eblondel
