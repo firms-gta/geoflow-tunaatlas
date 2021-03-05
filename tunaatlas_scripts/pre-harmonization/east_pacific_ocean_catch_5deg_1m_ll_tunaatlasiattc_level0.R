@@ -70,9 +70,11 @@ options(encoding = "UTF-8")
 ##Catches
 catches<-read.csv(path_to_raw_dataset_catch, stringsAsFactors = F)
 efforts<-read.csv(path_to_raw_dataset_effort, stringsAsFactors = F)
-
-catches<-melt(catches, id.vars=c("Record","Spp","DTypeID")) 
-
+nrow(catches)
+head(catches)
+# catches<-melt(catches, id.vars=c("Record","Spp","DTypeID"))  #@juldebar error with melt function from reshape package
+# catches <-melt(as.data.table(catches),id.vars=c("Record","Spp","DTypeID"))
+catches <- catches %>% tidyr::gather(variable, value, -c("Record","Spp","DTypeID"))
 # remove values=0
 catches <- catches  %>% 
   filter( ! value %in% 0 ) %>%
