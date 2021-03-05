@@ -73,6 +73,10 @@ colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
 DF <- melt(DF, id = c(colnames(DF[1:5])))
+# DF <- melt(DF, id = c(colnames(DF[1:5]))) #@juldebar error with melt function from reshape package
+# DF <- melt(as.data.table(DF), id=c(colnames(DF[1:5])))
+DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
+
 DF <- DF %>% filter(!value %in% 0) %>% filter(!is.na(value))
 DF$variable <- as.character(DF$variable)
 colnames(DF)[which(colnames(DF) == "variable")] <- "Species"

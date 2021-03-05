@@ -72,7 +72,11 @@ options(encoding = "UTF-8")
 
 
 ##Catches
+# path_to_raw_dataset <-"~/Downloads/WCPFC_L_PUBLIC_BY_FLAG_MON.CSV"
 DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
+nrow(DF)
+head(DF)
+
 #2020-11-13 @eblondel
 #Changes
 #	- Flag column added add UNK where missing
@@ -81,7 +85,9 @@ DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FAL
 DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)<-toupper(colnames(DF))
 if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
-DF<-melt(DF, id=c(colnames(DF[1:6]))) 
+# DF<-melt(DF, id=c(colnames(DF[1:6]))) 
+#DF<-melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
+DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
 
 DF<- DF %>% 
   filter( ! value %in% 0 ) %>%
