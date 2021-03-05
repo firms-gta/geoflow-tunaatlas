@@ -282,7 +282,7 @@ load_codelist <- function(entity, config, options){
 										st_setsrid(vue.geom, 4326) AS geom
 										FROM vue")
     query_create_view_label<-gsub(";","",query_create_view_label)
-    query_create_view_label<-gsub("CREATE OR REPLACE VIEW","DROP MATERIALIZED VIEW area.area_labels; CREATE MATERIALIZED VIEW",query_create_view_label)
+    query_create_view_label<-gsub("CREATE OR REPLACE VIEW","DROP MATERIALIZED VIEW area.area_labels CASCADE; CREATE MATERIALIZED VIEW",query_create_view_label)
     query_create_view_label<-paste0(query_create_view_label,";
 COMMENT ON MATERIALIZED VIEW \"area\".\"area_labels\" IS '\"area\".\"area_labels\" is a materialized view which fasters the access to information often needed in data access queries. View gathering all the codes and labels of the code lists available for the dimension area (spatial code lists).';
 COMMENT ON COLUMN \"area\".\"area_labels\".\"id_area\" IS '\"id_area\" is the identifier (primary key)  ';
