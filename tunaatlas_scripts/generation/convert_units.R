@@ -135,6 +135,8 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	}
 
 	# fill metadata elements
+	config$logger.info("Fill metadata elements accordingly\n")
+
 	lineage <- 
 	description <- ""
 	info <- NULL
@@ -152,6 +154,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	  info <- NULL
 	}
 	#@juldebar modify FIRMS-Secretariat@fao.org 
+	config$logger.info("Fill contact metadata elements \n")
 	firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
 	firms_contact$setRole("processor")
 	conversion_step <- geoflow_process$new()
