@@ -104,13 +104,17 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		georef_dataset <- georef_dataset[column_names_df_input]
 
 	}
-																							 
+	
+	config$logger.info("Execute rtunaatlas::convert_units() function ...\n")
+
 	georef_dataset<-rtunaatlas::convert_units(con = con,
 									 df_input = georef_dataset,
 									 df_conversion_factor = df_conversion_factor,
 									 codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
 									 codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
 	)
+	
+	config$logger.info("rtunaatlas::convert_units() function executed !\n")
 
 	# to get stats on the process (useful for metadata)
 	# georef_dataset$stats
