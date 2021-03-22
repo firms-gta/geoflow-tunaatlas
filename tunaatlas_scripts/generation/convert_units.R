@@ -147,8 +147,8 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	  description <- "- Units for the measures were harmonized."
 	  info <- NULL
 	}
-	
-	firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "firms-secretariat@fao.org"})][[1]]
+	#@juldebar modify FIRMS-Secretariat@fao.org 
+	firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
 	firms_contact$setRole("processor")
 	conversion_step <- geoflow_process$new()
 	conversion_step$setRationale(lineage)
