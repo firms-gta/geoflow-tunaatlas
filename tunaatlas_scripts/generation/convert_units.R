@@ -154,13 +154,16 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	  info <- NULL
 	}
 	#@juldebar modify FIRMS-Secretariat@fao.org 
-	config$logger.info("Fill contact metadata elements \n")
-	firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
-	firms_contact$setRole("processor")
-	conversion_step <- geoflow_process$new()
-	conversion_step$setRationale(lineage)
-	conversion_step$setProcessor(firms_contact)
-	entity$provenance$processes <- c(entity$provenance$processes, conversion_step)
+	#@juldebar begin commented
+	#@config$logger.info("Fill contact metadata elements \n")
+	#@firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
+	#@firms_contact$setRole("processor")
+	#@conversion_step <- geoflow_process$new()
+	#@conversion_step$setRationale(lineage)
+	#@conversion_step$setProcessor(firms_contact)
+	#@entity$provenance$processes <- c(entity$provenance$processes, conversion_step)
+	#@juldebar end commented
+	
 	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", description)
 	if(!is.null(info)){	
 		if(!is.null(entity$descriptions[["info"]])){
