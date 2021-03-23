@@ -279,6 +279,9 @@ switch(DATA_LEVEL,
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 			config$logger.info("Retrieving RFMOs nominal catch...")
 			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
+			head(nominal_catch)
+			class(nominal_catch$value) <- "numeric"
+
 			#nominal_catch <-retrive_nominal_catch(entity, config, options)
 			config$logger.info("Retrieving RFMOs nominal catch OK")
 		}
