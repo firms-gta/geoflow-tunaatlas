@@ -48,6 +48,7 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   
   # raise dataset
   cat("Executing rtunaatlas::raise_incomplete_dataset_to_total_dataset \n")
+  head(df_rf)
 
   data_raised<-rtunaatlas::raise_incomplete_dataset_to_total_dataset(df_input_incomplete = dataset_to_raise,
                                                                       df_input_total = nominal_dataset_df,
