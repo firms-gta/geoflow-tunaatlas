@@ -69,6 +69,8 @@ if ( include_CCSBT==TRUE | include_WCPFC==TRUE ) {
   }
   
   cat(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"flag"),collapse = ","),"\n"))
+  config$logger.info(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"flag"),collapse = ","),"\n"))
+
   data_WCPFC_CCSBT_raised<-function_raise_data(fact,
                                                source_authority_filter = source_authority_filter,
                                                 dataset_to_raise = dataset_to_raise,
@@ -87,6 +89,8 @@ if ( include_CCSBT==TRUE | include_WCPFC==TRUE ) {
 if ( include_IOTC==TRUE | include_ICCAT==TRUE | include_IATTC==TRUE ) {
 
   cat(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
+  config$logger.info(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
+
   data_IOTC_ICCAT_IATTC_raised<-function_raise_data(fact,
                                                     source_authority_filter = c("IOTC","ICCAT","IATTC"),
                                                      dataset_to_raise = dataset_to_raise,
@@ -113,7 +117,9 @@ lineage<-paste0("Catch-and-effort data are data aggregated over spatio-temporal 
 description<-paste0("- Geo-referenced ",fact," were raised to the total ",fact,if (raising_raise_only_for_PS_LL==TRUE) {" only for industrial fisheries (longliners and purse seiners) "},"\n")
 supplemental_information<-paste0("- Geo-referenced ",fact," were raised to the total catches ",if (raising_raise_only_for_PS_LL==TRUE) {"only for industrial fisheries (longliners and purse seiners) "}, "for all tRFMOs",if (raising_do_not_raise_wcfpc_data==TRUE) {" except for WCPFC since these data are already raised by the organization"},". Depending on the availability of the flag dimension (currently not available for the geo-referenced catch-and-effort dataset from the Western-Central Pacific Ocean), the dimensions used for the raising are either {Flag, Species, Year, Gear} or {Species, Year, Gear}. Some ",fact," cannot be raised because the combination {Flag, Species, Year, Gear} (resp. {Species, Year, Gear}) does exist in the geo-referenced ",fact," but the same combination does not exist in the total catches. In this case, non-raised ",fact," data were kept. Most catch-and-effort data have catches inferior to the catch available in the nominal catch dataset for a given stratum. However, in some cases the value of catch in the catch-and-effort data can be greater than the one in the nominal catch. In this case, the catch was 'downgraded' to the nominal catch one.\n")
 
-cat("Raising georeferenced dataset to nominal dataset OK\n")
+  
+#cat("Raising georeferenced dataset to nominal dataset OK\n")
+config$logger.info("Raising georeferenced dataset to nominal dataset OK")
 
 return(list(dataset=georef_dataset,lineage=lineage,description=description,supplemental_information=supplemental_information))
 }
