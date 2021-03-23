@@ -283,7 +283,7 @@ switch(DATA_LEVEL,
 			config$logger.info("Retrieving RFMOs nominal catch OK")
 		}
 
-		config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
+		config$logger.info("Retrieving Level1 and nominal catch datasets from the Tuna atlas Google drive OK")
 
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		#### 5) Raise georeferenced to total (nominal) dataset
@@ -294,6 +294,8 @@ switch(DATA_LEVEL,
 		  
 		  
 		  if (fact=="catch"){
+			  config$logger.info("Fact=catch !")
+			  
 			dataset_to_compute_rf=georef_dataset
 			x_raising_dimensions=c("flag","gear","species","year","source_authority")
 		  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
@@ -352,6 +354,10 @@ switch(DATA_LEVEL,
 			rm(dataset_catch)
 			x_raising_dimensions=c("flag","gear","year","source_authority")
 		  }
+		
+			
+			config$logger.info("Executing function function_raising_georef_to_nominal")
+
 			
 			georef_dataset<-function_raising_georef_to_nominal(entity,
 									   config,
@@ -359,6 +365,8 @@ switch(DATA_LEVEL,
 									   dataset_to_compute_rf,
 									   nominal_catch,
 									   x_raising_dimensions)
+			config$logger.info("function function_raising_georef_to_nominal has been executed !")
+			
 			rm(dataset_to_compute_rf)
 			metadata$description<-paste0(metadata$description,georef_dataset$description)
 			metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
