@@ -354,6 +354,9 @@ switch(DATA_LEVEL,
 			}
 			
 			dataset_to_compute_rf=dataset_catch
+			  #@juldebar try patch to fix error in rtunaatlas::raise_get_rf function
+			class(dataset_to_compute_rf$value) <- "numeric"
+
 			rm(dataset_catch)
 			x_raising_dimensions=c("flag","gear","year","source_authority")
 		  }
