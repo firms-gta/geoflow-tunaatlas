@@ -5,6 +5,7 @@ function_raising_georef_to_nominal<-function(entity,
                                              nominal_dataset_df,
                                              x_raising_dimensions){
   
+  con <- config$software$output$dbi
   options <- entity$data$actions[[1]]$options
   fact <- options$fact
   raising_do_not_raise_wcfpc_data <- options$raising_do_not_raise_wcfpc_data
@@ -14,6 +15,7 @@ function_raising_georef_to_nominal<-function(entity,
   
 
 cat("Raising georeferenced dataset to nominal dataset\n")
+config$logger.info("Creating function function_raise_data")
 
 # We have to separate the WCPFC and CCSBT from the other rfmos, because WCPFC and CCSBT georef catches do not have flag dimension available (hence we cannot use the flag dimension for the raising)
 
@@ -48,9 +50,12 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   return(data_raised)
   
 }
+config$logger.info("Now executing function function_raise_data")
+  
+  
 
 if (raising_raise_only_for_PS_LL==TRUE){
-  gears_PS_LL<-dbGetQuery(rtunaatlas::db_connection_tunaatlas_world(),"SELECT distinct(src_code) FROM gear.gear_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
+  gears_PS_LL<-dbGetQuery(con,"SELECT distinct(src_code) FROM gear.gear_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
   dataset_not_PS_LL<-dataset_to_raise %>% filter(!(gear %in% gears_PS_LL))
   dataset_to_raise<-dataset_to_raise %>% filter(gear %in% gears_PS_LL)
 }
