@@ -1,4 +1,15 @@
-function_raising_georef_to_nominal<-function(fact,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions,raising_do_not_raise_wcfpc_data,raising_raise_only_for_PS_LL){
+function_raising_georef_to_nominal<-function(entity,
+                                             config,
+                                             options,
+                                             dataset_to_raise,
+                                             dataset_to_compute_rf,
+                                             nominal_dataset_df,
+                                             x_raising_dimensions){
+  
+  fact <- options$fact
+  raising_do_not_raise_wcfpc_data <- options$raising_do_not_raise_wcfpc_data
+  raising_raise_only_for_PS_LL <- options$raising_raise_only_for_PS_LL
+  
 
 cat("Raising georeferenced dataset to nominal dataset\n")
 
