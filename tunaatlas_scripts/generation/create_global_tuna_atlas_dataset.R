@@ -272,6 +272,18 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
 
+		
+		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
+		#-------------------------------------------------------------------------------------------------------------------------------------
+		#-------------------------------------------------------------------------------------------------------------------------------------
+		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
+			config$logger.info("Retrieving RFMOs nominal catch...")
+			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
+			#nominal_catch <-retrive_nominal_catch(entity, config, options)
+			config$logger.info("Retrieving RFMOs nominal catch OK")
+		}
+
+		config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
 
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		#### 5) Raise georeferenced to total (nominal) dataset
@@ -341,7 +353,12 @@ switch(DATA_LEVEL,
 			x_raising_dimensions=c("flag","gear","year","source_authority")
 		  }
 			
-			georef_dataset<-function_raising_georef_to_nominal(fact,georef_dataset,dataset_to_compute_rf,nominal_catch,x_raising_dimensions,raising_do_not_raise_wcfpc_data,raising_raise_only_for_PS_LL)
+			georef_dataset<-function_raising_georef_to_nominal(entity,
+									   config,
+									   georef_dataset,
+									   dataset_to_compute_rf,
+									   nominal_catch,
+									   x_raising_dimensions)
 			rm(dataset_to_compute_rf)
 			metadata$description<-paste0(metadata$description,georef_dataset$description)
 			metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
