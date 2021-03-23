@@ -23,7 +23,7 @@ config$logger.info("Creating function function_raise_data")
 function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions){
   
   # filter by source_authority
-  cat("filter by source_authorityt\n")
+  cat("filter by source_authority\n")
 
   dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
   dataset_to_compute_rf<-dataset_to_compute_rf[which(dataset_to_compute_rf$source_authority %in% source_authority_filter),]
@@ -37,7 +37,8 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
     df_input_total = nominal_dataset_df,
     x_raising_dimensions = c(x_raising_dimensions,"unit")
   ) 
-  
+  cat("function rtunaatlas::raise_get_rf has been executed ! \n")
+
   if (fact=="catch"){
     raising_dimensions=c(x_raising_dimensions,"unit")
   } else if (fact=="effort"){
@@ -53,6 +54,8 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
                                                                       df_rf = df_rf,
                                                                       x_raising_dimensions = raising_dimensions,
                                                                       threshold_rf = NULL)
+  cat("function rtunaatlas::raise_incomplete_dataset_to_total_dataset has been executed ! \n")
+
   cat("end function_raise_data \n")
 
   return(data_raised)
