@@ -12,6 +12,7 @@ function_raising_georef_to_nominal<-function(entity,
   raising_raise_only_for_PS_LL <- options$raising_raise_only_for_PS_LL
   include_WCPFC <- options$include_WCPFC
   include_CCSBT <- options$include_CCSBT
+  include_IOTC <- options$include_IOTC
   
 
 cat("Raising georeferenced dataset to nominal dataset\n")
