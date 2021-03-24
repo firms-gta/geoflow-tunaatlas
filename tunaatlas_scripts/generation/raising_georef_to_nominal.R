@@ -13,6 +13,8 @@ function_raising_georef_to_nominal<-function(entity,
   include_WCPFC <- options$include_WCPFC
   include_CCSBT <- options$include_CCSBT
   include_IOTC <- options$include_IOTC
+  include_IATTC <- options$include_IATTC
+  include_ICCAT <- options$include_ICCAT
   
 
 cat("Raising georeferenced dataset to nominal dataset\n")
