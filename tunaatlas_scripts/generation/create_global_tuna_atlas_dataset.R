@@ -271,6 +271,10 @@ switch(DATA_LEVEL,
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
+		#@juldebar
+		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
+		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
+
 
 		
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
@@ -279,6 +283,10 @@ switch(DATA_LEVEL,
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 			config$logger.info("Retrieving RFMOs nominal catch...")
 			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
+		        #@juldebar
+			if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
+		        if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
+			
 			head(nominal_catch)
 			class(nominal_catch$value) <- "numeric"
 
