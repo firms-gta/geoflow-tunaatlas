@@ -364,11 +364,12 @@ switch(DATA_LEVEL,
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
 
+			          
 			
 			georef_dataset<-function_raising_georef_to_nominal(entity,
 									   config,
-									   georef_dataset,
-									   dataset_to_compute_rf,
+									   dataset_to_raise=georef_dataset,
+									   nominal_dataset_df=nominal_catch,
 									   nominal_catch,
 									   x_raising_dimensions)
 			config$logger.info("function function_raising_georef_to_nominal has been executed !")
