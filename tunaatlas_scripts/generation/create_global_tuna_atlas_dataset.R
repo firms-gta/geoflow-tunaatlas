@@ -242,6 +242,9 @@ switch(DATA_LEVEL,
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
+		#@juldebar
+		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
+		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
 		rm(dataset)
 		
 		#### 2) Convert units
@@ -272,8 +275,8 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
 		#@juldebar
-		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
-		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
+		#if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
+		#if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
 
 
 		
