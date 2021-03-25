@@ -416,9 +416,10 @@ switch(DATA_LEVEL,
 			config$logger.info("function function_raising_georef_to_nominal has been executed !")
 			
 			rm(dataset_to_compute_rf)
-			metadata$description<-paste0(metadata$description,georef_dataset$description)
-			metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-			metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+			#@juldebar: pending => metadata to be managed 
+			#metadata$description<-paste0(metadata$description,georef_dataset$description)
+			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
 			georef_dataset<-georef_dataset$dataset
 		  
 		} 
