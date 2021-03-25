@@ -147,7 +147,9 @@ switch(DATA_LEVEL,
 			georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, options$resolution_filter),]
 		}
 		
-		#### 4) Aggregates
+		#### 4) Spatial Aggregation of data
+ 		config$logger.info("Spatial Aggregation of data (5deg resolution datasets only")
+
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		## Aggregate data on 5° resolution quadrants
@@ -236,7 +238,7 @@ switch(DATA_LEVEL,
 		config$logger.info("Start generation of Level 1 products")
 
 		#### 1) Read Level 0 dataset
-		config$logger.info("Read Level 0 input")
+		config$logger.info("LEVEL 1 / STEP 1: Extract and load FIRMS Level 0 gridded catch data input")
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -278,7 +280,44 @@ switch(DATA_LEVEL,
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
-		}	
+		}
+		
+		config$logger.info("Disggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
+		
+		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
+		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
+													  georef_dataset=georef_dataset,
+													  resolution=5,
+													  action_to_do=options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		}
+
+		config$logger.info("Disggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
+		
+		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
+		  
+		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
+			
+		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+
+		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
+													  georef_dataset=georef_dataset,
+													  resolution=1,
+													  action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		  
+		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
+			
+		} 
 			
 			
 
@@ -290,7 +329,7 @@ switch(DATA_LEVEL,
 	"2" = {
 	
 		#### 1) Read Level 1 dataset
-		config$logger.info("Read Level 1 input")
+		config$logger.info("LEVEL 2 / STEP 1: Extract and load IRD Level 1 gridded catch data input")
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -300,14 +339,9 @@ switch(DATA_LEVEL,
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
-		#@juldebar
-		#if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
-		#if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
-
-
 		
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
-		config$logger.info("Read Level 0 nomincal catch to manage raising")
+		config$logger.info("LEVEL 2 / STEP 2: Extract and load FIRMS Level 0 nominal catch data input (required  to manage raising process) ")
 		
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		#-------------------------------------------------------------------------------------------------------------------------------------
@@ -325,12 +359,10 @@ switch(DATA_LEVEL,
 			config$logger.info("Retrieving RFMOs nominal catch OK")
 		}
 
-		config$logger.info("Retrieving Level1 and nominal catch datasets from the Tuna atlas Google drive OK")
+		config$logger.info("Retrieving IRD Level 1 gridded and nominal catch datasets from the Tuna atlas Google drive OK")
 
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		#### 5) Raise georeferenced to total (nominal) dataset
-		config$logger.info("Raise Level 1 input")
-		
+
+		config$logger.info("LEVEL 2 / STEP 3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$raising_georef_to_nominal) {   
@@ -421,76 +453,12 @@ switch(DATA_LEVEL,
 			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
 			georef_dataset<-georef_dataset$dataset
-		  
 		} 
-
-		#### 6) Spatial Aggregation / Disaggregation of data
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		## 6.1 Aggregate data on 5° resolution quadrants
-		#if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
-		# 
-		#	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-		#	georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
-		#	georef_dataset<-georef_dataset$df
-		#
-		#	# fill metadata elements
-		#	lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
-		#	aggregate_step = geoflow_process$new()
-		#	aggregate_step$setRationale(lineage)
-		#	aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
-		#	entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
-		#	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
-		#
-		#	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-		#
-		#} 
-
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		## 6.2 Disggregate data on 5° resolution quadrants
-		config$logger.info("Disggregate data on 5° resolution quadrants (5deg resolution dataset only)")
-		
-		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
-		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-		  
-		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
-													  georef_dataset=georef_dataset,
-													  resolution=5,
-													  action_to_do=options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
-		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  georef_dataset<-georef_dataset$dataset
-		}
-
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		## 6.3 Disggregate data on 1° resolution quadrants
-		config$logger.info("Disggregate data on 1° resolution quadrants (1deg resolution dataset only)")
-		
-		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
-		  
-		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
-			
-		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-
-		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
-		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
-													  georef_dataset=georef_dataset,
-													  resolution=1,
-													  action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
-		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  georef_dataset<-georef_dataset$dataset
-		  
-		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
-			
-		} 		
-
 	}
 )
 
-#final step
+
+config$logger.info("LEVEL 2 / STEP 4 (FINAL STEP)")
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
 dataset<-data.frame(dataset)
 
