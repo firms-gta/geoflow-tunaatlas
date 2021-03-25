@@ -233,8 +233,11 @@ switch(DATA_LEVEL,
 	#LEVEL 1
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"1" = {
-		
+		config$logger.info("Start generation of Level 1 products")
+
 		#### 1) Read Level 0 dataset
+		config$logger.info("Read Level 0 input")
+
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
@@ -248,6 +251,7 @@ switch(DATA_LEVEL,
 		rm(dataset)
 		
 		#### 2) Convert units
+		config$logger.info("Convert units by using A. Fonteneau file")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
@@ -255,10 +259,26 @@ switch(DATA_LEVEL,
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-			georef_dataset <- do_unit_conversion(entity, config, fact, options$unit_conversion_csv_conversion_factor_url, options$unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
+			georef_dataset <- do_unit_conversion(entity, config, fact,
+							     options$unit_conversion_csv_conversion_factor_url,
+							     options$unit_conversion_codelist_geoidentifiers_conversion_factors,
+							     mapping_map_code_lists,
+							     georef_dataset)
 		}
 			
-	
+
+		#### 3) Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension "geographic_identifier" set to "UNK/IND" or NA)
+		config$logger.info("Reallocation of data mislocated ")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
+		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
+		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,df=georef_dataset,
+									    spatial_curation_data_mislocated=spatial_curation_data_mislocated)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		}	
 			
 			
 
@@ -270,6 +290,8 @@ switch(DATA_LEVEL,
 	"2" = {
 	
 		#### 1) Read Level 1 dataset
+		config$logger.info("Read Level 1 input")
+		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
@@ -285,6 +307,8 @@ switch(DATA_LEVEL,
 
 		
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
+		config$logger.info("Read Level 0 nomincal catch to manage raising")
+		
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
@@ -305,6 +329,8 @@ switch(DATA_LEVEL,
 
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		#### 5) Raise georeferenced to total (nominal) dataset
+		config$logger.info("Raise Level 1 input")
+		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$raising_georef_to_nominal) {   
@@ -421,6 +447,8 @@ switch(DATA_LEVEL,
 
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		## 6.2 Disggregate data on 5° resolution quadrants
+		config$logger.info("Disggregate data on 5° resolution quadrants (5deg resolution data only")
+		
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R")) #modified for geoflow
 		  
@@ -432,6 +460,8 @@ switch(DATA_LEVEL,
 
 		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
 		## 6.3 Disggregate data on 1° resolution quadrants
+		config$logger.info("Disggregate data on 1° resolution quadrants (1deg resolution data only")
+		
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
 		  
 		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
@@ -448,18 +478,6 @@ switch(DATA_LEVEL,
 			
 		} 		
 
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		#### 7) Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension "geographic_identifier" set to "UNK/IND" or NA)
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
-		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
-		  
-		  georef_dataset<-function_spatial_curation_data_mislocated(con,georef_dataset,spatial_curation_data_mislocated)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  georef_dataset<-georef_dataset$dataset
-		}
 	}
 )
 
