@@ -72,7 +72,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 switch(DATA_LEVEL,
 
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 0
+	#LEVEL 0 FIRMS PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"0" = {
 
@@ -232,7 +232,7 @@ switch(DATA_LEVEL,
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 1
+	#LEVEL 1 IRD PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"1" = {
 		config$logger.info("Start generation of Level 1 products")
@@ -316,12 +316,12 @@ switch(DATA_LEVEL,
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 2 - TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+	#LEVEL 2 IRD PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"2" = {
 	
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 2 => STEP 1/4: Extract and load IRD Level 1 gridded catch data input")
+		config$logger.info("LEVEL 2 => STEP 1/3: Extract and load IRD Level 1 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -331,7 +331,7 @@ switch(DATA_LEVEL,
 		rm(dataset)
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 2 => STEP 2/4: Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
+		config$logger.info("LEVEL 2 => STEP 2/3: Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 			config$logger.info("Retrieving RFMOs nominal catch...")
@@ -348,7 +348,7 @@ switch(DATA_LEVEL,
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 2 => STEP 3/4: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
+		config$logger.info("LEVEL 2 => STEP 3/3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$raising_georef_to_nominal) {   
 		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
