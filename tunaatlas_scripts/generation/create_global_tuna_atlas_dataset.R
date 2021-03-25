@@ -86,14 +86,15 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
 
+		#@juldebar: lines below should be removed since not required to generate Level 0 products
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
-			config$logger.info("Retrieving RFMOs nominal catch...")
-			nominal_catch <-retrive_nominal_catch(entity, config, options)
-			config$logger.info("Retrieving RFMOs nominal catch OK")
-		}
+		#if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
+		#	config$logger.info("Retrieving RFMOs nominal catch...")
+		#	nominal_catch <-retrive_nominal_catch(entity, config, options)
+		#	config$logger.info("Retrieving RFMOs nominal catch OK")
+		#}
 
 		config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
 
