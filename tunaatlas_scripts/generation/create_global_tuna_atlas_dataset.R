@@ -470,7 +470,7 @@ switch(DATA_LEVEL,
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R")) #modified for geoflow
 
 		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
-		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,resolution=1,action_to_do=disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,resolution=1,action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
