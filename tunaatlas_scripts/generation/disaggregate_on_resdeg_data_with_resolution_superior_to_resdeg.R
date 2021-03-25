@@ -1,4 +1,7 @@
 function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg<-function(entity,config,options,georef_dataset,resolution,action_to_do){
+
+con <- config$software$output$dbi
+
 if (action_to_do=="disaggregate"){ 
   remove=FALSE 
   cat(paste0("Disaggregating data that are defined on quadrants or areas superior to ",resolution,"° quadrant resolution to corresponding ",resolution,"° quadrant by dividing the georef_dataset equally on the overlappings ",resolution,"° x ",resolution,"° quadrants...\n"))
