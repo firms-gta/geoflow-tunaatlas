@@ -237,10 +237,8 @@ switch(DATA_LEVEL,
 	"1" = {
 		config$logger.info("Start generation of Level 1 products")
 
-		#### 1) Read Level 0 dataset
-		config$logger.info("LEVEL 1 / STEP 1: Extract and load FIRMS Level 0 gridded catch data input")
-
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 1/5: Extract and load FIRMS Level 0 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -252,9 +250,8 @@ switch(DATA_LEVEL,
 		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
 		rm(dataset)
 		
-		#### 2) Convert units
-		config$logger.info("Convert units by using A. Fonteneau file")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 2/5: Convert units by using A. Fonteneau file")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
 			mapping_map_code_lists <- TRUE
@@ -269,9 +266,8 @@ switch(DATA_LEVEL,
 		}
 			
 
-		#### 3) Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension "geographic_identifier" set to "UNK/IND" or NA)
-		config$logger.info("Reallocation of data mislocated ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
@@ -282,8 +278,9 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		}
 		
-		config$logger.info("Disggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
-		
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 4/5: Disggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  
@@ -297,15 +294,14 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		}
 
-		config$logger.info("Disggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
-		
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 5/5: Disggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
-		  
-		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
 			
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-
 		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
+			
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
 													  resolution=1,
@@ -314,13 +310,9 @@ switch(DATA_LEVEL,
 		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
-		  
-		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
-			
 		} 
-			
-			
-
+	
+	#end LEVEL 1
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -328,10 +320,8 @@ switch(DATA_LEVEL,
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"2" = {
 	
-		#### 1) Read Level 1 dataset
-		config$logger.info("LEVEL 2 / STEP 1: Extract and load IRD Level 1 gridded catch data input")
-		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 1/4: Extract and load IRD Level 1 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -340,11 +330,9 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
 		
-		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
-		config$logger.info("LEVEL 2 / STEP 2: Extract and load FIRMS Level 0 nominal catch data input (required  to manage raising process) ")
-		
-		#-------------------------------------------------------------------------------------------------------------------------------------
-		#-------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 2/4: Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 			config$logger.info("Retrieving RFMOs nominal catch...")
 			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
@@ -359,11 +347,8 @@ switch(DATA_LEVEL,
 			config$logger.info("Retrieving RFMOs nominal catch OK")
 		}
 
-		config$logger.info("Retrieving IRD Level 1 gridded and nominal catch datasets from the Tuna atlas Google drive OK")
-
-
-		config$logger.info("LEVEL 2 / STEP 3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 3/4: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$raising_georef_to_nominal) {   
 		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
@@ -455,10 +440,15 @@ switch(DATA_LEVEL,
 			georef_dataset<-georef_dataset$dataset
 		} 
 	}
-)
+
+      #end switch level of processing
+      )
 
 
-config$logger.info("LEVEL 2 / STEP 4 (FINAL STEP)")
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+config$logger.info("ALL LEVELS (FINAL STEP): restructuring dataset before LOADING (in DRIVE / POSTGIS....)")
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
 dataset<-data.frame(dataset)
 
@@ -486,6 +476,9 @@ if(length(cl_relations)>0){
 		df_codelists <- read.csv(cl_relations[[1]]$link)
 	}
 }
+
+
+
 #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
 dataset <- list(
 	dataset = dataset, 
