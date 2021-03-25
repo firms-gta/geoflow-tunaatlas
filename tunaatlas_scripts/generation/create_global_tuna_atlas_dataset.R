@@ -416,7 +416,7 @@ switch(DATA_LEVEL,
 			config$logger.info("function function_raising_georef_to_nominal has been executed !")
 			
 			rm(dataset_to_compute_rf)
-			#@juldebar: pending => metadata to be managed 
+			#@juldebar: pending => metadata elements below to be managed (commented for now)
 			#metadata$description<-paste0(metadata$description,georef_dataset$description)
 			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
@@ -457,8 +457,9 @@ switch(DATA_LEVEL,
 													  georef_dataset=georef_dataset,
 													  resolution=5,
 													  action_to_do=options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
 		}
 
@@ -477,8 +478,9 @@ switch(DATA_LEVEL,
 													  georef_dataset=georef_dataset,
 													  resolution=1,
 													  action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
 		  
 		  config$logger.info(" Disggregate data on 1° resolution quadrants OK")
