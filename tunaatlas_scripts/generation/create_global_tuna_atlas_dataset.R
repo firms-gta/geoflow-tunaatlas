@@ -326,20 +326,34 @@ switch(DATA_LEVEL,
 	"2" = {
 	
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 2 => STEP 1/3: Extract and load IRD Level 1 gridded catch data input")
+		config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		raising_georef_to_nominal <- options$raising_georef_to_nominal
+		iattc_ps_raise_flags_to_schooltype <- options$iattc_ps_raise_flags_to_schooltype
+ 		iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
+  		iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
+		iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
+		
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 2/3: Extract and load IRD Level 1 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		rm(dataset)
 		
+
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 2 => STEP 2/3: Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
+		config$logger.info("LEVEL 2 => STEP 3/3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
-			config$logger.info("Retrieving RFMOs nominal catch...")
+		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
+			
+		config$logger.info("Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
 			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
 		        #@juldebar keep same units for all datatets
 			if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
@@ -347,21 +361,16 @@ switch(DATA_LEVEL,
 			class(nominal_catch$value) <- "numeric"
 		        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
 			#nominal_catch <-retrieve_nominal_catch(entity, config, options)
-			config$logger.info("Retrieving RFMOs nominal catch OK")
-		}
-
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 2 => STEP 3/3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$raising_georef_to_nominal) {   
-		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
-		  
+			config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
+			
+		config$logger.info("Start raising process")
 		  
 		  if (fact=="catch"){
-			  config$logger.info("Fact=catch !")
 			  
-			dataset_to_compute_rf=georef_dataset
-			x_raising_dimensions=c("flag","gear","species","year","source_authority")
+			  config$logger.info("Fact=catch !")
+			  dataset_to_compute_rf=georef_dataset
+			  x_raising_dimensions=c("flag","gear","species","year","source_authority")
+			  
 		  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
 			cat("Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n")
 			dataset_catch<-NULL
@@ -382,19 +391,19 @@ switch(DATA_LEVEL,
 			}
 			if (include_IATTC=="TRUE"){
 			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IATTC",
-																  "catch",
-																  datasets_year_release,
-																  iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
-																  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-																  iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
+									      "catch",
+									      datasets_year_release,
+									      iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
+									      iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
+									      iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
 			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
 			  rm(rfmo_dataset)
 			}
 			if (include_ICCAT=="TRUE"){
 			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("ICCAT",
-																  "catch",
-																  datasets_year_release,
-																  iccat_ps_include_type_of_school=iccat_ps_include_type_of_school)
+									      "catch",
+									      datasets_year_release,
+									      iccat_ps_include_type_of_school=iccat_ps_include_type_of_school)
 			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
 			  rm(rfmo_dataset)
 			}
@@ -411,11 +420,16 @@ switch(DATA_LEVEL,
 			dataset_catch$time_end<-substr(as.character(dataset_catch$time_end), 1, 10)
 			if (unit_conversion_convert=="TRUE"){ 
 			  # We use our conversion factors (IRD). This should be an input parameter of the script
-			  dataset_catch<-function_unit_conversion_convert(con,fact="catch",unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",mapping_map_code_lists,dataset_catch)$dataset
+			  dataset_catch<-function_unit_conversion_convert(con,
+									  fact="catch",
+									  unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",
+									  unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",
+									  mapping_map_code_lists,
+									  dataset_catch)$dataset
 			}
 			
 			dataset_to_compute_rf=dataset_catch
-			  #@juldebar try patch to fix error in rtunaatlas::raise_get_rf function
+			#@juldebar insert patch below to fix error in rtunaatlas::raise_get_rf function
 			class(dataset_to_compute_rf$value) <- "numeric"
 
 			rm(dataset_catch)
@@ -424,23 +438,21 @@ switch(DATA_LEVEL,
 		
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
-
-			          
-			
 			georef_dataset<-function_raising_georef_to_nominal(entity,
 									   config,
 									   dataset_to_raise=georef_dataset,
 									   nominal_dataset_df=nominal_catch,
 									   nominal_catch,
 									   x_raising_dimensions)
-			config$logger.info("function function_raising_georef_to_nominal has been executed !")
 			
 			rm(dataset_to_compute_rf)
+			
 			#@juldebar: pending => metadata elements below to be managed (commented for now)
 			#metadata$description<-paste0(metadata$description,georef_dataset$description)
 			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
 			georef_dataset<-georef_dataset$dataset
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		} 
 	#end swith LEVEL 2
 	}
