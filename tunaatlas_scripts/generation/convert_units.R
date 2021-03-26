@@ -50,6 +50,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		}
 	}
 	## For catches: Convert MTNO to MT and remove NOMT (we do not keep the data that were expressed in number with corresponding value in weight)
+	#@juldebar => see what to do with redundant action in Level 0 workflow
 	if (fact=="catch"){
 		georef_dataset$unit[which(georef_dataset$unit == "MTNO")]<-"MT"
 		georef_dataset<-georef_dataset[!(georef_dataset$unit=="NOMT"),]
