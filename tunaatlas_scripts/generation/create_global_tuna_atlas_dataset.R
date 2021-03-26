@@ -288,8 +288,8 @@ switch(DATA_LEVEL,
 									    df=georef_dataset,
 									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
