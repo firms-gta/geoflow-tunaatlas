@@ -258,7 +258,8 @@ switch(DATA_LEVEL,
 		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
 		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
 		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-		config$logger.info(sprintf("Gridded catch dataset for MY unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="MT"))))
+		config$logger.info(sprintf("Gridded catch dataset for 'MT' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="MT"))))
+		config$logger.info(sprintf("Gridded catch dataset for 'NO' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="NO"))))
 		rm(dataset)
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
