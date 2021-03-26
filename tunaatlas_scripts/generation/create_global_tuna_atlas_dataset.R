@@ -63,6 +63,11 @@ con <- config$software$output$dbi
 
 #set parameterization
 fact <- options$fact
+raising_georef_to_nominal <- options$raising_georef_to_nominal
+iattc_ps_raise_flags_to_schooltype <- options$iattc_ps_raise_flags_to_schooltype
+iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
+iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
+iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
 
 #Identify expected Level of processing
 DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
