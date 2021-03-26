@@ -121,6 +121,8 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 
 	# to get stats on the process (useful for metadata)
 	# georef_dataset$stats
+	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
+	cat(georef_dataset$stats)
 
 	georef_dataset<-georef_dataset$df
 	
