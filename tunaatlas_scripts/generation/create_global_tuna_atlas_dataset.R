@@ -61,12 +61,10 @@ source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modifie
 # connect to Tuna atlas database
 con <- config$software$output$dbi
 
-#### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
-config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
-
+#set parameterization
 fact <- options$fact
 
-#LEVEL
+#Identify expected Level of processing
 DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 
 switch(DATA_LEVEL,
@@ -76,8 +74,11 @@ switch(DATA_LEVEL,
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"0" = {
 
-		### 1.1 Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)
+		#### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
+		config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
+
 		#-------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 1/8:Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)")
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -96,11 +97,8 @@ switch(DATA_LEVEL,
 		#	config$logger.info("Retrieving RFMOs nominal catch OK")
 		#}
 
-		config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
-
-
-		#### 2) Map code lists 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
 		  
@@ -121,18 +119,19 @@ switch(DATA_LEVEL,
 		  }
 		}
 
-		#### 3) Filters
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#### 3.1 Filter data by groups of gears
 		if (!is.null(options$gear_filter)){
 			gear_filter<-unlist(strsplit(options$gear_filter, split=","))
 			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 			georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
 			config$logger.info("Filtering gears OK")
 		}
-
-		#### 3.2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
+		
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 4/8: Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs? ")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
 			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
 			if (options$SBF_data_rfmo_to_keep=="CCSBT"){
@@ -143,17 +142,17 @@ switch(DATA_LEVEL,
 			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
 		}
 		
-		#### 3.3 Grid spatial resolution filter
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 5/8: Grid spatial resolution filter")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		
 		if (!is.null(options$resolution_filter)){
 			georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, options$resolution_filter),]
 		}
 		
-		#### 4) Spatial Aggregation of data
- 		config$logger.info("Spatial Aggregation of data (5deg resolution datasets only")
-
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 6/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		## Aggregate data on 5° resolution quadrants
 		if(!is.null(options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
 		 
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
@@ -172,8 +171,8 @@ switch(DATA_LEVEL,
 		
 		}
 
-		#### 5) Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 7/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlapping_zone_iattc_wcpfc_data_to_keep)) {
 		 
@@ -224,12 +223,16 @@ switch(DATA_LEVEL,
 		}
 		
 		
-		### Units harmonization
+		### @juldebar => the lines below generates errors in the workflow thereafter if no patch to restore previous units
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 8/8: Units harmonization")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(any(georef_dataset$unit == "MT")) georef_dataset[georef_dataset$unit == "MT", ]$unit <- "t"
 		if(any(georef_dataset$unit == "NO")) georef_dataset[georef_dataset$unit == "NO", ]$unit <- "no"
 		if(any(georef_dataset$unit == "MTNO")) georef_dataset[georef_dataset$unit == "MTNO", ]$unit <- "t"
 		if(any(georef_dataset$unit == "NOMT")) georef_dataset[georef_dataset$unit == "NOMT", ]$unit <- "no"
+		
+	#end swith LEVEL 0
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -246,7 +249,7 @@ switch(DATA_LEVEL,
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
-		#@juldebar
+		#@juldebar patch to fix errors due to the last step of Level 0 workflow
 		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
 		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
 		rm(dataset)
@@ -259,7 +262,7 @@ switch(DATA_LEVEL,
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-			georef_dataset <- do_unit_conversion(entity, config, fact,
+			georef_dataset <- do_unit_conversion(entity, config,fact,
 							     options$unit_conversion_csv_conversion_factor_url,
 							     options$unit_conversion_codelist_geoidentifiers_conversion_factors,
 							     mapping_map_code_lists,
@@ -272,8 +275,9 @@ switch(DATA_LEVEL,
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
-		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,df=georef_dataset,
-									    spatial_curation_data_mislocated=spatial_curation_data_mislocated)
+		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
+									    df=georef_dataset,
+									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
@@ -313,7 +317,7 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		} 
 	
-	#end LEVEL 1
+	#end swith LEVEL 1
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -337,14 +341,12 @@ switch(DATA_LEVEL,
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 			config$logger.info("Retrieving RFMOs nominal catch...")
 			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
-		        #@juldebar
+		        #@juldebar keep same units for all datatets
 			if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
 		        if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
-			
-			head(nominal_catch)
 			class(nominal_catch$value) <- "numeric"
-
-			#nominal_catch <-retrive_nominal_catch(entity, config, options)
+		        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
+			#nominal_catch <-retrieve_nominal_catch(entity, config, options)
 			config$logger.info("Retrieving RFMOs nominal catch OK")
 		}
 
@@ -440,9 +442,9 @@ switch(DATA_LEVEL,
 			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
 			georef_dataset<-georef_dataset$dataset
 		} 
+	#end swith LEVEL 2
 	}
-
-      #end switch level of processing
+      #end switch levels of processing
       )
 
 
