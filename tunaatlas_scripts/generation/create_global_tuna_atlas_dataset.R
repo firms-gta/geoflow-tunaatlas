@@ -262,10 +262,10 @@ switch(DATA_LEVEL,
 		config$logger.info(sprintf("Gridded catch dataset for 'NO' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="NO"))))
 		rm(dataset)
 		
+		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 1 => STEP 2/5: Convert units by using A. Fonteneau file")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
 			mapping_map_code_lists <- TRUE
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
@@ -279,24 +279,25 @@ switch(DATA_LEVEL,
 		}
 			
 
+		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
 		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
 									    df=georef_dataset,
 									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 		
+		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 1 => STEP 4/5: Disggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
@@ -310,11 +311,10 @@ switch(DATA_LEVEL,
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 
+		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 1 => STEP 5/5: Disggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
-			
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
 			
@@ -348,7 +348,6 @@ switch(DATA_LEVEL,
 		iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 2 => STEP 2/3: Extract and load IRD Level 1 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
@@ -360,11 +359,11 @@ switch(DATA_LEVEL,
 		rm(dataset)
 		
 
+		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 2 => STEP 3/3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
-		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
+		source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
 			
 		config$logger.info("Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
 			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
