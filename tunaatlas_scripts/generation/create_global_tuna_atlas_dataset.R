@@ -252,6 +252,8 @@ switch(DATA_LEVEL,
 		#@juldebar patch to fix errors due to the last step of Level 0 workflow
 		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
 		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		config$logger.info(sprintf("Gridded catch dataset for MY unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="MT"))))
 		rm(dataset)
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -267,6 +269,7 @@ switch(DATA_LEVEL,
 							     options$unit_conversion_codelist_geoidentifiers_conversion_factors,
 							     mapping_map_code_lists,
 							     georef_dataset)
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 			
 
@@ -281,6 +284,7 @@ switch(DATA_LEVEL,
 		  metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -297,6 +301,7 @@ switch(DATA_LEVEL,
 		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -315,6 +320,8 @@ switch(DATA_LEVEL,
 		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
 		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  georef_dataset<-georef_dataset$dataset
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+
 		} 
 	
 	#end swith LEVEL 1
