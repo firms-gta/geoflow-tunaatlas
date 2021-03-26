@@ -1,9 +1,11 @@
 function_spatial_curation_data_mislocated<-function(entity,config,df,spatial_curation_data_mislocated){
   con <- config$software$output$dbi
-cat("Reallocating data that are in land areas...\n")
+	config$logger.info("Reallocating data that are in land areas")
 
 #all the data that are inland or do not have any spatial stratification ("UNK/IND",NA) are dealt (either removed - spatial_curation_data_mislocated=="remove" - or reallocated - spatial_curation_data_mislocated=="reallocate" )
-
+config$logger.info("Executing rtunaatlas::spatial_curation_intersect_areas")
+  #@juldebar => georef_dataset was not set
+  georef_dataset <- df
 areas_in_land<-rtunaatlas::spatial_curation_intersect_areas(con,georef_dataset,"areas_tuna_rfmos_task2","gshhs_world_coastlines")
 
 areas_in_land<-areas_in_land$df_input_areas_intersect_intersection_layer %>%
