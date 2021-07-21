@@ -38,7 +38,9 @@ load_dataset <- function(entity, config, options){
   dataset_pid <- entity$identifiers[["id"]]
   
   #enrich entity with id_version
-  id_version <- paste0(dataset_pid, "_", gsub("-","_", format(entity$temporal_extent$start, "%Y-%m-%d")),"_", gsub("-","_", format(entity$temporal_extent$end, "%Y-%m-%d")), "_", format(Sys.Date(),"%Y"))
+  # @juldebar temporary patch to fix errors with the line below
+  #id_version <- paste0(dataset_pid, "_", gsub("-","_", format(entity$temporal_extent$start, "%Y-%m-%d")),"_", gsub("-","_", format(entity$temporal_extent$end, "%Y-%m-%d")), "_", format(Sys.Date(),"%Y"))
+  id_version <- dataset_pid
   entity$setIdentifier("id_version", id_version)
   entity$enrichWithMetadata()
   

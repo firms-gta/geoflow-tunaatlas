@@ -71,7 +71,9 @@ colnames(CCSBT_NC)<-gsub("\r\n", "_", colnames(CCSBT_NC))
 colnames(CCSBT_NC)<-gsub(" ", "_", colnames(CCSBT_NC)) 
 
 CCSBT_NC<-as.data.frame(CCSBT_NC)
-CCSBT_NC<-reshape::melt(CCSBT_NC, id.vars="Calendar_Year") 
+# CCSBT_NC<-reshape::melt(CCSBT_NC, id.vars="Calendar_Year") 
+CCSBT_NC <- CCSBT_NC %>% tidyr::gather(variable, value, -"Calendar_Year")
+
 CCSBT_NC$variable<-as.character(CCSBT_NC$variable)
 
 CCSBT_NC$variable<-gsub("_", " ", CCSBT_NC$variable)

@@ -61,23 +61,29 @@ source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modifie
 # connect to Tuna atlas database
 con <- config$software$output$dbi
 
-#### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
-config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
-
+#set parameterization
 fact <- options$fact
+raising_georef_to_nominal <- options$raising_georef_to_nominal
+iattc_ps_raise_flags_to_schooltype <- options$iattc_ps_raise_flags_to_schooltype
+iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
+iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
+iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
 
-#LEVEL
+#Identify expected Level of processing
 DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 
 switch(DATA_LEVEL,
 
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 0
+	#LEVEL 0 FIRMS PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"0" = {
 
-		### 1.1 Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)
+		#### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
+		config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
+
 		#-------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 1/8:Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)")
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -86,20 +92,18 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
 
+		#@juldebar: lines below should be removed since not required to generate Level 0 products
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
-			config$logger.info("Retrieving RFMOs nominal catch...")
-			nominal_catch <-retrive_nominal_catch(entity, config, options)
-			config$logger.info("Retrieving RFMOs nominal catch OK")
-		}
+		#if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
+		#	config$logger.info("Retrieving RFMOs nominal catch...")
+		#	nominal_catch <-retrive_nominal_catch(entity, config, options)
+		#	config$logger.info("Retrieving RFMOs nominal catch OK")
+		#}
 
-		config$logger.info("Retrieving primary datasets from the Tuna atlas DB OK")
-
-
-		#### 2) Map code lists 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
 		  
@@ -120,18 +124,19 @@ switch(DATA_LEVEL,
 		  }
 		}
 
-		#### 3) Filters
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#### 3.1 Filter data by groups of gears
 		if (!is.null(options$gear_filter)){
 			gear_filter<-unlist(strsplit(options$gear_filter, split=","))
 			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 			georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
 			config$logger.info("Filtering gears OK")
 		}
-
-		#### 3.2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
+		
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 4/8: Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs? ")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
 			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
 			if (options$SBF_data_rfmo_to_keep=="CCSBT"){
@@ -142,15 +147,17 @@ switch(DATA_LEVEL,
 			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
 		}
 		
-		#### 3.3 Grid spatial resolution filter
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 5/8: Grid spatial resolution filter")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		
 		if (!is.null(options$resolution_filter)){
 			georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, options$resolution_filter),]
 		}
 		
-		#### 4) Aggregates
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 6/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		## Aggregate data on 5° resolution quadrants
 		if(!is.null(options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
 		 
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
@@ -169,8 +176,8 @@ switch(DATA_LEVEL,
 		
 		}
 
-		#### 5) Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 7/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlapping_zone_iattc_wcpfc_data_to_keep)) {
 		 
@@ -221,69 +228,161 @@ switch(DATA_LEVEL,
 		}
 		
 		
-		### Units harmonization
+		### @juldebar => the lines below generates errors in the workflow thereafter if no patch to restore previous units
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 0 => STEP 8/8: Units harmonization")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(any(georef_dataset$unit == "MT")) georef_dataset[georef_dataset$unit == "MT", ]$unit <- "t"
 		if(any(georef_dataset$unit == "NO")) georef_dataset[georef_dataset$unit == "NO", ]$unit <- "no"
 		if(any(georef_dataset$unit == "MTNO")) georef_dataset[georef_dataset$unit == "MTNO", ]$unit <- "t"
 		if(any(georef_dataset$unit == "NOMT")) georef_dataset[georef_dataset$unit == "NOMT", ]$unit <- "no"
+		
+	#end swith LEVEL 0
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 1
+	#LEVEL 1 IRD PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"1" = {
-		
-		#### 1) Read Level 0 dataset
+		config$logger.info("Start generation of Level 1 products")
+
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 1/5: Extract and load FIRMS Level 0 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
+		#@juldebar patch to fix errors due to the last step of Level 0 workflow
+		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
+		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		config$logger.info(sprintf("Gridded catch dataset for 'MT' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="MT"))))
+		config$logger.info(sprintf("Gridded catch dataset for 'NO' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="NO"))))
 		rm(dataset)
 		
-		#### 2) Convert units
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 2/5: Convert units by using A. Fonteneau file")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 			mapping_map_code_lists <- TRUE
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-			georef_dataset <- do_unit_conversion(entity, config, fact, options$unit_conversion_csv_conversion_factor_url, options$unit_conversion_codelist_geoidentifiers_conversion_factors, mapping_map_code_lists, georef_dataset)
+			georef_dataset <- do_unit_conversion(entity, config,fact,
+							     options$unit_conversion_csv_conversion_factor_url,
+							     options$unit_conversion_codelist_geoidentifiers_conversion_factors,
+							     mapping_map_code_lists,
+							     georef_dataset)
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		}
+			
+
+		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
+		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
+									    df=georef_dataset,
+									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 		
+		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 4/5: Disggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
+													  georef_dataset=georef_dataset,
+													  resolution=5,
+													  action_to_do=options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		}
+
+		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 1 => STEP 5/5: Disggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
+			
+		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
+													  georef_dataset=georef_dataset,
+													  resolution=1,
+													  action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  georef_dataset<-georef_dataset$dataset
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+
+		} 
+	
+	#end swith LEVEL 1
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 2 - TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
+	#LEVEL 2 IRD PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"2" = {
 	
-		#### 1) Read Level 1 dataset
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		raising_georef_to_nominal <- options$raising_georef_to_nominal
+		iattc_ps_raise_flags_to_schooltype <- options$iattc_ps_raise_flags_to_schooltype
+ 		iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
+  		iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
+		iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
+		
+		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 2/3: Extract and load IRD Level 1 gridded catch data input")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		rm(dataset)
+		
 
-
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		#### 5) Raise georeferenced to total (nominal) dataset
+		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+		config$logger.info("LEVEL 2 => STEP 3/3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$raising_georef_to_nominal) {   
-		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
-		  
+		source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
+			
+		config$logger.info("Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
+			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
+		        #@juldebar keep same units for all datatets
+			if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
+		        if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
+			class(nominal_catch$value) <- "numeric"
+		        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
+			#nominal_catch <-retrieve_nominal_catch(entity, config, options)
+			config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
+			
+		config$logger.info("Start raising process")
 		  
 		  if (fact=="catch"){
-			dataset_to_compute_rf=georef_dataset
-			x_raising_dimensions=c("flag","gear","species","year","source_authority")
+			  
+			  config$logger.info("Fact=catch !")
+			  dataset_to_compute_rf=georef_dataset
+			  x_raising_dimensions=c("flag","gear","species","year","source_authority")
+			  
 		  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
 			cat("Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n")
 			dataset_catch<-NULL
@@ -304,19 +403,19 @@ switch(DATA_LEVEL,
 			}
 			if (include_IATTC=="TRUE"){
 			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IATTC",
-																  "catch",
-																  datasets_year_release,
-																  iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
-																  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-																  iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
+									      "catch",
+									      datasets_year_release,
+									      iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
+									      iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
+									      iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
 			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
 			  rm(rfmo_dataset)
 			}
 			if (include_ICCAT=="TRUE"){
 			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("ICCAT",
-																  "catch",
-																  datasets_year_release,
-																  iccat_ps_include_type_of_school=iccat_ps_include_type_of_school)
+									      "catch",
+									      datasets_year_release,
+									      iccat_ps_include_type_of_school=iccat_ps_include_type_of_school)
 			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
 			  rm(rfmo_dataset)
 			}
@@ -333,83 +432,50 @@ switch(DATA_LEVEL,
 			dataset_catch$time_end<-substr(as.character(dataset_catch$time_end), 1, 10)
 			if (unit_conversion_convert=="TRUE"){ 
 			  # We use our conversion factors (IRD). This should be an input parameter of the script
-			  dataset_catch<-function_unit_conversion_convert(con,fact="catch",unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",mapping_map_code_lists,dataset_catch)$dataset
+			  dataset_catch<-function_unit_conversion_convert(con,
+									  fact="catch",
+									  unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",
+									  unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",
+									  mapping_map_code_lists,
+									  dataset_catch)$dataset
 			}
 			
 			dataset_to_compute_rf=dataset_catch
+			#@juldebar insert patch below to fix error in rtunaatlas::raise_get_rf function
+			class(dataset_to_compute_rf$value) <- "numeric"
+
 			rm(dataset_catch)
 			x_raising_dimensions=c("flag","gear","year","source_authority")
 		  }
+		
 			
-			georef_dataset<-function_raising_georef_to_nominal(fact,georef_dataset,dataset_to_compute_rf,nominal_catch,x_raising_dimensions,raising_do_not_raise_wcfpc_data,raising_raise_only_for_PS_LL)
+			config$logger.info("Executing function function_raising_georef_to_nominal")
+			georef_dataset<-function_raising_georef_to_nominal(entity,
+									   config,
+									   dataset_to_raise=georef_dataset,
+									   nominal_dataset_df=nominal_catch,
+									   nominal_catch,
+									   x_raising_dimensions)
+			
 			rm(dataset_to_compute_rf)
-			metadata$description<-paste0(metadata$description,georef_dataset$description)
-			metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-			metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+			
+			#@juldebar: pending => metadata elements below to be managed (commented for now)
+			#metadata$description<-paste0(metadata$description,georef_dataset$description)
+			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
 			georef_dataset<-georef_dataset$dataset
-		  
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		} 
-
-		#### 6) Spatial Aggregation / Disaggregation of data
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		## 6.1 Aggregate data on 5° resolution quadrants
-		#if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) { 
-		# 
-		#	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-		#	georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
-		#	georef_dataset<-georef_dataset$df
-		#
-		#	# fill metadata elements
-		#	lineage<-"Data that were provided at spatial resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant."
-		#	aggregate_step = geoflow_process$new()
-		#	aggregate_step$setRationale(lineage)
-		#	aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
-		#	entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
-		#	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
-		#
-		#	config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-		#
-		#} 
-
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		## 6.2 Disggregate data on 5° resolution quadrants
-		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
-		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R")) #modified for geoflow
-		  
-		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,5,disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  georef_dataset<-georef_dataset$dataset
-		}
-
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		## 6.3 Disggregate data on 1° resolution quadrants
-		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
-		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R")) #modified for geoflow
-		  
-		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(con,georef_dataset,1,disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  georef_dataset<-georef_dataset$dataset
-		} 
-
-		# TODO --> ADAPT R CODE (NOT YET INTEGRATED IN GEOFLOW-TUNAATLAS)
-		#### 7) Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension "geographic_identifier" set to "UNK/IND" or NA)
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
-		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
-		  
-		  georef_dataset<-function_spatial_curation_data_mislocated(con,georef_dataset,spatial_curation_data_mislocated)
-		  metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  georef_dataset<-georef_dataset$dataset
-		}
+	#end swith LEVEL 2
 	}
-)
+      #end switch levels of processing
+      )
 
-#final step
+
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+config$logger.info("ALL LEVELS (FINAL STEP): restructuring dataset before LOADING (in DRIVE / POSTGIS....)")
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
 dataset<-data.frame(dataset)
 
@@ -437,6 +503,9 @@ if(length(cl_relations)>0){
 		df_codelists <- read.csv(cl_relations[[1]]$link)
 	}
 }
+
+
+
 #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
 dataset <- list(
 	dataset = dataset, 

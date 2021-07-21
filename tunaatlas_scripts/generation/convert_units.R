@@ -50,6 +50,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		}
 	}
 	## For catches: Convert MTNO to MT and remove NOMT (we do not keep the data that were expressed in number with corresponding value in weight)
+	#@juldebar => see what to do with redundant action in Level 0 workflow
 	if (fact=="catch"){
 		georef_dataset$unit[which(georef_dataset$unit == "MTNO")]<-"MT"
 		georef_dataset<-georef_dataset[!(georef_dataset$unit=="NOMT"),]
@@ -104,21 +105,31 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		georef_dataset <- georef_dataset[column_names_df_input]
 
 	}
-																							 
+	
+	config$logger.info("Execute rtunaatlas::convert_units() function ...\n")
+	config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+
 	georef_dataset<-rtunaatlas::convert_units(con = con,
-									 df_input = georef_dataset,
-									 df_conversion_factor = df_conversion_factor,
-									 codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
-									 codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
-	)
+						  df_input = georef_dataset,
+						  df_conversion_factor = df_conversion_factor,
+						  codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
+						  codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
+						 )
+	
+	config$logger.info("rtunaatlas::convert_units() function executed !\n")
+	config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 
 	# to get stats on the process (useful for metadata)
 	# georef_dataset$stats
+	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
+	cat(georef_dataset$stats)
 
 	georef_dataset<-georef_dataset$df
 	
 	#filter by unit MT
+	#@juldebar => must be "t" now with changes on Level 0
 	georef_dataset <- georef_dataset[georef_dataset$unit == "MT", ]
+	#georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]
 
 	if (mapping_map_code_lists=="FALSE"){
 	  # resetting gear coding system to primary gear coding system
@@ -131,6 +142,8 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	}
 
 	# fill metadata elements
+	config$logger.info("Fill metadata elements accordingly\n")
+
 	lineage <- 
 	description <- ""
 	info <- NULL
@@ -147,13 +160,17 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	  description <- "- Units for the measures were harmonized."
 	  info <- NULL
 	}
+	#@juldebar modify FIRMS-Secretariat@fao.org 
+	#@juldebar begin commented
+	#@config$logger.info("Fill contact metadata elements \n")
+	#@firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
+	#@firms_contact$setRole("processor")
+	#@conversion_step <- geoflow_process$new()
+	#@conversion_step$setRationale(lineage)
+	#@conversion_step$setProcessor(firms_contact)
+	#@entity$provenance$processes <- c(entity$provenance$processes, conversion_step)
+	#@juldebar end commented
 	
-	firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "firms-secretariat@fao.org"})][[1]]
-	firms_contact$setRole("processor")
-	conversion_step <- geoflow_process$new()
-	conversion_step$setRationale(lineage)
-	conversion_step$setProcessor(firms_contact)
-	entity$provenance$processes <- c(entity$provenance$processes, conversion_step)
 	entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", description)
 	if(!is.null(info)){	
 		if(!is.null(entity$descriptions[["info"]])){
