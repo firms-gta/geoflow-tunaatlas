@@ -11,12 +11,12 @@ register_source_authority <- function(config){
 	return(out)
 }
 
-#register_fishing_fleet
-register_fishing_fleet <- function(config){
+#register_fishingfleet
+register_fishingfleet <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM fishing_fleet.fishing_fleet_labels WHERE tablesource_fishing_fleet = 'fishing_fleet_firms'")
+	fetched <- dbGetQuery(con, "SELECT * FROM fishingfleet.fishingfleet_labels WHERE tablesource_fishingfleet = 'fishingfleet_firms'")
 	out <- data.frame(
-		code = fetched$codesource_fishing_fleet,
+		code = fetched$codesource_fishingfleet,
 		uri = NA,
 		label = fetched$source_label,
 		definition = NA
