@@ -1,6 +1,6 @@
 
 -- prerequisite
-ALTER TABLE area.irregular_areas_task2_iotc ALTER column geom type geometry(GEOMETRY, 4326); -- missing
+-- ALTER TABLE area.irregular_areas_task2_iotc ALTER column geom type geometry(GEOMETRY, 4326); -- missing
 
 DROP VIEW IF EXISTS area.area_labels;
 
