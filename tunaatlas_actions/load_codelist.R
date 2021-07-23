@@ -103,7 +103,7 @@ load_codelist <- function(entity, config, options){
   InputMetadataset <- data.frame(
     identifier = entity$identifiers[["id"]],
     persistent_identifier = entity$identifiers[["id"]],
-    title = entity$title,
+    title = entity$titles[["title"]],
     contacts_and_roles = geoflow_df$Creator,
     subject = geoflow_df$Subject,
     description = geoflow_df$Description,
