@@ -57,7 +57,7 @@ load_mapping<-function(entity, config, options){
               " FROM ",DBDimensionName,".",DBDimensionName,
               " WHERE tablesource_",DBDimensionName,"='",src_codingsystem_table_name$database_table_name,"'",sep="")   
   FromTable<-dbGetQuery(con, sql1)
-  if("codesource_flag" %in% colnames(FromTable)) Encoding(FromTable$codesource_flag) <- "UTF-8" #required on Windows OS
+  if("codesource_fishingfleet" %in% colnames(FromTable)) Encoding(FromTable$codesource_fishingfleet) <- "UTF-8" #required on Windows OS
   if("codesource_species" %in% colnames(FromTable)) Encoding(FromTable$codesource_species) <- "UTF-8" #required on Windows OS
   
   sql2<- paste("SELECT id_",DBDimensionName,",codesource_",DBDimensionName,
