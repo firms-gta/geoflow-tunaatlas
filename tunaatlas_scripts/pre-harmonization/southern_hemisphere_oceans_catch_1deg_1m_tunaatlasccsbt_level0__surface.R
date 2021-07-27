@@ -26,7 +26,7 @@
   
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
   #   AU   BB 1976-09-01 1976-10-01  6337150    ALL     SBT       ALL         MT  36.2
   #   AU   BB 1976-10-01 1976-11-01  6337150    ALL     SBT       ALL         MT  41.0
   #   AU   BB 1976-12-01 1977-01-01  6332132    ALL     SBT       ALL         MT 167.5
@@ -74,8 +74,8 @@ RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),]
 RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
 RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
 
-#Flag
-RFMO_CE$Flag<-RFMO_CE$COUNTRY_CODE
+#FishingFleet
+RFMO_CE$FishingFleet<-RFMO_CE$COUNTRY_CODE
 
 #Gear
 RFMO_CE$Gear<-RFMO_CE$GEAR_CODE
@@ -107,12 +107,12 @@ RFMO_CE$Catch<-RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED/1000
 
 RFMO_CE$CatchUnits<-"MT"
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches <-RFMO_CE[,colToKeep_captures]
 
 
 #remove whitespaces on columns that should not have withespace
-catches[,c("AreaName","Flag")]<-as.data.frame(apply(catches[,c("AreaName","Flag")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
+catches[,c("AreaName","FishingFleet")]<-as.data.frame(apply(catches[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 
 # remove 0 and NA values 
 #catches <- catches  %>% 
@@ -122,13 +122,13 @@ catches <- catches[!is.na(catches$Catch),]
 catches <- catches[catches$Catch != 0,]
 
 #catches <- catches %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #catches<-as.data.frame(catches)
 
 catches <- aggregate(catches$Catch, FUN = sum,
 	by = list(
-		Flag = catches$Flag,
+		FishingFleet = catches$FishingFleet,
 		Gear = catches$Gear,
 		time_start = catches$time_start,
 		time_end = catches$time_end,
@@ -140,7 +140,7 @@ catches <- aggregate(catches$Catch, FUN = sum,
 	)
 )
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"CCSBT"
  
 #----------------------------------------------------------------------------------------------------------------------------

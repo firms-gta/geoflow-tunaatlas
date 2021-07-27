@@ -27,7 +27,7 @@
   
   
   # final data sample:
-  #Flag     Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  # FishingFleet     Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
   #  ALL Gill Net 1982-01-01 1983-01-01    CCSBT    ALL     SBF       ALL         MT    11
   #  ALL Gill Net 1983-01-01 1984-01-01    CCSBT    ALL     SBF       ALL         MT    12
   #  ALL Gill Net 1985-01-01 1986-01-01    CCSBT    ALL     SBF       ALL         MT    67
@@ -78,8 +78,8 @@ CCSBT_NC$variable<-as.character(CCSBT_NC$variable)
 
 CCSBT_NC$variable<-gsub("_", " ", CCSBT_NC$variable)
 
-#Flag
-CCSBT_NC$Flag<-"ALL"
+#FishingFleet
+CCSBT_NC$FishingFleet<-"ALL"
 
 #Gear
 CCSBT_NC$Gear<-CCSBT_NC$variable
@@ -112,25 +112,25 @@ CCSBT_NC$Catch<-CCSBT_NC$value
 
 CCSBT_NC$CatchUnits<-"MT"
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-CCSBT_NC[,colToKeep_captures]
 
 
 #remove whitespaces on columns that should not have withespace
-NC[,c("AreaName","Flag")]<-as.data.frame(apply(NC[,c("AreaName","Flag")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
+NC[,c("AreaName","FishingFleet")]<-as.data.frame(apply(NC[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 
 # remove 0 and NA values 
 NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
 #NC <- NC %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(
-			Flag = NC$Flag,
+			FishingFleet = NC$FishingFleet,
 			Gear = NC$Gear,
 			time_start = NC$time_start,
 			time_end = NC$time_end,
@@ -142,7 +142,7 @@ NC <- aggregate(NC$Catch,
 		)
 	)
 
-colnames(NC)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(NC)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 NC$source_authority<-"CCSBT"
 
 #----------------------------------------------------------------------------------------------------------------------------

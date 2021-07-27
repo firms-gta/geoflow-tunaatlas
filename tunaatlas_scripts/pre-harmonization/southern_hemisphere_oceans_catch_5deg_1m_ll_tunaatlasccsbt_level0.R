@@ -24,7 +24,7 @@
   
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
   #   AU   LL 1987-03-01 1987-04-01  6330130    ALL     SBF       ALL         NO     6
   #   AU   LL 1987-05-01 1987-06-01  6335150    ALL     SBF       ALL         NO     1
   #   AU   LL 1987-06-01 1987-07-01  6330150    ALL     SBF       ALL         NO     2
@@ -70,8 +70,8 @@ RFMO_CE<-as.data.frame(RFMO_CE)
 RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),]
 RFMO_CE$NUMBER_OF_SBT_RETAINED<-as.numeric(RFMO_CE$NUMBER_OF_SBT_RETAINED)
 
-#Flag
-RFMO_CE$Flag<-RFMO_CE$COUNTRY_CODE
+#FishingFleet
+RFMO_CE$FishingFleet<-RFMO_CE$COUNTRY_CODE
 
 #Gear
 RFMO_CE$Gear<-"Longline"
@@ -100,12 +100,12 @@ RFMO_CE$Catch<-RFMO_CE$NUMBER_OF_SBT_RETAINED
 
 RFMO_CE$CatchUnits<-"NO"
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches <-RFMO_CE[colToKeep_captures]
 
 
 #remove whitespaces on columns that should not have withespace
-catches[,c("AreaName","Flag")]<-as.data.frame(apply(catches[,c("AreaName","Flag")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
+catches[,c("AreaName","FishingFleet")]<-as.data.frame(apply(catches[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 
 # remove 0 and NA values 
 #catches <- catches  %>% 
@@ -115,13 +115,13 @@ catches <- catches[!is.na(catches$Catch),]
 catches <- catches[catches$Catch != 0,]
 
 #catches <- catches %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #catches<-as.data.frame(catches)
 
 catches <- aggregate(catches$Catch, FUN = sum,
 	by = list(
-		Flag = catches$Flag,
+		FishingFleet = catches$FishingFleet,
 		Gear = catches$Gear,
 		time_start = catches$time_start,
 		time_end = catches$time_end,
@@ -133,9 +133,9 @@ catches <- aggregate(catches$Catch, FUN = sum,
 	)
 )
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"CCSBT"
- 
+
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 catches$time_start <- as.Date(catches$time_start)
