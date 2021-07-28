@@ -31,7 +31,7 @@
   
   
 # Catch: final data sample:
-# Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+# FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
 # Belize   PS 2009-08-01 2009-09-01  5402000     FS     BET         C         MT  9.51
 # Belize   PS 2009-08-01 2009-09-01  5402000     FS     YFT         C         MT 98.58
 # Belize   PS 2009-09-01 2009-10-01  5202006     LS     BET         C         MT  0.38
@@ -78,7 +78,7 @@ RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
 if(keep_fleet_instead_of_flag==TRUE){
 RFMO_CE$Flag<-NULL
-names(RFMO_CE)[names(RFMO_CE) == 'FleetCode'] <- 'Flag'
+names(RFMO_CE)[names(RFMO_CE) == 'FleetCode'] <- 'FishingFleet'
 }
   
   
@@ -100,10 +100,10 @@ catches_pivot_ICCAT$variable<-gsub("fd","",catches_pivot_ICCAT$variable)
 #Catchunit
 catches_pivot_ICCAT$CatchUnits<-"MT"
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT,colToKeep_captures)
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"ICCAT"
 
 

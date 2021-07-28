@@ -39,7 +39,7 @@
   
   
   # Catch: final data sample:
-  # flag gear time_start   time_end geographic_identifier schooltype species catchtype catchunits value source_authority
+  # fishingfleet gear time_start   time_end geographic_identifier schooltype species catchtype catchunits value source_authority
   #  ARG   LL 1960-01-01 1960-02-01  6320020    ALL     ALB         C       MTNO 107.1	ICCAT
   #  ARG   LL 1960-01-01 1960-02-01  6320020    ALL     SWO         C       MTNO  46.6	ICCAT
   #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     ALB         C       MTNO   7.1	ICCAT
@@ -91,8 +91,8 @@ catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(t2ce,ICCAT_CE_species_colnames)
 #School
 catches_pivot_ICCAT$School<-"ALL"
 
-#Flag
-catches_pivot_ICCAT$Flag<-catches_pivot_ICCAT$FlagCode
+#FishingFleet
+catches_pivot_ICCAT$FishingFleet<-catches_pivot_ICCAT$FlagCode
 
 #CatchUnits
 catches_pivot_ICCAT$CatchUnits<-catches_pivot_ICCAT$CatchUnit
@@ -119,13 +119,13 @@ class(catches_pivot_ICCAT$value) = "numeric"
   
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
 if(keep_fleet_instead_of_flag==TRUE){
-	catches_pivot_ICCAT$Flag<-NULL
-	names(catches_pivot_ICCAT)[names(catches_pivot_ICCAT) == 'FleetCode'] <- 'Flag'
+	catches_pivot_ICCAT$FishingFleet<-NULL
+	names(catches_pivot_ICCAT)[names(catches_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
 }
   
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT,colToKeep_captures)
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"ICCAT"
 
 #----------------------------------------------------------------------------------------------------------------------------

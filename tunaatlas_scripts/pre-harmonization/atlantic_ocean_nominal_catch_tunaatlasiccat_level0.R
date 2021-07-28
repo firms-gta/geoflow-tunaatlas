@@ -54,15 +54,15 @@ if(is.null(spatial_stratification)) stop("Hum! Something went wrong in getting t
 #ICCAT_NC<-read_excel(path_to_raw_dataset, sheet = "dsT1NC", col_names = TRUE, col_types = NULL,na = "", skip = 3)
 ICCAT_NC<-read.csv(path_to_raw_dataset)
 
-colToKeep_NC<-c("Species","YearC","Flag",spatial_stratification,"GearCode","Qty_t","CatchTypeCode")  ### Previously CatchTypeCode was named DataType
+colToKeep_NC<-c("Species","YearC","FishingFleet",spatial_stratification,"GearCode","Qty_t","CatchTypeCode")  ### Previously CatchTypeCode was named DataType
 NC_harm_ICCAT<-ICCAT_NC[,colToKeep_NC]
 
 if(keep_fleet_instead_of_flag==TRUE){
-  # We rename the column 'Fleet' to 'Flag' so that the script below work
-  colnames(NC_harm_ICCAT)[colnames(NC_harm_ICCAT) == 'Fleet'] <- 'Flag'
+  # We rename the column 'Fleet' to 'FishingFleet' so that the script below work
+  colnames(NC_harm_ICCAT)[colnames(NC_harm_ICCAT) == 'Fleet'] <- 'FishingFleet'
 }
 
-colnames(NC_harm_ICCAT)<-c("Species", "Year","Flag","AreaName","Gear","Catch","CatchType")
+colnames(NC_harm_ICCAT)<-c("Species", "Year","FishingFleet","AreaName","Gear","Catch","CatchType")
 
 NC_harm_ICCAT$AreaCWPgrid<-NA
 NC_harm_ICCAT$School<-"ALL"
@@ -80,20 +80,20 @@ NC_harm_ICCAT<-format_time_db_format(NC_harm_ICCAT)
 NC<-NC_harm_ICCAT
 rm(NC_harm_ICCAT)
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-NC[,colToKeep_captures]
 # remove 0 and NA values 
 NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
 #NC <- NC %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(
-			Flag = NC$Flag,
+			FishingFleet = NC$FishingFleet,
 			Gear = NC$Gear,
 			time_start = NC$time_start,
 			time_end = NC$time_end,
@@ -105,12 +105,12 @@ NC <- aggregate(NC$Catch,
 		)
 	)
 	
-colnames(NC)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(NC)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 NC$source_authority<-"ICCAT"
 NC %>% mutate_if(is.factor, as.character) -> NC
 
-if(any(NC$flag=="Côte d'Ivoire")) NC$flag[NC$flag=="Côte d'Ivoire"] <- "Côte D Ivoire"
-if(any(NC$flag=="Serbia & Montenegro")) NC$flag[NC$flag=="Serbia & Montenegro"] <- "Serbia and Montenegro"
+if(any(NC$fishingfleet=="Côte d'Ivoire")) NC$fishingfleet[NC$fishingfleet=="Côte d'Ivoire"] <- "Côte D Ivoire"
+if(any(NC$fishingfleet=="Serbia & Montenegro")) NC$fishingfleet[NC$fishingfleet=="Serbia & Montenegro"] <- "Serbia and Montenegro"
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
