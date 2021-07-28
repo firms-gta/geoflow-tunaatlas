@@ -53,7 +53,7 @@ if(is.null(spatial_stratification)) stop("Hum! Something went wrong in getting t
 #library(readxl) # devtools::install_github("hadley/readxl") 
 #ICCAT_NC<-read_excel(path_to_raw_dataset, sheet = "dsT1NC", col_names = TRUE, col_types = NULL,na = "", skip = 3)
 ICCAT_NC<-read.csv(path_to_raw_dataset)
-colnames(ICCAT_IC)[colnames(ICCAT_IC)=="Flag"] <- "FishingFleet"
+colnames(ICCAT_NC)[colnames(ICCAT_NC)=="Flag"] <- "FishingFleet"
 
 colToKeep_NC<-c("Species","YearC","FishingFleet",spatial_stratification,"GearCode","Qty_t","CatchTypeCode")  ### Previously CatchTypeCode was named DataType
 NC_harm_ICCAT<-ICCAT_NC[,colToKeep_NC]
