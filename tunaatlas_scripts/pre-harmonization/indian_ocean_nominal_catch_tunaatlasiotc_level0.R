@@ -32,7 +32,7 @@
   #      Swordfish            Espadon    Xiphias gladius BILLFISH PORTE-ÉPÉE      BILL      1      0        13.087126  PELAGIC          SWO NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA NA
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits    Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits    Catch
   #  ARE GILL 1950-01-01 1951-01-01      F51    ALL     COM       ALL         MT 603.4760
   #  ARE GILL 1950-01-01 1951-01-01      F51    ALL     LOT       ALL         MT 517.2712
   #  ARE GILL 1951-01-01 1952-01-01      F51    ALL     COM       ALL         MT 603.4760
@@ -77,7 +77,7 @@ NC<-readxl::read_excel(path_to_raw_dataset, sheet = "Catches_Captures", col_name
 
 colToKeep_NC<-c("FlCde","ArCde","Year/An","GrCde","SpCde","Catch/Capture(t)")
 NC_harm_IOTC<-NC[,colToKeep_NC]
-colnames(NC_harm_IOTC)<-c("Flag", "AreaName","Year","Gear","Species","Catch")
+colnames(NC_harm_IOTC)<-c("FishingFleet", "AreaName","Year","Gear","Species","Catch")
 
 NC_harm_IOTC$Catch<-as.numeric(NC_harm_IOTC$Catch)
 NC_harm_IOTC$AreaCWPgrid<-NA
@@ -98,7 +98,7 @@ NC <- NC_harm_IOTC[NC_harm_IOTC$Catch != 0,]
 
 rm(NC_harm_IOTC)
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-NC[colToKeep_captures]
 # remove 0 and NA values 
 # remove 0 and NA values 
@@ -106,13 +106,13 @@ NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
 #NC <- NC %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(
-			Flag = NC$Flag,
+			FishingFleet = NC$FishingFleet,
 			Gear = NC$Gear,
 			time_start = NC$time_start,
 			time_end = NC$time_end,
@@ -124,7 +124,7 @@ NC <- aggregate(NC$Catch,
 		)
 	)
 
-colnames(NC)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(NC)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 NC$source_authority<-"IOTC"
 
 #----------------------------------------------------------------------------------------------------------------------------
