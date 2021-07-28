@@ -131,12 +131,12 @@ catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="NO"
 catches_pivot_WCPFC$School<-"ALL"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 #catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 #2020-11-13 @eblondel
 catches_pivot_WCPFC$RFMO <- "WCPFC"
 catches_pivot_WCPFC$Ocean <- "PAC_W"
-catches_pivot_WCPFC$Flag <- catches_pivot_WCPFC$FLAG_ID #@eblondel added
+catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID #@eblondel added
 catches_pivot_WCPFC <- rtunaatlas::harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
 catches_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(catches_pivot_WCPFC, 
@@ -145,15 +145,15 @@ catches_pivot_WCPFC$CatchType <- "ALL"
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
 catches <- catches_pivot_WCPFC[colToKeep_captures]
 rm(catches_pivot_WCPFC)
-catches[, c("AreaName", "Flag")] <- as.data.frame(apply(catches[, 
-	c("AreaName", "Flag")], 2, function(x) {
+catches[, c("AreaName", "FishingFleet")] <- as.data.frame(apply(catches[, 
+	c("AreaName", "FishingFleet")], 2, function(x) {
 	gsub(" *$", "", x)
 }), stringsAsFactors = FALSE)
 catches <- catches %>% filter(!Catch %in% 0) %>% filter(!is.na(Catch))
 catches <- as.data.frame(catches)
 catches <- aggregate(catches$Catch,
 	by = list(
-		Flag = catches$Flag,
+		FishingFleet = catches$FishingFleet,
 		Gear = catches$Gear,
 		time_start = catches$time_start,
 		time_end = catches$time_end,
@@ -166,7 +166,7 @@ catches <- aggregate(catches$Catch,
 	FUN = sum)
 colnames(catches)[colnames(catches)=="x"] <- "Catch"
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------

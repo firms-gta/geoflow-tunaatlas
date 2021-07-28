@@ -18,7 +18,7 @@
   # 1983 12  40S 170W  248  3822 21.402
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits    Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits    Catch
   #  ALL    D 1983-11-01 1983-12-01  6330165    ALL     ALB       ALL         MT    4.960
   #  ALL    D 1983-11-01 1983-12-01  6330165    ALL     ALB       ALL         NO  886.000
   #  ALL    D 1983-12-01 1984-01-01  6330165    ALL     ALB       ALL         MT    4.872
@@ -60,7 +60,7 @@ options(encoding = "UTF-8")
   
   
 ##Catches
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
 #catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
@@ -105,7 +105,7 @@ catches_pivot_WCPFC$School<-"ALL"
 
 catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------

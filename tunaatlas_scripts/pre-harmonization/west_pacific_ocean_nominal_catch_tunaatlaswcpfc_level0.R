@@ -16,7 +16,7 @@
   # 1950    O   PH            0      0      0   2782   2314      0      0      0      0      0      0      0      0      0      0
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
   #   AU    L 1985-01-01 1986-01-01    WCPFC    ALL     YFT       ALL         MT     9
   #   AU    L 1986-01-01 1987-01-01    WCPFC    ALL     BET       ALL         MT     1
   #   AU    L 1986-01-01 1987-01-01    WCPFC    ALL     YFT       ALL         MT    13
@@ -62,7 +62,7 @@ NC<-readxl::read_excel(path_to_raw_dataset,col_names = TRUE)
 NC <- as.data.frame(NC)
 
 colnames(NC)[colnames(NC) == "YY"] <- "Year"
-colnames(NC)[colnames(NC) == "FLAG_CODE"] <- "Flag"
+colnames(NC)[colnames(NC) == "FLAG_CODE"] <- "FishingFleet"
 colnames(NC)[colnames(NC) == "GEAR_CODE"] <- "Gear"
 colnames(NC)[colnames(NC) == "SP_CODE"] <- "Species"
 colnames(NC)[colnames(NC) == "SP_MT"] <- "Catch"
@@ -87,7 +87,7 @@ NC$Period<-12
 NC<-format_time_db_format(NC)
 NC <- NC[NC$Catch !=0 ,] #not sure if needed
 
-NC <-NC[c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")]
+NC <-NC[c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")]
 
 # remove 0 and NA values 
 #NC <- NC  %>% 
@@ -98,13 +98,13 @@ NC <- NC[!is.na(NC$Catch),]
 NC <- NC[NC$Catch != 0,]
 
 #NC <- NC %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(
-			Flag = NC$Flag,
+			FishingFleet = NC$FishingFleet,
 			Gear = NC$Gear,
 			time_start = NC$time_start,
 			time_end = NC$time_end,
@@ -117,7 +117,7 @@ NC <- aggregate(NC$Catch,
 	)
 
 
-colnames(NC)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(NC)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 NC$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------
