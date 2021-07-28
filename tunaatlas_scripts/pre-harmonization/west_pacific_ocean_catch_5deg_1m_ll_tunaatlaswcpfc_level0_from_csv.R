@@ -46,10 +46,16 @@ if(!require(data.table)){
   require(data.table)
 }
 
+if(!require(tidyr)){
+  install.packages("tidyr")
+  require(tidyr)
+}
+
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
 }
+
 
 if(!require(reshape)){
   install.packages("reshape")
@@ -87,8 +93,8 @@ if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
 
 DF<- DF %>% 
-  filter( ! value %in% 0 ) %>%
-  filter( ! is.na(value)) 
+  dplyr::filter( ! value %in% 0 ) %>%
+  dplyr::filter( ! is.na(value)) 
 DF$variable<-as.character(DF$variable)
 colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
 

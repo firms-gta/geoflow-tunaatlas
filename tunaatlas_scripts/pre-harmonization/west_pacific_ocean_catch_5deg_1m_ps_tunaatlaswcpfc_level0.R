@@ -53,6 +53,18 @@ if(!require(reshape)){
   install.packages("reshape")
   require(reshape)
 }
+
+if(!require(tidyr)){
+  install.packages("tidyr")
+  require(tidyr)
+}
+
+if(!require(dplyr)){
+  install.packages("dplyr")
+  require(dplyr)
+}
+
+    
   
 #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded
@@ -86,7 +98,7 @@ DF$CWP_GRID <- NULL
 # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:10])))
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
 
-DF <- DF %>% filter(!value %in% 0) %>% filter(!is.na(value))
+DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
 DF$variable <- as.character(DF$variable)
 colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
 DF$School <- substr(DF$Species, 7, nchar(DF$Species))

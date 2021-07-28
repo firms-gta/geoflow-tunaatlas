@@ -47,10 +47,16 @@ if(!require(foreign)){
   require(foreign)
 }
 
+if(!require(tidyr)){
+  install.packages("tidyr")
+  require(tidyr)
+}
+
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
 }
+
   
 #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded
