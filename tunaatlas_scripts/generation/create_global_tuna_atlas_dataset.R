@@ -130,7 +130,7 @@ switch(DATA_LEVEL,
 		if (!is.null(options$gear_filter)){
 			gear_filter<-unlist(strsplit(options$gear_filter, split=","))
 			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
-			georef_dataset<-georef_dataset %>% filter(gear %in% gear_filter)
+			georef_dataset<-georef_dataset %>% dplyr::filter(gear %in% gear_filter)
 			config$logger.info("Filtering gears OK")
 		}
 		
@@ -228,7 +228,8 @@ switch(DATA_LEVEL,
 		}
 		
 		
-		### @juldebar => the lines below generates errors in the workflow thereafter if no patch to restore previous units
+		### @juldebar => the lines below generates errors in the workflow thereafter if no patch to restore previous units 
+		### @eblondel => this code supposes refactoring / evolving of conversion not to rely anymore on MT which is not a standard
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 8/8: Units harmonization")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------

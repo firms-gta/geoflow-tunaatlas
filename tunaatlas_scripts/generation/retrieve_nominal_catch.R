@@ -22,7 +22,7 @@ retrieve_nominal_catch <- function(entity, config, options){
 	if(!options$include_CCSBT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("southern_hemisphere",names(dataset_files_nominal_catch))>0]
 	if(!options$include_IATTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("east_pacific",names(dataset_files_nominal_catch))>0]
 	
-	columns_to_keep=c("source_authority","species","gear","flag","time_start","time_end","geographic_identifier","unit","value")
+	columns_to_keep=c("source_authority","species","gear","fishingfleet","time_start","time_end","geographic_identifier","unit","value")
 	nominal_catch <- as.data.frame(do.call("rbind", lapply(dataset_files_nominal_catch, readr::read_csv, guess_max = 0)))
 	nominal_catch <- nominal_catch[,columns_to_keep]
 	class(nominal_catch$value) <- "numeric"
@@ -37,7 +37,7 @@ retrieve_nominal_catch <- function(entity, config, options){
 	  
 		nominal_catch_other_rfmos <- nominal_catch %>% filter (source_authority != "ICCAT")
 		nominal_catch_iccat <- nominal_catch %>% filter (source_authority == "ICCAT")
-		nominal_catch_iccat <- rtunaatlas::map_codelist(nominal_catch_iccat, df_mapping, "flag")$df 
+		nominal_catch_iccat <- rtunaatlas::map_codelist(nominal_catch_iccat, df_mapping, "fishingfleet")$df 
 	 
 		nominal_catch<-rbind(nominal_catch_other_rfmos,nominal_catch_iccat)
 	}

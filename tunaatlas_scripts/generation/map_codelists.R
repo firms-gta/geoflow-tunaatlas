@@ -3,9 +3,9 @@ map_codelists <- function(con, fact, mapping_dataset,dataset_to_map, mapping_kee
  
   # Get the dimensions to map from the mapping_dataset
   if (fact=="catch"){
-  dimension_to_map<-c("gear","species","flag","schooltype","catchtype")
+  dimension_to_map<-c("gear","species","fishingfleet","schooltype","catchtype")
   } else if (fact=="effort"){
-    dimension_to_map<-c("gear","flag","schooltype","unit")
+    dimension_to_map<-c("gear","fishingfleet","schooltype","unit")
   }
   # One by one, map the dimensions
   for (i in 1:length(dimension_to_map)){ # i takes the values of the dimensions to map
