@@ -24,7 +24,7 @@
   #    1920         OTR       LP             YFT  907
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     ALB       ALL         MT  4854
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     BET       ALL         MT  1987
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     BIL       ALL         MT   122
@@ -87,7 +87,9 @@ NC <- NC_harm_IATTC[NC_harm_IATTC$Catch != 0,]
 
 rm(NC_harm_IATTC)
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colnames(NC)[colnames(NC)=="Flag"] <- "FishingFleet"
+
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-NC[,colToKeep_captures]
 # remove 0 and NA values 
 #NC <- NC  %>% 
@@ -97,13 +99,13 @@ NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
 #NC <- NC %>% 
-#  group_by(Flag,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
+#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
 #  summarise(Catch = sum(Catch))
 #NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(
-			Flag = NC$Flag,
+			FishingFleet = NC$FishingFleet,
 			Gear = NC$Gear,
 			time_start = NC$time_start,
 			time_end = NC$time_end,
@@ -115,7 +117,7 @@ NC <- aggregate(NC$Catch,
 		)
 	)
 
-colnames(NC)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(NC)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 NC$source_authority<-"IATTC"
 
   

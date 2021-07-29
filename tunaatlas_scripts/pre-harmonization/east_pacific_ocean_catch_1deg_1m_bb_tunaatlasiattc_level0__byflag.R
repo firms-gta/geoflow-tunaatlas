@@ -25,7 +25,7 @@
   # 1978     1  USA  25.5 -114.5       2   0   0   0   0   0  5.00   0 3.60
   
   # Catch: final data sample:
-  # Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
   #  USA   LL 1992-07-01 1992-08-01  6425135    ALL     BSH       ALL         NO     4
   #  USA   LL 1993-04-01 1993-05-01  6425135    ALL     BSH       ALL         NO    75
   #  USA   LL 1993-04-01 1993-05-01  6430135    ALL     BSH       ALL         NO    15
@@ -72,10 +72,10 @@ options(encoding = "UTF-8")
 catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"Flag","LP")
 catches_pivot_IATTC$NumSets<-NULL
 
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"IATTC"
   
 #----------------------------------------------------------------------------------------------------------------------------

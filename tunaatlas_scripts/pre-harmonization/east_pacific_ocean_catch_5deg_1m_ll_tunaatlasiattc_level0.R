@@ -26,7 +26,7 @@
 
 
 # Catch: final data sample:
-# Flag Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+# FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
 #  USA   LL 1992-07-01 1992-08-01  6425135    ALL     BSH       ALL         NO     4
 #  USA   LL 1993-04-01 1993-05-01  6425135    ALL     BSH       ALL         NO    75
 #  USA   LL 1993-04-01 1993-05-01  6430135    ALL     BSH       ALL         NO    15
@@ -50,6 +50,10 @@ if(!require(reshape)){
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
+}
+if(!require(tidyr)){
+  install.packages("tidyr")
+  require(tidyr)
 }
 
 #----------------------------------------------------------------------------------------------------------------------------
@@ -75,8 +79,8 @@ efforts<-read.csv(path_to_raw_dataset_effort, stringsAsFactors = F)
 catches <- catches %>% tidyr::gather(variable, value, -c("Record","Spp","DTypeID"))
 # remove values=0
 catches <- catches  %>% 
-  filter( ! value %in% 0 ) %>%
-  filter( ! is.na(value)) 
+  dplyr::filter( ! value %in% 0 ) %>%
+  dplyr::filter( ! is.na(value)) 
 
 # Set catchunit values
 # DType code 1 means that the data was submitted in both weight and number for the same catch
@@ -109,11 +113,13 @@ catches$SetType<-"ALL"
 
 catches$variable[which(catches[,"variable"]=="BuM")]<-"BUM"
 
+colnames(catches)[colnames(catches)=="Flag"] <- "FishingFleet"
+
 # Reach the catches harmonized DSD using a function in IATTC_functions.R
-colToKeep_captures <- c("Flag","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches,colToKeep_captures)
 
-colnames(catches)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"IATTC"
   
 #----------------------------------------------------------------------------------------------------------------------------
