@@ -34,7 +34,7 @@ enrich_metadata <- function(entity, config, options){
 						if(!is.null(def_uri)) subject$setUri(def_uri)
 					}
 					print(values)
-					for(i in 1:nrow(values)){
+					if(nrow(values)>0) for(i in 1:nrow(values)){
 						value <- values[i,]
 						if(is.na(value$uri)){
 							subject$addKeyword(value$code)
