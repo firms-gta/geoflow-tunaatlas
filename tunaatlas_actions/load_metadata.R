@@ -13,7 +13,7 @@ load_metadata <- function(entity, config, options){
   #get entity as data.frame to make easier mapping with DBMS metadata table
   entity_df <- entity$asDataFrame()
   # temporary patch to fit with DCMI data structure
-  entity_df$Format <- "SQL"
+  entity_df$Format <- "resource:application/x-sql"
   entity_df$Source <- "RFMOs"
   
   if (!is.null(options$create_table)) if(options$create_table){
