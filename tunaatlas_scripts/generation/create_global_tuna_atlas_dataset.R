@@ -271,11 +271,15 @@ switch(DATA_LEVEL,
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-			georef_dataset <- do_unit_conversion(entity, config,fact,
-							     options$unit_conversion_csv_conversion_factor_url,
-							     options$unit_conversion_codelist_geoidentifiers_conversion_factors,
-							     mapping_map_code_lists,
-							     georef_dataset)
+			  
+			georef_dataset <- do_unit_conversion(entity=entity,
+			                                     config=config,
+			                                     fact=fact,
+			                                     unit_conversion_csv_conversion_factor_url=options$unit_conversion_csv_conversion_factor_url,
+			                                     unit_conversion_codelist_geoidentifiers_conversion_factors=options$unit_conversion_codelist_geoidentifiers_conversion_factors,
+			                                     mapping_map_code_lists=mapping_map_code_lists,
+			                                     georef_dataset=georef_dataset)
+			
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
 			
@@ -446,17 +450,18 @@ switch(DATA_LEVEL,
 			class(dataset_to_compute_rf$value) <- "numeric"
 
 			rm(dataset_catch)
-			x_raising_dimensions=c("flag","gear","year","source_authority")
+			#@juldeba : update with the new name of "flag" dimension (now "fishingfleet")
+			x_raising_dimensions=c("fishingfleet","gear","year","source_authority")
 		  }
 		
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
-			georef_dataset<-function_raising_georef_to_nominal(entity,
-									   config,
+			georef_dataset<-function_raising_georef_to_nominal(entity=entity,
+									   config=config,
 									   dataset_to_raise=georef_dataset,
+									   dataset_to_compute_rf=nominal_dataset_df=nominal_catch,
 									   nominal_dataset_df=nominal_catch,
-									   nominal_catch,
-									   x_raising_dimensions)
+									   x_raising_dimensions=x_raising_dimensions)
 			
 			rm(dataset_to_compute_rf)
 			
