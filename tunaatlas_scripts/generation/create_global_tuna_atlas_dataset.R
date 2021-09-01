@@ -349,7 +349,7 @@ switch(DATA_LEVEL,
 		raising_georef_to_nominal <- options$raising_georef_to_nominal
 		iattc_ps_raise_flags_to_schooltype <- options$iattc_ps_raise_flags_to_schooltype
  		iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
-  		iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
+  	iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
 		iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -386,7 +386,7 @@ switch(DATA_LEVEL,
 			  
 			  config$logger.info("Fact=catch !")
 			  dataset_to_compute_rf=georef_dataset
-			  x_raising_dimensions=c("flag","gear","species","year","source_authority")
+			  x_raising_dimensions=c("fishingfleet","gear","species","year","source_authority")
 			  
 		  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
 			cat("Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n")
@@ -450,28 +450,20 @@ switch(DATA_LEVEL,
 			class(dataset_to_compute_rf$value) <- "numeric"
 
 			rm(dataset_catch)
-			#@juldeba : update with the new name of "flag" dimension (now "fishingfleet")
+			#@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
 			x_raising_dimensions=c("fishingfleet","gear","year","source_authority")
 		  }
 		
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
 			georef_dataset<-function_raising_georef_to_nominal(entity=entity,
-									   config=config,
-									   dataset_to_raise=georef_dataset,
-									   dataset_to_compute_rf=nominal_catch,
-									   nominal_dataset_df=nominal_catch,
-									   x_raising_dimensions=x_raising_dimensions)
+			                                                   config=config,
+			                                                   dataset_to_raise=georef_dataset,
+			                                                   dataset_to_compute_rf=nominal_catch,
+			                                                   nominal_dataset_df=nominal_catch,
+			                                                   x_raising_dimensions=x_raising_dimensions)
 			
 			rm(dataset_to_compute_rf)
-			
-			georef_dataset<-function_raising_georef_to_nominal(entity,
-			                                                   config,
-			                                                   dataset_to_raise=georef_dataset,
-			                                                   nominal_dataset_df=nominal_catch,
-			                                                   dataset_to_compute_rf=nominal_catch,
-			                                                   x_raising_dimensions)
-			
 			#@juldebar: pending => metadata elements below to be managed (commented for now)
 			#metadata$description<-paste0(metadata$description,georef_dataset$description)
 			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
