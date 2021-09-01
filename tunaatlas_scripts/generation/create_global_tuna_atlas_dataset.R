@@ -459,11 +459,18 @@ switch(DATA_LEVEL,
 			georef_dataset<-function_raising_georef_to_nominal(entity=entity,
 									   config=config,
 									   dataset_to_raise=georef_dataset,
-									   dataset_to_compute_rf=nominal_dataset_df=nominal_catch,
+									   dataset_to_compute_rf=nominal_catch,
 									   nominal_dataset_df=nominal_catch,
 									   x_raising_dimensions=x_raising_dimensions)
 			
 			rm(dataset_to_compute_rf)
+			
+			georef_dataset<-function_raising_georef_to_nominal(entity,
+			                                                   config,
+			                                                   dataset_to_raise=georef_dataset,
+			                                                   nominal_dataset_df=nominal_catch,
+			                                                   dataset_to_compute_rf=nominal_catch,
+			                                                   x_raising_dimensions)
 			
 			#@juldebar: pending => metadata elements below to be managed (commented for now)
 			#metadata$description<-paste0(metadata$description,georef_dataset$description)
