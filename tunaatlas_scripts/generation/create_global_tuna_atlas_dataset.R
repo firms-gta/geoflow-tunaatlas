@@ -455,9 +455,8 @@ switch(DATA_LEVEL,
 		
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
-			
-			config$logger.info("Total ",fact," before raising is : ",sum(georef_dataset$value),"\n")
-			config$logger.info("Total ",fact," in nominal data is : ",sum(nominal_catch$value),"\n")
+			config$logger.info(paste0("Total ",fact," before raising is : ",sum(georef_dataset$value),"\n"))
+			config$logger.info(paste0("Total ",fact," in nominal data is : ",sum(nominal_catch$value),"\n"))
 			
 			georef_dataset<-function_raising_georef_to_nominal(entity=entity,
 			                                                   config=config,
@@ -465,7 +464,7 @@ switch(DATA_LEVEL,
 			                                                   dataset_to_compute_rf=nominal_catch,
 			                                                   nominal_dataset_df=nominal_catch,
 			                                                   x_raising_dimensions=x_raising_dimensions)
-			config$logger.info("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n")
+			config$logger.info(paste0("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n"))
 			
 			
 			rm(dataset_to_compute_rf)
