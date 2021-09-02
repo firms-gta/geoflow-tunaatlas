@@ -40,18 +40,18 @@ function_raising_georef_to_nominal<-function(entity,
 	  # calculate raising factor dataset
 	  cat("calculate raising factor dataset\n")
 
-	  df_rf <- rtunaatlas::raise_get_rf(
-		df_input_incomplete = dataset_to_compute_rf,
-		df_input_total = nominal_dataset_df,
-		x_raising_dimensions = c(x_raising_dimensions,"unit")
-	  ) 
+	  df_rf <- rtunaatlas::raise_get_rf(df_input_incomplete = dataset_to_compute_rf,
+	                                    df_input_total = nominal_dataset_df,
+	                                    x_raising_dimensions = c(x_raising_dimensions,"unit")
+	                                    )
+	  
 	  cat("function rtunaatlas::raise_get_rf has been executed ! \n")
 
 	  if (fact=="catch"){
-		raising_dimensions=c(x_raising_dimensions,"unit")
-	  } else if (fact=="effort"){
-		raising_dimensions=x_raising_dimensions
-		df_rf$unit=NULL
+	    raising_dimensions=c(x_raising_dimensions,"unit")
+	    } else if (fact=="effort"){
+	      raising_dimensions=x_raising_dimensions
+	      df_rf$unit=NULL
 	  }
 	  
 	  # raise dataset
@@ -65,7 +65,8 @@ function_raising_georef_to_nominal<-function(entity,
 	                                                                     threshold_rf = NULL)
 	  
 	  cat("function rtunaatlas::raise_incomplete_dataset_to_total_dataset has been executed ! \n")
-
+	  config$logger.info(paste0("Total catch for data_raised  is ",sum(nominal_dataset_df$value),"  \n"))
+	  
 	  cat("end function_raise_data \n")
 
 	  return(data_raised)
