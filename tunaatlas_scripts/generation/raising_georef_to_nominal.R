@@ -48,6 +48,11 @@ function_raising_georef_to_nominal<-function(entity,
 	                                    x_raising_dimensions = c(x_raising_dimensions,"unit")
 	                                    )
 	  
+	  cat(paste0("raise_get_rf function has",nrow(df_rf),"rows \n"))
+	  cat(paste0(" write csv file to check   \n"))
+	  filename <- paste0("/tmp/DFPartialInfo_rf_",gsub(Sys.time(),pattern = " ", replacement = "_"),".csv")
+	  write.csv(x = df_rf, file = filename)
+	  
 	  cat("function rtunaatlas::raise_get_rf has been executed ! \n")
 	  config$logger.info(paste0("Rows number in df_rf ",nrow(df_rf),"  \n"))
 	  
