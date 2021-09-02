@@ -30,7 +30,12 @@ function_raising_georef_to_nominal<-function(entity,
 
 	  dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
 	  dataset_to_compute_rf<-dataset_to_compute_rf[which(dataset_to_compute_rf$source_authority %in% source_authority_filter),]
+	  config$logger.info(paste0("Total catch for dataset_to_compute_rf before raising  is ",sum(dataset_to_compute_rf$value),"  \n"))
+	  
 	  nominal_dataset_df<-nominal_dataset_df[which(nominal_dataset_df$source_authority %in% source_authority_filter),]
+	  
+	  config$logger.info(paste0("Total catch for nominal_dataset_df with filters is ",sum(nominal_dataset_df$value),"  \n"))
+	  
 	  
 	  # calculate raising factor dataset
 	  cat("calculate raising factor dataset\n")
@@ -131,7 +136,8 @@ function_raising_georef_to_nominal<-function(entity,
 
 	  cat(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
 	  config$logger.info(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
-
+	  config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC before raising  is ",sum(dataset_to_raise$value),"  \n"))
+	  
 	  data_IOTC_ICCAT_IATTC_raised<-function_raise_data(fact,
 	                                                    source_authority_filter = c("IOTC","ICCAT","IATTC"),
 	                                                    dataset_to_raise = dataset_to_raise,
