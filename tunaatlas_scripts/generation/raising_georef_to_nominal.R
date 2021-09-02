@@ -46,6 +46,8 @@ function_raising_georef_to_nominal<-function(entity,
 	                                    )
 	  
 	  cat("function rtunaatlas::raise_get_rf has been executed ! \n")
+	  config$logger.info(paste0("Rows number in df_rf ",nrow(df_rf),"  \n"))
+	  
 
 	  if (fact=="catch"){
 	    raising_dimensions=c(x_raising_dimensions,"unit")
@@ -65,8 +67,10 @@ function_raising_georef_to_nominal<-function(entity,
 	                                                                     threshold_rf = NULL)
 	  
 	  cat("function rtunaatlas::raise_incomplete_dataset_to_total_dataset has been executed ! \n")
-	  config$logger.info(paste0("Total catch for data_raised  is ",sum(data_raised$value),"  \n"))
+	  thisdf <- data_raised$df
+	  config$logger.info(paste0("Total catch for data_raised  is ",sum(thisdf$value),"  \n"))
 	  
+	  # data_raised$stats
 	  cat("end function_raise_data \n")
 
 	  return(data_raised)
