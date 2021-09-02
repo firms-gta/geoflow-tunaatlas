@@ -65,7 +65,7 @@ function_raising_georef_to_nominal<-function(entity,
 	                                                                     threshold_rf = NULL)
 	  
 	  cat("function rtunaatlas::raise_incomplete_dataset_to_total_dataset has been executed ! \n")
-	  config$logger.info(paste0("Total catch for data_raised  is ",sum(nominal_dataset_df$value),"  \n"))
+	  config$logger.info(paste0("Total catch for data_raised  is ",sum(data_raised$value),"  \n"))
 	  
 	  cat("end function_raise_data \n")
 
