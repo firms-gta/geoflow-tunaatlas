@@ -18,7 +18,7 @@
 # wps.in: id = mapping_keep_src_code, type = string, title = Use only if parameter mapping_map_code_lists is set to TRUE. In case of code list mapping (mapping_map_code_lists is TRUE) keep source coding system column? TRUE : conserve in the output dataset both source and target coding systems columns. FALSE : conserve only target coding system. , value="FALSE|TRUE" ;
 # wps.in: id = gear_filter, type = string, title = Filter data by gear. Gear codes in this parameter must by the same as the ones used in the catch dataset (i.e. raw tRFMOs gear codes if no mapping or in case of mapping (mapping_map_code_lists is TRUE) codes used in the mapping code list). NULL : do not filter. If you want to filter you must write the codes to filter by separated by a comma in case of multiple codes.  , value = "NULL";
 # wps.in: id = unit_conversion_convert, type = string, title = Convert units of measure? if TRUE you must fill in the parameter unit_conversion_df_conversion_factor. , value = "FALSE|TRUE";
-# wps.in: id = unit_conversion_csv_conversion_factor_url, type = string, title = Use only if parameter unit_conversion_convert is set to TRUE. If units are converted path to the csv containing the conversion factors dataset. The conversion factor dataset must be properly structured. A template can be found here: https://goo.gl/i7QJYC . The coding systems used in the dimensions of the conversion factors must be the same as the ones used in the catch dataset (i.e. raw tRFMOs codes or in case of mapping (mapping_map_code_lists isTRUE) codes used in the mapping code lists) except for spatial code list. Additional information on the structure are provided here: https://ptaconet.github.io/rtunaatlas//reference/convert_units.html , value = "http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0";
+# wps.in: id = unit_conversion_csv_conversion_factor_url, type = string, title = Use only if parameter unit_conversion_convert is set to TRUE. If units are converted path to the csv containing the conversion factors dataset. The conversion factor dataset must be properly structured. A template can be found here: https://goo.gl/i7QJYC . The coding systems used in the dimensions of the conversion factors must be the same as the ones used in the catch dataset (i.e. raw tRFMOs codes or in case of mapping (mapping_map_code_lists isTRUE) codes used in the mapping code lists) except for spatial code list. Additional information on the structure are provided here: https://ptaconet.github.io/rtunaatlas//reference/convert_units.html , value = "https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL";
 # wps.in: id = unit_conversion_codelist_geoidentifiers_conversion_factors, type = string, title = Use only if parameter unit_conversion_convert is set to TRUE. If units are converted name of the coding system of the spatial dimension used in the conversion factor dataset (i.e. identifier of the layer in the Tuna atlas database)., value = "areas_conversion_factors_numtoweigth_ird";
 # wps.in: id = raising_georef_to_nominal, type = string, title =  Geo-referenced catch data and associated effort can represent only part of the total catches. Raise georeferenced catches to nominal catches? Depending on the availability of the flag dimension (currently not available for the geo-referenced catch-and-effort dataset from the WCPFC and CCSBT) the dimensions used for the raising are either {Flag|Species|Year|Gear} or {Species|Year|Gear}. Some catches cannot be raised because the combination {Flag|Species|Year|Gear} (resp. {Species|Year|Gear}) does exist in the geo-referenced catches but the same combination does not exist in the total catches. In this case non-raised catch data are kept. TRUE : Raise georeferenced catches to total catches. FALSE : Do not raise., value = "TRUE|FALSE";
 # wps.in: id = raising_do_not_raise_wcfpc_data, type = string, title =  WCPFC georeferenced data are already raised [terminer la description]. TRUE : Do not Raise WCPFC georeferenced catches to total catches. FALSE : Raise., value = "TRUE|FALSE";
@@ -224,9 +224,7 @@ switch(DATA_LEVEL,
 			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
 
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
-		  
 		}
-		
 		
 		### @juldebar => the lines below generates errors in the workflow thereafter if no patch to restore previous units 
 		### @eblondel => this code supposes refactoring / evolving of conversion not to rely anymore on MT which is not a standard
@@ -437,9 +435,10 @@ switch(DATA_LEVEL,
 			dataset_catch$time_end<-substr(as.character(dataset_catch$time_end), 1, 10)
 			if (unit_conversion_convert=="TRUE"){ 
 			  # We use our conversion factors (IRD). This should be an input parameter of the script
+			  #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
 			  dataset_catch<-function_unit_conversion_convert(con,
 									  fact="catch",
-									  unit_conversion_csv_conversion_factor_url="http://data.d4science.org/Z3V2RmhPK3ZKVStNTXVPdFZhbU5BTTVaWnE3VFAzaElHbWJQNStIS0N6Yz0",
+									  unit_conversion_csv_conversion_factor_url="https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL",
 									  unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",
 									  mapping_map_code_lists,
 									  dataset_catch)$dataset
@@ -456,14 +455,21 @@ switch(DATA_LEVEL,
 		
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
+			
+			config$logger.info("Total ",fact," before raising is : ",sum(georef_dataset$value),"\n")
+			config$logger.info("Total ",fact," in nominal data is : ",sum(nominal_catch$value),"\n")
+			
 			georef_dataset<-function_raising_georef_to_nominal(entity=entity,
 			                                                   config=config,
 			                                                   dataset_to_raise=georef_dataset,
 			                                                   dataset_to_compute_rf=nominal_catch,
 			                                                   nominal_dataset_df=nominal_catch,
 			                                                   x_raising_dimensions=x_raising_dimensions)
+			config$logger.info("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n")
+			
 			
 			rm(dataset_to_compute_rf)
+			
 			#@juldebar: pending => metadata elements below to be managed (commented for now)
 			#metadata$description<-paste0(metadata$description,georef_dataset$description)
 			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
@@ -508,7 +514,6 @@ if(length(cl_relations)>0){
 		df_codelists <- read.csv(cl_relations[[1]]$link)
 	}
 }
-
 
 
 #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
