@@ -26,14 +26,17 @@ function_raising_georef_to_nominal<-function(entity,
 	function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions){
 	  
 	  # filter by source_authority
+	  cat("BEGIN function_raise_data \n")
+	  
 	  cat("filter by source_authority\n")
 
 	  dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
+	  config$logger.info(paste0("Total catch for dataset_to_raise before raising  is ",sum(dataset_to_compute_rf$value),"  \n"))
+	  
 	  dataset_to_compute_rf<-dataset_to_compute_rf[which(dataset_to_compute_rf$source_authority %in% source_authority_filter),]
 	  config$logger.info(paste0("Total catch for dataset_to_compute_rf before raising  is ",sum(dataset_to_compute_rf$value),"  \n"))
 	  
 	  nominal_dataset_df<-nominal_dataset_df[which(nominal_dataset_df$source_authority %in% source_authority_filter),]
-	  
 	  config$logger.info(paste0("Total catch for nominal_dataset_df with filters is ",sum(nominal_dataset_df$value),"  \n"))
 	  
 	  
@@ -71,7 +74,7 @@ function_raising_georef_to_nominal<-function(entity,
 	  config$logger.info(paste0("Total catch for data_raised  is ",sum(thisdf$value),"  \n"))
 	  
 	  # data_raised$stats
-	  cat("end function_raise_data \n")
+	  cat("END function_raise_data \n")
 
 	  return(data_raised)
 	  
@@ -89,19 +92,23 @@ function_raising_georef_to_nominal<-function(entity,
 	  config$logger.info(paste0("Since option raising_raise_only_for_PS_LL==TRUE, kept rows number is  ",nrow(dataset_to_raise)," and number of removed rows is ",nrow(dataset_not_PS_LL),"\n"))
 	  
 	}
-
+  #@juldebar this condition has to be checked
+	config$logger.info(paste0(" checking include_CCSBT and  include_WCPFC options \n"))
 	if ( include_CCSBT==TRUE | include_WCPFC==TRUE ) {
 	  
+	  #@juldebar what if  include_CCSBT==FASLE and include_WCPFC==TRUE and raising_do_not_raise_wcfpc_data==TRUE ?
 	  if (raising_do_not_raise_wcfpc_data==TRUE){
-		source_authority_filter=c("CCSBT")
-	  } else {
-		source_authority_filter=c("WCPFC","CCSBT")
+	    config$logger.info(paste0(" raising_do_not_raise_wcfpc_data is SET to TRUE \n"))
+	    source_authority_filter=c("CCSBT")
+	  } else {	
+	    config$logger.info(paste0(" raising_do_not_raise_wcfpc_data is SET to FALSE \n"))
+	    source_authority_filter=c("WCPFC","CCSBT")
 	  }
 	  
 	  cat(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"fishingfleet"),collapse = ","),"\n"))
 	  config$logger.info(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"fishingfleet"),collapse = ","),"\n"))
 
-	  config$logger.info(paste0("Total catch before raising is ",sum(dataset_to_raise$value),"  \n"))
+	  config$logger.info(paste0("Executing function function_raise_data for CCSBT and WCPFC options \n"))
 	  data_WCPFC_CCSBT_raised<-function_raise_data(fact=fact,
 	                                               source_authority_filter = source_authority_filter,
 	                                               dataset_to_raise = dataset_to_raise,
@@ -134,15 +141,16 @@ function_raising_georef_to_nominal<-function(entity,
 	  
 	  config$logger.info(paste0(" data_WCPFC_CCSBT_raised is set to NULL \n"))
 	  
-	  
 	}
 
+	config$logger.info(paste0(" checking include_IOTC and  include_ICCAT and  include_IATTC options \n"))
 	if ( include_IOTC==TRUE | include_ICCAT==TRUE | include_IATTC==TRUE ) {
 
 	  cat(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
 	  config$logger.info(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
 	  config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC before raising  is ",sum(dataset_to_raise$value),"  \n"))
 	  
+	  config$logger.info(paste0("Executing function function_raise_data for include_IOTC and  include_ICCAT and  include_IATTC option \n"))
 	  data_IOTC_ICCAT_IATTC_raised<-function_raise_data(fact,
 	                                                    source_authority_filter = c("IOTC","ICCAT","IATTC"),
 	                                                    dataset_to_raise = dataset_to_raise,
