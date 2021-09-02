@@ -461,11 +461,9 @@ switch(DATA_LEVEL,
 			georef_dataset<-function_raising_georef_to_nominal(entity=entity,
 			                                                   config=config,
 			                                                   dataset_to_raise=georef_dataset,
-			                                                   dataset_to_compute_rf=nominal_catch,
+			                                                   dataset_to_compute_rf=dataset_to_compute_rf,
 			                                                   nominal_dataset_df=nominal_catch,
 			                                                   x_raising_dimensions=x_raising_dimensions)
-			config$logger.info(paste0("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n"))
-			
 			
 			rm(dataset_to_compute_rf)
 			
@@ -474,6 +472,7 @@ switch(DATA_LEVEL,
 			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
 			georef_dataset<-georef_dataset$dataset
+			config$logger.info(paste0("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n"))
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		} 
 	#end swith LEVEL 2
