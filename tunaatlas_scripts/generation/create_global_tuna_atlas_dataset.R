@@ -360,7 +360,7 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		rm(dataset)
-		config$logger.info(paste0("Total catch for data before raising is ",sum(georef_dataset$value),"  \n"))
+		config$logger.info(paste0("Total catch before raising  for file ",entity$data$source[[1]], "is :   ",sum(georef_dataset$value),"  \n"))
 		
 
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
@@ -378,7 +378,7 @@ switch(DATA_LEVEL,
 		        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
 			#nominal_catch <-retrieve_nominal_catch(entity, config, options)
 			config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
-			config$logger.info(paste0("Total of  nominal catch ",sum(nominal_catch$value),"  \n"))
+			config$logger.info(paste0("Total of  nominal catch for file ",entity$data$source[[2]], "is : ",sum(nominal_catch$value),"  \n"))
 			
 		config$logger.info("Start raising process")
 		  
