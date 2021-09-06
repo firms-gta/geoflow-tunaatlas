@@ -360,6 +360,7 @@ switch(DATA_LEVEL,
 		class(georef_dataset$value) <- "numeric"
 		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		rm(dataset)
+		config$logger.info(paste0("Total catch for data before raising is ",sum(georef_dataset$value),"  \n"))
 		
 
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
@@ -377,6 +378,7 @@ switch(DATA_LEVEL,
 		        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
 			#nominal_catch <-retrieve_nominal_catch(entity, config, options)
 			config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
+			config$logger.info(paste0("Total of  nominal catch ",sum(nominal_catch$value),"  \n"))
 			
 		config$logger.info("Start raising process")
 		  
@@ -384,6 +386,7 @@ switch(DATA_LEVEL,
 			  
 			  config$logger.info("Fact=catch !")
 			  dataset_to_compute_rf=georef_dataset
+			  #@juldebar why do we use "year' as time dimension here ?
 			  x_raising_dimensions=c("fishingfleet","gear","species","year","source_authority")
 			  
 		  } else if (fact=="effort"){    ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
@@ -406,11 +409,11 @@ switch(DATA_LEVEL,
 			}
 			if (include_IATTC=="TRUE"){
 			  rfmo_dataset<-rtunaatlas::get_rfmos_datasets_level0("IATTC",
-									      "catch",
-									      datasets_year_release,
-									      iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
-									      iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-									      iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
+			                                                      "catch",
+			                                                      datasets_year_release,
+			                                                      iattc_ps_raise_flags_to_schooltype=iattc_ps_raise_flags_to_schooltype,
+			                                                      iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype=iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
+			                                                      iattc_ps_catch_billfish_shark_raise_to_effort=TRUE)
 			  dataset_catch<-rbind(dataset_catch,rfmo_dataset)
 			  rm(rfmo_dataset)
 			}
@@ -474,6 +477,8 @@ switch(DATA_LEVEL,
 			georef_dataset<-georef_dataset$dataset
 			config$logger.info(paste0("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n"))
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			config$logger.info(paste0("Total catch for data after raising is ",sum(georef_dataset$value),"  \n"))
+			
 		} 
 	#end swith LEVEL 2
 	}
