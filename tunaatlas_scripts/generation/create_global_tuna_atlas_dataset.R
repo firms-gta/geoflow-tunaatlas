@@ -449,12 +449,12 @@ switch(DATA_LEVEL,
 			
 			dataset_to_compute_rf=dataset_catch
 			#@juldebar insert patch below to fix error in rtunaatlas::raise_get_rf function
-			class(dataset_to_compute_rf$value) <- "numeric"
 
 			rm(dataset_catch)
 			#@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
 			x_raising_dimensions=c("fishingfleet","gear","year","source_authority")
 		  }
+		class(dataset_to_compute_rf$value) <- "numeric"
 		
 			
 			config$logger.info("Executing function function_raising_georef_to_nominal")
@@ -465,8 +465,9 @@ switch(DATA_LEVEL,
 			                                                   config=config,
 			                                                   dataset_to_raise=georef_dataset,
 			                                                   nominal_dataset_df=nominal_catch,
-			                                                   nominal_catch,
+			                                                   # nominal_catch,
 			                                                   # dataset_to_compute_rf=nominal_catch,
+			                                                   dataset_to_compute_rf=dataset_to_compute_rf,
 			                                                   x_raising_dimensions=x_raising_dimensions)
 			
 			rm(dataset_to_compute_rf)
