@@ -254,25 +254,25 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 					if(options$iattc_ps_raise_flags_to_schooltype){
 					  
 						df_catch_billfish<-rtunaatlas::raise_datasets_by_dimension(df1=df_catch_billfish_flag,
-													df2=df_catch_billfish_settype,
-													dimension_missing_df1="schooltype",
-													dimension_missing_df2="fishingfleet")$df
+						                                                           df2=df_catch_billfish_settype,
+						                                                           dimension_missing_df1="schooltype",
+						                                                           dimension_missing_df2="fishingfleet")$df
 					
 						df_catch_shark<-rtunaatlas::raise_datasets_by_dimension(df1=df_catch_shark_flag,
-																   df2=df_catch_shark_settype,
-																   dimension_missing_df1="schooltype",
-																   dimension_missing_df2="fishingfleet")$df
+						                                                        df2=df_catch_shark_settype,
+						                                                        dimension_missing_df1="schooltype",
+						                                                        dimension_missing_df2="fishingfleet")$df
 					
 						df_catch_tuna<-rtunaatlas::raise_datasets_by_dimension(df1=df_catch_tuna_flag,
-																df2=df_catch_tuna_settype,
-																dimension_missing_df1="schooltype",
-																dimension_missing_df2="fishingfleet")$df
+						                                                       df2=df_catch_tuna_settype,
+						                                                       dimension_missing_df1="schooltype",
+						                                                       dimension_missing_df2="fishingfleet")$df
 					
 					
 					} else {
 						# If user decides to not raise flags to type of school, he chooses to use either the data with stratification by fishingfleet or the data with stratification by schooltype
 						if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishingfleet'){
-							df_catch_billfish <- df_catch_billfish_flag
+						  df_catch_billfish <- df_catch_billfish_flag
 							df_catch_shark <- df_catch_shark_flag
 							df_catch_tuna <- df_catch_tuna_flag
 						} else if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'schooltype'){
@@ -285,7 +285,6 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 					iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna)
 			  
 				}else if (variable=="effort"){
-				
 				  config$logger.info(sprintf("Case %s data", variable))
 				  
 					dataset_file_effort_flag <- switch(options$iattc_ps_effort_to_extract,
