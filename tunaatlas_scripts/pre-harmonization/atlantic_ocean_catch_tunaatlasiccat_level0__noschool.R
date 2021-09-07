@@ -84,9 +84,13 @@ t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 
 ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 
-catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(t2ce,ICCAT_CE_species_colnames)
 
+config$logger.info(paste0("BEGIN  function   \n"))
+catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(RFMO_CE=t2ce,
+                                          RFMO_CE_species_colnames=ICCAT_CE_species_colnames
+                                          )
 
+config$logger.info(paste0(" END function   \n"))
 
 #School
 catches_pivot_ICCAT$School<-"ALL"
@@ -97,11 +101,18 @@ catches_pivot_ICCAT$FishingFleet<-catches_pivot_ICCAT$FlagCode
 #CatchUnits
 catches_pivot_ICCAT$CatchUnits<-catches_pivot_ICCAT$CatchUnit
 
+config$logger.info(paste0(" ICI ?   \n"))
+
+
 index.kg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == ".w" )
 catches_pivot_ICCAT[index.kg,"CatchUnits"]<- "MT"
 
 index.nr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_ICCAT[,"DSetTypeID"] == "n." )
 catches_pivot_ICCAT[index.nr,"CatchUnits"]<- "NO"               
+
+
+config$logger.info(paste0(" ICI ??  \n"))
+
 
 index.kgnr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == "nw" )
 catches_pivot_ICCAT[index.kgnr,"CatchUnits"]<- "MTNO"
