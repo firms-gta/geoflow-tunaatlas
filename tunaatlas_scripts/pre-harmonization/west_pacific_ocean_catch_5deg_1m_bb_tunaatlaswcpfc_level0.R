@@ -48,7 +48,7 @@ if(!require(rtunaatlas)){
     install.packages("devtools")
   }
   require(devtools)
-  install_github("ptaconet/rtunaatlas")
+  install_github("eblondel/rtunaatlas")
   require(rtunaatlas)
 }
 
