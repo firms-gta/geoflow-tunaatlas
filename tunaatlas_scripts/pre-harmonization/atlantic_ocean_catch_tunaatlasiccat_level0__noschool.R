@@ -101,7 +101,7 @@ catches_pivot_ICCAT$FishingFleet<-catches_pivot_ICCAT$FlagCode
 #CatchUnits
 catches_pivot_ICCAT$CatchUnits<-catches_pivot_ICCAT$CatchUnit
 
-config$logger.info(paste0(" ICI ?   \n"))
+config$logger.info(paste0(" Change units  \n"))
 
 
 index.kg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == ".w" )
@@ -111,7 +111,7 @@ index.nr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_I
 catches_pivot_ICCAT[index.nr,"CatchUnits"]<- "NO"               
 
 
-config$logger.info(paste0(" ICI ??  \n"))
+config$logger.info(paste0(" Change units  \n"))
 
 
 index.kgnr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == "nw" )
@@ -125,7 +125,7 @@ if(any(catches_pivot_ICCAT$value == "NULL")) {
 	catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$value <- 0
 }
 class(catches_pivot_ICCAT$value) = "numeric"
-
+head(catches_pivot_ICCAT)
 ### Reach the catches harmonized DSD using a function in ICCAT_functions.R
   
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
@@ -135,7 +135,10 @@ if(keep_fleet_instead_of_flag==TRUE){
 }
   
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT,colToKeep_captures)
+  
+catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT=catches_pivot_ICCAT,
+                                                    colToKeep_captures=colToKeep_captures)
+
 colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
 catches$source_authority<-"ICCAT"
 
