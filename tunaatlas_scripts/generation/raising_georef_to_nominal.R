@@ -29,7 +29,6 @@ function_raising_georef_to_nominal<-function(entity,
 	  cat("BEGIN function_raise_data \n")
 	  
 	  cat("filter by source_authority\n")
-
 	  dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
 	  config$logger.info(paste0("Total catch for dataset_to_raise before raising  is ",sum(dataset_to_compute_rf$value),"  \n"))
 	  
@@ -37,7 +36,7 @@ function_raising_georef_to_nominal<-function(entity,
 	  config$logger.info(paste0("Total catch for dataset_to_compute_rf before raising  is ",sum(dataset_to_compute_rf$value),"  \n"))
 	  
 	  nominal_dataset_df<-nominal_dataset_df[which(nominal_dataset_df$source_authority %in% source_authority_filter),]
-	  config$logger.info(paste0("Total catch for nominal_dataset_df with filters is ",sum(nominal_dataset_df$value),"  \n"))
+	  config$logger.info(paste0("Total catch for nominal_dataset_df with filters is ",sum(as.numeric(nominal_dataset_df$value)),"  \n"))
 	  
 	  
 	  # calculate raising factor dataset
@@ -66,7 +65,6 @@ function_raising_georef_to_nominal<-function(entity,
 	  
 	  # raise dataset
 	  cat("Executing rtunaatlas::raise_incomplete_dataset_to_total_dataset \n")
-	  head(df_rf)
 
 	  data_raised<-rtunaatlas::raise_incomplete_dataset_to_total_dataset(df_input_incomplete = dataset_to_raise,
 	                                                                     df_input_total = nominal_dataset_df,
@@ -90,7 +88,10 @@ function_raising_georef_to_nominal<-function(entity,
 
 	if (raising_raise_only_for_PS_LL==TRUE){
 	  
+	  # @juldebar =>  check if gear codes are correct
 	  gears_PS_LL<-dbGetQuery(con,"SELECT distinct(src_code) FROM gear.gear_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
+	  # config$logger.info("Now filtering gear codes with those returned by SLQ query",  gears_PS_LL)
+	  
 	  dataset_not_PS_LL<-dataset_to_raise %>% filter(!(gear %in% gears_PS_LL))
 	  dataset_to_raise<-dataset_to_raise %>% filter(gear %in% gears_PS_LL)
 	  
