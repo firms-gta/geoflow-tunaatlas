@@ -171,7 +171,8 @@ switch(DATA_LEVEL,
 			# aggregate_step$setProcessor(firms_contact)  #TODO define who's the processor
 			# entity$provenance$processes <- c(entity$provenance$processes, aggregate_step)	
 			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
-			# 
+
+			
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
 		
 		}
@@ -290,9 +291,11 @@ switch(DATA_LEVEL,
 		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
 									    df=georef_dataset,
 									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
+		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
@@ -307,9 +310,11 @@ switch(DATA_LEVEL,
 													  georef_dataset=georef_dataset,
 													  resolution=5,
 													  action_to_do=options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
+		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		}
@@ -325,15 +330,17 @@ switch(DATA_LEVEL,
 													  georef_dataset=georef_dataset,
 													  resolution=1,
 													  action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
+		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  #metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  #metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 
 		} 
 	
-	#end swith LEVEL 1
+	#end switch LEVEL 1
 	},
 	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -473,9 +480,10 @@ switch(DATA_LEVEL,
 			rm(dataset_to_compute_rf)
 			
 			#@juldebar: pending => metadata elements below to be managed (commented for now)
-			#metadata$description<-paste0(metadata$description,georef_dataset$description)
-			#metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-			#metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+			metadata$description<-paste0(metadata$description,georef_dataset$description)
+			metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+			metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+			
 			georef_dataset<-georef_dataset$dataset
 			config$logger.info(paste0("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n"))
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
