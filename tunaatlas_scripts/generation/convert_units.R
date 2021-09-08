@@ -111,11 +111,11 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 
 	georef_dataset<-rtunaatlas::convert_units(con = con,
-						  df_input = georef_dataset,
-						  df_conversion_factor = df_conversion_factor,
-						  codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
-						  codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
-						 )
+	                                          df_input = georef_dataset,
+	                                          df_conversion_factor = df_conversion_factor,
+	                                          codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
+	                                          codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
+	                                          )
 	
 	config$logger.info("rtunaatlas::convert_units() function executed !\n")
 	config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
@@ -146,10 +146,10 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	# fill metadata elements
 	config$logger.info("Fill metadata elements accordingly\n")
 
-	lineage <- 
+	lineage <- ""
 	description <- ""
 	info <- NULL
-	if (unit_conversion_csv_conversion_factor_url=="https://drive.google.com/open?id=14mey1_WO2JVOBEly_FpiGDyg-9H8Zpz2"){
+	if (unit_conversion_csv_conversion_factor_url=="https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL"){
 	  lineage <- paste0("The units used to express catches may vary between tRFMOs datasets. Catches are expressed in weight, or in number of fishes, or in both weights and numbers in the same stratum. Values expressed in weight were kept and numbers were converted into weight using simple conversion matrices (A. Fonteneau, pers. com). These conversion factors depend on the species, the gear, the year and the main geographical area (equatorial or tropical). They were computed from the Japanese and Taiwanese size-frequency data as well as from the Japanese total catches and catch-and-effort data. The factors of conversion are available here: ",unit_conversion_csv_conversion_factor_url," and the methodology to compute these factors is available here: http://data.d4science.org/ZWFMa3JJUHBXWk9NTXVPdFZhbU5BUFEyQnhUeWd1d3lHbWJQNStIS0N6Yz0. Some data might not be converted at all because no conversion factor exists for the stratum: these data were kept in number. Information regarding the conversions of catch units for this dataset: ratio_converted_number % of the the catches that were originally expressed in number have been converted into weight through the conversion factors.")
 	  description <- "- Values of catch were expressed in weight converting numbers using matrices of average weights varying with species, fishing gear, year and large geographical areas, i.e. equatorial or tropical (A. Fonteneau, pers.com). Average weights were computed from the Japanese and Taiwanese size-frequency data as well as from the Japanese total catches and catch-and-effort data. Some data might not be converted at all because no conversion factor exists for the stratum: those data were kept and the unit of catch was set to Number of fishes harvested."
 	  info <- "- Data provided in number of fishes harvested for the Southern Bluefin tuna (SBF) were not converted into weight of fishes, because no factors of conversion are available for this species. This might represent a great amount of the data for SBF."
