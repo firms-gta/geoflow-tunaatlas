@@ -269,7 +269,7 @@ switch(DATA_LEVEL,
 		
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 1 => STEP 2/5: Convert units by using A. Fonteneau file")
+		config$logger.info("LEVEL 1 => STEP 2/5 is executed: Convert units by using A. Fonteneau file")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 			mapping_map_code_lists <- TRUE
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
@@ -277,6 +277,8 @@ switch(DATA_LEVEL,
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
 			
 			ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
+			config$logger.info(sprintf("Unit conversion: Total catch before unit conversion is now [%s] Tons", ntons_before_this_step))
+			
 			  
 			georef_dataset <- do_unit_conversion(entity=entity,
 			                                     config=config,
@@ -292,15 +294,18 @@ switch(DATA_LEVEL,
 			config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_conversion))
 			config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_conversion-ntons_before_this_step))
 			
+		}else{
+		  config$logger.info("LEVEL 1 => STEP 2/5 not executed (since not selected in the workflow options (see column Data)")
 		}
 			
 
 		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
+		config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
 		  ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
+		  config$logger.info(sprintf("Unit conversion: Total catch before Reallocation of mislocated data is now [%s] Tons", ntons_before_this_step))
 		  
 		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
 									    df=georef_dataset,
@@ -313,8 +318,10 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		  ntons_after_mislocated <- georef_dataset %>% select(value)  %>% sum()
-		  config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_mislocated))
+		  config$logger.info(sprintf("Unit conversion: Total catch after Reallocation of mislocated data is now [%s] Tons", ntons_after_mislocated))
 		  config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_mislocated-ntons_before_this_step))
+		}else{
+		  config$logger.info("LEVEL 1 => STEP 3/5 not executed (since not selected in the workflow options (see column Data)")
 		}
 		
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
@@ -324,6 +331,8 @@ switch(DATA_LEVEL,
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  
 		  ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
+		  config$logger.info(sprintf("Unit conversion: Total catch before Disggregate data on 5° resolution is now [%s] Tons", ntons_before_this_step))
+		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
 													  resolution=5,
@@ -336,9 +345,11 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
 		  ntons_after_disaggregation_5deg <- georef_dataset %>% select(value)  %>% sum()
-		  config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_disaggregation_5deg))
+		  config$logger.info(sprintf("Unit conversion: Total catch after Disggregate data on 5° resolution is now [%s] Tons", ntons_after_disaggregation_5deg))
 		  config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_disaggregation_5deg-ntons_before_this_step))
 		  
+		}else{
+		  config$logger.info("LEVEL 1 => STEP 4/5 not executed (since not selected in the workflow options (see column Data)")
 		}
 
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
@@ -349,6 +360,7 @@ switch(DATA_LEVEL,
 		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
 			
 		  ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
+		  config$logger.info(sprintf("Unit conversion: Total catch before Disggregate data on 1°  is now [%s] Tons", ntons_before_this_step))
 		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
@@ -362,9 +374,11 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		  ntons_after_disaggregation_1deg <- georef_dataset %>% select(value)  %>% sum()
-		  config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_disaggregation_1deg))
+		  config$logger.info(sprintf("Unit conversion: Total catch after Disggregate data on 1°  is now [%s] Tons", ntons_after_disaggregation_1deg))
 		  config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_disaggregation_1deg-ntons_before_this_step))
-		} 
+		} else{
+		  config$logger.info("LEVEL 1 => STEP 5/5 not executed (since not selected in the workflow options (see column Data)")
+		}
 	
 	#end switch LEVEL 1
 	},
@@ -515,11 +529,13 @@ switch(DATA_LEVEL,
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			config$logger.info(paste0("Total catch for data after raising is ",sum(georef_dataset$value),"  \n"))
 			
+		}else{
+		  config$logger.info("LEVEL 2 => STEP 3/3 not executed (since not selected in the workflow options (see column Data)")
 		} 
 	#end swith LEVEL 2
 	}
-      #end switch levels of processing
-      )
+#end switch levels of processing
+)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------
