@@ -276,7 +276,7 @@ switch(DATA_LEVEL,
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
 			
-			ntons_before_this_step <- round(oref_dataset %>% select(value)  %>% filter(unit=="MT")  %>% sum())
+			ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% filter(unit=="MT")  %>% sum())
 			config$logger.info(sprintf("Unit conversion: Total catch before unit conversion is [%s] Tons", ntons_before_this_step))
 			
 			  
