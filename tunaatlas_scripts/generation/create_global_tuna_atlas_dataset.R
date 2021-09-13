@@ -257,9 +257,14 @@ switch(DATA_LEVEL,
 		#@juldebar patch to fix errors due to the last step of Level 0 workflow
 		if(any(georef_dataset$unit == "t")) georef_dataset[georef_dataset$unit == "t", ]$unit <- "MT"
 		if(any(georef_dataset$unit == "no")) georef_dataset[georef_dataset$unit == "no", ]$unit <- "NO"
-		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		nrow_before <- nrow(georef_dataset)
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow_before))
 		config$logger.info(sprintf("Gridded catch dataset for 'MT' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="MT"))))
+		ntons_before <- georef_dataset %>% filter(unit=="MT")  %>% select(value)  %>% sum()
+		config$logger.info(sprintf("Total catch for 'MT' unit is [%s] Tons", ntons_before))
 		config$logger.info(sprintf("Gridded catch dataset for 'NO' unit only has [%s] lines", nrow(georef_dataset %>% filter(unit=="NO"))))
+		config$logger.info(sprintf("Total number for 'NO' unit is [%s] individuals", georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()))
+		
 		rm(dataset)
 		
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
@@ -270,6 +275,8 @@ switch(DATA_LEVEL,
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
 			if(is.null(options$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
 			if(is.null(options$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
+			
+			ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
 			  
 			georef_dataset <- do_unit_conversion(entity=entity,
 			                                     config=config,
@@ -280,6 +287,11 @@ switch(DATA_LEVEL,
 			                                     georef_dataset=georef_dataset)
 			
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+			config$logger.info(sprintf("[%s] lines have been removed", nrow(georef_dataset)-nrow_before))
+			ntons_after_conversion <- georef_dataset %>% select(value)  %>% sum()
+			config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_conversion))
+			config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_conversion-ntons_before_this_step))
+			
 		}
 			
 
@@ -288,6 +300,8 @@ switch(DATA_LEVEL,
 		config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of data mislocated (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
+		  ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
+		  
 		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
 									    df=georef_dataset,
 									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
@@ -298,6 +312,9 @@ switch(DATA_LEVEL,
 		  
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		  ntons_after_mislocated <- georef_dataset %>% select(value)  %>% sum()
+		  config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_mislocated))
+		  config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_mislocated-ntons_before_this_step))
 		}
 		
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
@@ -306,6 +323,7 @@ switch(DATA_LEVEL,
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  
+		  ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
 													  resolution=5,
@@ -317,6 +335,10 @@ switch(DATA_LEVEL,
 		  
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		  ntons_after_disaggregation_5deg <- georef_dataset %>% select(value)  %>% sum()
+		  config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_disaggregation_5deg))
+		  config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_disaggregation_5deg-ntons_before_this_step))
+		  
 		}
 
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
@@ -326,6 +348,8 @@ switch(DATA_LEVEL,
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
 			
+		  ntons_before_this_step <- georef_dataset %>% select(value)  %>% sum()
+		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
 													  resolution=1,
@@ -337,7 +361,9 @@ switch(DATA_LEVEL,
 		  
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
-
+		  ntons_after_disaggregation_1deg <- georef_dataset %>% select(value)  %>% sum()
+		  config$logger.info(sprintf("Unit conversion: Total catch after unit conversion is now [%s] Tons", ntons_after_disaggregation_1deg))
+		  config$logger.info(sprintf("Unit conversion generated [%s] additionnal tons", ntons_after_disaggregation_1deg-ntons_before_this_step))
 		} 
 	
 	#end switch LEVEL 1
