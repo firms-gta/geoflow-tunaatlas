@@ -123,9 +123,10 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	                                          )
 	# to get stats on the process (useful for metadata)
 	stats<-georef_dataset$stats
+	georef_dataset<-georef_dataset$df
+	
 	cat(georef_dataset$stats)
 	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
-	georef_dataset<-georef_dataset$df
 	config$logger.info("rtunaatlas::convert_units() function executed !")
 	config$logger.info(sprintf("Gridded catch dataset after tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
 	
