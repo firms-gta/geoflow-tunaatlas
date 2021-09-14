@@ -245,10 +245,11 @@ switch(DATA_LEVEL,
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	"1" = {
 		config$logger.info("Start generation of Level 1 products")
-
+	  
 	  config$logger.info("-----------------------------------------------------------------------------------------------------")
-	  config$logger.info("LEVEL 1 => STEP 1/5: Extract and load FIRMS Level 0 gridded catch data input")
+	  config$logger.info(sprintf("LEVEL 1 => STEP 1/5: Extract and load FIRMS Level 0 gridded catch data input to process file [%s] ",entity$data$source[[1]]))
 	  config$logger.info("-----------------------------------------------------------------------------------------------------")
+	  
 	  dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
@@ -282,6 +283,7 @@ switch(DATA_LEVEL,
 			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines", nrow(georef_dataset)))
 			
 			  
+			config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function")
 			georef_dataset <- do_unit_conversion(entity=entity,
 			                                     config=config,
 			                                     fact=fact,
@@ -289,6 +291,8 @@ switch(DATA_LEVEL,
 			                                     unit_conversion_codelist_geoidentifiers_conversion_factors=options$unit_conversion_codelist_geoidentifiers_conversion_factors,
 			                                     mapping_map_code_lists=mapping_map_code_lists,
 			                                     georef_dataset=georef_dataset)
+			config$logger.info("STEP 2/5: END do_unit_conversion() function")
+			
 			
 			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines", nrow(georef_dataset)))
 			config$logger.info(sprintf("[%s] lines have been removed", nrow(georef_dataset)-nrow_before))
@@ -299,7 +303,7 @@ switch(DATA_LEVEL,
 			config$logger.info("END STEP 2/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 2/5 not executed (since not selected in the workflow options (see column Data)")
+		  config$logger.info("LEVEL 1 => STEP 2/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 			
@@ -315,9 +319,11 @@ switch(DATA_LEVEL,
 		  config$logger.info(sprintf("STEP 3/5 : Gridded catch dataset before this step has [%s] lines", nrow(georef_dataset)))
 
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
+		  config$logger.info("STEP 3/5: BEGIN function_spatial_curation_data_mislocated() function")
 		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
 									    df=georef_dataset,
 									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
+		  config$logger.info("STEP 3/5: END function_spatial_curation_data_mislocated() function")
 		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
 		  # metadata$description<-paste0(metadata$description,georef_dataset$description)
@@ -331,26 +337,29 @@ switch(DATA_LEVEL,
 		  config$logger.info("END STEP 3/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 3/5 not executed (since not selected in the workflow options (see column Data)")
+		  config$logger.info("LEVEL 1 => STEP 3/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 		
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
 		  
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 4/5: Disggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
+		  config$logger.info("LEVEL 1 => STEP 4/5: Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		  
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
 		  
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
-		  config$logger.info(sprintf("STEP 4/5: Total catch before Disggregate data on 5° resolution is [%s] Tons", ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 4/5: Total catch before Disaggregate data on 5° resolution is [%s] Tons", ntons_before_this_step))
 		  config$logger.info(sprintf("STEP 4/5 : Gridded catch dataset before this step has [%s] lines", nrow(georef_dataset)))
 		  
+		  config$logger.info("STEP 4/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function")
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
 													  resolution=5,
 													  action_to_do=options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)
+		  config$logger.info("STEP 4/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function")
+		  
 		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
 		  # metadata$description<-paste0(metadata$description,georef_dataset$description)
@@ -359,31 +368,31 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("STEP 4/5 : Gridded catch dataset after this step has [%s] lines", nrow(georef_dataset)))
 		  ntons_after_disaggregation_5deg <- round(georef_dataset %>% select(value)  %>% sum())
-		  config$logger.info(sprintf("STEP 4/5 : Total catch after Disggregate data on 5° resolution is now [%s] Tons", ntons_after_disaggregation_5deg))
-		  config$logger.info(sprintf("STEP 4/5 : Disggregate data on 5° generated [%s] additionnal tons", ntons_after_disaggregation_5deg-ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 4/5 : Total catch after Disaggregate data on 5° resolution is now [%s] Tons", ntons_after_disaggregation_5deg))
+		  config$logger.info(sprintf("STEP 4/5 : Disaggregate data on 5° generated [%s] additionnal tons", ntons_after_disaggregation_5deg-ntons_before_this_step))
 		  config$logger.info("END STEP 4/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 4/5 not executed (since not selected in the workflow options (see column Data)")
+		  config$logger.info("LEVEL 1 => STEP 4/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 5/5: Disggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
+		  config$logger.info("LEVEL 1 => STEP 5/5: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		  
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
-		  config$logger.info(sprintf("STEP 5/5: Total catch before Disggregate data on 1°  is [%s] Tons", ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 5/5: Total catch before Disaggregate data on 1°  is [%s] Tons", ntons_before_this_step))
 		  config$logger.info(sprintf("STEP 5/5 : Gridded catch dataset before this step has [%s] lines", nrow(georef_dataset)))	
 		  
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-		  config$logger.info("Executing function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg ")
-		  
+		  config$logger.info("STEP 5/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function")
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
 													  resolution=1,
 													  action_to_do=options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)
+		  config$logger.info("STEP 5/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function")
 		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
 		  # metadata$description<-paste0(metadata$description,georef_dataset$description)
@@ -392,12 +401,12 @@ switch(DATA_LEVEL,
 		  georef_dataset<-georef_dataset$dataset
 		  config$logger.info(sprintf("STEP 5/5 : Gridded catch dataset after this step has [%s] lines", nrow(georef_dataset)))	
 		  ntons_after_disaggregation_1deg <- round(georef_dataset %>% select(value)  %>% sum())
-		  config$logger.info(sprintf("STEP 5/5: Total catch after Disggregate data on 1°  is now [%s] Tons", ntons_after_disaggregation_1deg))
-		  config$logger.info(sprintf("STEP 5/5 : Disggregate data on 1° generated [%s] additionnal tons", ntons_after_disaggregation_1deg-ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 5/5: Total catch after Disaggregate data on 1°  is now [%s] Tons", ntons_after_disaggregation_1deg))
+		  config$logger.info(sprintf("STEP 5/5 : Disaggregate data on 1° generated [%s] additionnal tons", ntons_after_disaggregation_1deg-ntons_before_this_step))
 		  config$logger.info("END STEP 5/5")
 		} else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 5/5 not executed (since not selected in the workflow options (see column Data)")
+		  config$logger.info("LEVEL 1 => STEP 5/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 	
@@ -551,7 +560,7 @@ switch(DATA_LEVEL,
 			config$logger.info(paste0("Total catch for data after raising is ",sum(georef_dataset$value),"  \n"))
 			
 		}else{
-		  config$logger.info("LEVEL 2 => STEP 3/3 not executed (since not selected in the workflow options (see column Data)")
+		  config$logger.info("LEVEL 2 => STEP 3/3 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
 		} 
 	#end swith LEVEL 2
 	}
