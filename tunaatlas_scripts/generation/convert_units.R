@@ -116,6 +116,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	sum_no_before <- georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()
 	species_no_before <- georef_dataset %>% filter(unit=="NO") %>% distinct(species)
 	cat(species_no_before$species)
+	cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
 	
 	georef_dataset<-rtunaatlas::convert_units(con = con,
 	                                          df_input = georef_dataset,
@@ -126,12 +127,13 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	# to get stats on the process (useful for metadata)
 	stats<-georef_dataset$stats
 	georef_dataset<-georef_dataset$df
+	
+	#check what species didn't get  conversion factors from IRD file
 	species_no_after <- georef_dataset %>% filter(unit=="NO") %>% distinct(species)
-	test <- df_conversion_factor %>% filter(species=='SKJ')
 	cat(setdiff(species_no_before$species,species_no_after$species))
-	cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
 	cat(intersect(species_no_after$species,unique(df_conversion_factor$species)))
 	#@juldebar => issue with SKJ and IOTC
+	# test <- df_conversion_factor %>% filter(species=='SKJ')
 	# df_conversion_factor %>% filter(species=='SKJ',source_authority=='IOTC')
 	
 	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
