@@ -283,7 +283,7 @@ switch(DATA_LEVEL,
 			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines", nrow(georef_dataset)))
 			
 			  
-			config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function")
+			config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset") 
 			georef_dataset <- do_unit_conversion(entity=entity,
 			                                     config=config,
 			                                     fact=fact,
