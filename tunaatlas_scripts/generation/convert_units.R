@@ -112,7 +112,6 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	
 	
 	config$logger.info("Execute rtunaatlas::convert_units() function")
-	config$logger.info(sprintf("Gridded catch dataset is input of -rtunaatlas::convert_units() and  has [%s] lines", nrow(georef_dataset)))
 	config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
 	
 	georef_dataset<-rtunaatlas::convert_units(con = con,
@@ -130,8 +129,6 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	config$logger.info("rtunaatlas::convert_units() function executed !")
 	config$logger.info(sprintf("Gridded catch dataset after tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
 	
-
-
 	
 	#filter by unit MT
 	#@juldebar => must be "t" now with changes on Level 0
@@ -170,7 +167,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	}
 	#@juldebar modify FIRMS-Secretariat@fao.org 
 	#@juldebar begin commented
-	#@config$logger.info("Fill contact metadata elements \n")
+	#@config$logger.info("Fill contact metadata elements")
 	#@firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
 	#@firms_contact$setRole("processor")
 	#@conversion_step <- geoflow_process$new()
