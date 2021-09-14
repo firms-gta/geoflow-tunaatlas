@@ -279,6 +279,7 @@ switch(DATA_LEVEL,
 			
 			ntons_before_this_step <- round(georef_dataset %>% filter(unit=="MT")  %>% select(value)  %>% sum())
 			config$logger.info(sprintf("STEP 2/5 : Total catch before unit conversion is [%s] Tons", ntons_before_this_step))
+			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines", nrow(georef_dataset)))
 			
 			  
 			georef_dataset <- do_unit_conversion(entity=entity,
@@ -308,6 +309,7 @@ switch(DATA_LEVEL,
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
 		  config$logger.info(sprintf("STEP 3/5 : Total catch before Reallocation of mislocated data is now [%s] Tons", ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 3/5 : Gridded catch dataset before this step has [%s] lines", nrow(georef_dataset)))
 		  
 		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
 									    df=georef_dataset,
@@ -318,10 +320,10 @@ switch(DATA_LEVEL,
 		  # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  
 		  georef_dataset<-georef_dataset$dataset
-		  config$logger.info(sprintf("STEP 3/5 : Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		  config$logger.info(sprintf("STEP 3/5 : Gridded catch dataset after this step has [%s] lines", nrow(georef_dataset)))
 		  ntons_after_mislocated <- round(georef_dataset %>% select(value)  %>% sum())
 		  config$logger.info(sprintf("STEP 3/5 : Total catch after Reallocation of mislocated data is now [%s] Tons", ntons_after_mislocated))
-		  config$logger.info(sprintf("STEP 3/5 :  Reallocation of mislocated data generated [%s] additionnal tons", ntons_after_mislocated-ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 3/5 : Reallocation of mislocated data generated [%s] additionnal tons", ntons_after_mislocated-ntons_before_this_step))
 		  config$logger.info("END STEP 3/5")
 		}else{
 		  config$logger.info("LEVEL 1 => STEP 3/5 not executed (since not selected in the workflow options (see column Data)")
@@ -335,6 +337,7 @@ switch(DATA_LEVEL,
 		  
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
 		  config$logger.info(sprintf("STEP 4/5: Total catch before Disggregate data on 5° resolution is [%s] Tons", ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 4/5 : Gridded catch dataset before this step has [%s] lines", nrow(georef_dataset)))
 		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
@@ -346,7 +349,7 @@ switch(DATA_LEVEL,
 		  # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  
 		  georef_dataset<-georef_dataset$dataset
-		  config$logger.info(sprintf("STEP 4/5 : Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		  config$logger.info(sprintf("STEP 4/5 : Gridded catch dataset after this step has [%s] lines", nrow(georef_dataset)))
 		  ntons_after_disaggregation_5deg <- round(georef_dataset %>% select(value)  %>% sum())
 		  config$logger.info(sprintf("STEP 4/5 : Total catch after Disggregate data on 5° resolution is now [%s] Tons", ntons_after_disaggregation_5deg))
 		  config$logger.info(sprintf("STEP 4/5 : Disggregate data on 5° generated [%s] additionnal tons", ntons_after_disaggregation_5deg-ntons_before_this_step))
@@ -364,6 +367,7 @@ switch(DATA_LEVEL,
 			
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
 		  config$logger.info(sprintf("STEP 5/5: Total catch before Disggregate data on 1°  is [%s] Tons", ntons_before_this_step))
+		  config$logger.info(sprintf("STEP 5/5 : Gridded catch dataset before this step has [%s] lines", nrow(georef_dataset)))	
 		  
 		  georef_dataset<-function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(entity,config,options,
 													  georef_dataset=georef_dataset,
@@ -375,7 +379,7 @@ switch(DATA_LEVEL,
 		  # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		  
 		  georef_dataset<-georef_dataset$dataset
-		  config$logger.info(sprintf("STEP 5/5 : Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+		  config$logger.info(sprintf("STEP 5/5 : Gridded catch dataset after this step has [%s] lines", nrow(georef_dataset)))	
 		  ntons_after_disaggregation_1deg <- round(georef_dataset %>% select(value)  %>% sum())
 		  config$logger.info(sprintf("STEP 5/5: Total catch after Disggregate data on 1°  is now [%s] Tons", ntons_after_disaggregation_1deg))
 		  config$logger.info(sprintf("STEP 5/5 : Disggregate data on 1° generated [%s] additionnal tons", ntons_after_disaggregation_1deg-ntons_before_this_step))
