@@ -2,10 +2,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
   
 	con <- config$software$output$dbi
   
-	config$logger.info("Converting units of georef_dataset...\n")
-
-	config$logger.info("Reading the conversion factors dataset\n")
-
+	config$logger.info("Reading the conversion factors dataset")
 	googledrive_baseurl <- "https://drive.google.com/open?id="
 	if(startsWith(unit_conversion_csv_conversion_factor_url, googledrive_baseurl)){
 		#managing download through google drive
@@ -19,7 +16,10 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	}
 
 	## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source gear coding system with ISSCFG coding system. In fact, the conversion factors dataset is expressed with ISSCFG coding system for gears, while the primary tRFMOs datasets are expressed with their own gear coding system.
+	config$logger.info("Checking if 'mapping_map_code_lists' option is set to TRUE")
 	if (!mapping_map_code_lists){
+	  config$logger.info("'mapping_map_code_lists' option is set to TRUE")
+	  
 	  source_authority<-c("IOTC","ICCAT","IATTC","WCPFC","CCSBT")
 	  db_mapping_dataset_name<-c("codelist_mapping_gear_iotc_isscfg_revision_1","codelist_mapping_gear_iccat_isscfg_revision_1","codelist_mapping_gear_iattc_isscfg_revision_1","codelist_mapping_gear_wcpfc_isscfg_revision_1","codelist_mapping_gear_ccsbt_isscfg_revision_1")
 	  mapping_dataset<-data.frame(source_authority,db_mapping_dataset_name)
@@ -45,17 +45,20 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		}
 		#georef_dataset with source coding system for units mapped with tuna atlas codes:
 		georef_dataset<-rtunaatlas::map_codelist(georef_dataset,df_mapping_final_this_dimension,"unit",TRUE)$df
-
-		
-		}
+	  }
+	  
 	}
+	config$logger.info("'mapping_map_code_lists' option is set to FALSE")
+	
 	## For catches: Convert MTNO to MT and remove NOMT (we do not keep the data that were expressed in number with corresponding value in weight)
 	#@juldebar => see what to do with redundant action in Level 0 workflow
 	#@eblondel => to refactor to align on standard units
 	if (fact=="catch"){
+	  config$logger.info("Dealing with cacth => Removing old NOMT / MTNO units if any")
 		georef_dataset$unit[which(georef_dataset$unit == "MTNO")]<-"MT"
 		georef_dataset<-georef_dataset[!(georef_dataset$unit=="NOMT"),]
 	} else if (fact=="effort"){
+	  config$logger.info("Dealing with effort => harmonization of units")
 		## For efforts: 
 		# Les strates sont potentiellement exprimées avec plusieurs unités par strates. 
 		# Si les states sont exprimées dans au moins une des unités standard, on isole l'unité standard et on supprime les autres unités.
@@ -107,25 +110,27 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 
 	}
 	
-	config$logger.info("Execute rtunaatlas::convert_units() function ...\n")
-	config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-
+	
+	config$logger.info("Execute rtunaatlas::convert_units() function")
+	config$logger.info(sprintf("Gridded catch dataset is input of -rtunaatlas::convert_units() and  has [%s] lines", nrow(georef_dataset)))
+	config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
+	
 	georef_dataset<-rtunaatlas::convert_units(con = con,
 	                                          df_input = georef_dataset,
 	                                          df_conversion_factor = df_conversion_factor,
 	                                          codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
 	                                          codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
 	                                          )
-	
-	config$logger.info("rtunaatlas::convert_units() function executed !\n")
-	config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-
 	# to get stats on the process (useful for metadata)
-	# georef_dataset$stats
-	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
+	stats<-georef_dataset$stats
 	cat(georef_dataset$stats)
-
+	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
 	georef_dataset<-georef_dataset$df
+	config$logger.info("rtunaatlas::convert_units() function executed !")
+	config$logger.info(sprintf("Gridded catch dataset after tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
+	
+
+
 	
 	#filter by unit MT
 	#@juldebar => must be "t" now with changes on Level 0
@@ -144,7 +149,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	}
 
 	# fill metadata elements
-	config$logger.info("Fill metadata elements accordingly\n")
+	config$logger.info("Fill metadata elements accordingly")
 
 	lineage <- ""
 	description <- ""
