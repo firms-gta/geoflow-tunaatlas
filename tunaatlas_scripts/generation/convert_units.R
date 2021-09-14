@@ -113,6 +113,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	
 	config$logger.info("Execute rtunaatlas::convert_units() function")
 	config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
+	sum_no_before <- georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()
 	
 	georef_dataset<-rtunaatlas::convert_units(con = con,
 	                                          df_input = georef_dataset,
@@ -133,6 +134,14 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	#filter by unit MT
 	#@juldebar => must be "t" now with changes on Level 0
 	#@eblondel => to refactor to align on standard units
+	sum_no_after<- df %>% filter(unit=="NO")  %>% select(value)  %>% sum()
+	nrow_no <- nrow(df %>% filter(unit=="NO")  %>% select(value))
+	# sum_t <- df %>% filter(unit=="MT")  %>% select(value)  %>% sum()
+	config$logger.info(sprintf("Gridded catch dataset has [%s] lines using 'number' as unit of measure", nrow_no))
+	config$logger.info(sprintf("Removing all lines still using  'number' as unit of measure representing a total of [%s] inidviduals", sum_no_after))
+	config$logger.info(sprintf("Ratio of total converted is [%s]", sum_no_after/sum_no_before))
+	
+	
 	georef_dataset <- georef_dataset[georef_dataset$unit == "MT", ]
 	#georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]
 
