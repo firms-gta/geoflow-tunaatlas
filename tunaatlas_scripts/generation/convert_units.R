@@ -114,6 +114,8 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	config$logger.info("Execute rtunaatlas::convert_units() function")
 	config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
 	sum_no_before <- georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()
+	species_no_before <- georef_dataset %>% filter(unit=="NO") %>% distinct(species)
+	cat(species_no_before$species)
 	
 	georef_dataset<-rtunaatlas::convert_units(con = con,
 	                                          df_input = georef_dataset,
@@ -124,8 +126,14 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	# to get stats on the process (useful for metadata)
 	stats<-georef_dataset$stats
 	georef_dataset<-georef_dataset$df
+	species_no_after <- georef_dataset %>% filter(unit=="NO") %>% distinct(species)
+	test <- df_conversion_factor %>% filter(species=='SKJ')
+	cat(setdiff(species_no_before$species,species_no_after$species))
+	cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
+	cat(intersect(species_no_after$species,unique(df_conversion_factor$species)))
+	#@juldebar => issue with SKJ and IOTC
+	# df_conversion_factor %>% filter(species=='SKJ',source_authority=='IOTC')
 	
-	cat(georef_dataset$stats)
 	config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
 	config$logger.info("rtunaatlas::convert_units() function executed !")
 	config$logger.info(sprintf("Gridded catch dataset after tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
