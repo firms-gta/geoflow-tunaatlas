@@ -151,7 +151,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	config$logger.info(sprintf("Now removing all lines still using 'number' as unit of measure representing a total of [%s] inidviduals", sum_no_after))
 	georef_dataset <- georef_dataset[georef_dataset$unit == "MT", ]
 	#georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]
-	config$logger.info(sprintf("Ratio of total in number converted is [%s] due to lack on conversion factors", sum_no_after/sum_no_before))
+	config$logger.info(sprintf("Ratio of converted numbers is [%s] due to lack on conversion factors for some dimensions (species, time, gears..)", 1-sum_no_after/sum_no_before))
 	
 	
 	if (mapping_map_code_lists=="FALSE"){
