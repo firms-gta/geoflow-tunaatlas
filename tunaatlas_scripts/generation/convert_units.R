@@ -148,7 +148,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	nrow_no <- nrow(georef_dataset %>% filter(unit=="NO")  %>% select(value))
 	# sum_t <- df %>% filter(unit=="MT")  %>% select(value)  %>% sum()
 	config$logger.info(sprintf("Gridded catch dataset has [%s] lines using 'number' as unit of measure", nrow_no))
-	config$logger.info(sprintf("Now removing all lines still using 'number' as unit of measure representing a total of [%s] inidviduals", sum_no_after))
+	config$logger.info(sprintf("Now removing all lines still using 'number' (NO) as unit of measure and still representing a total of [%s] inidviduals", sum_no_after))
 	georef_dataset <- georef_dataset[georef_dataset$unit == "MT", ]
 	#georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]
 	config$logger.info(sprintf("Ratio of converted numbers is [%s] due to lack on conversion factors for some dimensions (species, time, gears..)", 1-sum_no_after/sum_no_before))
