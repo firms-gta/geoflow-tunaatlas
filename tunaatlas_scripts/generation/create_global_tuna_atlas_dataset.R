@@ -247,7 +247,7 @@ switch(DATA_LEVEL,
 		config$logger.info("Start generation of Level 1 products")
 	  
 	  config$logger.info("-----------------------------------------------------------------------------------------------------")
-	  config$logger.info(sprintf("LEVEL 1 => STEP 1/5: Extract and load FIRMS Level 0 gridded catch data input to process file [%s] ",entity$data$source[[1]]))
+	  config$logger.info(sprintf("LEVEL 1 => STEP 1/5 for file [%s] is executed: Extract and load FIRMS Level 0 gridded catch data input",entity$data$source[[1]]))
 	  config$logger.info("-----------------------------------------------------------------------------------------------------")
 	  
 	  dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
@@ -271,7 +271,7 @@ switch(DATA_LEVEL,
 		
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 2/5 is executed: Convert units by using A. Fonteneau file")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], options$unit_conversion_convert))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		  mapping_map_code_lists <- TRUE
 			if(!is.null(options$mapping_map_code_lists)) mapping_map_code_lists = options$mapping_map_code_lists
@@ -281,7 +281,6 @@ switch(DATA_LEVEL,
 			ntons_before_this_step <- round(georef_dataset %>% filter(unit=="MT")  %>% select(value)  %>% sum())
 			config$logger.info(sprintf("STEP 2/5 : Total catch before unit conversion is [%s] Tons", ntons_before_this_step))
 			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines", nrow(georef_dataset)))
-			
 			  
 			config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset") 
 			georef_dataset <- do_unit_conversion(entity=entity,
@@ -292,7 +291,6 @@ switch(DATA_LEVEL,
 			                                     mapping_map_code_lists=mapping_map_code_lists,
 			                                     georef_dataset=georef_dataset)
 			config$logger.info("STEP 2/5: END do_unit_conversion() function")
-			
 			
 			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines", nrow(georef_dataset)))
 			config$logger.info(sprintf("[%s] lines have been removed", nrow(georef_dataset)-nrow_before))
@@ -311,7 +309,7 @@ switch(DATA_LEVEL,
 		if (options$spatial_curation_data_mislocated %in% c("reallocate","remove")){
 		  
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 3/5: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA')")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 3/5  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",entity$data$source[[1]], options$spatial_curation_data_mislocated))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
@@ -344,7 +342,7 @@ switch(DATA_LEVEL,
 		if (options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate","remove")) {
 		  
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 4/5: Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only)")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 4/5  for file [%s] is executed: Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",entity$data$source[[1]], options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		  
 		  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
@@ -378,8 +376,9 @@ switch(DATA_LEVEL,
 		}
 
 		if (options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate","remove")) { 
+		  
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 5/5: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only)")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 5/5 for file [%s] is executed: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",entity$data$source[[1]], options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		  
 		  ntons_before_this_step <- round(georef_dataset %>% select(value)  %>% sum())
