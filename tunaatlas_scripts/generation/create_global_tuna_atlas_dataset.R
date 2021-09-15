@@ -301,7 +301,7 @@ switch(DATA_LEVEL,
 			config$logger.info("END STEP 2/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 2/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 2/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], options$unit_conversion_convert))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 			
@@ -318,9 +318,10 @@ switch(DATA_LEVEL,
 
 		  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
 		  config$logger.info("STEP 3/5: BEGIN function_spatial_curation_data_mislocated() function")
-		  georef_dataset<-function_spatial_curation_data_mislocated(entity,config,
-									    df=georef_dataset,
-									    spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
+		  georef_dataset<-function_spatial_curation_data_mislocated(entity=entity,
+		                                                            config=config,
+		                                                            df=georef_dataset,
+		                                                            spatial_curation_data_mislocated=options$spatial_curation_data_mislocated)
 		  config$logger.info("STEP 3/5: END function_spatial_curation_data_mislocated() function")
 		  
 		  #@juldebar: pending => metadata elements below to be managed (commented for now)
@@ -335,7 +336,7 @@ switch(DATA_LEVEL,
 		  config$logger.info("END STEP 3/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 3/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 3/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",entity$data$source[[1]], options$spatial_curation_data_mislocated))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 		
@@ -371,7 +372,7 @@ switch(DATA_LEVEL,
 		  config$logger.info("END STEP 4/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 4/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 4/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",entity$data$source[[1]], options$disaggregate_on_5deg_data_with_resolution_superior_to_5deg))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 
@@ -405,7 +406,7 @@ switch(DATA_LEVEL,
 		  config$logger.info("END STEP 5/5")
 		} else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info("LEVEL 1 => STEP 5/5 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
+		  config$logger.info(sprintf("LEVEL 1 => STEP 5/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",entity$data$source[[1]], options$disaggregate_on_1deg_data_with_resolution_superior_to_1deg))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 	
