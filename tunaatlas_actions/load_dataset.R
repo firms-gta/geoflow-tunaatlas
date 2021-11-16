@@ -73,32 +73,34 @@ load_dataset <- function(entity, config, options){
 	  #build legacy metadata Tuna atlas metadata data.frame representation
 	  config$logger.info("Preparing legacy Tuna atlas metadata entry")
 	  InputMetadataset <- data.frame(
-		identifier = entity$identifiers[["id"]],
-		persistent_identifier = entity$identifiers[["id"]],
-		title = entity$titles[["title"]],
-		contacts_and_roles = geoflow_df$Creator,
-		subject = geoflow_df$Subject,
-		description = geoflow_df$Description,
-		date = geoflow_df$Date,
-		format = NA, #TODO
-		language = entity$language,
-		relation = geoflow_df$Relation,
-		spatial_coverage = geoflow_df$SpatialCoverage,
-		temporal_coverage = geoflow_df$TemporalCoverage,
-		rights = geoflow_df$Rights,
-		source = NA, #TODO ?
-		lineage = geoflow_df$Provenance,
-		supplemental_information = NA, #this is now managed within description
-		dataset_type = "raw_dataset",
-		sql_query_dataset_extraction = NA, #filled below with R code
-		database_table_name = table_name,
-		database_view_name = dataset_pid,
-		stringsAsFactors = FALSE
+	    identifier = entity$identifiers[["id"]],		
+	    persistent_identifier = entity$identifiers[["id"]],
+	    title = entity$titles[["title"]],
+	    contacts_and_roles = geoflow_df$Creator,
+	    subject = geoflow_df$Subject,
+	    description = geoflow_df$Description,
+	    date = geoflow_df$Date,
+	    format = NA, #TODO
+	    language = entity$language,
+	    relation = geoflow_df$Relation,
+	    spatial_coverage = geoflow_df$SpatialCoverage,
+	    temporal_coverage = geoflow_df$TemporalCoverage,
+	    rights = geoflow_df$Rights,
+	    source = NA, #TODO ?
+	    lineage = geoflow_df$Provenance,
+	    supplemental_information = NA, #this is now managed within description
+	    dataset_type = "raw_dataset",
+	    sql_query_dataset_extraction = NA, #filled below with R code
+	    database_table_name = table_name,
+	    database_view_name = dataset_pid,
+	    stringsAsFactors = FALSE
 	  )
+	  
 	  InputMetadataset[is.na(InputMetadataset)] <- "NA"
 	  
 	  # julien => should be taken from data dictionnary embedded in the database and used for 19110 ?
-	  db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
+	  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/eblondel/rtunaatlas/master/inst/extdata/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
+	  # db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
 	  
 	  variable_name<-gsub("fact_tables.","",InputMetadataset$database_table_name)
 	  

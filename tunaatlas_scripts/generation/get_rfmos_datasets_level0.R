@@ -157,6 +157,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 				#for catch fact
 				if(variable == "catch") {
 				  
+				  config$logger.info(sprintf("Case %s data", variable))
+				  
 					# Extract tuna catch
 					df_catch_tuna_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_tuna_catch], guess_max = 0))
 					df_catch_tuna_flag <- df_catch_tuna_flag[,columns_to_keep]
@@ -175,6 +177,9 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 																	dataset_file_billfish_or_shark_catch,
 																	dataset_file_billfish_or_shark_effort,
 																	raising_dimensions){
+						  
+						  config$logger.info(sprintf("Catch file which will be raised to efffort: %s ", dataset_file_billfish_or_shark_catch))
+						  
 						
 							billfish_or_shark_catch <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_billfish_or_shark_catch], guess_max = 0))
 							billfish_or_shark_catch <- billfish_or_shark_catch[,columns_to_keep]
@@ -199,7 +204,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 						  
 							# Raise the data
 							catch_raised <- rtunaatlas::raise_incomplete_dataset_to_total_dataset(
-								df_input_incomplete=billfish_or_shark_catch,
+							  df_input_incomplete=billfish_or_shark_catch,
 								df_input_total=billfish_or_shark_catch,
 								df_rf=df_rf,
 								x_raising_dimensions=raising_dimensions,
@@ -208,11 +213,25 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 							return(catch_raised$df)
 						}
 					
-						df_catch_billfish_flag <- function_raise_catch_to_effort(dataset_file_PSFlag_tuna_effort,dataset_file_PSFlag_billfish_catch,dataset_file_PSFlag_billfish_effort,c("gear","fishingfleet","time_start","time_end","geographic_identifier"))
-						df_catch_billfish_settype <- function_raise_catch_to_effort(dataset_file_PSSetType_tuna_effort,dataset_file_PSSetType_billfish_catch,dataset_file_PSSetType_billfish_effort,c("gear","schooltype","time_start","time_end","geographic_identifier"))
+						df_catch_billfish_flag <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSFlag_tuna_effort,
+						                                                         dataset_file_billfish_or_shark_catch=dataset_file_PSFlag_billfish_catch,
+						                                                         dataset_file_billfish_or_shark_effort=dataset_file_PSFlag_billfish_effort,
+						                                                         raising_dimensions=c("gear","fishingfleet","time_start","time_end","geographic_identifier"))
+						
+						df_catch_billfish_settype <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSSetType_tuna_effort,
+						                                                            dataset_file_billfish_or_shark_catch=dataset_file_PSSetType_billfish_catch,
+						                                                            dataset_file_billfish_or_shark_effort=dataset_file_PSSetType_billfish_effort,
+						                                                            raising_dimensions=c("gear","schooltype","time_start","time_end","geographic_identifier"))
 					
-						df_catch_shark_flag <- function_raise_catch_to_effort(dataset_file_PSFlag_tuna_effort,dataset_file_PSFlag_shark_catch,dataset_file_PSFlag_shark_effort,c("gear","fishingfleet","time_start","time_end","geographic_identifier"))
-						df_catch_shark_settype <- function_raise_catch_to_effort(dataset_file_PSSetType_tuna_effort,dataset_file_PSSetType_shark_catch,dataset_file_PSSetType_shark_effort,c("gear","schooltype","time_start","time_end","geographic_identifier"))
+						df_catch_shark_flag <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSFlag_tuna_effort,
+						                                                      dataset_file_billfish_or_shark_catch=dataset_file_PSFlag_shark_catch,
+						                                                      dataset_file_billfish_or_shark_effort=dataset_file_PSFlag_shark_effort,
+						                                                      raising_dimensions=c("gear","fishingfleet","time_start","time_end","geographic_identifier"))
+						
+						df_catch_shark_settype <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSSetType_tuna_effort,
+						                                                         dataset_file_billfish_or_shark_catch=dataset_file_PSSetType_shark_catch,
+						                                                         dataset_file_billfish_or_shark_effort=dataset_file_PSSetType_shark_effort,
+						                                                         raising_dimensions=c("gear","schooltype","time_start","time_end","geographic_identifier"))
 					
 					} else { # Else do not raise (i.e. for billfish/shark, keep catch only from billfish / shark)
 						df_catch_billfish_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_billfish_catch], guess_max = 0))
@@ -235,25 +254,25 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 					if(options$iattc_ps_raise_flags_to_schooltype){
 					  
 						df_catch_billfish<-rtunaatlas::raise_datasets_by_dimension(df1=df_catch_billfish_flag,
-													df2=df_catch_billfish_settype,
-													dimension_missing_df1="schooltype",
-													dimension_missing_df2="fishingfleet")$df
+						                                                           df2=df_catch_billfish_settype,
+						                                                           dimension_missing_df1="schooltype",
+						                                                           dimension_missing_df2="fishingfleet")$df
 					
 						df_catch_shark<-rtunaatlas::raise_datasets_by_dimension(df1=df_catch_shark_flag,
-																   df2=df_catch_shark_settype,
-																   dimension_missing_df1="schooltype",
-																   dimension_missing_df2="fishingfleet")$df
+						                                                        df2=df_catch_shark_settype,
+						                                                        dimension_missing_df1="schooltype",
+						                                                        dimension_missing_df2="fishingfleet")$df
 					
 						df_catch_tuna<-rtunaatlas::raise_datasets_by_dimension(df1=df_catch_tuna_flag,
-																df2=df_catch_tuna_settype,
-																dimension_missing_df1="schooltype",
-																dimension_missing_df2="fishingfleet")$df
+						                                                       df2=df_catch_tuna_settype,
+						                                                       dimension_missing_df1="schooltype",
+						                                                       dimension_missing_df2="fishingfleet")$df
 					
 					
 					} else {
 						# If user decides to not raise flags to type of school, he chooses to use either the data with stratification by fishingfleet or the data with stratification by schooltype
 						if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishingfleet'){
-							df_catch_billfish <- df_catch_billfish_flag
+						  df_catch_billfish <- df_catch_billfish_flag
 							df_catch_shark <- df_catch_shark_flag
 							df_catch_tuna <- df_catch_tuna_flag
 						} else if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'schooltype'){
@@ -266,7 +285,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 					iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna)
 			  
 				}else if (variable=="effort"){
-				
+				  config$logger.info(sprintf("Case %s data", variable))
+				  
 					dataset_file_effort_flag <- switch(options$iattc_ps_effort_to_extract,
 						"tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
 						"billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
