@@ -37,11 +37,11 @@ enrich_metadata <- function(entity, config, options){
 					if(nrow(values)>0) for(i in 1:nrow(values)){
 						value <- values[i,]
 						if(is.na(value$uri)){
-							subject$addKeyword(value$code)
+							#subject$addKeyword(value$code)
 							if(!is.na(value$label)) subject$addKeyword(value$label)
 							if(colname == "species") if(!is.na(value$definition)) subject$addKeyword(value$definition)
 						}else{
-							subject$addKeyword(value$code, value$uri)
+							#subject$addKeyword(value$code, value$uri)
 							if(!is.na(value$label)) subject$addKeyword(value$label, value$uri)
 							if(colname == "species") if(!is.na(value$definition)) subject$addKeyword(value$definition, value$uri)
 						}
