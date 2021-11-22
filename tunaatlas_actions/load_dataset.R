@@ -551,7 +551,11 @@ load_dataset <- function(entity, config, options){
 				drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
 				
-				entity$data$source <- list(file_csv_view, this_view_without_geom, file_sql_view, file_sql_data)
+				if("geom_wkt" %in% colnames(this_view)){
+					entity$data$source <- list(file_csv_view, file_csv_view_without_geom, file_sql_view, file_sql_data)
+				}else{
+					entity$data$source <- list(file_csv_view, file_sql_view, file_sql_data)
+				}
 			}else{
 				writeLines(sql_data, file.path("data", file_sql_data))
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
