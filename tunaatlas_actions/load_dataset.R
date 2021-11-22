@@ -528,6 +528,7 @@ load_dataset <- function(entity, config, options){
 			sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
 			file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
 			file_csv_view <- paste0(entity$identifiers[["id"]],"_view.csv")
+			file_csv_view_without_geom <- paste0(entity$identifiers[["id"]],"_view (without geom).csv")
 			sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
 			file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
 			
@@ -540,11 +541,17 @@ load_dataset <- function(entity, config, options){
 				writeLines(sql_data, file.path("data", file_sql_data))
 				this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name),";"))
 				write.csv(this_view, file.path("data", file_csv_view), row.names = FALSE)
-				drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
+				if("geom_wkt" %in% colnames(this_view)){
+					this_view_without_geom = this_view
+					this_view_without_geom$geom_wkt <- NULL
+					write.csv(this_view_without_geom, file.path("data", file_csv_view_without_geom), row.names = FALSE)
+					drive_upload(file.path("data", file_csv_view_without_geom), as_id(folder_views_id), overwrite = TRUE)
+				}
 				drive_upload(file.path("data", file_csv_view), as_id(folder_views_id), overwrite = TRUE)
+				drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
 				
-				entity$data$source <- list(file_csv_view, file_sql_view, file_sql_data)
+				entity$data$source <- list(file_csv_view, this_view_without_geom, file_sql_view, file_sql_data)
 			}else{
 				writeLines(sql_data, file.path("data", file_sql_data))
 				drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
