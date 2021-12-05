@@ -8,11 +8,11 @@ CREATE INDEX grid_area_labels_id_area_idx  ON area.grid_area_labels  (id_area);
 CREATE INDEX grid_area_labels_codesource_area_idx  ON area.grid_area_labels (codesource_area);
 
 CREATE MATERIALIZED VIEW area.grid_5deg_area_labels as 
-SELECT ar.id_area, ar.codesource_area, ar.tablesource_area, ar.source_label, st_intersects(ar.geom, cont.geometry) as geom FROM area.grid_area_labels as ar, public.continent as cont WHERE ar.codesource_area like '6%' and st_intersects(ar.geom, cont.geometry);
+SELECT ar.id_area, ar.codesource_area, ar.tablesource_area, ar.source_label, st_difference(ar.geom, cont.geometry) as geom FROM area.grid_area_labels as ar, public.continent as cont WHERE ar.codesource_area like '6%' and st_intersects(ar.geom, cont.geometry);
 CREATE INDEX grid_area_5deg_labels_id_area_idx  ON area.grid_5deg_area_labels  (id_area);
 CREATE INDEX grid_area_5deg_labels_codesource_area_idx  ON area.grid_5deg_area_labels (codesource_area);
 
 CREATE MATERIALIZED VIEW area.grid_1deg_area_labels as
-SELECT ar.id_area, ar.codesource_area, ar.tablesource_area, ar.source_label, st_intersects(ar.geom, cont.geometry) as geom FROM area.grid_area_labels as ar, public.continent as cont WHERE ar.codesource_area like '5%' and st_intersects(ar.geom, cont.geometry);
+SELECT ar.id_area, ar.codesource_area, ar.tablesource_area, ar.source_label, st_difference(ar.geom, cont.geometry) as geom FROM area.grid_area_labels as ar, public.continent as cont WHERE ar.codesource_area like '5%' and st_intersects(ar.geom, cont.geometry);
 CREATE INDEX grid_area_1deg_labels_id_area_idx  ON area.grid_1deg_area_labels  (id_area);
 CREATE INDEX grid_area_1deg_labels_codesource_area_idx  ON area.grid_1deg_area_labels (codesource_area);
