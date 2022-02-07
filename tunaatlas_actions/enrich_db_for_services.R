@@ -26,8 +26,8 @@ enrich_db_for_services <- function(entity, config, options){
 	#geoserver sql view properties
 	entity$data$layername <- pid
 	entity$data$setSql(sprintf("select * from get_fact_dataset_%s('%s', '%s', %s, '%s')", fact, schema, pid, paste0("'%", dimensions,"%'", collapse=","), geom_table))
-	entity$data$setGeometryField("the_geom")
-	entity$data$setGeometryType("Polygon")
+	entity$data$setGeometryField("geom")
+	entity$data$setGeometryType("MultiPolygon")
 	
 	default_values <- list()
 	for(dimension in dimensions){
