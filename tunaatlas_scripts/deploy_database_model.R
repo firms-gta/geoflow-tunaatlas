@@ -13,6 +13,8 @@ deploy_database_model <- function(config, software, software_config){
 	#Preliminary step: grant select on all objects of the DB to the user with select privileges
 	outsql <- paste(outsql, '-- PREREQUISITES', sep = "\n")
 	outsql <- paste(outsql, '-- Preliminary step: grant select on all objects of the DB to the user with select privileges', sep = "\n")
+	outsql <- paste(outsql, '-- create extension postgis', sep = "\n")
+	outsql <- paste(outsql, paste0("CREATE EXTENSION IF NOT EXISTS postgis ;"), sep = "\n")
 	outsql <- paste(outsql, paste0("alter default privileges grant select on tables to \"",db_read,"\";"), sep = "\n")
 	outsql <- paste0(outsql, "\n");
 
