@@ -37,7 +37,7 @@ if(!require(rtunaatlas)){
     install.packages("devtools")
   }
   require(devtools)
-  install_github("ptaconet/rtunaatlas")
+  install_github("eblondel/rtunaatlas")
   require(rtunaatlas)
 }
 
@@ -250,7 +250,7 @@ switch(DATA_LEVEL,
 			
 			ntons_after_conversion <- round(georef_dataset %>% select(value)  %>% sum())
 			config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons", nrow(georef_dataset),ntons_after_conversion))	
-			config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
+			# config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
 			config$logger.info(sprintf("STEP 2/5 : Unit conversion generated [%s] additionnal tons", ntons_after_conversion-ntons_before_this_step))
 			config$logger.info(sprintf("STEP 2/5 : Total number for 'NO' unit is now [%s] individuals", georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()))
 			config$logger.info("END STEP 2/5")
@@ -360,13 +360,13 @@ switch(DATA_LEVEL,
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 	
-	#end switch LEVEL 1
-	},
-	
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#LEVEL 2 IRD PRODUCTS
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	"2" = {
+	# #end switch LEVEL 1
+	# },
+	# 
+	# #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	# #LEVEL 2 IRD PRODUCTS
+	# #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	# "2" = {
 	
 	  config$logger.info("-----------------------------------------------------------------------------------------------------")
 	  config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
