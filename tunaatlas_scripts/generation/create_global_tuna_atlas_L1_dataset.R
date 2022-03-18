@@ -408,7 +408,6 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		config$logger.info("Start raising process")
 		  
 		  if (fact=="catch"){
-			  
 			  config$logger.info("Fact=catch !")
 			  dataset_to_compute_rf=georef_dataset
 			  #@juldebar why do we use "year' as time dimension here ?
