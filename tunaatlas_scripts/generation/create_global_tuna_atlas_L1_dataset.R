@@ -81,7 +81,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
 
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 1/8:Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC)")
+		config$logger.info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -89,20 +89,6 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		georef_dataset<-dataset
 		class(georef_dataset$value) <- "numeric"
 		rm(dataset)
-
-		#@juldebar: lines below should be removed since not required to generate Level 0 products
-		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
-		#-------------------------------------------------------------------------------------------------------------------------------------
-		#-------------------------------------------------------------------------------------------------------------------------------------
-		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){
-		config$logger.info("Retrieving RFMOs nominal catch...")
-		  nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
-		  #@juldebar keep same units for all datatets
-		  if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
-		  if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
-		  class(nominal_catch$value) <- "numeric"
-		  config$logger.info("Retrieving RFMOs nominal catch OK")
-		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
@@ -119,10 +105,21 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
 		  config$logger.info("Mapping code lists of georeferenced datasets OK")
 		   
-		  if(!is.null(options$raising_georef_to_nominal)) if(options$raising_georef_to_nominal){
+		  if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){
+		    config$logger.info("Retrieving RFMOs nominal catch...")
+		    nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
+		    #@juldebar keep same units for all datatets
+		    if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
+		    if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
+		    class(nominal_catch$value) <- "numeric"
+		    config$logger.info("Retrieving RFMOs nominal catch OK")
+		    
 			config$logger.info("Mapping code lists of nominal catch datasets...")
 			nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
 			config$logger.info("Mapping code lists of nominal catch datasets OK")
+			config$logger.info(sprintf("nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			
 		  }
 		}
 
@@ -134,6 +131,8 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 			georef_dataset<-georef_dataset %>% dplyr::filter(gear %in% gear_filter)
 			config$logger.info("Filtering gears OK")
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			
 		}
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -147,6 +146,8 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
 			}
 			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -168,7 +169,8 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 
 			
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-		
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -219,6 +221,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
 
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
+			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			
 		}
 		
