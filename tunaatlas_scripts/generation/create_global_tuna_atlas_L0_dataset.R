@@ -105,22 +105,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
 		  config$logger.info("Mapping code lists of georeferenced datasets OK")
 		   
-		  if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){
-		    config$logger.info("Retrieving RFMOs nominal catch...")
-		    nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
-		    #@juldebar keep same units for all datatets
-		    if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
-		    if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
-		    class(nominal_catch$value) <- "numeric"
-		    config$logger.info("Retrieving RFMOs nominal catch OK")
-		    
-			config$logger.info("Mapping code lists of nominal catch datasets...")
-			nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
-			config$logger.info("Mapping code lists of nominal catch datasets OK")
-			config$logger.info(sprintf("nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
-			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
-			
-		  }
+
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
