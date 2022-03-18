@@ -96,7 +96,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
 		  
 		  config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[2]])
+		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
 		  mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
 		  mapping_keep_src_code <- FALSE
 		  if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
