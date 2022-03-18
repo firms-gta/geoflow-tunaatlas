@@ -94,11 +94,15 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		### 1.2 If data will be raised, retrieve nominal catch datasets (+ processings: codelist mapping for ICCAT)
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		#if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
-		#	config$logger.info("Retrieving RFMOs nominal catch...")
-		#	nominal_catch <-retrive_nominal_catch(entity, config, options)
-		#	config$logger.info("Retrieving RFMOs nominal catch OK")
-		#}
+		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){
+		config$logger.info("Retrieving RFMOs nominal catch...")
+		  nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
+		  #@juldebar keep same units for all datatets
+		  if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
+		  if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
+		  class(nominal_catch$value) <- "numeric"
+		  config$logger.info("Retrieving RFMOs nominal catch OK")
+		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
@@ -106,7 +110,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
 		  
 		  config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
+		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[2]])
 		  mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
 		  mapping_keep_src_code <- FALSE
 		  if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
@@ -229,7 +233,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 	  
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info(sprintf("LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], options$unit_conversion_convert))
+		  config$logger.info(sprintf("LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[2]], options$unit_conversion_convert))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		  
 		  mapping_map_code_lists <- TRUE
@@ -258,7 +262,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 			config$logger.info("END STEP 2/5")
 		}else{
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
-		  config$logger.info(sprintf("LEVEL 1 => STEP 2/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], options$unit_conversion_convert))
+		  config$logger.info(sprintf("LEVEL 1 => STEP 2/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[2]], options$unit_conversion_convert))
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 			
@@ -388,15 +392,15 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
 			
 		config$logger.info("Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) ")
-			nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[2]]), guess_max = 0)
-		        #@juldebar keep same units for all datatets
-			if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
-		        if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
-			class(nominal_catch$value) <- "numeric"
+		# 	nominal_catch <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
+		#         #@juldebar keep same units for all datatets
+		# 	if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
+		#         if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
+		# 	class(nominal_catch$value) <- "numeric"
 		        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
 			#nominal_catch <-retrieve_nominal_catch(entity, config, options)
 			config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
-			config$logger.info(paste0("Total of  nominal catch for file ",entity$data$source[[2]], "is : ",sum(nominal_catch$value),"  \n"))
+			config$logger.info(paste0("Total of  nominal catch for file ",entity$data$source[[1]], "is : ",sum(nominal_catch$value),"  \n"))
 			
 		config$logger.info("Start raising process")
 		  
