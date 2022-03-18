@@ -72,12 +72,10 @@ iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
 #Identify expected Level of processing
 DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 
-switch(DATA_LEVEL,
 
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#LEVEL 0 FIRMS PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	"1" = {
 
 		#### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
 		config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
@@ -217,12 +215,16 @@ switch(DATA_LEVEL,
 			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
 
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
+			
 		}
 		
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#LEVEL 1 IRD PRODUCTS
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	# "1" = {
+		config$logger.info(paste0("Total ",fact," after raising is now: ",sum(georef_dataset$value),"\n"))
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+		config$logger.info(paste0("Total catch for data after raising is ",sum(georef_dataset$value),"  \n"))
+		
 		config$logger.info("Start generation of Level 1 products")
 	  
 		if(!is.null(options$unit_conversion_convert)) if (options$unit_conversion_convert){
@@ -360,13 +362,10 @@ switch(DATA_LEVEL,
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
 		}
 	
-	# #end switch LEVEL 1
-	# },
 	# 
 	# #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	# #LEVEL 2 IRD PRODUCTS
 	# #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	# "2" = {
 	
 	  config$logger.info("-----------------------------------------------------------------------------------------------------")
 	  config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
@@ -504,10 +503,6 @@ switch(DATA_LEVEL,
 		}else{
 		  config$logger.info("LEVEL 2 => STEP 3/3 not executed (since not selected in the workflow options (see column 'Data' of geoflow entities spreadsheet)")
 		} 
-	#end swith LEVEL 2
-	}
-#end switch levels of processing
-)
 
 
 config$logger.info("-----------------------------------------------------------------------------------------------------")
