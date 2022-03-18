@@ -380,15 +380,7 @@ switch(DATA_LEVEL,
 		config$logger.info("-----------------------------------------------------------------------------------------------------")
 		config$logger.info("LEVEL 2 => STEP 2/3: Extract and load IRD Level 1 gridded catch data input")
 		config$logger.info("-----------------------------------------------------------------------------------------------------")
-		dataset <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
-		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
-		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
-		georef_dataset<-dataset
-		class(georef_dataset$value) <- "numeric"
-		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
-		rm(dataset)
-		config$logger.info(paste0("Total catch before raising  for file ",entity$data$source[[1]], "is :   ",sum(georef_dataset$value),"  \n"))
-		
+
 
 		if(!is.null(options$raising_georef_to_nominal)) if (options$raising_georef_to_nominal){  
 		  config$logger.info("-----------------------------------------------------------------------------------------------------")
