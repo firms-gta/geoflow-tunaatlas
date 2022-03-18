@@ -143,10 +143,6 @@ rm(dataset)
 		  if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
 		  class(nominal_catch$value) <- "numeric"
 		  config$logger.info("Retrieving RFMOs nominal catch OK")
-		  
-		  config$logger.info("Mapping code lists of nominal catch datasets...")
-		  nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
-		  config$logger.info("Mapping code lists of nominal catch datasets OK")
 		  config$logger.info(sprintf("nominal catch dataset has [%s] lines", nrow(nominal_catch)))	
 		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 		  
