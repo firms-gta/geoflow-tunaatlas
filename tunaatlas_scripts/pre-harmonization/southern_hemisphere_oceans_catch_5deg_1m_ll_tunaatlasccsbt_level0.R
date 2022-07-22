@@ -31,7 +31,8 @@
   #   AU   LL 1987-06-01 1987-07-01  6335150    ALL     SBF       ALL         NO    47
   #   AU   LL 1987-07-01 1987-08-01  6325150    ALL     SBF       ALL         NO     1
   #   AU   LL 1987-09-01 1987-10-01  6330150    ALL     SBF       ALL         NO    14
- 
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -157,3 +158,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+}

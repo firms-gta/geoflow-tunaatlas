@@ -41,7 +41,8 @@
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     OTH       ALL         MT   0.14
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     SKJ       ALL         MT 336.61
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     YFT       ALL         MT  11.34
-
+function(action, entity, config){
+  
 #packages 
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -156,3 +157,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+}

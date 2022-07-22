@@ -45,7 +45,8 @@
   #  AUS   BB 1992-02-01 1992-03-01  6230135    ALL     SBF       ALL         MT  24.7
   #  AUS   BB 1992-02-01 1992-03-01  6235115    ALL     SBF       ALL         MT   2.5
   #  AUS   BB 1992-03-01 1992-04-01  6230130    ALL     ALB       ALL         MT   3.0
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -108,3 +109,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+}

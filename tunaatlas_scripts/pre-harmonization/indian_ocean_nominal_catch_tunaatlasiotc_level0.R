@@ -39,7 +39,8 @@
   #  ARE GILL 1951-01-01 1952-01-01      F51    ALL     LOT       ALL         MT 517.2712
   #  ARE GILL 1952-01-01 1953-01-01      F51    ALL     COM       ALL         MT 603.4760
   #  ARE GILL 1952-01-01 1953-01-01      F51    ALL     LOT       ALL         MT 517.2712
-
+function(action, entity, config){
+  
 #packages
 if(!require(dplyr)){
   install.packages("dplyr")
@@ -148,4 +149,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
-options(opts)
+options(opts)}

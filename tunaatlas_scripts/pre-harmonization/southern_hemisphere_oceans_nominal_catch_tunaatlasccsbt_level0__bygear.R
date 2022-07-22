@@ -34,7 +34,8 @@
   #  ALL Gill Net 1986-01-01 1987-01-01    CCSBT    ALL     SBF       ALL         MT    81
   #  ALL Gill Net 1987-01-01 1988-01-01    CCSBT    ALL     SBF       ALL         MT    87
   #  ALL Gill Net 1988-01-01 1989-01-01    CCSBT    ALL     SBF       ALL         MT   234
- 
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -165,4 +166,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+entity$addResource("codelists", output_name_codelists)}

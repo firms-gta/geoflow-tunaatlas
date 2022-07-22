@@ -23,7 +23,8 @@
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     ALB       ALL         MT   129
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BET       ALL         MT    64
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BLM       ALL         MT    17
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -140,4 +141,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+entity$addResource("codelists", output_name_codelists)}

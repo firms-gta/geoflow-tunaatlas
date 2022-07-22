@@ -33,6 +33,7 @@
   #   AU   BB 1976-12-01 1977-01-01  6333134    ALL     SBT       ALL         MT  35.6
   #   AU   BB 1976-12-01 1977-01-01  6334134    ALL     SBT       ALL         MT  56.5
   #   AU   BB 1976-12-01 1977-01-01  6334135    ALL     SBT       ALL         MT  37.0
+function(action, entity, config){
   
 #packages
 if(!require(rtunaatlas)){
@@ -163,3 +164,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+}

@@ -46,7 +46,8 @@
   #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     BET         C       MTNO  27.6	ICCAT
   #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     SWO         C       MTNO   1.4	ICCAT
   #  ARG   LL 1960-01-01 1960-02-01  6330045    ALL     YFT         C       MTNO   0.4	ICCAT
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -162,4 +163,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+entity$addResource("codelists", output_name_codelists)}
