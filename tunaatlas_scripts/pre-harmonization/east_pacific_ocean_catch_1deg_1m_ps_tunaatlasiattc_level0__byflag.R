@@ -9,7 +9,8 @@
 
 
 # '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -66,3 +67,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+}

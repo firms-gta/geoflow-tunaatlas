@@ -7,7 +7,8 @@
 # wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
 
 # '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -65,3 +66,4 @@ entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
 
+}

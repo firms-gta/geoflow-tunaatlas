@@ -25,6 +25,7 @@
   #  ALL    D 1983-12-01 1984-01-01  6330165    ALL     ALB       ALL         NO  870.000
   #  ALL    D 1983-12-01 1984-01-01  6335165    ALL     ALB       ALL         MT   21.402
   #  ALL    D 1983-12-01 1984-01-01  6335165    ALL     ALB       ALL         NO 3822.000
+function(action, entity, config){
   
 #packages
 if(!require(rtunaatlas)){
@@ -141,3 +142,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
+}

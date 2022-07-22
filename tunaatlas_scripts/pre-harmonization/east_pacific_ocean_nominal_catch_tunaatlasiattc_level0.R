@@ -31,7 +31,8 @@
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     PBF       ALL         MT   131
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     SFA       ALL         MT    93
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     SKH       ALL         MT  1326
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -145,3 +146,4 @@ entity$addResource("codelists", output_name_codelists)
 
  
 
+}

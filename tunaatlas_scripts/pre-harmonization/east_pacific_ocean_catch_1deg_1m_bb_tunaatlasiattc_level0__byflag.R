@@ -32,6 +32,7 @@
   #  USA   LL 1993-05-01 1993-06-01  6425135    ALL     BSH       ALL         NO    24
   #  USA   LL 1994-03-01 1994-04-01  6425135    ALL     BSH       ALL         NO    14
   #  USA   LL 1994-03-01 1994-04-01  6430135    ALL     BSH       ALL         NO     4
+function(action, entity, config){
   
 
 #packages
@@ -98,4 +99,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+entity$addResource("codelists", output_name_codelists)}

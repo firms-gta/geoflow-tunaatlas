@@ -13,7 +13,8 @@
 #' @keywords Internal Commission for the Conservation of Atlantic Tuna ICCAT tuna RFMO Sardara Global database on tuna fishieries
 #'
 #' @seealso \code{\link{convertDSD_iccat_ce_task2}} to convert ICCAT task 2 , \code{\link{convertDSD_iccat_nc}} to convert ICCAT nominal catch data structure
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -134,4 +135,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
-options(opts)
+options(opts)}

@@ -32,7 +32,8 @@
   # 1984  1  35S 165E     85     ALB    53         NO    ALL        DAYS    D
   # 1984  1  40S 170W    704     ALB  3850         NO    ALL        DAYS    D
   # 1984  1  40S 175W     88     ALB   966         NO    ALL        DAYS    D
-
+function(action, entity, config){
+  
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -134,4 +135,4 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+entity$addResource("codelists", output_name_codelists)}

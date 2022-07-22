@@ -30,7 +30,8 @@
 # wps.in: id = overlapping_zone_iattc_wcpfc_data_to_keep, type = string, title = Concerns IATTC and WCPFC data. IATTC and WCPFC have an overlapping area in their respective area of competence. Which data should be kept for this zone? IATTC : keep data from IATTC. WCPFC : keep data from WCPFC. NULL : Keep data from both tRFMOs. Caution: with the option NULL data in the overlapping zone are likely to be redundant., value = "IATTC|WCPFC|NULL";
 # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter fact is set to 'catch' and parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
-
+function(action, entity, config){
+  opts <- action$options
 #packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
@@ -62,12 +63,12 @@ source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modifie
 con <- config$software$output$dbi
 
 #set parameterization
-fact <- options$fact
-raising_georef_to_nominal <- options$raising_georef_to_nominal
-iattc_ps_raise_flags_to_schooltype <- options$iattc_ps_raise_flags_to_schooltype
-iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
-iattc_ps_catch_billfish_shark_raise_to_effort <- options$iattc_ps_catch_billfish_shark_raise_to_effort
-iccat_ps_include_type_of_school <- options$iccat_ps_include_type_of_school
+fact <- opts$fact
+raising_georef_to_nominal <- opts$raising_georef_to_nominal
+iattc_ps_raise_flags_to_schooltype <- opts$iattc_ps_raise_flags_to_schooltype
+iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
+iattc_ps_catch_billfish_shark_raise_to_effort <- opts$iattc_ps_catch_billfish_shark_raise_to_effort
+iccat_ps_include_type_of_school <- opts$iccat_ps_include_type_of_school
 
 #Identify expected Level of processing
 DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
@@ -83,7 +84,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, options))
+		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, opts))
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
 		dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
 		georef_dataset<-dataset
@@ -93,13 +94,13 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
+		if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
 		  
 		  config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
 		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
 		  mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
 		  mapping_keep_src_code <- FALSE
-		  if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
+		  if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
 		  
 		  config$logger.info("Mapping code lists of georeferenced datasets...")
 		  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
@@ -111,8 +112,8 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (!is.null(options$gear_filter)){
-			gear_filter<-unlist(strsplit(options$gear_filter, split=","))
+		if (!is.null(opts$gear_filter)){
+			gear_filter<-unlist(strsplit(opts$gear_filter, split=","))
 			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 			georef_dataset<-georef_dataset %>% dplyr::filter(gear %in% gear_filter)
 			config$logger.info("Filtering gears OK")
@@ -123,14 +124,14 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 4/8: Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs? ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (fact=="catch" && options$include_CCSBT && !is.null(options$SBF_data_rfmo_to_keep)){
-			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-			if (options$SBF_data_rfmo_to_keep=="CCSBT"){
+		if (fact=="catch" && opts$include_CCSBT && !is.null(opts$SBF_data_rfmo_to_keep)){
+			config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+			if (opts$SBF_data_rfmo_to_keep=="CCSBT"){
 			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
 			} else {
 			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
 			}
-			config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
+			config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
 			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			
 		}
@@ -138,7 +139,7 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 6/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if(!is.null(options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (options$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
+		if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
 		 
 			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
 			georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
@@ -161,9 +162,9 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		config$logger.info("LEVEL 0 => STEP 7/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		if (options$include_IATTC && options$include_WCPFC && !is.null(options$overlapping_zone_iattc_wcpfc_data_to_keep)) {
+		if (opts$include_IATTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
 		 
-			overlapping_zone_iattc_wcpfc_data_to_keep <- options$overlapping_zone_iattc_wcpfc_data_to_keep
+			overlapping_zone_iattc_wcpfc_data_to_keep <- opts$overlapping_zone_iattc_wcpfc_data_to_keep
 			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
 			# query the database to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
 			query_areas_overlapping_zone_iattc_wcpfc <- "SELECT codesource_area from
@@ -267,9 +268,10 @@ write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
-entity$addResource("geom_table", options$geom_table)
+entity$addResource("geom_table", opts$geom_table)
 
 #### END
 config$logger.info("-----------------------------------------------------------------------------------------------------")
 config$logger.info("End: Your tuna atlas dataset has been created!")
 config$logger.info("-----------------------------------------------------------------------------------------------------")
+}

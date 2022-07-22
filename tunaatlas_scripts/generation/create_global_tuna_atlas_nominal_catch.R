@@ -15,7 +15,8 @@
 # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL, data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
 
-
+function(action, entity, config){
+  opts <- action$options
 if(!require(rtunaatlas)){
   if(!require(devtools)){
     install.packages("devtools")
@@ -45,19 +46,19 @@ source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
 
 #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
 config$logger.info("Retrieving RFMOs nominal catch...")
-nominal_catch <-retrieve_nominal_catch(entity, config, options)
+nominal_catch <-retrieve_nominal_catch(entity, config, opts)
 config$logger.info("Retrieving RFMOs nominal catch OK")
 
 #### 2) Map code lists 
 
-if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists){
+if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
  
 	config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
 	filename <- entity$data$source[[1]]
 	mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, filename)
 	mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
 	mapping_keep_src_code <- FALSE
-	if(!is.null(options$mapping_keep_src_code)) mapping_keep_src_code = options$mapping_keep_src_code
+	if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
   
 	config$logger.info("Mapping code lists of georeferenced datasets...")
 	nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
@@ -68,15 +69,15 @@ if (!is.null(options$mapping_map_code_lists)) if(options$mapping_map_code_lists)
 
 #### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
 
-if (!is.null(options$SBF_data_rfmo_to_keep)){
+if (!is.null(opts$SBF_data_rfmo_to_keep)){
   
-	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-	if (options$SBF_data_rfmo_to_keep=="CCSBT"){
+	config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+	if (opts$SBF_data_rfmo_to_keep=="CCSBT"){
 		nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
 	} else {
 		nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
 	}
-	config$logger.info(paste0("Keeping only data from ",options$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
+	config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
 }
 
 #final step
@@ -122,7 +123,8 @@ write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
-entity$addResource("geom_table", options$geom_table)
+entity$addResource("geom_table", opts$geom_table)
 
 #### END
 config$logger.info("End: Your tuna atlas dataset has been created!")
+}
