@@ -1,5 +1,5 @@
-create_plsql_data_getter <- function(action,entity, config, options){
-	
+create_plsql_data_getter <- function(action,entity, config){
+  opts <- action$options
 	if(!require(readr)){
 		install.packages("readr")
 		require(readr)

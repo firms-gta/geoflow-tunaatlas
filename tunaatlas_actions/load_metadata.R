@@ -1,5 +1,5 @@
-load_metadata <- function(action,entity, config, options){
-
+load_metadata <- function(action,entity, config){
+  opts <- action$options
 	#create and load metadata table with entities as dataframe
 	if(dir.exists("errors_mappings")){
 		errMsg <- "create and load metadata table with entities as dataframe"
@@ -16,7 +16,7 @@ load_metadata <- function(action,entity, config, options){
   entity_df$Format <- "resource:application/x-sql"
   entity_df$Source <- "RFMOs"
   
-  if (!is.null(options$create_table)) if(options$create_table){
+  if (!is.null(opts$create_table)) if(opts$create_table){
     query_create_table_metadata <- paste(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_Dublin_Core_metadata.sql"), collapse=" ")
     query_create_table_metadata <- gsub("%db_admin%",user_database,query_create_table_metadata)
     create_table_metadata <- dbSendQuery(con_database,query_create_table_metadata)

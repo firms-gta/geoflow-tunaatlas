@@ -1,5 +1,5 @@
-load_codelist <- function(action,entity, config, options){
-  
+load_codelist <- function(action,entity, config){
+  opts <- action$options
   #connection to database
   CON = config$software$output$dbi
   

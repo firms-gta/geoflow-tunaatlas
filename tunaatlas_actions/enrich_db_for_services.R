@@ -1,5 +1,5 @@
-enrich_db_for_services <- function(action,entity, config, options){
-
+enrich_db_for_services <- function(action,entity, config){
+  opts <- action$options
 	con <- config$software$output$dbi
 	schema <- "fact_tables"
 
@@ -13,7 +13,7 @@ enrich_db_for_services <- function(action,entity, config, options){
 	#scripts
 	url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions"
 	source(file.path(url_scripts_create_own_tuna_atlas, "create_plsql_data_getter.R"))
-	create_plsql_data_getter(entity, config, options) #create pl/sql function in DB to get fact dataset (generic function, one function per fact)
+	create_plsql_data_getter(entity, config, opts) #create pl/sql function in DB to get fact dataset (generic function, one function per fact)
 	
 	#entity management
 	pid <- entity$identifiers[["id"]]

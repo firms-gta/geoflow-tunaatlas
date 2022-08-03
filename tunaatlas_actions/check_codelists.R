@@ -1,6 +1,6 @@
-check_codelists <- function(action,entity, config, options){
+check_codelists <- function(action,entity, config){
 	
-		
+  opts <- action$options
 	if(!require(readr)){
 	  install.packages("readr")
 	  require(readr)

@@ -1,6 +1,6 @@
-load_mapping<-function(action,entity, config, options){
-  
-  options(stringsAsFactors = FALSE)
+load_mapping<-function(action,entity, config){
+  opts <- action$options
+  opts(stringsAsFactors = FALSE)
   
   #connection to database
   con = config$software$output$dbi
