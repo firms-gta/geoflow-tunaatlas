@@ -1,4 +1,4 @@
-load_mapping<-function(entity, config, options){
+load_mapping<-function(action,entity, config, options){
   
   options(stringsAsFactors = FALSE)
   

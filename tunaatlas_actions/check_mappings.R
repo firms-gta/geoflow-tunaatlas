@@ -1,4 +1,4 @@
-check_mappings <- function(entity, config, options){
+check_mappings <- function(action,entity, config, options){
 	
 	#control to check that everything is ok on codelists side, if not we stop the workflow until codelists are fixed/updated
 	if(dir.exists("errors_codelists")){
