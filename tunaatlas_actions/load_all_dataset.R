@@ -1,4 +1,4 @@
-load_all_dataset <- function(action,entity, config){
+load_all_dataset <- function(action,entity, config, options){
   opts <- action$options
   source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_codelist.R")
   source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R")

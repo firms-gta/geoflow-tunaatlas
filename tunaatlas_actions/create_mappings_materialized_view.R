@@ -1,4 +1,4 @@
-create_mappings_materialized_view <- function(action,entity, config){
+create_mappings_materialized_view <- function(action,entity, config, options){
   opts <- action$options
   # set connection to database and other parameters from configuration
   CON = config$software$output$dbi

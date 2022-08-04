@@ -1,4 +1,4 @@
-check_codelists <- function(action,entity, config){
+check_codelists <- function(action,entity, config, options){
 	
   opts <- action$options
 	if(!require(readr)){

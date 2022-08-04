@@ -1,4 +1,4 @@
-load_metadata <- function(action,entity, config){
+load_metadata <- function(action,entity, config, options){
   opts <- action$options
 	#create and load metadata table with entities as dataframe
 	if(dir.exists("errors_mappings")){

@@ -1,4 +1,4 @@
-enrich_metadata <- function(action,entity, config){
+enrich_metadata <- function(action,entity, config, options){
   opts <- action$options
 	con <- config$software$input$dbi
 

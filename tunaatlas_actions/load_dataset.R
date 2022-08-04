@@ -1,4 +1,4 @@
-load_dataset <- function(action,entity, config){
+load_dataset <- function(action,entity, config, options){
   
   opts <- action$options
   if(!require(rtunaatlas)){
