@@ -15,14 +15,19 @@
 
 function(action, entity, config){
   
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
+  if(!require(rtunaatlas)){
+    if(!require(devtools)){
+      install.packages("devtools")
+    }
+    require(devtools)
+    install_github("ptaconet/rtunaatlas")
+    require(rtunaatlas)
   }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-require(rtunaatlas)
+  
+  if(!require(readxl)){
+    install.packages("readxl")
+    require(readxl)
+  }
 
 # Input data sample (after importing as data.frame in R):
 # YEAR MONTH COUNTRY_CODE TARGET_SPECIES CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOOKS NUMBER_OF_SBT_RETAINED
@@ -101,12 +106,12 @@ efforts[,c("AreaName","FishingFleet")]<-as.data.frame(apply(efforts[,c("AreaName
 
 # remove 0 and NA values 
 efforts <- efforts  %>% 
-  filter( ! Effort %in% 0 ) %>%
-  filter( ! is.na(Effort)) 
+  dplyr::filter( ! Effort %in% 0 ) %>%
+  dplyr::filter( ! is.na(Effort)) 
 
 efforts <- efforts %>% 
-  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %>% 
-  summarise(Effort = sum(Effort))  
+  dplyr::group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %>% 
+  dplyr::summarise(Effort = sum(Effort))  
 efforts<-as.data.frame(efforts)
 
 colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")

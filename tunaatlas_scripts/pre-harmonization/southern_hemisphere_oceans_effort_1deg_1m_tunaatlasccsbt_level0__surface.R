@@ -9,14 +9,19 @@
 function(action, entity, config){
   
 
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
+  if(!require(rtunaatlas)){
+    if(!require(devtools)){
+      install.packages("devtools")
+    }
+    require(devtools)
+    install_github("ptaconet/rtunaatlas")
+    require(rtunaatlas)
   }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-require(rtunaatlas)
+  
+  if(!require(readxl)){
+    install.packages("readxl")
+    require(readxl)
+  }
 
 # Input data sample (after importing as data.frame in R):
 # YEAR MONTH COUNTRY_CODE GEAR_CODE CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOURS_SEARCHED WEIGHT_(Kg)_OF_SBT_RETAINED
@@ -52,16 +57,21 @@ require(rtunaatlas)
 #RFMO_CE<-read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
 
   RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
+  
+  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub("\\(", "", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub("\\)", "", colnames(RFMO_CE))
   RFMO_CE<-as.data.frame(RFMO_CE)
+  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  write.csv(summary(as.data.frame(RFMO_CE)), "test1", row.names = FALSE)
   
   #Remove lines that are read in the Excel but that are not real
   RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
   RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
   RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
+  write.csv(summary(as.data.frame(RFMO_CE)), "test2", row.names = FALSE)
   
   #FishingFleet
   RFMO_CE$FishingFleet<-RFMO_CE$COUNTRY_CODE
@@ -89,7 +99,7 @@ require(rtunaatlas)
   #CatchType
   RFMO_CE$CatchType<-"ALL"
 
-
+  
 efforts<-RFMO_CE
 
 efforts$EffortUnits<-"NUMBER_OF_HOURS_SEARCHED"
@@ -100,6 +110,7 @@ efforts <-efforts[colToKeep_efforts]
 
 #remove whitespaces on columns that should not have withespace
 efforts[,c("AreaName","FishingFleet")]<-as.data.frame(apply(efforts[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
+write.csv(summary(as.data.frame(efforts)), "test3", row.names = FALSE)
 
 # remove 0 and NA values 
 efforts <- efforts  %>% 
@@ -107,9 +118,12 @@ efforts <- efforts  %>%
   filter( ! is.na(Effort)) 
 
 efforts <- efforts %>% 
-  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %>% 
-  summarise(Effort = sum(Effort))  
+  dplyr::group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %>% 
+  dplyr::summarise(Effort = sum(Effort))  
 efforts<-as.data.frame(efforts)
+
+config$logger.info(sprintf("colnumbers",ncol(efforts)))
+write.csv(summary(efforts), "test", row.names = FALSE)
 
 colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
 efforts$source_authority<-"CCSBT"
