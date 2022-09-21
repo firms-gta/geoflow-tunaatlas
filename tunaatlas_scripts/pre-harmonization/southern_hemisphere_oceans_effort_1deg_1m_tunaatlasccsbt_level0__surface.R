@@ -51,38 +51,43 @@ require(rtunaatlas)
 #library(readxl) # devtools::install_github("hadley/readxl") 
 #RFMO_CE<-read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
 
-### Reach the catches pivot DSD using a function stored in ICCAT_functions.R
-
-RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
-#colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
-#colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
-
-#RFMO_CE<-as.data.frame(RFMO_CE)
-#Remove lines that are read in the Excel but that are not real
-RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
-RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
-RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
-
-
-#Flag
-RFMO_CE$Flag<-RFMO_CE$COUNTRY_CODE
-
-#Gear
-RFMO_CE$Gear<-RFMO_CE$GEAR_CODE
-# replace PS by Purse Seine and BB by Pole and Line
-RFMO_CE$Gear[RFMO_CE$Gear == "PS"] <- "Purse Seine"
-RFMO_CE$Gear[RFMO_CE$Gear == "BB"] <- "Pole and Line"
-
-#Year and period
-RFMO_CE<-harmo_time_2(RFMO_CE, "YEAR", "MONTH")
-#Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
-RFMO_CE<-format_time_db_format(RFMO_CE)
-
-# Area 
-RFMO_CE<-harmo_spatial_5(RFMO_CE,"LATITUDE","LONGITUDE",1,5)
-
-#School
-RFMO_CE$School<-"ALL"
+  RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
+  colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
+  colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
+  colnames(RFMO_CE)<-gsub("\\(", "", colnames(RFMO_CE))
+  colnames(RFMO_CE)<-gsub("\\)", "", colnames(RFMO_CE))
+  RFMO_CE<-as.data.frame(RFMO_CE)
+  
+  #Remove lines that are read in the Excel but that are not real
+  RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
+  RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
+  RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
+  
+  #FishingFleet
+  RFMO_CE$FishingFleet<-RFMO_CE$COUNTRY_CODE
+  
+  #Gear
+  RFMO_CE$Gear<-RFMO_CE$GEAR_CODE
+  # replace PS by Purse Seine and BB by Pole and Line
+  RFMO_CE$Gear[RFMO_CE$Gear == "PS"] <- "Purse Seine"
+  RFMO_CE$Gear[RFMO_CE$Gear == "BB"] <- "Pole and Line"
+  
+  #Year and period
+  RFMO_CE<-harmo_time_2(RFMO_CE, "YEAR", "MONTH")
+  #Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
+  RFMO_CE<-format_time_db_format(RFMO_CE)
+  
+  # Area 
+  RFMO_CE<-harmo_spatial_5(RFMO_CE,"LATITUDE","LONGITUDE",1,5)
+  
+  #School
+  RFMO_CE$School<-"ALL"
+  
+  #Species
+  RFMO_CE$Species<-"SBF"
+  
+  #CatchType
+  RFMO_CE$CatchType<-"ALL"
 
 
 efforts<-RFMO_CE
