@@ -164,7 +164,7 @@ function(action, entity, config){
                          EffortUnits = efforts$EffortUnits
                        ),
                        FUN = sum)
-  colnames(efforts)[colnames(efforts)=="x"] <- "Catch"
+  colnames(efforts)[colnames(efforts)=="x"] <- "Effort"
   
   colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
   efforts$source_authority<-"WCPFC"
