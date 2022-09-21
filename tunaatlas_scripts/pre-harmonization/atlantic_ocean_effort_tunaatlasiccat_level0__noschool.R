@@ -108,15 +108,16 @@ efforts_pivot_ICCAT$School<-"ALL"
 #Flag
 efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
 
-if(keep_fleet_instead_of_flag==TRUE){
-  efforts_pivot_ICCAT$FishingFleet<-NULL
-  names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
-}
-
+# if(keep_fleet_instead_of_flag==TRUE){
+#   efforts_pivot_ICCAT$FishingFleet<-NULL
+#   names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
+# } 
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
-colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+efforts$CatchType <- "C" #bastien adding as it is not in effort function but it is in chatch function
+colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value","catchtype")
 efforts$source_authority<-"ICCAT"
 
 #----------------------------------------------------------------------------------------------------------------------------
