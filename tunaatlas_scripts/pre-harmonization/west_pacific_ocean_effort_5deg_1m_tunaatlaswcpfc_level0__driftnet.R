@@ -11,25 +11,20 @@
 
 function(action, entity, config){
   
-  #packages
+  #packages 
   if(!require(rtunaatlas)){
     if(!require(devtools)){
       install.packages("devtools")
     }
     require(devtools)
-    install_github("ptaconet/rtunaatlas")
+    install_github("eblondel/rtunaatlas")
     require(rtunaatlas)
-  }
-  if(!require(foreign)){
-    install.packages("foreign")
-    require(foreign)
   }
   
   if(!require(reshape)){
     install.packages("reshape")
     require(reshape)
   }
-  
   
   if(!require(tidyr)){
     install.packages("tidyr")
