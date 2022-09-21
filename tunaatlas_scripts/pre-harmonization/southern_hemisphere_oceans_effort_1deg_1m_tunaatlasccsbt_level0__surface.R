@@ -117,18 +117,18 @@ efforts$source_authority<-"CCSBT"
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
+efforts$time_start <- as.Date(efforts$time_start)
+efforts$time_end <- as.Date(efforts$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
-  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+  paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
+  paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
   sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 #@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(catches, output_name_dataset, row.names = FALSE)
+write.csv(efforts, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
 file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
