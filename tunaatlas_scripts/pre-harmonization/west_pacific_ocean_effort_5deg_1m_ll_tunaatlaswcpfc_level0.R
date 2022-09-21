@@ -138,7 +138,7 @@ efforts_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(efforts_pivot_WCPFC,
                                                    "LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
 efforts_pivot_WCPFC$CatchType <- "ALL"
 efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
-effort <- efforts_pivot_WCPFC[colToKeep_efforts]
+efforts <- efforts_pivot_WCPFC[colToKeep_efforts]
 rm(efforts_pivot_WCPFC)
 efforts[, c("AreaName", "FishingFleet")] <- as.data.frame(apply(efforts[, 
                                                                         c("AreaName", "FishingFleet")], 2, function(x) {
