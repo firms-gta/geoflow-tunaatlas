@@ -28,6 +28,10 @@ if(!require(data.table)){
 
 require(rtunaatlas)
 require(data.table)
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
 
 
 # Input data sample:

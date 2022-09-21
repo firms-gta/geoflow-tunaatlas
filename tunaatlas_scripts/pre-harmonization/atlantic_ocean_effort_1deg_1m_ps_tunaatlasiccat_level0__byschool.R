@@ -26,6 +26,10 @@ if(!require(rtunaatlas)){
   install_github("ptaconet/rtunaatlas")
   require(rtunaatlas)
 }
+if(!require(dplyr)){
+  install.packages("dplyr")
+  require(dplyr)
+}
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded

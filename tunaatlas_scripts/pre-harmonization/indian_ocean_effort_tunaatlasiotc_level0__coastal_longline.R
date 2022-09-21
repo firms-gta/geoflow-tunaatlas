@@ -25,6 +25,11 @@ if(!require(rtunaatlas)){
   install_github("ptaconet/rtunaatlas")
 }
 require(rtunaatlas)
+  
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
 
 # Input data sample:
 # Fleet Gear Year MonthStart MonthEnd      iGrid    Grid Effort EffortUnits QualityCode Source YFT.NO YFT.MT BET.NO BET.MT SKJ.NO SKJ.MT ALB.NO ALB.MT SBF.NO SBF.MT LOT.NO LOT.MT FRZ.NO FRZ.MT KAW.NO KAW.MT
