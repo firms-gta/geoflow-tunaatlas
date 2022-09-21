@@ -71,65 +71,123 @@ require(dplyr)
   
 
 ##Efforts
-
+  DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
+  
 # Reach the efforts pivot DSD using a function in WCPFC_functions.R
-
-DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
-DF$cwp_grid=NULL # remove column cwp_grid
-colnames(DF)<-toupper(colnames(DF))
-DF<-melt(DF, id=c(colnames(DF[1:5]))) 
-
-DF<- DF %>% 
-  filter( ! value %in% 0 ) %>%
-  filter( ! is.na(value)) 
-DF$variable<-as.character(DF$variable)
-colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
-
-DF$CatchUnits<-substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
-
-DF$Species<-sub('_C', '', DF$Species)
-DF$Species<-sub('_N', '', DF$Species)
-
-DF$School<-"OTH"
-
-DF$EffortUnits<-colnames(DF[5])    
-colnames(DF)[5]<-"Effort"
-
-
-efforts_pivot_WCPFC=DF
-
-efforts_pivot_WCPFC$Gear<-"L"
-
-#We multiply the longline effort (gear=L) by 100 (since effort is given in hundreds of hooks)
-efforts_pivot_WCPFC$Effort<- efforts_pivot_WCPFC$Effort*100
-
-
-# Reach the efforts harmonized DSD using a function in WCPFC_functions.R
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
-
-colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
-efforts$source_authority<-"WCPFC"
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
-#we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(
-  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
-  sep = "/"
-)
-entity$setTemporalExtent(dataset_temporal_extent)
-
-#@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(catches, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
-#----------------------------------------------------------------------------------------------------------------------------
-entity$addResource("source", path_to_raw_dataset)
-entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+  #2020-11-13 @eblondel
+  #Changes
+  #	- Flag column added add UNK where missing
+  #	- Change id upper index for melting
+  #---------------------------------------
+  DF$cwp_grid=NULL # remove column cwp_grid
+  colnames(DF)<-toupper(colnames(DF))
+  if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+  # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
+  # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
+  DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
+  
+  DF<- DF %>% 
+    dplyr::filter( ! value %in% 0 ) %>%
+    dplyr::filter( ! is.na(value)) 
+  DF$variable<-as.character(DF$variable)
+  colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+  
+  DF$CatchUnits<-substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+  
+  DF$Species<-sub('_C', '', DF$Species)
+  DF$Species<-sub('_N', '', DF$Species)
+  
+  DF$School<-"OTH"
+  
+  DF$EffortUnits<-colnames(DF[6])    
+  colnames(DF)[6]<-"Effort"
+  
+  
+  efforts_pivot_WCPFC=DF
+  efforts_pivot_WCPFC$Gear<-"L"
+  
+  # Catchunits
+  # Check data that exist both in number and weight
+  
+  number_of_units_by_strata<- dplyr::summarise(group_by_(efforts_pivot_WCPFC,.dots=setdiff(colnames(efforts_pivot_WCPFC),c("value","CatchUnits"))), count = n())
+  
+  strata_in_number_and_weight<-number_of_units_by_strata[number_of_units_by_strata$count>1,]
+  
+  efforts_pivot_WCPFC<-left_join (efforts_pivot_WCPFC,strata_in_number_and_weight,by=setdiff(colnames(strata_in_number_and_weight),"count"))
+  
+  index.catchinweightandnumber <- which(efforts_pivot_WCPFC[,"count"]==2 & efforts_pivot_WCPFC[,"CatchUnits"]=="N")
+  efforts_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="NOMT"
+  
+  index.catchinweightandnumber <- which(efforts_pivot_WCPFC[,"count"]==2 & efforts_pivot_WCPFC[,"CatchUnits"]=="C")
+  efforts_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="MTNO"
+  
+  index.catchinweightonly <- which(efforts_pivot_WCPFC[,"CatchUnits"]=="C")
+  efforts_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="MT"
+  
+  index.catchinnumberonly <- which(efforts_pivot_WCPFC[,"CatchUnits"]=="N")
+  efforts_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="NO"
+  
+  # School
+  efforts_pivot_WCPFC$School<-"ALL"
+  
+  ### Reach the efforts harmonized DSD using a function in WCPFC_functions.R
+  colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+  #efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_captures)
+  #2020-11-13 @eblondel
+  efforts_pivot_WCPFC$RFMO <- "WCPFC"
+  efforts_pivot_WCPFC$Ocean <- "PAC_W"
+  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID #@eblondel added
+  efforts_pivot_WCPFC <- rtunaatlas::harmo_time_2(efforts_pivot_WCPFC, 
+                                                  "YY", "MM")
+  efforts_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(efforts_pivot_WCPFC, 
+                                                     "LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+  efforts_pivot_WCPFC$CatchType <- "ALL"
+  efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
+  efforts <- efforts_pivot_WCPFC[colToKeep_captures]
+  rm(efforts_pivot_WCPFC)
+  efforts[, c("AreaName", "FishingFleet")] <- as.data.frame(apply(efforts[, 
+                                                                          c("AreaName", "FishingFleet")], 2, function(x) {
+                                                                            gsub(" *$", "", x)
+                                                                          }), stringsAsFactors = FALSE)
+  efforts <- efforts %>% filter(!Effort %in% 0) %>% filter(!is.na(Effort))
+  efforts <- as.data.frame(efforts)
+  efforts <- aggregate(efforts$Effort,
+                       by = list(
+                         FishingFleet = efforts$FishingFleet,
+                         Gear = efforts$Gear,
+                         time_start = efforts$time_start,
+                         time_end = efforts$time_end,
+                         AreaName = efforts$AreaName,
+                         School = efforts$School,
+                         Species = efforts$Species,
+                         CatchType = efforts$CatchType,
+                         EffortUnits = efforts$EffortUnits
+                       ),
+                       FUN = sum)
+  colnames(catches)[colnames(catches)=="x"] <- "Catch"
+  
+  colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
+  catches$source_authority<-"WCPFC"
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
+  catches$time_start <- as.Date(catches$time_start)
+  catches$time_end <- as.Date(catches$time_end)
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <- paste(
+    paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+    paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  entity$setTemporalExtent(dataset_temporal_extent)
+  
+  #@geoflow -> export as csv
+  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+  write.csv(catches, output_name_dataset, row.names = FALSE)
+  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
+  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  #----------------------------------------------------------------------------------------------------------------------------
+  entity$addResource("source", path_to_raw_dataset)
+  entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("codelists", output_name_codelists)
 }
