@@ -81,11 +81,12 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 
 keep_fleet_instead_of_flag=FALSE  
 
-ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 
 # Requires library(Hmisc)
 # Open the tables directly from the access database  
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
+ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
+
 # Flags<-mdb.get(paste0(working_directory_init,"/db.mdb"),tables='Flags',stringsAsFactors=FALSE,strip.white=TRUE)
 config$logger.info(paste0("BEGIN  function   \n"))
 
@@ -108,8 +109,8 @@ efforts_pivot_ICCAT$School<-"ALL"
 efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
 
 if(keep_fleet_instead_of_flag==TRUE){
-  catches_pivot_ICCAT$FishingFleet<-NULL
-  names(catches_pivot_ICCAT)[names(catches_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
+  efforts_pivot_ICCAT$FishingFleet<-NULL
+  names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
 }
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
@@ -120,12 +121,12 @@ efforts$source_authority<-"ICCAT"
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
+efforts$time_start <- as.Date(efforts$time_start)
+efforts$time_end <- as.Date(efforts$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
-  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+  paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
+  paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
   sep = "/"
 )
 
@@ -133,7 +134,7 @@ entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".mdb"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(catches, output_name_dataset, row.names = FALSE)
+write.csv(efforts, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".mdb"))[1], "_codelists.csv"), path_to_raw_dataset)
 file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
