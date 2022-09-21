@@ -15,23 +15,10 @@
 #' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}} to convert WCPFC task 2 Drifnet data structure, \code{\link{convertDSD_wcpfc_ce_Longline}} to convert WCPFC task 2 Longline data structure, \code{\link{convertDSD_wcpfc_ce_Pole_and_line}} to convert WCPFC task 2 Pole-and-line data structure, \code{\link{convertDSD_wcpfc_ce_PurseSeine}} to convert WCPFC task 2 Purse seine data structure, \code{\link{convertDSD_wcpfc_nc}} to convert WCPFC task 1 data structure  
 
 
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-if(!require(foreign)){
-  install.packages("foreign")
-}
 
-require(rtunaatlas)
-require(foreign)
-
-wd<-getwd()
-download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
-path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
+# wd<-getwd()
+# download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
+# path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
 
 
 
@@ -53,38 +40,137 @@ path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
 #  ALL    L 2000-01-01 2000-02-01  6100140    ALL      HHOOKS  990492
 #  ALL    L 2000-01-01 2000-02-01  6100145    ALL      HHOOKS  867903
 
-
-##Efforts
-
+function(action, entity, config){
+  
+  #packages
+  if(!require(rtunaatlas)){
+    if(!require(devtools)){
+      install.packages("devtools")
+    }
+    require(devtools)
+    install_github("ptaconet/rtunaatlas")
+    require(rtunaatlas)
+  }
+  
+  if(!require(data.table)){
+    install.packages("data.table")
+    require(data.table)
+  }
+  
+  if(!require(tidyr)){
+    install.packages("tidyr")
+    require(tidyr)
+  }
+  
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
+  
+  
+  if(!require(reshape)){
+    install.packages("reshape")
+    require(reshape)
+  }
+  
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  #@geoflow --> with this script 2 objects are pre-loaded
+  #config --> the global config of the workflow
+  #entity --> the entity you are managing
+  #get data from geoflow current job dir
+  filename1 <- entity$data$source[[1]] #data
+  filename2 <- entity$data$source[[2]] #structure
+  path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  opts <- options()
+  options(encoding = "UTF-8")
+  #----------------------------------------------------------------------------------------------------------------------------
+  
+  
+  DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
+  
+  #2020-11-13 @eblondel
+  #Changes
+  #	- Flag column added add UNK where missing
+  #	- Change id upper index for melting
+  #---------------------------------------
+  DF$cwp_grid=NULL # remove column cwp_grid
+  colnames(DF)<-toupper(colnames(DF))
+  if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+  # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
+  # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
+  DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
+  
+  DF<- DF %>% 
+    dplyr::filter( ! value %in% 0 ) %>%
+    dplyr::filter( ! is.na(value)) 
+  DF$variable<-as.character(DF$variable)
+  colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+  
+  DF$EffortUnits<-substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+  
+  DF$Species<-sub('_C', '', DF$Species)
+  DF$Species<-sub('_N', '', DF$Species)
+  
+  DF$School<-"OTH"
+  
+  DF$EffortUnits<-colnames(DF[6])    
+  colnames(DF)[6]<-"Effort"
+  
+  
+  efforts_pivot_WCPFC=DF
+  efforts_pivot_WCPFC$Gear<-"L"
+  
+  # School
+  efforts_pivot_WCPFC$School<-"ALL"
 # Reach the efforts pivot DSD using a function in WCPFC_functions.R
-efforts_pivot_WCPFC<-FUN_efforts_WCPFC_CE (path_to_raw_dataset)
 efforts_pivot_WCPFC$Gear<-"L"
+
+colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+
+efforts_pivot_WCPFC$RFMO <- "WCPFC"
+efforts_pivot_WCPFC$Ocean <- "PAC_W"
+efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID #@eblondel added
+efforts_pivot_WCPFC <- rtunaatlas::harmo_time_2(efforts_pivot_WCPFC, 
+                                                "YY", "MM")
+efforts_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(efforts_pivot_WCPFC, 
+                                                   "LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+efforts_pivot_WCPFC$CatchType <- "ALL"
+efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
+effort <- efforts_pivot_WCPFC[colToKeep_efforts]
+rm(efforts_pivot_WCPFC)
+efforts[, c("AreaName", "FishingFleet")] <- as.data.frame(apply(efforts[, 
+                                                                        c("AreaName", "FishingFleet")], 2, function(x) {
+                                                                          gsub(" *$", "", x)
+                                                                        }), stringsAsFactors = FALSE)
+efforts <- efforts %>% filter(!Effort %in% 0) %>% filter(!is.na(Effort))
+efforts <- as.data.frame(efforts)
+efforts <- aggregate(efforts$Effort,
+                     by = list(
+                       FishingFleet = efforts$FishingFleet,
+                       Gear = efforts$Gear,
+                       time_start = efforts$time_start,
+                       time_end = efforts$time_end,
+                       AreaName = efforts$AreaName,
+                       School = efforts$School,
+                       Species = efforts$Species,
+                       EffortUnits = efforts$EffortUnits
+                     ),
+                     FUN = sum)
+colnames(efforts)[colnames(efforts)=="x"] <- "Effort"
 
 #We multiply the longline effort (gear=L) by 100 (since effort is given in hundreds of hooks)
 efforts_pivot_WCPFC$Effort<- efforts_pivot_WCPFC$Effort*100
 
 
 # Reach the efforts harmonized DSD using a function in WCPFC_functions.R
-colToKeep_efforts <- c("Flag","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
 
-colnames(efforts)<-c("flag","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
+colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
 efforts$source_authority<-"WCPFC"
-dataset<-efforts
 
-### Compute metadata
-#if (path_to_metadata_file!="NULL"){
-#  source("https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/transform/compute_metadata.R")
-#} else {
-#  df_metadata<-NULL
-#  df_codelists<-NULL
-#}
-
-
-## To check the outputs:
-# str(dataset)
-# str(df_metadata)
-# str(df_codelists)
+}
 
 
 

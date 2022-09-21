@@ -15,24 +15,33 @@
 
 function(action, entity, config){
   
-
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
+  #packages
+  if(!require(rtunaatlas)){
+    if(!require(devtools)){
+      install.packages("devtools")
+    }
+    require(devtools)
+    install_github("ptaconet/rtunaatlas")
+    require(rtunaatlas)
   }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-if(!require(foreign)){
-  install.packages("foreign")
-}
+  if(!require(reshape)){
+    install.packages("reshape")
+    require(reshape)
+  }
+  
+  if(!require(tidyr)){
+    install.packages("tidyr")
+    require(tidyr)
+  }
+  
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
 
-require(rtunaatlas)
-require(foreign)
-
-wd<-getwd()
-download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
-path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
+# wd<-getwd()
+# download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
+# path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
 
 
 # Input data sample:
@@ -78,8 +87,30 @@ options(encoding = "UTF-8")
 
 ##Efforts
 
-# Reach the efforts pivot DSD using a function in WCPFC_functions.R
-efforts_pivot_WCPFC<-FUN_efforts_WCPFC_CE_Purse_Seine_2016 (path_to_raw_dataset)
+DF <- read.csv(path_to_raw_dataset)
+colnames(DF) <- toupper(colnames(DF))
+DF$CWP_GRID <- NULL
+
+# DF <- melt(DF, id = c(colnames(DF[1:10])))  #@juldebar error with melt function from reshape package
+# DF <- melt(as.data.table(DF), id=c(colnames(DF[1:10])))
+DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
+
+DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
+DF$variable <- as.character(DF$variable)
+colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+DF$School <- substr(DF$Species, 7, nchar(DF$Species))
+DF$Species <- sub("_C_UNA", "", DF$Species)
+DF$Species <- sub("_C_LOG", "", DF$Species)
+DF$Species <- sub("_C_DFAD", "", DF$Species)
+DF$Species <- sub("_C_AFAD", "", DF$Species)
+DF$Species <- sub("_C_OTH", "", DF$Species)
+DF$CatchUnits <- "MT"
+DF$EffortUnits <- colnames(DF[5])
+colnames(DF)[5] <- "Effort"
+efforts_pivot_WCPFC <- DF; rm(DF)
+
+#-----------------------------------------------------------
+#Gear
 efforts_pivot_WCPFC$Gear<-"S"
 
 # Reach the efforts harmonized DSD using a function in WCPFC_functions.R
@@ -91,19 +122,19 @@ efforts$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
+efforts$time_start <- as.Date(efforts$time_start)
+efforts$time_end <- as.Date(efforts$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
-  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+  paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
+  paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
   sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(catches, output_name_dataset, row.names = FALSE)
+write.csv(efforts, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_codelists.csv"), path_to_raw_dataset)
 file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------

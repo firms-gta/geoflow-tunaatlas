@@ -11,29 +11,41 @@
 
 function(action, entity, config){
   
-
-#path_to_raw_dataset="https://goo.gl/R5EbrB"
-
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
+  #packages
+  if(!require(rtunaatlas)){
+    if(!require(devtools)){
+      install.packages("devtools")
+    }
+    require(devtools)
+    install_github("ptaconet/rtunaatlas")
+    require(rtunaatlas)
   }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-if(!require(foreign)){
-  install.packages("foreign")
-}
+  if(!require(foreign)){
+    install.packages("foreign")
+    require(foreign)
+  }
+  
+  if(!require(reshape)){
+    install.packages("reshape")
+    require(reshape)
+  }
+  
+  
+  if(!require(tidyr)){
+    install.packages("tidyr")
+    require(tidyr)
+  }
+  
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
 
-require(rtunaatlas)
-require(foreign)
 
 
-
-
-wd<-getwd()
-download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
-path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
+# wd<-getwd()
+# download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
+# path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
 
 
 
@@ -76,9 +88,37 @@ colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName",
 
 ##Efforts
 
-# Reach the efforts pivot DSD using a function in WCPFC_functions.R
-efforts_pivot_WCPFC<-FUN_efforts_WCPFC_CE (path_to_raw_dataset)
+DF <- read.csv(path_to_raw_dataset)
+colnames(DF) <- toupper(colnames(DF))
+# DF <- melt(DF, id = c(colnames(DF[1:5]))) #@juldebar error with melt function from reshape package
+# DF <- melt(as.data.table(DF), id=c(colnames(DF[1:5])))
+DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
+
+DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
+DF$variable <- as.character(DF$variable)
+colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+DF$Species <- toupper(DF$Species) #@eblondel added
+DF$Species <- sub("_C", "", DF$Species)
+DF$Species <- sub("_N", "", DF$Species)
+DF$School <- "OTH"
+DF$EffortUnits <- colnames(DF[5])
+colnames(DF)[5] <- "Effort"
+#--------------------------------------------------
+efforts_pivot_WCPFC <- DF; rm(DF)
+
+#Gear
 efforts_pivot_WCPFC$Gear<-"D"
+
+# Catchunits
+index.kg <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "C" )
+efforts_pivot_WCPFC[index.kg,"CatchUnits"]<- "MT"
+
+index.nr <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "N" )
+efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "NO" 
+
+# School
+efforts_pivot_WCPFC$School<-"ALL"
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
@@ -89,19 +129,19 @@ efforts$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
+efforts$time_start <- as.Date(efforts$time_start)
+efforts$time_end <- as.Date(efforts$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
-  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+  paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
+  paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
   sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(catches, output_name_dataset, row.names = FALSE)
+write.csv(efforts, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_codelists.csv"), path_to_raw_dataset)
 file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
