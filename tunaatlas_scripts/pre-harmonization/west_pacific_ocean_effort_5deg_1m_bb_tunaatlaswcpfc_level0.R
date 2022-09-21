@@ -133,21 +133,21 @@ DF$Species <- sub("_N", "", DF$Species)
 DF$School <- "OTH"
 DF$EffortUnits <- colnames(DF[5])
 colnames(DF)[5] <- "Effort"
-effort_pivot_WCPFC <- DF; rm(DF)
+efforts_pivot_WCPFC <- DF; rm(DF)
 #-------------
 
 #Gear
-effort_pivot_WCPFC$Gear<-"P"
+efforts_pivot_WCPFC$Gear<-"P"
 
 # Catchunits
-index.kg <- which( effort_pivot_WCPFC[,"CatchUnits"] == "C" )
-effort_pivot_WCPFC[index.kg,"CatchUnits"]<- "MT"
+index.kg <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "C" )
+efforts_pivot_WCPFC[index.kg,"CatchUnits"]<- "MT"
 
-index.nr <- which( effort_pivot_WCPFC[,"CatchUnits"] == "N" )
-effort_pivot_WCPFC[index.nr,"CatchUnits"]<- "NO" 
+index.nr <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "N" )
+efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "NO" 
 
 # School
-effort_pivot_WCPFC$School<-"ALL"
+efforts_pivot_WCPFC$School<-"ALL"
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
