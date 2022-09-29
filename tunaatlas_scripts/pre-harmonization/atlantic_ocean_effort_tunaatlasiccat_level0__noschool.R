@@ -18,28 +18,23 @@ function(action, entity, config){
 
 keep_fleet_instead_of_flag=FALSE
 
+#packages
 if(!require(rtunaatlas)){
   if(!require(devtools)){
     install.packages("devtools")
   }
   require(devtools)
   install_github("ptaconet/rtunaatlas")
+  require(rtunaatlas)
 }
 if(!require(data.table)){
   install.packages("data.table")
+  require(data.table)
 }
 if(!require(dplyr)){
   install.packages("dplyr")
+  require(dplyr)
 }
-if(!require(Hmisc)){
-  install.packages("Hmisc")
-}
-
-require(rtunaatlas)
-require(data.table)
-require(dplyr)
-require(Hmisc) # install mdb tools (http://svitsrv25.epfl.ch/R-doc/library/Hmisc/html/mdb.get.html)
-
 # Input data sample: No sample. Miscrosoft Acces DB. However after the commands that read the input DB the sample is the following:
 # StrataID DSetID FleetID GearGrpCode GearCode FileTypeCode YearC TimePeriodID SquareTypeCode QuadID Lat Lon Eff1 Eff1Type Eff2 Eff2Type DSetTypeID CatchUnit ALB BET     BFT BUM
 #         1      1 021ES00          TP     TRAP       OF-REP  1950           17            1x1      4  36   5    4 NO.TRAPS   NA                  nw        kg   0   0 6725000   0
@@ -134,9 +129,9 @@ dataset_temporal_extent <- paste(
 entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".mdb"))[1], "_harmonized.csv"), path_to_raw_dataset)
+output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
 write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".mdb"))[1], "_codelists.csv"), path_to_raw_dataset)
+output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
 file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
