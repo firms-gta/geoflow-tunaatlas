@@ -68,7 +68,7 @@ filename1 <- entity$data$source[[1]] #data
 filename2 <- entity$data$source[[2]] #structure
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
-opts <- options()
+# opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------  
   
@@ -149,4 +149,5 @@ file.rename(from = entity$getJobDataResource(config, filename2), to = output_nam
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
-options(opts)}
+# options(opts)
+}
