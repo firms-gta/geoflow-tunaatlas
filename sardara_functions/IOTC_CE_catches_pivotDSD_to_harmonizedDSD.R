@@ -1,0 +1,30 @@
+IOTC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_IOTC, colToKeep_captures) 
+{
+  catches_pivot_IOTC$RFMO <- "IOTC"
+  catches_pivot_IOTC$Ocean <- "IND"
+  catches_pivot_IOTC$FishingFleet <- catches_pivot_IOTC$Fleet
+  catches_pivot_IOTC$Gear <- catches_pivot_IOTC$Gear
+  catches_pivot_IOTC <- harmo_time_3(catches_pivot_IOTC, "Year", 
+                                     "MonthStart", "MonthEnd")
+  catches_pivot_IOTC$AreaCWPgrid <- catches_pivot_IOTC$Grid
+  catches_pivot_IOTC$AreaName <- catches_pivot_IOTC$iGrid
+  catches_pivot_IOTC <- harmo_spatial_2(catches_pivot_IOTC, 
+                                        "AreaName")
+  catches_pivot_IOTC$School <- catches_pivot_IOTC$School
+  catches_pivot_IOTC$Species <- catches_pivot_IOTC$Species
+  catches_pivot_IOTC$CatchUnits <- catches_pivot_IOTC$CatchUnits
+  catches_pivot_IOTC$CatchType <- "ALL"
+  catches_pivot_IOTC$Catch <- catches_pivot_IOTC$value
+  catches <- catches_pivot_IOTC[colToKeep_captures]
+  rm(catches_pivot_IOTC)
+  catches[, c("AreaName", "FishingFleet")] <- as.data.frame(apply(catches[, 
+                                                                          c("AreaName", "FishingFleet")], 2, function(x) {
+                                                                            gsub(" *$", "", x)
+                                                                          }), stringsAsFactors = FALSE)
+  catches <- catches %>% filter(!Catch %in% 0) %>% filter(!is.na(Catch))
+  catches <- catches %>% group_by(FishingFleet, Gear, time_start, 
+                                  time_end, AreaName, School, Species, CatchType, CatchUnits) %>% 
+    summarise(Catch = sum(Catch))
+  catches <- as.data.frame(catches)
+  return(catches)
+}
