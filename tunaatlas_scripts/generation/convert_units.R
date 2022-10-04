@@ -85,7 +85,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		georef_dataset<-left_join(georef_dataset,df_conversion_factor)
 		df_conversion_factor$conversion_factor_available_in_line<-NULL
 
-		strata_with_conv_factor_available<-unique(georef_dataset[which(georef_dataset$conversion_factor_available_in_line==TRUE & georef_dataset$standard_unit_available_in_strata==FALSE),c("source_authority","flag","gear","schooltype","time_start","time_end","geographic_identifier","conversion_factor_available_in_line")])
+		strata_with_conv_factor_available<-unique(georef_dataset[which(georef_dataset$conversion_factor_available_in_line==TRUE & georef_dataset$standard_unit_available_in_strata==FALSE),c("source_authority","fishingfleet","gear","schooltype","time_start","time_end","geographic_identifier","conversion_factor_available_in_line")])
 		colnames(strata_with_conv_factor_available)[which(names(strata_with_conv_factor_available) == "conversion_factor_available_in_line")] <- "conversion_factor_available_in_strata"
 
 		georef_dataset<-left_join(georef_dataset,strata_with_conv_factor_available)
