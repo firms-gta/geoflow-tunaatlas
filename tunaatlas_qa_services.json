@@ -1,0 +1,152 @@
+{
+  "id": "tuna-atlas-services",
+  "profile": {
+	"project": "FIRMS Tuna Atlas",
+	"organization": "FIRMS Tuna Atlas",
+	"logos": [
+		"http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+		"http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+		"http://www.umr-marbec.fr/images/logo-ird-en.png"
+	]
+  },
+  "options": {
+	"line_separator": "_\n"
+  },
+  "mode": "entity",
+  "metadata": {
+	"dictionary" : {
+	  "handler": "gsheet",
+	  "source": "https://docs.google.com/spreadsheets/d/166f_fIB9ctwdsRI8MCqKmfYtyh6DPbipHp8_qVjrIs8/edit#gid=0"
+	},
+    "entities": {
+      "handler": "dbi",
+      "source": "SELECT * FROM metadata.metadata_dcmi"
+    },
+    "contacts" : {
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+    }
+  },
+  "software": [
+	{
+		"id": "zenodo",
+		"type": "output",
+		"software_type": "zenodo",
+		"parameters": {
+			"url": "https://zenodo.org/api",
+			"token": "{{ZENODO_TOKEN}}",
+			"logger": "DEBUG"
+		},
+		"properties": {
+			"clean": {
+				"run": false
+			}
+		}
+	},
+	{
+		"id": "tunaatlas-db-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "5432",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {
+		}
+	},
+	{
+		"id": "tunaatlas-db-read",
+		"type": "input",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "5432",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {
+		}
+	},
+	{
+		"id": "googledrive",
+		"type": "input",
+		"software_type": "googledrive",
+		"parameters": {
+			"email": "{{GMAIL_USER}}",
+			"token": "{{GMAIL_TOKEN}}"
+		},
+		"properties" : {}
+	},
+	{
+		"id": "my-geonetwork",
+		"type": "output",
+		"software_type": "geonetwork",
+		"parameters": {
+			"url": "{{GN_URL}}",
+			"user": "{{GN_USER}}",
+			"pwd": "{{GN_PASSWORD}}",
+			"version": "{{GN_VERSION}}",
+			"logger": "DEBUG"
+		}
+	},
+	{
+		"id": "my-geoserver",
+		"type": "output",
+		"software_type": "geoserver",
+		"parameters": {
+			"url": "{{GS_URL}}",
+			"user": "{{GS_USER}}",
+			"pwd": "{{GS_PASSWORD}}",
+			"logger": "DEBUG"
+		},
+		"properties" : {
+			"workspace": "{{GS_WORKSPACE}}",
+			"datastore": "{{GS_DATASTORE}}"
+		}
+	}
+  ],
+  "actions": [
+	{
+      "id": "zen4R-deposit-record",
+	    "options": {
+			"zipEachDataFile": true,
+		    "publish": false
+	    },
+      "run": false
+    },
+  	{
+      "id": "geometa-create-iso-19115",
+      "run": true,
+  	  "options": {
+    		"logo": true,
+    		"doi": true,
+    		"doi_thumbnail": false,
+    		"addfeatures": false
+      }
+	},
+  	{
+  	  "id": "geometa-create-iso-19110",
+  	  "run": true,
+  	  "options" : {
+  	    "exclude_attributes" : ["time_start", "time_end", "id_area", "longitude", "latitude"],
+  	    "exclude_attributes_not_in_dictionary": false,
+  		  "exclude_values_for_attributes": ["geographic_identifier", "time_start", "time_end", "catchtype"],
+  		  "extra_attributes": "aggregation_method"
+  	  }
+  	},
+  	{
+  	  "id": "geonapi-publish-iso-19139",
+  	  "run": true
+  	},
+  	{
+  	  "id": "geosapi-publish-ogc-services",
+  	  "run": true
+  	} 
+ ]
+}
