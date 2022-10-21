@@ -30,7 +30,7 @@
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
-			"user": "tunaatlas_u",
+			"user": "{{DB_USER}}",
 			"password": "{{DB_PASSWORD}}",
 			"host": "{{DB_HOST}}",
 			"port": "5432",
@@ -45,7 +45,7 @@
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
-			"user": "tunaatlas_u",
+			"user": "{{DB_USER}}",
 			"password": "{{DB_PASSWORD}}",
 			"host": "{{DB_HOST}}",
 			"port": "5432",
