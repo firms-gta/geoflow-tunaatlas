@@ -17,7 +17,7 @@
     "entities": [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1JhS1ADsnqTpWOEEvljk-c9EdzBurkc8A8__JOHJmkOk/edit#gid=163629835"
+      "source": "https://docs.google.com/spreadsheets/d/13SJB2PYkCCdrzw8HNJMPFg0yXs0OSYY2mUOAl5dagUc/edit?usp=sharing"
       }
     ],
     "contacts" : [
@@ -25,6 +25,12 @@
       "handler": "gsheet",
       "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
       }
+    ],
+    "dictionary" : [
+      {
+  	  "handler": "gsheet",
+  	  "source": "https://docs.google.com/spreadsheets/d/166f_fIB9ctwdsRI8MCqKmfYtyh6DPbipHp8_qVjrIs8/edit#gid=0"
+  	  }
     ]
   },
   "software": [
@@ -66,17 +72,6 @@
 		},
 		"properties" : {}
 	}
-	,
-		{
-		"id": "googledrive",
-		"type": "output",
-		"software_type": "googledrive",
-		"parameters": {
-			"email": "{{GMAIL_USER}}",
-			"token": "{{GMAIL_TOKEN}}"
-		},
-		"properties" : {}
-	}
   ],
   "actions": [
 	{
@@ -87,7 +82,7 @@
 			"upload_to_db": true,
 			"create_materialized_view" : true,
 			"add_sql_comments" : true,
-			"upload_to_googledrive": false
+			"upload_to_googledrive": true
 		}
 	},
 	{
@@ -100,15 +95,15 @@
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
 		"run": true
 	},
-	{		"id": "comparison_each_step",
-		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
-		"run": false
-	  
-	},
 	{
 		"id": "load_metadata",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
 		"run": true
+	},
+	{		"id": "comparison_each_step",
+		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
+		"run": false
+	  
 	}
 	
 
