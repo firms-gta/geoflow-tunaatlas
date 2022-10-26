@@ -7,6 +7,9 @@ FUNMergeDimensions_NonCodeListLike<-function(DBconnection,   # connection to DB
                                              dimension_colnames_to_retrieve,   # Name of the columns that will be used to match inputDataset and DBTableName
                                              DBTableName   # Name of the dimension table in DB, i.e. "time.time"
 ){
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
   
   if(DBTableName=="time.time"){
     sql<-"select id_time,to_char(time_start,'YYYY-MM-DD HH:MI:SS') as time_start,to_char(time_end,'YYYY-MM-DD HH:MI:SS') as time_end from time.time"
