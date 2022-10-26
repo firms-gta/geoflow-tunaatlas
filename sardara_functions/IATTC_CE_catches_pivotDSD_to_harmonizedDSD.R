@@ -2,6 +2,10 @@ IATTC_CE_catches_pivotDSD_to_harmonizedDSD= function (IATTC_CE_catches_df_pivotD
 {
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_4.R")
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
+  
   IATTC_CE_catches_df_pivotDSD$RFMO <- "IATTC"
   IATTC_CE_catches_df_pivotDSD$Ocean <- "PAC_E"
   index.fishingfleet.other <- which(IATTC_CE_catches_df_pivotDSD[, 
@@ -27,7 +31,7 @@ IATTC_CE_catches_pivotDSD_to_harmonizedDSD= function (IATTC_CE_catches_df_pivotD
     dplyr::filter(!is.na(Catch))
   catches <- catches %>% group_by(FishingFleet, Gear, time_start, 
                                   time_end, AreaName, School, Species, CatchType, CatchUnits) %>% 
-    summarise(Catch = sum(Catch))
+    dplyr::summarise(Catch = sum(Catch))
   catches <- as.data.frame(catches)
   return(catches)
 }

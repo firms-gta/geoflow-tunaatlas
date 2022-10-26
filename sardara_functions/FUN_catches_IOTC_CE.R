@@ -1,5 +1,9 @@
 FUN_catches_IOTC_CE = function (Path_to_CE_dataset, last_column_not_catch_value, CE_dataset_nature) 
 {
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
+  
   IOTC_CE <- read.table(Path_to_CE_dataset, sep = ",", header = TRUE, 
                         stringsAsFactors = FALSE, strip.white = TRUE)
   IOTC_CE[, c("Fleet", "iGrid")] <- as.data.frame(apply(IOTC_CE[, 
@@ -25,11 +29,11 @@ FUN_catches_IOTC_CE = function (Path_to_CE_dataset, last_column_not_catch_value,
     IOTC_CE$CatchUnits <- sub(".*\\.", "", IOTC_CE$variable)
     IOTC_CE$School <- "ALL"
   }
-  number_of_units_by_strata <- group_by_(IOTC_CE, .dots = setdiff(colnames(IOTC_CE), 
+  number_of_units_by_strata <- dplyr::group_by_(IOTC_CE, .dots = setdiff(colnames(IOTC_CE), 
                                                                   c("value", "CatchUnits", "variable"))) %>% summarise(count = n())
   strata_in_number_and_weight <- number_of_units_by_strata[number_of_units_by_strata$count > 
                                                              1, ]
-  IOTC_CE <- left_join(IOTC_CE, strata_in_number_and_weight, 
+  IOTC_CE <- dplyr::left_join(IOTC_CE, strata_in_number_and_weight, 
                        by = setdiff(colnames(strata_in_number_and_weight), 
                                     "count"))
   index.catchinweightandnumber <- which(IOTC_CE[, "count"] == 

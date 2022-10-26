@@ -19,11 +19,6 @@ function(action, entity, config){
 
   
     
-  }
-
-
-
-}
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)

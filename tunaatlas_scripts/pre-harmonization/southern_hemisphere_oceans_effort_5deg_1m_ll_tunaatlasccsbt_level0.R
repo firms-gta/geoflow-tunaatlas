@@ -23,6 +23,10 @@ function(action, entity, config){
     install.packages("readxl")
     require(readxl)
   }
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
+  
 
 # Input data sample (after importing as data.frame in R):
 # YEAR MONTH COUNTRY_CODE TARGET_SPECIES CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOOKS NUMBER_OF_SBT_RETAINED

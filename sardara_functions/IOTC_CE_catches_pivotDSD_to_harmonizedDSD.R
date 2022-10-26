@@ -2,6 +2,10 @@ IOTC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_IOTC, colToK
 {
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_3.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_2.R")
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
+  
   catches_pivot_IOTC$RFMO <- "IOTC"
   catches_pivot_IOTC$Ocean <- "IND"
   catches_pivot_IOTC$FishingFleet <- catches_pivot_IOTC$Fleet
@@ -23,10 +27,10 @@ IOTC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_IOTC, colToK
                                                                           c("AreaName", "FishingFleet")], 2, function(x) {
                                                                             gsub(" *$", "", x)
                                                                           }), stringsAsFactors = FALSE)
-  catches <- catches %>% filter(!Catch %in% 0) %>% filter(!is.na(Catch))
-  catches <- catches %>% group_by(FishingFleet, Gear, time_start, 
+  catches <- catches %>% dplyr::filter(!Catch %in% 0) %>% dplyr::filter(!is.na(Catch))
+  catches <- catches %>% dplyr::group_by(FishingFleet, Gear, time_start, 
                                   time_end, AreaName, School, Species, CatchType, CatchUnits) %>% 
-    summarise(Catch = sum(Catch))
+    dplyr::summarise(Catch = sum(Catch))
   catches <- as.data.frame(catches)
   return(catches)
 }

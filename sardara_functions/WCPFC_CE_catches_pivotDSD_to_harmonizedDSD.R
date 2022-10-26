@@ -2,6 +2,10 @@ WCPFC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_WCPFC, colT
 {
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
+  
   catches_pivot_WCPFC$RFMO <- "WCPFC"
   catches_pivot_WCPFC$Ocean <- "PAC_W"
   catches_pivot_WCPFC$FishingFleet <- "ALL"
@@ -17,10 +21,10 @@ WCPFC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_WCPFC, colT
                                                                           c("AreaName", "FishingFleet")], 2, function(x) {
                                                                             gsub(" *$", "", x)
                                                                           }), stringsAsFactors = FALSE)
-  catches <- catches %>% filter(!Catch %in% 0) %>% filter(!is.na(Catch))
-  catches <- catches %>% group_by(FishingFleet, Gear, time_start, 
+  catches <- catches %>% dplyr::filter(!Catch %in% 0) %>% dplyr::filter(!is.na(Catch))
+  catches <- catches %>% dplyr::group_by(FishingFleet, Gear, time_start, 
                                   time_end, AreaName, School, Species, CatchType, CatchUnits) %>% 
-    summarise(Catch = sum(Catch))
+    dplyr::summarise(Catch = sum(Catch))
   catches <- as.data.frame(catches)
   return(catches)
 }
