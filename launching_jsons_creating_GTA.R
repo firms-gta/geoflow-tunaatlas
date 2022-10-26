@@ -8,7 +8,7 @@ if(!require(remotes)){
 
   
 
-}
+
 if(!require(tinytex)){
   install.packages("tinytex")
   require(tinytex)
@@ -55,9 +55,6 @@ if(!require(rgeos)){
   require(rgeos)
 }
 
-  install_github("eblondel/rtunaatlas")
-
-}
 
 if(!require(rpostgis)){
   install_github("rpostgis")
