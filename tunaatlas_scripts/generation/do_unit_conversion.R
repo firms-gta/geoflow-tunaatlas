@@ -1,6 +1,9 @@
 do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset){
-  
-	con <- config$software$output$dbi
+  source("https://github.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/extract_dataset.R")
+	source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/convert_units.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/list_metadata_datasets.R")
+  source("https://github.com/firms-gta/geoflow-tunaatlas/blob/master/map_codelist.R")
+  con <- config$software$output$dbi
   
 	config$logger.info("Reading the conversion factors dataset")
 	googledrive_baseurl <- "https://drive.google.com/open?id="
@@ -25,12 +28,12 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	  mapping_dataset<-data.frame(source_authority,db_mapping_dataset_name)
 	  df_mapping_final_this_dimension<-NULL
 	  for (j in 1:nrow(mapping_dataset)){ 
-		df_mapping<-rtunaatlas::extract_dataset(con,list_metadata_datasets(con,identifier=mapping_dataset$db_mapping_dataset_name[j]))  # Extract the code list mapping dataset from the DB
+		df_mapping<-extract_dataset(con,list_metadata_datasets(con,identifier=mapping_dataset$db_mapping_dataset_name[j]))  # Extract the code list mapping dataset from the DB
 		df_mapping$source_authority<-as.character(mapping_dataset$source_authority[j])  # Add the dimension "source_authority" to the mapping dataset. That dimension is not included in the code list mapping datasets. However, it is necessary to map the code list.
 		df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)
 	  }
 	  #georef_dataset with source coding system for gears mapped with isscfg codes:
-	  georef_dataset<-rtunaatlas::map_codelist(georef_dataset,df_mapping_final_this_dimension,"gear",TRUE)$df
+	  georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"gear",TRUE)$df
 	  
 	  if (fact=="effort"){
 	  ## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source unit coding system with tuna atlas coding system. In fact, the conversion factors dataset is expressed with tuna atlas coding system for units, while the primary tRFMOs datasets are expressed with their own unit coding system.
@@ -39,12 +42,12 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 		mapping_dataset<-data.frame(source_authority,db_mapping_dataset_name)
 		df_mapping_final_this_dimension<-NULL
 		for (j in 1:nrow(mapping_dataset)){ 
-		  df_mapping<-rtunaatlas::extract_dataset(con,list_metadata_datasets(con,identifier=mapping_dataset$db_mapping_dataset_name[j]))  # Extract the code list mapping dataset from the DB
+		  df_mapping<-extract_dataset(con,list_metadata_datasets(con,identifier=mapping_dataset$db_mapping_dataset_name[j]))  # Extract the code list mapping dataset from the DB
 		  df_mapping$source_authority<-as.character(mapping_dataset$source_authority[j])  # Add the dimension "source_authority" to the mapping dataset. That dimension is not included in the code list mapping datasets. However, it is necessary to map the code list.
 		  df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)
 		}
 		#georef_dataset with source coding system for units mapped with tuna atlas codes:
-		georef_dataset<-rtunaatlas::map_codelist(georef_dataset,df_mapping_final_this_dimension,"unit",TRUE)$df
+		georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"unit",TRUE)$df
 	  }
 	  
 	}
@@ -118,7 +121,7 @@ do_unit_conversion <- function(entity, config,fact,unit_conversion_csv_conversio
 	cat(species_no_before$species)
 	cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
 	
-	georef_dataset<-rtunaatlas::convert_units(con = con,
+	georef_dataset<-convert_units(con = con,
 	                                          df_input = georef_dataset,
 	                                          df_conversion_factor = df_conversion_factor,
 	                                          codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
