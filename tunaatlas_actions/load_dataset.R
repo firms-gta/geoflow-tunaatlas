@@ -3,9 +3,7 @@ load_dataset <- function(action,entity, config, options){
   
   opts <- action$options
   
-    remotes::install_github("eblondel/rtunaatlas")
-  
-  }
+
   
   if(!require(readr)){
     install.packages("readr")

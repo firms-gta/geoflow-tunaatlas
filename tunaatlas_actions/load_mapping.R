@@ -10,12 +10,6 @@ function(action,entity, config, options){
   #packages
   
     
-      
-    }
-  
-  
-  
-  }
   
   if(!require(readr)){
 	install.packages("readr")
