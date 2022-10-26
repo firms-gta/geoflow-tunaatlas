@@ -16,16 +16,6 @@
 
 function(action, entity, config){
   
-
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
-require(rtunaatlas)
-  
   if(!require(dplyr)){
     install.packages("dplyr")
     require(dplyr)
@@ -67,9 +57,11 @@ require(rtunaatlas)
 
 # Reach the efforts pivot DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_IOTC_CE.R")
 efforts_pivot_IOTC<-FUN_efforts_IOTC_CE(path_to_raw_dataset,11)
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/IOTC_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts<-IOTC_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_IOTC,colToKeep_efforts)
 
 colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")

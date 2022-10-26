@@ -1,5 +1,7 @@
 getSQLSardaraQueries <-  function (con, dataset_metadata) 
 {
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/get_codelist_of_dimension.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/list_dataset_available_dimensions.R")
   if (nrow(dataset_metadata) == 0) {
     stop("There is no dataset that corresponds to your query")
   }
@@ -99,7 +101,7 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
     where_clause_gear <- NULL
     where_clause_species <- NULL
     if ("gear" %in% dataset_available_dimensions) {
-      codelist_identifier <- rtunaatlas::get_codelist_of_dimension(con, 
+      codelist_identifier <-  get_codelist_of_dimension(con, 
                                                                    dataset_metadata, "gear")$identifier
       if (codelist_identifier %in% c("isscfg_revision_1", 
                                      "gear_iotc", "gear_iccat", "gear_iattc", "gear_wcpfc")) {
@@ -134,7 +136,7 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
       }
     }
     if ("species" %in% dataset_available_dimensions) {
-      codelist_identifier <- rtunaatlas::get_codelist_of_dimension(con, 
+      codelist_identifier <-  get_codelist_of_dimension(con, 
                                                                    dataset_metadata, "species")$identifier
       if (codelist_identifier == "species_asfis") {
         db_dimensions_parameters$sql_select_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 

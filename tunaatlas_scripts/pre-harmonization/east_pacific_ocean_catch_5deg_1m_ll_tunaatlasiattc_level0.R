@@ -36,14 +36,8 @@
 function(action, entity, config){
   
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(reshape)){
   install.packages("reshape")
   require(reshape)
@@ -118,6 +112,7 @@ colnames(catches)[colnames(catches)=="Flag"] <- "FishingFleet"
 
 # Reach the catches harmonized DSD using a function in IATTC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches,colToKeep_captures)
 
 colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")

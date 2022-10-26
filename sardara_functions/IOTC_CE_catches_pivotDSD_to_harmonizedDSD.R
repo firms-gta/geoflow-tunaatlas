@@ -1,5 +1,7 @@
 IOTC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_IOTC, colToKeep_captures) 
 {
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_3.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_2.R")
   catches_pivot_IOTC$RFMO <- "IOTC"
   catches_pivot_IOTC$Ocean <- "IND"
   catches_pivot_IOTC$FishingFleet <- catches_pivot_IOTC$Fleet

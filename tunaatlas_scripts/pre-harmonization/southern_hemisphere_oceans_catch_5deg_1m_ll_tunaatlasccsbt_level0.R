@@ -32,16 +32,11 @@
   #   AU   LL 1987-07-01 1987-08-01  6325150    ALL     SBF       ALL         NO     1
   #   AU   LL 1987-09-01 1987-10-01  6330150    ALL     SBF       ALL         NO    14
 function(action, entity, config){
-  
-#packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_5.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
+  #packages
+
 
 if(!require(readxl)){
 	install.packages("readxl")

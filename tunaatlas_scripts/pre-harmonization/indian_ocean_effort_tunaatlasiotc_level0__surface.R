@@ -15,13 +15,6 @@
 #' @seealso \code{\link{convertDSD_iotc_ce_LonglineCoastal}} to convert IOTC task 2 CECoastal and CELongline data structure, \code{\link{convertDSD_iotc_nc}} to convert IOTC nominal catch data structure
 function(action, entity, config){
   
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-}
 if(!require(data.table)){
   install.packages("data.table")
 }
@@ -82,12 +75,14 @@ require(data.table)
 ##Efforts
 
 # Reach the efforts pivot DSD using a function in ICCAT_functions.R
-efforts_pivot_IOTC<-FUN_efforts_IOTC_CE(path_to_raw_dataset,12)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_IOTC_CE.R")
+  efforts_pivot_IOTC<-FUN_efforts_IOTC_CE(path_to_raw_dataset,12)
 efforts_pivot_IOTC$CatchUnits<-NULL
 efforts_pivot_IOTC$Source<-NULL
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/IOTC_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts<-IOTC_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_IOTC,colToKeep_efforts)
 
 

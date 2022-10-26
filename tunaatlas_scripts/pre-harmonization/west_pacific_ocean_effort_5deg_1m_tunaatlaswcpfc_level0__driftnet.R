@@ -12,14 +12,9 @@
 function(action, entity, config){
   
   #packages 
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
-    }
-    require(devtools)
-    install_github("eblondel/rtunaatlas")
-    require(rtunaatlas)
-  }
+  
+    
+      
   
   if(!require(reshape)){
     install.packages("reshape")
@@ -116,6 +111,7 @@ efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "NO"
 efforts_pivot_WCPFC$School<-"ALL"
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
 efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
 
 colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")

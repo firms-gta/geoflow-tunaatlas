@@ -1,5 +1,6 @@
 harmo_time_2 = function (df_input, colname_year, colname_month) 
 {
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
   colnames(df_input)[which(colnames(df_input) == colname_year)] <- "Year"
   colnames(df_input)[which(colnames(df_input) == colname_month)] <- "MonthStart"
   df_input$Period <- 1

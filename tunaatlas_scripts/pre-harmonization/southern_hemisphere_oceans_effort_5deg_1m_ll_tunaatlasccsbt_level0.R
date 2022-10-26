@@ -14,16 +14,11 @@
 #' @seealso \code{\link{convertDSD_ccsbt_ce_Surface}} to convert CCSBT task 2 Surface data structure, \code{\link{convertDSD_ccsbt_nc_annual_catches_by_gear}} to convert CCSBT nominal catch data structure
 
 function(action, entity, config){
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_5.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
   
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
-    }
-    require(devtools)
-    install_github("ptaconet/rtunaatlas")
-    require(rtunaatlas)
-  }
-  
+    
   if(!require(readxl)){
     install.packages("readxl")
     require(readxl)

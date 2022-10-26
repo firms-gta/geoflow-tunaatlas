@@ -32,16 +32,10 @@
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     SFA       ALL         MT    93
   #  BLZ   LL 2001-01-01 2002-01-01    IATTC    ALL     SKH       ALL         MT  1326
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
   
 if(!require(dplyr)){
   install.packages("dplyr")

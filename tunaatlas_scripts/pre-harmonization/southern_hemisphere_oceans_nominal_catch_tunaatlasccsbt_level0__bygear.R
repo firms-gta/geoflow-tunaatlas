@@ -35,16 +35,10 @@
   #  ALL Gill Net 1987-01-01 1988-01-01    CCSBT    ALL     SBF       ALL         MT    87
   #  ALL Gill Net 1988-01-01 1989-01-01    CCSBT    ALL     SBF       ALL         MT   234
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(reshape)){
   install.packages("reshape")
   require(reshape)

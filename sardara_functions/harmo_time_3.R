@@ -1,5 +1,7 @@
 harmo_time_3 = function (df_input, colname_year, colname_monthstart, colname_monthstop) 
 {
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_1.R")  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
   df_input$Period <- NA
   index1 <- which(df_input[, colname_monthstart] == df_input[, 
                                                              colname_monthstop])

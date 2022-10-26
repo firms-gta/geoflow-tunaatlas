@@ -14,15 +14,15 @@
 #'
 #' @seealso \code{\link{convertDSD_iccat_ce_task2}} to convert ICCAT task 2 , \code{\link{convertDSD_iccat_nc}} to convert ICCAT nominal catch data structure
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
+
+  
+    
   }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
+
+
+
 }
 if(!require(dplyr)){
   install.packages("dplyr")

@@ -28,32 +28,17 @@
     }
   },
   "software": [
-	{
-		"id": "zenodo",
-		"type": "output",
-		"software_type": "zenodo",
-		"parameters": {
-			"url": "https://zenodo.org/api",
-			"token": "{{ZENODO_TOKEN}}",
-			"logger": "DEBUG"
-		},
-		"properties": {
-			"clean": {
-				"run": false
-			}
-		}
-	},
-	{
+{
 		"id": "tunaatlas-db-write",
 		"type": "output",
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
-			"user": "{{DB_USER}}",
-			"password": "{{DB_PASSWORD}}",
-			"host": "{{DB_HOST}}",
+			"user": "{{DB_TUNA_USER}}",
+			"password": "{{DB_TUNA_PWD}}",
+			"host": "{{DB_TUNA_HOST}}",
 			"port": "5432",
-			"dbname": "{{DB_NAME}}"
+			"dbname": "{{DB_TUNA_NAME}}"
 		},
 		"properties" : {
 		}
@@ -64,11 +49,11 @@
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
-			"user": "{{DB_USER}}",
-			"password": "{{DB_PASSWORD}}",
-			"host": "{{DB_HOST}}",
+			"user": "{{DB_TUNA_USER}}",
+			"password": "{{DB_TUNA_PWD}}",
+			"host": "{{DB_TUNA_HOST}}",
 			"port": "5432",
-			"dbname": "{{DB_NAME}}"
+			"dbname": "{{DB_TUNA_NAME}}"
 		},
 		"properties" : {
 		}
@@ -78,7 +63,7 @@
 		"type": "input",
 		"software_type": "googledrive",
 		"parameters": {
-			"email": "{{GMAIL_USER}}",
+			"email": "{{GMAIL_FIRMS_USER}}",
 			"token": "{{GMAIL_TOKEN}}"
 		},
 		"properties" : {}
@@ -88,10 +73,10 @@
 		"type": "output",
 		"software_type": "geonetwork",
 		"parameters": {
-			"url": "{{GN_URL}}",
-			"user": "{{GN_USER}}",
-			"pwd": "{{GN_PASSWORD}}",
-			"version": "{{GN_VERSION}}",
+			"url": "{{GEONETWORK_OREME_URL}}",
+			"user": "{{GEONETWORK_OREME_USER}}",
+			"pwd": "{{GEONETWORK_OREME_PASSWORD}}",
+			"version": "3.0.4.0",
 			"logger": "DEBUG"
 		}
 	},
@@ -100,26 +85,18 @@
 		"type": "output",
 		"software_type": "geoserver",
 		"parameters": {
-			"url": "{{GS_URL}}",
-			"user": "{{GS_USER}}",
-			"pwd": "{{GS_PASSWORD}}",
+			"url": "{{GEOSERVER_URL}}",
+			"user": "{{GEOSERVER_USER}}",
+			"pwd": "{{GEOSERVER_PASSWORD}}",
 			"logger": "DEBUG"
 		},
 		"properties" : {
-			"workspace": "{{GS_WORKSPACE}}",
-			"datastore": "{{GS_DATASTORE}}"
+			"workspace": "tunaatlas",
+			"datastore": "tunaatlas_db_sandbox"
 		}
 	}
   ],
   "actions": [
-	{
-      "id": "zen4R-deposit-record",
-	    "options": {
-			"zipEachDataFile": true,
-		    "publish": false
-	    },
-      "run": false
-    },
   	{
       "id": "geometa-create-iso-19115",
       "run": true,

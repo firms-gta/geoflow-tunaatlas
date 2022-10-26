@@ -1,16 +1,17 @@
 load_codelist <- function(action,entity, config, options){
   #connection to database
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
   
   CON = config$software$output$dbi
   
   #packages
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
+  
+    
+      
     }
-    require(devtools)
-    install_github("ptaconet/rtunaatlas")
-    require(rtunaatlas)
+  
+  
+  
   }
   
   if(!require(readr)){
@@ -301,7 +302,7 @@ COMMENT ON COLUMN \"area\".\"area_labels\".\"geom\" IS '\"geom\" is the geometry
   
   ## fill-in metadata 'sql_query_dataset_extraction'
   InputMetadataset$id_metadata <- PK_metadata
-  sql_query_dataset_extraction <- rtunaatlas::getSQLSardaraQueries(CON, InputMetadataset)
+  sql_query_dataset_extraction <- getSQLSardaraQueries(CON, InputMetadataset)
   dbSendQuery(CON, paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",sql_query_dataset_extraction$query_CSV,"' WHERE identifier='",entity$identifiers[["id"]],"'"))
   
   config$logger.info("Successfuly loaded codelist into DB")

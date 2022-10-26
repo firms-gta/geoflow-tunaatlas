@@ -15,17 +15,11 @@
 #' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}} to convert WCPFC task 2 Drifnet data structure, \code{\link{convertDSD_wcpfc_ce_Longline}} to convert WCPFC task 2 Longline data structure, \code{\link{convertDSD_wcpfc_ce_Pole_and_line}} to convert WCPFC task 2 Pole-and-line data structure, \code{\link{convertDSD_wcpfc_ce_PurseSeine}} to convert WCPFC task 2 Purse seine data structure, \code{\link{convertDSD_wcpfc_nc}} to convert WCPFC task 1 data structure  
 
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
 
   #packages
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
-    }
-    require(devtools)
-    install_github("ptaconet/rtunaatlas")
-    require(rtunaatlas)
-  }
+  
+    
   if(!require(foreign)){
     install.packages("foreign")
     require(foreign)

@@ -1,9 +1,10 @@
 load_dataset <- function(action,entity, config, options){
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
   
   opts <- action$options
-  if(!require(rtunaatlas)){
+  
     remotes::install_github("eblondel/rtunaatlas")
-    require(rtunaatlas)
+  
   }
   
   if(!require(readr)){

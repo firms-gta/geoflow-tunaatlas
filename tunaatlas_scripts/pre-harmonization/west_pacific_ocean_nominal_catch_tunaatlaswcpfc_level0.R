@@ -24,16 +24,10 @@
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BET       ALL         MT    64
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BLM       ALL         MT    17
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)

@@ -40,20 +40,14 @@
   #  ARE GILL 1952-01-01 1953-01-01      F51    ALL     COM       ALL         MT 603.4760
   #  ARE GILL 1952-01-01 1953-01-01      F51    ALL     LOT       ALL         MT 517.2712
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
 #packages
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
 }
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(readxl)){
   install.packages("readxl")
   require(readxl)

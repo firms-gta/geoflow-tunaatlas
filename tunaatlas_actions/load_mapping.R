@@ -1,5 +1,6 @@
 function(action,entity, config, options){
-
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
+  
   
   base::options(stringsAsFactors = FALSE)
   
@@ -7,13 +8,13 @@ function(action,entity, config, options){
   con = config$software$output$dbi
   
   #packages
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
+  
+    
+      
     }
-    require(devtools)
-    install_github("ptaconet/rtunaatlas")
-    require(rtunaatlas)
+  
+  
+  
   }
   
   if(!require(readr)){

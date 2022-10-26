@@ -19,14 +19,8 @@ function(action, entity, config){
 keep_fleet_instead_of_flag=FALSE
 
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(data.table)){
   install.packages("data.table")
   require(data.table)
@@ -93,8 +87,10 @@ config$logger.info(paste0("BEGIN  function   \n"))
 
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCAT_CE_species_colnames)
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
 
 #School
@@ -110,6 +106,7 @@ efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
 names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType <- "C" #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value","catchtype")

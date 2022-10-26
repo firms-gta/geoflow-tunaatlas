@@ -1,6 +1,7 @@
 ICCAT_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_ICCAT, colToKeep_captures) 
 {
-  catches_pivot_ICCAT$RFMO <- "ICCAT"
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_1.R")  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_1.R")  catches_pivot_ICCAT$RFMO <- "ICCAT"
   catches_pivot_ICCAT$Ocean <- "ATL"
   catches_pivot_ICCAT$Gear <- catches_pivot_ICCAT$GearCode
   catches_pivot_ICCAT <- harmo_time_1(catches_pivot_ICCAT, 

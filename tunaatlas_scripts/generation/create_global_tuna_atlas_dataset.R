@@ -33,14 +33,9 @@
 function(action, entity, config){
   opts <- action$options
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
+ 
 
 if(!require(dplyr)){
   install.packages("dplyr")

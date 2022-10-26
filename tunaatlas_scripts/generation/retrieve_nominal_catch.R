@@ -1,5 +1,5 @@
 retrieve_nominal_catch <- function(entity, config, options){
-									   
+  source("https://github.com/firms-gta/geoflow-tunaatlas/blob/master/tunaatlas_scripts/generation/map_codelists.R")								   
 	
 	con <- config$software$output$dbi
 	
@@ -37,7 +37,7 @@ retrieve_nominal_catch <- function(entity, config, options){
 	  
 		nominal_catch_other_rfmos <- nominal_catch %>% filter (source_authority != "ICCAT")
 		nominal_catch_iccat <- nominal_catch %>% filter (source_authority == "ICCAT")
-		nominal_catch_iccat <- rtunaatlas::map_codelist(nominal_catch_iccat, df_mapping, "fishingfleet")$df 
+		nominal_catch_iccat <- map_codelist(nominal_catch_iccat, df_mapping, "fishingfleet")$df 
 	 
 		nominal_catch<-rbind(nominal_catch_other_rfmos,nominal_catch_iccat)
 	}

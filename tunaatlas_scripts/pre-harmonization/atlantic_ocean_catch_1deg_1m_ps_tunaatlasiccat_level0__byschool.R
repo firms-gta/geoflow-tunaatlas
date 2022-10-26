@@ -41,14 +41,8 @@
 function(action, entity, config){
   
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-	install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(data.table)){
   install.packages("data.table")
   require(data.table)
@@ -85,7 +79,7 @@ names(RFMO_CE)[names(RFMO_CE) == 'FleetCode'] <- 'FishingFleet'
   
   
 ICCAT_CE_species_colnames<-c("YFTfd","ALBfd","BETfd","BLFfd","LTAfd","SKJfd","FRIfd","YFTfs","ALBfs","BETfs","BLFfs","LTAfs","SKJfs","FRIfs")
-
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_ICCAT_CE.R")
 catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(RFMO_CE,ICCAT_CE_species_colnames)
 
 #School
@@ -103,6 +97,7 @@ catches_pivot_ICCAT$variable<-gsub("fd","",catches_pivot_ICCAT$variable)
 catches_pivot_ICCAT$CatchUnits<-"MT"
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/ICCAT_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT,colToKeep_captures)
 
 colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")

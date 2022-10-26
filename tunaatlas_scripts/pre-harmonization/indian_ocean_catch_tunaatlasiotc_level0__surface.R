@@ -48,14 +48,7 @@
 function(action, entity, config){
   
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
 if(!require(data.table)){
   install.packages("data.table")
   require(data.table)
@@ -76,12 +69,14 @@ options(encoding = "UTF-8")
 
   
 ##Catches
-  
+
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IOTC_CE.R")
 ### Reach the catches pivot DSD using a function stored in IOTC_functions.R
 catches_pivot_IOTC<-FUN_catches_IOTC_CE(path_to_raw_dataset,last_column_not_catch_value=12,"Surface")
 
 ### Reach the catches harmonized DSD using a function in IOTC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/IOTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-IOTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IOTC,colToKeep_captures)
 
 colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")

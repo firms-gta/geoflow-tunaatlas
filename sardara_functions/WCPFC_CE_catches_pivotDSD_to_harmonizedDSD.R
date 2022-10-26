@@ -1,5 +1,7 @@
 WCPFC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_WCPFC, colToKeep_captures) 
 {
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")
   catches_pivot_WCPFC$RFMO <- "WCPFC"
   catches_pivot_WCPFC$Ocean <- "PAC_W"
   catches_pivot_WCPFC$FishingFleet <- "ALL"

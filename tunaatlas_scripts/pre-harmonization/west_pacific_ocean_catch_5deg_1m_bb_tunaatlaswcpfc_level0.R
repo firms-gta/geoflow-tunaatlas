@@ -42,16 +42,10 @@
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     SKJ       ALL         MT 336.61
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     YFT       ALL         MT  11.34
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 #packages 
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("eblondel/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 
 if(!require(reshape)){
   install.packages("reshape")

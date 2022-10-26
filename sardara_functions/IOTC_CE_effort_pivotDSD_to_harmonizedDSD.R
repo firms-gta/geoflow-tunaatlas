@@ -1,5 +1,8 @@
 IOTC_CE_effort_pivotDSD_to_harmonizedDSD = function (efforts_pivot_IOTC, colToKeep_efforts) 
 {
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_3.R")
+  
   efforts_pivot_IOTC <- efforts_pivot_IOTC %>% filter(!Effort %in% 
                                                         0) %>% filter(!is.na(Effort))
   efforts_pivot_IOTC$RFMO <- "IOTC"

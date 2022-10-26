@@ -7,16 +7,11 @@
 # wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
 
 function(action, entity, config){
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_5.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
   
-
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
-    }
-    require(devtools)
-    install_github("ptaconet/rtunaatlas")
-    require(rtunaatlas)
-  }
+    
   
   if(!require(readxl)){
     install.packages("readxl")

@@ -31,16 +31,11 @@
 # 1984  1  40S 170W    704     ALB  3850         NO    ALL        DAYS    D
 # 1984  1  40S 175W     88     ALB   966         NO    ALL        DAYS    D
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 
 if(!require(data.table)){
   install.packages("data.table")
@@ -144,9 +139,9 @@ colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName"
 catches_pivot_WCPFC$RFMO <- "WCPFC"
 catches_pivot_WCPFC$Ocean <- "PAC_W"
 catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID #@eblondel added
-catches_pivot_WCPFC <- rtunaatlas::harmo_time_2(catches_pivot_WCPFC, 
+catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
-catches_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(catches_pivot_WCPFC, 
+catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, 
 	"LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
 catches_pivot_WCPFC$CatchType <- "ALL"
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value

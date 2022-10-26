@@ -41,16 +41,12 @@
 #  ALL    L 2000-01-01 2000-02-01  6100145    ALL      HHOOKS  867903
 
 function(action, entity, config){
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
   #packages
-  if(!require(rtunaatlas)){
-    if(!require(devtools)){
-      install.packages("devtools")
-    }
-    require(devtools)
-    install_github("ptaconet/rtunaatlas")
-    require(rtunaatlas)
-  }
+  
+    
   
   if(!require(data.table)){
     install.packages("data.table")
@@ -132,9 +128,9 @@ colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName",
 efforts_pivot_WCPFC$RFMO <- "WCPFC"
 efforts_pivot_WCPFC$Ocean <- "PAC_W"
 efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID #@eblondel added
-efforts_pivot_WCPFC <- rtunaatlas::harmo_time_2(efforts_pivot_WCPFC, 
+efforts_pivot_WCPFC <- harmo_time_2(efforts_pivot_WCPFC, 
                                                 "YY", "MM")
-efforts_pivot_WCPFC <- rtunaatlas::harmo_spatial_3(efforts_pivot_WCPFC, 
+efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, 
                                                    "LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
 efforts_pivot_WCPFC$CatchType <- "ALL"
 efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value

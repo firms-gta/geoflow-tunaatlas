@@ -18,14 +18,8 @@ function(action, entity, config){
 keep_fleet_instead_of_flag=FALSE
 
 #packages
-if(!require(rtunaatlas)){
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  install_github("ptaconet/rtunaatlas")
-  require(rtunaatlas)
-}
+
+  
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
@@ -89,6 +83,7 @@ last_column_not_catch_value=22
 #efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_with_schooltype(RFMO_CE,last_column_not_catch_value)
 RFMO_CE<-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c("Eff1","Eff2","Eff3","Eff4","Eff5"),c("Eff1Type","Eff2Type","Eff3Type","Eff4Type","Eff5Type"))
 
 # School
@@ -106,6 +101,7 @@ efforts_pivot_ICCAT$School[index_school_fd]<-"fd"
 
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 
 colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
