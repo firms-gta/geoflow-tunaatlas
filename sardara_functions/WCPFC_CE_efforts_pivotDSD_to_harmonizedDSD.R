@@ -2,6 +2,10 @@ WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD = function (efforts_pivot_WCPFC, colT
 {
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")
+  if(!(require(dplyr))){ 
+    install.packages(dplyr) 
+    (require(dplyr))} 
+  
   efforts_pivot_WCPFC$RFMO <- "WCPFC"
   efforts_pivot_WCPFC$Ocean <- "PAC_W"
   efforts_pivot_WCPFC$FishingFleet <- "ALL"
@@ -16,8 +20,8 @@ WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD = function (efforts_pivot_WCPFC, colT
                                                                             gsub(" *$", "", x)
                                                                           }), stringsAsFactors = FALSE)
   efforts <- efforts %>% filter(!Effort %in% 0) %>% filter(!is.na(Effort))
-  efforts <- efforts %>% group_by(FishingFleet, Gear, time_start, 
-                                  time_end, AreaName, School, EffortUnits) %>% summarise(Effort = sum(Effort))
+  efforts <- efforts %>% dplyr::group_by(FishingFleet, Gear, time_start, 
+                                  time_end, AreaName, School, EffortUnits) %>% dplyr::summarise(Effort = sum(Effort))
   efforts <- as.data.frame(efforts)
   return(efforts)
 }
