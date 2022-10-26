@@ -102,7 +102,7 @@ load_dataset <- function(action,entity, config, options){
 	  # db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
 	  
 	  variable_name<-gsub("fact_tables.","",InputMetadataset$database_table_name)
-	  
+	  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/list_variable_available_dimensions.R")
 	  dimensions<-list_variable_available_dimensions(con,variable_name)
 	  
 	  df_codelists_input<-df_codelists[which(df_codelists$dimension %in% dimensions),]
