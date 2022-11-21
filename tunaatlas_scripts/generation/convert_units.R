@@ -107,13 +107,13 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
   # stats_before_conversion <- df_input %>% group_by(unit, unit_target) %>% 
   #   summarise(sum_unit_source_before_conversion = sum(value)) %>% 
   #   filter(!is.na(unit_target))
-  # index.not_na.conv_factor <- which(!is.na(df_input$conversion_factor))
-  # df_input$value[index.not_na.conv_factor] <- df_input$value[index.not_na.conv_factor] * 
-  #   df_input$conversion_factor[index.not_na.conv_factor]
+  index.not_na.conv_factor <- which(!is.na(df_input$conversion_factor))
+  df_input$value[index.not_na.conv_factor] <- df_input$value[index.not_na.conv_factor] *
+    df_input$conversion_factor[index.not_na.conv_factor]
   # stats_after_conversion <- df_input %>% group_by(unit, unit_target) %>% 
   #   summarise(sum_unit_target_after_conversion = sum(value)) %>% 
   #   filter(!is.na(unit_target))
-  # df_input$unit[index.not_na.conv_factor] <- df_input$unit_target[index.not_na.conv_factor]
+  df_input$unit[index.not_na.conv_factor] <- df_input$unit_target[index.not_na.conv_factor]
   df_input <- df_input %>% dplyr::select(all_of(columns_df_input))
   # sum_after_conversion <- df_input %>% group_by(unit) %>% 
   #   summarise(sum_value_after_conversion = sum(value))
