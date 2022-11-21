@@ -100,26 +100,26 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
   else {
     df_input <- left_join(df_input, df_conversion_factor)
   }
-  sum_before_conversion <- df_input %>% group_by(unit) %>% 
-    summarise(sum_value_before_conversion = sum(value))
-  cat(paste0("\n sum_before_conversion is : ", sum_before_conversion$sum_value_before_conversion, 
-             " ", sum_before_conversion$unit, " \n"))
-  stats_before_conversion <- df_input %>% group_by(unit, unit_target) %>% 
-    summarise(sum_unit_source_before_conversion = sum(value)) %>% 
-    filter(!is.na(unit_target))
-  index.not_na.conv_factor <- which(!is.na(df_input$conversion_factor))
-  df_input$value[index.not_na.conv_factor] <- df_input$value[index.not_na.conv_factor] * 
-    df_input$conversion_factor[index.not_na.conv_factor]
-  stats_after_conversion <- df_input %>% group_by(unit, unit_target) %>% 
-    summarise(sum_unit_target_after_conversion = sum(value)) %>% 
-    filter(!is.na(unit_target))
-  df_input$unit[index.not_na.conv_factor] <- df_input$unit_target[index.not_na.conv_factor]
+  # sum_before_conversion <- df_input %>% group_by(unit) %>% 
+  #   summarise(sum_value_before_conversion = sum(value))
+  # cat(paste0("\n sum_before_conversion is : ", sum_before_conversion$sum_value_before_conversion, 
+  #            " ", sum_before_conversion$unit, " \n"))
+  # stats_before_conversion <- df_input %>% group_by(unit, unit_target) %>% 
+  #   summarise(sum_unit_source_before_conversion = sum(value)) %>% 
+  #   filter(!is.na(unit_target))
+  # index.not_na.conv_factor <- which(!is.na(df_input$conversion_factor))
+  # df_input$value[index.not_na.conv_factor] <- df_input$value[index.not_na.conv_factor] * 
+  #   df_input$conversion_factor[index.not_na.conv_factor]
+  # stats_after_conversion <- df_input %>% group_by(unit, unit_target) %>% 
+  #   summarise(sum_unit_target_after_conversion = sum(value)) %>% 
+  #   filter(!is.na(unit_target))
+  # df_input$unit[index.not_na.conv_factor] <- df_input$unit_target[index.not_na.conv_factor]
   df_input <- df_input %>% dplyr::select(all_of(columns_df_input))
-  sum_after_conversion <- df_input %>% group_by(unit) %>% 
-    summarise(sum_value_after_conversion = sum(value))
-  cat(paste0("\n sum_after_conversion is : ", sum_after_conversion$sum_value_after_conversion, 
-             " ", sum_after_conversion$unit, " \n"))
-  stats <- merge(stats_before_conversion, stats_after_conversion)
+  # sum_after_conversion <- df_input %>% group_by(unit) %>% 
+  #   summarise(sum_value_after_conversion = sum(value))
+  # cat(paste0("\n sum_after_conversion is : ", sum_after_conversion$sum_value_after_conversion, 
+  #            " ", sum_after_conversion$unit, " \n"))
+  # stats <- merge(stats_before_conversion, stats_after_conversion)
   df_input <- data.frame(df_input)
   return(list(df = df_input))
 }
