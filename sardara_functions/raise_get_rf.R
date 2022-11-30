@@ -1,4 +1,4 @@
-function (df_input_incomplete, df_input_total, x_raising_dimensions) 
+raise_get_rf <- function (df_input_incomplete, df_input_total, x_raising_dimensions) 
 {
   if ("year" %in% x_raising_dimensions) {
     df_input_incomplete$year <- as.numeric(substr(df_input_incomplete$time_start, 
