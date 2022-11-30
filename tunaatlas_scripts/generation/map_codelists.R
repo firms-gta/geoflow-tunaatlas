@@ -2,7 +2,7 @@
 map_codelists <- function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE){
   # Get the dimensions to map from the mapping_dataset
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
-  source("https://github.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/extract_dataset.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/extract_dataset.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/list_metadata_datasets.R")
   
   if (fact=="catch"){
