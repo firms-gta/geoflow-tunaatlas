@@ -3,9 +3,8 @@ list_dataset_available_dimensions = function (con, dataset_metadata)
   if (nrow(dataset_metadata) == 0) {
     stop("There is no dataset that corresponds to your query")
   }
-  db_dimensions_parameters <- read.csv(system.file("extdata", 
-                                                   "db_dimensions_parameters.csv", package = "rtunaatlas"), 
-                                       stringsAsFactors = F)
+  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
+  
   table_name = dataset_metadata$database_table_name
   id_metadata = dataset_metadata$id_metadata
   dataset_type = dataset_metadata$dataset_type

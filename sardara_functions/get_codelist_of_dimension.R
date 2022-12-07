@@ -1,8 +1,7 @@
 get_codelist_of_dimension <- function (con, dataset_metadata, dimension_name) 
 {
-  db_dimensions_parameters <- read.csv(system.file("extdata", 
-                                                   "db_dimensions_parameters.csv", package = "rtunaatlas"), 
-                                       stringsAsFactors = F)
+  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
+  
   db_dimensions_parameters <- db_dimensions_parameters %>% 
     filter(dimension == dimension_name)
   dataset_name_codelist_dimension_query <- paste0("select distinct(", 

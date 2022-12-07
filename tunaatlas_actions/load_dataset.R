@@ -108,7 +108,7 @@ load_dataset <- function(action,entity, config, options){
 	  InputMetadataset[is.na(InputMetadataset)] <- "NA"
 	  
 	  # julien => should be taken from data dictionnary embedded in the database and used for 19110 ?
-	  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/eblondel/rtunaatlas/master/inst/extdata/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
+	  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
 	  # db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
 	  
 	  variable_name<-gsub("fact_tables.","",InputMetadataset$database_table_name)

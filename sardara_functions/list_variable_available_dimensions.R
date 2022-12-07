@@ -38,7 +38,7 @@
 list_variable_available_dimensions<-function(con,variable){
   
   # All the dimensions possibly available in Sardara
-  db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
+  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
   
   ## List of available columns for the variable
   dimensions<-dbGetQuery(con,paste0("SELECT column_name as dimension_name from information_schema.columns where table_schema||'.'||table_name='fact_tables.",variable,"'"))

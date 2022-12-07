@@ -92,9 +92,7 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
     SQL$query_CSV_with_labels = SQL$query_CSV
   }
   else if (static_metadata_table_type == "raw_dataset") {
-    db_dimensions_parameters <- read.csv(system.file("extdata", 
-                                                     "db_dimensions_parameters.csv", package = "rtunaatlas"), 
-                                         stringsAsFactors = F)
+    db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
     dataset_available_dimensions <- list_dataset_available_dimensions(con, 
                                                                       dataset_metadata)
     tables_views_materializedviews <- dbGetQuery(con, "\n    SELECT table_schema||'.'||table_name FROM information_schema.tables\n    union\n    SELECT oid::regclass::text FROM   pg_class WHERE  relkind = 'm'")$`?column?`
