@@ -1,5 +1,5 @@
 retrieve_nominal_catch <- function(entity, config, options){
-  source("https://github.com/firms-gta/geoflow-tunaatlas/blob/master/tunaatlas_scripts/generation/map_codelists.R")								   
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/map_codelists.R")								   
 	
 	con <- config$software$output$dbi
 	
