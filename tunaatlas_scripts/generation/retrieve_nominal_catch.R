@@ -1,6 +1,6 @@
 retrieve_nominal_catch <- function(entity, config, options){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/map_codelists.R")								   
-	
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
+  
 	con <- config$software$output$dbi
 	
 	#list of dataset files (from entity data sources)
