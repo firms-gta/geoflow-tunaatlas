@@ -16,9 +16,11 @@ if (action_to_do=="disaggregate"){
   }
 
 
-config$logger.info("BEGIN rtunaatlas::spatial_curation_downgrade_resolution() function")
-georef_dataset<-rtunaatlas::spatial_curation_downgrade_resolution(con,georef_dataset,resolution,remove)
-config$logger.info("END rtunaatlas::spatial_curation_downgrade_resolution() function")
+config$logger.info("BEGIN spatial_curation_downgrade_resolution() function")
+source("")
+source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
+georef_dataset<-spatial_curation_downgrade_resolution(con,georef_dataset,resolution,remove)
+config$logger.info("END spatial_curation_downgrade_resolution() function")
 georef_dataset<-georef_dataset$df
 
 config$logger.info(sprintf("Disaggregating / Removing data that are defined on quadrants or areas superior to [%s]° quadrant resolution OK", resolution))
