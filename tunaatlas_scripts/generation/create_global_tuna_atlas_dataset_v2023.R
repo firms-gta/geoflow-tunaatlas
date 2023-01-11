@@ -22,7 +22,7 @@ function(action, entity, config){
   # wps.in: id = mapping_keep_src_code, type = string, title = Use only if parameter mapping_map_code_lists is set to TRUE. In case of code list mapping (mapping_map_code_lists is TRUE) keep source coding system column? TRUE : conserve in the output dataset both source and target coding systems columns. FALSE : conserve only target coding system. , value="FALSE|TRUE" ;
   # wps.in: id = gear_filter, type = string, title = Filter data by gear. Gear codes in this parameter must by the same as the ones used in the catch dataset (i.e. raw tRFMOs gear codes if no mapping or in case of mapping (mapping_map_code_lists is TRUE) codes used in the mapping code list). NULL : do not filter. If you want to filter you must write the codes to filter by separated by a comma in case of multiple codes.  , value = "NULL";
   # wps.in: id = unit_conversion_convert, type = string, title = Convert units of measure? if TRUE you must fill in the parameter unit_conversion_df_conversion_factor. , value = "FALSE|TRUE";
-  # wps.in: id = unit_conversion_csv_conversion_factor_url, type = string, title = Use only if parameter unit_conversion_convert is set to TRUE. If units are converted path to the csv containing the conversion factors dataset. The conversion factor dataset must be properly structured. A template can be found here: https://goo.gl/i7QJYC . The coding systems used in the dimensions of the conversion factors must be the same as the ones used in the catch dataset (i.e. raw tRFMOs codes or in case of mapping (mapping_map_code_lists isTRUE) codes used in the mapping code lists) except for spatial code list. Additional information on the structure are provided here: https://ptaconet.github.io/rtunaatlas//reference/convert_units.html , value = "https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL";
+  # wps.in: id = unit_conversion_csv_conversion_factor_url, type = string, title = Use only if parameter unit_conversion_convert is set to TRUE. If units are converted path to the csv containing the conversion factors dataset. The conversion factor dataset must be properly structured. A template can be found here: https://goo.gl/i7QJYC . The coding systems used in the dimensions of the conversion factors must be the same as the ones used in the catch dataset (i.e. raw tRFMOs codes or in case of mapping (mapping_map_code_lists isTRUE) codes used in the mapping code lists) except for spatial code list. Additional information on the structure are provided here: https://ptaconet.github.io/rtunaatlas//reference/convert_units.html , value = opts$unit_conversion_csv_conversion_factor_url;
   # wps.in: id = unit_conversion_codelist_geoidentifiers_conversion_factors, type = string, title = Use only if parameter unit_conversion_convert is set to TRUE. If units are converted name of the coding system of the spatial dimension used in the conversion factor dataset (i.e. identifier of the layer in the Tuna atlas database)., value = "areas_conversion_factors_numtoweigth_ird";
   # wps.in: id = raising_georef_to_nominal, type = string, title =  Geo-referenced catch data and associated effort can represent only part of the total catches. Raise georeferenced catches to nominal catches? Depending on the availability of the flag dimension (currently not available for the geo-referenced catch-and-effort dataset from the WCPFC and CCSBT) the dimensions used for the raising are either {Flag|Species|Year|Gear} or {Species|Year|Gear}. Some catches cannot be raised because the combination {Flag|Species|Year|Gear} (resp. {Species|Year|Gear}) does exist in the geo-referenced catches but the same combination does not exist in the total catches. In this case non-raised catch data are kept. TRUE : Raise georeferenced catches to total catches. FALSE : Do not raise., value = "TRUE|FALSE";
   # wps.in: id = raising_do_not_raise_wcfpc_data, type = string, title =  WCPFC georeferenced data are already raised [terminer la description]. TRUE : Do not Raise WCPFC georeferenced catches to total catches. FALSE : Raise., value = "TRUE|FALSE";
@@ -953,7 +953,7 @@ and groups of gears.",
   fwrite(iotc_conv_fact_mapped, file = paste0(gsub( ".csv","", cl_filename), "modified.csv"))
   georef_dataset_not_iotc <- georef_dataset %>% filter(source_authority != "IOTC")
   georef_dataset_iotc <- georef_dataset %>% filter(source_authority == "IOTC") 
-  georef_dataset_iotc_raised <- do_unit_conversion(con = con, entity=entity,
+  georef_dataset_iotc_raised <- do_unit_conversion( entity=entity,
                                                    config=config,
                                                    fact=fact,
                                                    unit_conversion_csv_conversion_factor_url=paste0(gsub( ".csv","", cl_filename), "modified.csv"),
@@ -991,7 +991,7 @@ and groups of gears.",
     
     config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
     
-    georef_dataset <- do_unit_conversion(con = con, entity=entity,
+    georef_dataset <- do_unit_conversion( entity=entity,
                                          config=config,
                                          fact=fact,
                                          unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
@@ -1043,7 +1043,7 @@ and groups of gears.",
     
     config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
     
-    georef_dataset <- do_unit_conversion(con = con, entity=entity,
+    georef_dataset <- do_unit_conversion( entity=entity,
                                          config=config,
                                          fact=fact,
                                          unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
@@ -1190,14 +1190,16 @@ and groups of gears.",
       dataset_catch$time_start<-substr(as.character(dataset_catch$time_start), 1, 10)
       dataset_catch$time_end<-substr(as.character(dataset_catch$time_end), 1, 10)
       if (unit_conversion_convert=="TRUE"){
-        # We use our conversion factors (IRD). This should be an input parameter of the script
+        # We use our conversion factors (IRD). This is now an input parameter of the script
         #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
-        dataset_catch<-do_unit_conversion(con,
-                                          fact="catch",
-                                          unit_conversion_csv_conversion_factor_url="https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL",
-                                          unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",
-                                          mapping_map_code_lists,
-                                          dataset_catch)$dataset
+        #
+         dataset_catch <- do_unit_conversion( entity=entity,
+         config=config,
+         fact="catch",
+         unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
+         unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+         mapping_map_code_lists=opts$mapping_map_code_lists,
+         dataset_catch)
       }
       
       dataset_to_compute_rf=dataset_catch
@@ -1308,12 +1310,13 @@ and groups of gears.",
       if (unit_conversion_convert=="TRUE"){
         # We use our conversion factors (IRD). This should be an input parameter of the script
         #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
-        dataset_catch<-do_unit_conversion(con,
-                                          fact="catch",
-                                          unit_conversion_csv_conversion_factor_url="https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL",
-                                          unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",
-                                          mapping_map_code_lists,
-                                          dataset_catch)$dataset
+        dataset_catch <- do_unit_conversion( entity=entity,
+                                             config=config,
+                                             fact="catch",
+                                             unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
+                                             unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+                                             mapping_map_code_lists=opts$mapping_map_code_lists,
+                                             dataset_catch)
       }
       
       dataset_to_compute_rf=dataset_catch
@@ -1420,12 +1423,13 @@ and groups of gears.",
       if (unit_conversion_convert=="TRUE"){
         # We use our conversion factors (IRD). This should be an input parameter of the script
         #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
-        dataset_catch<-do_unit_conversion(con,
-                                          fact="catch",
-                                          unit_conversion_csv_conversion_factor_url="https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL",
-                                          unit_conversion_codelist_geoidentifiers_conversion_factors="areas_conversion_factors_numtoweigth_ird",
-                                          mapping_map_code_lists,
-                                          dataset_catch)$dataset
+        dataset_catch <- do_unit_conversion( entity=entity,
+                                             config=config,
+                                             fact="catch",
+                                             unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
+                                             unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+                                             mapping_map_code_lists=opts$mapping_map_code_lists,
+                                             dataset_catch)
       }
       
       dataset_to_compute_rf=dataset_catch
