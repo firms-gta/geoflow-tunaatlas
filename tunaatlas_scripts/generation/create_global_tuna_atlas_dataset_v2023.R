@@ -255,11 +255,13 @@ function(action, entity, config){
   
   
   for (i in names(opts)){
-    if(!exists(i)){
     if (i != ""){
       
       assign(paste0("options_",i), paste(opts[[j]], collapse = ' ; '), envir= .GlobalEnv)
-      assign(i, paste0(opts[[j]]), envir= .GlobalEnv)}
+      if(!exists(i)){
+        assign(i, paste0(opts[[j]]), envir= .GlobalEnv)
+      }
+      }
     if (opts[[j]][1] == TRUE){
       assign(i, opts[[j]], envir= .GlobalEnv)
     } else if (opts[[j]][1] == FALSE){
@@ -272,7 +274,6 @@ function(action, entity, config){
     
     j <-  j+1 
   }
-}
   list_options = list_options[-1,]
   
   write_csv(list_options, "list_options.csv")
