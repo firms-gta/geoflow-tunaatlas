@@ -1,6 +1,6 @@
 function_spatial_curation_data_mislocated<-function(entity,config,df,spatial_curation_data_mislocated){
   con <- config$software$output$dbi
-  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/spatial_curation_intersect_areas")
+  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/spatial_curation_intersect_areas.R")
   config$logger.info("Reallocating data that are in land areas")
   
   #all the data that are inland or do not have any spatial stratification ("UNK/IND",NA) are dealt (either removed - spatial_curation_data_mislocated=="remove" - or reallocated - spatial_curation_data_mislocated=="reallocate" )
