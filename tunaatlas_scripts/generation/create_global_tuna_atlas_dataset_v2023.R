@@ -1101,7 +1101,7 @@ and groups of gears.",
   config$logger.info("-----------------------------------------------------------------------------------------------------")
   config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
   config$logger.info("-----------------------------------------------------------------------------------------------------")
-  raising_georef_to_nominal <- opts$raising_georef_to_nominal
+  # raising_georef_to_nominal <- opts$raising_georef_to_nominal
   iattc_ps_raise_flags_to_schooltype <- opts$iattc_ps_raise_flags_to_schooltype
   iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
   iattc_ps_catch_billfish_shark_raise_to_effort <- opts$iattc_ps_catch_billfish_shark_raise_to_effort
@@ -1241,7 +1241,7 @@ and groups of gears.",
     function_recap_each_step("Level2_RF1",
                              georef_dataset,
                              "In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
-                             "function_raising_georef_to_nominal", list(raising_georef_to_nominal ,
+                             "function_raising_georef_to_nominal", list(opts$raising_georef_to_nominal ,
                                                                         iattc_ps_raise_flags_to_schooltype ,
                                                                         iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
                                                                         iattc_ps_catch_billfish_shark_raise_to_effort ,
@@ -1459,7 +1459,7 @@ and groups of gears.",
                              georef_dataset,
                              "In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
                              "function_raising_georef_to_nominal, \n",
-                             list(raising_georef_to_nominal ,
+                             list(opts$raising_georef_to_nominal ,
                                   iattc_ps_raise_flags_to_schooltype ,
                                   iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
                                   iattc_ps_catch_billfish_shark_raise_to_effort ,
