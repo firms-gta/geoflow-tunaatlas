@@ -235,7 +235,7 @@ function(action, entity, config){
   #new is function_disaggregate_on_resdegBastien not done yet
   
   # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/disagregate_on_resdeg_Bastien.R")
-  source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
   # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/spatial_curation_upgrade_resolution_Bastien.R")
   # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/function_spatial_curation_data_mislocatedB.R")
@@ -1217,7 +1217,7 @@ and groups of gears.",
     config$logger.info(paste0("Total ",fact," before raising is : ",sum(georef_dataset$value),"\n"))
     config$logger.info(paste0("Total ",fact," in nominal data is : ",sum(nominal_catch$value),"\n"))
     
-    georef_dataset<-raising_georef_to_nominal(con = con, opts = opts ,entity=entity,
+    georef_dataset<-function_raising_georef_to_nominal(con = con, opts = opts ,entity=entity,
                                               config=config,
                                               dataset_to_raise=georef_dataset,
                                               nominal_dataset_df= nominal_catch,
@@ -1329,7 +1329,7 @@ and groups of gears.",
     
     class(dataset_to_compute_rf$value) <- "numeric"
     
-    georef_dataset<-raising_georef_to_nominal(con = con, opts = opts ,entity=entity,
+    georef_dataset<-function_raising_georef_to_nominal(con = con, opts = opts ,entity=entity,
                                               config=config,
                                               dataset_to_raise=georef_dataset,
                                               nominal_dataset_df=nominal_catch,
@@ -1442,7 +1442,7 @@ and groups of gears.",
     
     
     
-    georef_dataset<-raising_georef_to_nominal(con = con, opts = opts, entity=entity,
+    georef_dataset<-function_raising_georef_to_nominal(con = con, opts = opts, entity=entity,
                                               config=config,
                                               dataset_to_raise=georef_dataset,
                                               nominal_dataset_df=nominal_catch,
