@@ -119,26 +119,10 @@ function(action, entity, config){
     
     
     wd <- getwd()
-    # config$logger.info(paste0("working direcotyr begining create_latex : ",wd))
-    # y <- last_path(x)
     setwd("./../../../..")
     wd2 <- getwd()
     setwd(wd)
-    # output_file = paste0(gsub(".Rmd", "",x), "step",step_for_rmd)
-    # fs::dir_create(paste0(output_file,"/"))
-    # fs::dir_create(paste0(output_file,"/","data/"))
-    
-    # file.copy(paste0(wd2,"/",
-    # x), paste0(wd,"/",x), overwrite = TRUE)
-    # config$logger.info(paste0("jsute after copying rmd"))
-    
-    # file.copy(paste0(wd2,"/",'data2/SPECIES_LIST_RFMO_WITH_ERRORS.xlsx'),paste0(wd,"/",'data/SPECIES_LIST_RFMO_WITH_ERRORS.xlsx') , overwrite = FALSE)
-    # file.copy(paste0(wd2,"/",'data2/cl_cwp_gear_level2.csv'),paste0(wd,"/",'data/cl_cwp_gear_level2.csv') , overwrite = FALSE)
-    # if(!rawdataneeded == FALSE){
-    # file.copy(paste0(wd,"/","Markdown/",rawdataneeded,"/rds.rds"),paste0(wd,"/",'data/rawdata.rds') , overwrite = FALSE)
-    # }
     setwd(wd)
-    # print(getwd())
     list_dir <- list.dirs(path =paste0(wd,"/Markdown"), full.names = TRUE, recursive = FALSE)
     details = file.info(list_dir)
     details = details[with(details, order(as.POSIXct(mtime))), ]
@@ -155,8 +139,6 @@ function(action, entity, config){
       
       file.copy(paste0(wd2,"/",
                        x), paste0(wd,"/",name_output,x), overwrite = FALSE)}
-    # setwd(paste0(wd,"/",output_file))
-    # conection_db <- postgresqlConnectionInfo(con)
     if (!is.null(data_to_comp) & last == TRUE) {
       if(data_to_comp %in% lapply(rownames(details),last_path) ) {
         avant_last <- rownames(details[data_to_comp == lapply(rownames(details),last_path),])
@@ -210,43 +192,21 @@ function(action, entity, config){
   if (!is.null(opts$no_report)) if(opts$no_report){create_latex = function(...){}}
   
   
-  #de base il y a 
-  #url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
-  # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-  # source(file.path(url_scripts_create_own_tuna_atlas, "raising_georef_to_nominal.R"))
-  
+
   #scripts
   url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "convert_units.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas,"do_unit_conversion.R") )
-  source(file.path(url_scripts_create_own_tuna_atlas,"function_overlapped.R") ) # adding this function as overlapping is now a recurent procedures for several overlapping
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/do_unit_conversion_B.R") inputed in geoflow
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/fonction_overlap.R") # inputed in geoflow
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/function_raising_georef_to_nominal_B.R")
+  source(file.path(url_scripts_create_own_tuna_atlas, "do_unit_conversion.R") )
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R") ) # adding this function as overlapping is now a recurent procedures for several overlapping
   source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-  #new is function_disaggregate_on_resdegBastien not done yet
-  
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/disagregate_on_resdeg_Bastien.R")
   source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/spatial_curation_upgrade_resolution_Bastien.R")
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/function_spatial_curation_data_mislocatedB.R")
-  #set parameterization
-  #source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/double_unit_data_handling.R")
-  
   source(file.path(url_scripts_create_own_tuna_atlas, "double_unit_data_handling.R")) # new function for double unit 
   source(file.path(url_scripts_create_own_tuna_atlas, "function_recap_each_step.R"))  # new function to create rds for each treatment
   
-  # function_creation_options()
-  
+
   
   j <- 1
   
@@ -685,8 +645,7 @@ and groups of gears.",
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   if (opts$include_IATTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
     
-    if(!exists("options_strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species", "time_start", "time_end",
-                                                                                              "unit")
+    if(!exists("options_strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species","year", "fishingfleet")
     } else {options_strata_overlap_iattc_wcpfc<-unlist(strsplit(opts$strata_overlap_iattc_wcpfc , split=","))}
     config$logger.info(paste0(options_strata_overlap_iattc_wcpfc))
     
@@ -707,8 +666,8 @@ and groups of gears.",
   }
   if (opts$include_IOTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
     # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
-    if(!exists("options_strata_overlap_iotc_wcpfc")){options_strata_overlap_iotc_wcpfc <- c("geographic_identifier",    "species", "time_start", "time_end",
-                                                                                            "unit", "gear")
+    if(!exists("options_strata_overlap_iotc_wcpfc")){options_strata_overlap_iotc_wcpfc <- c("geographic_identifier",    "species","year",
+                                                                                             "fishingfleet")
     } else {options_strata_overlap_iotc_wcpfc<-unlist(strsplit(opts$strata_overlap_iotc_wcpfc, split=","))}
     
     
@@ -744,8 +703,7 @@ and groups of gears.",
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 7/: Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
-  if(!exists("options_strata_overlap_sbf")){options_strata_overlap_sbf <- c("species", "time_start", "time_end",
-                                                                            "unit")
+  if(!exists("options_strata_overlap_sbf")){options_strata_overlap_sbf <- c("species", "year", "fishingfleet")
   } else {options_strata_overlap_sbf<-unlist(strsplit(opts$strata_overlap_sbf, split=","))}
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
