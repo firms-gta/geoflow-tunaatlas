@@ -4,7 +4,7 @@ create_grid_views <- function(config, software, software_config){
   #load continent layer in public schema
   #TODO it as reference layer in codelists workflow
   library(ows4R)
-  WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
+  WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.1.3", logger = "INFO")
   sf = WFS$getFeatures("fifao:UN_CONTINENT2")
   sf::st_crs(sf) <- 4326
   dbi <- config$software$input$dbi
