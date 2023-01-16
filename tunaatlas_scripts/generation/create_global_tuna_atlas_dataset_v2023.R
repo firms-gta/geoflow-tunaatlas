@@ -646,7 +646,7 @@ and groups of gears.",
   
   if (opts$include_IATTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
     
-    if(!exists("options_strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species","year", "fishingfleet")
+    if(!exists("opts$strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species","year", "fishingfleet")
     } else {options_strata_overlap_iattc_wcpfc<-unlist(strsplit(opts$strata_overlap_iattc_wcpfc , split=","))}
     config$logger.info(paste0(options_strata_overlap_iattc_wcpfc))
     
@@ -672,7 +672,7 @@ and groups of gears.",
   
   if (opts$include_IOTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
     # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
-    if(!exists("options_strata_overlap_iotc_wcpfc")){options_strata_overlap_iotc_wcpfc <- c("geographic_identifier",    "species","year",
+    if(!exists("opts$strata_overlap_iotc_wcpfc")){options_strata_overlap_iotc_wcpfc <- c("geographic_identifier",    "species","year",
                                                                                              "fishingfleet")
     } else {options_strata_overlap_iotc_wcpfc<-unlist(strsplit(opts$strata_overlap_iotc_wcpfc, split=","))}
     
@@ -709,7 +709,7 @@ and groups of gears.",
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 7/: Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
-  if(!exists("options_strata_overlap_sbf")){options_strata_overlap_sbf <- c("species", "year", "fishingfleet")
+  if(!exists("opts$strata_overlap_sbf")){options_strata_overlap_sbf <- c("species", "year", "fishingfleet")
   } else {options_strata_overlap_sbf<-unlist(strsplit(opts$strata_overlap_sbf, split=","))}
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
