@@ -7,7 +7,7 @@ spatial_curation_data_mislocated<-function(entity,config,df,spatial_curation_dat
   config$logger.info("Executing spatial_curation_intersect_areas")
   #@juldebar => georef_dataset was not set
   georef_dataset <- df
-  areas_in_land<-spatial_curation_intersect_areas(con , georef_dataset ,"areas_tuna_rfmos_task2","gshhs_world_coastlines")
+  areas_in_land<-spatial_curation_intersect_areas(con , georef_dataset ,"areas_tuna_rfmos_task2","continent")
   
   areas_in_land<-areas_in_land$df_input_areas_intersect_intersection_layer %>%
     group_by(geographic_identifier_source_layer) %>%
