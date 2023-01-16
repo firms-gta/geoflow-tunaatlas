@@ -11,7 +11,7 @@ create_grid_views <- function(config, software, software_config){
   sf::st_write(obj = sf, dsn = dbi, layer = "continent")
   
   #grid views sql
-  sql <- paste0(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_view_area_labels_viewer.sql", collapse = "\n"))
+  sql <- paste(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_view_area_labels_viewer.sql"), collapse="\n")
   return(sql)
   
 }
