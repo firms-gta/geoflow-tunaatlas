@@ -8,15 +8,16 @@ function_overlapped =function(dataset, con, rfmo_to_keep, rfmo_not_to_keep,
   } else if (variable=="effort"){
     columns_to_keep<-c("source_authority","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","unit","value")
   }
+  rfmo_restant <- dataset %>% 
+    filter(source_authority != rfmo_not_to_keep & source_authority!= rfmo_to_keep)
+  
   if("year"%in%strata){
     dataset <- dataset %>% mutate(year = as.character(lubridate::year(time_start)))
     columns_to_keep <- append(setdiff(columns_to_keep, c("time_start", "time_end")), "year")
   }
   strata <- intersect(strata, columns_to_keep)
-  rfmo_to_keep_DT <- dataset %>% filter(source_authority == rfmo_to_keep)
-  rfmo_not_to_keep_DT <- dataset %>% filter(source_authority == rfmo_not_to_keep)
-  rfmo_restant <- dataset %>% 
-    filter(source_authority != rfmo_not_to_keep & source_authority!= rfmo_to_keep)
+  rfmo_to_keep_DT <- dataset %>% dplyr::filter(source_authority == rfmo_to_keep)
+  rfmo_not_to_keep_DT <- dataset %>% dplyr::filter(source_authority == rfmo_not_to_keep)
   
   rfmo_not_to_keep_without_equivalent <- dplyr::anti_join(rfmo_not_to_keep_DT, rfmo_to_keep_DT, 
                                                           by = strata)
@@ -28,14 +29,17 @@ function_overlapped =function(dataset, con, rfmo_to_keep, rfmo_not_to_keep,
     
     overlapping_kept <- overlapping_kept_unk_removed %>% 
       rowwise() %>% 
-      filter(!(overlap == 2 && any(c_across(strata) == "UNK")))
+      dplyr::filter(!(overlap == 2 && any(c_across(strata) == "UNK")))
+    overlapping_kept <- overlapping_kept %>% dplyr::select(-overlap)
   }
+  if("year" %in% colnames(overlapping_kept)){
+  overlapping_kept <- overlapping_kept %>% dplyr::select(-year)}
+  
   georef_dataset <- rbind(rfmo_restant, overlapping_kept)
   rm(rfmo_to_keep_DT, rfmo_not_to_keep_DT, rfmo_restant, rfmo_not_to_keep_without_equivalent)
   gc()
-  georef_dataset <- georef_dataset %>% select(-year)
-  
+
 
   
-  georef_dataset %>% ungroup()
+  return(georef_dataset %>% ungroup())
 }
