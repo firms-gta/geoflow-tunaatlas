@@ -1,6 +1,6 @@
 function_overlapped =function(dataset, con, rfmo_to_keep, rfmo_not_to_keep, 
-                              strata =c("geographic_identifier",    "species", "year",
-                                        "unit", opts = opts)){
+                              strata =c("geographic_identifier",    "species", "year" ,"fishingfleet")
+                              , opts = opts, removing_unk = "TRUE"){
   variable <- opts$fact
   columns_to_keep <- NULL
   if (variable == "catch"){
@@ -19,7 +19,17 @@ function_overlapped =function(dataset, con, rfmo_to_keep, rfmo_not_to_keep,
   
   rfmo_not_to_keep_without_equivalent <- dplyr::anti_join(rfmo_not_to_keep_DT, rfmo_to_keep_DT, 
                                                           by = strata)
-  georef_dataset <- rbind(rfmo_restant, rfmo_not_to_keep_without_equivalent, rfmo_to_keep_DT)
+  overlapping_kept <- rbind(rfmo_not_to_keep_without_equivalent, rfmo_to_keep_DT)
+  
+  if( removing_unk){# if we keep data from both rfmos we can remove data labelled as "UNK" as they are not precise enough and they can be duplicated
+    overlapping_kept_unk_removed <- overlapping_kept %>% dplyr::group_by(strata) %>%
+      mutate(overlap = n(source_authority))
+    
+    overlapping_kept <- overlapping_kept_unk_removed %>% 
+      rowwise() %>% 
+      filter(any(c_across(everything(.)) == "UNK") & overlap == 2)
+  }
+  georef_dataset <- rbind(rfmo_restant, overlapping_kept)
   rm(rfmo_to_keep_DT, rfmo_not_to_keep_DT, rfmo_restant, rfmo_not_to_keep_without_equivalent)
   gc()
   georef_dataset <- georef_dataset %>% select(-year)
