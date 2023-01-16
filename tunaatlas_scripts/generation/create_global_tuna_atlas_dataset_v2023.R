@@ -643,6 +643,7 @@ and groups of gears.",
   #--------get_rfmos_datasets_level0--------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 6/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  
   if (opts$include_IATTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
     
     if(!exists("options_strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species","year", "fishingfleet")
@@ -664,6 +665,11 @@ and groups of gears.",
     
     
   }
+  
+  #--------get_rfmos_datasets_level0--------------------------------------------------------------------------------------------------------------------------------------------------
+  config$logger.info("LEVEL 0 => STEP 6/8: Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?")
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  
   if (opts$include_IOTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
     # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
     if(!exists("options_strata_overlap_iotc_wcpfc")){options_strata_overlap_iotc_wcpfc <- c("geographic_identifier",    "species","year",
