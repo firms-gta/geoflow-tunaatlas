@@ -47,7 +47,7 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
     world_sf <- dbGetQuery(con, query)
     world_sf <- st_make_valid(st_read(con, query = query))%>% filter(!st_is_empty(.))
     world_sf <- world_sf[sf::st_is_valid(world_sf),]
-    query <- "SELECT  code,st_area(geom), geom from public.continent"
+    query <- "SELECT  code,st_area(geom), geom from area.gshhs_world_coastlines"
     continent <- st_read(con, query = query)%>% filter(!st_is_empty(.))
     world_sf$continent <- st_within(world_sf, continent) %>% lengths > 0 
     
