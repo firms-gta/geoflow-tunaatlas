@@ -192,7 +192,7 @@ function(action, entity, config){
   if (!is.null(opts$no_report)) if(opts$no_report){create_latex = function(...){}}
   
   
-
+  
   #scripts
   url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
@@ -206,7 +206,7 @@ function(action, entity, config){
   source(file.path(url_scripts_create_own_tuna_atlas, "double_unit_data_handling.R")) # new function for double unit 
   source(file.path(url_scripts_create_own_tuna_atlas, "function_recap_each_step.R"))  # new function to create rds for each treatment
   
-
+  
   
   j <- 1
   
@@ -221,7 +221,7 @@ function(action, entity, config){
       if(!exists(i)){
         assign(i, paste0(opts[[j]]), envir= .GlobalEnv)
       }
-      }
+    }
     if (opts[[j]][1] == TRUE){
       assign(i, opts[[j]], envir= .GlobalEnv)
     } else if (opts[[j]][1] == FALSE){
@@ -257,7 +257,12 @@ function(action, entity, config){
   #-------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
   #-------------------------------------------------------------------------------------------------------------------------------------
-  dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, opts))
+  rawdata <- opts
+  rawdata$iattc_ps_raise_flags_to_schooltype<- FALSE
+  rawdata$iccat_ps_include_type_of_school<- FALSE
+  rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
+  
+  dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, rawdata))
   dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
   dataset$time_end<-substr(as.character(dataset$time_end), 1, 10)
   georef_dataset<-dataset
@@ -278,309 +283,104 @@ function(action, entity, config){
   
   unlink("Markdown")
   
-  query <- "SELECT  code,code_cwp from area.irregular_areas_task2_iotc"
-  irregular_iotc <- st_read(con, query = query)
-  irregular_iotc <-irregular_iotc  %>% distinct()
-  irregular_iotc[irregular_iotc$code_cwp =="1100030",]$code_cwp <- "9100030"
-  irregular_iotc[irregular_iotc$code_cwp =="2120060",]$code_cwp <- "8120060"
-  irregular_iotc[irregular_iotc$code_cwp =="3200050",]$code_cwp <- "7200050"
-  if(any(irregular_iotc$code_cwp =="4220040")) irregular_iotc[irregular_iotc$code_cwp =="4220040",]$code_cwp <- "8220040"
+  if(opts$iattc_ps_raise_flags_to_schooltype){
+    rawdata$iattc_ps_raise_flags_to_schooltype<- opts$iattc_ps_raise_flags_to_schooltype
+    
+    
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iccat if needed")
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    iccat <- get_rfmos_datasets_level0("ICCAT", entity, config, rawdata)
+    iccat$time_start<-substr(as.character(dataset$time_start), 1, 10)
+    iccat$time_end<-substr(as.character(dataset$time_end), 1, 10)
+    class(iccat$value) <- "numeric"
+    
+    georef_dataset<-rbind(geref_dataset %>% filter(source_authority != "ICCAT"),iccat)
+    rm(dataset)
+    
+    function_recap_each_step("iccat enriched",
+                             georef_dataset,
+                             "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+                             "get_rfmos_datasets_level0"  , list(options_include_ICCAT))
+    ################
+  }
+  
+  if(opts$iccat_ps_include_type_of_school){
+    rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
+    
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iattc if needed")
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    iattc <- get_rfmos_datasets_level0("IATTC", entity, config, opts)
+    iattc$time_start<-substr(as.character(dataset$time_start), 1, 10)
+    iattc$time_end<-substr(as.character(dataset$time_end), 1, 10)
+    class(iattc$value) <- "numeric"
+    
+    georef_dataset<-rbind(geref_dataset %>% filter(source_authority != "IATTC"),iattc)
+    rm(dataset)
+    
+    function_recap_each_step("iattc enriched",
+                             georef_dataset,
+                             "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+                             "get_rfmos_datasets_level0"  , list(options_include_IATTC))
+    ################
+  }
+  if(opts$iattc_ps_catch_billfish_shark_raise_to_effort){
+    rawdata$iattc_ps_catch_billfish_shark_raise_to_effort<- opts$iattc_ps_catch_billfish_shark_raise_to_effort
+    
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    config$logger.info("LEVEL 0 => Raising catch data to effort for iattc")
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    iattc <- get_rfmos_datasets_level0("IATTC", entity, config, rawdata)
+    iattc$time_start<-substr(as.character(dataset$time_start), 1, 10)
+    iattc$time_end<-substr(as.character(dataset$time_end), 1, 10)
+    class(iattc$value) <- "numeric"
+    
+    georef_dataset<-rbind(geref_dataset %>% filter(source_authority != "IATTC"),iattc)
+    rm(dataset)
+    
+    function_recap_each_step("iattc enriched",
+                             georef_dataset,
+                             "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+                             "get_rfmos_datasets_level0"  , list(options_include_IATTC))
+    ################
+  }
+  
+  #### IOTC error hanldling  
   
   
-  #dbDisconnect(con)
-  # con <- config$software$input$dbi
-  # # dbConnect(con)
-  georef_dataset <- left_join(georef_dataset, irregular_iotc , by =c("geographic_identifier"= "code")) %>%
-    mutate(geographic_identifier= ifelse(!is.na(code_cwp), code_cwp, geographic_identifier)) %>%
-    select(-c(code_cwp))
   
-  georef_dataset$geographic_identifier = str_replace_all(georef_dataset$geographic_identifier,"6130045\n","6130045")
+  # query <- "SELECT  code,code_cwp from area.irregular_areas_task2_iotc"
+  # irregular_iotc <- st_read(con, query = query)
+  # irregular_iotc <-irregular_iotc  %>% distinct()
+  # irregular_iotc[irregular_iotc$code_cwp =="1100030",]$code_cwp <- "9100030"
+  # irregular_iotc[irregular_iotc$code_cwp =="2120060",]$code_cwp <- "8120060"
+  # irregular_iotc[irregular_iotc$code_cwp =="3200050",]$code_cwp <- "7200050"
+  # if(any(irregular_iotc$code_cwp =="4220040")) irregular_iotc[irregular_iotc$code_cwp =="4220040",]$code_cwp <- "8220040"
+  # georef_dataset <- left_join(georef_dataset, irregular_iotc , by =c("geographic_identifier"= "code")) %>%
+  #   mutate(geographic_identifier= ifelse(!is.na(code_cwp), code_cwp, geographic_identifier)) %>%
+  #   select(-c(code_cwp))
+  # 
+  # georef_dataset$geographic_identifier = str_replace_all(georef_dataset$geographic_identifier,"6130045\n","6130045")
+  
+  
+  iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
+  iotc_data <- iotc_data %>% dplyr::mutate(test = case_when(geographic_identifier == "1100030" ~ "9100030",
+                                                            geographic_identifier =="2120060"~"8120060",
+                                                            geographic_identifier == "3200050"~"7200050", 
+                                                            geographic_identifier == "4220040"~"8220040", 
+                                                            geographic_identifier == "6130045\n"~"6130045"))
+  
+  georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
+  
   
   function_recap_each_step("Modifying_IOTC_cwp_errors",
                            georef_dataset,
-                           "This step modify the name of several cwp grid code given by the IOTC as they are mitaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
+                           "This step modify the name of several cwp grid code given by the IOTC as they are mistaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
                            NULL,  )
   # create_latex("comparison.Rmd", last = TRUE)
   
   #-----------------------------------------------------------------
-  
-  variable <- opts$fact
-  columns_to_keep <- NULL
-  if (variable == "catch"){
-    columns_to_keep<-c("source_authority","species","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","catchtype","unit","value")
-  } else if (variable=="effort"){
-    columns_to_keep<-c("source_authority","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","unit","value")
-  }
-  
-  #list of dataset files (from entity data sources)
-  dataset_files <- sapply(entity$data$source[2:length(entity$data$source)], function(x){ entity$getJobDataResource(config, x) })
-  names(dataset_files) <- entity$data$source[2:length(entity$data$source)]
-  config$logger.info("LEVEL 0 => STEP 2/8: Treatment on iccat PS")
-  
-  if (opts$iccat_ps_include_type_of_school){
-    iccat_data <- georef_dataset %>% filter(source_authority == "ICCAT")
-    config$logger.info("Option 'iccat_ps_include_type_of_school' is TRUE. Include Type of school...")
-    dataset_iccat_byschool_file <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 &
-                                                   regexpr("byschool", names(dataset_files)) > 0 &
-                                                   regexpr("iccat", names(dataset_files)) > 0]
-    iccat_ce_WithSchooltypeInfo <- readr::read_csv(dataset_iccat_byschool_file, guess_max = 0)
-    iccat_ce_WithSchooltypeInfo <- as.data.frame(iccat_ce_WithSchooltypeInfo)
-    iccat_ce_WithSchooltypeInfo <- iccat_ce_WithSchooltypeInfo[, columns_to_keep]
-    class(iccat_ce_WithSchooltypeInfo$value) <- "numeric"
-    
-    # We need to map fishingfleet code list, because fishingfleet code list used in iccat task2 by operation mode dataset is different from fishingfleet code list used in ICCAT task2; however we have to use the same fishingfleet code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 fishingfleet code list.
-    cl_filename <- "codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv"
-    cl_id <- googledrive::drive_get(cl_filename)$id
-    googledrive::drive_download(googledrive::as_id(cl_id), cl_filename, overwrite = TRUE)
-    flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0))
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
-    iccat_ce_WithSchooltypeInfo <- map_codelist(iccat_ce_WithSchooltypeInfo, flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat, "fishingfleet")[[1]]
-    
-    strata_in_withoutschooltype_and_not_in_withshooltype <- dplyr::anti_join (iccat_data, iccat_ce_WithSchooltypeInfo, by=setdiff(columns_to_keep,c("value","schooltype")))
-    strata_in_withoutschooltype_and_not_in_withshooltype <- strata_in_withoutschooltype_and_not_in_withshooltype[, columns_to_keep]
-    
-    # Join datasets: Dataset with the type of school + dataset without the type of school from which we have removed the strata that are also available in the dataset with the type of school.
-    iccat_data <- rbind(strata_in_withoutschooltype_and_not_in_withshooltype, iccat_ce_WithSchooltypeInfo)
-    georef_dataset <- georef_dataset[, columns_to_keep]
-    georef_dataset <- rbind(georef_dataset %>% filter(source_authority !="ICCAT"), iccat_data)
-  }
-  
-  function_recap_each_step("Treatment ICCAT", georef_dataset, "ICCAT delivers two catch and efforts datasets for purse seiners:
-one that gives the detail of the type of school for purse seine fisheries starting in 1994 and one that
-does not give the information of the type of school and that covers all the time period (from 1950).
-These data are redundant (i.e. the data from the first dataset are also available in the second one but
-in the latter, the information on the type of school is not available. Both datasets were combined to
-produce a dataset that covers the whole time period, with fishing mode information.", "raise_datasets_by_dimension",
-                           list(options_iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-                                options_iattc_ps_raise_flags_to_schooltype, options_iattc_ps_catch_billfish_shark_raise_to_effort
-                           ) )
-  
-  
-  
-  #####
-  config$logger.info("LEVEL 0 => STEP 2/8: Treatment IATTC ")
-  
-  iattc_data <- georef_dataset %>% filter(source_authority == "IATTC")
-  
-  columns_to_keep_effort=c("source_authority","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","unit","value")
-  
-  # Get metadata of Catch datasets (for tuna, billfish and shark, and stratified by fishingfleet and then by type of school)
-  dataset_file_PSSetType_tuna_catch <- "catch_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
-  dataset_file_PSSetType_billfish_catch<- "catch_1deg_1m_ps_iattc_level0__billfish_byschool.csv"
-  dataset_file_PSSetType_shark_catch <- "catch_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-  dataset_file_PSFlag_tuna_catch <- "catch_1deg_1m_ps_iattc_level0__tuna_byflag.csv"
-  dataset_file_PSFlag_billfish_catch <- "catch_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
-  dataset_file_PSFlag_shark_catch <- "catch_1deg_1m_ps_iattc_level0__shark_byflag.csv"
-  
-  # Get metadata of Effort datasets (for tuna, billfish and shark, and stratified by flag and then by type of school)
-  dataset_file_PSSetType_tuna_effort <- "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
-  dataset_file_PSSetType_billfish_effort <- "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv"
-  dataset_file_PSSetType_shark_effort <- "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-  dataset_file_PSFlag_tuna_effort <- "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv"
-  dataset_file_PSFlag_billfish_effort <- "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
-  dataset_file_PSFlag_shark_effort <- "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
-  
-  #for catch fact
-  if(variable == "catch") {
-    
-    config$logger.info(sprintf("Case %s data", variable))
-    
-    # Extract tuna catch
-    df_catch_tuna_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_tuna_catch], guess_max = 0))
-    df_catch_tuna_flag <- df_catch_tuna_flag[,columns_to_keep]
-    class(df_catch_tuna_flag$value) <- "numeric"
-    
-    df_catch_tuna_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_tuna_catch], guess_max = 0))
-    df_catch_tuna_settype <- df_catch_tuna_settype[,columns_to_keep]
-    class(df_catch_tuna_settype$value) <- "numeric"
-    
-    # Extract billfish and shark catch.
-    # If the user decides to raise shark/billfish catch to ratio effort tuna / effort shark/billfish:
-    if (opts$iattc_ps_catch_billfish_shark_raise_to_effort){
-      
-      # Function to extract the datasets of catch (for billfish and tuna) and raise them to the ratio effort tuna / effort billfish (or effort shark)
-      function_raise_catch_to_effort <- function(dataset_file_tuna_effort,
-                                                 dataset_file_billfish_or_shark_catch,
-                                                 dataset_file_billfish_or_shark_effort,
-                                                 raising_dimensions){
-        
-        config$logger.info(sprintf("Catch file which will be raised to efffort: %s ", dataset_file_billfish_or_shark_catch))
-        
-        
-        billfish_or_shark_catch <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_billfish_or_shark_catch], guess_max = 0))
-        billfish_or_shark_catch <- billfish_or_shark_catch[,columns_to_keep]
-        class(billfish_or_shark_catch$value) <- "numeric"
-        
-        billfish_or_shark_effort <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_billfish_or_shark_effort], guess_max = 0))
-        billfish_or_shark_effort <- billfish_or_shark_effort[,columns_to_keep_effort]
-        class(billfish_or_shark_effort$value) <- "numeric"
-        
-        tuna_effort <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_tuna_effort], guess_max = 0))
-        tuna_effort <- tuna_effort[,columns_to_keep_effort]
-        class(tuna_effort$value) <- "numeric"
-        
-        # Get RF for effort (rf=effort tuna / effort billfish   or    effort tuna / effort shark)
-        source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_get_rf.R")
-        df_rf <- raise_get_rf(
-          df_input=billfish_or_shark_effort,
-          df_input_total=tuna_effort,
-          x_raising_dimensions=c(raising_dimensions,"unit")
-        )
-        
-        df_rf$unit<-NULL
-        
-        # Raise the data
-        source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
-        
-        catch_raised <- raise_incomplete_dataset_to_total_dataset(
-          df_input_incomplete=billfish_or_shark_catch,
-          df_input_total=billfish_or_shark_catch,
-          df_rf=df_rf,
-          x_raising_dimensions=raising_dimensions,
-          threshold_rf=NULL)
-        
-        return(catch_raised$df)
-      }
-      
-      df_catch_billfish_flag <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSFlag_tuna_effort,
-                                                               dataset_file_billfish_or_shark_catch=dataset_file_PSFlag_billfish_catch,
-                                                               dataset_file_billfish_or_shark_effort=dataset_file_PSFlag_billfish_effort,
-                                                               raising_dimensions=c("gear","fishingfleet","time_start","time_end","geographic_identifier"))
-      
-      df_catch_billfish_settype <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSSetType_tuna_effort,
-                                                                  dataset_file_billfish_or_shark_catch=dataset_file_PSSetType_billfish_catch,
-                                                                  dataset_file_billfish_or_shark_effort=dataset_file_PSSetType_billfish_effort,
-                                                                  raising_dimensions=c("gear","schooltype","time_start","time_end","geographic_identifier"))
-      
-      df_catch_shark_flag <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSFlag_tuna_effort,
-                                                            dataset_file_billfish_or_shark_catch=dataset_file_PSFlag_shark_catch,
-                                                            dataset_file_billfish_or_shark_effort=dataset_file_PSFlag_shark_effort,
-                                                            raising_dimensions=c("gear","fishingfleet","time_start","time_end","geographic_identifier"))
-      
-      df_catch_shark_settype <- function_raise_catch_to_effort(dataset_file_tuna_effort=dataset_file_PSSetType_tuna_effort,
-                                                               dataset_file_billfish_or_shark_catch=dataset_file_PSSetType_shark_catch,
-                                                               dataset_file_billfish_or_shark_effort=dataset_file_PSSetType_shark_effort,
-                                                               raising_dimensions=c("gear","schooltype","time_start","time_end","geographic_identifier"))
-      
-    } else { # Else do not raise (i.e. for billfish/shark, keep catch only from billfish / shark)
-      df_catch_billfish_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_billfish_catch], guess_max = 0))
-      df_catch_billfish_flag <- df_catch_billfish_flag[,columns_to_keep]
-      class(df_catch_billfish_flag$value) <- "numeric"
-      
-      df_catch_billfish_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_billfish_catch], guess_max = 0))
-      df_catch_billfish_settype <- df_catch_billfish_settype[,columns_to_keep]
-      class(df_catch_billfish_settype$value) <- "numeric"
-      
-      df_catch_shark_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_shark_catch],guess_max = 0))
-      df_catch_shark_flag <- df_catch_shark_flag[,columns_to_keep]
-      class(df_catch_shark_flag$value) <- "numeric"
-      
-      df_catch_shark_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_shark_catch],guess_max = 0))
-      df_catch_shark_settype <- df_catch_shark_settype[,columns_to_keep]
-      class(df_catch_shark_settype$value) <- "numeric"
-    }
-    
-    if(opts$iattc_ps_raise_flags_to_schooltype){
-      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_datasets_by_dimension.R")
-      
-      df_catch_billfish<-raise_datasets_by_dimension(df1=df_catch_billfish_flag,
-                                                     df2=df_catch_billfish_settype,
-                                                     dimension_missing_df1="schooltype",
-                                                     dimension_missing_df2="fishingfleet")$df
-      
-      df_catch_shark<-raise_datasets_by_dimension(df1=df_catch_shark_flag,
-                                                  df2=df_catch_shark_settype,
-                                                  dimension_missing_df1="schooltype",
-                                                  dimension_missing_df2="fishingfleet")$df
-      
-      df_catch_tuna<-raise_datasets_by_dimension(df1=df_catch_tuna_flag,
-                                                 df2=df_catch_tuna_settype,
-                                                 dimension_missing_df1="schooltype",
-                                                 dimension_missing_df2="fishingfleet")$df
-      
-      
-    } else {
-      # If user decides to not raise flags to type of school, he chooses to use either the data with stratification by fishingfleet or the data with stratification by schooltype
-      if (opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishingfleet'){
-        df_catch_billfish <- df_catch_billfish_flag
-        df_catch_shark <- df_catch_shark_flag
-        df_catch_tuna <- df_catch_tuna_flag
-      } else if (opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'schooltype'){
-        df_catch_billfish <- df_catch_billfish_settype
-        df_catch_shark <- df_catch_shark_settype
-        df_catch_tuna <- df_catch_tuna_settype
-      }
-    }
-    
-    iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna)
-    
-  }else if (variable=="effort"){
-    config$logger.info(sprintf("Case %s data", variable))
-    
-    dataset_file_effort_flag <- switch(opts$iattc_ps_effort_to_extract,
-                                       "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
-                                       "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
-                                       "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
-    )
-    dataset_file_effort_settype <- switch(opts$iattc_ps_effort_to_extract,
-                                          "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
-                                          "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv",
-                                          "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-    )
-    
-    # For the effort data, we keep only effort from one of the files (tuna or billfishes or shark). This is driven by the parameter "iattc_ps_effort_to_extract"
-    
-    df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_effort_settype], guess_max = 0))
-    df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
-    class(df_iattc_effort_PSSetType$value) <- "numeric"
-    df_iattc_effort_PSFlag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_effort_flag], guess_max = 0))
-    df_iattc_effort_PSFlag <- df_iattc_effort_PSFlag[,columns_to_keep_effort]
-    class(df_iattc_effort_PSFlag$value) <- "numeric"
-    
-    if (opts$iattc_ps_raise_flags_to_schooltype){
-      #Get Tuna effort by raising flags to schooltype
-      df <- raise_datasets_by_dimension(df1=df_iattc_effort_PSFlag,
-                                        df2=df_iattc_effort_PSSetType,
-                                        dimension_missing_df1="schooltype",
-                                        dimension_missing_df2="fishingfleet")$df
-      
-    } else {  # If the user decides not to raise flags to type of school, he chooses to use either the data with stratification by fishingfleet or the data with stratification by schooltype
-      if (opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishingfleet'){
-        df<-df_iattc_effort_PSFlag
-      } else if (opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'schooltype'){
-        df<-df_iattc_effort_PSSetType
-      }
-    }
-    
-    iattc_data <- rbind(iattc_data, df)
-    georef_dataset <- rbind(georef_dataset %>% filter(source_authority!= "IATTC"), iattc_data)
-  }
-  
-  # if(!is.null(opts$species_filter)){georef_dataset <- georef_dataset %>% filter(species %in% c(options_species_filter))}
-  
-  
-  function_recap_each_step("Raising IATTC", georef_dataset, "Concerns IATTC purse seine datasets: IATTC Purse seine
-catch-and-effort are available in 3 separate files according to the group of species: tuna, billfishes,
-sharks. This is due to the fact that PS data is collected from 2 sources: observer and fishing vessel
-logbooks. Observer records are used when available, and for unobserved trips logbooks are used. Both
-sources collect tuna data but only observers collect shark and billfish data. As an example, a strata
-may have observer effort and the number of sets from the observed trips would be counted for tuna
-and shark and billfish. But there may have also been logbook data for unobserved sets in the same
-strata so the tuna catch and number of sets for a cell would be added. This would make a higher total
-number of sets for tuna catch than shark or billfish. Efforts in the billfish and shark datasets might
-hence represent only a proportion of the total effort allocated in some strata since it is the observed
-effort, i.e. for which there was an observer onboard. As a result, catch in the billfish and shark datasets
-might represent only a proportion of the total catch allocated in some strata. Hence, shark and billfish
-catch were raised to the fishing effort reported in the tuna dataset.", "raise_datasets_by_dimension",
-                           list(options_iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-                                options_iattc_ps_raise_flags_to_schooltype, options_iattc_ps_catch_billfish_shark_raise_to_effort
-                           ) )
-  #create_latex("comp_sans_shiny_child.Rmd")
-  ##create_latex("short_comp.Rmd")
-  
-  
-  # source("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/map_codelists_Bastien.R")
-  
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
@@ -646,7 +446,7 @@ and groups of gears.",
   
   if (opts$include_IATTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
     
-    if(!exists("opts$strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species","year", "fishingfleet")
+    if(!exists("opts$strata_overlap_iattc_wcpfc")){options_strata_overlap_iattc_wcpfc <- c("geographic_identifier",    "species","year")
     } else {options_strata_overlap_iattc_wcpfc<-unlist(strsplit(opts$strata_overlap_iattc_wcpfc , split=","))}
     config$logger.info(paste0(options_strata_overlap_iattc_wcpfc))
     
@@ -673,7 +473,7 @@ and groups of gears.",
   if (opts$include_IOTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
     # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
     if(!exists("opts$strata_overlap_iotc_wcpfc")){options_strata_overlap_iotc_wcpfc <- c("geographic_identifier",    "species","year",
-                                                                                             "fishingfleet")
+                                                                                         "fishingfleet")
     } else {options_strata_overlap_iotc_wcpfc<-unlist(strsplit(opts$strata_overlap_iotc_wcpfc, split=","))}
     
     
@@ -918,13 +718,13 @@ and groups of gears.",
   georef_dataset_not_iotc <- georef_dataset %>% filter(source_authority != "IOTC")
   georef_dataset_iotc <- georef_dataset %>% filter(source_authority == "IOTC") 
   georef_dataset_iotc_raised <- do_unit_conversion( entity=entity,
-                                                   config=config,
-                                                   fact=fact,
-                                                   unit_conversion_csv_conversion_factor_url=paste0(gsub( ".csv","", cl_filename), "modified.csv"),
-                                                   unit_conversion_codelist_geoidentifiers_conversion_factors="areas_tuna_rfmos_task2",
-                                                   mapping_map_code_lists=opts$mapping_map_code_lists,
-                                                   georef_dataset=georef_dataset_iotc, 
-                                                   removing_numberfish_final = FALSE) # do not remove number of fish as they will be converted later with other conversion factor data
+                                                    config=config,
+                                                    fact=fact,
+                                                    unit_conversion_csv_conversion_factor_url=paste0(gsub( ".csv","", cl_filename), "modified.csv"),
+                                                    unit_conversion_codelist_geoidentifiers_conversion_factors="areas_tuna_rfmos_task2",
+                                                    mapping_map_code_lists=opts$mapping_map_code_lists,
+                                                    georef_dataset=georef_dataset_iotc, 
+                                                    removing_numberfish_final = FALSE) # do not remove number of fish as they will be converted later with other conversion factor data
   
   
   georef_dataset <- rbind(georef_dataset_not_iotc, georef_dataset_iotc_raised)
@@ -956,12 +756,12 @@ and groups of gears.",
     config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
     
     georef_dataset <- do_unit_conversion( entity=entity,
-                                         config=config,
-                                         fact=fact,
-                                         unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
-                                         unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-                                         mapping_map_code_lists=opts$mapping_map_code_lists,
-                                         georef_dataset=georef_dataset)
+                                          config=config,
+                                          fact=fact,
+                                          unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
+                                          unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+                                          mapping_map_code_lists=opts$mapping_map_code_lists,
+                                          georef_dataset=georef_dataset)
     config$logger.info("STEP 2/5: END do_unit_conversion() function")
     
     ntons_after_conversion <- round(georef_dataset %>% select(value)  %>% sum())
@@ -1008,12 +808,12 @@ and groups of gears.",
     config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
     
     georef_dataset <- do_unit_conversion( entity=entity,
-                                         config=config,
-                                         fact=fact,
-                                         unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
-                                         unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-                                         mapping_map_code_lists=opts$mapping_map_code_lists,
-                                         georef_dataset=georef_dataset)
+                                          config=config,
+                                          fact=fact,
+                                          unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
+                                          unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+                                          mapping_map_code_lists=opts$mapping_map_code_lists,
+                                          georef_dataset=georef_dataset)
     config$logger.info("STEP 2/5: END do_unit_conversion() function")
     
     ntons_after_conversion <- round(georef_dataset %>% select(value)  %>% sum())
@@ -1157,13 +957,13 @@ and groups of gears.",
         # We use our conversion factors (IRD). This is now an input parameter of the script
         #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
         #
-         dataset_catch <- do_unit_conversion( entity=entity,
-         config=config,
-         fact="catch",
-         unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
-         unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-         mapping_map_code_lists=opts$mapping_map_code_lists,
-         dataset_catch)
+        dataset_catch <- do_unit_conversion( entity=entity,
+                                             config=config,
+                                             fact="catch",
+                                             unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
+                                             unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+                                             mapping_map_code_lists=opts$mapping_map_code_lists,
+                                             dataset_catch)
       }
       
       dataset_to_compute_rf=dataset_catch
@@ -1182,13 +982,13 @@ and groups of gears.",
     config$logger.info(paste0("Total ",fact," in nominal data is : ",sum(nominal_catch$value),"\n"))
     
     georef_dataset<-function_raising_georef_to_nominal(con = con, opts = opts ,entity=entity,
-                                              config=config,
-                                              dataset_to_raise=georef_dataset,
-                                              nominal_dataset_df= nominal_catch,
-                                              # nominal_catch,
-                                              # dataset_to_compute_rf=nominal_catch,
-                                              dataset_to_compute_rf=dataset_to_compute_rf,
-                                              x_raising_dimensions=x_raising_dimensions)
+                                                       config=config,
+                                                       dataset_to_raise=georef_dataset,
+                                                       nominal_dataset_df= nominal_catch,
+                                                       # nominal_catch,
+                                                       # dataset_to_compute_rf=nominal_catch,
+                                                       dataset_to_compute_rf=dataset_to_compute_rf,
+                                                       x_raising_dimensions=x_raising_dimensions)
     
     rm(dataset_to_compute_rf)
     
@@ -1294,13 +1094,13 @@ and groups of gears.",
     class(dataset_to_compute_rf$value) <- "numeric"
     
     georef_dataset<-function_raising_georef_to_nominal(con = con, opts = opts ,entity=entity,
-                                              config=config,
-                                              dataset_to_raise=georef_dataset,
-                                              nominal_dataset_df=nominal_catch,
-                                              # nominal_catch,
-                                              # dataset_to_compute_rf=nominal_catch,
-                                              dataset_to_compute_rf=dataset_to_compute_rf,
-                                              x_raising_dimensions=x_raising_dimensions)
+                                                       config=config,
+                                                       dataset_to_raise=georef_dataset,
+                                                       nominal_dataset_df=nominal_catch,
+                                                       # nominal_catch,
+                                                       # dataset_to_compute_rf=nominal_catch,
+                                                       dataset_to_compute_rf=dataset_to_compute_rf,
+                                                       x_raising_dimensions=x_raising_dimensions)
     georef_dataset<-georef_dataset$dataset
     
     rm(dataset_to_compute_rf)
@@ -1407,13 +1207,13 @@ and groups of gears.",
     
     
     georef_dataset<-function_raising_georef_to_nominal(con = con, opts = opts, entity=entity,
-                                              config=config,
-                                              dataset_to_raise=georef_dataset,
-                                              nominal_dataset_df=nominal_catch,
-                                              # nominal_catch,
-                                              # dataset_to_compute_rf=nominal_catch,
-                                              dataset_to_compute_rf=dataset_to_compute_rf,
-                                              x_raising_dimensions=x_raising_dimensions)
+                                                       config=config,
+                                                       dataset_to_raise=georef_dataset,
+                                                       nominal_dataset_df=nominal_catch,
+                                                       # nominal_catch,
+                                                       # dataset_to_compute_rf=nominal_catch,
+                                                       dataset_to_compute_rf=dataset_to_compute_rf,
+                                                       x_raising_dimensions=x_raising_dimensions)
     
     rm(dataset_to_compute_rf)
     
