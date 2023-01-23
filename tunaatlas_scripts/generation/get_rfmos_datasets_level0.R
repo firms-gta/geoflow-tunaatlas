@@ -238,7 +238,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           } else { # Else do not raise (i.e. for billfish/shark, keep catch only from billfish / shark)
                             df_catch_billfish_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_billfish_catch], guess_max = 0))
                             df_catch_billfish_flag <- df_catch_billfish_flag[,columns_to_keep]
-                            class(df_catch_billfish_flag$max) <- "numeric"
+                            class(df_catch_billfish_flag$value) <- "numeric"
                             
                             df_catch_billfish_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_billfish_catch], guess_max = 0))
                             df_catch_billfish_settype <- df_catch_billfish_settype[,columns_to_keep]
@@ -246,11 +246,11 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                             
                             df_catch_shark_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_shark_catch],guess_max = 0))
                             df_catch_shark_flag <- df_catch_shark_flag[,columns_to_keep]
-                            class(df_catch_shark_flag$max) <- "numeric"
+                            class(df_catch_shark_flag$value) <- "numeric"
                             
                             df_catch_shark_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_shark_catch],guess_max = 0))
                             df_catch_shark_settype <- df_catch_shark_settype[,columns_to_keep]
-                            class(df_catch_shark_settype$max) <- "numeric"
+                            class(df_catch_shark_settype$value) <- "numeric"
                           }
                           
                           if(options$iattc_ps_raise_flags_to_schooltype){
