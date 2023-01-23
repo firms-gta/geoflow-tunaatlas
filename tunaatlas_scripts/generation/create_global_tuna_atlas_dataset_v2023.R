@@ -190,12 +190,12 @@ function(action, entity, config){
     config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iccat if needed")
     #-------------------------------------------------------------------------------------------------------------------------------------
     iccat <- get_rfmos_datasets_level0("ICCAT", entity, config, rawdata)
-    iccat$time_start<-substr(as.character(dataset$time_start), 1, 10)
-    iccat$time_end<-substr(as.character(dataset$time_end), 1, 10)
+    iccat$time_start<-substr(as.character(iccat$time_start), 1, 10)
+    iccat$time_end<-substr(as.character(iccat$time_end), 1, 10)
     class(iccat$value) <- "numeric"
     
-    georef_dataset<-rbind(geref_dataset %>% filter(source_authority != "ICCAT"),iccat)
-    rm(dataset)
+    georef_dataset<-rbind(georef_dataset %>% filter(source_authority != "ICCAT"),iccat)
+    rm(iccat)
     
     function_recap_each_step("iccat enriched",
                              georef_dataset,
@@ -211,12 +211,12 @@ function(action, entity, config){
     config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iattc if needed")
     #-------------------------------------------------------------------------------------------------------------------------------------
     iattc <- get_rfmos_datasets_level0("IATTC", entity, config, opts)
-    iattc$time_start<-substr(as.character(dataset$time_start), 1, 10)
-    iattc$time_end<-substr(as.character(dataset$time_end), 1, 10)
+    iattc$time_start<-substr(as.character(iattc$time_start), 1, 10)
+    iattc$time_end<-substr(as.character(iattc$time_end), 1, 10)
     class(iattc$value) <- "numeric"
     
-    georef_dataset<-rbind(geref_dataset %>% filter(source_authority != "IATTC"),iattc)
-    rm(dataset)
+    georef_dataset<-rbind(georef_dataset %>% filter(source_authority != "IATTC"),iattc)
+    rm(iattc)
     
     function_recap_each_step("iattc enriched",
                              georef_dataset,
@@ -231,14 +231,14 @@ function(action, entity, config){
     config$logger.info("LEVEL 0 => Raising catch data to effort for iattc")
     #-------------------------------------------------------------------------------------------------------------------------------------
     iattc <- get_rfmos_datasets_level0("IATTC", entity, config, rawdata)
-    iattc$time_start<-substr(as.character(dataset$time_start), 1, 10)
-    iattc$time_end<-substr(as.character(dataset$time_end), 1, 10)
+    iattc$time_start<-substr(as.character(iattc$time_start), 1, 10)
+    iattc$time_end<-substr(as.character(iattc$time_end), 1, 10)
     class(iattc$value) <- "numeric"
     
-    georef_dataset<-rbind(geref_dataset %>% filter(source_authority != "IATTC"),iattc)
-    rm(dataset)
+    georef_dataset<-rbind(georef_dataset %>% filter(source_authority != "IATTC"),iattc)
+    rm(iattc)
     
-    function_recap_each_step("iattc enriched",
+    function_recap_each_step("iattc raised for billfish and shark",
                              georef_dataset,
                              "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
                              "get_rfmos_datasets_level0"  , list(options_include_IATTC))
@@ -293,7 +293,7 @@ function(action, entity, config){
     if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
     
     config$logger.info("Mapping code lists of georeferenced datasets...")
-    mapping_codelist <- map_codelists(con, opts$fact, mapping_dataset, georef_dataset, mapping_keep_src_code, summary_mapping = TRUE) #this map condelist function is to retrieve the mapping dataset used
+    mapping_codelist <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map=georef_dataset, mapping_keep_src_code, summary_mapping = TRUE) #this map condelist function is to retrieve the mapping dataset used
     georef_dataset <- mapping_codelist$dataset_mapped
     mapping_codelist_summary <- mapping_codelist$summary_mapping
     output_mapping_codelist_name <- file.path("data", "mapping_codelist_summary.csv")
