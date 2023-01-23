@@ -92,104 +92,7 @@ function(action, entity, config){
   
   
   
-  create_latex = function(x,last = FALSE,unique = FALSE, rawdataneeded = FALSE, config2 = config, con2 = con, output_format = "pdf_document2",  data_to_comp = NULL, fact = "catch"){
-    last_path = function(x){tail(str_split(x,"/")[[1]],n=1)}
-    if(!(require(here))){ 
-      install.packages("here") 
-      (require(here))} 
-    if(!require(stringr)){
-      install.packages("stringr")
-      require(stringr)
-    }
-    if(!require(bookdown)){
-      install.packages("bookdown")
-      require(bookdown)
-    }
-    copyrmd <- function(x){
-      last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
-      use_github_file(repo_spec =x,
-                      save_as = paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x))),
-                      ref = NULL,
-                      ignore = FALSE,
-                      open = FALSE,
-                      host = NULL
-      ) }
-    c <- c(paste0("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/", x))
-    lapply(c,copyrmd)
-    
-    
-    wd <- getwd()
-    setwd("./../../../..")
-    wd2 <- getwd()
-    setwd(wd)
-    setwd(wd)
-    list_dir <- list.dirs(path =paste0(wd,"/Markdown"), full.names = TRUE, recursive = FALSE)
-    details = file.info(list_dir)
-    details = details[with(details, order(as.POSIXct(mtime))), ]
-    sub_list_dir_2 = rownames(details)
-    t <- tail(details, 2)
-    last_file <- rownames(tail(details, 1))
-    name_output <- paste0(last_path(as.character(last_file)), "markdown_number_",counting)
-    
-    if (last == TRUE){avant_last = rownames(head(details,1))
-    file.copy(paste0(wd2,"/",
-                     x), paste0(wd,"/",name_output,"last",x), overwrite = FALSE)
-    } else {
-      avant_last <-  rownames(head(t,1))
-      
-      file.copy(paste0(wd2,"/",
-                       x), paste0(wd,"/",name_output,x), overwrite = FALSE)}
-    if (!is.null(data_to_comp) & last == TRUE) {
-      if(data_to_comp %in% lapply(rownames(details),last_path) ) {
-        avant_last <- rownames(details[data_to_comp == lapply(rownames(details),last_path),])
-      }
-    }
-    if(unique == TRUE){rmarkdown::render(paste0(name_output,x),
-                                         params = list(final = last_file, host = config$software$input$dbi_config$parameters$host, 
-                                                       port = config$software$input$dbi_config$parameters$port, 
-                                                       user = config$software$input$dbi_config$parameters$user,
-                                                       dbname=config$software$input$dbi_config$parameters$dbname,
-                                                       password = config$software$input$dbi_config$parameters$password, 
-                                                       con = con2,filtering = opts$filtering, fact = opts$fact
-                                                       
-                                         ), output_format = output_format)
-    }
-    if(unique==FALSE){
-      if (last == TRUE){
-        print(paste0("params init is ", avant_last, " : params final is ", last_file))
-        rmarkdown::render(paste0(name_output,"last",x),params = list(init = avant_last, final = last_file, host = config$software$input$dbi_config$parameters$host, 
-                                                                     port = config$software$input$dbi_config$parameters$port, 
-                                                                     user = config$software$input$dbi_config$parameters$user,
-                                                                     dbname=config$software$input$dbi_config$parameters$dbname,
-                                                                     password = config$software$input$dbi_config$parameters$password, con = con2,
-                                                                     filtering   = opts$filtering, fact = opts$fact ),output_format = output_format)
-        
-      }
-      else {
-        print(paste0("params init is ", avant_last, " : params final is ", last_file))
-        rmarkdown::render(paste0(name_output,x),params = list(init = avant_last, final = last_file, host = config$software$input$dbi_config$parameters$host, 
-                                                              port = config$software$input$dbi_config$parameters$port, 
-                                                              user = config$software$input$dbi_config$parameters$user,
-                                                              dbname=config$software$input$dbi_config$parameters$dbname,
-                                                              password = config$software$input$dbi_config$parameters$password, con = con2,
-                                                              filtering   = opts$filtering, fact = opts$fact),output_format = output_format)
-        
-      }}#,
-    
-    if (output_format =="latex_document"){
-      print("Output_created")
-      if(last==TRUE){tex <- gsub(".Rmd", ".tex", paste0(name_output,"last",x)) } else {  tex <- gsub(".Rmd", ".tex", paste0(name_output,x)) }
-      tools::texi2dvi(tex, pdf = TRUE, clean = FALSE, quiet = TRUE,
-                      texi2dvi = getOption("texi2dvi"))
-    }
-    
-    counting <<- counting +1
-  }
   
-  if(!is.null(opts$output_format_report)){
-    formals(create_latex)$output_format <- opts$output_format_report
-  }
-  if (!is.null(opts$no_report)) if(opts$no_report){create_latex = function(...){}}
   
   
   
@@ -237,8 +140,6 @@ function(action, entity, config){
   list_options = list_options[-1,]
   
   write_csv(list_options, "list_options.csv")
-  if(!is.null(opts$no_markdown)){function_recap_each_step = function(...){}
-  create_latex = function(...){}}
   #Identify expected Level of processing
   DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
   
@@ -277,9 +178,6 @@ function(action, entity, config){
                                                                options_include_CCSBT))
   saveRDS(georef_dataset, "data/rawdata.rds")
   
-  # save(list = ls(all.names = TRUE), file = "image.RData", envir = 
-  #        environment())
-  #create_latex("Analyse_georeferenced_child.Rmd", unique = TRUE)
   
   unlink("Markdown")
   
@@ -378,7 +276,6 @@ function(action, entity, config){
                            georef_dataset,
                            "This step modify the name of several cwp grid code given by the IOTC as they are mistaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
                            NULL,  )
-  # create_latex("comparison.Rmd", last = TRUE)
   
   #-----------------------------------------------------------------
   
@@ -400,7 +297,7 @@ function(action, entity, config){
     mapping_codelist_summary <- mapping_codelist$summary_mapping
     output_mapping_codelist_name <- file.path("data", "mapping_codelist_summary.csv")
     write.csv(mapping_codelist_summary, output_mapping_codelist_name)
-    config$logger.info("Mapping code# con <- config$software$input$dbi
+    config$logger.info("Mapping code
  lists of georeferenced datasets OK")
     
     function_recap_each_step("mapping_codelist",
@@ -416,27 +313,11 @@ standing for other tuna within for ICCAT). In those cases, the code was set to U
 species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
 and groups of gears.",
                              "map_codelists", list(options_mapping_map_code_lists))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
-    # saveRDS(georef_dataset, "data/mapping_codelist.rds")
-    
     
     
     
   }
   
-  formals(create_latex)$data_to_comp  <- "mapping_codelist"
-  
-  
-  #dbDisconnect(con)
-  # con <- config$software$input$dbi
-  
-  # dbConnect(con)
-  
-  
-  
-  
-  #adding treatment for all the data in irregular zone given by ctoi.
   
   
   
@@ -460,8 +341,6 @@ and groups of gears.",
                              "In this step, the georeferenced data present on the overlapping zone between IATTC and WCPFC is handled. The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
                              "function_overlapped" , list(options_include_IATTC,
                                                           options_include_WCPFC , options_overlapping_zone_iattc_wcpfc_data_to_keep, options_strata_overlap_iattc_wcpfc))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
     
   }
@@ -495,8 +374,6 @@ and groups of gears.",
                              "function_overlapped",
                              list(options_include_WCPFC,
                                   options_include_IOTC, options_overlapping_zone_iotc_wcpfc_data_to_keep, options_strata_overlap_iotc_wcpfc))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
   }
   
@@ -531,8 +408,6 @@ and groups of gears.",
                              list( options_include_CCSBT  ,
                                    options_include_WCPFC ,
                                    options_overlapping_zone_wcpfc_ccsbt_data_to_keep, options_strata_overlap_sbf ))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
   }
   
@@ -563,8 +438,6 @@ and groups of gears.",
                              "function_overlapped",
                              list(options_include_CCSBT,
                                   options_include_ICCAT, options_overlapping_zone_iccat_ccsbt_data_to_keep, options_strata_overlap_sbf))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
     
   }
@@ -595,15 +468,11 @@ and groups of gears.",
                              "function_overlapped",
                              list( options_include_CCSBT  ,
                                    options_include_IOTC ,options_overlapping_zone_wcpfc_ccsbt_data_to_keep, options_overlapping_zone_iccat_ccsbt_data_to_keep,options_overlapping_zone_iotc_ccsbt_data_to_keep, options_strata_overlap_sbf ))
-    # #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
-    # create_latex("comp_sans_shiny_child.Rmd", last = TRUE)
     
     
   }
   
   if (opts$spatial_curation_data_mislocated %in% c("reallocate","remove")){
-    create_latex("potentially_mistaken_data.Rmd",unique =TRUE, rawdataneeded = "mapping_codelist")
     
     config$logger.info("---------------------------------------spatial_curation_intersect_areas--------------------------------------------------------------")
     config$logger.info(sprintf("LEVEL 1 => STEP 3/5  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",entity$data$source[[1]], opts$spatial_curation_data_mislocated))
@@ -633,14 +502,6 @@ and groups of gears.",
                              "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
                              "spatial_curation_data_mislocated",
                              list(options_spatial_curation_data_mislocated))
-    # #create_latex("comp_sans_shiny_child.Rmd")
-    # create_latex("comp_sans_shiny_child.Rmd", last = TRUE)
-    
-    #create_latex("short_comp.Rmd")
-    # #create_latex("Analyse_georeferenced.Rmd", unique = TRUE)
-    
-    create_latex("potentially_mistaken_data.Rmd",unique =TRUE, rawdataneeded = "mapping_codelist")
-    create_latex("strata_conversion_factor_gihtub.Rmd",unique =TRUE)
     
     gc()
     
@@ -674,7 +535,6 @@ and groups of gears.",
                    We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
                              "spatial_curation_data_mislocated",
                              list(curation_absurd_converted_data))
-    #create_latex("comp_sans_shiny_child.Rmd")
   }
   
   
@@ -773,15 +633,13 @@ and groups of gears.",
     function_recap_each_step("raising",
                              georef_dataset,
                              "In this step, we harmonise the data declared in NO, converting it in Tons using the by using A. Fonteneau file. The file used for the conversion can also be a parameter.", fonctions =
-                               "do_unit_conversion, unit_conversion_csv_conversion_factor_url, rtunaatlas::extract_dataset,
-                            rtunaatlas::map_codelist, rtunaatlas::convert_units",
+                               "do_unit_conversion, unit_conversion_csv_conversion_factor_url, extract_dataset,
+                            map_codelist, convert_units",
                              list( options_mapping_map_code_lists ,
                                    options_unit_conversion_csv_conversion_factor_url ,
                                    options_unit_conversion_codelist_geoidentifiers_conversion_factors ,
                                    options_unit_conversion_convert))
     
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
     
     
@@ -831,9 +689,6 @@ and groups of gears.",
                                    options_unit_conversion_codelist_geoidentifiers_conversion_factors ,
                                    options_unit_conversion_convert))
     
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
-    
     
     
   }else{
@@ -847,10 +702,10 @@ and groups of gears.",
   
   
   
-  #dbDisconnect(con)
-  # dbConnect(con)
   
-  # con <- config$software$input$dbi
+  
+  
+  
   
   
   
@@ -1014,9 +869,6 @@ and groups of gears.",
                                                                         fact, raising_do_not_raise_wcfpc_data, raising_raise_only_for_PS_LL
                              ))
     
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
-    
     
     
     if (fact=="catch"){
@@ -1127,8 +979,6 @@ and groups of gears.",
                                   fact, raising_do_not_raise_wcfpc_data, raising_raise_only_for_PS_LL
                              ))
     
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
     
     
@@ -1303,8 +1153,6 @@ and groups of gears.",
                              "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
                              list(options_disaggregate_on_1deg_data_with_resolution_superior_to_1deg))
     gc()
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
     
   } else{
     config$logger.info("-----------------------------------------------------------------------------------------------------")
@@ -1312,9 +1160,6 @@ and groups of gears.",
     config$logger.info("-----------------------------------------------------------------------------------------------------")
   }
   gc()
-  #dbDisconnect(con)
-  # dbConnect(con)
-  # con <- config$software$input$dbi
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 3/8: WCPFC at the end")
@@ -1329,16 +1174,14 @@ and groups of gears.",
                              georef_dataset,
                              "This step is to remove data provided by WCPFC as it is not relevant for 1° resolution data.",
                              "", list(options_filter_WCPFC_at_the_end))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
+    
+    
     
     
   }
   
   
   
-  # dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
-  # dataset<-data.frame(dataset)
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 11/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
@@ -1346,8 +1189,8 @@ and groups of gears.",
   if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    georef_dataset<-spatial_curation_bastien(con, georef_dataset, 5)
-    # georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+    source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_upgrade_resolution.R")) #modified for geoflow
+    georef_dataset<-spatial_curation_upgrade_resolution(con, georef_dataset, 5)
     georef_dataset<-georef_dataset$df
     
     
@@ -1358,14 +1201,10 @@ and groups of gears.",
                              "This step is to aggregate data on resolution lower than 5° in 5°.",
                              "spatial_curation_upgrade_resolution",
                              list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
+    
+    
     
   }
-  #dbDisconnect(con)
-  # dbConnect(con)
-  # con <- config$software$input$dbi
-  # conflict_prefer("startsWith", "gdata")
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 3/8: Grid spatial resolution filter")
@@ -1388,9 +1227,9 @@ and groups of gears.",
       shape_without_geom  <- shapefile.fix %>% as_tibble() %>% select(-geom) %>% filter(st_area == as.numeric(area))
       georef_dataset <- georef_dataset %>% semi_join(shape_without_geom, by =c("geographic_identifier"= "code"))} else{
         georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
-        #dbDisconnect(con)
-        # dbConnect(con)
-        # con <- config$software$input$dbi
+        
+        
+        
         
       }
     # georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
@@ -1398,8 +1237,8 @@ and groups of gears.",
                              georef_dataset,
                              "This step is to filter on the wanted resolution.",
                              "", list(options_resolution_filter))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
+    
+    
     
   }
   
@@ -1418,8 +1257,8 @@ and groups of gears.",
                              georef_dataset,
                              "This step is to filter on gears if needed (for 1 deg resolution only few gears should be kept, other are irrelevant).",
                              "", list(options_gear_filter))
-    #create_latex("comp_sans_shiny_child.Rmd")
-    #create_latex("short_comp.Rmd")
+    
+    
     
     
   }
@@ -1427,7 +1266,7 @@ and groups of gears.",
   create_latex("comp_sans_shiny_child.Rmd", last = TRUE)
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("Last step/8: Apply filters if filter needed ed (Filter data by groups of everything) ")
+  config$logger.info("Last step/8: Apply filters if filter needed (Filter data by groups of everything) ")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   
