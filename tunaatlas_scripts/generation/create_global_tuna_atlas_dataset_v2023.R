@@ -264,7 +264,7 @@ function(action, entity, config){
   
   
   iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
-  iotc_data <- iotc_data %>% dplyr::mutate(test = case_when(geographic_identifier == "1100030" ~ "9100030",
+  iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
                                                             geographic_identifier =="2120060"~"8120060",
                                                             geographic_identifier == "3200050"~"7200050", 
                                                             geographic_identifier == "4220040"~"8220040", 
