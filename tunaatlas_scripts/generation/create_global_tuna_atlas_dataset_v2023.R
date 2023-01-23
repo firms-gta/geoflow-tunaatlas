@@ -1263,8 +1263,7 @@ and groups of gears.",
     
   }
   
-  create_latex("comp_sans_shiny_child.Rmd", last = TRUE)
-  
+
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("Last step/8: Apply filters if filter needed (Filter data by groups of everything) ")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1341,8 +1340,7 @@ and groups of gears.",
     df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
   }
   # ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
-  # create_latex("tableau_recap_entity.Rmd")
-  
+
   #@geoflow -> export as csv
   output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
   fwrite(dataset$dataset, output_name_dataset, row.names = FALSE)#export with fwrite which simplifies the data having too many decimals
