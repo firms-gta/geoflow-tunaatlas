@@ -162,6 +162,7 @@ function(action, entity, config){
   rawdata$iattc_ps_raise_flags_to_schooltype<- FALSE
   rawdata$iccat_ps_include_type_of_school<- FALSE
   rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
+  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishingfleet"
   
   dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, rawdata))
   dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
