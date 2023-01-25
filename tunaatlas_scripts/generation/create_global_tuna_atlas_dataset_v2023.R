@@ -268,7 +268,7 @@ function(action, entity, config){
                                                             geographic_identifier =="2120060"~"8120060",
                                                             geographic_identifier == "3200050"~"7200050", 
                                                             geographic_identifier == "4220040"~"8220040", 
-                                                            geographic_identifier == "6130045\n"~"6130045", TRUE ~ geographic_identifier))
+                                                            geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
   
   georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
   
