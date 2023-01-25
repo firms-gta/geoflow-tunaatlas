@@ -268,7 +268,7 @@ function(action, entity, config){
                                                             geographic_identifier =="2120060"~"8120060",
                                                             geographic_identifier == "3200050"~"7200050", 
                                                             geographic_identifier == "4220040"~"8220040", 
-                                                            geographic_identifier == "6130045\n"~"6130045"))
+                                                            geographic_identifier == "6130045\n"~"6130045", TRUE ~ geographic_identifier))
   
   georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
   
@@ -650,55 +650,7 @@ and groups of gears.",
     config$logger.info("-----------------------------------------------------------------------------------------------------")
   }
   
-  # unit conv factor staying
-  
-  if(!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert){
-    config$logger.info("-----------------------------------------------------------------------------------------------------")
-    config$logger.info(sprintf("LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], opts$unit_conversion_convert))
-    config$logger.info("-----------------------------------------------------------------------------------------------------")
-    mapping_map_code_lists <- TRUE
-    if(!is.null(opts$mapping_map_code_lists)) mapping_map_code_lists = opts$mapping_map_code_lists
-    if(is.null(opts$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
-    if(is.null(opts$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
-    
-    ntons_before_this_step <- round(georef_dataset %>% filter(unit=="MT")  %>% select(value)  %>% sum())
-    config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons", nrow(georef_dataset),ntons_before_this_step))
-    
-    config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
-    
-    georef_dataset <- do_unit_conversion( entity=entity,
-                                          config=config,
-                                          fact=fact,
-                                          unit_conversion_csv_conversion_factor_url=opts$unit_conversion_csv_conversion_factor_url,
-                                          unit_conversion_codelist_geoidentifiers_conversion_factors=opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-                                          mapping_map_code_lists=opts$mapping_map_code_lists,
-                                          georef_dataset=georef_dataset)
-    config$logger.info("STEP 2/5: END do_unit_conversion() function")
-    
-    ntons_after_conversion <- round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons", nrow(georef_dataset),ntons_after_conversion))
-    # config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
-    config$logger.info(sprintf("STEP 2/5 : Unit conversion generated [%s] additionnal tons", ntons_after_conversion-ntons_before_this_step))
-    config$logger.info(sprintf("STEP 2/5 : Total number for 'NO' unit is now [%s] individuals", georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()))
-    config$logger.info("END STEP 2/5")
-    function_recap_each_step("raising",
-                             georef_dataset,
-                             "In this step, we harmonise the data declared in NO, converting it in Tons using the by using A. Fonteneau file. The file used for the conversion can also be a parameter.", fonctions =
-                               "do_unit_conversion unit_conversion_csv_conversion_factor_url extract_dataset map_codelist convert_units",
-                             list( options_mapping_map_code_lists ,
-                                   options_unit_conversion_csv_conversion_factor_url ,
-                                   options_unit_conversion_codelist_geoidentifiers_conversion_factors ,
-                                   options_unit_conversion_convert))
-    
-    
-    
-  }else{
-    config$logger.info("-----------------------------------------------------------------------------------------------------")
-    config$logger.info(sprintf("LEVEL 1 => STEP 2/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], opts$unit_conversion_convert))
-    config$logger.info("-----------------------------------------------------------------------------------------------------")
-  }
-  
-  
+
   
   
   
