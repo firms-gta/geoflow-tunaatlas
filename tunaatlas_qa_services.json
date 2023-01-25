@@ -76,7 +76,7 @@
 			"url": "{{GEONETWORK_OREME_URL}}",
 			"user": "{{GEONETWORK_OREME_USER}}",
 			"pwd": "{{GEONETWORK_OREME_PASSWORD}}",
-			"version": "3.0.4.0",
+			"version": "{{GEONETWORK_OREME_VERSION}}",
 			"logger": "DEBUG"
 		}
 	},
@@ -92,7 +92,7 @@
 		},
 		"properties" : {
 			"workspace": "tunaatlas",
-			"datastore": "tunaatlas_db_sandbox"
+			"store": "tunaatlas_db_sandbox"
 		}
 	}
   ],
