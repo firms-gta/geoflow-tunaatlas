@@ -387,7 +387,7 @@ and groups of gears.",
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 7/: Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
-  if(!exists("opts$strata_overlap_sbf")){options_strata_overlap_sbf <- c("species", "year", "fishingfleet")
+  if(!exists("opts$strata_overlap_sbf")){options_strata_overlap_sbf <- c("species", "year")
   } else {options_strata_overlap_sbf<-unlist(strsplit(opts$strata_overlap_sbf, split=","))}
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -460,7 +460,7 @@ and groups of gears.",
     
     config$logger.info(paste0("Keeping only data from ",overlapping_zone_iotc_ccsbt_data_to_keep," in the IOTC/CCSBT overlapping zone OK"))
     
-    function_recap_each_step("overlap_other_rfmos_ccsbt",
+    function_recap_each_step("overlap_iotc_ccsbt",
                              georef_dataset,
                              paste0("In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
                             The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
