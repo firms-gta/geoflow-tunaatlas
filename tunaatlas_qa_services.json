@@ -122,8 +122,12 @@
   	  "run": true
   	},
   	{
-  	  "id": "geosapi-publish-ogc-services",
-  	  "run": true
-  	} 
+	  "id": "geosapi-publish-ogc-services",
+	  "run": true,
+	  "options" : {
+	    "createWorkspace": true,
+	    "createStore": true
+	  }
+	}
  ]
 }
