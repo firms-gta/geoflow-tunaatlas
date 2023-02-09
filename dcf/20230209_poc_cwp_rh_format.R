@@ -34,3 +34,4 @@ cwp_rh_valid_data <- data.frame(
 	measurement_obs = NA,
 	stringsAsFactors = FALSE
 )
+readr::write_csv(cwp_rh_valid_data,"iotc_nominal_catch_firms_level0_dcf.csv")
