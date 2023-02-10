@@ -1,7 +1,6 @@
 FUN_catches_IATTC_CE_Flag_or_SetType = function (Path_to_IATTC_CE, aggregation_dimension, GearCode) 
 {
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/create_additional_columns_IATTC_CE.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
   IATTC_CE <- read.table(Path_to_IATTC_CE, sep = ",", header = TRUE, 
                          stringsAsFactors = FALSE, strip.white = TRUE)
