@@ -183,7 +183,7 @@ function(action, entity, config){
   unlink("Markdown")
   
   if(opts$iattc_ps_raise_flags_to_schooltype){
-    rawdata$iattc_ps_raise_flags_to_schooltype<- opts$iattc_ps_raise_flags_to_schooltype
+    rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
     
     
     #-------------------------------------------------------------------------------------------------------------------------------------
@@ -205,7 +205,8 @@ function(action, entity, config){
   }
   
   if(opts$iccat_ps_include_type_of_school){
-    rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
+    rawdata$iattc_ps_raise_flags_to_schooltype<- opts$iattc_ps_raise_flags_to_schooltype
+    
     
     #-------------------------------------------------------------------------------------------------------------------------------------
     config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iattc if needed")
@@ -1179,7 +1180,7 @@ and groups of gears.",
       area <-  case_when(opts$resolution_filter == "5" ~ "1", opts$resolution_filter == "6" ~ "25")
       shape_without_geom  <- shapefile.fix %>% as_tibble() %>% select(-geom) %>% filter(st_area == as.numeric(area))
       georef_dataset <- georef_dataset %>% semi_join(shape_without_geom, by =c("geographic_identifier"= "code"))} else{
-        georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
+      georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
         
         
         
