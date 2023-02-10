@@ -4,9 +4,9 @@ spatial_curation_intersect_areas<-function (con, df_input, df_spatial_code_list_
   inputAreas_forQuery <- paste(unique(df_input$geographic_identifier), 
                                collapse = "','")
   db_table_name_inputAreas <- dbGetQuery(con, paste0("SELECT identifier from metadata.metadata where identifier='", 
-                                                     df_spatial_code_list_name, "'"))$table_name
+                                                     df_spatial_code_list_name, "'"))$identifier
   db_table_name_intersectionArea <- dbGetQuery(con, paste0("SELECT identifier from metadata.metadata where identifier='", 
-                                                           intersection_spatial_code_list_name, "'"))$table_name
+                                                           intersection_spatial_code_list_name, "'"))$identifier
   query_data_inland <- paste("WITH \n                           source_layer AS (\n                           SELECT code, label, geom FROM area.", 
                              df_spatial_code_list_name, " WHERE code IN ('", inputAreas_forQuery, 
                              "')\n                           ),intersection_layer\n                           AS (\n                           SELECT code, label, geom FROM area.", 
