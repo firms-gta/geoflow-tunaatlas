@@ -8,9 +8,8 @@ CREATE MATERIALIZED VIEW area.erased_area_labels AS
 SELECT ar.id_area, ar.codesource_area, ar.tablesource_area, ar.source_label, st_difference(ar.geom, cont.the_geom) as geom FROM area.area_labels as ar, public.continent as cont WHERE tablesource_area = 'areas_tuna_rfmos_task1' ;
 CREATE INDEX erased_area_labels_id_area_idx ON area.erased_area_labels (id_area);
 CREATE INDEX erased_area_labels_codesource_area_idx  ON area.erased_area_labels (codesource_area);
-CREATE INDEX erased_area_labels_codesource_area_geom_idx ON area.erased_area_labels USING GIST (the_geom);
+CREATE INDEX erased_area_labels_codesource_area_geom_idx ON area.erased_area_labels USING GIST (geom);
 
-DROP MATERIALIZED VIEW area.grid_area_labels CASCADE;
 CREATE MATERIALIZED VIEW area.grid_area_labels AS
 SELECT ar.id_area, ar.codesource_area, ar.tablesource_area, ar.source_label, st_difference(ar.geom, cont.the_geom) as geom FROM area.area_labels as ar, public.continent as cont WHERE tablesource_area = 'areas_tuna_rfmos_task2';
 CREATE INDEX grid_area_labels_id_area_idx  ON area.grid_area_labels  (id_area);
@@ -30,4 +29,3 @@ SELECT * FROM area.grid_area_labels WHERE codesource_area like '5%';
 CREATE INDEX grid_area_1deg_labels_id_area_idx  ON area.grid_1deg_area_labels (id_area);
 CREATE INDEX grid_area_1deg_labels_codesource_area_idx  ON area.grid_1deg_area_labels (codesource_area);
 CREATE INDEX grid_area_1deg_labels_codesource_area_geom_idx ON area.grid_1deg_area_labels USING GIST (geom);
-
