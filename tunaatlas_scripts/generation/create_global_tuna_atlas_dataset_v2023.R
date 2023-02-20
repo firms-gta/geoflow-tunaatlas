@@ -279,6 +279,26 @@ function(action, entity, config){
                            "This step modify the name of several cwp grid code given by the IOTC as they are mistaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
                            NULL,  )
   
+  
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  config$logger.info("LEVEL 0 => Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
+    
+    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+    source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_upgrade_resolution.R")) #modified for geoflow
+    georef_dataset<-spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+    georef_dataset<-georef_dataset$df
+    
+    
+    
+    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+    function_recap_each_step("Aggregation",
+                             georef_dataset,
+                             "This step is to aggregate data on resolution lower than 5° in 5°.",
+                             "spatial_curation_upgrade_resolution",
+                             list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
+  
   #-----------------------------------------------------------------
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1137,24 +1157,6 @@ and groups of gears.",
   
   
   
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 11/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
-    
-    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_upgrade_resolution.R")) #modified for geoflow
-    georef_dataset<-spatial_curation_upgrade_resolution(con, georef_dataset, 5)
-    georef_dataset<-georef_dataset$df
-    
-    
-    
-    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-    function_recap_each_step("Aggregation",
-                             georef_dataset,
-                             "This step is to aggregate data on resolution lower than 5° in 5°.",
-                             "spatial_curation_upgrade_resolution",
-                             list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
     
     
     
