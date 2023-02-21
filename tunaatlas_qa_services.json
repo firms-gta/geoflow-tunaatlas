@@ -16,7 +16,7 @@
   "metadata": {
 	"dictionary" : {
 	  "handler": "gsheet",
-	  "source": "https://docs.google.com/spreadsheets/d/166f_fIB9ctwdsRI8MCqKmfYtyh6DPbipHp8_qVjrIs8/edit#gid=0"
+	  "source": "https://docs.google.com/spreadsheets/d/166f_fIB9ctwdsRI8MCqKmfYtyh6DPbipHp8_qVjrIs8/edit?usp=sharing"
 	},
     "entities": {
       "handler": "dbi",
@@ -34,11 +34,11 @@
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
-			"user": "{{DB_TUNA_USER}}",
-			"password": "{{DB_TUNA_PWD}}",
-			"host": "{{DB_TUNA_HOST}}",
-			"port": "5432",
-			"dbname": "{{DB_TUNA_NAME}}"
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
 		},
 		"properties" : {
 		}
@@ -49,11 +49,11 @@
 		"software_type": "dbi",
 		"parameters": {
 			"drv": "PostgreSQL",
-			"user": "{{DB_TUNA_USER}}",
-			"password": "{{DB_TUNA_PWD}}",
-			"host": "{{DB_TUNA_HOST}}",
-			"port": "5432",
-			"dbname": "{{DB_TUNA_NAME}}"
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
 		},
 		"properties" : {
 		}
@@ -63,7 +63,7 @@
 		"type": "input",
 		"software_type": "googledrive",
 		"parameters": {
-			"email": "{{GMAIL_FIRMS_USER}}",
+			"email": "{{GMAIL_USER}}",
 			"token": "{{GMAIL_TOKEN}}"
 		},
 		"properties" : {}
@@ -91,8 +91,8 @@
 			"logger": "DEBUG"
 		},
 		"properties" : {
-			"workspace": "tunaatlas",
-			"store": "tunaatlas_db_sandbox"
+			"workspace": "{{GEOSERVER_WORKSPACE}}",
+			"store": "{{GEOSERVER_STORE}}"
 		}
 	}
   ],
