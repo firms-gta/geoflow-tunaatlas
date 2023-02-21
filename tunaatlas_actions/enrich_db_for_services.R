@@ -21,6 +21,7 @@ enrich_db_for_services <- function(action,entity, config, options){
   entity$data$run <- FALSE #deactivate local action (harmonization/generation)
   entity$data$sourceType <- "csv"
   entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling geoserver sql view data services
+  entity$data$uploadSource <- TRUE
   #for feature catalogue / dictionnary
   entity$data$featureType <- fact
   #geoserver sql view properties
