@@ -170,7 +170,16 @@ function(action, entity, config){
   georef_dataset<-dataset
   class(georef_dataset$value) <- "numeric"
   rm(dataset)
+  ### next steps to correct identifier incorrect of iotc
+  iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
+  iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
+                                                                             geographic_identifier =="2120060"~"8120060",
+                                                                             geographic_identifier == "3200050"~"7200050", 
+                                                                             geographic_identifier == "4220040"~"8220040", 
+                                                                             geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
   
+  georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
+  ######
   function_recap_each_step("rawdata",
                            georef_dataset,
                            "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
@@ -180,9 +189,9 @@ function(action, entity, config){
   saveRDS(georef_dataset, "data/rawdata.rds")
   
   
-  unlink("Markdown")
+  # unlink("Markdown")
   
-  if(opts$iattc_ps_raise_flags_to_schooltype){
+  if(opts$iccat_ps_include_type_of_school){
     rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
     
     
@@ -204,7 +213,7 @@ function(action, entity, config){
     ################
   }
   
-  if(opts$iccat_ps_include_type_of_school){
+  if(opts$iattc_ps_raise_flags_to_schooltype){
     rawdata$iattc_ps_raise_flags_to_schooltype<- opts$iattc_ps_raise_flags_to_schooltype
     
     
@@ -264,20 +273,20 @@ function(action, entity, config){
   # georef_dataset$geographic_identifier = str_replace_all(georef_dataset$geographic_identifier,"6130045\n","6130045")
   
   
-  iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
-  iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
-                                                            geographic_identifier =="2120060"~"8120060",
-                                                            geographic_identifier == "3200050"~"7200050", 
-                                                            geographic_identifier == "4220040"~"8220040", 
-                                                            geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
+  # iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
+  # iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
+  #                                                           geographic_identifier =="2120060"~"8120060",
+  #                                                           geographic_identifier == "3200050"~"7200050", 
+  #                                                           geographic_identifier == "4220040"~"8220040", 
+  #                                                           geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
+  # 
+  # georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
   
-  georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
   
-  
-  function_recap_each_step("Modifying_IOTC_cwp_errors",
-                           georef_dataset,
-                           "This step modify the name of several cwp grid code given by the IOTC as they are mistaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
-                           NULL,  )
+  # function_recap_each_step("Modifying_IOTC_cwp_errors",
+  #                          georef_dataset,
+  #                          "This step modify the name of several cwp grid code given by the IOTC as they are mistaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
+  #                          NULL,  )
   
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
