@@ -33,7 +33,7 @@
 			"user": "postgres",
 			"password": "postgres",
 			"host": "localhost",
-			"port": "5432",
+			"port": "{{DB_PORT}}",
 			"dbname": "geoflow"
 		},
 		"properties" : {}

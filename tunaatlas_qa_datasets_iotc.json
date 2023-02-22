@@ -38,7 +38,7 @@
 			"user": "{{DB_USER}}",
 			"password": "{{DB_PASSWORD}}",
 			"host": "{{DB_HOST}}",
-			"port": "5432",
+			"port": "{{DB_PORT}}",
 			"dbname": "{{DB_NAME}}"
 		},
 		"properties" : {}
@@ -63,7 +63,7 @@
 			"upload_to_db": true,
 			"create_materialized_view": true,
 			"add_sql_comments": true,
-			"upload_to_googledrive": false
+			"upload_to_googledrive": true
 		}
 	}
   
