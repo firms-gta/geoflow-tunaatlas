@@ -1,12 +1,16 @@
-# 
-# getwd()
-setwd("~/Documents/Tunaatlas_level1")
+
+if(!require(renv)){
+    install.packages("renv")
+    require(renv)
+  }
+renv::restore()
+#
 if(!require(remotes)){
   install.packages("remotes")
   require(remotes)
 }
 
-  
+
 
 
 if(!require(tinytex)){
@@ -70,6 +74,9 @@ if(!require(dotenv)){
   require(dotenv)
 }
 load_dot_env(file = "catch_server.env")
+
+
+load_dot_env(file = "geoserver_sdi_lab.env")
 
 executeWorkflow("tunaatlas_qa_dbmodel+codelists.json")#works
 executeWorkflow("tunaatlas_qa_mappings.json")
