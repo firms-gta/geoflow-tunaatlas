@@ -14,10 +14,10 @@
     }
   },
   "metadata": {
-    "entities": [
+    "entities" : [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/13SJB2PYkCCdrzw8HNJMPFg0yXs0OSYY2mUOAl5dagUc/edit?usp=sharing"
+      "source": "https://docs.google.com/spreadsheets/d/1JhS1ADsnqTpWOEEvljk-c9EdzBurkc8A8__JOHJmkOk/edit#gid=163629835"
       }
     ],
     "contacts" : [
@@ -74,6 +74,8 @@
 	}
   ],
   "actions": [
+  
+	
 	{
 		"id": "load_dataset",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
@@ -103,7 +105,6 @@
 	{		"id": "comparison_each_step",
 		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
 		"run": false
-	  
 	}
 	
 
