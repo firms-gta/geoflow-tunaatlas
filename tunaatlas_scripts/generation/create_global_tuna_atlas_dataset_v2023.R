@@ -571,7 +571,8 @@ and groups of gears.",
   
   # unit conversion already given factors -----------------------------------
   
-  
+  if(!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert){
+      
   georef_dataset <- double_unit_data_handling(con = con, entity=entity,
                                               config=config,
                                               fact=fact,
@@ -585,7 +586,7 @@ and groups of gears.",
                            "",
                            list(""))
   
-  
+    
   
   # unit conversion IOTC given factors -----------------------------------
   cl_filename <- "data/CA_RAISED_FILTERED_NO_FLEET.csv"
@@ -632,7 +633,6 @@ and groups of gears.",
   # unit conversion with factors -----------------------------------
   
   
-  if(!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert){
     config$logger.info("-----------------------------------------------------------------------------------------------------")
     config$logger.info(sprintf("LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",entity$data$source[[1]], opts$unit_conversion_convert))
     config$logger.info("-----------------------------------------------------------------------------------------------------")
