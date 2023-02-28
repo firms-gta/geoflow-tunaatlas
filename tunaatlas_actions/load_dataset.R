@@ -19,9 +19,9 @@ load_dataset <- function(action,entity, config, options){
     install.packages("googledrive")
     require(googledrive)
   }
-  if(!require(data.table)){
-    install.packages("data.table")
-    require(data.table)
+  if(!require(readr)){
+    install.packages("readr")
+    require(readr)
   }
   
   
@@ -549,11 +549,11 @@ load_dataset <- function(action,entity, config, options){
 				writeLines(sql_view, file.path("data", file_sql_view))
 				writeLines(sql_data, file.path("data", file_sql_data))
 				this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name),";"))
-				fwrite(this_view, file.path("data", file_csv_view), row.names = FALSE)
+				readr::write_csv(this_view, file.path("data", file_csv_view))
 				if("geom_wkt" %in% colnames(this_view)){
 					this_view_without_geom = this_view
 					this_view_without_geom$geom_wkt <- NULL
-					fwrite(this_view_without_geom, file.path("data", file_csv_view_without_geom), row.names = FALSE)
+					readr::write_csv(this_view_without_geom, file.path("data", file_csv_view_without_geom))
 					drive_upload(file.path("data", file_csv_view_without_geom), as_id(folder_views_id), overwrite = TRUE)
 				}
 				drive_upload(file.path("data", file_csv_view), as_id(folder_views_id), overwrite = TRUE)

@@ -48,9 +48,9 @@ function(action, entity, config){
   
     
   
-  if(!require(data.table)){
-    install.packages("data.table")
-    require(data.table)
+  if(!require(readr)){
+    install.packages("readr")
+    require(readr)
   }
   
   if(!require(tidyr)){

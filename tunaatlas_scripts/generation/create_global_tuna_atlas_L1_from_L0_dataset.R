@@ -35,21 +35,14 @@ function(action, entity, config){
 #packages
 
   
-    
-  }
-
-  install_github("eblondel/rtunaatlas")
-
-}
-
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
 }
 
-if(!require(data.table)){
-  install.packages("data.table")
-  require(data.table)
+if(!require(readr)){
+  install.packages("readr")
+  require(readr)
 }
 
 #scripts

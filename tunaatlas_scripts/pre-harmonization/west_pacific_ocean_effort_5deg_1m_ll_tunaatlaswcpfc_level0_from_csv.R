@@ -20,10 +20,10 @@ function(action, entity, config){
   
 
   
-  if(!require(data.table)){
-    install.packages("data.table")
+  if(!require(readr)){
+    install.packages("readr")
   }
-  require(data.table)
+  require(readr)
   
   if(!require(dplyr)){
     install.packages("dplyr")

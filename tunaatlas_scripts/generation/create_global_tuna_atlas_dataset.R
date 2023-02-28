@@ -42,9 +42,9 @@ if(!require(dplyr)){
   require(dplyr)
 }
 
-if(!require(data.table)){
-  install.packages("data.table")
-  require(data.table)
+if(!require(readr)){
+  install.packages("readr")
+  require(readr)
 }
 
 #scripts

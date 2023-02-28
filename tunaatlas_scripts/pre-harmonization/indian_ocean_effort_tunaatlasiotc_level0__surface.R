@@ -15,12 +15,12 @@
 #' @seealso \code{\link{convertDSD_iotc_ce_LonglineCoastal}} to convert IOTC task 2 CECoastal and CELongline data structure, \code{\link{convertDSD_iotc_nc}} to convert IOTC nominal catch data structure
 function(action, entity, config){
   
-if(!require(data.table)){
-  install.packages("data.table")
+if(!require(readr)){
+  install.packages("readr")
 }
 
 require(rtunaatlas)
-require(data.table)
+require(readr)
   if(!require(dplyr)){
     install.packages("dplyr")
     require(dplyr)

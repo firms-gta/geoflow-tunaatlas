@@ -21,9 +21,9 @@ keep_fleet_instead_of_flag=FALSE
 #packages
 
   
-if(!require(data.table)){
-  install.packages("data.table")
-  require(data.table)
+if(!require(readr)){
+  install.packages("readr")
+  require(readr)
 }
 if(!require(dplyr)){
   install.packages("dplyr")

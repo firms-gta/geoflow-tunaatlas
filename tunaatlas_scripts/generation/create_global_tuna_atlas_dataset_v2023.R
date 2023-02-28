@@ -35,9 +35,9 @@ function(action, entity, config){
   # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter fact is set to 'catch' and parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
   # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
   #packages
-  if(!require(data.table)){
-    install.packages("data.table")
-    require(data.table)
+  if(!require(readr)){
+    install.packages("readr")
+    require(readr)
   }
   
   if(!require(dplyr)){
@@ -58,9 +58,9 @@ function(action, entity, config){
     require(R3port)
   }
   
-  if(!require(data.table)){
-    install.packages("data.table")
-    require(data.table)
+  if(!require(readr)){
+    install.packages("readr")
+    require(readr)
   }
   
   
@@ -606,7 +606,7 @@ and groups of gears.",
   # output_mapping_codelist_name <- file.path("data", "mapping_codelist_summary.csv")
   # write.csv(mapping_codelist_summary, output_mapping_codelist_name)
   
-  fwrite(iotc_conv_fact_mapped, file = paste0(gsub( ".csv","", cl_filename), "modified.csv"))
+  readr::write_csv(iotc_conv_fact_mapped, file = paste0(gsub( ".csv","", cl_filename), "modified.csv"))
   georef_dataset_not_iotc <- georef_dataset %>% filter(source_authority != "IOTC")
   georef_dataset_iotc <- georef_dataset %>% filter(source_authority == "IOTC") 
   georef_dataset_iotc_raised <- do_unit_conversion( entity=entity,
@@ -1308,7 +1308,7 @@ and groups of gears.",
 
   #@geoflow -> export as csv
   output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-  fwrite(dataset$dataset, output_name_dataset, row.names = FALSE)#export with fwrite which simplifies the data having too many decimals
+  readr::write_csv(dataset$dataset, output_name_dataset)#export with fwrite which simplifies the data having too many decimals
   output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
   write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
   # ---------------------------------------------------------------------------------------------------------------------------
