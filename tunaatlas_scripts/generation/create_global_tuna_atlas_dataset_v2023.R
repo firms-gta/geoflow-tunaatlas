@@ -35,11 +35,7 @@ function(action, entity, config){
   # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter fact is set to 'catch' and parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
   # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
   #packages
-  if(!require(readr)){
-    install.packages("readr")
-    require(readr)
-  }
-  
+
   if(!require(dplyr)){
     install.packages("dplyr")
     require(dplyr)
@@ -58,10 +54,12 @@ function(action, entity, config){
     require(R3port)
   }
   
-  if(!require(readr)){
-    install.packages("readr")
-    require(readr)
+  
+  if(!require(reshape2)){
+    install.packages("reshape2")
+    require(reshape2)
   }
+  
   
   
   if(!require(readr)){
