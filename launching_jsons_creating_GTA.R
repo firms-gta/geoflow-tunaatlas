@@ -1,10 +1,10 @@
 
-if(!require(renv)){
-    install.packages("renv")
-    require(renv)
-  }
-renv::restore()
-#
+# if(!require(renv)){
+#     install.packages("renv")
+#     require(renv)
+#   }
+# renv::restore()
+# #
 if(!require(remotes)){
   install.packages("remotes")
   require(remotes)
@@ -46,9 +46,9 @@ if(!require(gsheet)){
   install.packages("gsheet")
   require(gsheet)
 }
-if(!require(data.table)){
-  install.packages("data.table")
-  require(data.table)
+if(!require(readr)){
+  install.packages("readr")
+  require(readr)
 }
 if(!require(plotrix)){
   install.packages("plotrix")
@@ -73,7 +73,7 @@ if(!require(dotenv)){
   install.packages("dotenv")
   require(dotenv)
 }
-load_dot_env(file = "catch_server.env")
+# load_dot_env(file = "catch_server.env")
 
 
 load_dot_env(file = "geoserver_sdi_lab.env")
@@ -88,6 +88,7 @@ executeWorkflow("tunaatlas_qa_datasets_wcpfc.json") # ok
 executeWorkflow("tunaatlas_qa_datasets_iattc.json") # ok
 executeWorkflow("tunaatlas_qa_datasets_iotc.json") # ok
 executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
+executeWorkflow("tunaatlas_qa_services.json")
 
 
 load_dot_env(file = "effort_server.env")
