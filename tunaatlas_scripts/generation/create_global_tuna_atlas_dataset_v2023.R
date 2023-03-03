@@ -305,7 +305,7 @@ function(action, entity, config){
                              "This step is to aggregate data on resolution lower than 5° in 5°.",
                              "spatial_curation_upgrade_resolution",
                              list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
-  
+  }
   #-----------------------------------------------------------------
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1167,7 +1167,7 @@ and groups of gears.",
     
     
     
-  }
+  
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 3/8: Grid spatial resolution filter")
