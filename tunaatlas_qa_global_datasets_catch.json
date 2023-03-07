@@ -25,12 +25,6 @@
       "handler": "gsheet",
       "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
       }
-    ],
-    "dictionary" : [
-      {
-  	  "handler": "gsheet",
-  	  "source": "https://docs.google.com/spreadsheets/d/166f_fIB9ctwdsRI8MCqKmfYtyh6DPbipHp8_qVjrIs8/edit#gid=0"
-  	  }
     ]
   },
   "software": [
@@ -102,9 +96,9 @@
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
 		"run": true
 	},
-	{		"id": "comparison_each_step",
+	{		"id": "recap_all_markdown",
 		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
-		"run": false
+		"run": true
 	}
 	
 
