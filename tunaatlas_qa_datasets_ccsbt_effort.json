@@ -57,7 +57,7 @@
   "actions": [
 	{
 		"id": "load_dataset",
-		"script": "~/Documents/Tunaatlas_level1/load_dataset_test_cause_hurry.R",
+		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
 		"run": true,
 		"options": {
 			"upload_to_db": true,
