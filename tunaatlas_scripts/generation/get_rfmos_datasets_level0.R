@@ -318,10 +318,10 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           
                           df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_effort_settype], guess_max = 0))
                           df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
-                          class(df_iattc_effort_PSSetType) <- "numeric"
+                          class(df_iattc_effort_PSSetType$value) <- "numeric"
                           df_iattc_effort_PSFlag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_effort_flag], guess_max = 0))
                           df_iattc_effort_PSFlag <- df_iattc_effort_PSFlag[,columns_to_keep_effort]
-                          class(df_iattc_effort_PSFlag) <- "numeric"
+                          class(df_iattc_effort_PSFlag$value) <- "numeric"
                           
                           if (options$iattc_ps_raise_flags_to_schooltype){
                             #Get Tuna effort by raising flags to schooltype
