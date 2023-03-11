@@ -134,7 +134,21 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         # - 1 dataset for sharks, stratified by fishingfleet (but not type of school)
                         ## So in total there are 6 datasets. 
                         
-                        # Commentaire Emmanuel Chassot: L’effort est exprimé ici en nombre de calées. Cela signifie dans le cas de l’EPO que les efforts donnés dans certains jeux de données peuvent correspondre à une partie de l’effort total alloué à une strate puisqu’il s’agit de l’effort observé, cà-d. pour lequel il y avait un observateur à bord du senneur. De mon point de vue, (1) L’effort unique et homogène serait celui des thons tropicaux et (2) pour uniformiser le jeu de captures par strate, il faut calculer un ratio de captures de requins par calée (observée) et de porte-épées par calée (observée) et de les multiplier ensuite par l’effort reporté pour les thons tropicaux puisqu’on considère que c’est l’effort de la pêcherie (qui cible les thons). Le raising factor est effort thons / effort billfish et effort thons / effort sharks.
+                        # Commentaire Emmanuel Chassot (English below) : L’effort est exprimé ici en nombre de calées. 
+                        # Cela signifie dans le cas de l’EPO que les efforts donnés dans certains jeux de données 
+                        # peuvent correspondre à une partie de l’effort total alloué à une strate puisqu’il
+                        # s’agit de l’effort observé, cà-d. pour lequel il y avait un observateur à bord du 
+                        # senneur. De mon point de vue, 
+                        # (1) L’effort unique et homogène serait celui des thons tropicaux et 
+                        # (2) pour uniformiser le jeu de captures par strate, 
+                        # il faut calculer un ratio de captures de requins par calée (observée) 
+                        # et de porte-épées par calée (observée) et de les multiplier ensuite par l’effort 
+                        # reporté pour les thons tropicaux puisqu’on considère que c’est l’effort de la pêcherie 
+                        # (qui cible les thons). Le raising factor est effort thons / effort billfish et effort 
+                        # thons / effort sharks.
+                        
+                        # The effort is expressed here in terms of number of sets. This means in the case of the EPO that the effort given in some datasets may correspond to a part of the total effort allocated to a stratum since it is the observed effort, i.e. for which there was an observer on board the purse seine vessel. From my point of view, (1) the unique and homogeneous effort would be that of tropical tunas and (2) to standardize the set of catches per stratum, it is necessary to calculate a ratio of shark catches per set (observed) and swordfish catches per set (observed) and then multiply them by the effort carried over for tropical tunas since this is considered to be the effort of the fishery (which targets tunas). The raising factor is tuna effort/billfish effort and tuna effort/shark effort.
+                        
                         
                         columns_to_keep_effort=c("source_authority","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","unit","value")
                         
