@@ -99,6 +99,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           iccat_ce_WithSchooltypeInfo <- map_codelist(iccat_ce_WithSchooltypeInfo, flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat, "fishingfleet")[[1]]
                           
                           strata_in_withoutschooltype_and_not_in_withshooltype <- dplyr::anti_join (iccat_data, iccat_ce_WithSchooltypeInfo, by=setdiff(columns_to_keep,c("value","schooltype")))
+                          strata_in_withoutschooltype_and_not_in_withshooltype <- strata_in_withoutschooltype_and_not_in_withshooltype[, columns_to_keep]
                           
                           # Join datasets: Dataset with the type of school + dataset without the type of school from which we have removed the strata that are also available in the dataset with the type of school.
                           iccat_data <- rbind(strata_in_withoutschooltype_and_not_in_withshooltype, iccat_ce_WithSchooltypeInfo)
