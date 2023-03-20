@@ -73,10 +73,10 @@
 		"type": "output",
 		"software_type": "geonetwork",
 		"parameters": {
-			"url": "{{GEONETWORK_OREME_URL}}",
-			"user": "{{GEONETWORK_OREME_USER}}",
-			"pwd": "{{GEONETWORK_OREME_PASSWORD}}",
-			"version": "{{GEONETWORK_OREME_VERSION}}",
+			"url": "{{GEONETWORK_URL}}",
+			"user": "{{GEONETWORK_USER}}",
+			"pwd": "{{GEONETWORK_PASSWORD}}",
+			"version": "{{GEONETWORK_VERSION}}",
 			"logger": "DEBUG"
 		}
 	},
