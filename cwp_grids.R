@@ -12,11 +12,27 @@ erased_layers <- paste0(layers, "_erased")
 
 #CWP Grids not erased by continent
 cwp_grid <- do.call(rbind, lapply(layers, WFS_FAO_NFI$getFeatures))
-readr::write_csv(cwp_grid, "cwp_grid.csv")
+cwp_grid$code <- cwp_grid$CWP_CODE
+cwp_grid$label <- cwp_grid$CWP_CODE
+cwp_grid$geom_wkt <- cwp_grid$the_geom
+cwp_grid$the_geom <- NULL
+
+
+readr::write_csv(cwp_grid, "fao_cwp_grid.csv")
 
 #CWP Grids erased by continent
-cwp_grid_erased <- do.call(rbind, lapply(erased_layers, WFS_FAO_NFI$getFeatures))
-readr::write_csv(cwp_grid, "cwp_grid_erased.csv")
+cwp_grid_erased <- do.call(rbind, lapply(erased_layers, function(x){
+  sf = WFS_FAO_NFI$getFeatures(x)
+  sf$grid_area <- NULL
+  return(sf)
+}))
+
+cwp_grid_erased$code <- cwp_grid_erased$CWP_CODE
+cwp_grid_erased$label <- cwp_grid_erased$CWP_CODE
+cwp_grid_erased$geom_wkt <- cwp_grid_erased$the_geom
+cwp_grid_erased$the_geom <- NULL
+
+readr::write_csv(cwp_grid_erased, "fao_cwp_grid_erased.csv")
 
 #logic to upload on drive
 folder_codelists_id <- drive_get("~/geoflow_tunaatlas/data/inputs/codelists")
