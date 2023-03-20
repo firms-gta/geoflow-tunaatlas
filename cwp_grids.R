@@ -1,5 +1,6 @@
 require(ows4R)
 require(readr)
+require(googledrive)
 
 WFS_FAO_NFI <- WFSClient$new(
   url = "https://www.fao.org/fishery/geoserver/cwp/wfs",
@@ -14,11 +15,11 @@ erased_layers <- paste0(layers, "_erased")
 cwp_grid <- do.call(rbind, lapply(layers, WFS_FAO_NFI$getFeatures))
 cwp_grid$code <- cwp_grid$CWP_CODE
 cwp_grid$label <- cwp_grid$CWP_CODE
-cwp_grid$geom_wkt <- cwp_grid$the_geom
-cwp_grid$the_geom <- NULL
 
-
-readr::write_csv(cwp_grid, "fao_cwp_grid.csv")
+sf::st_write(cwp_grid, "fao_cwp_grid.csv", layer_options = "GEOMETRY=AS_WKT")
+fao_cwp_grid <- readr::read_csv("fao_cwp_grid.csv")
+colnames(fao_cwp_grid)[colnames(fao_cwp_grid)=="WKT"] <- "geom_wkt"
+readr::write_csv(fao_cwp_grid, "fao_cwp_grid.csv")
 
 #CWP Grids erased by continent
 cwp_grid_erased <- do.call(rbind, lapply(erased_layers, function(x){
@@ -29,15 +30,16 @@ cwp_grid_erased <- do.call(rbind, lapply(erased_layers, function(x){
 
 cwp_grid_erased$code <- cwp_grid_erased$CWP_CODE
 cwp_grid_erased$label <- cwp_grid_erased$CWP_CODE
-cwp_grid_erased$geom_wkt <- cwp_grid_erased$the_geom
-cwp_grid_erased$the_geom <- NULL
 
-readr::write_csv(cwp_grid_erased, "fao_cwp_grid_erased.csv")
+sf::st_write(cwp_grid_erased, "fao_cwp_grid_erased.csv", layer_options = "GEOMETRY=AS_WKT")
+fao_cwp_grid_erased <- readr::read_csv("fao_cwp_grid_erased.csv")
+colnames(fao_cwp_grid_erased)[colnames(fao_cwp_grid_erased)=="WKT"] <- "geom_wkt"
+readr::write_csv(fao_cwp_grid_erased, "fao_cwp_grid_erased.csv")
 
 #logic to upload on drive
-folder_codelists_id <- drive_get("~/geoflow_tunaatlas/data/inputs/codelists")
-drive_upload("fao_cwp_grid.csv", as_id(folder_codelists_id), overwrite = TRUE)
-drive_upload("fao_cwp_grid_erased.csv", as_id(folder_codelists_id), overwrite = TRUE)
+folder_codelists_id <- googledrive::drive_get("~/geoflow_tunaatlas/data/inputs/codelists")
+googledrive::drive_upload("fao_cwp_grid.csv", as_id(folder_codelists_id), overwrite = TRUE)
+googledrive::drive_upload("fao_cwp_grid_erased.csv", as_id(folder_codelists_id), overwrite = TRUE)
 
 
 
