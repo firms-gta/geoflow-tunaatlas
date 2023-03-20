@@ -18,7 +18,7 @@ if(!require(tinytex)){
   require(tinytex)
 }
 if(!require(geoflow)){
-  remotes::install_github("eblondel/geoflow")
+  remotes::install_github("r-geoflow/geoflow")
   require(geoflow)}
 
 if(!require(RSQLite)){
@@ -61,7 +61,7 @@ if(!require(rgeos)){
 
 
 if(!require(rpostgis)){
-  install_github("rpostgis")
+  install.packages("rpostgis")
   require(rpostgis)
 }
 if(!require(janitor)){
@@ -87,12 +87,6 @@ executeWorkflow("tunaatlas_qa_datasets_ccsbt.json") # ok
 executeWorkflow("tunaatlas_qa_datasets_wcpfc.json") # ok 
 executeWorkflow("tunaatlas_qa_datasets_iattc.json") # ok
 executeWorkflow("tunaatlas_qa_datasets_iotc.json") # ok
-executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
-executeWorkflow("tunaatlas_qa_services.json")
-
-
-load_dot_env(file = "effort_server.env")
-
 
 
 executeWorkflow("tunaatlas_qa_datasets_ccsbt_effort.json") #ok
@@ -101,4 +95,7 @@ executeWorkflow("tunaatlas_qa_datasets_iattc_effort.json") # ok
 executeWorkflow("tunaatlas_qa_datasets_iotc_effort.json") # ok
 executeWorkflow("tunaatlas_qa_datasets_iccat_effort.json") # ok
 
+executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
+
 executeWorkflow("tunaatlas_qa_global_datasets_effort.json")
+executeWorkflow("tunaatlas_qa_services.json")
