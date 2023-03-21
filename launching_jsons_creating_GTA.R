@@ -81,7 +81,7 @@ if(!require(data.table)){
 
 default_file = ".env"
 
-if(files.exists("geoserver_sdi_lab.env")){
+if(file.exists("geoserver_sdi_lab.env")){
   default_file <- "geoserver_sdi_lab.env"
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
