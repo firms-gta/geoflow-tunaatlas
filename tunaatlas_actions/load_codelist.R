@@ -86,7 +86,7 @@ load_codelist <- function(action,entity, config, options){
   ColNamesAsReservedWords<-tolower(colnames(df_to_load)) %in% ReservedWords$word
   index.ColNamesAsReservedWords <- which(ColNamesAsReservedWords=="TRUE")
   if(length(index.ColNamesAsReservedWords)){
-    colnames(df_to_load)[index.ColNamesAsReservedWords]<-paste(colnames(df_input)[index.ColNamesAsReservedWords],"_",sep="")
+    colnames(df_to_load)[index.ColNamesAsReservedWords]<-paste(colnames(df_to_load)[index.ColNamesAsReservedWords],"_",sep="")
   }
   
   ### METADATA
