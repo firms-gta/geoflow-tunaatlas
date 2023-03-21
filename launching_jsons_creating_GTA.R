@@ -74,6 +74,11 @@ if(!require(dotenv)){
   require(dotenv)
 }
 
+if(!require(data.table)){
+  install.packages("data.table")
+  require(data.table)
+} #to be removed 
+
 default_file = ".env"
 
 if(files.exists("geoserver_sdi_lab.env")){
@@ -82,6 +87,7 @@ if(files.exists("geoserver_sdi_lab.env")){
 
 load_dot_env(file =default_file) # to be replaced by the one used
 
+# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
 
 executeWorkflow("tunaatlas_qa_dbmodel+codelists.json")#works
 executeWorkflow("tunaatlas_qa_mappings.json")
