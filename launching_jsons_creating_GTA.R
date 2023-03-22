@@ -89,24 +89,37 @@ load_dot_env(file =default_file) # to be replaced by the one used
 
 # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
 
-executeWorkflow("tunaatlas_qa_dbmodel+codelists.json")#works
-executeWorkflow("tunaatlas_qa_mappings.json")
+lapply(paste0("jobs/",list("tunaatlas_qa_dbmodel+codelists", "tunaatlas_qa_mappings","tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_datasets_iccat",
+            "tunaatlas_qa_datasets_wcpfc", "tunaatlas_qa_datasets_iattc","tunaatlas_qa_datasets_iotc")),dir.create)
+
+executeWorkflow("tunaatlas_qa_dbmodel+codelists.json", dir = "jobs/tunaatlas_qa_dbmodel+codelists")#works
+executeWorkflow("tunaatlas_qa_mappings.json", dir = "jobs/tunaatlas_qa_mappings")
 
 
-executeWorkflow("tunaatlas_qa_datasets_iccat.json") # ok
-executeWorkflow("tunaatlas_qa_datasets_ccsbt.json") # ok
-executeWorkflow("tunaatlas_qa_datasets_wcpfc.json") # ok 
-executeWorkflow("tunaatlas_qa_datasets_iattc.json") # ok
-executeWorkflow("tunaatlas_qa_datasets_iotc.json") # ok
+executeWorkflow("tunaatlas_qa_datasets_iccat.json", dir = "jobs/tunaatlas_qa_datasets_iccat") # ok
+executeWorkflow("tunaatlas_qa_datasets_ccsbt.json", dir = "jobs/tunaatlas_qa_datasets_ccsbt") # ok
+executeWorkflow("tunaatlas_qa_datasets_wcpfc.json", dir = "jobs/tunaatlas_qa_datasets_wcpfc") # ok 
+executeWorkflow("tunaatlas_qa_datasets_iattc.json", dir = "jobs/tunaatlas_qa_datasets_iattc") # ok
+executeWorkflow("tunaatlas_qa_datasets_iotc.json", dir = "jobs/tunaatlas_qa_datasets_iotc") # ok
+
+lapply(paste0(paste0("jobs/",list("tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_datasets_iccat",
+                           "tunaatlas_qa_datasets_wcpfc", "tunaatlas_qa_datasets_iattc","tunaatlas_qa_datasets_iotc")),"_effort"),dir.create)
 
 
-executeWorkflow("tunaatlas_qa_datasets_ccsbt_effort.json") #ok
-executeWorkflow("tunaatlas_qa_datasets_wcpfc_effort.json") #ok
-executeWorkflow("tunaatlas_qa_datasets_iattc_effort.json") # ok
-executeWorkflow("tunaatlas_qa_datasets_iotc_effort.json") # ok
-executeWorkflow("tunaatlas_qa_datasets_iccat_effort.json") # ok
 
-executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
+executeWorkflow("tunaatlas_qa_datasets_ccsbt_effort.json", dir = "jobs/tunaatlas_qa_datasets_ccsbt_effort") #ok
+executeWorkflow("tunaatlas_qa_datasets_wcpfc_effort.json", dir = "jobs/tunaatlas_qa_datasets_wcpfc_effort") #ok
+executeWorkflow("tunaatlas_qa_datasets_iattc_effort.json", dir = "jobs/tunaatlas_qa_datasets_iattc_effort") # ok
+executeWorkflow("tunaatlas_qa_datasets_iotc_effort.json", dir = "jobs/tunaatlas_qa_datasets_iotc_effort") # ok
+executeWorkflow("tunaatlas_qa_datasets_iccat_effort.json", dir = "jobs/tunaatlas_qa_datasets_iccat_effort") # ok
 
-executeWorkflow("tunaatlas_qa_global_datasets_effort.json")
+
+lapply(paste0("jobs/",list("tunaatlas_qa_global_datasets_catch","tunaatlas_qa_global_datasets_effort")),dir.create)
+
+
+executeWorkflow("tunaatlas_qa_global_datasets_catch.json", dir = "jobs/tunaatlas_qa_global_datasets_catch")
+
+executeWorkflow("tunaatlas_qa_global_datasets_effort.json", dir = "jobs/tunaatlas_qa_global_datasets_effort")
+
+dir.create("jobs/tunaatlas_qa_services")
 executeWorkflow("tunaatlas_qa_services.json")
