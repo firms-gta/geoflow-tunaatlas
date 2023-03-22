@@ -242,8 +242,8 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
       geo_attributes_NetCDF <- ",area_labels.source_label as geographic_identifier_label,st_astext(ST_Envelope(geom)) as geom_wkt"
     }
     else {
-      geo_attributes <- ",st_astext(geom) as geom_wkt,st_x(ST_Centroid(geom)) as longitude,st_y(ST_Centroid(geom)) as latitude"
-      geo_attributes_NetCDF <- ",st_astext(geom) as geom_wkt"
+      geo_attributes <- ",st_astext(ST_Envelope(geom)) as geom_wkt,st_x(ST_Centroid(geom)) as longitude,st_y(ST_Centroid(geom)) as latitude"
+      geo_attributes_NetCDF <- ",st_astext(ST_Envelope(geom)) as geom_wkt"
     }
     SQL$query_CSV <- paste("SELECT ", select_query_csv_wms_wfs, 
                            geo_attributes, ",value FROM ", tab_name, join_clause, 
