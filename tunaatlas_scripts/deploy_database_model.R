@@ -1,13 +1,14 @@
 #deploy_database_model
 deploy_database_model <- function(config, software, software_config){
 
+	db_name <- software_config$parameters$dbname
 	db_read <- software_config$properties$user_readonly
 	repository_sql_scripts_database_deployement <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql"
 	db_dimensions <- "area,catchtype,unit,fishingfleet,gear,schooltype,sex,sizeclass,species,time,source"
 	db_variables_and_associated_dimensions <- "catch=schooltype,species,time,area,gear,fishingfleet,catchtype,unit,source@effort=schooltype,time,area,gear,fishingfleet,unit,source@catch_at_size=schooltype,species,time,area,gear,fishingfleet,catchtype,sex,unit,sizeclass,source"
  
 	#out sql
-	outsql <- sprintf("-- SQL script to deploy database '%s'", db_read)
+	outsql <- sprintf("-- SQL script to deploy database '%s'", db_name)
 	outsql <- paste(outsql, sprintf("-- Generated on '%s'", format(Sys.time(), "%Y-%m-%dT%H:%M:%S")), sep = "\n")
 
 	#Preliminary step: grant select on all objects of the DB to the user with select privileges
