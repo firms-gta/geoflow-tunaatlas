@@ -33,7 +33,7 @@
 		"type": "output",
 		"software_type": "dbi",
 		"parameters": {
-			"drv": "PostgreSQL",
+			"drv": "{{DB_DRV}}",
 			"user": "{{DB_USER}}",
 			"password": "{{DB_PASSWORD}}",
 			"host": "{{DB_HOST}}",
@@ -41,7 +41,7 @@
 			"dbname": "{{DB_NAME}}"
 		},
 		"properties" : {
-			"user_readonly": "tunaatlas_u",
+			"user_readonly": "{{DB_USER_READONLY}}",
 			"onstart_r": {
 				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/deploy_database_model.R",
 				"fun": "deploy_database_model"
@@ -57,7 +57,7 @@
 		"type": "input",
 		"software_type": "dbi",
 		"parameters": {
-			"drv": "PostgreSQL",
+			"drv": "{{DB_DRV}}",
 			"user": "{{DB_USER}}",
 			"password": "{{DB_PASSWORD}}",
 			"host": "{{DB_HOST}}",
