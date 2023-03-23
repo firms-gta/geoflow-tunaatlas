@@ -36,28 +36,6 @@ function(action, entity, config){
   entity$addResource("harmonized", output_name_dataset)
   entity$addResource("codelists", output_name_codelists)
   
-  
-  
-  
-  
-  
+
 }  
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-}
