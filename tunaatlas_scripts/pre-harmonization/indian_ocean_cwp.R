@@ -10,20 +10,28 @@ function(action, entity, config){
   #----------------------------------------------------------------------------------------------------------------------------
   
   ##Catches
-  catches <- catches %>% rename(schooltype = fishing_mode, gear = gear_type, catchtype = measurement_type, schooltype = fishing_mode, value = measurement_value, unit = measurement_unit ) 
+  catches <- catches %>% dplyr::rename(schooltype = fishing_mode, gear = gear_type, catchtype = measurement_type, schooltype = fishing_mode, value = measurement_value, unit = measurement_unit ) 
   
-  catches <- catches %>% mutate( geographic_identifier= as.character(geographic_identifier))
+  catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier))
   
 
-  colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+  catches<-catches %>% dplyr::select("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
   
   #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
+  catches$time_start <- as.Date(catches$time_start)
+  catches$time_end <- as.Date(catches$time_end)
   #we enrich the entity with temporal coverage
   dataset_temporal_extent <- paste(
     paste0(format(min(catches$time_start), "%Y"), "-01-01"),
     paste0(format(max(catches$time_end), "%Y"), "-12-31"),
     sep = "/"
   )
+  entity$setTemporalExtent(dataset_temporal_extent)
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <- paste(min(catches$time_start),max(catches$time_end),sep = "/")
   entity$setTemporalExtent(dataset_temporal_extent)
   
   #@geoflow -> export as csv
