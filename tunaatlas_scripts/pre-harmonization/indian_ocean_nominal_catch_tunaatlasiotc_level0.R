@@ -40,6 +40,8 @@
   #  ARE GILL 1952-01-01 1953-01-01      F51    ALL     COM       ALL         MT 603.4760
   #  ARE GILL 1952-01-01 1953-01-01      F51    ALL     LOT       ALL         MT 517.2712
 function(action, entity, config){
+  
+  #deprecated use of https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/indian_ocean_cwp.R 
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/format_time_db_format.R")
 #packages
 if(!require(dplyr)){
@@ -66,9 +68,9 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------  
   
-  #require(readxl) # devtools::install_github("hadley/readxl") 
-NC<-readxl::read_excel(path_to_raw_dataset, sheet = "Catches_Captures", col_names = TRUE, col_types = NULL,na = "")  
-#NC <- read.csv(path_to_raw_dataset , header=TRUE, stringsAsFactors=FALSE, strip.white=TRUE)
+#   #require(readxl) # devtools::install_github("hadley/readxl") 
+# NC<-readxl::read_excel(path_to_raw_dataset, sheet = "Catches_Captures", col_names = TRUE, col_types = NULL,na = "")  
+NC <- read.csv(path_to_raw_dataset , header=TRUE, stringsAsFactors=FALSE, strip.white=TRUE)
 
 colToKeep_NC<-c("FlCde","ArCde","Year/An","GrCde","SpCde","Catch/Capture(t)")
 NC_harm_IOTC<-NC[,colToKeep_NC]
