@@ -125,6 +125,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         
                         # Deal with special case of IATTC PS
                         iattc_data <- unique(iattc_data)
+                        iattc_data <- iattc_data[, columns_to_keep]
+                        
                         
                         ## IATTC PS catch-and-effort are stratified as following:
                         # - 1 dataset for tunas, stratified by type of school (but not fishingfleet)
