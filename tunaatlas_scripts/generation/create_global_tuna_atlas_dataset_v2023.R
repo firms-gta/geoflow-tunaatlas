@@ -156,6 +156,8 @@ function(action, entity, config){
   #-------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
   #-------------------------------------------------------------------------------------------------------------------------------------
+  
+
   rawdata <- opts
   rawdata$iattc_ps_raise_flags_to_schooltype<- FALSE
   rawdata$iccat_ps_include_type_of_school<- FALSE
@@ -169,15 +171,7 @@ function(action, entity, config){
   class(georef_dataset$value) <- "numeric"
   rm(dataset)
   ### next steps to correct identifier incorrect of iotc
-  iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
-  iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
-                                                                             geographic_identifier =="2120060"~"8120060",
-                                                                             geographic_identifier == "3200050"~"7200050", 
-                                                                             geographic_identifier == "4220040"~"8220040", 
-                                                                             geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
   
-  georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
-  ######
   function_recap_each_step("rawdata",
                            georef_dataset,
                            "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
@@ -253,60 +247,21 @@ function(action, entity, config){
     ################
   }
   
-  #### IOTC error hanldling  
   
-  
-  
-  # query <- "SELECT  code,code_cwp from area.irregular_areas_task2_iotc"
-  # irregular_iotc <- st_read(con, query = query)
-  # irregular_iotc <-irregular_iotc  %>% distinct()
-  # irregular_iotc[irregular_iotc$code_cwp =="1100030",]$code_cwp <- "9100030"
-  # irregular_iotc[irregular_iotc$code_cwp =="2120060",]$code_cwp <- "8120060"
-  # irregular_iotc[irregular_iotc$code_cwp =="3200050",]$code_cwp <- "7200050"
-  # if(any(irregular_iotc$code_cwp =="4220040")) irregular_iotc[irregular_iotc$code_cwp =="4220040",]$code_cwp <- "8220040"
-  # georef_dataset <- left_join(georef_dataset, irregular_iotc , by =c("geographic_identifier"= "code")) %>%
-  #   mutate(geographic_identifier= ifelse(!is.na(code_cwp), code_cwp, geographic_identifier)) %>%
-  #   select(-c(code_cwp))
-  # 
-  # georef_dataset$geographic_identifier = str_replace_all(georef_dataset$geographic_identifier,"6130045\n","6130045")
   
   
   # iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
   # iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
-  #                                                           geographic_identifier =="2120060"~"8120060",
-  #                                                           geographic_identifier == "3200050"~"7200050", 
-  #                                                           geographic_identifier == "4220040"~"8220040", 
-  #                                                           geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
+  #                                                                            geographic_identifier =="2120060"~"8120060",
+  #                                                                            geographic_identifier == "3200050"~"7200050", 
+  #                                                                            geographic_identifier == "4220040"~"8220040", 
+  #                                                                            geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
   # 
   # georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
+
   
   
-  # function_recap_each_step("Modifying_IOTC_cwp_errors",
-  #                          georef_dataset,
-  #                          "This step modify the name of several cwp grid code given by the IOTC as they are mistaken. This step is aimed to be removed as the mistakes shouldn't be in the provided data.",
-  #                          NULL,  )
   
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
-    
-    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_upgrade_resolution.R")) #modified for geoflow
-    georef_dataset<-spatial_curation_upgrade_resolution(con, georef_dataset, 5)
-    georef_dataset<-georef_dataset$df
-    
-    
-    
-    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-    function_recap_each_step("Aggregation",
-                             georef_dataset,
-                             "This step is to aggregate data on resolution lower than 5° in 5°.",
-                             "spatial_curation_upgrade_resolution",
-                             list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
-  }
-  #-----------------------------------------------------------------
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
@@ -474,7 +429,7 @@ and groups of gears.",
   
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 9/8: Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
+  config$logger.info("LEVEL 0 => STEPs Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   if (opts$include_IOTC && opts$include_CCSBT && !is.null(opts$overlapping_zone_iotc_ccsbt_data_to_keep)) {
     
@@ -500,6 +455,28 @@ and groups of gears.",
     
     
   }
+  
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  config$logger.info("LEVEL 0 => Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
+    
+    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+    source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_upgrade_resolution.R")) #modified for geoflow
+    georef_dataset<-spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+    georef_dataset<-georef_dataset$df
+    
+    
+    
+    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+    function_recap_each_step("Aggregation",
+                             georef_dataset,
+                             "This step is to aggregate data on resolution lower than 5° in 5°.",
+                             "spatial_curation_upgrade_resolution",
+                             list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
+  }
+  #-----------------------------------------------------------------
+  
   
   if (opts$spatial_curation_data_mislocated %in% c("reallocate","remove")){
     
@@ -618,7 +595,7 @@ and groups of gears.",
   
   
   georef_dataset <- rbind(georef_dataset_not_iotc, georef_dataset_iotc_raised)
-  function_recap_each_step("Raising IOTC data",
+  function_recap_each_step("Harmonising units on IOTC data",
                            georef_dataset,
                            "In this step, we target the data provided in Tons and Number of fish provided by IOTC.
                  As a new conversion factor dataset has been provided by Emmanuel Chassot",
