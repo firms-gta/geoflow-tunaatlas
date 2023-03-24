@@ -15,7 +15,7 @@ function(action, entity, config){
   catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier))
   
 
-  catches<-catches %>% dplyr::select("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+  catches<-catches %>% dplyr::select("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value", "source_authority")
   
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
