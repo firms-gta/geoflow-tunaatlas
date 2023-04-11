@@ -463,7 +463,7 @@ and groups of gears.",
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   if (opts$irregular_area %in% c("remove", "reallocate")) {
-    source(function_irregular_areas)
+    source(file.path(url_scripts_create_own_tuna_atlas,'spatial_curation'))
     georef_dataset <- spatial_curation(georef_dataset, con, opts$irregular_area)
     
     function_recap_each_step("irregular_area_handling",
