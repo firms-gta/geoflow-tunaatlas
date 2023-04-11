@@ -153,7 +153,7 @@ function(action, entity, config){
   #### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
   config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
   
-  #-------------------------------------------------------------------------------------------------------------------------------------
+  #-------get_rfmos_datasets_level0------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
   #-------------------------------------------------------------------------------------------------------------------------------------
   
@@ -187,7 +187,7 @@ function(action, entity, config){
     rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
     
     
-    #-------------------------------------------------------------------------------------------------------------------------------------
+    #------------Enriching data with schootype for iccat-------------------------------------------------------------------------------------------------------------------------
     config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iccat if needed")
     #-------------------------------------------------------------------------------------------------------------------------------------
     iccat <- get_rfmos_datasets_level0("ICCAT", entity, config, rawdata)
@@ -209,7 +209,7 @@ function(action, entity, config){
     rawdata$iattc_ps_raise_flags_to_schooltype<- opts$iattc_ps_raise_flags_to_schooltype
     
     
-    #-------------------------------------------------------------------------------------------------------------------------------------
+    #---------Enriching data with schootype for iattc----------------------------------------------------------------------------------------------------------------------------
     config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iattc if needed")
     #-------------------------------------------------------------------------------------------------------------------------------------
     iattc <- get_rfmos_datasets_level0("IATTC", entity, config, opts)
@@ -229,7 +229,7 @@ function(action, entity, config){
   if(opts$iattc_ps_catch_billfish_shark_raise_to_effort){
     rawdata$iattc_ps_catch_billfish_shark_raise_to_effort<- opts$iattc_ps_catch_billfish_shark_raise_to_effort
     
-    #-------------------------------------------------------------------------------------------------------------------------------------
+    #----------Raising catch data to effort for iattc---------------------------------------------------------------------------------------------------------------------------
     config$logger.info("LEVEL 0 => Raising catch data to effort for iattc")
     #-------------------------------------------------------------------------------------------------------------------------------------
     iattc <- get_rfmos_datasets_level0("IATTC", entity, config, rawdata)
@@ -263,7 +263,7 @@ function(action, entity, config){
   
   
   
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  #----------Map code lists -------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
@@ -302,10 +302,11 @@ and groups of gears.",
     
   }
   
+
   
   
   
-  #--------get_rfmos_datasets_level0--------------------------------------------------------------------------------------------------------------------------------------------------
+  #--------Overlapping zone (IATTC/WCPFC)--------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 6/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
@@ -329,7 +330,8 @@ and groups of gears.",
     
   }
   
-  #--------get_rfmos_datasets_level0--------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  #--------Overlapping zone (IOTC/WCPFC)--------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 6/8: Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
@@ -456,14 +458,33 @@ and groups of gears.",
     
   }
   
+  #--------irregular areas--------------------------------------------------------------------------------------------------------------------------------------------------
+  config$logger.info("LEVEL 0 => irregular areas hanlding")
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  if (opts$irregular_area %in% c("remove", "reallocate")) {
+    source(function_irregular_areas)
+    georef_dataset <- spatial_curation(georef_dataset, con, opts$irregular_area)
+    
+    function_recap_each_step("irregular_area_handling",
+                             georef_dataset,
+                             paste0("In this step, we handle areas that does not match cwp grids norme") ,
+                             "function_overlapped",
+                             list(options_irregular_area))
+    
+  }
+  
+  
+  
+  
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_upgrade_resolution.R")) #modified for geoflow
-    georef_dataset<-spatial_curation_upgrade_resolution(con, georef_dataset, 5)
+    source(file.path(url_scripts_create_own_tuna_atlas, "upgrade_resolution.R")) #modified for geoflow
+    georef_dataset<-aggregate_resolution(con, georef_dataset, 6)
     georef_dataset<-georef_dataset$df
     
     
