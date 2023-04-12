@@ -57,9 +57,17 @@ if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
 	if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
   
 	config$logger.info("Mapping code lists of georeferenced datasets...")
-	nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
+	nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE)
 	config$logger.info("Mapping code lists of georeferenced datasets OK")
- 
+	nominal_catch = nominal_catch$dataset_mapped
+	summary_mapping = nominal_catch$summary_mapping
+	stats_total = nominal_catch$stats_total
+	not_mapped_total = nominal_catch$not_mapped_total
+	
+	lapply(list(summary_mapping, stats_total, not_mapped_total), function(x){
+	  saveRDS(x, file = paste0("data/",x))
+	})
+	
 }
 
 

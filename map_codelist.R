@@ -8,6 +8,10 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   column_names_df_input <- colnames(df_input)
   colnames(df_mapping)[colnames(df_mapping) == "src_code"] <- dimension_to_map
   df_input <- left_join(df_input, df_mapping)
+  
+  not_mapped <- unique((df_input %>% filter(is.na(trg_code))) %>% select({{dimension_to_map}})) %>% 
+    rename("Value" :={{dimension_to_map}} ) %>% 
+    mutate("Dimension" = dimension_to_map)
   if (keep_src_code == FALSE) {
     df_input[, dimension_to_map] <- df_input$trg_code
     df_input <- df_input[column_names_df_input]
@@ -36,5 +40,5 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   stats_data_not_mapped[is.na(stats_data_not_mapped)] <- 0
   stats_data_not_mapped$percentage_not_mapped <- stats_data_not_mapped$sum_value_not_mapped/stats_data_not_mapped$sum_value_mapped * 
     100
-  return(list(df = df_input, stats = stats_data_not_mapped))
+  return(list(df = df_input, stats = stats_data_not_mapped, not_mapped = not_mapped))
 }

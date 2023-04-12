@@ -13,6 +13,8 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
     dimension_to_map <- dimension_to_map[dimension_to_map%in%colnames(dataset_to_map)]
   }
   recap_mapping <- NULL
+  not_mapped_total <- NULL
+  stats_total <- NULL
   # One by one, map the dimensions
   for (i in 1:length(dimension_to_map)){ # i takes the values of the dimensions to map
     dimension <- dimension_to_map[i]
@@ -26,10 +28,18 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
       }
       recap_mapping <- rbind(df_mapping_final_this_dimension, recap_mapping)
       
-      dataset_to_map <- map_codelist(dataset_to_map,df_mapping_final_this_dimension,dimension,mapping_keep_src_code)$df  # Codes are mapped by tRFMOs (source_authority)
+      mapping <- map_codelist(dataset_to_map,df_mapping_final_this_dimension,dimension,mapping_keep_src_code)
+      dataset_to_map <- mapping$df  # Codes are mapped by tRFMOs (source_authority)
+      stats <- mapping$stats
+      stats$dimension <- dimension
+      not_mapped <- mapping$not_mapped
+      
+      not_mapped_total <- rbind(not_mapped_total, not_mapped)
+      
+      stats_total <- rbind(stats_total, stats)
     }
   }
-  if(summary_mapping){dataset_mapped <- list(dataset_mapped = dataset_to_map, summary_mapping =recap_mapping)
+  if(summary_mapping){dataset_mapped <- list(dataset_mapped = dataset_to_map, summary_mapping =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   }else {
     dataset_mapped <- dataset_to_map
   }
