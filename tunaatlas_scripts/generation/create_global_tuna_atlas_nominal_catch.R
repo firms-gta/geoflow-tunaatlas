@@ -57,7 +57,7 @@ function(action, entity, config){
     if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
     
     config$logger.info("Mapping code lists of georeferenced datasets...")
-    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE)
+    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE, source_authority_to_map = opts$source_authority_to_map)
     config$logger.info("Mapping code lists of georeferenced datasets OK")
     nominal_catch = nominal_catch$dataset_mapped
     summary_mapping = nominal_catch$summary_mapping
