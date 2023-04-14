@@ -29,9 +29,8 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
       recap_mapping <- rbind(df_mapping_final_this_dimension, recap_mapping)
       
       mapping <- map_codelist(dataset_to_map,df_mapping_final_this_dimension,dimension,mapping_keep_src_code)
-      dataset_to_map <- mapping$df  # Codes are mapped by tRFMOs (source_authority)
+      dataset_mapped <- mapping$df  # Codes are mapped by tRFMOs (source_authority)
       stats <- mapping$stats
-      stats$dimension <- dimension
       not_mapped <- mapping$not_mapped
       
       not_mapped_total <- rbind(not_mapped_total, not_mapped)
@@ -39,7 +38,7 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
       stats_total <- rbind(stats_total, stats)
     }
   }
-  if(summary_mapping){dataset_mapped <- list(dataset_mapped = dataset_to_map, summary_mapping =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
+  if(summary_mapping){dataset_mapped <- list(dataset_mapped = dataset_mapped, summary_mapping =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   }else {
     dataset_mapped <- dataset_to_map
   }
