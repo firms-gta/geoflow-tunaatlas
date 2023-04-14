@@ -1,5 +1,5 @@
 #re-written from https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/create_own_tuna_atlas/sourced_scripts/map_code_lists.R
-map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE){
+map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")){
   # Get the dimensions to map from the mapping_dataset
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/extract_dataset.R")
@@ -12,6 +12,10 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
     dimension_to_map<-c("gear","fishingfleet","schooltype","unit")
     dimension_to_map <- dimension_to_map[dimension_to_map%in%colnames(dataset_to_map)]
   }
+  `%notin%` <- Negate(`%in%`)
+  data_not_to_map <- mapping_dataset %>% filter(source_authority %notin% source_authority_to_map)
+  mapping_dataset <- mapping_dataset %>% filter(source_authority %in% source_authority_to_map)
+  
   recap_mapping <- NULL
   not_mapped_total <- NULL
   stats_total <- NULL
@@ -38,6 +42,9 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
       stats_total <- rbind(stats_total, stats)
     }
   }
+  
+  dataset_mapped <- rbind(mapping_dataset, data_not_to_map)
+  
   if(summary_mapping){dataset_mapped <- list(dataset_mapped = dataset_mapped, summary_mapping =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   }else {
     dataset_mapped <- dataset_to_map
