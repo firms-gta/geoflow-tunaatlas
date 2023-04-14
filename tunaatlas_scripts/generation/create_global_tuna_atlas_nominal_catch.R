@@ -17,118 +17,123 @@
 
 function(action, entity, config){
   opts <- action$options
-
   
+  
+  
+  
+  
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
+  
+  if(!require(readr)){
+    install.packages("readr")
+    require(readr)
+  }
+  
+  # connect to Tuna atlas database
+  con <- config$software$output$dbi
+  
+  #scripts
+  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
+  source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
+  
+  #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
+  config$logger.info("Retrieving RFMOs nominal catch...")
+  nominal_catch <-retrieve_nominal_catch(entity, config, opts)
+  config$logger.info("Retrieving RFMOs nominal catch OK")
+  
+  #### 2) Map code lists 
+  
+  if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
     
-
-
-if(!require(dplyr)){
-  install.packages("dplyr")
-  require(dplyr)
-}
-
-if(!require(readr)){
-  install.packages("readr")
-  require(readr)
-}
-
-# connect to Tuna atlas database
-con <- config$software$output$dbi
-
-#scripts
-url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
-source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
-source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
-
-#### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
-config$logger.info("Retrieving RFMOs nominal catch...")
-nominal_catch <-retrieve_nominal_catch(entity, config, opts)
-config$logger.info("Retrieving RFMOs nominal catch OK")
-
-#### 2) Map code lists 
-
-if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
- 
-	config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-	filename <- entity$data$source[[1]]
-	mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, filename)
-	mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
-	mapping_keep_src_code <- FALSE
-	if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
+    config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
+    filename <- entity$data$source[[1]]
+    mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, filename)
+    mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
+    mapping_keep_src_code <- FALSE
+    if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
+    
+    config$logger.info("Mapping code lists of georeferenced datasets...")
+    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE)
+    config$logger.info("Mapping code lists of georeferenced datasets OK")
+    nominal_catch = nominal_catch$dataset_mapped
+    summary_mapping = nominal_catch$summary_mapping
+    stats_total = nominal_catch$stats_total
+    not_mapped_total = nominal_catch$not_mapped_total
+    
+    names_list <- c("summary_mapping", "stats_total", "not_mapped_total") # file we want to save
+    lapply(names_list, function(name) {
+      file_name <- paste0("data/", name, ".rds")
+      object <- mget(name, envir = globalenv())
+      saveRDS(object, file = file_name)
+    })
+    
+    
+    
+  }
   
-	config$logger.info("Mapping code lists of georeferenced datasets...")
-	nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE)
-	config$logger.info("Mapping code lists of georeferenced datasets OK")
-	nominal_catch = nominal_catch$dataset_mapped
-	summary_mapping = nominal_catch$summary_mapping
-	stats_total = nominal_catch$stats_total
-	not_mapped_total = nominal_catch$not_mapped_total
-	
-	lapply(list(summary_mapping, stats_total, not_mapped_total), function(x){
-	  saveRDS(x, file = paste0("data/",x))
-	})
-	
-}
-
-
-#### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
-
-if (!is.null(opts$SBF_data_rfmo_to_keep)){
   
-	config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-	if (opts$SBF_data_rfmo_to_keep=="CCSBT"){
-		nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
-	} else {
-		nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
-	}
-	config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
-}
-
-#final step
-dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"value")) %>% dplyr::summarise(value=sum(value))
-dataset<-data.frame(dataset)
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
-dataset$time_start <- as.Date(dataset$time_start)
-dataset$time_end <- as.Date(dataset$time_end)
-#we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
-entity$setTemporalExtent(dataset_temporal_extent)
-#if there is any entity relation with name 'codelists' we read the file
-df_codelists <- NULL
-cl_relations <- entity$relations[sapply(entity$relations, function(x){x$name=="codelists"})]
-if(length(cl_relations)>0){
-	config$logger.info("Appending codelists to global dataset generation action output")
-	googledrive_baseurl <- "https://drive.google.com/open?id="
+  #### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
+  
+  if (!is.null(opts$SBF_data_rfmo_to_keep)){
+    
+    config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+    if (opts$SBF_data_rfmo_to_keep=="CCSBT"){
+      nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
+    } else {
+      nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
+    }
+    config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
+  }
+  
+  #final step
+  dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"value")) %>% dplyr::summarise(value=sum(value))
+  dataset<-data.frame(dataset)
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
+  dataset$time_start <- as.Date(dataset$time_start)
+  dataset$time_end <- as.Date(dataset$time_end)
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <- paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
+  entity$setTemporalExtent(dataset_temporal_extent)
+  #if there is any entity relation with name 'codelists' we read the file
+  df_codelists <- NULL
+  cl_relations <- entity$relations[sapply(entity$relations, function(x){x$name=="codelists"})]
+  if(length(cl_relations)>0){
+    config$logger.info("Appending codelists to global dataset generation action output")
+    googledrive_baseurl <- "https://drive.google.com/open?id="
     if(startsWith(cl_relations[[1]]$link, googledrive_baseurl)){
-		#managing download through google drive
-		config$logger.info("Downloading file using Google Drive R interface")
-		drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
-		drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-		googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
-		df_codelists <- read.csv(file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
-	}else{
-		df_codelists <- read.csv(cl_relations[[1]]$link)
-	}
-}
-#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-dataset <- list(
-	dataset = dataset, 
-	additional_metadata = NULL, #nothing here
-	codelists = df_codelists #in case the entity was provided with a link to codelists
-)
-
-#@geoflow -> export as csv
-output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
-output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
-write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
-#----------------------------------------------------------------------------------------------------------------------------  
-entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
-entity$addResource("geom_table", opts$geom_table)
-
-#### END
-config$logger.info("End: Your tuna atlas dataset has been created!")
+      #managing download through google drive
+      config$logger.info("Downloading file using Google Drive R interface")
+      drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
+      drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
+      googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
+      df_codelists <- read.csv(file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
+    }else{
+      df_codelists <- read.csv(cl_relations[[1]]$link)
+    }
+  }
+  #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
+  dataset <- list(
+    dataset = dataset, 
+    additional_metadata = NULL, #nothing here
+    codelists = df_codelists #in case the entity was provided with a link to codelists
+  )
+  
+  #@geoflow -> export as csv
+  output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
+  write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
+  output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
+  write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
+  #----------------------------------------------------------------------------------------------------------------------------  
+  entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("codelists", output_name_codelists)
+  entity$addResource("geom_table", opts$geom_table)
+  
+  #### END
+  config$logger.info("End: Your tuna atlas dataset has been created!")
 }
