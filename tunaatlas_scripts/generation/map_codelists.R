@@ -13,8 +13,8 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
     dimension_to_map <- dimension_to_map[dimension_to_map%in%colnames(dataset_to_map)]
   }
   `%notin%` <- Negate(`%in%`)
-  data_not_to_map <- mapping_dataset %>% filter(source_authority %notin% source_authority_to_map)
-  mapping_dataset <- mapping_dataset %>% filter(source_authority %in% source_authority_to_map)
+  data_not_to_map <- dataset_to_map %>% filter(source_authority %notin% source_authority_to_map)
+  dataset_to_map <- dataset_to_map %>% filter(source_authority %in% source_authority_to_map)
   
   recap_mapping <- NULL
   not_mapped_total <- NULL
@@ -43,11 +43,11 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
     }
   }
   
-  dataset_mapped <- rbind(mapping_dataset, data_not_to_map)
+  dataset_mapped <- rbind(dataset_mapped, data_not_to_map)
   
   if(summary_mapping){dataset_mapped <- list(dataset_mapped = dataset_mapped, summary_mapping =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   }else {
-    dataset_mapped <- dataset_to_map
+    dataset_mapped <- dataset_mapped
   }
   return(dataset_mapped)
 }
