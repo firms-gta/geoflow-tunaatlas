@@ -64,11 +64,13 @@ function(action, entity, config){
     stats_total = nominal_catch$stats_total
     not_mapped_total = nominal_catch$not_mapped_total
     
-    names_list <- c("summary_mapping", "stats_total", "not_mapped_total") # file we want to save
+    names_list <- c("summary_mapping", "stats_total", "not_mapped_total") #file we want to save
+    
     lapply(names_list, function(name) {
       file_name <- paste0("data/", name, ".rds")
-      object <- mget(name, envir = globalenv())
-      saveRDS(object, file = file_name)
+      object_list <- mget(name, envir = globalenv())
+      object_df <- object_list[[1]]
+      saveRDS(object_df, file = file_name)
     })
     
     
