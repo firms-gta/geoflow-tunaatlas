@@ -39,6 +39,10 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   if (!("sum_value_not_mapped" %in% colnames(stats_data_not_mapped))) {
     stats_data_not_mapped$sum_value_not_mapped = 0
   }
+  if (!("sum_value_mapped" %in% colnames(stats_data_not_mapped))) {
+    stats_data_not_mapped$sum_value_mapped = 0
+  }
+  
   stats_data_not_mapped[is.na(stats_data_not_mapped)] <- 0
   stats_data_not_mapped$percentage_not_mapped <- stats_data_not_mapped$sum_value_not_mapped/stats_data_not_mapped$sum_value_mapped * 
     100
