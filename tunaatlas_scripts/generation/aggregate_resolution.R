@@ -1,18 +1,19 @@
 aggregate_resolution =function (con, df_input, resolution) 
 {
   columns_df_input <- colnames(df_input)
-  df_input_distinct_area <- unique(df_input$geographic_identifier)
-  df_input_distinct_area <- paste(unique(df_input_distinct_area), 
-                                  collapse = "','")
   
   
   cwp_grid_data_with_resolution_as_required <- subset(df_input, grepl(paste0("^", resolution), geographic_identifier))
   cwp_grid_data_with_resolution_not_as_required <- setdiff(df_input, cwp_grid_data_with_resolution_as_required)
   
+  df_input_distinct_area <- unique(cwp_grid_data_with_resolution_not_as_required$geographic_identifier)
+  df_input_distinct_area <- paste(unique(df_input_distinct_area), 
+                                  collapse = "','")
+  
   
   areas_to_project_data_to_aggregate <- dbGetQuery(con, paste0("SELECT\n      left(a2.code,7) as input_geographic_identifier,\n      left(a1.code,7) as geographic_identifier_project\n      from\n      area.cwp_grid a1,\n      area.cwp_grid a2\n      where\n      a2.code IN ('", 
-                                                               area_changeresolution, "') and\n      LEFT(CAST(a1.code AS TEXT), 1) = '6' and LEFT(CAST(a2.code AS TEXT), 1) = '5' and \n      ST_Within(a2.geom, a1.geom)\n      UNION\n      SELECT\n      a2.code as input_geographic_identifier,\n      left(a1.code,7) as geographic_identifier_project\n      from\n      area.cwp_grid a1,\n      area.irregular_areas_task2_iotc a2\n      where\n      a2.code IN ('", 
-                                                               area_changeresolution, "') and\n      LEFT(CAST(a1.code AS TEXT), 1)='6' and \n      ST_Within(a2.geom, a1.geom)")) %>% distinct()
+                                                               df_input_distinct_area, "') and\n      LEFT(CAST(a1.code AS TEXT), 1) = '6' and LEFT(CAST(a2.code AS TEXT), 1) = '5' and \n      ST_Within(a2.geom, a1.geom)\n      UNION\n      SELECT\n      a2.code as input_geographic_identifier,\n      left(a1.code,7) as geographic_identifier_project\n      from\n      area.cwp_grid a1,\n      area.irregular_areas_task2_iotc a2\n      where\n      a2.code IN ('", 
+                                                               df_input_distinct_area, "') and\n      LEFT(CAST(a1.code AS TEXT), 1)='6' and \n      ST_Within(a2.geom, a1.geom)")) %>% distinct()
   
   
 
