@@ -278,7 +278,6 @@ function(action, entity, config){
     config$logger.info("Mapping code lists of georeferenced datasets...")
     mapping_codelist <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map=georef_dataset, mapping_keep_src_code, summary_mapping = TRUE,source_authority_to_map = opts$source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     georef_dataset <- mapping_codelist$dataset_mapped
-    nominal_catch = mapping_codelist$dataset_mapped
     summary_mapping = mapping_codelist$summary_mapping
     stats_total = mapping_codelist$stats_total
     not_mapped_total = mapping_codelist$not_mapped_total
@@ -475,7 +474,7 @@ and groups of gears.",
   
   if (opts$irregular_area %in% c("remove", "reallocate")) {
     source(file.path(url_scripts_create_own_tuna_atlas,'spatial_curation.R'))
-    georef_dataset <- spatial_curation(georef_dataset, con, opts$irregular_area)
+    georef_dataset <- spatial_curation(con,georef_dataset, opts$irregular_area)
     
     function_recap_each_step("irregular_area_handling",
                              georef_dataset,
