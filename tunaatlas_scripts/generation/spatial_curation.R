@@ -1,6 +1,6 @@
 spatial_curation =function (con, df_input, remove_reallocate){
 
-cwp_grid <- dbGetQuery(con, "SELECT cwp_code from area.cwp_grid") %>% dplyr::rename(geographic_identifier = cwp_code)
+cwp_grid <- DBI::dbGetQuery(con, "SELECT cwp_code from area.cwp_grid") %>% dplyr::rename(geographic_identifier = cwp_code)
 
 df_input_cwp_grid <- df_input %>% dplyr::inner_join(cwp_grid)
   
