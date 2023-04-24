@@ -15,6 +15,7 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
   `%notin%` <- Negate(`%in%`)
   data_not_to_map <- dataset_to_map %>% filter(source_authority %notin% source_authority_to_map)
   dataset_to_map <- dataset_to_map %>% filter(source_authority %in% source_authority_to_map)
+  mapping_dataset <- mapping_dataset %>% filter(source_authority %in% source_authority_to_map)
   
   recap_mapping <- NULL
   not_mapped_total <- NULL
