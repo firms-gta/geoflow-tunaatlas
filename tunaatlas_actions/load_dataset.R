@@ -234,7 +234,7 @@ load_dataset <- function(action,entity, config, options){
       
       # Merge to get back the ID from the DB
       df_to_load <- FUNMergeDimensions_NonCodeListLike(
-        con,
+        DBconnection = con,
         inputDataset= df_to_load,
         DB_PK_AttributeName = db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim],
         dimension_colnames_to_retrieve = db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim],
