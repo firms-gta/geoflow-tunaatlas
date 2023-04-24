@@ -474,8 +474,11 @@ and groups of gears.",
   
   if (opts$irregular_area %in% c("remove", "reallocate")) {
     source(file.path(url_scripts_create_own_tuna_atlas,'spatial_curation.R'))
-    georef_dataset <- spatial_curation(con,georef_dataset, opts$irregular_area)
-    
+    spatial_curation <- spatial_curation(con,georef_dataset, opts$irregular_area)
+    georef_dataset <- spatial_curation$df
+    removed_irregular_areas <- spatial_curation$not_cwp_grid
+    stats_irregular_areas <- spatial_curation$stats
+
     function_recap_each_step("irregular_area_handling",
                              georef_dataset,
                              paste0("In this step, we handle areas that does not match cwp grids norme") ,
@@ -483,6 +486,16 @@ and groups of gears.",
                              list(options_irregular_area))
     
   }
+  
+  names_list_irregular_areas <- c("removed_irregular_areas", "stats_irregular_areas") #file we want to save
+  
+  lapply(names_list_irregular_areas, function(name) {
+    file_name <- paste0("data/", name, ".rds")
+    object_list <- mget(name, envir = globalenv())
+    object_df <- object_list[[1]]
+    saveRDS(object_df, file = file_name)
+  })
+  
   
   
   
