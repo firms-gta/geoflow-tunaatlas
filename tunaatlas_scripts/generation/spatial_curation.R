@@ -1,19 +1,19 @@
 spatial_curation =function (con, df_input, remove_reallocate){
 
-cwp_grid <- dbGetQuery(con, "SELECT cwp_code from area.cwp_grid") %>% rename(geographic_identifier = cwp_code)
+cwp_grid <- dbGetQuery(con, "SELECT cwp_code from area.cwp_grid") %>% dplyr::rename(geographic_identifier = cwp_code)
 
-df_input_cwp_grid <- df_input %>% inner_join(cwp_grid)
+df_input_cwp_grid <- df_input %>% dplyr::inner_join(cwp_grid)
   
-not_cwp_grid <- df_input %>% anti_join(cwp_grid)
+not_cwp_grid <- df_input %>% dplyr::anti_join(cwp_grid)
 
 if(remove_reallocate == "remove"){
   
   if (!is.null(df_input_cwp_grid)) {
     sum_fact_to_reallocate <- df_input_cwp_grid %>% 
-      group_by(unit) %>% summarise(value_reallocate = sum(value))
-    sum_whole_df_input <- df_input %>% group_by(unit) %>% 
-      summarise(value = sum(value))
-    stats_reallocated_data <- left_join(sum_whole_df_input, 
+      dplyr::group_by(unit) %>% dplyr::summarise(value_reallocate = sum(value))
+    sum_whole_df_input <- df_input %>% dplyr::group_by(unit) %>% 
+      dplyr::summarise(value = sum(value))
+    stats_reallocated_data <- dplyr::left_join(sum_whole_df_input, 
                                         sum_fact_to_reallocate)
     stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$value * 
       100
@@ -36,17 +36,17 @@ areas_to_project_data_not_cwp <- dbGetQuery(con,
 if (nrow(areas_to_project_data_not_cwp) > 0) {
   areas_to_curate <- unique(areas_to_project_data_not_cwp$input_geographic_identifier)
   df_input_areas_to_curate <- not_cwp_grid %>%
-    filter(geographic_identifier %in% areas_to_curate)
-  areas_to_project_data_not_cwp <- areas_to_project_data_not_cwp %>% group_by(input_geographic_identifier) %>% slice(1)
+    dplyr::filter(geographic_identifier %in% areas_to_curate)
+  areas_to_project_data_not_cwp <- areas_to_project_data_not_cwp %>% dplyr::group_by(input_geographic_identifier) %>% dplyr::slice(1)
   `%notin%` <- Negate(`%in%`)
   df_input_areas_not_curated <- not_cwp_grid %>% 
-    filter(geographic_identifier %notin% areas_to_curate)
+    dplyr::filter(geographic_identifier %notin% areas_to_curate)
 }
 
-df_input_curated <- df_input_areas_to_curate %>% inner_join(areas_to_project_data_not_cwp, by = c("geographic_identifier" = "input_geographic_identifier"))
-df_input_not_curated <- df_input_areas_to_curate %>% left_join(areas_to_project_data_not_cwp, by = c("geographic_identifier" = "input_geographic_identifier")) 
+df_input_curated <- df_input_areas_to_curate %>% dplyr::inner_join(areas_to_project_data_not_cwp, by = c("geographic_identifier" = "input_geographic_identifier"))
+df_input_not_curated <- df_input_areas_to_curate %>% dplyr::left_join(areas_to_project_data_not_cwp, by = c("geographic_identifier" = "input_geographic_identifier")) 
 
-df_input_curated <- df_input_curated %>% group_by_(.dots = setdiff(c(columns_df_input, 
+df_input_curated <- df_input_curated %>% dplyr::group_by_(.dots = setdiff(c(columns_df_input, 
                                                                                "geographic_identifier_project"), c("geographic_identifier", 
                                                                                                                    "value"))) %>% summarise(value = sum(value))
 df_input_curated$geographic_identifier <- df_input_curated$geographic_identifier_project
@@ -58,10 +58,10 @@ df_input_final_curated <- rbind(data.frame(df_input_cwp_grid),
 )
 if (!is.null(df_input_final_curated)) {
   sum_fact_to_reallocate <- df_input_final_curated %>% 
-    group_by(unit) %>% summarise(value_reallocate = sum(value))
-  sum_whole_df_input <- df_input %>% group_by(unit) %>% 
-    summarise(value = sum(value))
-  stats_reallocated_data <- left_join(sum_whole_df_input, 
+    dplyr::group_by(unit) %>% dplyr::summarise(value_reallocate = sum(value))
+  sum_whole_df_input <- df_input %>% dplyr::group_by(unit) %>% 
+    dplyr::summarise(value = sum(value))
+  stats_reallocated_data <- dplyr::left_join(sum_whole_df_input, 
                                       sum_fact_to_reallocate)
   stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$value * 
     100
