@@ -506,7 +506,7 @@ and groups of gears.",
   if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    source(file.path(url_scripts_create_own_tuna_atlas, "upgrade_resolution.R")) #modified for geoflow
+    source(file.path(url_scripts_create_own_tuna_atlas, "aggregate_resolution.R")) #modified for geoflow
     georef_dataset<-aggregate_resolution(con, georef_dataset, 6)
     georef_dataset<-georef_dataset$df
     
