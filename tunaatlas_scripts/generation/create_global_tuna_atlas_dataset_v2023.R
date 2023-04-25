@@ -278,11 +278,11 @@ function(action, entity, config){
     config$logger.info("Mapping code lists of georeferenced datasets...")
     mapping_codelist <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map=georef_dataset, mapping_keep_src_code, summary_mapping = TRUE,source_authority_to_map = opts$source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     georef_dataset <- mapping_codelist$dataset_mapped
-    summary_mapping = mapping_codelist$summary_mapping
+    recap_mapping = mapping_codelist$recap_mapping
     stats_total = mapping_codelist$stats_total
     not_mapped_total = mapping_codelist$not_mapped_total
     
-    names_list <- c("summary_mapping", "stats_total", "not_mapped_total") #file we want to save
+    names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
     
     lapply(names_list, function(name) {
       file_name <- paste0("data/", name, ".rds")
