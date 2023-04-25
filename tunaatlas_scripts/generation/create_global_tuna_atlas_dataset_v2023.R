@@ -282,6 +282,9 @@ function(action, entity, config){
     stats_total <- mapping_codelist$stats_total
     not_mapped_total <- mapping_codelist$not_mapped_total
     
+    config$logger.info("Mapping code lists of georeferenced datasets OK")
+    
+    
     names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
     
     lapply(names_list, function(name) {
@@ -291,7 +294,7 @@ function(action, entity, config){
       saveRDS(object_df, file = file_name)
     })
     
-    config$logger.info("Mapping code lists of georeferenced datasets OK")
+    config$logger.info("Saving recap of mapping ok")
     
     function_recap_each_step("mapping_codelist",
                              georef_dataset,
