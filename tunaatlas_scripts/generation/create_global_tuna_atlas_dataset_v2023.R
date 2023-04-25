@@ -476,7 +476,7 @@ and groups of gears.",
     source(file.path(url_scripts_create_own_tuna_atlas,'spatial_curation.R'))
     spatial_curation <- spatial_curation(con,georef_dataset, opts$irregular_area)
     georef_dataset <- spatial_curation$df
-    removed_irregular_areas <- spatial_curation$not_cwp_grid
+    removed_irregular_areas <- spatial_curation$df_input_areas_not_curated
     stats_irregular_areas <- spatial_curation$stats
 
     function_recap_each_step("irregular_area_handling",
