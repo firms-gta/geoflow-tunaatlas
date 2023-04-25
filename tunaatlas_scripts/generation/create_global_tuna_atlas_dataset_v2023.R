@@ -278,9 +278,9 @@ function(action, entity, config){
     config$logger.info("Mapping code lists of georeferenced datasets...")
     mapping_codelist <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map=georef_dataset, mapping_keep_src_code, summary_mapping = TRUE,source_authority_to_map = opts$source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     georef_dataset <- mapping_codelist$dataset_mapped
-    recap_mapping = mapping_codelist$recap_mapping
-    stats_total = mapping_codelist$stats_total
-    not_mapped_total = mapping_codelist$not_mapped_total
+    recap_mapping <- mapping_codelist$recap_mapping
+    stats_total <- mapping_codelist$stats_total
+    not_mapped_total <- mapping_codelist$not_mapped_total
     
     names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
     
@@ -291,8 +291,7 @@ function(action, entity, config){
       saveRDS(object_df, file = file_name)
     })
     
-    config$logger.info("Mapping code
- lists of georeferenced datasets OK")
+    config$logger.info("Mapping code lists of georeferenced datasets OK")
     
     function_recap_each_step("mapping_codelist",
                              georef_dataset,
@@ -305,8 +304,7 @@ to standard code lists, for some tRFMOs own-defined codes that usually are aggre
 codes (e.g. flag ’IDPH’ standing for Indonesia and Philippines within WCPFC or the species “Otun”
 standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For
 species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
-and groups of gears.",
-                             "map_codelists", list(options_mapping_map_code_lists))
+and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     
     
     
