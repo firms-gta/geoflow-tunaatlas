@@ -234,22 +234,22 @@ load_dataset <- function(action,entity, config, options){
       
       # Merge to get back the ID from the DB
       df_to_load <- FUNMergeDimensions_NonCodeListLike(
-        DBconnection = con,
-        inputDataset= df_to_load,
+        con,
+        df_to_load,
+        DBTableName = db_nondf_inputlike_dimensions_parameters$db_tablename[dim],
         DB_PK_AttributeName = db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim],
-        dimension_colnames_to_retrieve = db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim],
-        DBTableName = db_nondf_inputlike_dimensions_parameters$db_tablename[dim]
+        dimension_colnames_to_retrieve = db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim]
       )
       
       #check if some codes are missing after the matching. If so, upload the new records in Sardara
       index.na<-which(is.na(df_to_load[, db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim]]))
       
       if (length(index.na)>0){
-        rs<-FUNuploadNewRecordsToDB(con,
+        rs<-FUNuploadNewRecordsToDB(DBconnection = con,
                                     inputDatasetMergedWithDBCodeList= df_to_load,
-                                    DBTableName = db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim],
-                                    DB_PK_AttributeName = db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim],
-                                    dimension_colnames_to_retrieve = db_nondf_inputlike_dimensions_parameters$db_tablename[dim])
+                                    DBTableName = db_nondf_inputlike_dimensions_parameters$db_tablename[dim],
+                                    DB_PK_AttributeName = db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim],
+                                    dimension_colnames_to_retrieve = db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim])
         
         #if codes were missing in db, re-run the function that does the merging
         
@@ -258,9 +258,9 @@ load_dataset <- function(action,entity, config, options){
         df_to_load <- FUNMergeDimensions_NonCodeListLike(
           con,
           df_to_load,
-          db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim],
-          db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim],
-          db_nondf_inputlike_dimensions_parameters$db_tablename[dim]
+          DBTableName = db_nondf_inputlike_dimensions_parameters$db_tablename[dim],
+          DB_PK_AttributeName = db_nondf_inputlike_dimensions_parameters$db_pkattribute_colname[dim],
+          dimension_colnames_to_retrieve = db_nondf_inputlike_dimensions_parameters$csv_formatted_dimension_colname[dim]
         )
       }
       
