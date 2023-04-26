@@ -46,6 +46,6 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
   
   dataset_mapped <- rbind(dataset_to_map, data_not_to_map)
   
-  dataset_mapped <- list(dataset_mapped = dataset_mapped, recap_mapping =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
+  dataset_mapped <- list(dataset_mapped = dataset_mapped, recap_mapping  =recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   return(dataset_mapped)
 }
