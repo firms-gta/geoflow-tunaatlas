@@ -277,7 +277,9 @@ function(action, entity, config){
     
     config$logger.info("Mapping code lists of georeferenced datasets...")
     mapping_codelist <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map=georef_dataset, mapping_keep_src_code, summary_mapping = TRUE,source_authority_to_map = opts$source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
+    
     georef_dataset <- mapping_codelist$dataset_mapped
+    
     recap_mapping <- mapping_codelist$recap_mapping
     stats_total <- mapping_codelist$stats_total
     not_mapped_total <- mapping_codelist$not_mapped_total
@@ -290,9 +292,14 @@ function(action, entity, config){
     lapply(names_list, function(name) {
       file_name <- paste0("data/", name, ".rds")
       object_list <- mget(name, envir = globalenv())
-      object_df <- object_list[[1]]
-      saveRDS(object_df, file = file_name)
+      if (!is.null(object_list[[1]])) {
+        object_df <- object_list[[1]]
+        saveRDS(object_df, file = file_name)
+      } else {
+        config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
+      }
     })
+    
     
     config$logger.info("Saving recap of mapping ok")
     
@@ -493,9 +500,14 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   lapply(names_list_irregular_areas, function(name) {
     file_name <- paste0("data/", name, ".rds")
     object_list <- mget(name, envir = globalenv())
-    object_df <- object_list[[1]]
-    saveRDS(object_df, file = file_name)
+    if (!is.null(object_list[[1]])) {
+      object_df <- object_list[[1]]
+      saveRDS(object_df, file = file_name)
+    } else {
+      config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
+    }
   })
+  
   
   
   
