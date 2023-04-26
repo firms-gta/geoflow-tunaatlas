@@ -289,7 +289,7 @@ function(action, entity, config){
     
     names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
     
-    lapply(names_list, function(name) {
+    function_write_RDS = function(name) {
       file_name <- paste0("data/", name, ".rds")
       object_list <- mget(name, envir = globalenv())
       if (!is.null(object_list[[1]])) {
@@ -298,7 +298,9 @@ function(action, entity, config){
       } else {
         config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
       }
-    })
+    }
+    
+    try(lapply(names_list, function_write_RDS))
     
     
     config$logger.info("Saving recap of mapping ok")
@@ -497,16 +499,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   
   names_list_irregular_areas <- c("removed_irregular_areas", "stats_irregular_areas") #file we want to save
   
-  lapply(names_list_irregular_areas, function(name) {
-    file_name <- paste0("data/", name, ".rds")
-    object_list <- mget(name, envir = globalenv())
-    if (!is.null(object_list[[1]])) {
-      object_df <- object_list[[1]]
-      saveRDS(object_df, file = file_name)
-    } else {
-      config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
-    }
-  })
+  try(lapply(names_list_irregular_areas, function_write_RDS))
   
   
   
