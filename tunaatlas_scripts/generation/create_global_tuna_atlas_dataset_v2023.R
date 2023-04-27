@@ -259,6 +259,8 @@ function(action, entity, config){
   # 
   # georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
 
+  georef_dataset <- georef_dataset %>% 
+    dplyr::mutate(unit = case_when(unit %in% c("t") ~ "MT", unit %in% c("no") ~ "NO"), TRUE ~ unit)
   
   
   
@@ -301,6 +303,8 @@ function(action, entity, config){
     }
     
     try(lapply(names_list, function_write_RDS))
+    
+    
     
     
     config$logger.info("Saving recap of mapping ok")
@@ -597,7 +601,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     
     
     conversion_factor_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter((conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
-    # conversion_factor_not_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter(conversion_factor > max_weight | conversion_factor < min_weight | conversion_factor < 0.002 | conversion_factor > 0.5)
+    conversion_factor_not_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter(!(conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
     georef_dataset_without_nomt <- georef_dataset %>% dplyr::filter(unit%in%c("MT", "NO","MTNO"))
     georef_dataset <- rbind(georef_dataset_without_nomt, conversion_factor_to_keep %>% dplyr::mutate(unit = "NOMT") %>% dplyr::rename(value = NO) %>% dplyr::select(colnames(georef_dataset_without_nomt)))
     function_recap_each_step("Removing_absurd_nomt",
