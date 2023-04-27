@@ -260,7 +260,7 @@ function(action, entity, config){
   # georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
 
   georef_dataset <- georef_dataset %>% 
-    dplyr::mutate(unit = case_when(unit %in% c("t") ~ "MT", unit %in% c("no") ~ "NO"), TRUE ~ unit)
+    dplyr::mutate(unit = case_when(unit %in% c("t") ~ "MT", unit %in% c("no") ~ "NO", TRUE ~ unit))
   
   
   
