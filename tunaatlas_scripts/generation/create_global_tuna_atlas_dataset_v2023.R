@@ -172,6 +172,41 @@ function(action, entity, config){
   rm(dataset)
   ### next steps to correct identifier incorrect of iotc
   
+  
+  ### filtering on minimum time_start 
+  
+  if(is.null(opts$filtering_on_minimum_year_declared)){
+    filtering_on_minimum_year_declared <- TRUE
+    
+    } else {filtering_on_minimum_year_declared <- opts$filtering_on_minimum_year_declared}
+  
+  
+  
+  if(filtering_on_minimum_year_declared){
+  config$logger.info("filtering on minimum time_start ")
+  
+  library(dplyr)
+  
+  # extract the maximum year of declaration for each source_authority
+  max_years <- georef_dataset %>%
+    group_by(source_authority) %>%
+    summarise(max_time_start = max(time_start))
+  
+  # check if not all the source_authority columns have the same maximum year of declaration
+  if (length(unique(max_years$max_time_start)) > 1) {
+    config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
+  }
+  
+  # get the minimum time_start of all the maximum time_start of each source_authority
+  min_time_start <- min(max_years$max_time_start)
+  
+  # filter the georef_dataset based on the minimum time_start of all the maximum time_start of each source_authority
+  georef_dataset <- georef_dataset %>%
+    filter(time_start <= min_time_start)
+  
+  }
+  
+  
   function_recap_each_step("rawdata",
                            georef_dataset,
                            "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
