@@ -665,8 +665,8 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                            "",
                            list(""))
   
-    
-  
+  new_version_iotc_raising_available <- FALSE
+  if(new_version_iotc_raising_available){
   # unit conversion IOTC given factors -----------------------------------
   cl_filename <- "data/CA_RAISED_FILTERED_NO_FLEET.csv"
   iotc_conv_fact <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0, 
@@ -707,7 +707,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                            list(""))
   
   
-  
+  }
   
   # unit conversion with factors -----------------------------------
   
