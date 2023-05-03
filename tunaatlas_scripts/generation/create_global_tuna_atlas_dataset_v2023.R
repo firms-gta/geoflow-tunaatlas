@@ -665,7 +665,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                            "",
                            list(""))
   
-  new_version_iotc_raising_available <- FALSE
+  new_version_iotc_raising_available <- TRUE
   if(new_version_iotc_raising_available){
   # unit conversion IOTC given factors -----------------------------------
   cl_filename <- "data/CA_RAISED_FILTERED_NO_FLEET.csv"
@@ -680,7 +680,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   mapping_dataset<- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
   mapping_keep_src_code <- FALSE
   if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
-  iotc_conv_fact_mapped <- map_codelists(con, opts$fact, mapping_dataset, iotc_conv_fact, mapping_keep_src_code) #this map condelist function is to retieve the mapping dataset used
+  iotc_conv_fact_mapped <- map_codelists(con, opts$fact, mapping_dataset, iotc_conv_fact, mapping_keep_src_code)$dataset_mapped #this map condelist function is to retieve the mapping dataset used
   iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% select(-value)
   # output_mapping_codelist_name <- file.path("data", "mapping_codelist_summary.csv")
   # write.csv(mapping_codelist_summary, output_mapping_codelist_name)
@@ -865,7 +865,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
       
       
       if (mapping_map_code_lists=="TRUE"){
-        dataset_catch<-map_codelists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset
+        dataset_catch<-map_codelists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset_mapped
       }
       
       dataset_catch$time_start<-substr(as.character(dataset_catch$time_start), 1, 10)
@@ -980,7 +980,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
       
       
       if (mapping_map_code_lists=="TRUE"){
-        dataset_catch<-map_codelists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset
+        dataset_catch<-map_codelists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset_mapped
       }
       
       dataset_catch$time_start<-substr(as.character(dataset_catch$time_start), 1, 10)
@@ -1091,7 +1091,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
       
       
       if (mapping_map_code_lists=="TRUE"){
-        dataset_catch<-map_codelists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset
+        dataset_catch<-map_codelists("catch",mapping_csv_mapping_datasets_url,dataset_catch,mapping_keep_src_code)$dataset_mapped
       }
       
       dataset_catch$time_start<-substr(as.character(dataset_catch$time_start), 1, 10)
