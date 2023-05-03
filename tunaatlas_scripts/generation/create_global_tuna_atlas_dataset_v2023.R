@@ -185,8 +185,7 @@ function(action, entity, config){
   if(filtering_on_minimum_year_declared){
   config$logger.info("filtering on minimum time_start ")
   
-  library(dplyr)
-  
+ 
   # extract the maximum year of declaration for each source_authority
   max_years <- georef_dataset %>%
     group_by(source_authority) %>%
