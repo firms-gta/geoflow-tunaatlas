@@ -194,7 +194,7 @@ function(action, entity, config){
   # check if not all the source_authority columns have the same maximum year of declaration
   if (length(unique(max_years$max_time_start)) > 1) {
     config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
-  }
+  
   
   # get the minimum time_start of all the maximum time_start of each source_authority
   min_time_start <- min(max_years$max_time_start)
@@ -202,6 +202,7 @@ function(action, entity, config){
   # filter the georef_dataset based on the minimum time_start of all the maximum time_start of each source_authority
   georef_dataset <- georef_dataset %>%
     filter(time_start <= min_time_start)
+  }
   
   }
   
