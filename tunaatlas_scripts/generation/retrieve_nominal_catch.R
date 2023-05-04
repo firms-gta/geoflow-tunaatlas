@@ -23,24 +23,50 @@ retrieve_nominal_catch <- function(entity, config, options){
 	if(!options$include_IATTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("east_pacific",names(dataset_files_nominal_catch))>0]
 	
 	columns_to_keep=c("source_authority","species","gear","fishingfleet","time_start","time_end","geographic_identifier","unit","value")
-	nominal_catch <- as.data.frame(do.call("rbind", lapply(dataset_files_nominal_catch, readr::read_csv, guess_max = 0)))
-	nominal_catch <- nominal_catch[,columns_to_keep]
-	class(nominal_catch$value) <- "numeric"
-
-	# For ICCAT Nominal catch, we need to map flag code list, because flag code list used in nominal catch dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
-	if (options$include_ICCAT){
-		# extract mapping
-		df_mapping_source <- entity$data$source[[2]]
-		df_mapping_file <- entity$getJobDataResource(config, df_mapping_source)
-		df_mapping <- as.data.frame(readr::read_csv(df_mapping_file, guess_max = 0))
-		df_mapping$source_authority <- "ICCAT"
+	library(dplyr)
+	
+	# create a function that renames columns
+	library(dplyr)
+	
+	rename_columns <- function(x) {
+	  nominal <- readr::read_csv(x)
 	  
-		nominal_catch_other_rfmos <- nominal_catch %>% filter (source_authority != "ICCAT")
-		nominal_catch_iccat <- nominal_catch %>% filter (source_authority == "ICCAT")
-		nominal_catch_iccat <- map_codelist(nominal_catch_iccat, df_mapping, "fishingfleet")$df 
-	 
-		nominal_catch<-rbind(nominal_catch_other_rfmos,nominal_catch_iccat)
+	  # rename columns only if they exist
+	  if ("gear_type" %in% colnames(nominal)) {
+	    nominal <- nominal %>% rename(gear = gear_type)
+	  }
+	  if ("fishing_mode" %in% colnames(nominal)) {
+	    nominal <- nominal %>% rename(schooltype = fishing_mode)
+	  }
+	  if ("measurement_value" %in% colnames(nominal)) {
+	    nominal <- nominal %>% rename(value = measurement_value)
+	  }
+	  if ("measurement_unit" %in% colnames(nominal)) {
+	    nominal <- nominal %>% rename(unit = measurement_unit)
+	  }
+	  nominal_catch <- nominal[,columns_to_keep]
+	  class(nominal_catch$value) <- "numeric"
+	  
+	  
+	  return(nominal_catch)
 	}
+	
+	nominal_catch <- as.data.frame(do.call("rbind", lapply(dataset_files_nominal_catch,rename_columns)))
+
+	# # For ICCAT Nominal catch, we need to map flag code list, because flag code list used in nominal catch dataset is different from flag code list used in ICCAT task2; however we have to use the same flag code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 flag code list.
+	# if (options$include_ICCAT){
+	# 	# extract mapping
+	# 	df_mapping_source <- entity$data$source[[2]]
+	# 	df_mapping_file <- entity$getJobDataResource(config, df_mapping_source)
+	# 	df_mapping <- as.data.frame(readr::read_csv(df_mapping_file, guess_max = 0))
+	# 	df_mapping$source_authority <- "ICCAT"
+	#   
+	# 	nominal_catch_other_rfmos <- nominal_catch %>% filter (source_authority != "ICCAT")
+	# 	nominal_catch_iccat <- nominal_catch %>% filter (source_authority == "ICCAT")
+	# 	nominal_catch_iccat <- map_codelist(nominal_catch_iccat, df_mapping, "fishingfleet")$df 
+	#  
+	# 	nominal_catch<-rbind(nominal_catch_other_rfmos,nominal_catch_iccat)
+	# }
 
 	nominal_catch$time_start<-substr(as.character(nominal_catch$time_start), 1, 10)
 	nominal_catch$time_end<-substr(as.character(nominal_catch$time_end), 1, 10)
