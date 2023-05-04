@@ -26,7 +26,9 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                               regexpr("iotc", names(dataset_files)) > 0]
                         iotc_data <- do.call("rbind", lapply(dataset_files_iotc, readr::read_csv, guess_max = 0))
                         iotc_data <- as.data.frame(iotc_data)
+                        if(variable == "catch"){
                         iotc_data <- iotc_data %>% dplyr::rename(gear = gear_type , schooltype = fishing_mode, value =measurement_value, unit = measurement_unit)
+                        } # temporary patch before receiving effort dataset
                         class(iotc_data$value) <- "numeric"
                         iotc_data<- iotc_data[, columns_to_keep]
                       }else{
