@@ -608,37 +608,14 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   
   if (!is.null(opts$curation_absurd_converted_data)){
     
-    colnames_georef_dataset_groupping <- setdiff(colnames(georef_dataset), c("value", "unit"))
-
+    source(file.path(url_scripts_create_own_tuna_atlas,"curation_absurd_converted_data.R"))
+    
     max_conversion_factor <- read.csv("data/max_conversion_factor.csv")
-    strata_nomt <- georef_dataset %>% filter(unit%in%c("NOMT"))
-    strata_mtno <- georef_dataset %>% filter(unit%in%c("MTNO"))
-    strata_converted_level0 <-  rbind(strata_nomt, strata_mtno) %>% ungroup() %>% dplyr::select(-c(value)) %>% dplyr::distinct()
-    conversion_factor_level0 <- rbind(
-      dplyr::inner_join(strata_nomt , strata_mtno, by = setdiff(colnames(strata_mtno), c("value", "unit") )) %>%
-        dplyr::rename(NO =value.x, MT = value.y) %>%
-        dplyr::group_by(across(colnames_georef_dataset_groupping)) %>%
-        dplyr::summarise(NO = sum(NO), MT = sum(MT)) %>% 
-        ungroup(),
-      dplyr::inner_join(strata_mtno , strata_nomt, by = setdiff(colnames(strata_mtno), c("value", "unit") )) %>%
-        dplyr::rename(MT =value.x, NO = value.y)%>%
-        dplyr::group_by(across(colnames_georef_dataset_groupping)) %>%
-        dplyr::summarise(NO = sum(NO), MT = sum(MT)) %>% 
-        ungroup()
-    ) %>% 
-      dplyr::distinct() %>%
-      dplyr::group_by(across(colnames_georef_dataset_groupping)) %>%
-      dplyr::summarise(NO = sum(NO), MT = sum(MT)) %>% 
-      dplyr::mutate(conversion_factor = MT/NO) %>% 
-      dplyr::distinct()
     
+    georef_dataset <- curation_absurd_converted_data(georef_dataset = georef_dataset, 
+    max_conversion_factor = max_conversion_factor,
+    colnames_georef_dataset_groupping = colnames_georef_dataset_groupping)
     
-    
-    
-    conversion_factor_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter((conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
-    conversion_factor_not_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter(!(conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
-    georef_dataset_without_nomt <- georef_dataset %>% dplyr::filter(unit%in%c("MT", "NO","MTNO"))
-    georef_dataset <- rbind(georef_dataset_without_nomt, conversion_factor_to_keep %>% dplyr::mutate(unit = "NOMT") %>% dplyr::rename(value = NO) %>% dplyr::select(colnames(georef_dataset_without_nomt)))
     function_recap_each_step("Removing_absurd_nomt",
                              georef_dataset,
                              "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
@@ -666,40 +643,23 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                            list(""))
   
   new_version_iotc_raising_available <- TRUE
-  if(new_version_iotc_raising_available){
+  if(file.exists("data/conversion_factors_IOTC.csv")){
   # unit conversion IOTC given factors -----------------------------------
-  cl_filename <- "data/CA_RAISED_FILTERED_NO_FLEET.csv"
-  iotc_conv_fact <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0, 
-                                                  col_types = cols(AVG_WEIGHT = col_double())))%>%
-    mutate(geographic_identifier = FISHING_GROUND_CODE,
-           unit = "NO", unit_target = "MT", species = SPECIES_CODE, gear = GEAR_CODE,source_authority = "IOTC",
-           conversion_factor = AVG_WEIGHT/1000, 
-           time_start = lubridate::as_date(paste0(YEAR,"-",MONTH_START, "-01 "))) %>%
-    mutate(time_end =lubridate::ceiling_date(time_start, "month") - 1 ) %>%
-    select(gear	,source_authority,	species	,geographic_identifier,	time_start,	time_end,	unit	,unit_target,	conversion_factor) %>% mutate(value = conversion_factor)
-  mapping_dataset<- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
-  mapping_keep_src_code <- FALSE
-  if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
+  iotc_conv_fact <- read_csv("data/conversion_factors_IOTC.csv", 
+                             col_types = cols(geographic_identifier = col_character(), 
+                                              time_start = col_character(), time_end = col_character()))
   iotc_conv_fact_mapped <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map = iotc_conv_fact, mapping_keep_src_code,  source_authority_to_map = c("IOTC"))$dataset_mapped #this map condelist function is to retieve the mapping dataset used
-
-  iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% select(-value)
-  # output_mapping_codelist_name <- file.path("data", "mapping_codelist_summary.csv")
-  # write.csv(mapping_codelist_summary, output_mapping_codelist_name)
-  
-  readr::write_csv(iotc_conv_fact_mapped, file = paste0(gsub( ".csv","", cl_filename), "modified.csv"))
-  georef_dataset_not_iotc <- georef_dataset %>% filter(source_authority != "IOTC")
-  georef_dataset_iotc <- georef_dataset %>% filter(source_authority == "IOTC") 
-  georef_dataset_iotc_raised <- do_unit_conversion( entity=entity,
+    
+  georef_dataset <- do_unit_conversion( entity=entity,
                                                     config=config,
                                                     fact=fact,
-                                                    unit_conversion_csv_conversion_factor_url=paste0(gsub( ".csv","", cl_filename), "modified.csv"),
+                                                    unit_conversion_csv_conversion_factor_url=iotc_conv_fact_mapped,
                                                     unit_conversion_codelist_geoidentifiers_conversion_factors="areas_tuna_rfmos_task2",
                                                     mapping_map_code_lists=opts$mapping_map_code_lists,
                                                     georef_dataset=georef_dataset_iotc, 
                                                     removing_numberfish_final = FALSE) # do not remove number of fish as they will be converted later with other conversion factor data
   
   
-  georef_dataset <- rbind(georef_dataset_not_iotc, georef_dataset_iotc_raised)
   function_recap_each_step("Harmonising units on IOTC data",
                            georef_dataset,
                            "In this step, we target the data provided in Tons and Number of fish provided by IOTC.
