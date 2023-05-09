@@ -1,9 +1,14 @@
-do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE){
+do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE, converting_dataset_mapped  = TRUE){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/extract_dataset.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/convert_units.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/list_metadata_datasets.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
   con <- config$software$output$dbi
+  
+  if(is.data.frame(unit_conversion_csv_conversion_factor_url)){
+    
+    df_conversion_factor <- unit_conversion_csv_conversion_factor_url
+  } else {
   
   config$logger.info("Reading the conversion factors dataset")
   googledrive_baseurl <- "https://drive.google.com/open?id="
@@ -17,9 +22,15 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   }else{
     df_conversion_factor <- as.data.frame(readr::read_csv(unit_conversion_csv_conversion_factor_url, guess_max=0))
   }
-  
+  }
   ## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source gear coding system with ISSCFG coding system. In fact, the conversion factors dataset is expressed with ISSCFG coding system for gears, while the primary tRFMOs datasets are expressed with their own gear coding system.
   config$logger.info("Checking if 'mapping_map_code_lists' option is set to TRUE")
+  
+  if("value" %in% colnames(df_conversion_factor)){
+    df_conversion_factor <- df_conversion_factor %>% dplyr::rename(conversion_factor = value)
+  }
+  
+  
   if (!mapping_map_code_lists){
     config$logger.info("'mapping_map_code_lists' option is set to TRUE")
     
@@ -127,6 +138,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   lineage <- ""
   description <- ""
   info <- NULL
+  if(!is.data.frame(unit_conversion_csv_conversion_factor_url)){
   if (unit_conversion_csv_conversion_factor_url=="https://drive.google.com/open?id=1csQ5Ww8QRTaYd1DG8chwuw0UVUOGkjNL"){
     lineage <- paste0("The units used to express catches may vary between tRFMOs datasets. Catches are expressed in weight, or in number of fishes, or in both weights and numbers in the same stratum. Values expressed in weight were kept and numbers were converted into weight using simple conversion matrices (A. Fonteneau, pers. com). These conversion factors depend on the species, the gear, the year and the main geographical area (equatorial or tropical). They were computed from the Japanese and Taiwanese size-frequency data as well as from the Japanese total catches and catch-and-effort data. The factors of conversion are available here: ",unit_conversion_csv_conversion_factor_url," and the methodology to compute these factors is available here: http://data.d4science.org/ZWFMa3JJUHBXWk9NTXVPdFZhbU5BUFEyQnhUeWd1d3lHbWJQNStIS0N6Yz0. Some data might not be converted at all because no conversion factor exists for the stratum: these data were kept in number. Information regarding the conversions of catch units for this dataset: ratio_converted_number % of the the catches that were originally expressed in number have been converted into weight through the conversion factors.")
     description <- "- Values of catch were expressed in weight converting numbers using matrices of average weights varying with species, fishing gear, year and large geographical areas, i.e. equatorial or tropical (A. Fonteneau, pers.com). Average weights were computed from the Japanese and Taiwanese size-frequency data as well as from the Japanese total catches and catch-and-effort data. Some data might not be converted at all because no conversion factor exists for the stratum: those data were kept and the unit of catch was set to Number of fishes harvested."
@@ -139,6 +151,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     lineage <- paste0("The units used to express the measure may vary between tRFMOs datasets. The measures were harmonized through unit conversion factors located here: ",unit_conversion_csv_conversion_factor_url,". Information regarding the conversions of units for this dataset: ratio_converted_number % of the the catches that were originally expressed in number have been converted into weight through the conversion factors.")
     description <- "- Units for the measures were harmonized."
     info <- NULL
+  }
   }
   #@juldebar modify FIRMS-Secretariat@fao.org 
   #@juldebar begin commented
