@@ -3,7 +3,10 @@ function(action, entity, config){
   require(dplyr)
   
   catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]))
-  filename_dsd <- entity$data$source[[2]] #structure
+
+  filename1 <- entity$data$source[[1]]
+  filename2 <- entity$data$source[[2]]
+  path_to_raw_dataset <- entity$getJobDataResource(config, entity$data$source[[1]])
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()
   options(encoding = "UTF-8")
@@ -14,7 +17,8 @@ function(action, entity, config){
   
   catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier))
   
-
+  catches <- catches %>% filter(value!= 0)
+  
   catches<-catches %>% dplyr::select("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value", "source_authority")
   
   #----------------------------------------------------------------------------------------------------------------------------
@@ -35,11 +39,11 @@ function(action, entity, config){
   entity$setTemporalExtent(dataset_temporal_extent)
   
   #@geoflow -> export as csv
-  output_name_dataset <- file.path(dirname(filename_dsd), paste0(entity$identifiers[["id"]], "_harmonized.csv"))
+  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
   write.csv(catches, output_name_dataset, row.names = FALSE)
-  output_name_codelists <-  file.path(dirname(filename_dsd), paste0(entity$identifiers[["id"]], "_codelists.csv"))
-  file.rename(from = entity$getJobDataResource(config, filename_dsd), to = output_name_codelists)
-  #----------------------------------------------------------------------------------------------------------------------------
+  
+  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
+  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)  #----------------------------------------------------------------------------------------------------------------------------
   # entity$addResource("source", output_name_dataset)
   entity$addResource("harmonized", output_name_dataset)
   entity$addResource("codelists", output_name_codelists)
