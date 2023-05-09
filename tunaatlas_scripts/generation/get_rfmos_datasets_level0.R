@@ -82,8 +82,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                                regexpr("iccat", names(dataset_files)) > 0]
                         iccat_data <- do.call("rbind", lapply(dataset_files_iccat, readr::read_csv, guess_max = 0))
                         iccat_data <- as.data.frame(iccat_data)
-                        iccat_data <- iccat_data %>% dplyr::rename(gear = gear_type , schooltype = fishing_mode, value =measurement_value, unit = measurement_unit)
-                        
+
                         class(iccat_data$value) <- "numeric"
                         
                         iccat_data<- iccat_data[, columns_to_keep]
