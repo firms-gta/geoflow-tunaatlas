@@ -655,7 +655,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                                                     unit_conversion_csv_conversion_factor_url=iotc_conv_fact_mapped,
                                                     unit_conversion_codelist_geoidentifiers_conversion_factors="areas_tuna_rfmos_task2",
                                                     mapping_map_code_lists=opts$mapping_map_code_lists,
-                                                    georef_dataset=georef_dataset_iotc, 
+                                                    georef_dataset=georef_dataset, 
                                                     removing_numberfish_final = FALSE) # do not remove number of fish as they will be converted later with other conversion factor data
   
   
