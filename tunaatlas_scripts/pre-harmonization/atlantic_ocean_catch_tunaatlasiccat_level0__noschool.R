@@ -100,10 +100,10 @@ config$logger.info(paste0(" Change units  \n"))
 
 
 index.kg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == ".w" )
-catches_pivot_ICCAT[index.kg,"CatchUnits"]<- "MT"
+catches_pivot_ICCAT[index.kg,"CatchUnits"]<- "t"
 
 index.nr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_ICCAT[,"DSetTypeID"] == "n." )
-catches_pivot_ICCAT[index.nr,"CatchUnits"]<- "NO"               
+catches_pivot_ICCAT[index.nr,"CatchUnits"]<- "no"               
 
 
 config$logger.info(paste0(" Change units  \n"))
@@ -116,7 +116,7 @@ index.nrkg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot
 catches_pivot_ICCAT[index.nrkg,"CatchUnits"]<- "NOMT"            
 
 if(any(catches_pivot_ICCAT$value == "NULL")) {
-	catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$CatchUnits <- "MT"
+	catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$CatchUnits <- "t"
 	catches_pivot_ICCAT[catches_pivot_ICCAT$value == "NULL",]$value <- 0
 }
 class(catches_pivot_ICCAT$value) = "numeric"

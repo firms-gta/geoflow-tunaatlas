@@ -295,7 +295,7 @@ function(action, entity, config){
   # georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
 
   georef_dataset <- georef_dataset %>% 
-    dplyr::mutate(unit = case_when(unit %in% c("t") ~ "MT", unit %in% c("no") ~ "NO", TRUE ~ unit))
+    dplyr::mutate(unit = case_when(unit %in% c("t") ~ "t", unit %in% c("no") ~ "no", TRUE ~ unit))
   
   
   
@@ -613,8 +613,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     max_conversion_factor <- read.csv("data/max_conversion_factor.csv")
     
     georef_dataset <- curation_absurd_converted_data(georef_dataset = georef_dataset, 
-    max_conversion_factor = max_conversion_factor,
-    colnames_georef_dataset_groupping = colnames_georef_dataset_groupping)
+    max_conversion_factor = max_conversion_factor)
     
     function_recap_each_step("Removing_absurd_nomt",
                              georef_dataset,
@@ -681,7 +680,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     if(is.null(opts$unit_conversion_csv_conversion_factor_url)) stop("Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'")
     if(is.null(opts$unit_conversion_codelist_geoidentifiers_conversion_factors)) stop("Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'")
     
-    ntons_before_this_step <- round(georef_dataset %>% filter(unit=="MT")  %>% select(value)  %>% sum())
+    ntons_before_this_step <- round(georef_dataset %>% filter(unit=="t")  %>% select(value)  %>% sum())
     config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons", nrow(georef_dataset),ntons_before_this_step))
     
     config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
@@ -699,7 +698,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     config$logger.info(sprintf("STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons", nrow(georef_dataset),ntons_after_conversion))
     # config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
     config$logger.info(sprintf("STEP 2/5 : Unit conversion generated [%s] additionnal tons", ntons_after_conversion-ntons_before_this_step))
-    config$logger.info(sprintf("STEP 2/5 : Total number for 'NO' unit is now [%s] individuals", georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()))
+    config$logger.info(sprintf("STEP 2/5 : Total number for 'NO' unit is now [%s] individuals", georef_dataset %>% filter(unit=="no")  %>% select(value)  %>% sum()))
     config$logger.info("END STEP 2/5")
     function_recap_each_step("raising",
                              georef_dataset,
@@ -769,8 +768,8 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     # nominal_catch2 <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
     # nominal_catch <- read.csv2("entities/global_catch_1deg_1m_ps_bb_firms_Bastien_with_step_rds__level2/data/nominal_catch_mapped.csv", sep = ";")
     #         #@juldebar keep same units for all datatets
-    if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "MT"
-    if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "NO"
+    if(any(nominal_catch$unit == "t")) nominal_catch[nominal_catch$unit == "t", ]$unit <- "t"
+    if(any(nominal_catch$unit == "no")) nominal_catch[nominal_catch$unit == "no", ]$unit <- "no"
     class(nominal_catch$value) <- "numeric"
     #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
     if(nrow(nominal_catch)==0){nominal_catch <-retrieve_nominal_catch(entity, config, opts)}

@@ -94,7 +94,7 @@ catches_pivot_ICCAT$variable<-gsub("fs","",catches_pivot_ICCAT$variable)
 catches_pivot_ICCAT$variable<-gsub("fd","",catches_pivot_ICCAT$variable)
 
 #Catchunit
-catches_pivot_ICCAT$CatchUnits<-"MT"
+catches_pivot_ICCAT$CatchUnits<-"t"
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/ICCAT_CE_catches_pivotDSD_to_harmonizedDSD.R")

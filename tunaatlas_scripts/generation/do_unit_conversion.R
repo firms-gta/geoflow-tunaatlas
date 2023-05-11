@@ -75,8 +75,8 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   config$logger.info("Execute rtunaatlas::convert_units() function")
   config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
   if(fact == "catch"){
-    sum_no_before <- georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()
-    species_no_before <- georef_dataset %>% filter(unit=="NO") %>% distinct(species)
+    sum_no_before <- georef_dataset %>% filter(unit=="no")  %>% select(value)  %>% sum()
+    species_no_before <- georef_dataset %>% filter(unit=="no") %>% distinct(species)
     cat(species_no_before$species)
     cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
   }
@@ -94,7 +94,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   
   #check what species didn't get  conversion factors from IRD file
   if(fact == "catch"){
-    species_no_after <- georef_dataset %>% filter(unit=="NO") %>% distinct(species)
+    species_no_after <- georef_dataset %>% filter(unit=="no") %>% distinct(species)
     cat(setdiff(species_no_before$species,species_no_after$species))
     cat(intersect(species_no_after$species,unique(df_conversion_factor$species)))
     #@juldebar => issue with SKJ and IOTC
@@ -110,13 +110,13 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   #@juldebar => must be "t" now with changes on Level 0
   #@eblondel => to refactor to align on standard units
   if(fact == "catch"){
-    sum_no_after<- georef_dataset %>% filter(unit=="NO")  %>% select(value)  %>% sum()
-    nrow_no <- nrow(georef_dataset %>% filter(unit=="NO")  %>% select(value))
-    # sum_t <- df %>% filter(unit=="MT")  %>% select(value)  %>% sum()
+    sum_no_after<- georef_dataset %>% filter(unit=="no")  %>% select(value)  %>% sum()
+    nrow_no <- nrow(georef_dataset %>% filter(unit=="no")  %>% select(value))
+    # sum_t <- df %>% filter(unit=="t")  %>% select(value)  %>% sum()
     config$logger.info(sprintf("Gridded catch dataset has [%s] lines using 'number' as unit of measure", nrow_no))
     config$logger.info(sprintf("Now removing all lines still using 'number' (NO) as unit of measure and still representing a total of [%s] inidviduals", sum_no_after))
     if(removing_numberfish_final){
-      georef_dataset <- georef_dataset[georef_dataset$unit == "MT", ]}
+      georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]}
     
     #georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]
     config$logger.info(sprintf("Ratio of converted numbers is [%s] due to lack on conversion factors for some dimensions (species, time, gears..)", 1-sum_no_after/sum_no_before))

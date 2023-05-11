@@ -94,7 +94,7 @@ RFMO_CE$CatchType<-"ALL"
 #Catch
 RFMO_CE$Catch<-RFMO_CE$NUMBER_OF_SBT_RETAINED
 
-RFMO_CE$CatchUnits<-"NO"
+RFMO_CE$CatchUnits<-"no"
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches <-RFMO_CE[colToKeep_captures]

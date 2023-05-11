@@ -104,7 +104,7 @@ DF$Species <- sub("_C_LOG", "", DF$Species)
 DF$Species <- sub("_C_DFAD", "", DF$Species)
 DF$Species <- sub("_C_AFAD", "", DF$Species)
 DF$Species <- sub("_C_OTH", "", DF$Species)
-DF$CatchUnits <- "MT"
+DF$CatchUnits <- "t"
 DF$EffortUnits <- colnames(DF[5])
 colnames(DF)[5] <- "Effort"
 catches_pivot_WCPFC <- DF; rm(DF)

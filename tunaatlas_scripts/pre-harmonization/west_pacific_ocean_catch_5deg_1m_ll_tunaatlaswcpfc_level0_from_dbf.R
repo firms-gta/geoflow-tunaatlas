@@ -91,10 +91,10 @@ index.catchinweightandnumber <- which(catches_pivot_WCPFC[,"count"]==2 & catches
 catches_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="MTNO"
 
 index.catchinweightonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="C")
-catches_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="MT"
+catches_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="t"
 
 index.catchinnumberonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="N")
-catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="NO"
+catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
 
 # School
 catches_pivot_WCPFC$School<-"ALL"

@@ -68,7 +68,7 @@ NC_harm_IATTC$AreaName<-"IATTC"
 NC_harm_IATTC$AreaCWPgrid<-NA
 NC_harm_IATTC$School<-"ALL"
 NC_harm_IATTC$CatchType<-"ALL"
-NC_harm_IATTC$CatchUnits<-"MT"
+NC_harm_IATTC$CatchUnits<-"t"
 NC_harm_IATTC$RFMO<-"IATTC"
 NC_harm_IATTC$Ocean<-"PAC_E"
 

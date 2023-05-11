@@ -6,7 +6,7 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
                                  collapse = "','")
   cwp_grid_data_with_resolution_to_downgrade <- dbGetQuery(con, 
                                                            paste0("SELECT codesource_area as geographic_identifier,left(cwp_grid.code,7) as code FROM area.area_labels \n                                                                    JOIN area.cwp_grid\n                                                                    USING (geom)\n                                                                    WHERE codesource_area IN ('", 
-                                                                  dataset_distinct_area, "')\n                                                                    AND tablesource_area='areas_tuna_rfmos_task2'\n                                                                    and spatial_resolution='", 
+                                                                  dataset_distinct_area, "')\n                                                                    AND tablesource_area='areas_tuna_rfmos_task2'\n                                                                    and left(code,1)='", 
                                                                   resolution, "'"))
   if (nrow(cwp_grid_data_with_resolution_to_downgrade) > 0) {
     dataset_not_to_leave_as_so <- anti_join(georef_dataset, cwp_grid_data_with_resolution_to_downgrade, 

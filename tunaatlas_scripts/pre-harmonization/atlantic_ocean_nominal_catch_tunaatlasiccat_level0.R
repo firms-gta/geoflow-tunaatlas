@@ -63,7 +63,7 @@ colnames(NC_harm_ICCAT)<-c("Species", "Year","FishingFleet","AreaName","Gear","C
 
 NC_harm_ICCAT$AreaCWPgrid<-NA
 NC_harm_ICCAT$School<-"ALL"
-NC_harm_ICCAT$CatchUnits<-"MT"
+NC_harm_ICCAT$CatchUnits<-"t"
 NC_harm_ICCAT$RFMO<-"ICCAT"
 NC_harm_ICCAT$Ocean<-"ATL"
 

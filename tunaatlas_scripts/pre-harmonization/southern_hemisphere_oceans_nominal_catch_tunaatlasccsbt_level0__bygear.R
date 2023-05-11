@@ -105,7 +105,7 @@ CCSBT_NC$CatchType<-"ALL"
 #Catch
 CCSBT_NC$Catch<-CCSBT_NC$value
 
-CCSBT_NC$CatchUnits<-"MT"
+CCSBT_NC$CatchUnits<-"t"
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-CCSBT_NC[,colToKeep_captures]

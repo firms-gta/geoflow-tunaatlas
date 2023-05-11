@@ -102,10 +102,10 @@ efforts_pivot_WCPFC$Gear<-"D"
 
 # Catchunits
 index.kg <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "C" )
-efforts_pivot_WCPFC[index.kg,"CatchUnits"]<- "MT"
+efforts_pivot_WCPFC[index.kg,"CatchUnits"]<- "t"
 
 index.nr <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "N" )
-efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "NO" 
+efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
 
 # School
 efforts_pivot_WCPFC$School<-"ALL"

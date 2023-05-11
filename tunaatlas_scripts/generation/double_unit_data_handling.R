@@ -5,7 +5,7 @@ double_unit_data_handling = function(con, entity, config,fact,unit_conversion_cs
   #@eblondel => to refactor to align on standard units
   if (fact=="catch"){
     config$logger.info("Dealing with cacth => Removing old NOMT / MTNO units if any")
-    georef_dataset$unit[which(georef_dataset$unit == "MTNO")]<-"MT"
+    georef_dataset$unit[which(georef_dataset$unit == "MTNO")]<-"t"
     georef_dataset<-georef_dataset[!(georef_dataset$unit=="NOMT"),]
   } else if (fact=="effort"){
     config$logger.info("Dealing with effort => harmonization of units")

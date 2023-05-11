@@ -64,7 +64,7 @@ colnames(NC)[colnames(NC) == "SP_MT"] <- "Catch"
 NC$Catch<-as.numeric(NC$Catch)
 NC <- NC[!is.na(NC$Catch),]
 NC <- NC[NC$Catch != 0,]
-NC$CatchUnits <- "MT"
+NC$CatchUnits <- "t"
 NC$SP_NAME <- NULL
 NC$FLEET_CODE <- NULL
 
@@ -72,7 +72,7 @@ NC$AreaName<-"WCPFC"
 NCAreaCWPgrid<-NA
 NC$School<-"ALL"
 NC$CatchType<-"ALL"
-NC$CatchUnits<-"MT"
+NC$CatchUnits<-"t"
 NC$RFMO<-"WCPFC"
 NC$Ocean<-"PAC_W"
 

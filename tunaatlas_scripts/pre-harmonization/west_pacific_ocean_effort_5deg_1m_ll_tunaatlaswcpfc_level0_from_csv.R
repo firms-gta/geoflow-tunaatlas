@@ -116,10 +116,10 @@ function(action, entity, config){
   efforts_pivot_WCPFC[index.catchinweightandnumber,"CatchUnits"]="MTNO"
   
   index.catchinweightonly <- which(efforts_pivot_WCPFC[,"CatchUnits"]=="C")
-  efforts_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="MT"
+  efforts_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="t"
   
   index.catchinnumberonly <- which(efforts_pivot_WCPFC[,"CatchUnits"]=="N")
-  efforts_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="NO"
+  efforts_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
   
   # School
   efforts_pivot_WCPFC$School<-"ALL"

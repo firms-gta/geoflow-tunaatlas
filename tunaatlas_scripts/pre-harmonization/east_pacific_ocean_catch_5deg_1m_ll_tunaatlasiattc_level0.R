@@ -90,8 +90,8 @@ index.CatchunitNO<-which(catches[,"DTypeID"]==2 & catches[,"variable"]=="Number"
 index.CatchunitMTNO<-which(catches[,"DTypeID"]==1 & catches[,"variable"]=="Weight")
 index.CatchunitNOMT<-which(catches[,"DTypeID"]==1 & catches[,"variable"]=="Number")
 
-catches$CatchUnits[index.CatchunitMT]<-"MT"
-catches$CatchUnits[index.CatchunitNO]<-"NO"
+catches$CatchUnits[index.CatchunitMT]<-"t"
+catches$CatchUnits[index.CatchunitNO]<-"no"
 catches$CatchUnits[index.CatchunitMTNO]<-"MTNO"
 catches$CatchUnits[index.CatchunitNOMT]<-"NOMT"
 

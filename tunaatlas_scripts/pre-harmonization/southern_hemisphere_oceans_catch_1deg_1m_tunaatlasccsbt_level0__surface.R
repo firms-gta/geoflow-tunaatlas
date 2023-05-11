@@ -102,7 +102,7 @@ RFMO_CE$CatchType<-"ALL"
 #Catch
 RFMO_CE$Catch<-RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED/1000
 
-RFMO_CE$CatchUnits<-"MT"
+RFMO_CE$CatchUnits<-"t"
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches <-RFMO_CE[,colToKeep_captures]

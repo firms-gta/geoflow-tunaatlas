@@ -80,7 +80,7 @@ NC_harm_IOTC$Catch<-as.numeric(NC_harm_IOTC$Catch)
 NC_harm_IOTC$AreaCWPgrid<-NA
 NC_harm_IOTC$School<-"ALL"
 NC_harm_IOTC$CatchType<-"ALL"
-NC_harm_IOTC$CatchUnits<-"MT"
+NC_harm_IOTC$CatchUnits<-"t"
 NC_harm_IOTC$RFMO<-"IOTC"
 NC_harm_IOTC$Ocean<-"IND"
 

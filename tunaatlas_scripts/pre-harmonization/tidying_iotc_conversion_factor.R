@@ -7,7 +7,7 @@ tidying_iotc_conversion_factor <- function(action, entity, config){
     
     iotc_data_final <- iotc_data_initial%>%
       mutate(geographic_identifier = FISHING_GROUND_CODE,
-             unit = "NO", unit_target = "MT", species = SPECIES_CODE, gear = GEAR_CODE,source_authority = "IOTC",
+             unit = "no", unit_target = "t", species = SPECIES_CODE, gear = GEAR_CODE,source_authority = "IOTC",
              conversion_factor = AVG_WEIGHT/1000, 
              time_start = lubridate::as_date(paste0(YEAR,"-",MONTH_START, "-01 "))) %>%
       mutate(time_end =lubridate::ceiling_date(time_start, "month") - 1 ) %>%
