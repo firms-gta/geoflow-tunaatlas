@@ -57,21 +57,31 @@ function(action, entity, config){
     if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
     
     config$logger.info("Mapping code lists of georeferenced datasets...")
-    nominal_catch <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE, source_authority_to_map = opts$source_authority_to_map)
+    mapping_codelist <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE, source_authority_to_map = opts$source_authority_to_map)
     config$logger.info("Mapping code lists of georeferenced datasets OK")
-    nominal_catch = nominal_catch$dataset_mapped
-    summary_mapping = nominal_catch$summary_mapping
-    stats_total = nominal_catch$stats_total
-    not_mapped_total = nominal_catch$not_mapped_total
+    nominal_catch = mapping_codelist$dataset_mapped
     
-    names_list <- c("summary_mapping", "stats_total", "not_mapped_total") #file we want to save
+    recap_mapping <- mapping_codelist$recap_mapping
+    stats_total <- mapping_codelist$stats_total
+    not_mapped_total <- mapping_codelist$not_mapped_total
     
-    lapply(names_list, function(name) {
+    config$logger.info("Mapping code lists of georeferenced datasets OK")
+    
+    
+    names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
+    
+    function_write_RDS = function(name) {
       file_name <- paste0("data/", name, ".rds")
       object_list <- mget(name, envir = globalenv())
-      object_df <- object_list[[1]]
-      saveRDS(object_df, file = file_name)
-    })
+      if (!is.null(object_list[[1]])) {
+        object_df <- object_list[[1]]
+        saveRDS(object_df, file = file_name)
+      } else {
+        config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
+      }
+    }
+    
+    try(lapply(names_list, function_write_RDS))
     
     
     
