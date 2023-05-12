@@ -53,7 +53,7 @@ options(encoding = "UTF-8")
 
 
 ### Nominal catches
-NC<-readxl::read_excel(path_to_raw_dataset,col_names = TRUE)
+NC<-read.csv(path_to_raw_dataset)
 NC <- as.data.frame(NC)
 
 colnames(NC)[colnames(NC) == "YY"] <- "Year"
