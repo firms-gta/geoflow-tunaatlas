@@ -1,6 +1,7 @@
 harmo_spatial_1 = function (df_input, colname_longitude, colname_latitude, colname_quadrant, 
                             colname_squaresize, colname_samplingareacode) 
 {
+  df_input <- as.data.frame(df_input)
   df_input$SquareSizeCode <- NULL
   indice.5 <- which(df_input[, colname_squaresize] == "1x1")
   indice.6 <- which(df_input[, colname_squaresize] == "5x5")
