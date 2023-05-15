@@ -32,7 +32,16 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
                                                                                                   dimension_to_map]), "sum_value_not_mapped", "sum_value_mapped")) %>% 
     group_by(sum_mapped_unmapped, unit) %>% summarise(sum_value_by_dimension = sum(value))
   
-  df_input[, dimension_to_map][which(is.na(df_input[, dimension_to_map]))] = "UNK"
+  if(dimension_to_map=="fishingfleet"){
+    replace_unk <- "NEI"
+  } else if(dimension_to_map=="species"){
+    replace_unk <- "MZZ"
+    }
+  if(dimension_to_map=="fishingfleet"){
+    replace_unk <- "99.9"
+  } else {replace_unk <- "UNK"}
+  
+  df_input[, dimension_to_map][which(is.na(df_input[, dimension_to_map]))] = replace_unk
   
   stats_data_not_mapped <- reshape2::dcast(setDT(stats_data_not_mapped), 
                                            unit ~ sum_mapped_unmapped, sum)
