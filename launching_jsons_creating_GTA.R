@@ -120,6 +120,9 @@ executeWorkflow(here("tunaatlas_qa_datasets_iattc_effort.json"), dir = here("job
 executeWorkflow(here("tunaatlas_qa_datasets_iotc_effort.json"), dir = here("jobs/tunaatlas_qa_datasets_iotc_effort")) # ok
 executeWorkflow(here("tunaatlas_qa_datasets_iccat_effort.json"), dir = here("jobs/tunaatlas_qa_datasets_iccat_effort")) # ok
 
+lapply(paste0("jobs/", list("tunaatlas_qa_global_datasets_catch", "tunaatlas_qa_global_datasets_effort")),
+                                   dir.create)
+
 
 executeWorkflow("tunaatlas_qa_global_datasets_catch.json", dir = "jobs/tunaatlas_qa_global_datasets_catch")
 executeWorkflow(here("tunaatlas_qa_global_datasets_catch_new.json"), dir = here("jobs/tunaatlas_qa_global_datasets_catch"))
