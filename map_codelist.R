@@ -1,4 +1,4 @@
-map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code = FALSE) 
+function (df_input, df_mapping, dimension_to_map, keep_src_code = FALSE) 
 {
   if(!require(data.table)){
     install.packages("data.table")
@@ -9,7 +9,7 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   colnames(df_mapping)[colnames(df_mapping) == "src_code"] <- dimension_to_map
   df_input <- left_join(df_input, df_mapping)
   
-  not_mapped <- unique((df_input %>% filter(is.na(trg_code))) %>% select({{dimension_to_map}})) %>% 
+  not_mapped <- unique((df_input %>% filter(is.na(trg_code))) %>% dplyr::select({{dimension_to_map}})) %>% 
     dplyr::rename("Value" :={{dimension_to_map}} ) %>% 
     dplyr::mutate("Dimension" = dimension_to_map)
   if (keep_src_code == FALSE) {
@@ -36,7 +36,7 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
     replace_unk <- "NEI"
   } else if(dimension_to_map=="species"){
     replace_unk <- "MZZ"
-    }
+  }
   if(dimension_to_map=="fishingfleet"){
     replace_unk <- "99.9"
   } else {replace_unk <- "UNK"}
