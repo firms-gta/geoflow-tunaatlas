@@ -1,4 +1,4 @@
-function (df_input, df_mapping, dimension_to_map, keep_src_code = FALSE) 
+map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code = FALSE) 
 {
   if(!require(data.table)){
     install.packages("data.table")
