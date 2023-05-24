@@ -639,7 +639,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   iotc_conv_fact_mapped$time_start <- as.Date(iotc_conv_fact_mapped$time_start)
   iotc_conv_fact_mapped$time_start <- as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
   iotc_conv_fact_mapped$time_end <- as.Date(iotc_conv_fact_mapped$time_end)
-  iotc_conv_fact_mapped$time_end <- as.character(lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - days(1))
+  iotc_conv_fact_mapped$time_end <- as.character(lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1))
   
   georef_dataset <- do_unit_conversion( entity=entity,
                                                     config=config,
