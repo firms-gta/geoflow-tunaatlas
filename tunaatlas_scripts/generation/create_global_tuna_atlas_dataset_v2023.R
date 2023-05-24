@@ -214,27 +214,27 @@ function(action, entity, config){
   
   # unlink("Markdown")
   
-  if(opts$iccat_ps_include_type_of_school){
-    rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
-    
-    
-    #------------Enriching data with schootype for iccat-------------------------------------------------------------------------------------------------------------------------
-    config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iccat if needed")
-    #-------------------------------------------------------------------------------------------------------------------------------------
-    iccat <- get_rfmos_datasets_level0("ICCAT", entity, config, rawdata)
-    iccat$time_start<-substr(as.character(iccat$time_start), 1, 10)
-    iccat$time_end<-substr(as.character(iccat$time_end), 1, 10)
-    class(iccat$value) <- "numeric"
-    
-    georef_dataset<-rbind(georef_dataset %>% filter(source_authority != "ICCAT"),iccat)
-    rm(iccat)
-    
-    function_recap_each_step("iccat enriched",
-                             georef_dataset,
-                             "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
-                             "get_rfmos_datasets_level0"  , list(options_include_ICCAT))
-    ################
-  }
+  # if(opts$iccat_ps_include_type_of_school){
+  #   rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
+  #   
+  #   
+  #   #------------Enriching data with schootype for iccat-------------------------------------------------------------------------------------------------------------------------
+  #   config$logger.info("LEVEL 0 => STEP Enriching data with schooltype for iccat if needed")
+  #   #-------------------------------------------------------------------------------------------------------------------------------------
+  #   iccat <- get_rfmos_datasets_level0("ICCAT", entity, config, rawdata)
+  #   iccat$time_start<-substr(as.character(iccat$time_start), 1, 10)
+  #   iccat$time_end<-substr(as.character(iccat$time_end), 1, 10)
+  #   class(iccat$value) <- "numeric"
+  #   
+  #   georef_dataset<-rbind(georef_dataset %>% filter(source_authority != "ICCAT"),iccat)
+  #   rm(iccat)
+  #   
+  #   function_recap_each_step("iccat enriched",
+  #                            georef_dataset,
+  #                            "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+  #                            "get_rfmos_datasets_level0"  , list(options_include_ICCAT))
+  #   ################
+  # }
   
   if(opts$iattc_ps_raise_flags_to_schooltype){
     rawdata$iattc_ps_raise_flags_to_schooltype<- opts$iattc_ps_raise_flags_to_schooltype
@@ -243,7 +243,7 @@ function(action, entity, config){
     #---------Enriching data with schootype for iattc----------------------------------------------------------------------------------------------------------------------------
     config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iattc if needed")
     #-------------------------------------------------------------------------------------------------------------------------------------
-    iattc <- get_rfmos_datasets_level0("IATTC", entity, config, opts)
+    iattc <- get_rfmos_datasets_level0("IATTC", entity, config, rawdata)
     iattc$time_start<-substr(as.character(iattc$time_start), 1, 10)
     iattc$time_end<-substr(as.character(iattc$time_end), 1, 10)
     class(iattc$value) <- "numeric"
@@ -631,12 +631,11 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   # unit conversion IOTC given factors -----------------------------------
   iotc_conv_fact <- read_csv("data/conversion_factors_IOTC.csv", 
                              col_types = cols(geographic_identifier = col_character(), 
-                                              time_start = col_character(), time_end = col_character()))
+                                              time_start = col_character(), time_end = col_character()))%>% dplyr::rename( value= conversion_factor)#this map condelist function is to retieve the mapping dataset used
+  
   iotc_conv_fact_mapped <- map_codelists(con = con, "catch", mapping_dataset = mapping_dataset, dataset_to_map = iotc_conv_fact, mapping_keep_src_code = FALSE,
-                                         source_authority_to_map = c("IOTC"))$dataset_mapped%>% dplyr::rename( conversion_factor= value)#this map condelist function is to retieve the mapping dataset used
-  
-  library(lubridate)
-  
+                                         source_authority_to_map = c("IOTC"))$dataset_mapped
+
   iotc_conv_fact_mapped$time_start <- as.Date(iotc_conv_fact_mapped$time_start)
   iotc_conv_fact_mapped$time_start <- as.character(floor_date(iotc_conv_fact_mapped$time_start, "year"))
   iotc_conv_fact_mapped$time_end <- as.Date(iotc_conv_fact_mapped$time_end)
@@ -968,7 +967,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                                                        # dataset_to_compute_rf=nominal_catch,
                                                        dataset_to_compute_rf=dataset_to_compute_rf,
                                                        x_raising_dimensions=x_raising_dimensions)
-    georef_dataset<-georef_dataset$dataset
+    georef_dataset<-georef_dataset$dataset %>% dplyr::select(-fishingfleet)
     
     rm(dataset_to_compute_rf)
     
