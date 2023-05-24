@@ -138,10 +138,6 @@ function(action, entity, config){
   list_options = list_options[-1,]
   
   write_csv(list_options, "list_options.csv")
-  #Identify expected Level of processing
-  DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
-  
-  
   
   # #############
   
@@ -282,17 +278,6 @@ function(action, entity, config){
     ################
   }
   
-  
-  
-  
-  # iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
-  # iotc_data <- iotc_data %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "1100030" ~ "9100030",
-  #                                                                            geographic_identifier =="2120060"~"8120060",
-  #                                                                            geographic_identifier == "3200050"~"7200050", 
-  #                                                                            geographic_identifier == "4220040"~"8220040", 
-  #                                                                            geographic_identifier == "6130045\n"~"6130045", TRUE~geographic_identifier))
-  # 
-  # georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data)
 
   georef_dataset <- georef_dataset %>% 
     dplyr::mutate(unit = case_when(unit %in% c("MT") ~ "t", unit %in% c("NO") ~ "no", TRUE ~ unit))
@@ -647,8 +632,16 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   iotc_conv_fact <- read_csv("data/conversion_factors_IOTC.csv", 
                              col_types = cols(geographic_identifier = col_character(), 
                                               time_start = col_character(), time_end = col_character()))
-  iotc_conv_fact_mapped <- map_codelists(con, opts$fact, mapping_dataset = mapping_dataset, dataset_to_map = iotc_conv_fact, mapping_keep_src_code,  source_authority_to_map = c("IOTC"))$dataset_mapped #this map condelist function is to retieve the mapping dataset used
-    
+  iotc_conv_fact_mapped <- map_codelists(con_GTA, "catch", mapping_dataset = mapping_dataset, dataset_to_map = iotc_conv_fact, mapping_keep_src_code = FALSE,
+                                         source_authority_to_map = c("IOTC"))$dataset_mapped%>% dplyr::rename( conversion_factor= value)#this map condelist function is to retieve the mapping dataset used
+  
+  library(lubridate)
+  
+  iotc_conv_fact_mapped$time_start <- as.Date(iotc_conv_fact_mapped$time_start)
+  iotc_conv_fact_mapped$time_start <- as.character(floor_date(iotc_conv_fact_mapped$time_start, "year"))
+  iotc_conv_fact_mapped$time_end <- as.Date(iotc_conv_fact_mapped$time_end)
+  iotc_conv_fact_mapped$time_end <- as.character(ceiling_date(iotc_conv_fact_mapped$time_end, "year") - days(1))
+  
   georef_dataset <- do_unit_conversion( entity=entity,
                                                     config=config,
                                                     fact=fact,
