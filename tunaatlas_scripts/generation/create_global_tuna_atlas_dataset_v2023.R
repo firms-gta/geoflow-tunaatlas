@@ -632,7 +632,7 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
   iotc_conv_fact <- read_csv("data/conversion_factors_IOTC.csv", 
                              col_types = cols(geographic_identifier = col_character(), 
                                               time_start = col_character(), time_end = col_character()))
-  iotc_conv_fact_mapped <- map_codelists(con_GTA, "catch", mapping_dataset = mapping_dataset, dataset_to_map = iotc_conv_fact, mapping_keep_src_code = FALSE,
+  iotc_conv_fact_mapped <- map_codelists(con = con, "catch", mapping_dataset = mapping_dataset, dataset_to_map = iotc_conv_fact, mapping_keep_src_code = FALSE,
                                          source_authority_to_map = c("IOTC"))$dataset_mapped%>% dplyr::rename( conversion_factor= value)#this map condelist function is to retieve the mapping dataset used
   
   library(lubridate)
