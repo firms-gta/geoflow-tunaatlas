@@ -32,12 +32,12 @@ aggregate_resolution =function (con, df_input, resolution)
 
   if (nrow(areas_to_project_data_to_aggregate) > 0) {
     
-    df_input_to_aggregate <- inner_join(cwp_grid_data_with_resolution_not_as_required, areas_to_project_data_to_aggregate, 
+    df_input_to_aggregate <- dplyr::inner_join(cwp_grid_data_with_resolution_not_as_required, areas_to_project_data_to_aggregate, 
                                         by = c(geographic_identifier = "input_geographic_identifier")) 
     
-    df_input_not_aggregated <- df_input_to_aggregate %>% filter(is.na(geographic_identifier_project))
+    df_input_not_aggregated <- df_input_to_aggregate %>% dplyr::filter(is.na(geographic_identifier_project))
     
-    df_input_to_aggregate <- df_input_to_aggregate %>% filter(!is.na(geographic_identifier_project))
+    df_input_to_aggregate <- df_input_to_aggregate %>% dplyr::filter(!is.na(geographic_identifier_project))
     
     
     df_input_to_aggregate <- df_input_to_aggregate %>% group_by_(.dots = setdiff(c(columns_df_input, 
