@@ -540,6 +540,13 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
     georef_dataset<-aggregate_resolution(con, georef_dataset, 6)
     georef_dataset<-georef_dataset$df
     
+    removed_irregular_areas <- spatial_curation$df_input_areas_not_curated
+    stats_irregular_areas <- spatial_curation$stats
+    
+    
+    names_list_aggregation <- c("df_input_not_aggregated", "stats_not_aggregated") #file we want to save
+    
+    try(lapply(names_list_aggregation, function_write_RDS))
     
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
@@ -548,6 +555,9 @@ and groups of gears.", "map_codelists", list(options_mapping_map_code_lists))
                              "This step is to aggregate data on resolution lower than 5° in 5°.",
                              "spatial_curation_upgrade_resolution",
                              list(options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
+  
+  
+
   }
   #-----------------------------------------------------------------
   
