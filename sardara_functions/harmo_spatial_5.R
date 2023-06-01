@@ -5,19 +5,19 @@ harmo_spatial_5 = function (df_input, colname_latitude, colname_longitude, Squar
   indice.quad.4 <- which(df_input[, colname_longitude] >= 
                            -180 & df_input[, colname_longitude] <= 0 & df_input[, 
                                                                                 colname_latitude] >= 0 & df_input[, colname_latitude] <= 
-                           180)
+                           90)
   indice.quad.3 <- which(df_input[, colname_longitude] >= 
                            -180 & df_input[, colname_longitude] <= 0 & df_input[, 
-                                                                                colname_latitude] >= -180 & df_input[, colname_latitude] <= 
+                                                                                colname_latitude] >= -90 & df_input[, colname_latitude] <= 
                            0)
   indice.quad.2 <- which(df_input[, colname_longitude] >= 
                            0 & df_input[, colname_longitude] <= 180 & df_input[, 
-                                                                               colname_latitude] >= -180 & df_input[, colname_latitude] <= 
+                                                                               colname_latitude] >= -90 & df_input[, colname_latitude] <= 
                            0)
   indice.quad.1 <- which(df_input[, colname_longitude] >= 
                            0 & df_input[, colname_longitude] <= 180 & df_input[, 
                                                                                colname_latitude] >= 0 & df_input[, colname_latitude] <= 
-                           180)
+                           90)
   df_input$quadrant <- 9
   df_input[indice.quad.1, "quadrant"] <- 1
   df_input[indice.quad.2, "quadrant"] <- 2
@@ -33,7 +33,7 @@ harmo_spatial_5 = function (df_input, colname_latitude, colname_longitude, Squar
                                                           colname_latitude] - SquareSize
   }
 
-  # indice.quad.2 not to changed
+  # indice.quad.2 not to be changed
   
     if (length(indice.quad.3)) {
     df_input[indice.quad.3, colname_longitude] <- df_input[indice.quad.3, 
