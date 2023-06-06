@@ -7,13 +7,11 @@ spatial_curation_data_mislocated<-function(entity,config,df,spatial_curation_dat
   config$logger.info("Executing spatial_curation_intersect_areas")
   #@juldebar => georef_dataset was not set
   georef_dataset <- df
-  areas_in_land<-spatial_curation_intersect_areas(con , georef_dataset ,"areas_tuna_rfmos_task2","gshhs_world_coastlines")
   
-  areas_in_land<-areas_in_land$df_input_areas_intersect_intersection_layer %>%
-    group_by(geographic_identifier_source_layer) %>%
-    summarise(percentage_intersection_total=sum(proportion_source_area_intersection))
   
-  areas_in_land<-areas_in_land$geographic_identifier_source_layer[which(areas_in_land$percentage_intersection_total==1)]
+  # areas_in_land<-spatial_curation_intersect_areas(con , georef_dataset ,"areas_tuna_rfmos_task2","gshhs_world_coastlines")
+  areas_in_land<-identification_data_on_land_cwp(con , georef_dataset)
+  
   
   areas_with_no_spatial_information<-c("UNK/IND",NA)
   
