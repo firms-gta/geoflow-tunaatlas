@@ -84,7 +84,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   georef_dataset<-convert_units(con = con,
                                 df_input = georef_dataset,
                                 df_conversion_factor = df_conversion_factor,
-                                codelist_geoidentifiers_df_input = "areas_tuna_rfmos_task2",
+                                codelist_geoidentifiers_df_input = "cwp_grid",
                                 codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors
   )
   # to get stats on the process (useful for metadata)
