@@ -1,5 +1,6 @@
 spatial_curation_downgrade_resolution <- function (con, df_input, resolution, remove = FALSE) 
 {
+  georef_dataset <- df_input
   columns_dataset_input <- colnames(georef_dataset)
   dataset_distinct_area <- unique(georef_dataset$geographic_identifier)
   dataset_distinct_area <- paste(unique(dataset_distinct_area), 
@@ -41,6 +42,8 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
                                                              area_changeresolution, "') and\n    a1.size_grid=", 
                                                              a1.size_grid, " and \n    ST_Within(a1.geom, a2.geom)"))
   
+  
+  
   if (nrow(areas_to_project_data_to_disaggregate) > 0) {
     
     query <- "SELECT  code,st_area(geom), geom from area.cwp_grid"
@@ -72,37 +75,9 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
     dataset_to_disaggregate <- rename(dataset_to_disaggregate, geographic_identifier = geographic_identifier_project)
     dataset_disaggregated <- rbind(dataset_to_aggregate, dataset_to_disaggregate)
     gc()
-    
-  }  else {
-    dataset_to_disaggregate = NULL
-  }
-  if (resolution == 5) {
-    areas_to_project_data_to_aggregate <- dbGetQuery(con, 
-                                                     paste0("SELECT\n        left(a2.code,7) as input_geographic_identifier,\n        left(a1.code,7) as geographic_identifier_project\n        from\n        area.cwp_grid a1,\n        area.cwp_grid a2\n        where\n        a2.code IN ('", 
-                                                            area_changeresolution, "') and\n        a1.size_grid = '6' and a2.size_grid = '5' and \n        ST_Within(a2.geom, a1.geom)\n        UNION\n        SELECT\n        a2.code as input_geographic_identifier,\n        left(a1.code,7) as geographic_identifier_project\n        from\n        area.cwp_grid a1,\n        area.irregular_areas_task2_iotc a2\n        where\n        a2.code IN ('", 
-                                                            area_changeresolution, "') and\n        a1.size_grid='6' and \n        ST_Within(a2.geom, a1.geom)")) %>% distinct()
-    areas_to_project_data_to_aggregate <- anti_join(areas_to_project_data_to_aggregate, areas_to_project_data_to_disaggregate)
-    if (nrow(areas_to_project_data_to_aggregate) > 0) {
-      areas_inf_to_resolution_to_disaggregate <- unique(areas_to_project_data_to_aggregate$input_geographic_identifier)
-      dataset_areas_inf_to_resolution_to_disaggregate <- georef_dataset %>% 
-        filter(geographic_identifier %in% areas_inf_to_resolution_to_disaggregate)
-    }
-    else {
-      dataset_areas_inf_to_resolution_to_disaggregate = NULL
-    }
-  } else if (resolution == 1) {
-    dataset_areas_inf_to_resolution_to_disaggregate = NULL
-  }
-  
-  
-  if (remove_data) {
-    dataset_final_disaggregated_on_resolution_to_disaggregate <- rbind(data.frame(dataset_to_leave_as_so), 
-                                                                       data.frame(dataset_areas_inf_to_resolution_to_disaggregate))
-  }  else {
-    dataset_final_disaggregated_on_resolution_to_disaggregate <- rbind(data.frame(dataset_to_leave_as_so), data.frame(dataset_disaggregated))
-  }
-  rm(dataset_to_leave_as_so)
-  gc()
+  } else {
+    config$logger.info("No areas to project data to disaggregate so returning initial input")
+    return(df_input)}
   if (!is.null(dataset_to_disaggregate)) {
     sum_fact_to_reallocate <- dataset_to_disaggregate %>% 
       group_by(unit) %>% summarise(value_reallocate = sum(value))
@@ -118,8 +93,8 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
   rm(georef_dataset)
   rm(dataset_to_disaggregate)
   gc()
-  georef_dataset <- (list(df = dataset_final_disaggregated_on_resolution_to_disaggregate, 
-                          stats = stats_reallocated_data))
+  georef_dataset <- list(df = dataset_final_disaggregated_on_resolution_to_disaggregate, 
+                          stats = stats_reallocated_data)
   
   
   # georef_dataset<-function_spatial_curation_upgrade_Bastien(con,georef_dataset = georef_dataset,resolution,remove)
@@ -129,6 +104,6 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
   
   config$logger.info(sprintf("Disaggregating / Removing data that are defined on quadrants or areas superior to [%s]° quadrant resolution OK", resolution))
   
-  return(list(dataset=georef_dataset,lineage=lineage,description=description))
+  return(list(dataset=georef_dataset,lineage=lineage,description=description, stats_reallocated_data = stats_reallocated_data))
   
 }
