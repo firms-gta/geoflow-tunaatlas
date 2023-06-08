@@ -267,6 +267,7 @@ function(action, entity, config) {
   saveRDS(georef_dataset, "data/rawdata.rds")
   
   
+  
   # unlink("Markdown")
   
   # if(opts$iccat_ps_include_type_of_school){
@@ -290,6 +291,24 @@ function(action, entity, config) {
   #                            "get_rfmos_datasets_level0"  , list(options_include_ICCAT))
   #   ################
   # }
+
+# Filtering on species under mandate --------------------------------------
+  config$logger.info("Filtering on species under mandate")
+  url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/GTA_SPECIES_LIST_DRAFT.csv"
+  species_to_be_kept_in_level0 <- read_csv(url_asfis_list)
+
+  
+  georef_dataset <- georef_dataset %>% inner_join(species_to_be_kept_in_level0, by = c("species" = "ASFIS code"))
+  
+  function_recap_each_step(
+    "Filtering species",
+    georef_dataset,
+    paste0("Filtering species on the base of the file ", url_asfis_list, " to keep only the species under mandate of tRFMOs. This file contains " ,as.character(length(nrow(species_to_be_kept_in_level0))), " species."),
+    "inner_join"  , NULL
+  )
+  
+# -------------------------------------------------------------------------
+
   
   if (opts$iattc_ps_raise_flags_to_schooltype) {
     rawdata$iattc_ps_raise_flags_to_schooltype <-
