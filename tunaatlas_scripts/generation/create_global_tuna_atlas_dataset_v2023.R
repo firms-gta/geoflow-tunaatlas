@@ -291,24 +291,36 @@ function(action, entity, config) {
   #                            "get_rfmos_datasets_level0"  , list(options_include_ICCAT))
   #   ################
   # }
-
-# Filtering on species under mandate --------------------------------------
-  config$logger.info("Filtering on species under mandate")
-  url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
-  species_to_be_kept_in_level0 <- read_csv(url_asfis_list)
-
   
+  
+  # Filtering on species under mandate --------------------------------------
+  config$logger.info("Filtering on species under mandate")
+  url_asfis_list <-
+    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
+  species_to_be_kept_in_level0 <- read_csv(url_asfis_list)
+  
+  
+  georef_dataset <-
+    georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
   georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
   
   function_recap_each_step(
     "Filtering species",
     georef_dataset,
-    paste0("Filtering species on the base of the file ", url_asfis_list, " to keep only the species under mandate of tRFMOs. This file contains " ,as.character(length(nrow(species_to_be_kept_in_level0))), " species."),
-    "inner_join"  , NULL
+    paste0(
+      "Filtering species on the base of the file ",
+      url_asfis_list,
+      " to keep only the species under mandate of tRFMOs. This file contains " ,
+      as.character(length(nrow(
+        species_to_be_kept_in_level0
+      ))),
+      " species."
+    ),
+    "inner_join"  ,
+    NULL
   )
+  # -------------------------------------------------------------------------
   
-# -------------------------------------------------------------------------
-
   
   if (opts$iattc_ps_raise_flags_to_schooltype) {
     rawdata$iattc_ps_raise_flags_to_schooltype <-
@@ -1051,7 +1063,7 @@ list(options_mapping_map_code_lists)
         
       }
       
-      # unit conversion with factors -----------------------------------
+      # unit conversion with factors from IRD dataset -----------------------------------
       
       
       config$logger.info(
@@ -1164,6 +1176,34 @@ list(options_mapping_map_code_lists)
   
   
   
+  
+  # Filtering on species for level 1 --------------------------------------
+  config$logger.info("Filtering on species for level 1")
+  url_asfis_list_level1 <-
+    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
+  species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1)
+  
+  
+  georef_dataset <-
+    georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
+  
+  function_recap_each_step(
+    "Filtering species level 1",
+    georef_dataset,
+    paste0(
+      "Filtering species on the base of the file ",
+      url_asfis_list_level1,
+      " to keep only the species. This file contains " ,
+      as.character(length(nrow(
+        species_to_be_kept_in_level1
+      ))),
+      " species."
+    ),
+    "inner_join"  ,
+    NULL
+  )
+  
+  # -------------------------------------------------------------------------
   
   
   
