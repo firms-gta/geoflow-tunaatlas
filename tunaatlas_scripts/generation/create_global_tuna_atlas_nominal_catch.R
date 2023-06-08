@@ -45,6 +45,21 @@ function(action, entity, config){
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
   config$logger.info("Retrieving RFMOs nominal catch OK")
   
+  
+
+# Temporary patch  --------------------------------------------------------
+
+## Species RMJ -------------
+  nominal_catch <- nominal_catch %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM",
+                                                                       TRUE ~ species))
+
+## -------------------------------------------------------------------------
+
+
+# -------------------------------------------------------------------------
+
+
+  
   #### 2) Map code lists 
   
   if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
