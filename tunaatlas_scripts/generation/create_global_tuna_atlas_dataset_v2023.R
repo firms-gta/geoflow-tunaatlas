@@ -294,11 +294,11 @@ function(action, entity, config) {
 
 # Filtering on species under mandate --------------------------------------
   config$logger.info("Filtering on species under mandate")
-  url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/GTA_SPECIES_LIST_DRAFT.csv"
+  url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
   species_to_be_kept_in_level0 <- read_csv(url_asfis_list)
 
   
-  georef_dataset <- georef_dataset %>% inner_join(species_to_be_kept_in_level0, by = c("species" = "ASFIS code"))
+  georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
   
   function_recap_each_step(
     "Filtering species",
