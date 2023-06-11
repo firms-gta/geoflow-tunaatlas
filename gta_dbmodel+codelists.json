@@ -1,6 +1,6 @@
 {
   "profile": {
-  	"id": "tunaatlas-qa",
+  	"id": "firms-gta-dbmodel-codelists",
   	"mode": "entity",
   	"environment": {
   		"file": "envs/qa.env",
