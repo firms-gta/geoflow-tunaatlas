@@ -1,0 +1,14 @@
+-- DROP schemas
+DROP SCHEMA "metadata" CASCADE;
+DROP SCHEMA "fact_tables" CASCADE;
+DROP SCHEMA "fishing_mode" CASCADE;
+DROP SCHEMA "sex" CASCADE;
+DROP SCHEMA "size_class" CASCADE;
+DROP SCHEMA "species" CASCADE;
+DROP SCHEMA "time" CASCADE;
+DROP SCHEMA "source" CASCADE;
+DROP SCHEMA "area" CASCADE;
+DROP SCHEMA "measurement_type" CASCADE;
+DROP SCHEMA "measurement_unit" CASCADE;
+DROP SCHEMA "fishing_fleet" CASCADE;
+DROP SCHEMA "gear_type" CASCADE;
