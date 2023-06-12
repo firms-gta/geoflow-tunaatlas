@@ -246,13 +246,13 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
       geo_attributes_NetCDF <- ",st_astext(ST_Envelope(geom)) as geom_wkt"
     }
     SQL$query_CSV <- paste("SELECT ", select_query_csv_wms_wfs, 
-                           geo_attributes, ",value FROM ", tab_name, join_clause, 
+                           geo_attributes, ",measurement_value FROM ", tab_name, join_clause, 
                            where_clause, sep = " ")
     SQL$query_CSV_with_labels <- paste("SELECT ", select_query_csv_wms_wfs_with_labels, 
-                                       geo_attributes, ",value FROM ", tab_name, join_clause, 
+                                       geo_attributes, ",measurement_value FROM ", tab_name, join_clause, 
                                        where_clause, sep = " ")
     SQL$query_NetCDF <- paste("SELECT ", select_query_netcdf, 
-                              geo_attributes_NetCDF, ",value FROM ", tab_name, 
+                              geo_attributes_NetCDF, ",measurement_value FROM ", tab_name, 
                               join_clause, where_clause, sep = " ")
     if (tolower(static_metadata_table_view_name) %in% tables_views_materializedviews) {
       if (geo_identifier_column == "area_wkt") {
@@ -260,10 +260,10 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
                                         "", select_query_csv_wms_wfs)
       }
       SQL$query_wfs_wms <- paste("SELECT ", select_query_csv_wms_wfs, 
-                                 ",longitude,latitude,value,tab_geom.geom as the_geom FROM ", 
+                                 ",longitude,latitude,measurement_value,tab_geom.geom as the_geom FROM ", 
                                  static_metadata_table_view_name, " LEFT OUTER JOIN area.area_labels tab_geom USING (id_area) WHERE ", 
                                  where_query_wms_wfs, sep = "")
-      SQL$query_wfs_wms_aggregated_layer <- paste("SELECT value,tab_geom.codesource_area as geographic_identifier,tab_geom.geom as the_geom from ( SELECT CASE '%aggregation_method%' WHEN 'sum' THEN sum(value) WHEN 'avg' THEN sum(value)/(select DATE_PART('year', '%time_end%'::date) - DATE_PART('year', '%time_start%'::date) ) END as value,id_area FROM ", 
+      SQL$query_wfs_wms_aggregated_layer <- paste("SELECT measurement_value,tab_geom.codesource_area as geographic_identifier,tab_geom.geom as the_geom from ( SELECT CASE '%aggregation_method%' WHEN 'sum' THEN sum(measurement_value) WHEN 'avg' THEN sum(measurement_value)/(select DATE_PART('year', '%time_end%'::date) - DATE_PART('year', '%time_start%'::date) ) END as measurement_value,id_area FROM ", 
                                                   static_metadata_table_view_name, " WHERE ", 
                                                   where_query_wms_wfs, " AND geographic_identifier<>'UNK' group by id_area) tab   LEFT OUTER JOIN area.area_labels tab_geom USING (id_area) ", 
                                                   sep = "")
