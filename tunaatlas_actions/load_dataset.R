@@ -1,4 +1,4 @@
-load_dataset <- function(action,entity, config, options){
+load_dataset <- function(action,entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUNMergeDimensions_CodeListLike.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUNUploadDatasetToTableInDB.R")
