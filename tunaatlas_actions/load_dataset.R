@@ -118,13 +118,13 @@ load_dataset <- function(action,entity, config, options){
     df_codelists_input<-df_codelists[which(df_codelists$dimension %in% dimensions),]
     
     # convert columns that are not character to character and ensure that the column "value" is a numeric
-    cols<-setdiff(colnames(df_to_load),"value")
+    cols<-setdiff(colnames(df_to_load),"measurement_value")
     for (i in 1:length(cols)){
       if (typeof(df_to_load[,cols[i]])!="character"){
         df_to_load[,cols[i]]<-as.character(df_to_load[,cols[i]])
       }
     }
-    df_to_load$value<-as.numeric(df_to_load$value)
+    df_to_load$measurement_value<-as.numeric(df_to_load$measurement_value)
     
     #### First we deal with all the dimensions that are "real" code lists: area,catchtype,catchunit,effortunit,fishingfleet,gear,schooltype,species,sex,ocean
     # Dimensions time and sizeclass are not "real" code lists. They are dealt in a second step
@@ -227,7 +227,7 @@ load_dataset <- function(action,entity, config, options){
     # One by one, retrieve the numeric codes
     for (dim in 1:nrow(db_nondf_inputlike_dimensions_parameters)){
       
-      if (db_nondf_inputlike_dimensions_parameters$dimension[dim]=="sizeclass"){
+      if (db_nondf_inputlike_dimensions_parameters$dimension[dim]=="size_class"){
         df_to_load$size_min<-as.numeric(df_to_load$size_min)
         df_to_load$size_step<-as.numeric(df_to_load$size_step)
       }
@@ -476,16 +476,16 @@ load_dataset <- function(action,entity, config, options){
             new_comment <- switch(column_names[i],
                                   "source_authority" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority"),"  IS 'Source authority in charge of producing the source statistics collated and harmonized.';"),
                                   "source_authority_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority_label")," IS 'source_authority_label.';"),
-                                  "fishingfleet" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishingfleet")," IS 'Fishing fleet. A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).';"),
-                                  "fishingfleet_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishingfleet_label")," IS 'fishingfleet_label.';"),
-                                  "gear" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear"),"  IS 'Fishing gear used. Fishing gear are grouped by categories, in accordance with the International Standard Statitical Classficiation of Fishing Gear (ISSCFG) endorsed by the CWP. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "gear_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_label")," IS 'gear_label.';"),
+                                  "fishing_fleet" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_fleet")," IS 'Fishing fleet. A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).';"),
+                                  "fishing_fleet_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_fleet_label")," IS 'fishing_fleet_label.';"),
+                                  "gear_type" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_type"),"  IS 'Fishing gear used. Fishing gear are grouped by categories, in accordance with the International Standard Statitical Classficiation of Fishing Gear (ISSCFG) endorsed by the CWP. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                  "gear_type_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_type_label")," IS 'gear_type_label.';"),
                                   "gear_group" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group"),"  IS 'Group of fishing gears.';"),
                                   "gear_group_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group_label")," IS 'gear_group_label.';"),
                                   "species" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species"),"  IS 'Species captured. The main tuna species are available in all the RFMOs Depending on the RFMO, some non-target species (e.g. some sharks or turtles) are also reported. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
                                   "species_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species_label")," IS 'species_label.';"),
-                                  "schooltype" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".schooltype"),"  IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
-                                  "schooltype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".schooltype_label")," IS 'Type of school.';"),
+                                  "fishing_mode" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_mode"),"  IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
+                                  "schooltype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_mode_label")," IS 'Type of school.';"),
                                   "time" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time"),"  IS 'Dating of the fact. In Sardara, the dating is provided as two columns: time_start gives the first date of availability of the measure (included) and time_end gives the last date of availability of the measure (not included). The data in Sardara are mainly defined over the following time steps: 1) Nominal catch are mostly defined on 1 year resolution. 2) Georeferenced catch-and-effort and catch-at-size are mostly defined on 1 month resolution.  This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
                                   "time_period" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_period")," IS 'Interval of time over which the measure is defined.';"),
                                   "time_start" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_start")," IS 'Start time of the fact. Starting time - first date of availability of the measure (inclusive).';"),
@@ -500,11 +500,11 @@ load_dataset <- function(action,entity, config, options){
                                   "the_geom" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".the_geom" )," IS 'Geometry in one of the standard data formats (e.g. GML, WKT).';"),
                                   "longitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".longitude" )," IS 'Longitude of the centroid of the pixel or point location (EPSG:4326).';"),
                                   "latitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".latitude")," IS 'Latitude of the centroid of the pixel or point location (EPSG:4326).';"),
-                                  "catchtype" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype"),"  IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "catchtype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchtype_label")," IS 'catchtype_label.';"),
-                                  "value" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".value" )," IS 'the measure of the fact (variable).';"),
-                                  "unit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit")," IS 'unit.';"),
-                                  "unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".unit_label" )," IS 'unit_label.';")
+                                  "measurement_type" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_type"),"  IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                  "measurement_type_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_type_label")," IS 'measurement_type_label.';"),
+                                  "measurement_value" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_value" )," IS 'the measure of the fact (variable).';"),
+                                  "measurement_unit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_unit")," IS 'measurement_unit.';"),
+                                  "measurement_unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_unit_label" )," IS 'unit_label.';")
                                   # "catchunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchunit")," IS 'Unit of catch.';"),
                                   # "effortunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".effortunit")," IS 'Unit of effort.';"),		             
                                   # "cmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".cmax" )," IS 'cmax';"),
