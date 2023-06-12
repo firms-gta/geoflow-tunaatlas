@@ -1,4 +1,4 @@
-enrich_db_for_services <- function(action,entity, config, options){
+enrich_db_for_services <- function(action,entity, config){
   opts <- action$options
   con <- config$software$output$dbi
   schema <- "fact_tables"
