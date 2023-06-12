@@ -13,6 +13,8 @@ function(action, entity, config){
   #----------------------------------------------------------------------------------------------------------------------------
   
   ##Catches
+  catches <- catches %>% dplyr::rename(fishingfleet = fishing_fleet) 
+  
   catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier))
   
   catches <- catches %>% filter(measurement_value!= 0)
