@@ -3,9 +3,9 @@ deploy_database_model <- function(config, software, software_config){
 
 	db_name <- software_config$parameters$dbname
 	db_read <- software_config$properties$user_readonly
-	repository_sql_scripts_database_deployement <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql"
-	db_dimensions <- "area,catchtype,unit,fishingfleet,gear,schooltype,sex,sizeclass,species,time,source"
-	db_variables_and_associated_dimensions <- "catch=schooltype,species,time,area,gear,fishingfleet,catchtype,unit,source@effort=schooltype,time,area,gear,fishingfleet,unit,source@catch_at_size=schooltype,species,time,area,gear,fishingfleet,catchtype,sex,unit,sizeclass,source"
+	repository_sql_scripts_database_deployment <- geoflow::get_config_resource_path(config, "./tunaatlas_sql")
+	db_dimensions <- "area,measurement_type,measurement_unit,fishing_fleet,gear_type,fishing_mode,sex,size_class,species,time,source"
+	db_variables_and_associated_dimensions <- "catch=fishing_mode,species,time,area,gear_type,fishing_fleet,measurement_type,measurement_unit,source@effort=fishing_mode,time,area,gear_type,fishing_fleet,measurement_unit,source@catch_at_size=fishing_mode,species,time,area,gear_type,fishing_fleet,measurement_type,sex,measurement_unit,size_class,source"
  
 	#out sql
 	outsql <- sprintf("-- SQL script to deploy database '%s'", db_name)
@@ -24,12 +24,12 @@ deploy_database_model <- function(config, software, software_config){
 	# Read Sql files
 	# METADATA legacy table
 	outsql <- paste(outsql, '-- 1A/ METADATA Legacy table', sep = "\n")
-	fileName <- paste(repository_sql_scripts_database_deployement,"create_schema_metadata.sql",sep="/")
+	fileName <- paste(repository_sql_scripts_database_deployment,"create_schema_metadata.sql",sep="/")
 	sql_deploy_metadata <- paste(readLines(fileName), collapse="\n")
 	outsql <- paste(outsql, sql_deploy_metadata, sep="\n")
 	# METADATA DCMI table (NEW)
 	outsql <- paste(outsql, '-- 1B/ METADATA DCMI table', sep = "\n")
-	fileName <- paste(repository_sql_scripts_database_deployement,"create_Dublin_Core_metadata.sql",sep="/")
+	fileName <- paste(repository_sql_scripts_database_deployment,"create_Dublin_Core_metadata.sql",sep="/")
 	sql_deploy_metadata <- paste(readLines(fileName), collapse="\n")
 	outsql <- paste(outsql, sql_deploy_metadata, sep="\n")
 
@@ -45,41 +45,41 @@ deploy_database_model <- function(config, software, software_config){
 	  
 	  scriptName <- switch(dimension,
 		"time" = "create_schema_dimension_time.sql",
-		"sizeclass" = "create_schema_dimension_sizeclass.sql",
+		"size_class" = "create_schema_dimension_size_class.sql",
 		"create_schema_dimension.sql"
 	  )
 	  
-	  fileName <- paste(repository_sql_scripts_database_deployement, scriptName,sep="/")
+	  fileName <- paste(repository_sql_scripts_database_deployment, scriptName,sep="/")
 	  sql_deploy_dimension <- paste(readLines(fileName), collapse="\n")
 	  sql_deploy_dimension <- gsub("%dimension_name%", dimension, sql_deploy_dimension)
 	  outsql <- paste(outsql, sql_deploy_dimension, sep = "\n")
 	  
 	  if (dimensions[i]=="area"){
-		# Create table area.area_wkt
-		sql_deploy_table_area_wkt <- paste(readLines(paste(repository_sql_scripts_database_deployement,"create_table_area_wkt.sql",sep="/")), collapse="\n")
-		outsql <- paste(outsql, sql_deploy_table_area_wkt, sep = "\n")
-		outsql <- paste(outsql, "COMMENT ON SCHEMA area IS 'Schema containing the spatial code lists (i.e. reference data) (including the PostGIS geometries) used in the datasets';", sep = "\n")
-		
-		# Update view area.area_labels
-		sql_deploy_view_area_labels <- paste(readLines(paste(repository_sql_scripts_database_deployement,"create_view_area_labels.sql",sep="/")), collapse="\n")
-		outsql <- paste(outsql, sql_deploy_view_area_labels, sep = "\n")
+  		# Create table area.area_wkt
+  		sql_deploy_table_area_wkt <- paste(readLines(paste(repository_sql_scripts_database_deployment,"create_table_area_wkt.sql",sep="/")), collapse="\n")
+  		outsql <- paste(outsql, sql_deploy_table_area_wkt, sep = "\n")
+  		outsql <- paste(outsql, "COMMENT ON SCHEMA area IS 'Schema containing the spatial code lists (i.e. reference data) (including the PostGIS geometries) used in the datasets';", sep = "\n")
+  		
+  		# Update view area.area_labels
+  		sql_deploy_view_area_labels <- paste(readLines(paste(repository_sql_scripts_database_deployment,"create_view_area_labels.sql",sep="/")), collapse="\n")
+  		outsql <- paste(outsql, sql_deploy_view_area_labels, sep = "\n")
 	  }
 	  
 	  #Julien => merge with other comments 
 	  dimensionTableComment <- switch(dimension,
 	                                  "catch" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of fish  (in number or weight / biomass) harvested in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "effort" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of effort (expressed in a given unit such as number of sets, number of fishing hours, number of hooks, etc.) exerted in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "catch-at-size" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of fish at a given size (or size class) harvested in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "effort" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of effort (expressed in a given measurement_unit such as number of sets, number of fishing hours, number of hooks, etc.) exerted in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "catch_at_size" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Quantity of fish at a given size (or size class) harvested in a given stratum. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
 	                                  "area" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Spatial area (zone) where the fact has taken place. The data in Sardara are mainly defined on the following areas: 1) Nominal catch are mostly defined on the areas of competence of the RFMOs. For some RFMOs, the spatial stratification can be thinner: IOTC gives nominal catch at the FAO areas scale and ICCAT gives it at the sampling area scale. 2) Georeferenced catch and effort and catch-at-size are mostly defined on 1 or 5 degree square resolution. In some cases irregular areas are also used (e.g. in IOTC). This may happen when the reporting country/institution does not provide the data at 1 or 5 degree resolution. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "catchtype" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "catchunit" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Unit of catch (metric tons or number of fish). Catches are mainly given in weight (metric tons), but some historical catch (e.g. japanese longliners) are reported in number of fishes captured. Some catch are also reported in both weight and number. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "effortunit" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Unit of effort. The unit of effort mainly depends on the gear and the country that reports the data. Several units of efforts are available, even for a given gear (e.g. day at sea and searching days for purse seine). This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "fishingfleet" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Fishing fleet. A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).';"),
-	                                  "gear" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Fishing gear used. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "schooltype" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
+	                                  "measurement_type" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "catchmeasurement_unit" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'measurement_unit of catch (metric tons or number of fish). Catches are mainly given in weight (metric tons), but some historical catch (e.g. japanese longliners) are reported in number of fishes captured. Some catch are also reported in both weight and number. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "effortmeasurement_unit" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'measurement_unit of effort. The measurement_unit of effort mainly depends on the gear_type and the country that reports the data. Several measurement_units of efforts are available, even for a given gear_type (e.g. day at sea and searching days for purse seine). This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "fishing_fleet" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Fishing fleet. A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).';"),
+	                                  "gear_type" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Fishing gear_type used. The number of gear_types varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gear_types while IATTC has 10 gear_types. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "fishing_mode" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
 	                                  "sex" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Sex of the fish captured. Only partially available in the catch-at-size datasets.';"),
 	                                  "species" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Species captured. The main tuna species are available in all the RFMOs Depending on the RFMO, some non-target species (e.g. some sharks or turtles) are also reported. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-	                                  "sizeclass" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Class of size of a distribution. This dimension is used only in the catch-at-size dataset. A class is defined by its minimum size (e.g. 30 cm) and the size bin (e.g. 2 cm). This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+	                                  "size_class" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Class of size of a distribution. This dimension is used only in the catch-at-size dataset. A class is defined by its minimum size (e.g. 30 cm) and the size bin (e.g. 2 cm). This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
 	                                  "time" = paste0("COMMENT ON TABLE ",dimension,".",dimension," IS 'Dating of the fact. In Sardara, the dating is provided as two columns: time_start gives the first date of availability of the measure (included) and time_end gives the last date of availability of the measure (not included). The data in Sardara are mainly defined over the following time steps: 1) Nominal catch are mostly defined on 1 year resolution. 2) Georeferenced catch-and-effort and catch-at-size are mostly defined on 1 month resolution.  This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';")
 	  )
 

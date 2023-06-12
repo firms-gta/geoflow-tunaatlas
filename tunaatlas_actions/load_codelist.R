@@ -1,13 +1,10 @@
-load_codelist <- function(action,entity, config, options){
+load_codelist <- function(action,entity, config){
   #connection to database
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
+  source(geoflow::get_config_resource_path(config, "./sardara_functions/getSQLSardaraQueries.R"))
   
   CON = config$software$output$dbi
   
   #packages
-  
-  
-  
   if(!require(readr)){
     install.packages("readr")
     require(readr)
@@ -25,6 +22,7 @@ load_codelist <- function(action,entity, config, options){
   #get data from geoflow current job dir
   filename <- entity$data$source[[1]]
   path_to_dataset <- entity$getJobDataResource(config, filename)
+  if(endsWith(path_to_dataset, ".zip")) path_to_dataset = paste0(unlist(strsplit(path_to_dataset, "\\.zip"))[1], ".csv")
   #----------------------------------------------------------------------------------------------------------------------------
   
   codelist_pid <- entity$identifiers[["id"]]
@@ -32,7 +30,7 @@ load_codelist <- function(action,entity, config, options){
   dimension_name <- sub('\\..*', '', table_name)
   
   config$logger.info(sprintf("Load codelist '%s' as table '%s'",codelist_pid, table_name))
-  config$logger.info(sprintf("Load codelist from jobdir file '%s'", path_to_dataset))
+  ##config$logger.info(sprintf("Load codelist from jobdir file '%s'", path_to_dataset))
   df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
   
   #below code inherited from https://github.com/ptaconet/rtunaatlas/blob/master/R/load_datasets_in_db.R#L394
