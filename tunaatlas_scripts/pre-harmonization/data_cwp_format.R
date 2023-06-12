@@ -13,13 +13,11 @@ function(action, entity, config){
   #----------------------------------------------------------------------------------------------------------------------------
   
   ##Catches
-  catches <- catches %>% dplyr::rename(schooltype = fishing_mode, gear = gear_type, catchtype = measurement_type, schooltype = fishing_mode, value = measurement_value, unit = measurement_unit ) 
-  
   catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier))
   
-  catches <- catches %>% filter(value!= 0)
+  catches <- catches %>% filter(measurement_value!= 0)
   
-  catches<-catches %>% dplyr::select("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value", "source_authority")
+  catches<-catches %>% dplyr::select("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value", "source_authority")
   
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
