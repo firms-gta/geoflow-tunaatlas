@@ -1,4 +1,4 @@
-function(action,entity, config, options){
+function(action,entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
   
   
