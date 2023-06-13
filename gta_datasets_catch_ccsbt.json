@@ -1,7 +1,7 @@
 {
   
   "profile": {
-    "id": "firms-gta-datasets-iotc",
+    "id": "firms-gta-datasets-ccsbt",
     "mode": "entity",
 	"environment": {
   		"file": "envs/qa.env",
@@ -15,14 +15,14 @@
   		"http://www.umr-marbec.fr/images/logo-ird-en.png"
   	],
   	"options": {
-  	"line_separator": "_\n"
+  	  "line_separator": "_\n"
     }
   },
   "metadata": {
     "entities": [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1wwovnGbx8VQ4ErC5sGAX_PidSlXP2ATrXMTg42Gdmh0/edit?usp=sharing"
+      "source": "https://docs.google.com/spreadsheets/d/1591BqDuehrmTHRN6C8s5ss8Z5jiTwA7jNdfnn_kvVRs/edit#gid=0"
       }
     ],
     "contacts" : [

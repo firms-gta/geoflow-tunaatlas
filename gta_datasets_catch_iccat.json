@@ -1,7 +1,7 @@
 {
   
   "profile": {
-    "id": "firms-gta-datasets-iotc",
+    "id": "firms-gta-datasets-iccat",
     "mode": "entity",
 	"environment": {
   		"file": "envs/qa.env",
@@ -22,7 +22,7 @@
     "entities": [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1wwovnGbx8VQ4ErC5sGAX_PidSlXP2ATrXMTg42Gdmh0/edit?usp=sharing"
+      "source": "https://docs.google.com/spreadsheets/d/1tHkgvLNAPjAytLaRDqdjtDae_OBO8Yke0XWvgNl7DRk/edit?usp=sharing"
       }
     ],
     "contacts" : [
