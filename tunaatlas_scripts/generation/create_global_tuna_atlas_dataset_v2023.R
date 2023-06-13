@@ -602,194 +602,160 @@ list(options_mapping_map_code_lists)
   
   
   
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  #-------------Overlap sbf----------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info("LEVEL 0 => STEP 7/: Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
-  if (!exists("opts$strata_overlap_sbf")) {
-    options_strata_overlap_sbf <- c("species", "year")
+  
+  if(!exists("opts$strata_overlap_sbf")){
+    options_strata_overlap_sbf <- c("species")
+    
   } else {
+  
+    config$logger.info("Attention you are providing options for Southern Bluefin Tuna possible overlapping data")
     options_strata_overlap_sbf <-
       unlist(strsplit(opts$strata_overlap_sbf, split = ","))
   }
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (opts$include_WCPFC &&
-      opts$include_CCSBT &&
-      !is.null(opts$overlapping_zone_wcpfc_ccsbt_data_to_keep)) {
-    georef_dataset <-
-      function_overlapped(
-        dataset = georef_dataset,
-        con = con,
-        rfmo_to_keep = overlapping_zone_wcpfc_ccsbt_data_to_keep,
-        rfmo_not_to_keep = (if (overlapping_zone_wcpfc_ccsbt_data_to_keep == "WCPFC") {
-          "CCSBT"
-        } else {
-          "WCPFC"
-        }),
-        strata = options_strata_overlap_sbf
-      )
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        overlapping_zone_wcpfc_ccsbt_data_to_keep,
-        " in the WCPFC/CCSBT overlapping zone..."
-      )
-    )
     
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        overlapping_zone_wcpfc_ccsbt_data_to_keep,
-        " in the WCPFC/CCSBT overlapping zone OK"
+    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+    if (opts$include_WCPFC &&
+        opts$include_CCSBT) {
+      georef_dataset <-
+        function_overlapped(
+          dataset = georef_dataset,
+          con = con,
+          rfmo_to_keep = "CCSBT",
+          rfmo_not_to_keep = "WCPFC",
+          strata = options_strata_overlap_sbf
+        )
+      config$logger.info(
+        paste0(
+          "Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone..."
+        )
       )
-    )
-    
-    function_recap_each_step(
-      "overlap_ccsbt_wcpfc",
-      georef_dataset,
-      paste0(
-        "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.
-                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-        "In the case the data is identical on the stratas privided, the remaining data is from ",
-        options_overlapping_zone_wcpfc_ccsbt_data_to_keep
-      ),
-      "function_overlapped",
-      list(
-        options_include_CCSBT  ,
-        options_include_WCPFC ,
-        options_overlapping_zone_wcpfc_ccsbt_data_to_keep,
-        options_strata_overlap_sbf
-      )
-    )
-    
-  }
-  
-  
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 8/8: Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (opts$include_ICCAT &&
-      opts$include_CCSBT &&
-      !is.null(opts$overlapping_zone_iccat_ccsbt_data_to_keep)) {
-    georef_dataset <-
-      function_overlapped(
-        dataset = georef_dataset,
-        con = con,
-        rfmo_to_keep = overlapping_zone_iccat_ccsbt_data_to_keep,
-        rfmo_not_to_keep = (if (overlapping_zone_iccat_ccsbt_data_to_keep == "ICCAT") {
-          "CCSBT"
-        } else {
-          "ICCAT"
-        }),
-        strata = options_strata_overlap_sbf
-      )
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        overlapping_zone_iccat_ccsbt_data_to_keep,
-        " in the ICCAT/CCSBT overlapping zone..."
-      )
-    )
-    
-    # georef_dataset_level0_step8_ancient<- overlapping_ancient_method
-    # georef_dataset_level0_step8 <- georef_dataset
-    # georef_dataset_level0_step8_reverse <- reverse_overlapping
-    
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        overlapping_zone_iccat_ccsbt_data_to_keep,
-        " in the ICCAT/CCSBT overlapping zone OK"
-      )
-    )
-    
-    function_recap_each_step(
-      "overlap_iccat_ccsbt",
-      georef_dataset,
-      paste0(
-        "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.
-                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-        "In the case the data is identical on the stratas privided, the remaining data is from ",
-        options_overlapping_zone_iccat_ccsbt_data_to_keep
-      ),
       
-      "function_overlapped",
-      list(
-        options_include_CCSBT,
-        options_include_ICCAT,
-        options_overlapping_zone_iccat_ccsbt_data_to_keep,
-        options_strata_overlap_sbf
+      config$logger.info(
+        paste0(
+          "Keeping only data from CCSBT",
+          " in the WCPFC/CCSBT overlapping zone OK"
+        )
       )
-    )
-    
-    
-  }
-  
-  
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEPs Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (opts$include_IOTC &&
-      opts$include_CCSBT &&
-      !is.null(opts$overlapping_zone_iotc_ccsbt_data_to_keep)) {
-    georef_dataset <-
-      function_overlapped(
-        dataset = georef_dataset,
-        con = con,
-        rfmo_to_keep = overlapping_zone_iotc_ccsbt_data_to_keep,
-        rfmo_not_to_keep = (if (overlapping_zone_iotc_ccsbt_data_to_keep == "IOTC") {
-          "CCSBT"
-        } else {
-          "IOTC"
-        }),
-        strata = options_strata_overlap_sbf
-      )
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        overlapping_zone_iotc_ccsbt_data_to_keep,
-        " in the IOTC/CCSBT overlapping zone..."
-      )
-    )
-    # georef_dataset_level0_step9 <- georef_dataset
-    # georef_dataset_level0_step9_ancient<- overlapping_ancient_method
-    # georef_dataset_level0_step9_reverse <- reverse_overlapping
-    
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        overlapping_zone_iotc_ccsbt_data_to_keep,
-        " in the IOTC/CCSBT overlapping zone OK"
-      )
-    )
-    
-    function_recap_each_step(
-      "overlap_iotc_ccsbt",
-      georef_dataset,
-      paste0(
-        "In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
-                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-        "In the case the data is identical on the stratas privided, the remaining data is from ",
-        options_overlapping_zone_iccat_ccsbt_data_to_keep
-      ),
       
-      "function_overlapped",
-      list(
-        options_include_CCSBT  ,
-        options_include_IOTC ,
-        options_overlapping_zone_wcpfc_ccsbt_data_to_keep,
-        options_overlapping_zone_iccat_ccsbt_data_to_keep,
-        options_overlapping_zone_iotc_ccsbt_data_to_keep,
-        options_strata_overlap_sbf
+      function_recap_each_step(
+        "overlap_ccsbt_wcpfc",
+        georef_dataset,
+        paste0(
+          "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.
+                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+          "In the case the data is identical on the stratas privided, the remaining data is from ",
+          options_overlapping_zone_wcpfc_ccsbt_data_to_keep
+        ),
+        "function_overlapped",
+        list(
+          options_include_CCSBT  ,
+          options_include_WCPFC ,
+          options_strata_overlap_sbf
+        )
       )
-    )
+      
+    }
     
     
-  }
+    
+    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+    config$logger.info("LEVEL 0 => STEP 8/8: Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?")
+    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+    if (opts$include_ICCAT &&
+        opts$include_CCSBT ) {
+      georef_dataset <-
+        function_overlapped(
+          dataset = georef_dataset,
+          con = con,
+          rfmo_to_keep = "CCSBT",
+          rfmo_not_to_keep = "ICCAT",
+          strata = options_strata_overlap_sbf
+        )
+      config$logger.info(
+        paste0(
+          "Keeping only data from CCSBT in the ICCAT/CCSBT overlapping zone..."
+        )
+      )
+      
+
+      config$logger.info(
+        paste0(
+          "Keeping only data from ICCAT in the ICCAT/CCSBT overlapping zone OK"
+        )
+      )
+      
+      function_recap_each_step(
+        "overlap_iccat_ccsbt",
+        georef_dataset,
+        paste0(
+          "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.
+                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+          "In the case the data is identical on the stratas privided, the remaining data is from CCSBT",
+        ),
+        
+        "function_overlapped",
+        list(
+          options_include_CCSBT,
+          options_include_ICCAT,
+          options_strata_overlap_sbf
+        )
+      )
+      
+      
+    }
+    
+    
+    
+    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+    config$logger.info("LEVEL 0 => STEPs Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
+    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+    if (opts$include_IOTC &&
+        opts$include_CCSBT) {
+      georef_dataset <-
+        function_overlapped(
+          dataset = georef_dataset,
+          con = con,
+          rfmo_to_keep = "CCSBT",
+          rfmo_not_to_keep = "IOTC",
+          strata = options_strata_overlap_sbf
+        )
+      config$logger.info(
+        paste0(
+          "Keeping only data from CCSBT in the IOTC/CCSBT overlapping zone..."
+        )
+      )
+
+      config$logger.info(
+        paste0(
+          "Keeping only data from IOTC in the IOTC/CCSBT overlapping zone OK"
+        )
+      )
+      
+      function_recap_each_step(
+        "overlap_iotc_ccsbt",
+        georef_dataset,
+        paste0(
+          "In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
+                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+          "In the case the data is identical on the stratas privided, the remaining data is from ",
+          options_overlapping_zone_iccat_ccsbt_data_to_keep
+        ),
+        
+        "function_overlapped",
+        list(
+          options_include_CCSBT  ,
+          options_include_IOTC ,
+          options_strata_overlap_sbf
+        )
+      )
+      
+    }
+  
   
   #--------irregular areas--------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => irregular areas hanlding")
+  config$logger.info("LEVEL 0 => irregular areas handling")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   if (opts$irregular_area %in% c("remove", "reallocate")) {
@@ -823,7 +789,7 @@ list(options_mapping_map_code_lists)
   
   
   
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
   config$logger.info(
     "LEVEL 0 => Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)"
   )
@@ -867,7 +833,7 @@ list(options_mapping_map_code_lists)
       
       
     }
-  #-----------------------------------------------------------------
+  #-----------spatial_curation_data_mislocated------------------------------------------------------
   
   
   if (opts$spatial_curation_data_mislocated %in% c("reallocate", "remove")) {
@@ -951,6 +917,9 @@ list(options_mapping_map_code_lists)
       "-----------------------------------------------------------------------------------------------------"
     )
   }
+  
+  # Curation absurd converted data ------------------------------------------
+  
   
   if (!is.null(opts$curation_absurd_converted_data)) {
     source(
