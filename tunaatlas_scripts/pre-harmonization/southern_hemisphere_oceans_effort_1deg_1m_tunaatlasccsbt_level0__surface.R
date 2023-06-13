@@ -123,7 +123,7 @@ efforts<-as.data.frame(efforts)
 config$logger.info(sprintf("colnumbers",ncol(efforts)))
 write.csv(summary(efforts), "test", row.names = FALSE)
 
-colnames(efforts)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","unit","value")
+colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"CCSBT"
 
 
