@@ -113,7 +113,7 @@ catches_pivot_WCPFC$School<-"ALL"
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 
-colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
 catches$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------

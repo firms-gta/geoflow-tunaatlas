@@ -168,7 +168,7 @@ catches <- aggregate(catches$Catch,
 	FUN = sum)
 colnames(catches)[colnames(catches)=="x"] <- "Catch"
 
-colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")
+colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
 catches$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------
