@@ -17,7 +17,7 @@ load_metadata <- function(action,entity, config){
   entity_df$Source <- "RFMOs"
   
   if (!is.null(opts$create_table)) if(opts$create_table){
-    query_create_table_metadata <- paste(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_Dublin_Core_metadata.sql"), collapse=" ")
+    query_create_table_metadata <- paste(readLines(geoflow::get_config_resource_path(config, "./tunaatlas_sql/create_Dublin_Core_metadata.sql")), collapse=" ")
     query_create_table_metadata <- gsub("%db_admin%",user_database,query_create_table_metadata)
     create_table_metadata <- dbSendQuery(con_database,query_create_table_metadata)
   }

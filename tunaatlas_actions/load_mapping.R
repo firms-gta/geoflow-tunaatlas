@@ -1,5 +1,5 @@
 function(action,entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
+  source(geoflow::get_config_resource_path(config, "./sardara_functions/getSQLSardaraQueries.R"))
   
   
   base::options(stringsAsFactors = FALSE)

@@ -11,8 +11,7 @@ enrich_db_for_services <- function(action,entity, config){
   dimensions <- c(df_codelists$dimension [df_codelists$dimension != "area"], "time_start", "time_end", "year", "quarter", "month", "aggregation_method")
   
   #scripts
-  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions"
-  source(file.path(url_scripts_create_own_tuna_atlas, "create_plsql_data_getter.R"))
+  source(geoflow::get_config_resource_path(config, "./tunaatlas_actions/create_plsql_data_getter.R"))
   create_plsql_data_getter(action,entity, config, opts) #create pl/sql function in DB to get fact dataset (generic function, one function per fact)
   
   #entity management
