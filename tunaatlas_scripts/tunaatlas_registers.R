@@ -11,12 +11,12 @@ register_source_authority <- function(config){
 	return(out)
 }
 
-#register_fishingfleet
-register_fishingfleet <- function(config){
+#register_fishing_fleet
+register_fishing_fleet <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM fishingfleet.fishingfleet_labels WHERE tablesource_fishingfleet = 'fishingfleet_firms'")
+	fetched <- dbGetQuery(con, "SELECT * FROM fishing_fleet.fishing_fleet_labels WHERE tablesource_fishing_fleet = 'fishingfleet_firms'")
 	out <- data.frame(
-		code = fetched$codesource_fishingfleet,
+		code = fetched$codesource_fishing_fleet,
 		uri = NA,
 		label = fetched$source_label,
 		definition = NA
@@ -37,12 +37,12 @@ register_species <- function(config){
 	return(out)	
 }
 
-#register_schooltype
-register_schooltype <- function(config){
+#register_fishing_mode
+register_fishing_mode <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM schooltype.schooltype_labels where tablesource_schooltype = 'schooltype_rfmos'")
+	fetched <- dbGetQuery(con, "SELECT * FROM fishing_mode.fishing_mode_labels where tablesource_fishing_mode = 'schooltype_rfmos'")
 	out <- data.frame(
-		code = fetched$codesource_schooltype,
+		code = fetched$codesource_fishing_mode,
 		uri = NA,
 		label = fetched$source_label,
 		definition = NA
@@ -50,12 +50,12 @@ register_schooltype <- function(config){
 	return(out)		
 }
 
-#register_gear
-register_gear <- function(config){
+#register_gear_type
+register_gear_type <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM gear.gear_labels where tablesource_gear = 'isscfg_revision_1'")
+	fetched <- dbGetQuery(con, "SELECT * FROM gear_type.gear_type_labels where tablesource_gear_type = 'isscfg_revision_1'")
 	out <- data.frame(
-		code = fetched$codesource_gear,
+		code = fetched$codesource_gear_type,
 		uri = NA,
 		label = fetched$source_label,
 		definition = NA
@@ -63,12 +63,12 @@ register_gear <- function(config){
 	return(out)			
 }
 
-#register_catch_type
-register_catchtype <- function(config){
+#register_catch_measurement_type
+register_catch_measurement_type <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM catchtype.catchtype_labels where tablesource_catchtype = 'catchtype_tunaatlas'")
+	fetched <- dbGetQuery(con, "SELECT * FROM measurement_type.measurement_type_labels where tablesource_measurement_type = 'catchtype_tunaatlas'")
 	out <- data.frame(
-		code = fetched$codesource_catchtype,
+		code = fetched$codesource_measurement_type,
 		uri = NA,
 		label = fetched$source_label,
 		definition = NA
@@ -76,12 +76,12 @@ register_catchtype <- function(config){
 	return(out)		
 }
 
-#register_unit_catch
-register_unit_catch <- function(config){
+#register_catch_measurement_unit
+register_catch_measurement_unit <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM unit.unit_labels where tablesource_unit = 'catchunit_rfmos'")
+	fetched <- dbGetQuery(con, "SELECT * FROM measurement_unit.measurement_unit_labels where tablesource_measurement_unit = 'catchunit_rfmos'")
 	out <- data.frame(
-		code = c(fetched$codesource_unit),
+		code = c(fetched$codesource_measurement_unit),
 		uri = NA,
 		label = c(fetched$source_label),
 		definition = NA
@@ -89,12 +89,12 @@ register_unit_catch <- function(config){
 	return(out)		
 }
 
-#register_unit_effort
-register_unit_effort <- function(config){
+#register_effort_measurement_unit
+register_effort_measurement_unit <- function(config){
 	con <- config$software$input$dbi
-	fetched <- dbGetQuery(con, "SELECT * FROM unit.unit_labels where tablesource_unit = 'effortunit_rfmos'")
+	fetched <- dbGetQuery(con, "SELECT * FROM measurement_unit.measurement_unit_labels where tablesource_measurement_unit = 'effortunit_rfmos'")
 	out <- data.frame(
-		code = fetched$codesource_unit,
+		code = fetched$codesource_measurement_unit,
 		uri = NA,
 		label = fetched$source_label,
 		definition = NA
