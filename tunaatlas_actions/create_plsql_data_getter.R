@@ -16,12 +16,12 @@ create_plsql_data_getter <- function(action,entity, config){
 	sql_drop <- sprintf("DROP FUNCTION public.get_fact_dataset_%s(%s)", fact, paste0(rep("varchar", length(dimensions)+3),collapse=","))
 	sql_create <- sprintf("CREATE OR REPLACE FUNCTION public.get_fact_dataset_%s(%s) \n", fact, sql_params)
 	
-	sql_table_columns <- c(dimensions[dimensions != "aggregation_method"], "value", "geographic_identifier", "geom")
+	sql_table_columns <- c(dimensions[dimensions != "aggregation_method"], "measurement_value", "geographic_identifier", "geom")
 	sql_table_columns <- paste0(sapply(sql_table_columns, function(x){
 		type <- switch(x,
 			"time_start" = "timestamp",
 			"time_end" = "timestamp",
-			"value" = "numeric",
+			"measurement_value" = "numeric",
 			"geom" = "geometry",
 			"year" =  "integer",
 			"quarter" = "integer",
@@ -86,7 +86,7 @@ create_plsql_data_getter <- function(action,entity, config){
 		return(out)
 	}), collapse=", ")
 	
-	sql_query_raw <- paste0("SELECT ", sql_query_raw_select_columns, ", dataset.value, tab_geom.codesource_area as geographic_identifier, tab_geom.geom as the_geom FROM '||schema_name||'.' || pid || ' dataset LEFT OUTER JOIN '||geom_table||' tab_geom USING (id_area) \n")
+	sql_query_raw <- paste0("SELECT ", sql_query_raw_select_columns, ", dataset.measurement_value, tab_geom.codesource_area as geographic_identifier, tab_geom.geom as the_geom FROM '||schema_name||'.' || pid || ' dataset LEFT OUTER JOIN '||geom_table||' tab_geom USING (id_area) \n")
 	#sql_query_raw <- paste0(sql_query_raw, "WHERE \n")	
 	#sql_query_raw <- paste0(sql_query_raw, sql_query_filters, ";")
 	
@@ -101,7 +101,7 @@ create_plsql_data_getter <- function(action,entity, config){
 		return(out)
 	}), collapse=", ")
 	
-	sql_query_agg <- paste0("SELECT ", sql_query_agg_select_columns, ", CAST(dataset.value AS numeric), tab_geom.codesource_area as geographic_identifier,tab_geom.geom as the_geom from ( SELECT CASE '''|| input_aggregation_method ||''' WHEN ''sum'' THEN sum(value) WHEN ''avg_by_year'' THEN sum(value)/'|| count_year ||' WHEN ''avg_by_quarter'' THEN sum(value)/'|| count_year * count_quarter ||' WHEN ''avg_by_month'' THEN sum(value)/'|| count_year * count_month ||' END as value, id_area FROM '|| schema_name ||'.'|| pid ||'")
+	sql_query_agg <- paste0("SELECT ", sql_query_agg_select_columns, ", CAST(dataset.measurement_value AS numeric), tab_geom.codesource_area as geographic_identifier,tab_geom.geom as the_geom from ( SELECT CASE '''|| input_aggregation_method ||''' WHEN ''sum'' THEN sum(measurement_value) WHEN ''avg_by_year'' THEN sum(measurement_value)/'|| count_year ||' WHEN ''avg_by_quarter'' THEN sum(measurement_value)/'|| count_year * count_quarter ||' WHEN ''avg_by_month'' THEN sum(measurement_value)/'|| count_year * count_month ||' END as measurement_value, id_area FROM '|| schema_name ||'.'|| pid ||'")
 	
 	sql_create <- paste(sql_create,
 		"BEGIN
