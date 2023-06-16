@@ -39,10 +39,10 @@
       "parameters": {
 		"drv": "{{DB_DRV}}",
         "user": "{{DB_USER}}",
-			"password": "{{DB_PASSWORD}}",
-			"host": "{{DB_HOST}}",
-			"port": "{{DB_PORT}}",
-			"dbname": "{{DB_NAME}}"
+		"password": "{{DB_PASSWORD}}",
+		"host": "{{DB_HOST}}",
+		"port": "{{DB_PORT}}",
+		"dbname": "{{DB_NAME}}"
       },
       "properties" : {}
     },
