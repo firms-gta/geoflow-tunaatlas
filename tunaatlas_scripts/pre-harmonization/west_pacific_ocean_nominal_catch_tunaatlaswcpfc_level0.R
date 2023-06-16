@@ -43,9 +43,11 @@ if(!require(reshape)){
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 #get data from geoflow current job dir
-filename1 <- entity$data$source[[1]] #data
-filename2 <- entity$data$source[[2]] #structure
-path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+filename1 <- entity$data$source[[1]] #WCPFC data
+filename2 <- entity$data$source[[2]] #WCPO data
+filename3 <- entity$data$source[[3]] #structure
+path_to_raw_dataset1 <- entity$getJobDataResource(config, filename1)
+path_to_raw_dataset2 <- entity$getJobDataResource(config, filename2)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
 options(encoding = "UTF-8")
@@ -53,8 +55,17 @@ options(encoding = "UTF-8")
 
 
 ### Nominal catches
-NC<-read.csv(path_to_raw_dataset)
-NC <- as.data.frame(NC)
+#from wcpfc
+wcpfc_species = c("ALV", "BLM", "BSH", "BTH", "BUM", "FAL", "LMA", "MAK", "OCS", "POR", "PTH", "RHN", "SMA", "SPK", "SPL", "SPN", "SPY", "SPZ", "THR")
+NC1<-read.csv(path_to_raw_dataset1)
+NC1<-NC1[NC1$SP_CODE %in% wcpfc_species,]
+#from wcpo
+wcpo_species = c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT")
+NC2<-read.csv(path_to_raw_dataset2)
+NC2<-NC2[NC2$SP_CODE %in% wcpo_species,]
+
+#bind both sources
+NC <- rbind(NC1,NC2)
 
 colnames(NC)[colnames(NC) == "YY"] <- "Year"
 colnames(NC)[colnames(NC) == "FLAG_CODE"] <- "FishingFleet"
@@ -131,8 +142,8 @@ entity$setTemporalExtent(dataset_temporal_extent)
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
 write.csv(NC, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+file.rename(from = entity$getJobDataResource(config, filename3), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------  
-entity$addResource("source", path_to_raw_dataset)
+entity$addResource("source", c(path_to_raw_dataset1, path_to_raw_dataset2))
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)}
