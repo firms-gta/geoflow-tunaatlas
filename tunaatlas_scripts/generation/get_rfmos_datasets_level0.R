@@ -82,42 +82,42 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                                regexpr("iccat", names(dataset_files)) > 0]
                         iccat_data <- do.call("rbind", lapply(dataset_files_iccat, readr::read_csv, guess_max = 0))
                         iccat_data <- as.data.frame(iccat_data)
-
+                        
                         class(iccat_data$value) <- "numeric"
                         
                         iccat_data<- iccat_data[, columns_to_keep]
                         
-                      #   
-                      #   # Deal with special case of ICCAT PS
-                      #   if (options$iccat_ps_include_type_of_school){ 
-                      #     config$logger.info("Option 'iccat_ps_include_type_of_school' is TRUE. Include Type of school...")
-                      #     dataset_iccat_byschool_file <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-                      #                                                    regexpr("byschool", names(dataset_files)) > 0 &
-                      #                                                    regexpr("iccat", names(dataset_files)) > 0]
-                      #     iccat_ce_WithSchooltypeInfo <- readr::read_csv(dataset_iccat_byschool_file, guess_max = 0)
-                      #     iccat_ce_WithSchooltypeInfo <- as.data.frame(iccat_ce_WithSchooltypeInfo)
-                      #     iccat_ce_WithSchooltypeInfo <- iccat_ce_WithSchooltypeInfo[, columns_to_keep]
-                      #     class(iccat_ce_WithSchooltypeInfo$value) <- "numeric"
-                      #     
-                      #     # We need to map fishingfleet code list, because fishingfleet code list used in iccat task2 by operation mode dataset is different from fishingfleet code list used in ICCAT task2; however we have to use the same fishingfleet code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 fishingfleet code list.
-                      #     cl_filename <- "codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv"
-                      #     cl_id <- googledrive::drive_get(cl_filename)$id
-                      #     googledrive::drive_download(googledrive::as_id(cl_id), cl_filename, overwrite = TRUE)
-                      #     flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0))
-                      #     source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
-                      #     iccat_ce_WithSchooltypeInfo <- map_codelist(iccat_ce_WithSchooltypeInfo, flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat, "fishingfleet")[[1]]
-                      #     
-                      #     strata_in_withoutschooltype_and_not_in_withshooltype <- dplyr::anti_join (iccat_data, iccat_ce_WithSchooltypeInfo, by=setdiff(columns_to_keep,c("value","schooltype")))
-                      #     strata_in_withoutschooltype_and_not_in_withshooltype <- strata_in_withoutschooltype_and_not_in_withshooltype[, columns_to_keep]
-                      #     
-                      #     # Join datasets: Dataset with the type of school + dataset without the type of school from which we have removed the strata that are also available in the dataset with the type of school.
-                      #     iccat_data <- rbind(strata_in_withoutschooltype_and_not_in_withshooltype, iccat_ce_WithSchooltypeInfo)
-                      #   }
+                        #   
+                        #   # Deal with special case of ICCAT PS
+                        #   if (options$iccat_ps_include_type_of_school){ 
+                        #     config$logger.info("Option 'iccat_ps_include_type_of_school' is TRUE. Include Type of school...")
+                        #     dataset_iccat_byschool_file <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                        #                                                    regexpr("byschool", names(dataset_files)) > 0 &
+                        #                                                    regexpr("iccat", names(dataset_files)) > 0]
+                        #     iccat_ce_WithSchooltypeInfo <- readr::read_csv(dataset_iccat_byschool_file, guess_max = 0)
+                        #     iccat_ce_WithSchooltypeInfo <- as.data.frame(iccat_ce_WithSchooltypeInfo)
+                        #     iccat_ce_WithSchooltypeInfo <- iccat_ce_WithSchooltypeInfo[, columns_to_keep]
+                        #     class(iccat_ce_WithSchooltypeInfo$value) <- "numeric"
+                        #     
+                        #     # We need to map fishingfleet code list, because fishingfleet code list used in iccat task2 by operation mode dataset is different from fishingfleet code list used in ICCAT task2; however we have to use the same fishingfleet code list for data raising. In other words, we express all ICCAT datasets following ICCAT task2 fishingfleet code list.
+                        #     cl_filename <- "codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv"
+                        #     cl_id <- googledrive::drive_get(cl_filename)$id
+                        #     googledrive::drive_download(googledrive::as_id(cl_id), cl_filename, overwrite = TRUE)
+                        #     flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0))
+                        #     source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
+                        #     iccat_ce_WithSchooltypeInfo <- map_codelist(iccat_ce_WithSchooltypeInfo, flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat, "fishingfleet")[[1]]
+                        #     
+                        #     strata_in_withoutschooltype_and_not_in_withshooltype <- dplyr::anti_join (iccat_data, iccat_ce_WithSchooltypeInfo, by=setdiff(columns_to_keep,c("value","schooltype")))
+                        #     strata_in_withoutschooltype_and_not_in_withshooltype <- strata_in_withoutschooltype_and_not_in_withshooltype[, columns_to_keep]
+                        #     
+                        #     # Join datasets: Dataset with the type of school + dataset without the type of school from which we have removed the strata that are also available in the dataset with the type of school.
+                        #     iccat_data <- rbind(strata_in_withoutschooltype_and_not_in_withshooltype, iccat_ce_WithSchooltypeInfo)
+                        #   }
                       }else{
                         config$logger.warn(sprintf("Option include_%s = FALSE. Ignoring data...", rfmo))
                       }
-
-
+                      
+                      
                       iccat_data
                     },
                     #IATTC
@@ -361,6 +361,14 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iattc_data
                     }
   )
+  
+  dataset$time_start <- substr(as.character(dataset$time_start), 1, 10)
+  dataset$time_end <- substr(as.character(dataset$time_end), 1, 10)
+  class(dataset$value) <- "numeric"
+  
+  dataset <- dataset%>%
+    dplyr::mutate(unit = case_when(unit %in% c("MT") ~ "t", unit %in% c("NO") ~ "no", TRUE ~ unit))
+  
   
   return(dataset)
 }
