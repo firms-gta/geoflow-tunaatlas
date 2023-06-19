@@ -188,6 +188,13 @@ function(action, entity, config) {
   )
   #-------------------------------------------------------------------------------------------------------------------------------------
   
+  rawdata <- opts
+  rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
+  rawdata$iccat_ps_include_type_of_school <- FALSE
+  rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
+  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <-
+    "fishingfleet"
+  
   
   georef_dataset <-
     do.call("rbind",
@@ -196,7 +203,7 @@ function(action, entity, config) {
               get_rfmos_datasets_level0,
               entity,
               config,
-              opts
+              rawdata
             ))
   
   # -------------------------------------------------------------------------
