@@ -269,7 +269,7 @@ function(action, entity, config) {
   
   
   #----------Map code lists -------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
+  config$logger.info("LEVEL 0 => STEP Map code lists ")
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   if (!is.null(opts$mapping_map_code_lists))
@@ -570,7 +570,7 @@ list(options_mapping_map_code_lists)
     )
     config$logger.info(
       sprintf(
-        "LEVEL 1 => STEP 3/5  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
+        "LEVEL 1 => STEP  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
         entity$data$source[[1]],
         opts$spatial_curation_data_mislocated
       )
@@ -583,13 +583,13 @@ list(options_mapping_map_code_lists)
       round(georef_dataset %>% select(value)  %>% sum())
     config$logger.info(
       sprintf(
-        "STEP 3/5 : Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
+        "STEP Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
         nrow(georef_dataset),
         ntons_before_this_step
       )
     )
     
-    config$logger.info("STEP 3/5: BEGIN function_spatial_curation_data_mislocated() function")
+    config$logger.info("STEP BEGIN function_spatial_curation_data_mislocated() function")
     georef_dataset <- spatial_curation_data_mislocated(
       entity = entity,
       config = config,
@@ -597,7 +597,7 @@ list(options_mapping_map_code_lists)
       spatial_curation_data_mislocated =
         opts$spatial_curation_data_mislocated
     )
-    config$logger.info("STEP 3/5: END function_spatial_curation_data_mislocated() function")
+    config$logger.info("STEP: END function_spatial_curation_data_mislocated() function")
     
     #@juldebar: pending => metadata elements below to be managed (commented for now)
     # metadata$description<-paste0(metadata$description,georef_dataset$description)
@@ -608,18 +608,18 @@ list(options_mapping_map_code_lists)
       round(georef_dataset %>% select(value)  %>% sum())
     config$logger.info(
       sprintf(
-        "STEP 3/5 : Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
+        "STEP Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
         nrow(georef_dataset),
         ntons_after_mislocated
       )
     )
     config$logger.info(
       sprintf(
-        "STEP 3/5 : Reallocation of mislocated data generated [%s] additionnal tons",
+        "STEP Reallocation of mislocated data generated [%s] additionnal tons",
         ntons_after_mislocated - ntons_before_this_step
       )
     )
-    config$logger.info("END STEP 3/5")
+    config$logger.info("END STEP")
     function_recap_each_step(
       "Realocating_removing_mislocated_data",
       georef_dataset,
@@ -822,7 +822,7 @@ list(options_mapping_map_code_lists)
           ntons_after_conversion
         )
       )
-      # config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
+      # config$logger.info(sprintf("STEP : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
       config$logger.info(
         sprintf(
           "Unit conversion generated [%s] additionnal tons",
@@ -893,7 +893,7 @@ list(options_mapping_map_code_lists)
   config$logger.info(
     "-----------------------------------------------------------------------------------------------------"
   )
-  config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
+  config$logger.info("LEVEL 2 => STEP : Set parameters")
   config$logger.info(
     "-----------------------------------------------------------------------------------------------------"
   )
@@ -1286,18 +1286,18 @@ list(options_mapping_map_code_lists)
       round(georef_dataset %>% select(value)  %>% sum())
     config$logger.info(
       sprintf(
-        "STEP 4/5 : Gridded catch dataset after Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
+        "STEP : Gridded catch dataset after Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
         nrow(georef_dataset),
         ntons_after_disaggregation_5deg
       )
     )
     config$logger.info(
       sprintf(
-        "STEP 4/5 : Disaggregate data on 5° generated [%s] additionnal tons",
+        "STEP : Disaggregate data on 5° generated [%s] additionnal tons",
         ntons_after_disaggregation_5deg - ntons_before_this_step
       )
     )
-    config$logger.info("END STEP 4/5")
+    config$logger.info("END STEP ")
     function_recap_each_step(
       "Disaggregate5deg",
       georef_dataset,
@@ -1313,7 +1313,7 @@ list(options_mapping_map_code_lists)
     )
     config$logger.info(
       sprintf(
-        "LEVEL 1 => STEP 4/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",
+        "LEVEL 1 => STEP not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",
         entity$data$source[[1]],
         opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
       )
@@ -1331,7 +1331,7 @@ list(options_mapping_map_code_lists)
     )
     config$logger.info(
       sprintf(
-        "LEVEL 1 => STEP 5/5 for file [%s] is executed: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
+        "LEVEL 1 => STEP for file [%s] is executed: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
         entity$data$source[[1]],
         opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
       )
@@ -1344,14 +1344,14 @@ list(options_mapping_map_code_lists)
       round(georef_dataset %>% select(value)  %>% sum())
     config$logger.info(
       sprintf(
-        "STEP 5/5 : Gridded catch dataset before Disaggregate data on 1° has [%s] lines and total catch is [%s] Tons",
+        "STEP Gridded catch dataset before Disaggregate data on 1° has [%s] lines and total catch is [%s] Tons",
         nrow(georef_dataset),
         ntons_before_this_step
       )
     )
     
     config$logger.info(
-      "STEP 5/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
+      "STEP BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
     )
     georef_dataset <-
       function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(
@@ -1366,7 +1366,7 @@ list(options_mapping_map_code_lists)
           opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
       )
     config$logger.info(
-      "STEP 5/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
+      "STEP END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
     )
     
     
@@ -1375,14 +1375,14 @@ list(options_mapping_map_code_lists)
       round(georef_dataset %>% select(value)  %>% sum())
     config$logger.info(
       sprintf(
-        "STEP 5/5 : Gridded catch dataset after Disaggregate data on 1° has [%s] lines and total catch is now [%s] Tons",
+        "STEP Gridded catch dataset after Disaggregate data on 1° has [%s] lines and total catch is now [%s] Tons",
         nrow(georef_dataset),
         ntons_after_disaggregation_1deg
       )
     )
     config$logger.info(
       sprintf(
-        "STEP 5/5 : Disaggregate data on 1° generated [%s] additionnal tons",
+        "STEP : Disaggregate data on 1° generated [%s] additionnal tons",
         ntons_after_disaggregation_1deg - ntons_before_this_step
       )
     )
@@ -1403,7 +1403,7 @@ list(options_mapping_map_code_lists)
     )
     config$logger.info(
       sprintf(
-        "LEVEL 1 => STEP 5/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
+        "LEVEL 1 => STEP not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
         entity$data$source[[1]],
         opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
       )
@@ -1464,7 +1464,7 @@ list(options_mapping_map_code_lists)
   
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   config$logger.info(
-    "LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) "
+    "LEVEL 0 => STEP Apply filters on fishing gears if needed (Filter data by groups of gears) "
   )
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   if (!is.null(opts$gear_filter)) {
