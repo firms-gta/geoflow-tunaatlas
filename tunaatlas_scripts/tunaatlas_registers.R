@@ -28,12 +28,7 @@ register_fishing_fleet <- function(config){
 register_species <- function(config){	
 	con <- config$software$input$dbi
 	fetched <- dbGetQuery(con, "SELECT * FROM species.species_asfis")
-	out <- data.frame(
-		code = fetched$code,
-		uri = NA,
-		label = fetched$label,
-		definition = fetched$scientific_name
-	)
+	out <- fetched[,c("code", "uri", "label", "definition")]
 	return(out)	
 }
 
