@@ -1,5 +1,5 @@
 enrich_metadata <- function(action,entity, config){
-  opts <- action$options
+	opts <- action$options
 	con <- config$software$input$dbi
 
 	#subjects
@@ -9,7 +9,7 @@ enrich_metadata <- function(action,entity, config){
 		ft <- dictionary$getFeatureTypeById(entity$data$featureType)
 		this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0("fact_tables.",entity$identifiers[["id"]])," LIMIT 1;"))
 		column_names <- colnames(this_view)
-		column_names <- column_names[!column_names %in% c("id_area", "longitude", "latitude", "geom_wkt", "geographic_identifier", "year", "month", "quarter", "time_start", "time_end", "time_period", "aggregation_method", "value", "gear_group", "species_group", "the_geom")]
+		column_names <- column_names[!column_names %in% c("id_area", "longitude", "latitude", "geom_wkt", "geographic_identifier", "year", "month", "quarter", "time_start", "time_end", "time_period", "aggregation_method", "measurement_value", "gear_group", "species_group", "the_geom")]
 		column_names <- column_names[!sapply(column_names, endsWith, "_label")]
 		for(colname in column_names){	
 			subject <- NULL
