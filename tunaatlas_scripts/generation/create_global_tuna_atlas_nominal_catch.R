@@ -17,20 +17,24 @@
 
 function(action, entity, config){
   opts <- action$options
-  
-  
-  
-  
-  
+
+  #packages
   if(!require(dplyr)){
     install.packages("dplyr")
     require(dplyr)
-  }
-  
+  }  
   if(!require(readr)){
     install.packages("readr")
     require(readr)
   }
+  
+  # #############
+  #action options
+  recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else FALSE #default FALSE
+  mapping_map_code_lists = if(!is.null(opts$mapping_map_code_lists)) opts$mapping_map_code_lists else TRUE #default is TRUE
+  mapping_keep_src_code = if(!is.null(opts$mapping_keep_src_code)) opts$mapping_keep_src_code else FALSE #default is FALSE
+  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("IATTC", "CCSBT", "WCPFC")
+  SBF_data_rfmo_to_keep = if(!is.null(opts$SBF_data_rfmo_to_keep)) opts$SBF_data_rfmo_to_keep else "CCSBT"
   
   # connect to Tuna atlas database
   con <- config$software$output$dbi
@@ -45,11 +49,8 @@ function(action, entity, config){
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
   config$logger.info("Retrieving RFMOs nominal catch OK")
   
-  
-
-# Temporary patch  --------------------------------------------------------
-
-## Species RMJ -------------
+  # Temporary patch  --------------------------------------------------------
+  ## Species RMJ -------------
   nominal_catch <- nominal_catch %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM",
                                                                        TRUE ~ species))
 
@@ -62,17 +63,14 @@ function(action, entity, config){
   
   #### 2) Map code lists 
   
-  if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
+  if (mapping_map_code_lists){
     
     config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-    filename <- entity$data$source[[1]]
-    mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, filename)
+    mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
     mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
-    mapping_keep_src_code <- FALSE
-    if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
     
     config$logger.info("Mapping code lists of georeferenced datasets...")
-    mapping_codelist <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE, source_authority_to_map = opts$source_authority_to_map)
+    mapping_codelist <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code, summary_mapping = TRUE, source_authority_to_map = source_authority_to_map)
     config$logger.info("Mapping code lists of georeferenced datasets OK")
     nominal_catch = mapping_codelist$dataset_mapped
     
@@ -82,21 +80,20 @@ function(action, entity, config){
     
     config$logger.info("Mapping code lists of georeferenced datasets OK")
     
-    
-    names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
-    
-    function_write_RDS = function(name) {
-      file_name <- paste0("data/", name, ".rds")
-      object_list <- mget(name, envir = globalenv())
-      if (!is.null(object_list[[1]])) {
-        object_df <- object_list[[1]]
-        saveRDS(object_df, file = file_name)
-      } else {
-        config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
-      }
-    }
-    
-    try(lapply(names_list, function_write_RDS))
+    if(recap_each_step){
+		names_list <- c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
+		function_write_RDS = function(name) {
+		  file_name <- paste0("data/", name, ".rds")
+		  object_list <- mget(name, envir = globalenv())
+		  if (!is.null(object_list[[1]])) {
+			object_df <- object_list[[1]]
+			saveRDS(object_df, file = file_name)
+		  } else {
+			config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
+		  }
+		}	
+		try(lapply(names_list, function_write_RDS))
+	}
     
     
     
@@ -105,19 +102,19 @@ function(action, entity, config){
   
   #### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
   
-  if (!is.null(opts$SBF_data_rfmo_to_keep)){
+  if (!is.null(SBF_data_rfmo_to_keep)){
     
-    config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-    if (opts$SBF_data_rfmo_to_keep=="CCSBT"){
+    config$logger.info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+    if (SBF_data_rfmo_to_keep=="CCSBT"){
       nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
     } else {
       nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
     }
-    config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
+    config$logger.info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
   }
   
   #final step
-  dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"value")) %>% dplyr::summarise(value=sum(value))
+  dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"masurement_value")) %>% dplyr::summarise(measurement_value=sum(measurement_value))
   dataset<-data.frame(dataset)
   
   #----------------------------------------------------------------------------------------------------------------------------
