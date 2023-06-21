@@ -48,11 +48,7 @@ function(action, entity, config){
   config$logger.info("Retrieving RFMOs nominal catch...")
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
   config$logger.info("Retrieving RFMOs nominal catch OK")
-  
-  # Temporary patch  --------------------------------------------------------
-  ## Species RMJ -------------
-  nominal_catch <- nominal_catch %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM",
-                                                                       TRUE ~ species))
+ 
 
 ## -------------------------------------------------------------------------
 
@@ -94,10 +90,38 @@ function(action, entity, config){
 		}	
 		try(lapply(names_list, function_write_RDS))
 	}
-    
-    
-    
+	
+	# Temporary patch  --------------------------------------------------------
+	## Species RMJ -------------
+	nominal_catch <- nominal_catch %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM", TRUE ~ species))
+	
+	# Filtering on species under mandate --------------------------------------
+	# done base on mapping between source_authority (tRFMO) and species 
+	url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
+	species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
+	nominal_catch <- nominal_catch %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species", "source_authority" = "source_authority"))
+  
+	if(recap_each_step){
+	  function_recap_each_step(
+		"Filtering species",
+		nominal_catch,
+		paste0(
+		  "Filtering species on the base of the file ",
+		  url_asfis_list,
+		  " to keep only the species under mandate of tRFMOs. This file contains " ,
+		  as.character(length(nrow(
+			species_to_be_kept_in_level0
+		  ))),
+		  " species."
+		),
+		"inner_join"  ,
+		NULL
+	  )
+	}
+	
   }
+  
+  
   
   
   #### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
