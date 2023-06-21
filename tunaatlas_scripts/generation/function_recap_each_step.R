@@ -4,10 +4,10 @@ function_recap_each_step=function(nom_dossier, nomrds, explication="",fonctions=
   dir.create("Markdown")
   dir.create(paste0("Markdown/",nom_dossier))
   nom_dossier <- paste0("Markdown/",nom_dossier)
-  rds_t <- (nomrds %>% filter(unit %in% c("t", "MTNO","MT"))) 
-  rds_no <- (nomrds %>% filter(unit %in% c("no", "NOMT","NO"))) 
-  somme_t <- sum(rds_t$value, na.rm = TRUE)
-  somme_no <- sum(rds_no$value, na.rm = TRUE)
+  rds_t <- (nomrds %>% filter(measurement_unit %in% c("t", "MTNO","MT"))) 
+  rds_no <- (nomrds %>% filter(measurement_unit %in% c("no", "NOMT","NO"))) 
+  somme_t <- sum(rds_t$measurement_value, na.rm = TRUE)
+  somme_no <- sum(rds_no$measurement_value, na.rm = TRUE)
   lines <- nrow(nomrds)
   write_csv(data.frame(somme_t, somme_no, lines), paste0(nom_dossier,"/sums.csv"))
   if (!is.null(option_list)){
@@ -17,11 +17,6 @@ function_recap_each_step=function(nom_dossier, nomrds, explication="",fonctions=
     for (i in 1:length(options_substi)){
       options_written <- paste0(options_written, (paste0(options_substi[i], " = ", option_list[i])), 
                                 sep = " , \n ")
-      
-      
-      
-      
-      
     }
     print(options_written)
   } else {options_written = "NONE"}
