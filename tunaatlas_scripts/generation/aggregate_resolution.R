@@ -42,7 +42,7 @@ aggregate_resolution =function (con, df_input, resolution)
     
     df_input_to_aggregate <- df_input_to_aggregate %>% group_by_(.dots = setdiff(c(columns_df_input, 
                                                                                    "geographic_identifier_project"), c("geographic_identifier", 
-                                                                                                                       "value"))) %>% summarise(value = sum(value))
+                                                                                                                       "measurement_value"))) %>% summarise(measurement_value = sum(measurement_value))
     df_input_to_aggregate$geographic_identifier <- df_input_to_aggregate$geographic_identifier_project
     df_input_to_aggregate$geographic_identifier_project <- NULL
     
@@ -55,12 +55,12 @@ aggregate_resolution =function (con, df_input, resolution)
                                                                 )
   if (!is.null(df_input_final_aggregated_on_resolution_to_aggregate)) {
     sum_fact_to_reallocate <- df_input_final_aggregated_on_resolution_to_aggregate %>% 
-      group_by(unit) %>% summarise(value_reallocate = sum(value))
+      group_by(unit) %>% summarise(value_reallocate = sum(measurement_value))
     sum_whole_df_input <- df_input %>% group_by(unit) %>% 
-      summarise(value = sum(value))
+      summarise(measurement_value = sum(measurement_value))
     stats_reallocated_data <- left_join(sum_whole_df_input, 
                                         sum_fact_to_reallocate)
-    stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$value * 
+    stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$measurement_value * 
       100
   }
   else {
