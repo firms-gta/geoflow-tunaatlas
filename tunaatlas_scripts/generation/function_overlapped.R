@@ -1,12 +1,12 @@
 function_overlapped =function(dataset, con, rfmo_to_keep, rfmo_not_to_keep, 
-                              strata =c("geographic_identifier",    "species", "year" ,"fishingfleet")
-                              , opts = opts, removing_unk = "TRUE"){
+                              strata =c("geographic_identifier",    "species", "year" ,"fishing_fleet")
+                              , opts = list(), removing_unk = "TRUE"){
   variable <- opts$fact
   columns_to_keep <- NULL
   if (variable == "catch"){
-    columns_to_keep<-c("source_authority","species","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","catchtype","unit","value")
+    columns_to_keep<-c("source_authority","species","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","catchtype","measurement_unit","measurement_value")
   } else if (variable=="effort"){
-    columns_to_keep<-c("source_authority","gear","fishingfleet","schooltype","time_start","time_end","geographic_identifier","unit","value")
+    columns_to_keep<-c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value")
   }
   rfmo_restant <- dataset %>% 
     filter(source_authority != rfmo_not_to_keep & source_authority!= rfmo_to_keep)
@@ -33,13 +33,14 @@ function_overlapped =function(dataset, con, rfmo_to_keep, rfmo_not_to_keep,
     overlapping_kept <- overlapping_kept %>% dplyr::select(-overlap)
   }
   if("year" %in% colnames(overlapping_kept)){
-  overlapping_kept <- overlapping_kept %>% dplyr::select(-year)}
+	overlapping_kept <- overlapping_kept %>% dplyr::select(-year)
+  }
   
   georef_dataset <- rbind(rfmo_restant, overlapping_kept)
   rm(rfmo_to_keep_DT, rfmo_not_to_keep_DT, rfmo_restant, rfmo_not_to_keep_without_equivalent)
   gc()
 
 
-  
-  return(georef_dataset %>% ungroup())
+  out = georef_dataset %>% ungroup()
+  return(out)
 }
