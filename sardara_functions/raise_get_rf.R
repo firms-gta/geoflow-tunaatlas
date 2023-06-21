@@ -12,16 +12,16 @@ raise_get_rf <- function (df_input_incomplete, df_input_total, x_raising_dimensi
     stop("one of the dataframes as input does not have the dimensions set in the dimensions to consider for the raising")
   }
   DFPartialInfo_ByEachRaisingDimension <- group_by_(df_input_incomplete, 
-                                                    .dots = x_raising_dimensions) %>% summarise(value = sum(value))
+                                                    .dots = x_raising_dimensions) %>% summarise(measurement_value = sum(measurement_value))
   DFTotalInfo_ByEachRaisingDimension <- group_by_(df_input_total, 
-                                                  .dots = x_raising_dimensions) %>% summarise(value = sum(value))
+                                                  .dots = x_raising_dimensions) %>% summarise(measurement_value = sum(measurement_value))
   DFPartialInfo_rf <- merge(DFPartialInfo_ByEachRaisingDimension, 
                             DFTotalInfo_ByEachRaisingDimension, by = x_raising_dimensions, 
                             all = TRUE)
   colnames(DFPartialInfo_rf)[which(colnames(DFPartialInfo_rf) == 
-                                     "value.x")] <- "sum_value_df_input_incomplete"
+                                     "measurement_value.x")] <- "sum_value_df_input_incomplete"
   colnames(DFPartialInfo_rf)[which(colnames(DFPartialInfo_rf) == 
-                                     "value.y")] <- "sum_value_df_input_total"
+                                     "measurement_value.y")] <- "sum_value_df_input_total"
   DFPartialInfo_rf$rf <- DFPartialInfo_rf$sum_value_df_input_total/DFPartialInfo_rf$sum_value_df_input_incomplete
   cat(paste0("raise_get_rf file output DFPartialInfo_rf has", 
              nrow(DFPartialInfo_rf), "rows \n"))
