@@ -54,13 +54,10 @@ function(action, entity, config) {
     require(R3port)
   }
   
-  
   if (!require(reshape2)) {
     install.packages("reshape2")
     require(reshape2)
   }
-  
-  
   
   if (!require(readr)) {
     install.packages("readr")
@@ -85,61 +82,34 @@ function(action, entity, config) {
     require(googledrive)
   }
   
-  
-  counting <- 1
-  
-  
-  
-  
-  
-  
+  stepnumber <- 1
   
   #scripts
-  url_scripts_create_own_tuna_atlas <-
-    "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
-  source(file.path(
-    url_scripts_create_own_tuna_atlas,
-    "get_rfmos_datasets_level0.R"
-  )) #modified for geoflow
-  source(file.path(
-    url_scripts_create_own_tuna_atlas,
-    "retrieve_nominal_catch.R"
-  )) #modified for geoflow
+  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
+  #utils
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_recap_each_step.R"))  # new function to create rds for each treatment
+  #for level 0 - FIRMS
+  source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
+  
+  #for level 1 - FIRMS (candidate)
+  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "double_unit_data_handling.R")) # new function for double unit
   source(file.path(url_scripts_create_own_tuna_atlas, "do_unit_conversion.R"))
-  source(file.path(
-    url_scripts_create_own_tuna_atlas,
-    "function_overlapped.R"
-  )) # adding this function as overlapping is now a recurent procedures for several overlapping
-  source(
-    file.path(
-      url_scripts_create_own_tuna_atlas,
-      "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"
-    )
-  )
-  source(
-    file.path(
-      url_scripts_create_own_tuna_atlas,
-      "function_raising_georef_to_nominal.R"
-    )
-  ) #modified for geoflow
-  source(
-    file.path(
-      url_scripts_create_own_tuna_atlas,
-      "spatial_curation_data_mislocated.R"
-    )
-  ) #modified for geoflow
-  source(file.path(
-    url_scripts_create_own_tuna_atlas,
-    "double_unit_data_handling.R"
-  )) # new function for double unit
-  source(file.path(
-    url_scripts_create_own_tuna_atlas,
-    "function_recap_each_step.R"
-  ))  # new function to create rds for each treatment
-  
-  
-  
+
+  #for level 2 - IRD
+  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
+
+  #stepLog
+  stepLogger = function(level, step, msg){
+	config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
+  }
+
+  #TODO @BastienIRD --> please add some comments in this code, why you need to export the action options (for reporting)
+  #Better if you could create a function to avoid this chunk of codes directly set here
   j <- 1
   
   list_options <-
@@ -170,31 +140,34 @@ function(action, entity, config) {
   }
   list_options = list_options[-1, ]
   
-  write_csv(list_options, "list_options.csv")
+  readr::write_csv(list_options, "list_options.csv")
   
   # #############
+  #action options
+  filtering_on_minimum_year_declared = if(!is.null(opts$filtering_on_minimum_year_declared)) opts$filtering_on_minimum_year_declared else TRUE
+  recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else FALSE
   
   #Identify expected Level of processing
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  #LEVEL 0 FIRMS PRODUCTS
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  DATASET_LEVEL <- opts$dataset_level
+  #===========================================================================================================================================================
+  #===========================================================================================================================================================
+  #>(||||*> LEVEL 0 FIRMS PRODUCTS
+  #===========================================================================================================================================================
+  #===========================================================================================================================================================
   
   #### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
   config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
   
   #-------get_rfmos_datasets_level0------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info(
-    "LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked"
-  )
+  stepLogger(level = 0, step = stepnumber, msg = "Retrieve georeferenced catch or effort (+ processings for IATTC) AND NOMINAL CATCH if asked")
+  stepnumber = stepnumber+1
   #-------------------------------------------------------------------------------------------------------------------------------------
   
-  
   rawdata <- opts
+  #by default, at this step we will skip specific processings applied to IATTC data. These processings are eventually done later in the script (if options are activated)
   rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
-  rawdata$iccat_ps_include_type_of_school <- FALSE
   rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
-  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <-
-    "fishingfleet"
+  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_fleet"
   
   dataset <-
     do.call("rbind",
@@ -209,26 +182,15 @@ function(action, entity, config) {
     substr(as.character(dataset$time_start), 1, 10)
   dataset$time_end <- substr(as.character(dataset$time_end), 1, 10)
   georef_dataset <- dataset
-  class(georef_dataset$value) <- "numeric"
+  class(georef_dataset$measurement_value) <- "numeric"
   rm(dataset)
   ### next steps to correct identifier incorrect of iotc
   
-  
-  ### filtering on minimum time_start
-  
-  if (is.null(opts$filtering_on_minimum_year_declared)) {
-    filtering_on_minimum_year_declared <- TRUE
-    
-  } else {
-    filtering_on_minimum_year_declared <-
-      opts$filtering_on_minimum_year_declared
-  }
-  
-  
-  
+  ### filtering on minimum time_start (TRUE  by default)
+
   if (filtering_on_minimum_year_declared) {
-    config$logger.info("filtering on minimum time_start ")
-    
+	stepLogger(level = 0, step = stepnumber, msg = "Filtering on minimum time_start")
+	stepnumber = stepnumber+1
     
     # extract the maximum year of declaration for each source_authority
     max_years <- georef_dataset %>%
@@ -238,8 +200,7 @@ function(action, entity, config) {
     # check if not all the source_authority columns have the same maximum year of declaration
     if (length(unique(max_years$max_time_start)) > 1) {
       config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
-      
-      
+
       # get the minimum time_start of all the maximum time_start of each source_authority
       min_time_start <- min(max_years$max_time_start)
       
@@ -247,80 +208,27 @@ function(action, entity, config) {
       georef_dataset <- georef_dataset %>%
         filter(time_start <= min_time_start)
     }
-    
   }
   
+  if(recap_each_step){
+	  function_recap_each_step(
+		"rawdata",
+		georef_dataset,
+		"Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+		"get_rfmos_datasets_level0"  ,
+		list(
+		  options_include_IOTC,
+		  options_include_ICCAT,
+		  options_include_IATTC,
+		  options_include_WCPFC,
+		  options_include_CCSBT
+		)
+	  )
+	  saveRDS(georef_dataset, "data/rawdata.rds")
+  }
   
-  function_recap_each_step(
-    "rawdata",
-    georef_dataset,
-    "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
-    "get_rfmos_datasets_level0"  ,
-    list(
-      options_include_IOTC,
-      options_include_ICCAT,
-      options_include_IATTC,
-      options_include_WCPFC,
-      options_include_CCSBT
-    )
-  )
-  saveRDS(georef_dataset, "data/rawdata.rds")
-  
-  
-  
-  # unlink("Markdown")
-  
-  # if(opts$iccat_ps_include_type_of_school){
-  #   rawdata$iccat_ps_include_type_of_school<- opts$iccat_ps_include_type_of_school
-  #
-  #
-  #   #------------Enriching data with schootype for iccat-------------------------------------------------------------------------------------------------------------------------
-  #   config$logger.info("LEVEL 0 => STEP Enriching data with schooltype for iccat if needed")
-  #   #-------------------------------------------------------------------------------------------------------------------------------------
-  #   iccat <- get_rfmos_datasets_level0("ICCAT", entity, config, rawdata)
-  #   iccat$time_start<-substr(as.character(iccat$time_start), 1, 10)
-  #   iccat$time_end<-substr(as.character(iccat$time_end), 1, 10)
-  #   class(iccat$value) <- "numeric"
-  #
-  #   georef_dataset<-rbind(georef_dataset %>% filter(source_authority != "ICCAT"),iccat)
-  #   rm(iccat)
-  #
-  #   function_recap_each_step("iccat enriched",
-  #                            georef_dataset,
-  #                            "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
-  #                            "get_rfmos_datasets_level0"  , list(options_include_ICCAT))
-  #   ################
-  # }
-  
-  
-  # Filtering on species under mandate --------------------------------------
-  config$logger.info("Filtering on species under mandate")
-  url_asfis_list <-
-    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
-  species_to_be_kept_in_level0 <- read_csv(url_asfis_list)
-  
-  
-  georef_dataset <-
-    georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
-  georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
-  
-  function_recap_each_step(
-    "Filtering species",
-    georef_dataset,
-    paste0(
-      "Filtering species on the base of the file ",
-      url_asfis_list,
-      " to keep only the species under mandate of tRFMOs. This file contains " ,
-      as.character(length(nrow(
-        species_to_be_kept_in_level0
-      ))),
-      " species."
-    ),
-    "inner_join"  ,
-    NULL
-  )
   # -------------------------------------------------------------------------
-  
+  # PROCESSINGS FOR IATTC data
   
   if (opts$iattc_ps_raise_flags_to_schooltype) {
     rawdata$iattc_ps_raise_flags_to_schooltype <-
@@ -328,26 +236,29 @@ function(action, entity, config) {
     
     
     #---------Enriching data with schootype for iattc----------------------------------------------------------------------------------------------------------------------------
-    config$logger.info("LEVEL 0 => STEP Enriching data with schootype for iattc if needed")
+    stepLogger(level = 0, step = stepnumber, msg = "Enriching data with schootype for IATTC if needed")
+	stepnumber = stepnumber+1
     #-------------------------------------------------------------------------------------------------------------------------------------
     iattc <-
       get_rfmos_datasets_level0("IATTC", entity, config, rawdata)
     iattc$time_start <- substr(as.character(iattc$time_start), 1, 10)
     iattc$time_end <- substr(as.character(iattc$time_end), 1, 10)
-    class(iattc$value) <- "numeric"
+    class(iattc$measurement_value) <- "numeric"
     
     georef_dataset <-
       rbind(georef_dataset %>% filter(source_authority != "IATTC"),
             iattc)
     rm(iattc)
     
-    function_recap_each_step(
-      "iattc enriched",
-      georef_dataset,
-      "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
-      "get_rfmos_datasets_level0"  ,
-      list(options_include_IATTC)
-    )
+	if(recap_each_step){
+		function_recap_each_step(
+		  "iattc enriched",
+		  georef_dataset,
+		  "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+		  "get_rfmos_datasets_level0"  ,
+		  list(options_include_IATTC)
+		)
+	}
     ################
   }
   if (opts$iattc_ps_catch_billfish_shark_raise_to_effort) {
@@ -355,56 +266,73 @@ function(action, entity, config) {
       opts$iattc_ps_catch_billfish_shark_raise_to_effort
     
     #----------Raising catch data to effort for iattc---------------------------------------------------------------------------------------------------------------------------
-    config$logger.info("LEVEL 0 => Raising catch data to effort for iattc")
+    stepLogger(level = 0, step = stepnumber, msg = "Raising catch data to effort for IATTC")
+	stepnumber = stepnumber+1
     #-------------------------------------------------------------------------------------------------------------------------------------
     iattc <-
       get_rfmos_datasets_level0("IATTC", entity, config, rawdata)
     iattc$time_start <- substr(as.character(iattc$time_start), 1, 10)
     iattc$time_end <- substr(as.character(iattc$time_end), 1, 10)
-    class(iattc$value) <- "numeric"
+    class(iattc$measurement_value) <- "numeric"
     
     georef_dataset <-
       rbind(georef_dataset %>% filter(source_authority != "IATTC"),
             iattc)
     rm(iattc)
     
-    function_recap_each_step(
-      "iattc raised for billfish and shark",
-      georef_dataset,
-      "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
-      "get_rfmos_datasets_level0"  ,
-      list(options_include_IATTC)
-    )
+	if(recap_each_step){
+		function_recap_each_step(
+		  "iattc raised for billfish and shark",
+		  georef_dataset,
+		  "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+		  "get_rfmos_datasets_level0"  ,
+		  list(options_include_IATTC)
+		)
+	}
     ################
   }
   
-  
-  georef_dataset <- georef_dataset %>%
-    dplyr::mutate(unit = case_when(unit %in% c("MT") ~ "t", unit %in% c("NO") ~ "no", TRUE ~ unit))
-  
-  
-  
+  #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
+  stepLogger(level = 0, step = stepnumber, msg = "Standardizing unit of measures")
+  stepnumber = stepnumber+1
+  #-------------------------------------------------------------------------------------------------------------------------------------
+  unit_weight_to_remap = c("MT")
+  unit_number_to_remap = c("NO")
+  if(DATASET_LEVEL == 0){
+	#in the case we are tackling the production of a level 0, we need to replace MT,MTNO by "t" and NO,NOMT by "no"
+	#MTNO and NOMT are code artefacts created at preharmonization level (now targeting essentially IATTC for catch)
+	unit_weight_to_remap = c("MT", "MTNO")
+	unit_number_to_remap = c("NO", "NOMT")
+  }
+  georef_dataset <- georef_dataset %>% 
+	dplyr::mutate( 
+		measurement_unit = case_when(
+			measurement_unit %in% unit_weight_to_remap ~ "t", 
+			measurement_unit %in% unit_number_to_remap ~ "no", 
+			TRUE ~ measurement_unit
+		)
+	)
   
   #----------Map code lists -------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
+  #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("CCSBT", "IATTC", "WCPFC")
   
-  if (!is.null(opts$mapping_map_code_lists))
+  if (!is.null(opts$mapping_map_code_lists)){
     if (opts$mapping_map_code_lists) {
+	  stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
+      stepnumber = stepnumber+1
       config$logger.info(
         "Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database."
       )
-      mapping_csv_mapping_datasets_url <-
-        entity$getJobDataResource(config, entity$data$source[[2]])
+      mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
       mapping_dataset <-
         read.csv(
           mapping_csv_mapping_datasets_url,
           stringsAsFactors = F,
           colClasses = "character"
         )
-      mapping_keep_src_code <- FALSE
-      if (!is.null(opts$mapping_keep_src_code))
-        mapping_keep_src_code = opts$mapping_keep_src_code
+      mapping_keep_src_code <- if (!is.null(opts$mapping_keep_src_code)) opts$mapping_keep_src_code else FALSE
       
       config$logger.info("Mapping code lists of georeferenced datasets...")
       mapping_codelist <-
@@ -415,75 +343,111 @@ function(action, entity, config) {
           dataset_to_map = georef_dataset,
           mapping_keep_src_code,
           summary_mapping = TRUE,
-          source_authority_to_map = opts$source_authority_to_map
+          source_authority_to_map = source_authority_to_map
         ) #this map condelist function is to retrieve the mapping dataset used
       
       georef_dataset <- mapping_codelist$dataset_mapped
-      
-      recap_mapping <- mapping_codelist$recap_mapping
-      stats_total <- mapping_codelist$stats_total
-      not_mapped_total <- mapping_codelist$not_mapped_total
-      
+    
       config$logger.info("Mapping code lists of georeferenced datasets OK")
+
       
+	  if(recap_each_step){
+	  
+		  recap_mapping <- mapping_codelist$recap_mapping
+		  stats_total <- mapping_codelist$stats_total
+		  not_mapped_total <- mapping_codelist$not_mapped_total
+	  
+		  names_list <-
+			c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
+		  
+		  function_write_RDS = function(name) {
+			file_name <- paste0("data/", name, ".rds")
+			object_list <- mget(name, envir = globalenv())
+			if (!is.null(object_list[[1]])) {
+			  object_df <- object_list[[1]]
+			  saveRDS(object_df, file = file_name)
+			} else {
+			  config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
+			}
+		  }
+		  
+		  try(lapply(names_list, function_write_RDS))
+		  
+		  
+		  
+		  
+		  config$logger.info("Saving recap of mapping ok")
+		  
+		  function_recap_each_step(
+			"mapping_codelist",
+			georef_dataset,
+			"This step is to map all the data with the same codes for gears, species, and fishingfleet,
+	that is to say, to put all the data coming from different RFMOs in the same langage with the same
+	codes. Coding systems and nomenclatures used to describe the data may differ according to tRFMOs.
+	Codes used by the tuna RFMOs in their respective datasets were mapped with global code lists for
+	gear (ISSCFG), flag (ISO3 countries codes), and species (ASFIS). Some codes could not be mapped
+	to standard code lists, for some tRFMOs own-defined codes that usually are aggregation of existing
+	codes (e.g. flag ’IDPH’ standing for Indonesia and Philippines within WCPFC or the species “Otun”
+	standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For
+	species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
+	and groups of gears.",
+	"map_codelists",
+			list(options_mapping_map_code_lists)
+		  )
       
-      names_list <-
-        c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
-      
-      function_write_RDS = function(name) {
-        file_name <- paste0("data/", name, ".rds")
-        object_list <- mget(name, envir = globalenv())
-        if (!is.null(object_list[[1]])) {
-          object_df <- object_list[[1]]
-          saveRDS(object_df, file = file_name)
-        } else {
-          config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
-        }
       }
-      
-      try(lapply(names_list, function_write_RDS))
-      
-      
-      
-      
-      config$logger.info("Saving recap of mapping ok")
-      
-      function_recap_each_step(
-        "mapping_codelist",
-        georef_dataset,
-        "This step is to map all the data with the same codes for gears, species, and fishingfleet,
-that is to say, to put all the data coming from different RFMOs in the same langage with the same
-codes. Coding systems and nomenclatures used to describe the data may differ according to tRFMOs.
-Codes used by the tuna RFMOs in their respective datasets were mapped with global code lists for
-gear (ISSCFG), flag (ISO3 countries codes), and species (ASFIS). Some codes could not be mapped
-to standard code lists, for some tRFMOs own-defined codes that usually are aggregation of existing
-codes (e.g. flag ’IDPH’ standing for Indonesia and Philippines within WCPFC or the species “Otun”
-standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For
-species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
-and groups of gears.",
-"map_codelists",
-list(options_mapping_map_code_lists)
-      )
-      
-      
+	  
+	  #Filter on species under mandate for FIRMS level 0
+	  #-------------------------------------------------------------------------------------------------
+	  stepLogger(level = 0, step = stepnumber, msg = "Filter on species under mandate for FIRMS level 0")
+      stepnumber = stepnumber+1
+	  
+	  # Temporary patch for ASFIS RMJ --> RMM
+	  georef_dataset <- georef_dataset %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM", TRUE ~ species))
+	  
+	  # Filtering on species under mandate --------------------------------------
+	  # done base on mapping between source_authority (tRFMO) and species
+	  stepLogger(level = 0, step = stepnumber, msg = "Filtering on species under mandate, targeted by GTA")
+	  stepnumber = stepnumber +1
+	  #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
+	  #species_to_be_kept_in_level0 <- readr::read_csv(url_asfis_list)
+	  #georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
+	  
+	  url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
+	  species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
+	  georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species", "source_authority" = "source_authority"))
+	  
+	  if(recap_each_step){
+		  function_recap_each_step(
+			"Filtering species",
+			georef_dataset,
+			paste0(
+			  "Filtering species on the base of the file ",
+			  url_asfis_list,
+			  " to keep only the species under mandate of tRFMOs. This file contains " ,
+			  as.character(length(nrow(
+				species_to_be_kept_in_level0
+			  ))),
+			  " species."
+			),
+			"inner_join"  ,
+			NULL
+		  )
+	  }
+	  
       
     }
+  }
   
-  
-  
-  
-  
-  
-  
-  
-  
-  #--------Overlapping zone (IATTC/WCPFC)--------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 6/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
+  #--------Overlapping zone (IATTC/WCPFC)---------------------------------------------------------------------------------------------------------------------
+  #Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   if (opts$include_IATTC &&
       opts$include_WCPFC &&
       !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
+	stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
+	stepnumber = stepnumber+1
     if (!exists("opts$strata_overlap_iattc_wcpfc")) {
       options_strata_overlap_iattc_wcpfc <-
         c("geographic_identifier",    "species", "year")
@@ -507,37 +471,40 @@ list(options_mapping_map_code_lists)
         }),
         strata = options_strata_overlap_iattc_wcpfc
       )
-    function_recap_each_step(
-      "overlap_iattc_wcpfc",
-      georef_dataset,
-      "In this step, the georeferenced data present on the overlapping zone between IATTC and WCPFC is handled. The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-      "function_overlapped" ,
-      list(
-        options_include_IATTC,
-        options_include_WCPFC ,
-        options_overlapping_zone_iattc_wcpfc_data_to_keep,
-        options_strata_overlap_iattc_wcpfc
-      )
-    )
-    
+	  
+	if(recap_each_step){
+		function_recap_each_step(
+		  "overlap_iattc_wcpfc",
+		  georef_dataset,
+		  "In this step, the georeferenced data present on the overlapping zone between IATTC and WCPFC is handled. The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+		  "function_overlapped" ,
+		  list(
+			options_include_IATTC,
+			options_include_WCPFC ,
+			options_overlapping_zone_iattc_wcpfc_data_to_keep,
+			options_strata_overlap_iattc_wcpfc
+		  )
+		)
+    }
     
   }
   
-  
-  #--------Overlapping zone (IOTC/WCPFC)--------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 6/8: Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?")
+  #--------Overlapping zone (IOTC/WCPFC)----------------------------------------------------------------------------------------------------------------------
+  #Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   if (opts$include_IOTC &&
       opts$include_WCPFC &&
       !is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
+	stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?")
+	stepnumber = stepnumber+1
     # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
     if (!exists("opts$strata_overlap_iotc_wcpfc")) {
       options_strata_overlap_iotc_wcpfc <-
         c("geographic_identifier",
           "species",
           "year",
-          "fishingfleet")
+          "fishing_fleet")
     } else {
       options_strata_overlap_iotc_wcpfc <-
         unlist(strsplit(opts$strata_overlap_iotc_wcpfc, split = ","))
@@ -563,9 +530,6 @@ list(options_mapping_map_code_lists)
         " in the IOTC/WCPFC overlapping zone..."
       )
     )
-    # georef_dataset_level0_step10 <- georef_dataset
-    # georef_dataset_level0_step10_ancient<- overlapping_ancient_method
-    # georef_dataset_level0_step10_reverse <- reverse_overlapping
     
     config$logger.info(
       paste0(
@@ -575,190 +539,165 @@ list(options_mapping_map_code_lists)
       )
     )
     
-    function_recap_each_step(
-      "overlap_iotc_wcpfc",
-      georef_dataset,
-      paste0(
-        "In this step, the georeferenced data present on the overlapping zone between IOTC and WCPFC is handled.
-                   The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.
-                   In the case the data is identical on the stratas privided, the remaining data is from ",
-        options_overlapping_zone_iotc_wcpfc_data_to_keep
-      ) ,
-      "function_overlapped",
-      list(
-        options_include_WCPFC,
-        options_include_IOTC,
-        options_overlapping_zone_iotc_wcpfc_data_to_keep,
-        options_strata_overlap_iotc_wcpfc
-      )
-    )
-    
+	if(recap_each_step){
+		function_recap_each_step(
+		  "overlap_iotc_wcpfc",
+		  georef_dataset,
+		  paste0(
+			"In this step, the georeferenced data present on the overlapping zone between IOTC and WCPFC is handled.
+					   The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.
+					   In the case the data is identical on the stratas privided, the remaining data is from ",
+			options_overlapping_zone_iotc_wcpfc_data_to_keep
+		  ) ,
+		  "function_overlapped",
+		  list(
+			options_include_WCPFC,
+			options_include_IOTC,
+			options_overlapping_zone_iotc_wcpfc_data_to_keep,
+			options_strata_overlap_iotc_wcpfc
+		  )
+		)
+    }
   }
   
   
+  #-------------Overlap sbf-------------------------------------------------------------------------------------------------------------------------------------
+  #Overlapping on SBF
+  #-------------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  
-  
-  
-  
-  
-  #-------------Overlap sbf----------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 7/: Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
-  
-  if(!exists("opts$strata_overlap_sbf")){
-    options_strata_overlap_sbf <- c("species")
+	if(!exists("opts$strata_overlap_sbf")){
+		options_strata_overlap_sbf <- c("species")	
+	} else {  
+		config$logger.info("Attention you are providing options for Southern Bluefin Tuna possible overlapping data")
+		options_strata_overlap_sbf <- unlist(strsplit(opts$strata_overlap_sbf, split = ","))
+	}
     
-  } else {
-  
-    config$logger.info("Attention you are providing options for Southern Bluefin Tuna possible overlapping data")
-    options_strata_overlap_sbf <-
-      unlist(strsplit(opts$strata_overlap_sbf, split = ","))
-  }
-    
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	#Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
     if (opts$include_WCPFC &&
         opts$include_CCSBT) {
+	  stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
+	  stepnumber = stepnumber+1
+      config$logger.info("Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone...") 
       georef_dataset <-
         function_overlapped(
           dataset = georef_dataset,
           con = con,
           rfmo_to_keep = "CCSBT",
           rfmo_not_to_keep = "WCPFC",
-          strata = options_strata_overlap_sbf
-        )
-      config$logger.info(
-        paste0(
-          "Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone..."
-        )
-      )
+          strata = options_strata_overlap_sbf,
+		  opts = opts
+        )   
+      config$logger.info("Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone OK")
       
-      config$logger.info(
-        paste0(
-          "Keeping only data from CCSBT",
-          " in the WCPFC/CCSBT overlapping zone OK"
-        )
-      )
-      
-      function_recap_each_step(
-        "overlap_ccsbt_wcpfc",
-        georef_dataset,
-        paste0(
-          "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.
-                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-          "In the case the data is identical on the stratas privided, the remaining data is from ",
-          options_overlapping_zone_wcpfc_ccsbt_data_to_keep
-        ),
-        "function_overlapped",
-        list(
-          options_include_CCSBT  ,
-          options_include_WCPFC ,
-          options_strata_overlap_sbf
-        )
-      )
-      
+	  if(recap_each_step){
+		  function_recap_each_step(
+			"overlap_ccsbt_wcpfc",
+			georef_dataset,
+			paste0(
+			  "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.
+								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+			  "In the case the data is identical on the stratas privided, the remaining data is from ",
+			  options_overlapping_zone_wcpfc_ccsbt_data_to_keep
+			),
+			"function_overlapped",
+			list(
+			  options_include_CCSBT  ,
+			  options_include_WCPFC ,
+			  options_strata_overlap_sbf
+			)
+		  )
+      }
     }
     
-    
-    
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    config$logger.info("LEVEL 0 => STEP 8/8: Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?")
+	#Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
     if (opts$include_ICCAT &&
         opts$include_CCSBT ) {
-      georef_dataset <-
-        function_overlapped(
+		stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?")
+		stepnumber = stepnumber+1
+		config$logger.info("Keeping only data from CCSBT in the ICCAT/CCSBT overlapping zone...")
+		georef_dataset <- function_overlapped(
           dataset = georef_dataset,
           con = con,
           rfmo_to_keep = "CCSBT",
           rfmo_not_to_keep = "ICCAT",
-          strata = options_strata_overlap_sbf
+          strata = options_strata_overlap_sbf,
+		  opts = opts
         )
-      config$logger.info(
-        paste0(
-          "Keeping only data from CCSBT in the ICCAT/CCSBT overlapping zone..."
-        )
-      )
+		config$logger.info("Keeping only data from ICCAT in the ICCAT/CCSBT overlapping zone OK")
       
-
-      config$logger.info(
-        paste0(
-          "Keeping only data from ICCAT in the ICCAT/CCSBT overlapping zone OK"
-        )
-      )
-      
-      function_recap_each_step(
-        "overlap_iccat_ccsbt",
-        georef_dataset,
-        paste0(
-          "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.
-                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-          "In the case the data is identical on the stratas privided, the remaining data is from CCSBT",
-        ),
-        
-        "function_overlapped",
-        list(
-          options_include_CCSBT,
-          options_include_ICCAT,
-          options_strata_overlap_sbf
-        )
-      )
-      
+		if(recap_each_step){
+		  function_recap_each_step(
+			"overlap_iccat_ccsbt",
+			georef_dataset,
+			paste0(
+			  "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.
+								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+			  "In the case the data is identical on the stratas privided, the remaining data is from CCSBT",
+			),
+			
+			"function_overlapped",
+			list(
+			  options_include_CCSBT,
+			  options_include_ICCAT,
+			  options_strata_overlap_sbf
+			)
+		  )
+		}
       
     }
     
-    
-    
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    config$logger.info("LEVEL 0 => STEPs Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
+	#Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
     if (opts$include_IOTC &&
-        opts$include_CCSBT) {
-      georef_dataset <-
-        function_overlapped(
+		opts$include_CCSBT) {
+		stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
+		stepnumber = stepnumber+1
+		config$logger.info("Keeping only data from CCSBT in the IOTC/CCSBT overlapping zone...")
+		georef_dataset <- function_overlapped(
           dataset = georef_dataset,
           con = con,
           rfmo_to_keep = "CCSBT",
           rfmo_not_to_keep = "IOTC",
-          strata = options_strata_overlap_sbf
+          strata = options_strata_overlap_sbf,
+		  opts = opts
         )
-      config$logger.info(
-        paste0(
-          "Keeping only data from CCSBT in the IOTC/CCSBT overlapping zone..."
-        )
-      )
-
-      config$logger.info(
-        paste0(
-          "Keeping only data from IOTC in the IOTC/CCSBT overlapping zone OK"
-        )
-      )
+		config$logger.info("Keeping only data from IOTC in the IOTC/CCSBT overlapping zone OK")
       
-      function_recap_each_step(
-        "overlap_iotc_ccsbt",
-        georef_dataset,
-        paste0(
-          "In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
-                            The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-          "In the case the data is identical on the stratas privided, the remaining data is from ",
-          options_overlapping_zone_iccat_ccsbt_data_to_keep
-        ),
-        
-        "function_overlapped",
-        list(
-          options_include_CCSBT  ,
-          options_include_IOTC ,
-          options_strata_overlap_sbf
-        )
-      )
-      
+		if(recap_each_step){
+		  function_recap_each_step(
+			"overlap_iotc_ccsbt",
+			georef_dataset,
+			paste0(
+			  "In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
+								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+			  "In the case the data is identical on the stratas privided, the remaining data is from ",
+			  options_overlapping_zone_iccat_ccsbt_data_to_keep
+			),
+			
+			"function_overlapped",
+			list(
+			  options_include_CCSBT  ,
+			  options_include_IOTC ,
+			  options_strata_overlap_sbf
+			)
+		  )
+		}
     }
   
   
-  #--------irregular areas--------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => irregular areas handling")
+  #--------irregular areas------------------------------------------------------------------------------------------------------------------------------------
+  #Irregular areas handling
+  #TODO this step should be removed, as it should be managed by IOTC from now
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  if (opts$irregular_area %in% c("remove", "reallocate")) {
+  spatial_curation = NULL
+  if(!is.null(opts$irregular_area)) if (opts$irregular_area %in% c("remove", "reallocate")) {
+	stepLogger(level = 0, step = stepnumber, msg = "Irregular areas handling")
+	stepnumber = stepnumber+1
     source(file.path(url_scripts_create_own_tuna_atlas, 'spatial_curation.R'))
     spatial_curation <-
       spatial_curation(con, georef_dataset, opts$irregular_area)
@@ -767,38 +706,31 @@ list(options_mapping_map_code_lists)
       spatial_curation$df_input_areas_not_curated
     stats_irregular_areas <- spatial_curation$stats
     
-    function_recap_each_step(
-      "irregular_area_handling",
-      georef_dataset,
-      paste0(
-        "In this step, we handle areas that does not match cwp grids norme"
-      ) ,
-      "function_overlapped",
-      list(options_irregular_area)
-    )
-    
+	if(recap_each_step){
+		function_recap_each_step(
+		  "irregular_area_handling",
+		  georef_dataset,
+		  paste0(
+			"In this step, we handle areas that does not match cwp grids norme"
+		  ) ,
+		  "function_overlapped",
+		  list(options_irregular_area)
+		)
+		names_list_irregular_areas <-
+		c("removed_irregular_areas", "stats_irregular_areas") #file we want to save
+	  
+		try(lapply(names_list_irregular_areas, function_write_RDS))
+    }
   }
-  
-  names_list_irregular_areas <-
-    c("removed_irregular_areas", "stats_irregular_areas") #file we want to save
-  
-  try(lapply(names_list_irregular_areas, function_write_RDS))
-  
-  
-  
-  
-  
+
   
   #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
-  config$logger.info(
-    "LEVEL 0 => Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)"
-  )
+  #Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg))
-    if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
-      config$logger.info(
-        "Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant..."
-      )
+  if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
+	  stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
+	  stepnumber = stepnumber+1
+      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
       source(file.path(
         url_scripts_create_own_tuna_atlas,
         "aggregate_resolution.R"
@@ -806,1239 +738,1209 @@ list(options_mapping_map_code_lists)
       georef_dataset <- aggregate_resolution(con, georef_dataset, 6)
       georef_dataset <- georef_dataset$df
       
-      removed_irregular_areas <-
-        spatial_curation$df_input_areas_not_curated
-      stats_irregular_areas <- spatial_curation$stats
+	  #TODO this should be removed, we are not going to treat irregular areas from IOTC
+	  #not sure to understand why this appears here... 
+	  if(!is.null(opts$irregular_area)){
+		removed_irregular_areas <- spatial_curation$df_input_areas_not_curated
+		stats_irregular_areas <- spatial_curation$stats
+	  }
+   
+      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
       
-      
-      names_list_aggregation <-
-        c("df_input_not_aggregated", "stats_not_aggregated") #file we want to save
-      
-      try(lapply(names_list_aggregation, function_write_RDS))
-      
-      
-      config$logger.info(
-        "Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK"
-      )
-      function_recap_each_step(
-        "Aggregation",
-        georef_dataset,
-        "This step is to aggregate data on resolution lower than 5° in 5°.",
-        "spatial_curation_upgrade_resolution",
-        list(
-          options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg
-        )
-      )
-      
-      
-      
-    }
-  #-----------spatial_curation_data_mislocated------------------------------------------------------
-  
-  
-  if (opts$spatial_curation_data_mislocated %in% c("reallocate", "remove")) {
-    config$logger.info(
-      "---------------------------------------spatial_curation_intersect_areas--------------------------------------------------------------"
-    )
-    config$logger.info(
-      sprintf(
-        "LEVEL 1 => STEP 3/5  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
-        entity$data$source[[1]],
-        opts$spatial_curation_data_mislocated
-      )
-    )
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    
-    ntons_before_this_step <-
-      round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(
-      sprintf(
-        "STEP 3/5 : Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
-        nrow(georef_dataset),
-        ntons_before_this_step
-      )
-    )
-    
-    config$logger.info("STEP 3/5: BEGIN function_spatial_curation_data_mislocated() function")
-    georef_dataset <- spatial_curation_data_mislocated(
-      entity = entity,
-      config = config,
-      df = georef_dataset,
-      spatial_curation_data_mislocated =
-        opts$spatial_curation_data_mislocated
-    )
-    config$logger.info("STEP 3/5: END function_spatial_curation_data_mislocated() function")
-    
-    #@juldebar: pending => metadata elements below to be managed (commented for now)
-    # metadata$description<-paste0(metadata$description,georef_dataset$description)
-    # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-    
-    georef_dataset <- georef_dataset$dataset
-    ntons_after_mislocated <-
-      round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(
-      sprintf(
-        "STEP 3/5 : Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
-        nrow(georef_dataset),
-        ntons_after_mislocated
-      )
-    )
-    config$logger.info(
-      sprintf(
-        "STEP 3/5 : Reallocation of mislocated data generated [%s] additionnal tons",
-        ntons_after_mislocated - ntons_before_this_step
-      )
-    )
-    config$logger.info("END STEP 3/5")
-    function_recap_each_step(
-      "Realocating_removing_mislocated_data",
-      georef_dataset,
-      "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
-      "spatial_curation_data_mislocated",
-      list(options_spatial_curation_data_mislocated)
-    )
-    
-    gc()
-    
-  } else{
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    config$logger.info(
-      sprintf(
-        "LEVEL 1 => STEP 3/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
-        entity$data$source[[1]],
-        opts$spatial_curation_data_mislocated
-      )
-    )
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-  }
-  
-  # Curation absurd converted data ------------------------------------------
-  
-  
-  if (!is.null(opts$curation_absurd_converted_data)) {
-    source(
-      file.path(
-        url_scripts_create_own_tuna_atlas,
-        "curation_absurd_converted_data.R"
-      )
-    )
-    
-    max_conversion_factor <-
-      read.csv("data/max_conversion_factor.csv")
-    
-    georef_dataset <-
-      curation_absurd_converted_data(georef_dataset = georef_dataset,
-                                     max_conversion_factor = max_conversion_factor)
-    
-    function_recap_each_step(
-      "Removing_absurd_nomt",
-      georef_dataset,
-      "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
-                   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
-      "spatial_curation_data_mislocated",
-      list(curation_absurd_converted_data)
-    )
-  }
-  
-  
-  # unit conversion already given factors -----------------------------------
-  
-  if (!is.null(opts$unit_conversion_convert))
-    if (opts$unit_conversion_convert) {
-      georef_dataset <-
-        double_unit_data_handling(
-          con = con,
-          entity = entity,
-          config = config,
-          fact = fact,
-          unit_conversion_csv_conversion_factor_url =
-            opts$unit_conversion_csv_conversion_factor_url,
-          unit_conversion_codelist_geoidentifiers_conversion_factors =
-            opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-          mapping_map_code_lists = opts$mapping_map_code_lists,
-          georef_dataset = georef_dataset
-        )
-      function_recap_each_step(
-        "Removing NOMT and converting MTNO in MT",
-        georef_dataset,
-        "In this step, we target the data provided in Tons and Number of fish. The data initially in MTNO will be converted in MT and the data in NTMO will be removed.",
-        "",
-        list("")
-      )
-      
-      new_version_iotc_raising_available <- TRUE
-      if (file.exists("data/conversion_factors_IOTC.csv")) {
-        # unit conversion IOTC given factors -----------------------------------
-        iotc_conv_fact <- read_csv(
-          "data/conversion_factors_IOTC.csv",
-          col_types = cols(
-            geographic_identifier = col_character(),
-            time_start = col_character(),
-            time_end = col_character()
-          )
-        ) %>% dplyr::rename(value = conversion_factor)#this map condelist function is to retieve the mapping dataset used
-        
-        iotc_conv_fact_mapped <-
-          map_codelists(
-            con = con,
-            "catch",
-            mapping_dataset = mapping_dataset,
-            dataset_to_map = iotc_conv_fact,
-            mapping_keep_src_code = FALSE,
-            source_authority_to_map = c("IOTC")
-          )$dataset_mapped
-        
-        iotc_conv_fact_mapped$time_start <-
-          as.Date(iotc_conv_fact_mapped$time_start)
-        iotc_conv_fact_mapped$time_start <-
-          as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
-        iotc_conv_fact_mapped$time_end <-
-          as.Date(iotc_conv_fact_mapped$time_end)
-        iotc_conv_fact_mapped$time_end <-
-          as.character(
-            lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
-          )
-        
-        georef_dataset <- do_unit_conversion(
-          entity = entity,
-          config = config,
-          fact = fact,
-          unit_conversion_csv_conversion_factor_url =
-            iotc_conv_fact_mapped,
-          unit_conversion_codelist_geoidentifiers_conversion_factors =
-            "cwp_grid",
-          mapping_map_code_lists =
-            opts$mapping_map_code_lists,
-          georef_dataset = georef_dataset,
-          removing_numberfish_final = FALSE
-        ) # do not remove number of fish as they will be converted later with other conversion factor data
-        
-        
-        function_recap_each_step(
-          "Harmonising units on IOTC data",
-          georef_dataset,
-          "In this step, we target the data provided in Tons and Number of fish provided by IOTC.
-                 As a new conversion factor dataset has been provided by Emmanuel Chassot",
-          "",
-          list("")
-        )
-        
-        
-      }
-      
-      # unit conversion with factors from IRD dataset -----------------------------------
-      
-      
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      config$logger.info(
-        sprintf(
-          "LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",
-          entity$data$source[[1]],
-          opts$unit_conversion_convert
-        )
-      )
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      mapping_map_code_lists <- TRUE
-      if (!is.null(opts$mapping_map_code_lists))
-        mapping_map_code_lists = opts$mapping_map_code_lists
-      if (is.null(opts$unit_conversion_csv_conversion_factor_url))
-        stop(
-          "Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'"
-        )
-      if (is.null(opts$unit_conversion_codelist_geoidentifiers_conversion_factors))
-        stop(
-          "Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'"
-        )
-      
-      ntons_before_this_step <-
-        round(georef_dataset %>% filter(unit == "t")  %>% select(value)  %>% sum())
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons",
-          nrow(georef_dataset),
-          ntons_before_this_step
-        )
-      )
-      
-      config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
-      
-      georef_dataset <- do_unit_conversion(
-        entity = entity,
-        config = config,
-        fact = fact,
-        unit_conversion_csv_conversion_factor_url =
-          opts$unit_conversion_csv_conversion_factor_url,
-        unit_conversion_codelist_geoidentifiers_conversion_factors =
-          opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-        mapping_map_code_lists = opts$mapping_map_code_lists,
-        georef_dataset = georef_dataset
-      )
-      config$logger.info("STEP 2/5: END do_unit_conversion() function")
-      
-      ntons_after_conversion <-
-        round(georef_dataset %>% select(value)  %>% sum())
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons",
-          nrow(georef_dataset),
-          ntons_after_conversion
-        )
-      )
-      # config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Unit conversion generated [%s] additionnal tons",
-          ntons_after_conversion - ntons_before_this_step
-        )
-      )
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Total number for 'NO' unit is now [%s] individuals",
-          georef_dataset %>% filter(unit == "no")  %>% select(value)  %>% sum()
-        )
-      )
-      config$logger.info("END STEP 2/5")
-      function_recap_each_step(
-        "raising",
-        georef_dataset,
-        "In this step, we harmonise the data declared in NO, converting it in Tons using the by using A. Fonteneau file. The file used for the conversion can also be a parameter.",
-        fonctions =
-          "do_unit_conversion, unit_conversion_csv_conversion_factor_url, extract_dataset,
-                            map_codelist, convert_units",
-        list(
-          options_mapping_map_code_lists ,
-          options_unit_conversion_csv_conversion_factor_url ,
-          options_unit_conversion_codelist_geoidentifiers_conversion_factors ,
-          options_unit_conversion_convert
-        )
-      )
-      
-      
-      
-      
-    } else{
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      config$logger.info(
-        sprintf(
-          "LEVEL 1 => STEP 2/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Convert units by using A. Fonteneau file. Option is: [%s] ",
-          entity$data$source[[1]],
-          opts$unit_conversion_convert
-        )
-      )
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-    }
-  
-  
-  
-  
-  
-  # Filtering on species for level 1 --------------------------------------
-  config$logger.info("Filtering on species for level 1")
-  url_asfis_list_level1 <-
-    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
-  species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1)
-  
-  
-  georef_dataset <-
-    georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
-  
-  function_recap_each_step(
-    "Filtering species level 1",
-    georef_dataset,
-    paste0(
-      "Filtering species on the base of the file ",
-      url_asfis_list_level1,
-      " to keep only the species. This file contains " ,
-      as.character(length(nrow(
-        species_to_be_kept_in_level1
-      ))),
-      " species."
-    ),
-    "inner_join"  ,
-    NULL
-  )
-  
-  # -------------------------------------------------------------------------
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  #end switch LEVEL 1
-  
-  
-  
-  # #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  # #LEVEL 2 IRD PRODUCTS
-  # #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  config$logger.info("LEVEL 2 => STEP 1/3: Set parameters")
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  # raising_georef_to_nominal <- opts$raising_georef_to_nominal
-  iattc_ps_raise_flags_to_schooltype <-
-    opts$iattc_ps_raise_flags_to_schooltype
-  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <-
-    opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
-  iattc_ps_catch_billfish_shark_raise_to_effort <-
-    opts$iattc_ps_catch_billfish_shark_raise_to_effort
-  iccat_ps_include_type_of_school <-
-    opts$iccat_ps_include_type_of_school
-  
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  config$logger.info("LEVEL 2 => STEP 2/3: Extract and load IRD Level 1 gridded catch data input")
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  
-  
-  if (!is.null(opts$raising_georef_to_nominal))
-    if (opts$raising_georef_to_nominal) {
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      config$logger.info(
-        "LEVEL 2 => STEP 3/3: Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset"
-      )
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      
-      config$logger.info(
-        "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
-      )
-      nominal_catch <-
-        readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]),
-                        guess_max = 0)
-      class(nominal_catch$value) <- "numeric"
-      mapping_dataset <-
-        read.csv(
-          mapping_csv_mapping_datasets_url,
-          stringsAsFactors = F,
-          colClasses = "character"
-        )
-      mapping_keep_src_code <- FALSE
-      
-      #no need to map it is already mapped
-      # nominal_catch2 <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
-      # nominal_catch <- read.csv2("entities/global_catch_1deg_1m_ps_bb_firms_Bastien_with_step_rds__level2/data/nominal_catch_mapped.csv", sep = ";")
-      #         #@juldebar keep same units for all datatets
-      if (any(nominal_catch$unit == "t"))
-        nominal_catch[nominal_catch$unit == "t",]$unit <- "t"
-      if (any(nominal_catch$unit == "no"))
-        nominal_catch[nominal_catch$unit == "no",]$unit <- "no"
-      class(nominal_catch$value) <- "numeric"
-      #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
-      if (nrow(nominal_catch) == 0) {
-        nominal_catch <- retrieve_nominal_catch(entity, config, opts)
-      }
-      config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))
-      config$logger.info(paste0(
-        "Total of  nominal catch for file ",
-        entity$data$source[[1]],
-        "is : ",
-        sum(nominal_catch$value),
-        "  \n"
-      ))
-      
-      config$logger.info("Start raising process")
-      
-      if (fact == "catch") {
-        config$logger.info("Fact=catch !")
-        dataset_to_compute_rf = georef_dataset
-        #@juldebar why do we use "year' as time dimension here ?
-        if (is.null(opts$x_raising_dimensions)) {
-          x_raising_dimensions = c("gear", "species", "year", "source_authority")
-        }
-        
-        
-      } else if (fact == "effort") {
-        ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
-        cat(
-          "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
-        )
-        dataset_catch <- NULL
-        if (include_IOTC == "TRUE") {
-          rfmo_dataset <-
-            get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_WCPFC == "TRUE") {
-          rfmo_dataset <-
-            get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_CCSBT == "TRUE") {
-          rfmo_dataset <-
-            get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_IATTC == "TRUE") {
-          rfmo_dataset <- get_rfmos_datasets_level0(
-            "IATTC",
-            "catch",
-            datasets_year_release,
-            iattc_ps_raise_flags_to_schooltype =
-              iattc_ps_raise_flags_to_schooltype,
-            iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
-              iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-            iattc_ps_catch_billfish_shark_raise_to_effort =
-              TRUE
-          )
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_ICCAT == "TRUE") {
-          rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
-                                                    "catch",
-                                                    datasets_year_release,
-                                                    iccat_ps_include_type_of_school =
-                                                      iccat_ps_include_type_of_school)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        
-        
-        if (mapping_map_code_lists == "TRUE") {
-          dataset_catch <-
-            map_codelists(
-              "catch",
-              mapping_csv_mapping_datasets_url,
-              dataset_catch,
-              mapping_keep_src_code
-            )$dataset_mapped
-        }
-        
-        dataset_catch$time_start <-
-          substr(as.character(dataset_catch$time_start), 1, 10)
-        dataset_catch$time_end <-
-          substr(as.character(dataset_catch$time_end), 1, 10)
-        if (unit_conversion_convert == "TRUE") {
-          # We use our conversion factors (IRD). This is now an input parameter of the script
-          #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
-          #
-          dataset_catch <- do_unit_conversion(
-            entity = entity,
-            config = config,
-            fact = "catch",
-            unit_conversion_csv_conversion_factor_url =
-              opts$unit_conversion_csv_conversion_factor_url,
-            unit_conversion_codelist_geoidentifiers_conversion_factors =
-              opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-            mapping_map_code_lists = opts$mapping_map_code_lists,
-            dataset_catch
-          )
-        }
-        
-        dataset_to_compute_rf = dataset_catch
-        #@juldebar insert patch below to fix error in raise_get_rf function
-        
-        rm(dataset_catch)
-        #@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
-        # x_raising_dimensions=c("fishingfleet","gear","year","source_authority")
-      }
-      
-      class(dataset_to_compute_rf$value) <- "numeric"
-      
-      
-      config$logger.info("Executing function function_raising_georef_to_nominal")
-      config$logger.info(paste0(
-        "Total ",
-        fact,
-        " before raising is : ",
-        sum(georef_dataset$value),
-        "\n"
-      ))
-      config$logger.info(paste0(
-        "Total ",
-        fact,
-        " in nominal data is : ",
-        sum(nominal_catch$value),
-        "\n"
-      ))
-      
-      georef_dataset <-
-        function_raising_georef_to_nominal(
-          con = con,
-          opts = opts ,
-          entity = entity,
-          config = config,
-          dataset_to_raise =
-            georef_dataset,
-          nominal_dataset_df = nominal_catch,
-          # nominal_catch,
-          # dataset_to_compute_rf=nominal_catch,
-          dataset_to_compute_rf =
-            dataset_to_compute_rf,
-          x_raising_dimensions =
-            x_raising_dimensions
-        )
-      
-      rm(dataset_to_compute_rf)
-      
-      #@juldebar: pending => metadata elements below to be managed (commented for now)
-      # metadata$description<-paste0(metadata$description,georef_dataset$description)
-      # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-      # metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
-      
-      georef_dataset <- georef_dataset$dataset
-      config$logger.info(paste0(
-        "Total ",
-        fact,
-        " after raising is now: ",
-        sum(georef_dataset$value),
-        "\n"
-      ))
-      config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-      config$logger.info(paste0(
-        "Total catch for data after raising is ",
-        sum(georef_dataset$value),
-        "  \n"
-      ))
-      
-      function_recap_each_step(
-        "Level2_RF1",
-        georef_dataset,
-        "In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
-        "function_raising_georef_to_nominal",
-        list(
-          opts$raising_georef_to_nominal ,
-          iattc_ps_raise_flags_to_schooltype ,
-          iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
-          iattc_ps_catch_billfish_shark_raise_to_effort ,
-          iccat_ps_include_type_of_school,
-          include_IATTC,
-          include_IOTC,
-          include_ICCAT,
-          include_CCSBT,
-          include_WCPFC,
-          fact,
-          raising_do_not_raise_wcfpc_data,
-          raising_raise_only_for_PS_LL
-        )
-      )
-      
-      
-      
-      if (fact == "catch") {
-        config$logger.info("Fact=catch !")
-        dataset_to_compute_rf = georef_dataset
-        #@juldebar why do we use "year' as time dimension here ?
-        if (is.null(opts$x_raising_dimensions)) {
-          x_raising_dimensions = c("species", "year", "source_authority")
-        }
-        
-        
-      } else if (fact == "effort") {
-        ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
-        cat(
-          "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
-        )
-        dataset_catch <- NULL
-        if (include_IOTC == "TRUE") {
-          rfmo_dataset <-
-            get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_WCPFC == "TRUE") {
-          rfmo_dataset <-
-            get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_CCSBT == "TRUE") {
-          rfmo_dataset <-
-            get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_IATTC == "TRUE") {
-          rfmo_dataset <- get_rfmos_datasets_level0(
-            "IATTC",
-            "catch",
-            datasets_year_release,
-            iattc_ps_raise_flags_to_schooltype =
-              iattc_ps_raise_flags_to_schooltype,
-            iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
-              iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-            iattc_ps_catch_billfish_shark_raise_to_effort =
-              TRUE
-          )
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        if (include_ICCAT == "TRUE") {
-          rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
-                                                    "catch",
-                                                    datasets_year_release,
-                                                    iccat_ps_include_type_of_school =
-                                                      iccat_ps_include_type_of_school)
-          dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-          rm(rfmo_dataset)
-        }
-        
-        
-        if (mapping_map_code_lists == "TRUE") {
-          dataset_catch <-
-            map_codelists(
-              "catch",
-              mapping_csv_mapping_datasets_url,
-              dataset_catch,
-              mapping_keep_src_code
-            )$dataset_mapped
-        }
-        
-        dataset_catch$time_start <-
-          substr(as.character(dataset_catch$time_start), 1, 10)
-        dataset_catch$time_end <-
-          substr(as.character(dataset_catch$time_end), 1, 10)
-        if (unit_conversion_convert == "TRUE") {
-          # We use our conversion factors (IRD). This should be an input parameter of the script
-          #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
-          dataset_catch <- do_unit_conversion(
-            entity = entity,
-            config = config,
-            fact = "catch",
-            unit_conversion_csv_conversion_factor_url =
-              opts$unit_conversion_csv_conversion_factor_url,
-            unit_conversion_codelist_geoidentifiers_conversion_factors =
-              opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-            mapping_map_code_lists = opts$mapping_map_code_lists,
-            dataset_catch
-          )
-        }
-        
-        dataset_to_compute_rf = dataset_catch
-        #@juldebar insert patch below to fix error in raise_get_rf function
-        
-        rm(dataset_catch)
-        #@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
-        # x_raising_dimensions=c("species","gear","year","source_authority")
-      }
-      
-      class(dataset_to_compute_rf$value) <- "numeric"
-      
-      georef_dataset <-
-        function_raising_georef_to_nominal(
-          con = con,
-          opts = opts ,
-          entity = entity,
-          config = config,
-          dataset_to_raise =
-            georef_dataset,
-          nominal_dataset_df =
-            nominal_catch,
-          # nominal_catch,
-          # dataset_to_compute_rf=nominal_catch,
-          dataset_to_compute_rf =
-            dataset_to_compute_rf,
-          x_raising_dimensions =
-            x_raising_dimensions
-        )
-      georef_dataset <-
-        georef_dataset$dataset %>% dplyr::select(-fishingfleet)
-      
-      rm(dataset_to_compute_rf)
-      
-      #@juldebar: pending => metadata elements below to be managed (commented for now)
-      # metadata$description<-paste0(metadata$description,georef_dataset$description)
-      # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-      # metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
-      
-      config$logger.info(paste0(
-        "Total ",
-        fact,
-        " after raising is now: ",
-        sum(georef_dataset$value),
-        "\n"
-      ))
-      config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-      config$logger.info(paste0(
-        "Total catch for data after raising is ",
-        sum(georef_dataset$value),
-        "  \n"
-      ))
-      
-      function_recap_each_step(
-        "Level2_RF2",
-        georef_dataset,
-        "In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
-        fonctions = "function_raising_georef_to_nominal",
-        list(
-          raising_georef_to_nominal ,
-          iattc_ps_raise_flags_to_schooltype ,
-          iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
-          iattc_ps_catch_billfish_shark_raise_to_effort ,
-          iccat_ps_include_type_of_school,
-          include_IATTC,
-          include_IOTC,
-          include_ICCAT,
-          include_CCSBT,
-          include_WCPFC,
-          fact,
-          raising_do_not_raise_wcfpc_data,
-          raising_raise_only_for_PS_LL
-        )
-      )
-      
-    }
-  
-  if (opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate", "remove")) {
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    config$logger.info(
-      sprintf(
-        "LEVEL 1 => STEP 4/5  for file [%s] is executed: Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",
-        entity$data$source[[1]],
-        opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
-      )
-    )
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    
-    
-    ntons_before_this_step <-
-      round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(
-      sprintf(
-        "STEP 4/5 : Gridded catch dataset before Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
-        nrow(georef_dataset),
-        ntons_before_this_step
-      )
-    )
-    
-    config$logger.info(
-      "STEP 4/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
-    )
-    
-    georef_dataset <-
-      function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(
-        entity,
-        config,
-        opts,
-        georef_dataset =
-          georef_dataset,
-        resolution =
-          5,
-        action_to_do =
-          opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
-      )
-    config$logger.info(
-      "STEP 4/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
-    )
-    
-    
-    georef_dataset <- georef_dataset$dataset
-    ntons_after_disaggregation_5deg <-
-      round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(
-      sprintf(
-        "STEP 4/5 : Gridded catch dataset after Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
-        nrow(georef_dataset),
-        ntons_after_disaggregation_5deg
-      )
-    )
-    config$logger.info(
-      sprintf(
-        "STEP 4/5 : Disaggregate data on 5° generated [%s] additionnal tons",
-        ntons_after_disaggregation_5deg - ntons_before_this_step
-      )
-    )
-    config$logger.info("END STEP 4/5")
-    function_recap_each_step(
-      "Disaggregate5deg",
-      georef_dataset,
-      "This step disaggregate data on resolution higher than 5° in 5° resolution. iGridded catch dataset before Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
-      "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
-      list(
-        options_disaggregate_on_5deg_data_with_resolution_superior_to_5deg
-      )
-    )
-  } else{
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    config$logger.info(
-      sprintf(
-        "LEVEL 1 => STEP 4/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",
-        entity$data$source[[1]],
-        opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
-      )
-    )
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-  }
-  
-  
-  
-  if (opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate", "remove")) {
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    config$logger.info(
-      sprintf(
-        "LEVEL 1 => STEP 5/5 for file [%s] is executed: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
-        entity$data$source[[1]],
-        opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
-      )
-    )
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    
-    ntons_before_this_step <-
-      round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(
-      sprintf(
-        "STEP 5/5 : Gridded catch dataset before Disaggregate data on 1° has [%s] lines and total catch is [%s] Tons",
-        nrow(georef_dataset),
-        ntons_before_this_step
-      )
-    )
-    
-    config$logger.info(
-      "STEP 5/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
-    )
-    georef_dataset <-
-      function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(
-        entity,
-        config,
-        opts,
-        georef_dataset =
-          georef_dataset,
-        resolution =
-          1,
-        action_to_do =
-          opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
-      )
-    config$logger.info(
-      "STEP 5/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
-    )
-    
-    
-    georef_dataset <- georef_dataset$dataset
-    ntons_after_disaggregation_1deg <-
-      round(georef_dataset %>% select(value)  %>% sum())
-    config$logger.info(
-      sprintf(
-        "STEP 5/5 : Gridded catch dataset after Disaggregate data on 1° has [%s] lines and total catch is now [%s] Tons",
-        nrow(georef_dataset),
-        ntons_after_disaggregation_1deg
-      )
-    )
-    config$logger.info(
-      sprintf(
-        "STEP 5/5 : Disaggregate data on 1° generated [%s] additionnal tons",
-        ntons_after_disaggregation_1deg - ntons_before_this_step
-      )
-    )
-    config$logger.info("END STEP 5/5")
-    function_recap_each_step(
-      "Disaggregate1deg",
-      georef_dataset,
-      "This step disaggregate data on resolution higher than 1° in 1° resolution. iGridded catch dataset before Disaggregate data on 1° resolution has [%s] lines and total catch is [%s] Tons",
-      "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
-      list(
-        options_disaggregate_on_1deg_data_with_resolution_superior_to_1deg
-      )
-    )
-    gc()
-    
-  } else{
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-    config$logger.info(
-      sprintf(
-        "LEVEL 1 => STEP 5/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
-        entity$data$source[[1]],
-        opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
-      )
-    )
-    config$logger.info(
-      "-----------------------------------------------------------------------------------------------------"
-    )
-  }
-  gc()
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 3/8: WCPFC at the end")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (!is.null(opts$filter_WCPFC_at_the_end)) {
-    config$logger.info(("Filtering WCPFC_at_the_end [%s]"))
-    georef_dataset <-
-      georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
-    config$logger.info("Filtering WCPFC OK")
-    config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-    
-    function_recap_each_step(
-      "Filtering_on_WCPFC_at_the_end",
-      georef_dataset,
-      "This step is to remove data provided by WCPFC as it is not relevant for 1° resolution data.",
-      "",
-      list(options_filter_WCPFC_at_the_end)
-    )
-    
-    
-    
-    
-  }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("LEVEL 0 => STEP 3/8: Grid spatial resolution filter")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (!is.null(opts$resolution_filter)) {
-    geograph_identifier <- georef_dataset
-    geograph_identifier$geograph_identifier_num <-
-      as.numeric(geograph_identifier$geographic_identifier)
-    geograph_identifier <-
-      geograph_identifier %>% filter(geograph_identifier_num == geographic_identifier)
-    if (nrow(geograph_identifier) != nrow(georef_dataset)) {
-      query <- "SELECT code, st_area(geom), geom from area.cwp_grid"
-      world_sf <- st_read(con, query = query)
-      
-      
-      shapefile.fix <-
-        st_make_valid(world_sf) %>% filter(!st_is_empty(.))
-      area <-
-        case_when(opts$resolution_filter == "5" ~ "1",
-                  opts$resolution_filter == "6" ~ "25")
-      shape_without_geom  <-
-        shapefile.fix %>% as_tibble() %>% select(-geom) %>% filter(st_area == as.numeric(area))
-      georef_dataset <-
-        georef_dataset %>% semi_join(shape_without_geom,
-                                     by = c("geographic_identifier" = "code"))
-    } else{
-      georef_dataset <-
-        georef_dataset[startsWith(georef_dataset$geographic_identifier,
-                                  opts$resolution_filter), ]
-      
-      
-      
-      
-    }
-    # georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
-    function_recap_each_step(
-      "filtering_on_spatial_resolution",
-      georef_dataset,
-      "This step is to filter on the wanted resolution.",
-      "",
-      list(options_resolution_filter)
-    )
-    
-    
-    
-  }
-  
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info(
-    "LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) "
-  )
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (!is.null(opts$gear_filter)) {
-    gear_filter <- unlist(strsplit(opts$gear_filter, split = ","))
-    config$logger.info(sprintf(
-      "Filtering by gear(s) [%s]",
-      paste(gear_filter, collapse = ",")
-    ))
-    georef_dataset <-
-      georef_dataset %>% dplyr::filter(gear %in% gear_filter)
-    config$logger.info("Filtering gears OK")
-    config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-    
-    function_recap_each_step(
-      "filtering_on_gear",
-      georef_dataset,
-      "This step is to filter on gears if needed (for 1 deg resolution only few gears should be kept, other are irrelevant).",
-      "",
-      list(options_gear_filter)
-    )
-    
-    
-    
-    
-  }
-  
-  
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  config$logger.info("Last step/8: Apply filters if filter needed (Filter data by groups of everything) ")
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  
-  if (!is.null(opts$filtering)) {
-    parameter_filtering <-
-      opts$filtering
-  } else{
-    parameter_filtering <- list(species = NULL, fishingfleet = NULL)
-  }
-  if (is.character(parameter_filtering)) {
-    parameter_filtering <-
-      eval(parse(text = toString(parameter_filtering)))
-  }
-  
-  matchingList <-
-    parameter_filtering %>% purrr::keep(~ !is.null(.))
-  
-  filtering_function = function(dataframe_to_filter,
-                                filtering_params = matchingList) {
-    colnames_to_filter <-
-      colnames(dataframe_to_filter %>% select(names(filtering_params)))
-    names(filtering_params) <- colnames_to_filter
-    
-    filtering_params <-
-      lapply(filtering_params, function(x) {
-        #handling single filter
-        if (length(x) == 1) {
-          x <- c(x, x)
-        } else {
-          x
-        }
-      })
-    
-    if (length(matchingList) != 0) {
-      dataframe_to_filter <-
-        dataframe_to_filter %>% filter(!!rlang::parse_expr(
-          str_c(
-            colnames_to_filter,
-            matchingList,
-            sep = '%in%',
-            collapse = "&"
-          )
-        ))
-    } else{
-      dataframe_to_filter
-    }
-    
-  }
-  
-  georef_dataset <- filtering_function(georef_dataset)
-  
-  
-  
-  
-  dataset <-
-    georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset), "value")) %>% dplyr::summarise(value =
-                                                                                                           sum(value))
-  dataset <- data.frame(dataset)
-  
-  #----------------------------------------------------------------------------------------------------------------------------
-  #@eblondel additional formatting for next time support
-  dataset$time_start <- as.Date(dataset$time_start)
-  dataset$time_end <- as.Date(dataset$time_end)
-  #we enrich the entity with temporal coverage
-  dataset_temporal_extent <-
-    paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
-  entity$setTemporalExtent(dataset_temporal_extent)
-  
-  #if there is any entity relation with name 'codelists' we read the file
-  df_codelists <- NULL
-  cl_relations <-
-    entity$relations[sapply(entity$relations, function(x) {
-      x$name == "codelists"
-    })]
-  if (length(cl_relations) > 0) {
-    config$logger.info("Appending codelists to global dataset generation action output")
-    googledrive_baseurl <- "https://drive.google.com/open?id="
-    if (startsWith(cl_relations[[1]]$link, googledrive_baseurl)) {
-      #managing download through google drive
-      config$logger.info("Downloading file using Google Drive R interface")
-      drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
-      drive_id <-
-        unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-      googledrive::drive_download(file = googledrive::as_id(drive_id),
-                                  path = file.path("data", paste0(
-                                    entity$identifiers[["id"]], "_codelists.csv"
-                                  )))
-      df_codelists <-
-        read.csv(file.path("data", paste0(
-          entity$identifiers[["id"]], "_codelists.csv"
-        )))
-    } else{
-      df_codelists <- read.csv(cl_relations[[1]]$link)
-    }
-  }
-  
-  
-  #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-  dataset <- list(
-    dataset = dataset,
-    additional_metadata = NULL,
-    #nothing here
-    codelists = df_codelists #in case the entity was provided with a link to codelists
-  )
-  
-  
-  # if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
-  #   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
-  #   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
-  # }
-  # ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
-  
-  #@geoflow -> export as csv
-  output_name_dataset <-
-    file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-  readr::write_csv(dataset$dataset, output_name_dataset)#export with fwrite which simplifies the data having too many decimals
-  output_name_codelists <-
-    file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
-  write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
-  # ---------------------------------------------------------------------------------------------------------------------------
-  
-  entity$addResource("harmonized", output_name_dataset)
-  
-  entity$addResource("codelists", output_name_codelists)
-  
-  entity$addResource("geom_table", opts$geom_table)
-  #### END
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  config$logger.info("End: Your tuna atlas dataset has been created!")
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  # write.csv(options)
-  
-  rm(georef_dataset)
-  
-  gc()
+	  if(recap_each_step){
+		  names_list_aggregation <-
+			c("df_input_not_aggregated", "stats_not_aggregated") #file we want to save
+		  
+		  try(lapply(names_list_aggregation, function_write_RDS))
+
+		  function_recap_each_step(
+			"Aggregation",
+			georef_dataset,
+			"This step is to aggregate data on resolution lower than 5° in 5°.",
+			"spatial_curation_upgrade_resolution",
+			list(
+			  options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg
+			)
+		  )
+      }  
+	}
+ 
+	#===========================================================================================================================================================
+    #===========================================================================================================================================================
+	#>(||||*> LEVEL 1 FIRMS CANDIDATE PRODUCT
+	#===========================================================================================================================================================
+	#===========================================================================================================================================================
+	#TODO review and clean
+	if(DATASET_LEVEL >= 1){ #with this condition code will be run to deal with dataset level 1 and above
+		#-----------spatial_curation_data_mislocated------------------------------------------------------
+		
+	  
+		if (opts$spatial_curation_data_mislocated %in% c("reallocate", "remove")) {
+		config$logger.info(
+		  "---------------------------------------spatial_curation_intersect_areas--------------------------------------------------------------"
+		)
+		config$logger.info(
+		  sprintf(
+			"LEVEL 1 => STEP 3/5  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
+			entity$data$source[[1]],
+			opts$spatial_curation_data_mislocated
+		  )
+		)
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		
+		ntons_before_this_step <-
+		  round(georef_dataset %>% select(value)  %>% sum())
+		config$logger.info(
+		  sprintf(
+			"STEP 3/5 : Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
+			nrow(georef_dataset),
+			ntons_before_this_step
+		  )
+		)
+		
+		config$logger.info("STEP 3/5: BEGIN function_spatial_curation_data_mislocated() function")
+		georef_dataset <- spatial_curation_data_mislocated(
+		  entity = entity,
+		  config = config,
+		  df = georef_dataset,
+		  spatial_curation_data_mislocated =
+			opts$spatial_curation_data_mislocated
+		)
+		config$logger.info("STEP 3/5: END function_spatial_curation_data_mislocated() function")
+		
+		#@juldebar: pending => metadata elements below to be managed (commented for now)
+		# metadata$description<-paste0(metadata$description,georef_dataset$description)
+		# metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		
+		georef_dataset <- georef_dataset$dataset
+		ntons_after_mislocated <-
+		  round(georef_dataset %>% select(value)  %>% sum())
+		config$logger.info(
+		  sprintf(
+			"STEP 3/5 : Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
+			nrow(georef_dataset),
+			ntons_after_mislocated
+		  )
+		)
+		config$logger.info(
+		  sprintf(
+			"STEP 3/5 : Reallocation of mislocated data generated [%s] additionnal tons",
+			ntons_after_mislocated - ntons_before_this_step
+		  )
+		)
+		config$logger.info("END STEP 3/5")
+		function_recap_each_step(
+		  "Realocating_removing_mislocated_data",
+		  georef_dataset,
+		  "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
+		  "spatial_curation_data_mislocated",
+		  list(options_spatial_curation_data_mislocated)
+		)
+		
+		gc()
+		
+	  } else{
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		config$logger.info(
+		  sprintf(
+			"LEVEL 1 => STEP 3/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
+			entity$data$source[[1]],
+			opts$spatial_curation_data_mislocated
+		  )
+		)
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+	  }
+	  
+	  # Curation absurd converted data ------------------------------------------
+	  
+	  
+	  if (!is.null(opts$curation_absurd_converted_data)) {
+		source(
+		  file.path(
+			url_scripts_create_own_tuna_atlas,
+			"curation_absurd_converted_data.R"
+		  )
+		)
+		
+		max_conversion_factor <-
+		  read.csv("data/max_conversion_factor.csv")
+		
+		georef_dataset <-
+		  curation_absurd_converted_data(georef_dataset = georef_dataset,
+										 max_conversion_factor = max_conversion_factor)
+		
+		function_recap_each_step(
+		  "Removing_absurd_nomt",
+		  georef_dataset,
+		  "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
+					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
+		  "spatial_curation_data_mislocated",
+		  list(curation_absurd_converted_data)
+		)
+	  }
+	  
+	  
+	  # unit conversion already given factors -----------------------------------
+	  
+	  if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
+		  georef_dataset <-
+			double_unit_data_handling(
+			  con = con,
+			  entity = entity,
+			  config = config,
+			  fact = fact,
+			  unit_conversion_csv_conversion_factor_url =
+				opts$unit_conversion_csv_conversion_factor_url,
+			  unit_conversion_codelist_geoidentifiers_conversion_factors =
+				opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+			  mapping_map_code_lists = opts$mapping_map_code_lists,
+			  georef_dataset = georef_dataset
+			)
+		  function_recap_each_step(
+			"Removing NOMT and converting MTNO in MT",
+			georef_dataset,
+			"In this step, we target the data provided in Tons and Number of fish. The data initially in MTNO will be converted in MT and the data in NTMO will be removed.",
+			"",
+			list("")
+		  )
+		  
+		  new_version_iotc_raising_available <- TRUE
+		  if (file.exists("data/conversion_factors_IOTC.csv")) {
+			# unit conversion IOTC given factors -----------------------------------
+			iotc_conv_fact <- read_csv(
+			  "data/conversion_factors_IOTC.csv",
+			  col_types = cols(
+				geographic_identifier = col_character(),
+				time_start = col_character(),
+				time_end = col_character()
+			  )
+			) %>% dplyr::rename(value = conversion_factor)#this map condelist function is to retieve the mapping dataset used
+			
+			iotc_conv_fact_mapped <-
+			  map_codelists(
+				con = con,
+				"catch",
+				mapping_dataset = mapping_dataset,
+				dataset_to_map = iotc_conv_fact,
+				mapping_keep_src_code = FALSE,
+				source_authority_to_map = c("IOTC")
+			  )$dataset_mapped
+			
+			iotc_conv_fact_mapped$time_start <-
+			  as.Date(iotc_conv_fact_mapped$time_start)
+			iotc_conv_fact_mapped$time_start <-
+			  as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
+			iotc_conv_fact_mapped$time_end <-
+			  as.Date(iotc_conv_fact_mapped$time_end)
+			iotc_conv_fact_mapped$time_end <-
+			  as.character(
+				lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
+			  )
+			
+			georef_dataset <- do_unit_conversion(
+			  entity = entity,
+			  config = config,
+			  fact = fact,
+			  unit_conversion_csv_conversion_factor_url =
+				iotc_conv_fact_mapped,
+			  unit_conversion_codelist_geoidentifiers_conversion_factors =
+				"cwp_grid",
+			  mapping_map_code_lists =
+				opts$mapping_map_code_lists,
+			  georef_dataset = georef_dataset,
+			  removing_numberfish_final = FALSE
+			) # do not remove number of fish as they will be converted later with other conversion factor data
+			
+			
+			function_recap_each_step(
+			  "Harmonising units on IOTC data",
+			  georef_dataset,
+			  "In this step, we target the data provided in Tons and Number of fish provided by IOTC.
+					 As a new conversion factor dataset has been provided by Emmanuel Chassot",
+			  "",
+			  list("")
+			)
+			
+			
+		  }
+		  
+		  # unit conversion with factors from IRD dataset -----------------------------------
+		  
+		  
+		  config$logger.info(
+			"-----------------------------------------------------------------------------------------------------"
+		  )
+		  config$logger.info(
+			sprintf(
+			  "LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",
+			  entity$data$source[[1]],
+			  opts$unit_conversion_convert
+			)
+		  )
+		  config$logger.info(
+			"-----------------------------------------------------------------------------------------------------"
+		  )
+		  mapping_map_code_lists <- TRUE
+		  if (!is.null(opts$mapping_map_code_lists))
+			mapping_map_code_lists = opts$mapping_map_code_lists
+		  if (is.null(opts$unit_conversion_csv_conversion_factor_url))
+			stop(
+			  "Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'"
+			)
+		  if (is.null(opts$unit_conversion_codelist_geoidentifiers_conversion_factors))
+			stop(
+			  "Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'"
+			)
+		  
+		  ntons_before_this_step <-
+			round(georef_dataset %>% filter(unit == "t")  %>% select(value)  %>% sum())
+		  config$logger.info(
+			sprintf(
+			  "STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons",
+			  nrow(georef_dataset),
+			  ntons_before_this_step
+			)
+		  )
+		  
+		  config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
+		  
+		  georef_dataset <- do_unit_conversion(
+			entity = entity,
+			config = config,
+			fact = fact,
+			unit_conversion_csv_conversion_factor_url =
+			  opts$unit_conversion_csv_conversion_factor_url,
+			unit_conversion_codelist_geoidentifiers_conversion_factors =
+			  opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+			mapping_map_code_lists = opts$mapping_map_code_lists,
+			georef_dataset = georef_dataset
+		  )
+		  config$logger.info("STEP 2/5: END do_unit_conversion() function")
+		  
+		  ntons_after_conversion <-
+			round(georef_dataset %>% select(value)  %>% sum())
+		  config$logger.info(
+			sprintf(
+			  "STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons",
+			  nrow(georef_dataset),
+			  ntons_after_conversion
+			)
+		  )
+		  # config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
+		  config$logger.info(
+			sprintf(
+			  "STEP 2/5 : Unit conversion generated [%s] additionnal tons",
+			  ntons_after_conversion - ntons_before_this_step
+			)
+		  )
+		  config$logger.info(
+			sprintf(
+			  "STEP 2/5 : Total number for 'NO' unit is now [%s] individuals",
+			  georef_dataset %>% filter(unit == "no")  %>% select(value)  %>% sum()
+			)
+		  )
+		  config$logger.info("END STEP 2/5")
+		  function_recap_each_step(
+			"raising",
+			georef_dataset,
+			"In this step, we harmonise the data declared in NO, converting it in Tons using the by using A. Fonteneau file. The file used for the conversion can also be a parameter.",
+			fonctions =
+			  "do_unit_conversion, unit_conversion_csv_conversion_factor_url, extract_dataset,
+								map_codelist, convert_units",
+			list(
+			  options_mapping_map_code_lists ,
+			  options_unit_conversion_csv_conversion_factor_url ,
+			  options_unit_conversion_codelist_geoidentifiers_conversion_factors ,
+			  options_unit_conversion_convert
+			)
+		  )
+		  
+		  
+		  
+		  
+		} else{
+		  config$logger.info(
+			"-----------------------------------------------------------------------------------------------------"
+		  )
+		  config$logger.info(
+			sprintf(
+			  "LEVEL 1 => STEP 2/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Convert units by using A. Fonteneau file. Option is: [%s] ",
+			  entity$data$source[[1]],
+			  opts$unit_conversion_convert
+			)
+		  )
+		  config$logger.info(
+			"-----------------------------------------------------------------------------------------------------"
+		  )
+		}
+	  
+
+		# Filtering on species for level 1 --------------------------------------
+		config$logger.info("Filtering on species for level 1")
+		url_asfis_list_level1 <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
+		species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1)
+		georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
+	  
+		function_recap_each_step(
+			"Filtering species level 1",
+			georef_dataset,
+			paste0(
+			  "Filtering species on the base of the file ",
+			  url_asfis_list_level1,
+			  " to keep only the species. This file contains " ,
+			  as.character(length(nrow(
+				species_to_be_kept_in_level1
+			  ))),
+			  " species."
+			),
+			"inner_join"  ,
+			NULL
+		)
+	
+	}
+	# -------------------------------------------------------------------------
+  
+	#===========================================================================================================================================================
+	#===========================================================================================================================================================
+	#>(||||*> LEVEL 2 IRD PRODUCTS, not yet submitted/endorsed by FIRMS
+	#===========================================================================================================================================================
+	#===========================================================================================================================================================
+	#TODO review and clean
+	if(DATASET_LEVEL >= 2){ #with this condition code will be run to deal with dataset level 2
+		config$logger.info(
+		"-----------------------------------------------------------------------------------------------------"
+		)
+		stepLogger(level = 2, step = 1, "Set parameters")
+		config$logger.info(
+		"-----------------------------------------------------------------------------------------------------"
+		)
+		# raising_georef_to_nominal <- opts$raising_georef_to_nominal
+		iattc_ps_raise_flags_to_schooltype <-
+		opts$iattc_ps_raise_flags_to_schooltype
+		iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <-
+		opts$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype
+		iattc_ps_catch_billfish_shark_raise_to_effort <-
+		opts$iattc_ps_catch_billfish_shark_raise_to_effort
+		iccat_ps_include_type_of_school <-
+		opts$iccat_ps_include_type_of_school
+
+		config$logger.info(
+		"-----------------------------------------------------------------------------------------------------"
+		)
+		stepLogger(level = 2, step = 2, "Extract and load IRD Level 1 gridded catch data input")
+		config$logger.info(
+		"-----------------------------------------------------------------------------------------------------"
+		)
+
+
+		if (!is.null(opts$raising_georef_to_nominal))
+		if (opts$raising_georef_to_nominal) {
+		  config$logger.info(
+			"-----------------------------------------------------------------------------------------------------"
+		  )
+		  stepLogger(level = 2, step = 3, "Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
+		  config$logger.info(
+			"-----------------------------------------------------------------------------------------------------"
+		  )
+		  
+		  config$logger.info(
+			"Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
+		  )
+		  nominal_catch <-
+			readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]),
+							guess_max = 0)
+		  class(nominal_catch$measurement_value) <- "numeric"
+		  mapping_dataset <-
+			read.csv(
+			  mapping_csv_mapping_datasets_url,
+			  stringsAsFactors = F,
+			  colClasses = "character"
+			)
+		  mapping_keep_src_code <- FALSE
+		  
+		  #no need to map it is already mapped
+		  # nominal_catch2 <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
+		  # nominal_catch <- read.csv2("entities/global_catch_1deg_1m_ps_bb_firms_Bastien_with_step_rds__level2/data/nominal_catch_mapped.csv", sep = ";")
+		  #         #@juldebar keep same units for all datatets
+		  if (any(nominal_catch$unit == "t"))
+			nominal_catch[nominal_catch$unit == "t",]$unit <- "t"
+		  if (any(nominal_catch$unit == "no"))
+			nominal_catch[nominal_catch$unit == "no",]$unit <- "no"
+		  class(nominal_catch$measurement_value) <- "numeric"
+		  #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
+		  if (nrow(nominal_catch) == 0) {
+			nominal_catch <- retrieve_nominal_catch(entity, config, opts)
+		  }
+		  config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))
+		  config$logger.info(paste0(
+			"Total of  nominal catch for file ",
+			entity$data$source[[1]],
+			"is : ",
+			sum(nominal_catch$measurement_value),
+			"  \n"
+		  ))
+		  
+		  config$logger.info("Start raising process")
+		  
+		  if (fact == "catch") {
+			config$logger.info("Fact=catch !")
+			dataset_to_compute_rf = georef_dataset
+			#@juldebar why do we use "year' as time dimension here ?
+			if (is.null(opts$x_raising_dimensions)) {
+			  x_raising_dimensions = c("gear", "species", "year", "source_authority")
+			}
+			
+			
+		  } else if (fact == "effort") {
+			## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
+			cat(
+			  "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
+			)
+			dataset_catch <- NULL
+			if (include_IOTC == "TRUE") {
+			  rfmo_dataset <-
+				get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_WCPFC == "TRUE") {
+			  rfmo_dataset <-
+				get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_CCSBT == "TRUE") {
+			  rfmo_dataset <-
+				get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_IATTC == "TRUE") {
+			  rfmo_dataset <- get_rfmos_datasets_level0(
+				"IATTC",
+				"catch",
+				datasets_year_release,
+				iattc_ps_raise_flags_to_schooltype =
+				  iattc_ps_raise_flags_to_schooltype,
+				iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
+				  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
+				iattc_ps_catch_billfish_shark_raise_to_effort =
+				  TRUE
+			  )
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_ICCAT == "TRUE") {
+			  rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
+														"catch",
+														datasets_year_release,
+														iccat_ps_include_type_of_school =
+														  iccat_ps_include_type_of_school)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			
+			
+			if (mapping_map_code_lists == "TRUE") {
+			  dataset_catch <-
+				map_codelists(
+				  "catch",
+				  mapping_csv_mapping_datasets_url,
+				  dataset_catch,
+				  mapping_keep_src_code
+				)$dataset_mapped
+			}
+			
+			dataset_catch$time_start <-
+			  substr(as.character(dataset_catch$time_start), 1, 10)
+			dataset_catch$time_end <-
+			  substr(as.character(dataset_catch$time_end), 1, 10)
+			if (unit_conversion_convert == "TRUE") {
+			  # We use our conversion factors (IRD). This is now an input parameter of the script
+			  #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
+			  #
+			  dataset_catch <- do_unit_conversion(
+				entity = entity,
+				config = config,
+				fact = "catch",
+				unit_conversion_csv_conversion_factor_url =
+				  opts$unit_conversion_csv_conversion_factor_url,
+				unit_conversion_codelist_geoidentifiers_conversion_factors =
+				  opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+				mapping_map_code_lists = opts$mapping_map_code_lists,
+				dataset_catch
+			  )
+			}
+			
+			dataset_to_compute_rf = dataset_catch
+			#@juldebar insert patch below to fix error in raise_get_rf function
+			
+			rm(dataset_catch)
+			#@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
+			# x_raising_dimensions=c("fishingfleet","gear","year","source_authority")
+		  }
+		  
+		  class(dataset_to_compute_rf$measurement_value) <- "numeric"
+		  
+		  
+		  config$logger.info("Executing function function_raising_georef_to_nominal")
+		  config$logger.info(paste0(
+			"Total ",
+			fact,
+			" before raising is : ",
+			sum(georef_dataset$measurement_value),
+			"\n"
+		  ))
+		  config$logger.info(paste0(
+			"Total ",
+			fact,
+			" in nominal data is : ",
+			sum(nominal_catch$measurement_value),
+			"\n"
+		  ))
+		  
+		  georef_dataset <-
+			function_raising_georef_to_nominal(
+			  con = con,
+			  opts = opts ,
+			  entity = entity,
+			  config = config,
+			  dataset_to_raise =
+				georef_dataset,
+			  nominal_dataset_df = nominal_catch,
+			  # nominal_catch,
+			  # dataset_to_compute_rf=nominal_catch,
+			  dataset_to_compute_rf =
+				dataset_to_compute_rf,
+			  x_raising_dimensions =
+				x_raising_dimensions
+			)
+		  
+		  rm(dataset_to_compute_rf)
+		  
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  # metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  # metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+		  
+		  georef_dataset <- georef_dataset$dataset
+		  config$logger.info(paste0(
+			"Total ",
+			fact,
+			" after raising is now: ",
+			sum(georef_dataset$measurement_value),
+			"\n"
+		  ))
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		  config$logger.info(paste0(
+			"Total catch for data after raising is ",
+			sum(georef_dataset$measurement_value),
+			"  \n"
+		  ))
+		  
+		  if(recap_each_step){
+			  function_recap_each_step(
+				"Level2_RF1",
+				georef_dataset,
+				"In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
+				"function_raising_georef_to_nominal",
+				list(
+				  opts$raising_georef_to_nominal ,
+				  iattc_ps_raise_flags_to_schooltype ,
+				  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
+				  iattc_ps_catch_billfish_shark_raise_to_effort ,
+				  iccat_ps_include_type_of_school,
+				  include_IATTC,
+				  include_IOTC,
+				  include_ICCAT,
+				  include_CCSBT,
+				  include_WCPFC,
+				  fact,
+				  raising_do_not_raise_wcfpc_data,
+				  raising_raise_only_for_PS_LL
+				)
+			  )
+			}
+		  
+		  
+		  
+		  if (fact == "catch") {
+			config$logger.info("Fact=catch !")
+			dataset_to_compute_rf = georef_dataset
+			#@juldebar why do we use "year' as time dimension here ?
+			if (is.null(opts$x_raising_dimensions)) {
+			  x_raising_dimensions = c("species", "year", "source_authority")
+			}
+			
+			
+		  } else if (fact == "effort") {
+			## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
+			cat(
+			  "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
+			)
+			dataset_catch <- NULL
+			if (include_IOTC == "TRUE") {
+			  rfmo_dataset <-
+				get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_WCPFC == "TRUE") {
+			  rfmo_dataset <-
+				get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_CCSBT == "TRUE") {
+			  rfmo_dataset <-
+				get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_IATTC == "TRUE") {
+			  rfmo_dataset <- get_rfmos_datasets_level0(
+				"IATTC",
+				"catch",
+				datasets_year_release,
+				iattc_ps_raise_flags_to_schooltype =
+				  iattc_ps_raise_flags_to_schooltype,
+				iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
+				  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
+				iattc_ps_catch_billfish_shark_raise_to_effort =
+				  TRUE
+			  )
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			if (include_ICCAT == "TRUE") {
+			  rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
+														"catch",
+														datasets_year_release,
+														iccat_ps_include_type_of_school =
+														  iccat_ps_include_type_of_school)
+			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
+			  rm(rfmo_dataset)
+			}
+			
+			
+			if (mapping_map_code_lists == "TRUE") {
+			  dataset_catch <-
+				map_codelists(
+				  "catch",
+				  mapping_csv_mapping_datasets_url,
+				  dataset_catch,
+				  mapping_keep_src_code
+				)$dataset_mapped
+			}
+			
+			dataset_catch$time_start <-
+			  substr(as.character(dataset_catch$time_start), 1, 10)
+			dataset_catch$time_end <-
+			  substr(as.character(dataset_catch$time_end), 1, 10)
+			if (unit_conversion_convert == "TRUE") {
+			  # We use our conversion factors (IRD). This should be an input parameter of the script
+			  #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
+			  dataset_catch <- do_unit_conversion(
+				entity = entity,
+				config = config,
+				fact = "catch",
+				unit_conversion_csv_conversion_factor_url =
+				  opts$unit_conversion_csv_conversion_factor_url,
+				unit_conversion_codelist_geoidentifiers_conversion_factors =
+				  opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+				mapping_map_code_lists = opts$mapping_map_code_lists,
+				dataset_catch
+			  )
+			}
+			
+			dataset_to_compute_rf = dataset_catch
+			#@juldebar insert patch below to fix error in raise_get_rf function
+			
+			rm(dataset_catch)
+			#@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
+			# x_raising_dimensions=c("species","gear","year","source_authority")
+		  }
+		  
+		  class(dataset_to_compute_rf$measurement_value) <- "numeric"
+		  
+		  georef_dataset <-
+			function_raising_georef_to_nominal(
+			  con = con,
+			  opts = opts ,
+			  entity = entity,
+			  config = config,
+			  dataset_to_raise =
+				georef_dataset,
+			  nominal_dataset_df =
+				nominal_catch,
+			  # nominal_catch,
+			  # dataset_to_compute_rf=nominal_catch,
+			  dataset_to_compute_rf =
+				dataset_to_compute_rf,
+			  x_raising_dimensions =
+				x_raising_dimensions
+			)
+		  georef_dataset <-
+			georef_dataset$dataset %>% dplyr::select(-fishingfleet)
+		  
+		  rm(dataset_to_compute_rf)
+		  
+		  #@juldebar: pending => metadata elements below to be managed (commented for now)
+		  # metadata$description<-paste0(metadata$description,georef_dataset$description)
+		  # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
+		  # metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
+		  
+		  config$logger.info(paste0(
+			"Total ",
+			fact,
+			" after raising is now: ",
+			sum(georef_dataset$measurement_value),
+			"\n"
+		  ))
+		  config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		  config$logger.info(paste0(
+			"Total catch for data after raising is ",
+			sum(georef_dataset$measurement_value),
+			"  \n"
+		  ))
+		  
+		  if(recap_each_step){
+			  function_recap_each_step(
+				"Level2_RF2",
+				georef_dataset,
+				"In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
+				fonctions = "function_raising_georef_to_nominal",
+				list(
+				  raising_georef_to_nominal ,
+				  iattc_ps_raise_flags_to_schooltype ,
+				  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
+				  iattc_ps_catch_billfish_shark_raise_to_effort ,
+				  iccat_ps_include_type_of_school,
+				  include_IATTC,
+				  include_IOTC,
+				  include_ICCAT,
+				  include_CCSBT,
+				  include_WCPFC,
+				  fact,
+				  raising_do_not_raise_wcfpc_data,
+				  raising_raise_only_for_PS_LL
+				)
+			  )
+			}
+		  
+		}
+
+
+		if (opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate", "remove")) {
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		config$logger.info(
+		  sprintf(
+			"LEVEL 1 => STEP 4/5  for file [%s] is executed: Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",
+			entity$data$source[[1]],
+			opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
+		  )
+		)
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+
+
+		ntons_before_this_step <-
+		  round(georef_dataset %>% select(measurement_value)  %>% sum())
+		config$logger.info(
+		  sprintf(
+			"STEP 4/5 : Gridded catch dataset before Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
+			nrow(georef_dataset),
+			ntons_before_this_step
+		  )
+		)
+
+		config$logger.info(
+		  "STEP 4/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
+		)
+
+		georef_dataset <-
+		  function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(
+			entity,
+			config,
+			opts,
+			georef_dataset =
+			  georef_dataset,
+			resolution =
+			  5,
+			action_to_do =
+			  opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
+		  )
+		config$logger.info(
+		  "STEP 4/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
+		)
+
+
+		georef_dataset <- georef_dataset$dataset
+		ntons_after_disaggregation_5deg <-
+		  round(georef_dataset %>% select(measurement_value)  %>% sum())
+		config$logger.info(
+		  sprintf(
+			"STEP 4/5 : Gridded catch dataset after Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
+			nrow(georef_dataset),
+			ntons_after_disaggregation_5deg
+		  )
+		)
+		config$logger.info(
+		  sprintf(
+			"STEP 4/5 : Disaggregate data on 5° generated [%s] additionnal tons",
+			ntons_after_disaggregation_5deg - ntons_before_this_step
+		  )
+		)
+		config$logger.info("END STEP 4/5")
+		function_recap_each_step(
+		  "Disaggregate5deg",
+		  georef_dataset,
+		  "This step disaggregate data on resolution higher than 5° in 5° resolution. iGridded catch dataset before Disaggregate data on 5° resolution has [%s] lines and total catch is [%s] Tons",
+		  "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
+		  list(
+			options_disaggregate_on_5deg_data_with_resolution_superior_to_5deg
+		  )
+		)
+		} else{
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		config$logger.info(
+		  sprintf(
+			"LEVEL 1 => STEP 4/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Disaggregate data on 5° resolution quadrants (for 5deg resolution datasets only). Option is: [%s] ",
+			entity$data$source[[1]],
+			opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
+		  )
+		)
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		}
+
+
+
+		if (opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate", "remove")) {
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		config$logger.info(
+		  sprintf(
+			"LEVEL 1 => STEP 5/5 for file [%s] is executed: Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
+			entity$data$source[[1]],
+			opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
+		  )
+		)
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+
+		ntons_before_this_step <-
+		  round(georef_dataset %>% select(measurement_value)  %>% sum())
+		config$logger.info(
+		  sprintf(
+			"STEP 5/5 : Gridded catch dataset before Disaggregate data on 1° has [%s] lines and total catch is [%s] Tons",
+			nrow(georef_dataset),
+			ntons_before_this_step
+		  )
+		)
+
+		config$logger.info(
+		  "STEP 5/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
+		)
+		georef_dataset <-
+		  function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg(
+			entity,
+			config,
+			opts,
+			georef_dataset =
+			  georef_dataset,
+			resolution =
+			  1,
+			action_to_do =
+			  opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
+		  )
+		config$logger.info(
+		  "STEP 5/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
+		)
+
+
+		georef_dataset <- georef_dataset$dataset
+		ntons_after_disaggregation_1deg <-
+		  round(georef_dataset %>% select(measurement_value)  %>% sum())
+		config$logger.info(
+		  sprintf(
+			"STEP 5/5 : Gridded catch dataset after Disaggregate data on 1° has [%s] lines and total catch is now [%s] Tons",
+			nrow(georef_dataset),
+			ntons_after_disaggregation_1deg
+		  )
+		)
+		config$logger.info(
+		  sprintf(
+			"STEP 5/5 : Disaggregate data on 1° generated [%s] additionnal tons",
+			ntons_after_disaggregation_1deg - ntons_before_this_step
+		  )
+		)
+		config$logger.info("END STEP 5/5")
+		function_recap_each_step(
+		  "Disaggregate1deg",
+		  georef_dataset,
+		  "This step disaggregate data on resolution higher than 1° in 1° resolution. iGridded catch dataset before Disaggregate data on 1° resolution has [%s] lines and total catch is [%s] Tons",
+		  "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
+		  list(
+			options_disaggregate_on_1deg_data_with_resolution_superior_to_1deg
+		  )
+		)
+		gc()
+
+		} else{
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		config$logger.info(
+		  sprintf(
+			"LEVEL 1 => STEP 5/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet): Disaggregate data on 1° resolution quadrants (for 1deg resolution datasets only). Option is: [%s] ",
+			entity$data$source[[1]],
+			opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
+		  )
+		)
+		config$logger.info(
+		  "-----------------------------------------------------------------------------------------------------"
+		)
+		}
+		gc()
+	}
+  
+	#===========================================================================================================================================================
+	#===========================================================================================================================================================
+	#>(||||*> FILTERS (MAY APPLY TO LEVEL 0, 1 or 2)
+	#===========================================================================================================================================================
+	#===========================================================================================================================================================
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	config$logger.info("LEVEL 0 => STEP 3/8: WCPFC at the end")
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	if (!is.null(opts$filter_WCPFC_at_the_end)) {
+		config$logger.info(("Filtering WCPFC_at_the_end [%s]"))
+		georef_dataset <-
+		  georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
+		config$logger.info("Filtering WCPFC OK")
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+
+		if(recap_each_step){
+			function_recap_each_step(
+			  "Filtering_on_WCPFC_at_the_end",
+			  georef_dataset,
+			  "This step is to remove data provided by WCPFC as it is not relevant for 1° resolution data.",
+			  "",
+			  list(options_filter_WCPFC_at_the_end)
+			)
+		}
+	}
+
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	config$logger.info("LEVEL 0 => STEP 3/8: Grid spatial resolution filter")
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	if (!is.null(opts$resolution_filter)) {
+		geograph_identifier <- georef_dataset
+		geograph_identifier$geograph_identifier_num <-
+		  as.numeric(geograph_identifier$geographic_identifier)
+		geograph_identifier <-
+		  geograph_identifier %>% filter(geograph_identifier_num == geographic_identifier)
+		if (nrow(geograph_identifier) != nrow(georef_dataset)) {
+		  #@bastienird no clue what you are doing here. The resolution_filter is an option enabled to filter on a CWP grid resolution
+		  #so the first digit should be sufficient to filter
+		  query <- "SELECT code, st_area(geom), geom from area.cwp_grid"
+		  world_sf <- st_read(con, query = query)
+		  
+		  
+		  shapefile.fix <-
+			st_make_valid(world_sf) %>% filter(!st_is_empty(.))
+		  area <-
+			case_when(opts$resolution_filter == "5" ~ "1",
+					  opts$resolution_filter == "6" ~ "25")
+		  shape_without_geom  <-
+			shapefile.fix %>% as_tibble() %>% select(-geom) %>% filter(st_area == as.numeric(area))
+		  georef_dataset <-
+			georef_dataset %>% semi_join(shape_without_geom,
+										 by = c("geographic_identifier" = "code"))
+		} else{
+		  georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, as.character(opts$resolution_filter)), ]
+		}
+		# georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
+		if(recap_each_step){
+			function_recap_each_step(
+			  "filtering_on_spatial_resolution",
+			  georef_dataset,
+			  "This step is to filter on the wanted resolution.",
+			  "",
+			  list(options_resolution_filter)
+			)
+		}
+	}
+
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	config$logger.info(
+	"LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) "
+	)
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	if (!is.null(opts$gear_filter)) {
+		gear_filter <- unlist(strsplit(opts$gear_filter, split = ","))
+		config$logger.info(sprintf(
+		  "Filtering by gear(s) [%s]",
+		  paste(gear_filter, collapse = ",")
+		))
+		georef_dataset <-
+		  georef_dataset %>% dplyr::filter(gear_type %in% gear_filter)
+		config$logger.info("Filtering gears OK")
+		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
+		if(recap_each_step){
+			function_recap_each_step(
+			  "filtering_on_gear",
+			  georef_dataset,
+			  "This step is to filter on gears if needed (for 1 deg resolution only few gears should be kept, other are irrelevant).",
+			  "",
+			  list(options_gear_filter)
+			)
+		}
+	}
+
+
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	config$logger.info("Last step/8: Apply filters if filter needed (Filter data by groups of everything) ")
+	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
+	#THIS NEED DOCUMENTATION
+	parameter_filtering = if (!is.null(opts$filtering)) opts$filtering else list(species = NULL, fishing_fleet = NULL)
+	if (is.character(parameter_filtering)) {
+	parameter_filtering <-
+	  eval(parse(text = toString(parameter_filtering)))
+	}
+
+	matchingList <-
+	parameter_filtering %>% purrr::keep(~ !is.null(.))
+
+	filtering_function = function(dataframe_to_filter,
+								filtering_params = matchingList) {
+		colnames_to_filter <-
+		  colnames(dataframe_to_filter %>% select(names(filtering_params)))
+		names(filtering_params) <- colnames_to_filter
+
+		filtering_params <-
+		  lapply(filtering_params, function(x) {
+			#handling single filter
+			if (length(x) == 1) {
+			  x <- c(x, x)
+			} else {
+			  x
+			}
+		  })
+
+		if (length(matchingList) != 0) {
+		  dataframe_to_filter <-
+			dataframe_to_filter %>% filter(!!rlang::parse_expr(
+			  str_c(
+				colnames_to_filter,
+				matchingList,
+				sep = '%in%',
+				collapse = "&"
+			  )
+			))
+		} else{
+		  dataframe_to_filter
+		}
+
+	}
+
+	georef_dataset <- filtering_function(georef_dataset)
+
+	#----------------------------------------------------------------------------------------------------------------------------
+
+	#we do an aggregation by dimensions
+	dataset <-
+	georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset), "measurement_value")) %>% dplyr::summarise(measurement_value =
+																										   sum(measurement_value))
+	dataset <- data.frame(dataset)
+  
+	#----------------------------------------------------------------------------------------------------------------------------
+	#@eblondel additional formatting for next time support
+	dataset$time_start <- as.Date(dataset$time_start)
+	dataset$time_end <- as.Date(dataset$time_end)
+	#we enrich the entity with temporal coverage
+	dataset_temporal_extent <-
+	paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
+	entity$setTemporalExtent(dataset_temporal_extent)
+
+	#if there is any entity relation with name 'codelists' we read the file
+	df_codelists <- NULL
+	cl_relations <-
+	entity$relations[sapply(entity$relations, function(x) {
+	  x$name == "codelists"
+	})]
+	if (length(cl_relations) > 0) {
+		config$logger.info("Appending codelists to global dataset generation action output")
+		googledrive_baseurl <- "https://drive.google.com/open?id="
+		if (startsWith(cl_relations[[1]]$link, googledrive_baseurl)) {
+		  #managing download through google drive
+		  config$logger.info("Downloading file using Google Drive R interface")
+		  drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
+		  drive_id <-
+			unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
+		  googledrive::drive_download(file = googledrive::as_id(drive_id),
+									  path = file.path("data", paste0(
+										entity$identifiers[["id"]], "_codelists.csv"
+									  )))
+		  df_codelists <-
+			read.csv(file.path("data", paste0(
+			  entity$identifiers[["id"]], "_codelists.csv"
+			)))
+		} else{
+		  df_codelists <- read.csv(cl_relations[[1]]$link)
+		}
+	}
+
+
+	#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
+	dataset <- list(
+		dataset = dataset,
+		additional_metadata = NULL,
+		#nothing here
+		codelists = df_codelists #in case the entity was provided with a link to codelists
+	)
+
+
+	# if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
+	#   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
+	#   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
+	# }
+	# ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
+
+	#@geoflow -> export as csv
+	output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
+	readr::write_csv(dataset$dataset, output_name_dataset)#export with fwrite which simplifies the data having too many decimals
+	output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
+	write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
+	# ---------------------------------------------------------------------------------------------------------------------------
+	entity$addResource("harmonized", output_name_dataset)
+	entity$addResource("codelists", output_name_codelists)
+	entity$addResource("geom_table", opts$geom_table)
+	#### END
+	config$logger.info(
+	"-----------------------------------------------------------------------------------------------------"
+	)
+	config$logger.info("End: Your tuna atlas dataset has been created!")
+	config$logger.info(
+	"-----------------------------------------------------------------------------------------------------"
+	)
+	# write.csv(options)
+
+	rm(georef_dataset)
+
+	gc()
 }
