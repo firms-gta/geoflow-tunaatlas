@@ -51,7 +51,8 @@ function(action, entity, config){
  
 
 ## -------------------------------------------------------------------------
-
+#patch to rename IOTC areas
+nominal_catch <- nominal_catch %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "F57" ~ "IOTC_EAST", "F51" ~ "IOTC_WEST", TRUE ~ geographic_identifier))
 
 # -------------------------------------------------------------------------
 
