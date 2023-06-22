@@ -175,10 +175,22 @@ function(action, entity, config){
   #@geoflow -> export as csv
   output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
   write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
+  #-------------------------------------------------------
+
+  output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
+  dataset_enriched = dataset$dataset
+  dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
+  dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
+  dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
+  dataset_enriched = dataset_enriched[,c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")]
+  readr::write_csv(dataset_enriched, output_name_dataset_public)
+
+	#-------------------------------------------------------
   output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
   write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
   #----------------------------------------------------------------------------------------------------------------------------  
   entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("public", output_name_dataset_public)
   entity$addResource("codelists", output_name_codelists)
   entity$addResource("geom_table", opts$geom_table)
   
