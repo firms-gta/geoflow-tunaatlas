@@ -515,8 +515,8 @@ function(action, entity, config) {
       function_overlapped(
         georef_dataset,
         con,
-        rfmo_to_keep = overlapping_zone_iotc_wcpfc_data_to_keep,
-        rfmo_not_to_keep = (if (overlapping_zone_iotc_wcpfc_data_to_keep == "IOTC") {
+        rfmo_to_keep = opts$overlapping_zone_iotc_wcpfc_data_to_keep,
+        rfmo_not_to_keep = (if (opts$overlapping_zone_iotc_wcpfc_data_to_keep == "IOTC") {
           "WCPFC"
         } else {
           "IOTC"
@@ -526,7 +526,7 @@ function(action, entity, config) {
     config$logger.info(
       paste0(
         "Keeping only data from ",
-        overlapping_zone_iotc_wcpfc_data_to_keep,
+        opts$overlapping_zone_iotc_wcpfc_data_to_keep,
         " in the IOTC/WCPFC overlapping zone..."
       )
     )
@@ -534,7 +534,7 @@ function(action, entity, config) {
     config$logger.info(
       paste0(
         "Keeping only data from ",
-        overlapping_zone_iotc_wcpfc_data_to_keep,
+        opts$overlapping_zone_iotc_wcpfc_data_to_keep,
         " in the IOTC/WCPFC overlapping zone OK"
       )
     )
@@ -547,7 +547,7 @@ function(action, entity, config) {
 			"In this step, the georeferenced data present on the overlapping zone between IOTC and WCPFC is handled.
 					   The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.
 					   In the case the data is identical on the stratas privided, the remaining data is from ",
-			options_overlapping_zone_iotc_wcpfc_data_to_keep
+			opts$overlapping_zone_iotc_wcpfc_data_to_keep
 		  ) ,
 		  "function_overlapped",
 		  list(
@@ -572,6 +572,8 @@ function(action, entity, config) {
 		options_strata_overlap_sbf <- unlist(strsplit(opts$strata_overlap_sbf, split = ","))
 	}
     
+	rfmo_to_keep = "CCSBT"
+	
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -584,7 +586,7 @@ function(action, entity, config) {
         function_overlapped(
           dataset = georef_dataset,
           con = con,
-          rfmo_to_keep = "CCSBT",
+          rfmo_to_keep = rfmo_to_keep,
           rfmo_not_to_keep = "WCPFC",
           strata = options_strata_overlap_sbf,
 		  opts = opts
@@ -599,7 +601,7 @@ function(action, entity, config) {
 			  "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.
 								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
 			  "In the case the data is identical on the stratas privided, the remaining data is from ",
-			  options_overlapping_zone_wcpfc_ccsbt_data_to_keep
+			  rfmo_to_keep
 			),
 			"function_overlapped",
 			list(
@@ -1922,12 +1924,25 @@ function(action, entity, config) {
 	# ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
 
 	#@geoflow -> export as csv
+	#-------------------------------------------------------
 	output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-	readr::write_csv(dataset$dataset, output_name_dataset)#export with fwrite which simplifies the data having too many decimals
+	readr::write_csv(dataset$dataset, output_name_dataset)
+	#-------------------------------------------------------
+	
+	output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
+	dataset_enriched = dataset$dataset
+	dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
+	dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
+	dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
+	dataset_enriched = dataset_enriched[,c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")]
+	readr::write_csv(dataset_enriched, output_name_dataset_public)
+	
+	#-------------------------------------------------------
 	output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
 	write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
 	# ---------------------------------------------------------------------------------------------------------------------------
 	entity$addResource("harmonized", output_name_dataset)
+	entity$addResource("public", output_name_dataset_public)
 	entity$addResource("codelists", output_name_codelists)
 	entity$addResource("geom_table", opts$geom_table)
 	#### END

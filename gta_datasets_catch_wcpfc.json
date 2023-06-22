@@ -63,10 +63,9 @@
 	  "script": "./tunaatlas_actions/load_dataset.R",
       "run": true,
       "options": {
-        "upload_to_db": true,
-        "create_materialized_view": true,
-        "add_sql_comments": true,
-        "upload_to_googledrive": true
+			"upload_to_db": true,
+			"create_materialized_view": false,
+			"upload_to_googledrive": true
       }
     }
     

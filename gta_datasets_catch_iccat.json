@@ -64,8 +64,7 @@
 		"run": true,
 		"options": {
 			"upload_to_db": true,
-			"create_materialized_view": true,
-			"add_sql_comments": true,
+			"create_materialized_view": false,
 			"upload_to_googledrive": true
 		}
 	}

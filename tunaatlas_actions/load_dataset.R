@@ -33,10 +33,11 @@ load_dataset <- function(action,entity, config){
   }
   
   #opts
+  upload_to_db_public <- if(!is.null(opts$upload_to_db_public)) opts$upload_to_db_public else TRUE
   upload_to_db <- if(!is.null(opts$upload_to_db)) opts$upload_to_db else TRUE
-  create_materialized_view <- if(!is.null(opts$create_materialized_view)) opts$create_materialized_view else TRUE
-  create_indexes <- if(!is.null(opts$create_indexes)) opts$create_indexes else TRUE
-  add_sql_comments <- if(!is.null(opts$add_sql_comments)) opts$add_sql_comments else TRUE
+  create_materialized_view <- if(!is.null(opts$create_materialized_view)) opts$create_materialized_view else FALSE
+  index_materialized_view <- if(!is.null(opts$index_materialized_view)) opts$index_materialized_view else TRUE
+  comment_materialized_view <- if(!is.null(opts$comment_materialized_view)) opts$comment_materialized_view else TRUE
   upload_to_googledrive <- if(!is.null(opts$upload_to_googledrive)) opts$upload_to_googledrive else TRUE
   
   #db
@@ -65,8 +66,35 @@ load_dataset <- function(action,entity, config){
   schema_name_for_view <- dimension_name
   database_view_name <- dataset_pid
   
-  if(upload_to_db){
-    
+  	#-------------------------------------------------------------------------------------------------------------------------
+	#we upload the dataset (in its public enriched form) as it is to public schema
+	#this will be used for services from now, so we can bypass all the materialized view flow that is too time consuming 
+	#-------------------------------------------------------------------------------------------------------------------------
+	#upload to DB public schema
+	if(upload_to_db_public && !is.null(entity$resources$public)){
+		dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public))
+		class(dfenriched_to_load$year) = "integer"
+		class(dfenriched_to_load$month) = "integer"
+		class(dfenriched_to_load$quarter) = "integer"
+		
+		geoflow::writeWorkflowJobDataResource(
+			entity = entity,
+			config = config,
+			obj = dfenriched_to_load,
+			useFeatures = FALSE,
+			resourcename = entity$identifiers$id,
+			useUploadSource = FALSE,
+			createIndexes = TRUE,
+			overwrite = TRUE,
+			append = FALSE,
+			chunk.size = 0L,
+			type = "dbtable"
+		)
+	}
+  
+	#upload to DB sardara schema (complementary, still used for queries in particular on metadata)
+	if(upload_to_db){
+	
     #read sources
     df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
     df_codelists <- as.data.frame(readr::read_csv(path_to_codelists, guess_max=0))
@@ -405,13 +433,13 @@ load_dataset <- function(action,entity, config){
     # 3) dataset-dataset  (le dataset x utilise les dataset x,y,z) -> PAS ENCORE GERE
     
     
-  }
+	}
   
-  # Create the materialized view if set in the metadata
-  if(!is.na(database_view_name)){
-    
+    # Create the materialized view if set in the metadata
+
     # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
-    if(upload_to_db && create_materialized_view){
+	go_view = upload_to_db && create_materialized_view && !is.na(database_view_name)
+    if(go_view){
       
       config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
       # Check if schema exists
@@ -438,7 +466,7 @@ load_dataset <- function(action,entity, config){
       dbSendQuery(con, sql_create_materialized_view)
       
       #create indexes for main columns
-      if(create_indexes){
+      if(index_materialized_view){
         config$logger.info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
         this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
         column_names <- colnames(this_view)
@@ -452,7 +480,7 @@ load_dataset <- function(action,entity, config){
       }
       
       #comment DB materialized view columns
-      if(add_sql_comments){
+      if(comment_materialized_view){
         dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
         this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
         column_names <- colnames(this_view)
@@ -523,31 +551,50 @@ load_dataset <- function(action,entity, config){
     
     #upload dataset to Google drive
     if(upload_to_googledrive){
+	  
+	  entity$data$access <- "googledrive"
+	
+	  #DATA
       config$logger.info("Upload dataset (CSV) to Google Drive")
       # folder_datasets_id <- drive_get("~/geoflow_tunaatlas/data/outputs/datasets")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
-      folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+      #standard harmonized dataset
+	  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
       path_to_dataset_new <- file.path(getwd(), "data", paste0(entity$identifiers[["id"]], ".csv"))
       file.rename(from = path_to_dataset, to = path_to_dataset_new)
       id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
       
+	  #public dataset
+	  if(upload_to_db_public && !is.null(entity$resources$public)){
+		id_csv_dataset_public <- drive_upload(file.path(getwd(), entity$resources$public), as_id(folder_datasets_id), overwrite = TRUE)$id
+	  }
+	  
+	  #VIEWS
+	  config$logger.info("Upload SQL queries (view/data) to Google Drive")
+      # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
+      folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+	  
+	  #google drive uploads related to sardara db model (SQL query file)
       if(upload_to_db){
         
         #store SQL files on job dir google drive
         config$logger.info("Write SQL queries (view/data) to job directory")
-        sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
-        file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
-        file_csv_view <- paste0(entity$identifiers[["id"]],"_view.csv")
-        file_csv_view_without_geom <- paste0(entity$identifiers[["id"]],"_view (without geom).csv")
         sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
         file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
+		writeLines(sql_data, file.path("data", file_sql_data))
+		drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
+        entity$data$source <- list(file_sql_data)
         
-        config$logger.info("Upload SQL queries (view/data) to Google Drive")
-        # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
-        folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
-        entity$data$access <- "googledrive"
-        if(create_materialized_view){
+      }
+	  
+	  #google drive uploads related to sardara db model (in case of materialized view)
+	  if(go_view){
+		  
+		  file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
+          file_csv_view <- paste0(entity$identifiers[["id"]],"_view.csv")
+          file_csv_view_without_geom <- paste0(entity$identifiers[["id"]],"_view (without geom).csv")
+		
+		  sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
           writeLines(sql_view, file.path("data", file_sql_view))
-          writeLines(sql_data, file.path("data", file_sql_data))
           this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name),";"))
           readr::write_csv(this_view, file.path("data", file_csv_view))
           if("geom_wkt" %in% colnames(this_view)){
@@ -558,25 +605,15 @@ load_dataset <- function(action,entity, config){
           }
           drive_upload(file.path("data", file_csv_view), as_id(folder_views_id), overwrite = TRUE)
           drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
-          drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
           
           if("geom_wkt" %in% colnames(this_view)){
             entity$data$source <- list(file_csv_view, file_csv_view_without_geom, file_sql_view, file_sql_data)
           }else{
             entity$data$source <- list(file_csv_view, file_sql_view, file_sql_data)
           }
-        }else{
-          writeLines(sql_data, file.path("data", file_sql_data))
-          drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
-          entity$data$source <- list(file_sql_data)
-        }
-        
-      }
+       }
+ 
     }
-  }
-  #}
-  
-  
-  
+
   
 }

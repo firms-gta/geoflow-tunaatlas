@@ -1,7 +1,9 @@
 enrich_db_for_services <- function(action,entity, config){
   opts <- action$options
   con <- config$software$output$dbi
-  schema <- "fact_tables"
+  
+  #for services rely on the public schema dataset
+  schema <- "public"
   
   #set information required for (meta)data services
   geom_table <- "area.area_labels"
