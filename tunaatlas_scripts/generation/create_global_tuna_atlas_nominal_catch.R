@@ -160,7 +160,7 @@ function(action, entity, config){
       config$logger.info("Downloading file using Google Drive R interface")
       drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
       drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-      googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
+      googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")), overwrite = TRUE)
       df_codelists <- read.csv(file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
     }else{
       df_codelists <- read.csv(cl_relations[[1]]$link)

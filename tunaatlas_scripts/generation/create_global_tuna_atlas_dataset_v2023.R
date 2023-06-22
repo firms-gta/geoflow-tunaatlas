@@ -1898,7 +1898,7 @@ function(action, entity, config) {
 		  googledrive::drive_download(file = googledrive::as_id(drive_id),
 									  path = file.path("data", paste0(
 										entity$identifiers[["id"]], "_codelists.csv"
-									  )))
+									  )), overwrite = TRUE)
 		  df_codelists <-
 			read.csv(file.path("data", paste0(
 			  entity$identifiers[["id"]], "_codelists.csv"
