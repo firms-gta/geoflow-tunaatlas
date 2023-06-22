@@ -37,7 +37,7 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   } else if(dimension_to_map=="species"){
     replace_unk <- "MZZ"
   }
-  if(dimension_to_map=="fishing_fleet"){
+  if(dimension_to_map=="gear_type"){
     replace_unk <- "99.9"
   } else {replace_unk <- "UNK"}
   
