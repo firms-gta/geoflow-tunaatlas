@@ -2,7 +2,7 @@ function(action, entity, config){
   
   require(dplyr)
   
-  catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]))
+  catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 
   filename1 <- entity$data$source[[1]]
   filename2 <- entity$data$source[[2]]
@@ -15,7 +15,7 @@ function(action, entity, config){
   ##Catches
   catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
   
-  catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier))
+  catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier), measurement_value = as.numeric(catches$measurement_value))
   
   catches <- catches %>% filter(measurement_value!= 0)
   
