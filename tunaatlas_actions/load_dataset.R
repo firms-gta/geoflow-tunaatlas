@@ -72,7 +72,7 @@ load_dataset <- function(action,entity, config){
 	#-------------------------------------------------------------------------------------------------------------------------
 	#upload to DB public schema
 	if(upload_to_db_public && !is.null(entity$resources$public)){
-		dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public))
+		dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public, col_types = list(measurement_unit = col_character())))
 		class(dfenriched_to_load$year) = "integer"
 		class(dfenriched_to_load$month) = "integer"
 		class(dfenriched_to_load$quarter) = "integer"
