@@ -1869,6 +1869,7 @@ function(action, entity, config) {
 	georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset), "measurement_value")) %>% dplyr::summarise(measurement_value =
 																										   sum(measurement_value))
 	dataset <- data.frame(dataset)
+	if(!is.na(any(dataset$measurement_unit) == "TRUE")) if(any(dataset$measurement_unit) == "TRUE") dataset[(dataset$measurement_unit) == "TRUE",]$measurement_unit <- "t" #patch because of https://github.com/firms-gta/geoflow-tunaatlas/issues/41
   
 	#----------------------------------------------------------------------------------------------------------------------------
 	#@eblondel additional formatting for next time support
