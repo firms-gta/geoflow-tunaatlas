@@ -66,6 +66,9 @@ load_dataset <- function(action,entity, config){
   schema_name_for_view <- dimension_name
   database_view_name <- dataset_pid
   
+  #whether view has to been created
+  go_view = upload_to_db && create_materialized_view && !is.na(database_view_name)
+  
   	#-------------------------------------------------------------------------------------------------------------------------
 	#we upload the dataset (in its public enriched form) as it is to public schema
 	#this will be used for services from now, so we can bypass all the materialized view flow that is too time consuming 
@@ -399,12 +402,12 @@ load_dataset <- function(action,entity, config){
     
     ## Update some metadata elements
     # first drop materialized view
-    # if(!is.null(database_view_name)){
-    config$logger.info(sprintf("Droping materialized view '%s'", dataset_pid))
-    dataset_drop_view_sql <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";"))
-    config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
-    dbSendQuery(con, dataset_drop_view_sql)
-    # }
+	if(go_view){
+		config$logger.info(sprintf("Droping materialized view '%s'", dataset_pid))
+		dataset_drop_view_sql <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";"))
+		config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
+		dbSendQuery(con, dataset_drop_view_sql)
+	}
     
     # sql_query_dataset_extraction
     sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
@@ -438,7 +441,6 @@ load_dataset <- function(action,entity, config){
     # Create the materialized view if set in the metadata
 
     # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
-	go_view = upload_to_db && create_materialized_view && !is.na(database_view_name)
     if(go_view){
       
       config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
