@@ -804,7 +804,7 @@ function(action, entity, config) {
 		)
 		config$logger.info(
 		  sprintf(
-			"STEP 3/5 : Reallocation of mislocated data generated [%s] additionnal tons",
+			"Reallocation of mislocated data generated [%s] additionnal tons",
 			ntons_after_mislocated - ntons_before_this_step
 		  )
 		)
@@ -825,8 +825,7 @@ function(action, entity, config) {
 		)
 		config$logger.info(
 		  sprintf(
-			"LEVEL 1 => STEP 3/5 not executed  for file [%s] (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
-			entity$data$source[[1]],
+			"Step for managing mislocated data not executed not executed  for file (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
 			opts$spatial_curation_data_mislocated
 		  )
 		)
