@@ -48,15 +48,6 @@ function(action, entity, config){
   config$logger.info("Retrieving RFMOs nominal catch...")
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
   config$logger.info("Retrieving RFMOs nominal catch OK")
- 
-
-## -------------------------------------------------------------------------
-#patch to rename IOTC areas
-nominal_catch <- nominal_catch %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "F57" ~ "IOTC_EAST", "F51" ~ "IOTC_WEST", TRUE ~ geographic_identifier))
-
-# -------------------------------------------------------------------------
-
-
   
   #### 2) Map code lists 
   
