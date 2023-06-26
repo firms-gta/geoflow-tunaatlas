@@ -766,62 +766,38 @@ function(action, entity, config) {
 		  )
       }  
 	}
- 
-	#===========================================================================================================================================================
-    #===========================================================================================================================================================
-	#>(||||*> LEVEL 1 FIRMS CANDIDATE PRODUCT
-	#===========================================================================================================================================================
-	#===========================================================================================================================================================
-	#TODO review and clean
-	if(DATASET_LEVEL >= 1){ #with this condition code will be run to deal with dataset level 1 and above
-		#-----------spatial_curation_data_mislocated------------------------------------------------------
+	
+	#-----------spatial_curation_data_mislocated------------------------------------------------------  
+	if(is.null(opts$spatial_curation_data_mislocated)) if(DATASET_LEVEL == 0) opts$spatial_curation_data_mislocated = "remove" #we force this in case option is not set for level 0
+	if(!is.null(opts$spatial_curation_data_mislocated)) if (opts$spatial_curation_data_mislocated %in% c("reallocate", "remove")) {
+	
+		if(DATASET_LEVEL == 0) opts$spatial_curation_data_mislocated = "remove" #we force this in case option is badly set for level 0
 		
-	  
-		if (opts$spatial_curation_data_mislocated %in% c("reallocate", "remove")) {
-		config$logger.info(
-		  "---------------------------------------spatial_curation_intersect_areas--------------------------------------------------------------"
-		)
+		stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$spatial_curation_data_mislocated))
+		stepnumber = stepnumber+1
+		
+		ntons_before_this_step <- round(georef_dataset %>% select(measurement_value)  %>% sum())
 		config$logger.info(
 		  sprintf(
-			"LEVEL 1 => STEP 3/5  for file [%s] is executed: Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
-			entity$data$source[[1]],
-			opts$spatial_curation_data_mislocated
-		  )
-		)
-		config$logger.info(
-		  "-----------------------------------------------------------------------------------------------------"
-		)
-		
-		ntons_before_this_step <-
-		  round(georef_dataset %>% select(value)  %>% sum())
-		config$logger.info(
-		  sprintf(
-			"STEP 3/5 : Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
+			"Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
 			nrow(georef_dataset),
 			ntons_before_this_step
 		  )
 		)
 		
-		config$logger.info("STEP 3/5: BEGIN function_spatial_curation_data_mislocated() function")
 		georef_dataset <- spatial_curation_data_mislocated(
 		  entity = entity,
 		  config = config,
 		  df = georef_dataset,
-		  spatial_curation_data_mislocated =
-			opts$spatial_curation_data_mislocated
+		  spatial_curation_data_mislocated = opts$spatial_curation_data_mislocated
 		)
-		config$logger.info("STEP 3/5: END function_spatial_curation_data_mislocated() function")
-		
-		#@juldebar: pending => metadata elements below to be managed (commented for now)
-		# metadata$description<-paste0(metadata$description,georef_dataset$description)
-		# metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
 		
 		georef_dataset <- georef_dataset$dataset
 		ntons_after_mislocated <-
-		  round(georef_dataset %>% select(value)  %>% sum())
+		  round(georef_dataset %>% select(measurement_value)  %>% sum())
 		config$logger.info(
 		  sprintf(
-			"STEP 3/5 : Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
+			"Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
 			nrow(georef_dataset),
 			ntons_after_mislocated
 		  )
@@ -832,15 +808,15 @@ function(action, entity, config) {
 			ntons_after_mislocated - ntons_before_this_step
 		  )
 		)
-		config$logger.info("END STEP 3/5")
-		function_recap_each_step(
-		  "Realocating_removing_mislocated_data",
-		  georef_dataset,
-		  "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
-		  "spatial_curation_data_mislocated",
-		  list(options_spatial_curation_data_mislocated)
-		)
-		
+		if(recap_each_step){
+			function_recap_each_step(
+			  "Realocating_removing_mislocated_data",
+			  georef_dataset,
+			  "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
+			  "spatial_curation_data_mislocated",
+			  list(options_spatial_curation_data_mislocated)
+			)
+		}
 		gc()
 		
 	  } else{
@@ -858,10 +834,17 @@ function(action, entity, config) {
 		  "-----------------------------------------------------------------------------------------------------"
 		)
 	  }
+ 
+	#===========================================================================================================================================================
+    #===========================================================================================================================================================
+	#>(||||*> LEVEL 1 FIRMS CANDIDATE PRODUCT
+	#===========================================================================================================================================================
+	#===========================================================================================================================================================
+	#TODO review and clean
+	if(DATASET_LEVEL >= 1){ #with this condition code will be run to deal with dataset level 1 and above
+
 	  
 	  # Curation absurd converted data ------------------------------------------
-	  
-	  
 	  if (!is.null(opts$curation_absurd_converted_data)) {
 		source(
 		  file.path(
