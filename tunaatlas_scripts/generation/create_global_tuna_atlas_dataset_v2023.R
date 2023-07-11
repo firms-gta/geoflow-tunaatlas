@@ -982,7 +982,7 @@ function(action, entity, config) {
 			)
 		  
 		  ntons_before_this_step <-
-			round(georef_dataset %>% filter(unit == "t")  %>% select(value)  %>% sum())
+			round(georef_dataset %>% filter(measurement_unit == "t")  %>% select(measurement_value)  %>% sum())
 		  config$logger.info(
 			sprintf(
 			  "STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons",
@@ -1001,13 +1001,13 @@ function(action, entity, config) {
 			  opts$unit_conversion_csv_conversion_factor_url,
 			unit_conversion_codelist_geoidentifiers_conversion_factors =
 			  opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-			mapping_map_code_lists = opts$mapping_map_code_lists,
+			mapping_map_code_lists = mapping_map_code_lists,
 			georef_dataset = georef_dataset
 		  )
 		  config$logger.info("STEP 2/5: END do_unit_conversion() function")
 		  
 		  ntons_after_conversion <-
-			round(georef_dataset %>% select(value)  %>% sum())
+			round(georef_dataset %>% select(measurement_value)  %>% sum())
 		  config$logger.info(
 			sprintf(
 			  "STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons",
@@ -1025,7 +1025,7 @@ function(action, entity, config) {
 		  config$logger.info(
 			sprintf(
 			  "STEP 2/5 : Total number for 'NO' unit is now [%s] individuals",
-			  georef_dataset %>% filter(unit == "no")  %>% select(value)  %>% sum()
+			  georef_dataset %>% filter(measurement_unit == "no")  %>% select(measurement_value)  %>% sum()
 			)
 		  )
 		  config$logger.info("END STEP 2/5")
