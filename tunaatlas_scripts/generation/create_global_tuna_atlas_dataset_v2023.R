@@ -410,8 +410,6 @@ function(action, entity, config) {
 	  stepLogger(level = 0, step = stepnumber, msg = "Filtering on species under mandate, targeted by GTA")
 	  stepnumber = stepnumber +1
 	  #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
-	  #species_to_be_kept_in_level0 <- readr::read_csv(url_asfis_list)
-	  #georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level0, by = c("species" = "code"))
 	  
 	  url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
 	  species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
@@ -423,10 +421,10 @@ function(action, entity, config) {
 			georef_dataset,
 			paste0(
 			  "Filtering species on the base of the file ",
-			  url_asfis_list,
+			  url_mapping_asfis_rfmo,
 			  " to keep only the species under mandate of tRFMOs. This file contains " ,
 			  as.character(length(nrow(
-				species_to_be_kept_in_level0
+			    species_to_be_kept_by_rfmo_in_level0
 			  ))),
 			  " species."
 			),
@@ -598,8 +596,8 @@ function(action, entity, config) {
 			"overlap_ccsbt_wcpfc",
 			georef_dataset,
 			paste0(
-			  "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.
-								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+			  "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.",
+			  "The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
 			  "In the case the data is identical on the stratas privided, the remaining data is from ",
 			  rfmo_to_keep
 			),
@@ -636,9 +634,10 @@ function(action, entity, config) {
 			"overlap_iccat_ccsbt",
 			georef_dataset,
 			paste0(
-			  "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.
-								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-			  "In the case the data is identical on the stratas privided, the remaining data is from CCSBT",
+			  "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.",
+			  "The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
+			  "In the case the data is identical on the stratas privided, the remaining data is from ",
+			  rfmo_to_keep
 			),
 			
 			"function_overlapped",
@@ -678,7 +677,7 @@ function(action, entity, config) {
 			  "In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
 								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
 			  "In the case the data is identical on the stratas privided, the remaining data is from ",
-			  options_overlapping_zone_iccat_ccsbt_data_to_keep
+			  rfmo_to_keep
 			),
 			
 			"function_overlapped",
