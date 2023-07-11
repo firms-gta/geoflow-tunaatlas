@@ -2,7 +2,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/extract_dataset.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/convert_units.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/list_metadata_datasets.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/map_codelist.R")
   con <- config$software$output$dbi
   
   if(is.data.frame(unit_conversion_csv_conversion_factor_url)){
@@ -45,8 +45,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
       df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)
     }
     #georef_dataset with source coding system for gears mapped with isscfg codes:
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
-    georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"gear",TRUE)$df
+    georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"gear_type",TRUE)$df
     
     if (fact=="effort"){
       ## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source unit coding system with tuna atlas coding system. In fact, the conversion factors dataset is expressed with tuna atlas coding system for units, while the primary tRFMOs datasets are expressed with their own unit coding system.
@@ -62,7 +61,6 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
         df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)
       }
       #georef_dataset with source coding system for units mapped with tuna atlas codes:
-      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
       
       georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"measurement_unit",TRUE)$df
     }
@@ -75,7 +73,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   config$logger.info("Execute rtunaatlas::convert_units() function")
   config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
   if(fact == "catch"){
-    sum_no_before <- georef_dataset %>% filter(measurement_unit=="no")  %>% select(value)  %>% sum()
+    sum_no_before <- georef_dataset %>% filter(measurement_unit=="no")  %>% select(measurement_value)  %>% sum()
     species_no_before <- georef_dataset %>% filter(measurement_unit=="no") %>% distinct(species)
     cat(species_no_before$species)
     cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
@@ -94,7 +92,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   
   #check what species didn't get  conversion factors from IRD file
   if(fact == "catch"){
-    species_no_after <- georef_dataset %>% filter(unit=="no") %>% distinct(species)
+    species_no_after <- georef_dataset %>% filter(measurement_unit=="no") %>% distinct(species)
     cat(setdiff(species_no_before$species,species_no_after$species))
     cat(intersect(species_no_after$species,unique(df_conversion_factor$species)))
     #@juldebar => issue with SKJ and IOTC
@@ -110,22 +108,22 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   #@juldebar => must be "t" now with changes on Level 0
   #@eblondel => to refactor to align on standard units
   if(fact == "catch"){
-    sum_no_after<- georef_dataset %>% filter(unit=="no")  %>% select(value)  %>% sum()
-    nrow_no <- nrow(georef_dataset %>% filter(unit=="no")  %>% select(value))
-    # sum_t <- df %>% filter(unit=="t")  %>% select(value)  %>% sum()
+    sum_no_after<- georef_dataset %>% filter(measurement_unit=="no")  %>% select(measurement_value)  %>% sum()
+    nrow_no <- nrow(georef_dataset %>% filter(measurement_unit=="no")  %>% select(measurement_value))
+    # sum_t <- df %>% filter(measurement_unit=="t")  %>% select(measurement_value)  %>% sum()
     config$logger.info(sprintf("Gridded catch dataset has [%s] lines using 'number' as unit of measure", nrow_no))
     config$logger.info(sprintf("Now removing all lines still using 'number' (NO) as unit of measure and still representing a total of [%s] inidviduals", sum_no_after))
     if(removing_numberfish_final){
-      georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]}
+      georef_dataset <- georef_dataset[georef_dataset$measurement_unit == "t", ]}
     
-    #georef_dataset <- georef_dataset[georef_dataset$unit == "t", ]
+    #georef_dataset <- georef_dataset[georef_dataset$measurement_unit == "t", ]
     config$logger.info(sprintf("Ratio of converted numbers is [%s] due to lack on conversion factors for some dimensions (species, time, gears..)", 1-sum_no_after/sum_no_before))
   }
   
   if (mapping_map_code_lists=="FALSE"){
     # resetting gear coding system to primary gear coding system
-    georef_dataset$gear<-NULL
-    colnames(georef_dataset)[colnames(georef_dataset) == 'gear_src_code'] <- 'gear'
+    georef_dataset$gear_type<-NULL
+    colnames(georef_dataset)[colnames(georef_dataset) == 'gear_src_code'] <- 'gear_type'
     if (fact=="effort"){
       # We keep tuna atlas effort unit codes although this is not perfect, but going back to tRFMOs codes is too complicated 
       georef_dataset$unit_src_code<-NULL
