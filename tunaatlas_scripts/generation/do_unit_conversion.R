@@ -64,7 +64,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
       #georef_dataset with source coding system for units mapped with tuna atlas codes:
       source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
       
-      georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"unit",TRUE)$df
+      georef_dataset<-map_codelist(georef_dataset,df_mapping_final_this_dimension,"measurement_unit",TRUE)$df
     }
     
   }
@@ -75,8 +75,8 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   config$logger.info("Execute rtunaatlas::convert_units() function")
   config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
   if(fact == "catch"){
-    sum_no_before <- georef_dataset %>% filter(unit=="no")  %>% select(value)  %>% sum()
-    species_no_before <- georef_dataset %>% filter(unit=="no") %>% distinct(species)
+    sum_no_before <- georef_dataset %>% filter(measurement_unit=="no")  %>% select(value)  %>% sum()
+    species_no_before <- georef_dataset %>% filter(measurement_unit=="no") %>% distinct(species)
     cat(species_no_before$species)
     cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
   }
