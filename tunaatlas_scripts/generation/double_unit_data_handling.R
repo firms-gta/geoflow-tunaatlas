@@ -5,8 +5,8 @@ double_unit_data_handling = function(con, entity, config,fact,unit_conversion_cs
   #@eblondel => to refactor to align on standard units
   if (fact=="catch"){
     config$logger.info("Dealing with cacth => Removing old NOMT / MTNO units if any")
-    georef_dataset$unit[which(georef_dataset$unit == "MTNO")]<-"t"
-    georef_dataset<-georef_dataset[!(georef_dataset$unit=="NOMT"),]
+    georef_dataset$measurement_unit[which(georef_dataset$measurement_unit == "MTNO")]<-"t"
+    georef_dataset<-georef_dataset[!(georef_dataset$measurement_unit=="NOMT"),]
   } else if (fact=="effort"){
     config$logger.info("Dealing with effort => harmonization of units")
     ## For efforts: 
@@ -20,9 +20,9 @@ double_unit_data_handling = function(con, entity, config,fact,unit_conversion_cs
     vector_standard_effortunits<-c("HOOKS","FDAYS")
     
     # get the units available in each stratum, separated by commas
-    df_units_available_in_strata<-aggregate(unit ~., georef_dataset[,setdiff(colnames(georef_dataset),c("value","schooltype","unit_src_code","gear_src_code"))], toString)
+    df_units_available_in_strata<-aggregate(measurement_unit ~., georef_dataset[,setdiff(colnames(georef_dataset),c("value","schooltype","unit_src_code","gear_src_code"))], toString)
     
-    colnames(df_units_available_in_strata)[which(names(df_units_available_in_strata) == "unit")] <- "units_available"
+    colnames(df_units_available_in_strata)[which(names(df_units_available_in_strata) == "measurement_unit")] <- "units_available"
     
     # Check for each strata if it is expressed in at least 1 of the standard unit
     df_units_available_in_strata$standard_unit_available_in_strata <- grepl(paste(vector_standard_effortunits,collapse="|"),df_units_available_in_strata$units_available)
@@ -45,9 +45,9 @@ double_unit_data_handling = function(con, entity, config,fact,unit_conversion_cs
     
     # Remove the unrelevant lines
     # 1) lignes dont les strates équivalentes existent dans une des unités standard et dont la ligne n'est pas exprimée dans une unité standard
-    index_to_remove_1<-which(!(georef_dataset$unit %in% vector_standard_effortunits) & georef_dataset$standard_unit_available_in_strata==TRUE)
+    index_to_remove_1<-which(!(georef_dataset$measurement_unit %in% vector_standard_effortunits) & georef_dataset$standard_unit_available_in_strata==TRUE)
     # 2) ignes dont les strates équivalentes existent dans aucune des unités standard mais pour lesquelles il existe un facteur de conversion, et dont la ligne n'est pas exprimée dans l'unité correspondant au facteur de conversion
-    index_to_remove_2<-which(!(georef_dataset$unit %in% vector_standard_effortunits) & georef_dataset$standard_unit_available_in_strata==FALSE & georef_dataset$conversion_factor_available_in_strata==TRUE & georef_dataset$conversion_factor_available_in_line==FALSE)
+    index_to_remove_2<-which(!(georef_dataset$measurement_unit %in% vector_standard_effortunits) & georef_dataset$standard_unit_available_in_strata==FALSE & georef_dataset$conversion_factor_available_in_strata==TRUE & georef_dataset$conversion_factor_available_in_line==FALSE)
     
     index_rows_to_remove<-c(index_to_remove_1,index_to_remove_2)
     
