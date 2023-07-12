@@ -903,7 +903,7 @@ function(action, entity, config) {
 				time_start = col_character(),
 				time_end = col_character()
 			  )
-			) %>% dplyr::rename(value = conversion_factor)#this map condelist function is to retieve the mapping dataset used
+			) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit)#this map condelist function is to retieve the mapping dataset used
 			
 			iotc_conv_fact_mapped <-
 			  map_codelists(
