@@ -26,8 +26,8 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   ## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source gear coding system with ISSCFG coding system. In fact, the conversion factors dataset is expressed with ISSCFG coding system for gears, while the primary tRFMOs datasets are expressed with their own gear coding system.
   config$logger.info("Checking if 'mapping_map_code_lists' option is set to TRUE")
   
-  if("value" %in% colnames(df_conversion_factor)){
-    df_conversion_factor <- df_conversion_factor %>% dplyr::rename(conversion_factor = value)
+  if("measurement_value" %in% colnames(df_conversion_factor)){
+    df_conversion_factor <- df_conversion_factor %>% dplyr::rename(conversion_factor = measurement_value)
   }
   
   
