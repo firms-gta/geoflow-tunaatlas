@@ -1067,7 +1067,7 @@ function(action, entity, config) {
 		# Filtering on species for level 1 --------------------------------------
 		config$logger.info("Filtering on species for level 1")
 		url_asfis_list_level1 <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
-		species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1)
+		species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1) %>% dplyr::select(code)
 		georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
 	  
 		function_recap_each_step(
@@ -1151,10 +1151,10 @@ function(action, entity, config) {
 		  # nominal_catch2 <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
 		  # nominal_catch <- read.csv2("entities/global_catch_1deg_1m_ps_bb_firms_Bastien_with_step_rds__level2/data/nominal_catch_mapped.csv", sep = ";")
 		  #         #@juldebar keep same units for all datatets
-		  if (any(nominal_catch$unit == "t"))
-			nominal_catch[nominal_catch$unit == "t",]$unit <- "t"
-		  if (any(nominal_catch$unit == "no"))
-			nominal_catch[nominal_catch$unit == "no",]$unit <- "no"
+		  if (any(nominal_catch$measurement_unit == "t"))
+			nominal_catch[nominal_catch$measurement_unit == "t",]$measurement_unit <- "t"
+		  if (any(nominal_catch$measurement_unit == "no"))
+			nominal_catch[nominal_catch$measurement_unit == "no",]$measurement_unit <- "no"
 		  class(nominal_catch$measurement_value) <- "numeric"
 		  #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
 		  if (nrow(nominal_catch) == 0) {
@@ -1176,7 +1176,7 @@ function(action, entity, config) {
 			dataset_to_compute_rf = georef_dataset
 			#@juldebar why do we use "year' as time dimension here ?
 			if (is.null(opts$x_raising_dimensions)) {
-			  x_raising_dimensions = c("gear", "species", "year", "source_authority")
+			  x_raising_dimensions = c("gear_type", "species", "year", "source_authority")
 			}
 			
 			
