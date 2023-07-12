@@ -1069,7 +1069,10 @@ function(action, entity, config) {
 		url_asfis_list_level1 <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
 		species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1) %>% dplyr::select(code)
 		georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
-	  
+
+		# Removing all the fishingfleet from the georef_dataset
+		georef_dataset$fishing_fleet <- "UNK"
+		
 		function_recap_each_step(
 			"Filtering species level 1",
 			georef_dataset,
@@ -1086,6 +1089,8 @@ function(action, entity, config) {
 			NULL
 		)
 	
+		
+		
 	}
 	# -------------------------------------------------------------------------
   
@@ -1469,8 +1474,7 @@ function(action, entity, config) {
 			  x_raising_dimensions =
 				x_raising_dimensions
 			)
-		  georef_dataset <-
-			georef_dataset$dataset %>% dplyr::select(-fishingfleet)
+		  georef_dataset <- georef_dataset$dataset
 		  
 		  rm(dataset_to_compute_rf)
 		  
