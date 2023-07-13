@@ -1156,8 +1156,12 @@ function(action, entity, config) {
 		  # nominal_catch2 <- map_codelists(con, "catch", mapping_dataset, nominal_catch, mapping_keep_src_code)
 		  # nominal_catch <- read.csv2("entities/global_catch_1deg_1m_ps_bb_firms_Bastien_with_step_rds__level2/data/nominal_catch_mapped.csv", sep = ";")
 		  #         #@juldebar keep same units for all datatets
+		  class(nominal_catch$measurement_unit) <- "character"
+		  
 		  if (any(nominal_catch$measurement_unit == "t"))
-			nominal_catch[nominal_catch$measurement_unit == "t",]$measurement_unit <- "t"
+		    nominal_catch[nominal_catch$measurement_unit == "t",]$measurement_unit <- "t"
+		  if (any(nominal_catch$measurement_unit == "TRUE"))
+		    nominal_catch[nominal_catch$measurement_unit == "TRUE",]$measurement_unit <- "t"
 		  if (any(nominal_catch$measurement_unit == "no"))
 			nominal_catch[nominal_catch$measurement_unit == "no",]$measurement_unit <- "no"
 		  class(nominal_catch$measurement_value) <- "numeric"
