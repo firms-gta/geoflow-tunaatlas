@@ -1,0 +1,429 @@
+---
+title: 'Stratas in georeferenced data but not in nominal'
+output: html_document
+---
+
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE, error = TRUE
+)
+knitr::opts_chunk$set(fig.filename = paste0("figure_", knitr::opts_current$get("fig.cap"), ".png"), fig.path = fig.path)
+
+knitr::knit_hooks$set(fig_filename = function(before, options, envir) {
+  if (before && !is.null(options$fig.cap)) {
+    options$fig.filename <- paste0("figure_", gsub(" ", "_", options$fig.cap), ".png")
+  }
+  NULL
+})
+
+# Custom hook for kable
+knitr::knit_hooks$set(kable = function(before, options, envir) {
+  if (before && !is.null(options$fig.cap)) {
+    filename <- paste0(options$fig.cap, ".html")
+    save_as_html(kable_table, filename)
+  }
+  NULL
+})
+
+# Custom hook for qflextable
+knitr::knit_hooks$set(qflextable = function(before, options, envir) {
+  if (before && !is.null(options$fig.cap)) {
+    filename <- paste0(options$fig.cap, ".docx")
+    save_as_docx(qflextable_table, filename)
+  }
+  NULL
+})
+
+# Custom hook for ggplot
+knitr::knit_hooks$set(ggplot = function(before, options, envir) {
+  if (before && !is.null(options$fig.cap)) {
+    filename_pdf <- paste0(options$fig.cap, ".pdf")
+    filename_png <- paste0(options$fig.cap, ".png")
+    filename_html <- paste0(options$fig.cap, ".html")
+
+    ggsave(filename_pdf, plot = ggplot_object, device = "pdf")
+    ggsave(filename_png, plot = ggplot_object, device = "png")
+    webshot::webshot(ggplot_object, file = filename_html)
+  }
+  NULL
+})
+
+
+
+options(knitr.duplicate.label = "allow")
+```
+
+
+
+```{r packagesloading, include=FALSE}
+if(!(require(base))){ 
+ install.packages(base) 
+ (require(base))} 
+ if(!(require(flextable))){ 
+ install.packages(flextable) 
+ (require(flextable))} 
+ if(!(require(remotes))){ 
+ install.packages(remotes) 
+ (require(remotes))} 
+ if(!(require(utils))){ 
+ install.packages(utils) 
+ (require(utils))} 
+ if(!(require(stringr))){ 
+ install.packages(stringr) 
+ (require(stringr))} 
+ if(!(require(knitr))){ 
+ install.packages(knitr) 
+ (require(knitr))} 
+ if(!(require(DBI))){ 
+ install.packages(DBI) 
+ (require(DBI))} 
+ if(!(require(odbc))){ 
+ install.packages(odbc) 
+ (require(odbc))} 
+ if(!(require(sf))){ 
+ install.packages(sf) 
+ (require(sf))} 
+ if(!(require(dplyr))){ 
+ install.packages(dplyr) 
+ (require(dplyr))} 
+ if(!(require(kableExtra))){ 
+ install.packages(kableExtra) 
+ (require(kableExtra))} 
+ if(!(require(readxl))){ 
+ install.packages(readxl) 
+ (require(readxl))} 
+ if(!(require(readr))){ 
+ install.packages(readr) 
+ (require(readr))} 
+ if(!(require(tidyr))){ 
+ install.packages(tidyr) 
+ (require(tidyr))} 
+ if(!(require(ggplot2))){ 
+ install.packages(ggplot2) 
+ (require(ggplot2))} 
+ if(!(require(stats))){ 
+ install.packages(stats) 
+ (require(stats))} 
+ if(!(require(RColorBrewer))){ 
+ install.packages(RColorBrewer) 
+ (require(RColorBrewer))} 
+ if(!(require(cowplot))){ 
+ install.packages(cowplot) 
+ (require(cowplot))} 
+ if(!(require(studycatchesird))){ 
+ install.packages(studycatchesird) 
+ (require(studycatchesird))} 
+ if(!(require(tmap))){ 
+ install.packages(tmap) 
+ (require(tmap))} 
+ if(!(require(RPostgreSQL))){ 
+ install.packages(RPostgreSQL) 
+ (require(RPostgreSQL))} 
+ 
+
+ if(!require(usethis)){
+  install.packages("usethis")
+  require(usethis)
+}
+
+
+
+
+
+set_flextable_defaults(
+  font.size = 10,
+  font.color = "black",
+  table.layout = "autofit",
+  digits = 2,
+  theme_fun = "theme_box"
+  )
+# qflextable2 = function(x){x <- autofit(kable(x))}
+install_github("BastienIRD/sutdycatchesird", dependencies = c("Depends", "Imports"))
+library(studycatchesird)
+last_path = function(x){tail(str_split(x,"/")[[1]],n=1)}
+plotting_type <- "plot" 
+if (knitr::is_html_output()){plotting_type <- "view" }
+
+
+
+
+```
+
+
+
+```{r}
+
+url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
+species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
+
+is_null_or_not_exist = function(x) {
+  if (!exists(deparse(substitute(x))) || is.null(x)) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
+
+
+```
+
+```{r eval = TRUE, include=FALSE}
+
+opts <- entity$data$actions[[1]]$options
+con <- config$software$output$dbi
+parameter_fact <-  opts$fact
+if(!is.null(opts$filtering)){parameter_filtering <-opts$filtering} else{ parameter_filtering <-list(species = NULL, fishing_fleet = NULL)}
+if(is.character(parameter_filtering)){
+  parameter_filtering <- eval(parse(text=toString(parameter_filtering)))
+}
+
+
+# if(exists('params')){parameters <- params}else{
+parameters_child <- list(config = config, entity = entity,opts = opts ,action = action, parameter_filtering = parameter_filtering, parameter_fact = parameter_fact, parameter_con = con,parameter_host =config$software$input$dbi_config$parameters$host, parameter_port = config$software$input$dbi_config$parameters$port,  parameter_user = config$software$input$dbi_config$parameters$user,parameter_dbname=config$software$input$dbi_config$parameters$dbname, parameter_password = config$software$input$dbi_config$parameters$password,  child = TRUE, no_recap_options = TRUE)
+child_env = new.env()
+list2env(parameters_child, env = child_env)
+
+# }
+```
+
+
+
+```{r echo=FALSE, results='asis'}
+
+isNullList = function(x) all(!lengths(x))
+if (!exists("parameter_filtering") || isNullList(parameter_filtering)){cat("There are no filter on this data in the following report.")
+  parameter_filtering <- list(species = NULL, source_authority = NULL)} else {
+  
+  cat (paste0("The filter used on the data in the following report are:  \n "))
+  for (i in 1:length(parameter_filtering)){
+    if (!is.null(parameter_filtering[[i]])){
+      cat(paste0("***- On ", names((parameter_filtering)[i]), " : ", paste((parameter_filtering)[[i]], collapse = " ; "),"*** \n"))
+    } else {""}
+  }
+}
+
+```
+
+
+
+# Analysis of the data georeferenced not declared in nominal
+
+```{r eval = TRUE}
+matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
+
+filtering_function = function(dataframe_to_filter, filtering_params = matchingList){
+  colnames_to_filter <- colnames(dataframe_to_filter %>% select(names(filtering_params)))
+  names(filtering_params) <- colnames_to_filter
+
+  filtering_params <- lapply(filtering_params, function(x){ #handling single filter
+  if(length(x) == 1){
+  x <- c(x, x) }else {
+    x
+  }
+  }
+    )
+  
+  
+  
+  if(length(filtering_params)!= 0){  dataframe_to_filter <- dataframe_to_filter%>% filter(!! rlang::parse_expr(str_c(colnames_to_filter, filtering_params, sep = '%in%', collapse="&")))} else{dataframe_to_filter}
+
+}
+
+
+```
+
+```{r}
+
+nominal <- read_csv("data/global_nominal_catch_firms_level0.csv")
+georef_mapped <- readRDS("Markdown/mapping_codelist/rds.rds")
+
+georef_mapped <- filtering_function(georef_mapped)%>% inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species", "source_authority") )
+nominal <- filtering_function(nominal)%>% inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species", "source_authority") )
+
+georef_mapped <- georef_mapped %>% mutate(year = lubridate::year(time_start)) %>% select("fishing_fleet"  ,   "species"    ,      "measurement_unit"          ,  "gear_type", "source_authority",
+"year", "measurement_value") %>% mutate(measurement_unit = ifelse(measurement_unit == "MTNO", "MT",measurement_unit)) %>% filter(measurement_unit == "MT") #%>% group_by(year) %>% summarise(measurement_value = sum(measurement_value))
+row.names(georef_mapped) <- NULL
+nominal <- nominal%>% mutate(year = lubridate::year(time_start)) %>% select("fishing_fleet"  ,   "species"    ,      "measurement_unit"          ,  "gear_type",  "source_authority",
+"year","measurement_value")
+```
+
+
+
+
+
+```{r}
+georef_no_nominal <- dplyr::anti_join(georef_mapped,nominal, by = strata)
+```
+
+
+```{r}
+if (!exists("georef_no_nominal")) {
+  knitr::opts_knit$set(stop_on_error = FALSE)
+  stop("Table 'georef_no_nominal' does not exist.")
+}
+```
+
+
+```{r}
+georef_no_nominal <- georef_no_nominal %>% mutate(year = as.character(year))%>% mutate(year = paste0(year, "-01-01"))
+dir.create("data/georef_not_nominal")
+saveRDS(georef_no_nominal, "data/georef_not_nominal/rds.rds")
+```
+
+
+
+## General overview of this inconsistent data 
+
+The measurement_value of catches in the georeferenced dataset but not in nominal is different depending on what we take as a strata. For now the strata kept are `r strata`, the corresponding measurement_values are : `r round(sum(georef_no_nominal$measurement_value)/1000000,2)` millions, which corresponds of a total of  `r round(100*sum(georef_no_nominal$measurement_value)/sum(nominal$measurement_value),2)` % of the nominal catch and `r round(100*sum(georef_no_nominal$measurement_value)/sum(georef_mapped$measurement_value),2)` % of the georeferenced catch.
+
+
+```{r}
+if(nrow(georef_no_nominal)==0){knitr::knit_exit()}
+```
+
+
+
+
+
+```{r}
+georef_no_nominal <- georef_no_nominal%>% mutate(year = lubridate::year(year))
+
+georef_no_nominal_groupped <- georef_no_nominal  %>% group_by(year) %>% summarise(measurement_value = sum(measurement_value/1000000))
+
+
+# ggplot(georef_no_nominal) +
+#   aes(x = year, y = measurement_value) +
+#   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
+#   labs(
+#     title = paste0("Tonnages in georef but not in nominal \n depending on the year (in millions of tons): \n Joined by", str_remove(toString(strata), "year,")) 
+#   ) +
+#   theme_minimal()
+
+georef_no_nominal_groupped <- georef_no_nominal %>% group_by(year, species, source_authority) %>% summarise(measurement_value = sum(measurement_value))
+```
+
+
+```{r georefnotnominalgrouppedbyyear}
+ggplot(georef_no_nominal_groupped) +
+  aes(
+    x = year,
+    y = measurement_value,
+    fill = species,
+    colour = species
+  ) +
+  geom_area() +
+  scale_fill_hue(direction = 1) +
+  scale_color_hue(direction = 1) +
+  labs(x = "Year", y = "Value (in tons)") +
+  theme_minimal() +
+  facet_wrap(vars(source_authority), scales = "free")
+```
+
+
+
+<!-- The number of row of the table of georef with no equivalent in nominal is `r nrow(georef_no_nominal)`.  -->
+
+<!-- ## Joining without gear_type -->
+
+
+The number of stratas georeferenced with no equivalent in nominal is `r nrow(georef_no_nominal)`. (Around `r round(100-(((nrow(georef_mapped)-nrow(georef_no_nominal))/nrow(georef_mapped))*100),2)` % of the georeferenced stratas total.
+
+
+<!-- ## Analyzis of the data having a declaration in georeferenced with `r strata` but no equivalent in nominal -->
+
+<!-- ```{r include=FALSE} -->
+
+
+<!-- copyrmd <- function(x){ -->
+<!--         last_path = function(y){tail(str_split(y,"/")[[1]],n=1)} -->
+<!--         if(!file.exists(paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x))))) -->
+<!--         use_github_file(repo_spec =x, -->
+<!--                         save_as = paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x))), -->
+<!--                         ref = NULL, -->
+<!--                         ignore = FALSE, -->
+<!--                         open = FALSE, -->
+<!--                         host = NULL -->
+<!--         ) } -->
+
+<!-- copyrmd("https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/comparison.Rmd") -->
+<!-- ``` -->
+
+<!-- ```{r eval = TRUE} -->
+
+<!-- child_env$parameter_titre_dataset_1 <- "Georeferenced but not nominal data" -->
+<!-- child_env$parameter_init <- "data/georef_not_nominal" -->
+<!-- child_env$parameter_final <- NULL -->
+<!-- child_env$parameter_colnames_to_keep <- c( "species",  "source_authority", "year", "measurement_unit", "measurement_value") -->
+<!-- child_env$child <- FALSE -->
+<!-- child_env$no_recap_options <- TRUE -->
+<!-- child_env$parameter_fact <- "catch" -->
+<!-- child_env$time_dimension <- c("year") -->
+
+<!-- res2 <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE) -->
+
+<!-- ``` -->
+
+<!-- ```{r eval = TRUE , echo=FALSE, results='asis'} -->
+
+<!-- cat(res2, sep =  "\\clearpage") -->
+
+
+<!-- ``` -->
+
+
+
+```{r}
+
+nominal_year_species_source_auth <- nominal %>% group_by(species, year, source_authority) %>% summarise(measurement_value_nominal = sum(measurement_value, na.rm = TRUE))
+
+georef_year_species_source_auth <- georef_mapped %>% group_by(species, year, source_authority) %>% summarise(measurement_value_georef = sum(measurement_value, na.rm = TRUE))
+
+join <- full_join(georef_year_species_source_auth, nominal_year_species_source_auth, by = c("species", "year", "source_authority"))
+
+georef_sup_to_nom <- join %>% filter(measurement_value_georef > measurement_value_nominal) %>% mutate(Difference = measurement_value_georef - measurement_value_nominal)
+
+```
+
+## Stratas with declaration superior in georeferenced than in nominal
+
+The species concerned by declaration (on a year) of georeferenced captures superior to nominal are : `r paste(unique(georef_sup_to_nom$species), sep = " ; ")`, for a total (by species of)
+
+
+```{r strataswithpostivediff, fig.cap = "Stratas of georeferenced dataset being superior to nominal dataset for a specific year and species", eval=TRUE, include=FALSE}
+
+qflextable(georef_sup_to_nom %>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ))
+
+```
+
+
+<!-- Only the stratas for which year that there is more declaration in georef than in nominal which are groupped. -->
+
+
+```{r sumpositivesdiffeveryyear, fig.cap ="Sum of positive differences in every year between georeferenced and nominal"}
+
+kable(georef_sup_to_nom %>% group_by(species, source_authority) %>% summarise(Difference = sum(Difference))%>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ), caption = "Sum of positive differences in every year between georeferenced and nominal")
+
+```
+
+```{r plotgeorefsuptonom, fig.cap = "Plot of georeferenced dataset being superior to nominal dataset for a specific year and species"}
+
+ggplot(georef_sup_to_nom) +
+  aes(
+    x = year,
+    y = Difference,
+    fill = source_authority,
+    colour = source_authority,
+    group = source_authority
+  ) +
+  geom_jitter(size = 1.5) +
+  scale_fill_hue(direction = 1) +
+  scale_color_hue(direction = 1) +
+  theme_minimal() +
+  facet_wrap(vars(species), scales = "free")
+
+
+```
+
