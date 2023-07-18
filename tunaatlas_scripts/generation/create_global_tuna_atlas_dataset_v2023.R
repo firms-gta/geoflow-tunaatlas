@@ -86,8 +86,6 @@ function(action, entity, config) {
   
   #scripts
   url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
-  #utils
-  source(file.path(url_scripts_create_own_tuna_atlas, "function_recap_each_step.R"))  # new function to create rds for each treatment
   #for level 0 - FIRMS
   source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
@@ -107,40 +105,13 @@ function(action, entity, config) {
   stepLogger = function(level, step, msg){
 	config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
   }
-
-  #TODO @BastienIRD --> please add some comments in this code, why you need to export the action options (for reporting)
-  #Better if you could create a function to avoid this chunk of codes directly set here
-  j <- 1
   
-  list_options <-
-    assign("list_options", data.frame(matrix(ncol = 2 , nrow = 1)), envir = .GlobalEnv)
-  colnames(list_options) <- c("Options", "Position")
-  
-  
-  for (i in names(opts)) {
-    if (i != "") {
-      assign(paste0("options_", i),
-             paste(opts[[j]], collapse = ' ; '),
-             envir = .GlobalEnv)
-      if (!exists(i)) {
-        assign(i, paste0(opts[[j]]), envir = .GlobalEnv)
-      }
-    }
-    if (opts[[j]][1] == TRUE) {
-      assign(i, opts[[j]], envir = .GlobalEnv)
-    } else if (opts[[j]][1] == FALSE) {
-      assign(i, opts[[j]], envir = .GlobalEnv)
-    }
-    assign("data_i",  data.frame(i, paste(opts[[j]], collapse = ' ; ')))
-    names(data_i) <- colnames(list_options)
-    assign("data_i", data_i, envir = .GlobalEnv)
-    list_options <- rbind(list_options, data_i)
-    
-    j <-  j + 1
-  }
-  list_options = list_options[-1, ]
-  
-  readr::write_csv(list_options, "list_options.csv")
+  #for reporting
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_Markdown/functions/write_options_to_csv.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_Markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_Markdown/functions/copyrmd.R")
+  # Saving options in a csv file and creating a new variable for each options
+  write_options_to_csv(opts)
   
   # #############
   #action options
@@ -394,7 +365,9 @@ function(action, entity, config) {
 	"map_codelists",
 			list(options_mapping_map_code_lists)
 		  )
-      
+		  
+		  
+
       }
 	  
 	  #Filter on species under mandate for FIRMS level 0
@@ -903,7 +876,8 @@ function(action, entity, config) {
 				time_start = col_character(),
 				time_end = col_character()
 			  )
-			) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit)#this map condelist function is to retieve the mapping dataset used
+			) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit, 
+			                    gear_type  = gear)#this map condelist function is to retieve the mapping dataset used
 			
 			iotc_conv_fact_mapped <-
 			  map_codelists(
@@ -925,8 +899,17 @@ function(action, entity, config) {
 			  as.character(
 				lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
 			  )
+
+			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
+			  group_by(across(setdiff(everything(), "measurement_value"))) %>%
+			  summarise(measurement_value = mean(measurement_value))
+			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
+			  dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t")~ "t", measurement_unit %in% c("NO", "no")~"no", TRUE ~ measurement_unit)) %>% 
+			  dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t")~ "t", unit_target %in% c("NO", "no")~"no", TRUE ~ unit_target)) 
 			
-			georef_dataset <- do_unit_conversion(
+			iotc_data <- georef_dataset %>% filter(source_authority == "IOTC")
+			
+			iotc_data_converted <- do_unit_conversion(
 			  entity = entity,
 			  config = config,
 			  fact = fact,
@@ -936,10 +919,11 @@ function(action, entity, config) {
 				"cwp_grid",
 			  mapping_map_code_lists =
 				opts$mapping_map_code_lists,
-			  georef_dataset = georef_dataset,
+			  georef_dataset = iotc_data,
 			  removing_numberfish_final = FALSE
 			) # do not remove number of fish as they will be converted later with other conversion factor data
 			
+			georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data_converted)
 			
 			function_recap_each_step(
 			  "Harmonising units on IOTC data",
@@ -1183,7 +1167,7 @@ function(action, entity, config) {
 		  if (fact == "catch") {
 			config$logger.info("Fact=catch !")
 			dataset_to_compute_rf = georef_dataset
-			#@juldebar why do we use "year' as time dimension here ?
+			# year is used as a dimension to match the conversion factors dimension 
 			if (is.null(opts$x_raising_dimensions)) {
 			  x_raising_dimensions = c("gear_type", "species", "year", "source_authority")
 			}
@@ -1716,56 +1700,17 @@ function(action, entity, config) {
 	#===========================================================================================================================================================
 	#===========================================================================================================================================================
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	config$logger.info("LEVEL 0 => STEP 3/8: WCPFC at the end")
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (!is.null(opts$filter_WCPFC_at_the_end)) {
-		config$logger.info(("Filtering WCPFC_at_the_end [%s]"))
-		georef_dataset <-
-		  georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
-		config$logger.info("Filtering WCPFC OK")
-		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-
-		if(recap_each_step){
-			function_recap_each_step(
-			  "Filtering_on_WCPFC_at_the_end",
-			  georef_dataset,
-			  "This step is to remove data provided by WCPFC as it is not relevant for 1° resolution data.",
-			  "",
-			  list(options_filter_WCPFC_at_the_end)
-			)
-		}
-	}
-
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	config$logger.info("LEVEL 0 => STEP 3/8: Grid spatial resolution filter")
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (!is.null(opts$resolution_filter)) {
-		geograph_identifier <- georef_dataset
-		geograph_identifier$geograph_identifier_num <-
-		  as.numeric(geograph_identifier$geographic_identifier)
-		geograph_identifier <-
-		  geograph_identifier %>% filter(geograph_identifier_num == geographic_identifier)
-		if (nrow(geograph_identifier) != nrow(georef_dataset)) {
-		  #@bastienird no clue what you are doing here. The resolution_filter is an option enabled to filter on a CWP grid resolution
-		  #so the first digit should be sufficient to filter
-		  query <- "SELECT code, st_area(geom), geom from area.cwp_grid"
-		  world_sf <- st_read(con, query = query)
-		  
-		  
-		  shapefile.fix <-
-			st_make_valid(world_sf) %>% filter(!st_is_empty(.))
-		  area <-
-			case_when(opts$resolution_filter == "5" ~ "1",
-					  opts$resolution_filter == "6" ~ "25")
-		  shape_without_geom  <-
-			shapefile.fix %>% as_tibble() %>% select(-geom) %>% filter(st_area == as.numeric(area))
-		  georef_dataset <-
-			georef_dataset %>% semi_join(shape_without_geom,
-										 by = c("geographic_identifier" = "code"))
-		} else{
-		  georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, as.character(opts$resolution_filter)), ]
-		}
-		# georef_dataset <- georef_dataset[startsWith(georef_dataset$geographic_identifier, opts$resolution_filter),]
+	  
+	  filtering_resolution_filter <- function(datatable, first_digit) {
+	    filtered_data <- datatable[substr(datatable$geographic_identifier, 1, 1) == first_digit, ]
+	    return(filtered_data)
+	  }
+	  
+	  georef_dataset <- filtering_resolution_filter(georef_dataset, opts$resolution_filter)
+	  
 		if(recap_each_step){
 			function_recap_each_step(
 			  "filtering_on_spatial_resolution",
@@ -1778,34 +1723,7 @@ function(action, entity, config) {
 	}
 
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	config$logger.info(
-	"LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) "
-	)
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (!is.null(opts$gear_filter)) {
-		gear_filter <- unlist(strsplit(opts$gear_filter, split = ","))
-		config$logger.info(sprintf(
-		  "Filtering by gear(s) [%s]",
-		  paste(gear_filter, collapse = ",")
-		))
-		georef_dataset <-
-		  georef_dataset %>% dplyr::filter(gear_type %in% gear_filter)
-		config$logger.info("Filtering gears OK")
-		config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-		if(recap_each_step){
-			function_recap_each_step(
-			  "filtering_on_gear",
-			  georef_dataset,
-			  "This step is to filter on gears if needed (for 1 deg resolution only few gears should be kept, other are irrelevant).",
-			  "",
-			  list(options_gear_filter)
-			)
-		}
-	}
-
-
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	config$logger.info("Last step/8: Apply filters if filter needed (Filter data by groups of everything) ")
+	config$logger.info("Apply filters if filter needed (Filter data by groups of everything) ")
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#THIS NEED DOCUMENTATION
 	parameter_filtering = if (!is.null(opts$filtering)) opts$filtering else list(species = NULL, fishing_fleet = NULL)
