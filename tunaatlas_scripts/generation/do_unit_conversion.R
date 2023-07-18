@@ -26,9 +26,22 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   ## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source gear coding system with ISSCFG coding system. In fact, the conversion factors dataset is expressed with ISSCFG coding system for gears, while the primary tRFMOs datasets are expressed with their own gear coding system.
   config$logger.info("Checking if 'mapping_map_code_lists' option is set to TRUE")
   
+  if("gear" %in% colnames(df_conversion_factor)){
+    df_conversion_factor <- df_conversion_factor %>% dplyr::rename(gear_type = gear)
+  }
+  
+  if("unit" %in% colnames(df_conversion_factor)){
+    df_conversion_factor <- df_conversion_factor %>% dplyr::rename(measurement_unit = unit)
+  }
+  
+  
+  
   if("measurement_value" %in% colnames(df_conversion_factor)){
     df_conversion_factor <- df_conversion_factor %>% dplyr::rename(conversion_factor = measurement_value)
   }
+  
+  df_conversion_factor <- df_conversion_factor %>% dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t")~ "t", measurement_unit %in% c("NO", "no")~"no", TRUE ~ measurement_unit)) %>% 
+    dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t")~ "t", unit_target %in% c("NO", "no")~"no", TRUE ~ unit_target)) 
   
   
   if (!mapping_map_code_lists){
@@ -79,6 +92,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     cat(intersect(species_no_before$species,unique(df_conversion_factor$species)))
   }
   source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/convert_units.R")
+  
   georef_dataset<-convert_units(con = con,
                                 df_input = georef_dataset,
                                 df_conversion_factor = df_conversion_factor,
