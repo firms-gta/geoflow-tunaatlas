@@ -29,7 +29,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     cat("filter by source_authority\n")
     dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
-    config$logger.info(paste0("Total catch for dataset_to_raise before raising  is ",sum(dataset_to_compute_rf$measurement_value),"  \n"))
+    config$logger.info(paste0("Total catch for dataset_to_raise before raising  is ",sum(dataset_to_raise$measurement_value),"  \n"))
     
     dataset_to_compute_rf<-dataset_to_compute_rf[which(dataset_to_compute_rf$source_authority %in% source_authority_filter),]
     config$logger.info(paste0("Total catch for dataset_to_compute_rf before raising  is ",sum(dataset_to_compute_rf$measurement_value),"  \n"))
@@ -49,8 +49,8 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     cat(paste0("raise_get_rf function has",nrow(df_rf),"rows \n"))
     cat(paste0(" write csv file to check   \n"))
-    filename <- paste0("/tmp/DFPartialInfo_rf_",gsub(Sys.time(),pattern = " ", replacement = "_"),".csv")
-    write.csv(x = df_rf, file = filename)
+    # filename <- paste0("DFPartialInfo_rf_",gsub(Sys.time(),pattern = " ", replacement = "_"),".csv")
+    # write.csv(x = df_rf, file = filename)
     
     cat("function raise_get_rf has been executed ! \n")
     config$logger.info(paste0("Rows number in df_rf ",nrow(df_rf),"  \n"))
@@ -65,7 +65,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     # raise dataset
     cat("Executing raise_incomplete_dataset_to_total_dataset \n")
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
+    source("~/Documents/geoflow-tunaatlas/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
     
     data_raised<-raise_incomplete_dataset_to_total_dataset(df_input_incomplete = dataset_to_raise,
                                                            df_input_total = nominal_dataset_df,
@@ -90,11 +90,11 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
   if (raising_raise_only_for_PS_LL==TRUE){
     
     # @juldebar =>  check if gear codes are correct
-    gears_PS_LL<-dbGetQuery(con,"SELECT distinct(src_code) FROM gear.gear_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
+    gears_PS_LL<-dbGetQuery(con,"SELECT distinct(src_code) FROM gear_type.gear_type_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
     # config$logger.info("Now filtering gear codes with those returned by SLQ query",  gears_PS_LL)
     
-    dataset_not_PS_LL<-dataset_to_raise %>% filter(!(gear_type %in% gears_PS_LL))
-    dataset_to_raise<-dataset_to_raise %>% filter(gear_type %in% gears_PS_LL)
+    dataset_not_PS_LL<-dataset_to_raise %>% dplyr::filter(!(gear_type %in% gears_PS_LL))
+    dataset_to_raise<-dataset_to_raise %>% dplyr::filter(gear_type %in% gears_PS_LL)
     
     config$logger.info(paste0("Since option raising_raise_only_for_PS_LL==TRUE, kept rows number is  ",nrow(dataset_to_raise)," and number of removed rows is ",nrow(dataset_not_PS_LL),"\n"))
     

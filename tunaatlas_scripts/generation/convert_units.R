@@ -4,7 +4,7 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
   cat(paste0("\n BEGIN tunaatlas::convert_units() => converting units and measures"))
   columns_df_input = colnames(df_input)
   df_input <- data.table(df_input)
-  units_source <- unique(df_conversion_factor$unit)
+  units_source <- unique(df_conversion_factor$measurement_unit)
   units_target <- unique(df_conversion_factor$unit_target)
   df_conversion_factor$conversion_factor = as.numeric(df_conversion_factor$conversion_factor)
   if ("geographic_identifier" %in% colnames(df_conversion_factor)) {
@@ -85,15 +85,15 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
     df_input <- left_join(df_input, data_zone_0)
     df_input$conv_factor_df_geo_id[which(!is.na(df_input$zone0))] <- "0"
     df_input <- df_input %>% dplyr::select(-zone0, -unit_target)
-    class(df_input$value) <- "numeric"
+    class(df_input$measurement_value) <- "numeric"
   }
   if (nrow(df_input) == nrow(left_join(df_input, df_conversion_factor) %>% 
                              filter(is.na(conversion_factor)))) {
-    if (length(intersect(unique(df_conversion_factor$gear), 
-                         unique(df_input$gear))) == 0) {
+    if (length(intersect(unique(df_conversion_factor$gear_type), 
+                         unique(df_input$gear_type))) == 0) {
       df_conversion_factor_no_gear <- df_conversion_factor %>% 
         group_by_at(setdiff(colnames(df_conversion_factor), 
-                            "gear")) %>% summarise(conversion_factor = mean(conversion_factor))
+                            "gear_type")) %>% summarise(conversion_factor = mean(conversion_factor))
       df_input <- left_join(df_input, df_conversion_factor_no_gear)
     }
   }
@@ -108,12 +108,12 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
   #   summarise(sum_unit_source_before_conversion = sum(value)) %>% 
   #   filter(!is.na(unit_target))
   index.not_na.conv_factor <- which(!is.na(df_input$conversion_factor))
-  df_input$value[index.not_na.conv_factor] <- df_input$value[index.not_na.conv_factor] *
+  df_input$measurement_value[index.not_na.conv_factor] <- df_input$measurement_value[index.not_na.conv_factor] *
     df_input$conversion_factor[index.not_na.conv_factor]
   # stats_after_conversion <- df_input %>% group_by(unit, unit_target) %>% 
   #   summarise(sum_unit_target_after_conversion = sum(value)) %>% 
   #   filter(!is.na(unit_target))
-  df_input$unit[index.not_na.conv_factor] <- df_input$unit_target[index.not_na.conv_factor]
+  df_input$measurement_unit[index.not_na.conv_factor] <- df_input$unit_target[index.not_na.conv_factor]
   df_input <- df_input %>% dplyr::select(all_of(columns_df_input))
   # sum_after_conversion <- df_input %>% group_by(unit) %>% 
   #   summarise(sum_value_after_conversion = sum(value))
