@@ -1,5 +1,5 @@
 raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_input_total, df_rf, x_raising_dimensions, 
-          decrease_when_rf_inferior_to_one = TRUE, threshold_rf = NULL) 
+          decrease_when_rf_inferior_to_one = FALSE, threshold_rf = NULL) 
 {
   df_input_incomplete$year <- as.numeric(substr(df_input_incomplete$time_start, 
                                                 0, 4))
@@ -34,8 +34,7 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
                                                       "rf"]))
     df_input_incomplete$value_raised[index.rfNotNa] <- df_input_incomplete[index.rfNotNa, 
                                                                            "measurement_value"] * df_input_incomplete[index.rfNotNa, "rf"]
-  }
-  else {
+  }   else {
     index.rfNotNa <- which(!is.na(df_input_incomplete[, 
                                                       "rf"]) & df_input_incomplete[, "rf"] >= 1)
     df_input_incomplete$value_raised[index.rfNotNa] <- df_input_incomplete[index.rfNotNa, 
@@ -66,5 +65,12 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
     100
   stats$perc_df_incomplete_over_df_total_before_raising <- stats$sum_df_incomplete_before_raising/stats$sum_df_total * 
     100
+  saveRDS(stats, paste0("data/",gsub(Sys.time(),pattern = " ", replacement = "_"),"stats.rds"))
+  
+  nominal_inferior_to_georeferenced <- df_input_incomplete %>% dplyr::filter(!is.na(rf) & rf <=1 )  
+  
+  if(exists("nominal_inferior_to_georeferenced") && nrow(nominal_inferior_to_georeferenced) != 0){
+  saveRDS(nominal_inferior_to_georeferenced, paste0("data/",gsub(Sys.time(),pattern = " ", replacement = "_"),"nominal_inferior_to_georeferenced.rds"))
+  }
   return(list(df = dataset_to_return, stats = stats))
 }
