@@ -24,6 +24,7 @@ address:
 csl: dmk-format.csl # Use any CSL style. See https://www.zotero.org/styles for a good list. Ignored if citation_package: natbib
 link-citations: TRUE
 output:
+  bookdown::html_document2:
   bookdown::pdf_document2:
     extra_dependencies: ["adjustbox", "subfig", "flafter"]
     toc: FALSE
@@ -65,15 +66,15 @@ fancyhdr:
     footrulewidth: 0pt
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = FALSE,
-  message = FALSE,
-  warning = FALSE,
-  fig.align = 'center',
-  error = TRUE
-)
+```{r}
+if(!exists("child")){child = FALSE} else{child = child}
+
 ```
+
+```{r eval = child, child = 'setup_markdown.Rmd'}
+
+```
+
 
 ```{r namingplots, include=FALSE}
 counter <- 1  # Initialize a counter
@@ -81,7 +82,7 @@ counter <- 1  # Initialize a counter
 knitr::opts_hooks$set(plot = function(options) {
   if (!is.null(options$fig.cap)) {
     filename <- paste0(options$label, "_", counter, ".pdf")
-    options$fig.path <- paste0("path/to/save/directory/", filename)
+    options$fig.path <- paste0(fig.path, "figures/", filename)
     counter <<- counter + 1  # Increment the counter
   }
   options
@@ -89,30 +90,11 @@ knitr::opts_hooks$set(plot = function(options) {
 ```
 
 
-```{r utility_functions, include=FALSE}
-`%notin%` <- Negate(`%in%`)
 
-last_path = function(x) {
-  substr(x, max(gregexpr("/", x)[[1]]) + 1, nchar(x))
-}
-
-last_path_reduced = function(x) {
-  gsub("georef_dataset", "", last_path(x))
-}
-
-is_null_or_not_exist = function(x) {
-  if (!exists(deparse(substitute(x))) || is.null(x)) {
-    return(TRUE)
-  } else {
-    return(FALSE)
-  }
-}
-```
 
 
 ```{r globalvariables, include=FALSE}
 
-if(!exists("child")){child = FALSE} else{child = child}
 if(!exists("step_title")){step_title_t_f = FALSE} else{step_title_t_f = TRUE}
 
 if (exists("params")) {
@@ -197,234 +179,20 @@ if (is_null_or_not_exist(parameter_titre_dataset_1)){
 ```
 
 
-```{r GTAMARKDOWNFUNCTIONS, include=FALSE}
-fSpatPlan_Convert2PacificRobinson = function(df, buff = 0){
-  
-  if(!exists("df_robinson")){
-    df_robinson <- df}
-  return(df_robinson)
-  
-}
-
-knit_child_map =function(list_map_unit){
-  assign("unit_name_map", list_map_unit[2][[1]], envir = environment())
-  assign("map_for_knit", list_map_unit[1][[1]], envir = environment())
-
-  knit_child(text = c(
-    '```{r results = "asis"}',
-    '',
-    'unit_title <- gsub("_","..",unit_name_map)',
-    '```',
-    '',
-    '',
-    '```{r results="asis", fig.cap = paste0("Map of the differences between two datasets for the unit ", unit_title)}',
-'',
-  'map_for_knit',
-  '',
-    '```',
-  '',
-  '',''),
-  envir = environment(), quiet= TRUE)
-}
-
-
-qflextable2 =function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, colour = FALSE){
- y<-x
- y <- y %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.character, ~str_replace_all( ., ",", ", \n" )) %>% 
-  dplyr::mutate_if(is.character,~str_replace_all( ., "_", "-" )) %>% dplyr::mutate_if(is.numeric, function(.){round(.,2)})
-  flextable <- flextable(y)
-  if(colour){
-  flextable <- flextable %>% 
-          color(~ `Difference (in % of tons)` < 0, color = "green",~ `Difference (in % of tons)`) %>% 
-          color(~ `Difference (in % of tons)` >0, color = "red",~ `Difference (in % of tons)`)%>%   color(~ `Difference (in % of fish)` < 0, color = "green",~ `Difference (in % of fish)`) %>% 
-          color(~ `Difference (in % of fish)` >0, color = "red",~ `Difference (in % of fish)`)%>%color(~ `Difference (in % of lines)` < 0, color = "green",~ `Difference (in % of lines)`) %>% 
-          color(~ `Difference (in % of lines)` >0, color = "red",~ `Difference (in % of lines)`)
-  } 
-  if(!is.null(captionn)){flextable_captionned <- set_caption(flextable, caption = captionn,  style = "Table Caption")} else {flextable_captionned <- flextable}
-  ft_out <- flextable_captionned %>% autofit()
-  ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
-
-  return(ft_out)
-
-}
-
-
-filtering_function= function(dataframe_to_filter, colnames_to_filter, matchingList, geo_dim, parameter_fact, parameter_UNK_for_not_standards_unit){
-  if(length(colnames_to_filter)!= 0){  dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
-  if(  parameter_UNK_for_not_standards_unit & parameter_fact == "effort"){
-    dataframe_to_filter <- dataframe_to_filter %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit%in%c("HOOKS","FDAYS"), measurement_unit, "UNK" ))}
-  if("geographic_identifier"%in%colnames(dataframe_to_filter)){
-    dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("geographic_identifier" := {{geo_dim}})
-  }
-  return(dataframe_to_filter)
-}
-
-tidying_data_for_GTA = function(dataframe, time_dim, shape, species_group_dataframe = species_group, cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2){
-  if("geographic_identifier"%in%colnames(dataframe)){
-  dataframe <- dataframe%>%  dplyr::left_join(shape, by = c("geographic_identifier"="CWP_CODE"))
-  print_map <- TRUE
-  } else {print_map <- FALSE}
-
-
-dataframe <- dataframe %>% mutate_at(all_of(time_dim), as.character)
-
-if("GRIDTYPE"%in%colnames(dataframe)){
-  dataframe <- dataframe%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
-}
-
-dataframe <- dataframe %>% dplyr::left_join(species_group_dataframe%>% dplyr::distinct(), by = c("species"))
-    if("gear_type" %in%colnames(dataframe) ){
-    dataframe <- dataframe %>% dplyr::left_join(cl_cwp_gear_level2_dataframe, by = c("gear_type" = "Code"))
-    }
-
-  
-  dataframe <- dataframe%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons", measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit)) 
-
-return(list(dataframe = dataframe, print_map = print_map))
-}
-
-
-fonction_groupement = function(these_col, init, final){
-  
-  # Compute sum of values for each combination of the columns in "these_col" and "measurement_unit" in the "init" dataframe
-  groupement_1 <- init %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(!!!rlang::syms(these_col), measurement_unit) %>%
-    dplyr::summarise(value_sum_1 = ((sum(measurement_value, na.rm=TRUE)))) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(value_sum_1 = dplyr::coalesce(value_sum_1, 0)) %>%
-    dplyr::mutate(measurement_unit = as.character(measurement_unit)) %>%
-    dplyr::mutate(number_lines1 = n())
-  
-  # Compute sum of values for each combination of the columns in "these_col" and "measurement_unit" in the "final" dataframe
-  groupement_2 <- final %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(!!!rlang::syms(these_col), measurement_unit) %>%
-    dplyr::summarise(value_sum_2 = ((sum(measurement_value, na.rm=TRUE)))) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    dplyr::mutate(measurement_unit = as.character(measurement_unit)) %>%
-    dplyr::mutate(number_lines2 = n())
-  
-  # Join the two dataframes based on the columns in "these_col" and "measurement_unit"
-  fulljoin <- dplyr::full_join(groupement_1, groupement_2) %>%
-    dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    dplyr::mutate(value_sum_1 = dplyr::coalesce(value_sum_1, 0)) %>%
-    dplyr::mutate(loss = value_sum_1 - value_sum_2) %>%
-    # Compute whether the difference in value is a gain or loss
-    dplyr::mutate(`Loss / Gain` = dplyr::case_when(abs(loss) <= 1 ~ "Egal", loss > 1 ~"Loss",  loss < 1 ~"Gain")) %>%
-    dplyr::mutate(Loss_pourcent = 100*((value_sum_1 - value_sum_2)/value_sum_1)) %>%
-    dplyr::mutate(Dimension = colnames(groupement_1[1])) %>%
-    dplyr::rename("Precision" = 1) %>%
-    dplyr::mutate(Precision = as.character(Precision)) %>%
-    dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    # Set Loss_pourcent to 100 if it is NA or -Inf
-    dplyr::mutate(Loss_pourcent = base::ifelse(is.na(Loss_pourcent)|Loss_pourcent==-Inf, 100, Loss_pourcent)) %>%
-    dplyr::ungroup() %>%
-    # Compute the difference in the number of lines between the two dataframes
-    dplyr::mutate(loss_nb_ligne = number_lines1 - number_lines2) %>%
-    dplyr::mutate(`Difference in value`= (value_sum_2 - value_sum_1)) %>% #final - init
-    dplyr::rename(`Difference (in %)` = Loss_pourcent,`Difference in number of lines` = loss_nb_ligne)%>%
-    dplyr::mutate_if(is.numeric, list(~replace_na(., 0)))
-
-return(fulljoin)
-}
-
-
-resume_knit_child = function(x){
-  
-  knitr::knit_child(text = c(
-    '',
-    '```{r}', 
-    'dimension_title <- gsub("_","..",x$dimension)',
-    '',
-    '```',
-    '',
-    '',
-    '',
-    '```{r results = "asis" ,fig.cap = paste0("Distribution in value for the dimension : ",(dimension_title))}',
-    '',
-    'x$pie_chart',
-    '```',
-    '',
-    '',
-    '',
-    '```{r results = "asis", eval= !is.null(x$df)}',
-    'x$df',
-    '',
-    '',
-    '```',
-    '',
-    '', 
-    ''
-
-
-
-
-  ), envir = environment(), quiet= TRUE)
-}
-function_pie_chart_df = function(dimension, ...){
-  formals(pie_chart_2_default)$dimension <- dimension
-  dimension_returned <- dimension
-  pie_chart = pie_chart_2_default(...)
-  if(exists("pie_chart$df")){
-    df = pie_chart$df
-  pie_chart = pie_chart$plot} else{
-    pie_chart = pie_chart
-    df = NULL}
-
-if(!is.null(df)){
-df <- qflextable2(df, captionn = paste0("Strata movement for the dimension : ", dimension_returned))}
-  return(list(pie_chart=pie_chart,df=df, dimension=dimension_returned))
-}
-
-
-function_knitting = function(x){
-assign("Dimension2", gsub("_", "", unique(x$data$Dimension)), envir = environment())
-assign("y", x, envir = environment())
-title_knit <- paste0("Evolutions of values for the dimension ", Dimension2, " for ", `titre_1`, " and ",`titre_2`, " dataset ")
-if(nrow(final)==0){title_knit = paste0("Evolutions of values for the dimension ", Dimension2, " for ", `titre_1`, " dataset ")}
-knitr::knit_child(text =c('```{r fig.cap=`title_knit`, fig.align = "center", out.widht = "100%"}',
-'',
-'',
-'(y)',
-'',
-'```'), envir = environment(), quiet= TRUE)
-}
-function_knitting_difference = function(x){
-assign("Dimension2", gsub("_", "", unique(x$data$Dimension)), envir = environment())
-assign("y", x, envir = environment())
-knitr::knit_child(text =c('```{r fig.cap=paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", `titre_1`, " and ",`titre_2`, " dataset ")}',
-'',
-'',
-'(y)',
-'',
-'```'), envir = environment(), quiet= TRUE)
-}
-
-
-```
-
-```{r options, include=FALSE}
-base::options(scipen=999)
-plotting_type <- "plot" 
-if (knitr::is_html_output()){plotting_type <- "view" }
-```
-
 
 
 ```{r childheader, include=FALSE}
 
 if(!exists("child_header")){child_header = "#"}
-cat2 = function(x){cat(paste0(child_header, x, " \n"))}
+cat_title = function(x){cat(paste0(child_header, x, " \n"))}
 
 if(!child|!step_title_t_f){
-  cat2 <- cat
+  cat_title <- cat
 
 }
 
 if(step_title_t_f){
-  cat2(step_title)
+  cat_title(step_title)
 }
 
 if(!child){cat("\\clearpage")}
@@ -432,7 +200,8 @@ if(!child){cat("\\clearpage")}
 ```
 
 
-```{r libraries, eval = !child, message=FALSE, warning=FALSE, include=FALSE}
+
+```{r include=FALSE}
 
 # Set custom inline hook to format numeric values
 knitr::knit_hooks$set(inline = function(x) {   
@@ -442,37 +211,6 @@ knitr::knit_hooks$set(inline = function(x) {
     prettyNum(round(x,2), big.mark=",")
   }
 })
-
-# Prevent package installation from upgrading
-formals(install.packages)$upgrade <- "never"
-
-# List of required packages
-required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", 
-                        "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata")
-
-# Check if each package is already installed, and if not, install and load it
-for (package in required_packages) {
-  if (!require(package, character.only = TRUE)) {
-    install.packages(package)
-    require(package)
-  }
-}
-
-# Install and load sutdycatchesird package from GitHub if not already installed
-if(!require(sutdycatchesird)){
-  remotes::install_github("BastienIRD/sutdycatchesird")
-  require(sutdycatchesird)
-}
-
-```
-
-```{r include=FALSE}
-knitr::opts_chunk$set(
-	echo = FALSE,
-	message = FALSE,
-	warning = FALSE, error = TRUE
-)
 knitr::opts_chunk$set(fig.filename = paste0("figure_", knitr::opts_current$get("fig.cap"), ".png"), fig.path = fig.path)
 
 knitr::knit_hooks$set(fig_filename = function(before, options, envir) {
@@ -520,23 +258,6 @@ options(knitr.duplicate.label = "allow")
 
 
 
-```{r eval = !child, message=FALSE, warning=FALSE, include=FALSE}
-set_flextable_defaults(
-  font.size = 10,
-  font.color = "black",
-  digits = 2,
-  theme_fun = "theme_box"
-)
-
-
-#set the dataset caption styling
-# knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
-
-#set the dataset caption styling
-if(!child){autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # number the table, bkm (bookmark) is important as the cross-referencing is done using the bookmark
-}
-
-```
 
 
 ```{r filterprinting, eval=!child, results='asis'}
@@ -761,7 +482,7 @@ if (round(sum_valeur_init) == round(sum_valeur_final)&nrow(t %>%dplyr::filter(`L
 ```
 
 ```{r eval=!unique_analyse ,  results='asis'}
-if(parameter_short == FALSE){cat2("# Main differences \n ")}
+if(parameter_short == FALSE){cat_title("# Main differences \n ")}
 ```
 
 
@@ -803,11 +524,43 @@ strates_perdues_first_10 <- strates_perdues_first_10 %>% filter(Dimension %notin
 if (nrow(strates_perdues_first_10)!=0){
 
 
-groupe_df <- flextable::as_grouped_data(strates_perdues_first_10 %>%dplyr::mutate(`Loss / Gain` = dplyr::case_when(loss > 1~ "Loss", abs(loss)<=1 ~ "No differences", loss < 1~ "Gain", TRUE ~ NA_character_))  %>% dplyr::mutate(`Loss / Gain` = dplyr::case_when(is.na(`Loss / Gain`) ~ "Gain",value_sum_1 == value_sum_2~"Egal", TRUE ~ `Loss / Gain`))%>% dplyr::ungroup()%>%  dplyr::rename(`Values dataset 1` = "value_sum_1",`Values dataset 2` = "value_sum_2") %>% dplyr::select(parameter_columns_to_keep) %>%  dplyr::group_by(Dimension, measurement_unit,`Loss / Gain`) %>% dplyr::arrange( Dimension, measurement_unit,`Loss / Gain`,desc(`Difference in value`)) %>% ungroup(),groups = c("Dimension","measurement_unit","Loss / Gain"))
-  cat("The stratas differences (completely lost or appearing) between the first one and the second one are:\n")
-  cat(knit_print(qflextable2(groupe_df%>% dplyr::select(Dimension, measurement_unit, `Loss / Gain`, Precision, `Difference in millions` = `Difference in value`), captionn = paste0("Disappearing or appearing stratas between ", titre_1, " and ", titre_2))))
-  cat(paste0("They represent ", round(pourcentage_strates_perdues)," % of the total number of stratas."))
-} else {towrite =("No strata is gain nor lost")}
+groupe_df <- strates_perdues_first_10 %>%
+  dplyr::mutate(`Loss / Gain` = dplyr::case_when(
+    loss > 1 ~ "Loss",
+    abs(loss) <= 1 ~ "No differences",
+    loss < 1 ~ "Gain",
+    TRUE ~ NA_character_
+  )) %>%
+  dplyr::mutate(`Loss / Gain` = dplyr::case_when(
+    is.na(`Loss / Gain`) ~ "Gain",
+    value_sum_1 == value_sum_2 ~ "Egal",
+    TRUE ~ `Loss / Gain`
+  )) %>%
+  dplyr::ungroup() %>%
+  dplyr::rename(
+    `Values dataset 1` = "value_sum_1",
+    `Values dataset 2` = "value_sum_2"
+  ) %>%
+  dplyr::select(parameter_columns_to_keep) %>%
+  dplyr::group_by(Dimension, measurement_unit, `Loss / Gain`) %>%
+  dplyr::arrange(Dimension, measurement_unit, `Loss / Gain`, desc(`Difference in value`)) %>%
+  dplyr::ungroup()
+
+cat("The strata differences (completely lost or appearing) between the first one and the second one are:\n")
+knit_child(text = c(
+  '```{r results = "asis"}',
+  '',
+  'cat(knit_print(qflextable2(',
+  '  groupe_df %>% dplyr::select(Dimension, measurement_unit, `Loss / Gain`, Precision, `Difference in millions` = `Difference in value`),',
+  '  captionn = paste0("Disappearing or appearing strata between ", titre_1, " and ", titre_2)',
+  ')))',
+  '',
+  '```'
+))
+cat(paste0("They represent ", round(pourcentage_strates_perdues), " % of the total number of strata."))
+} else {
+  towrite <- "No stratum is gained nor lost"
+}
 
 ```
 
@@ -853,7 +606,7 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 ```{r eval= !unique_analyse,results='asis'}
 title_introduction <- "# Introduction to the two datasets"
 if(!unique_analyse){
-  cat2(title_introduction)
+  cat_title(title_introduction)
   }
 
 ```
@@ -861,7 +614,7 @@ if(!unique_analyse){
 We first present the main characteristics of each dimension.
 
 ```{r results='asis'}
-cat2("## Time coverage")
+cat_title("## Time coverage")
 ```
 
 We present the evolution of value in every unit available (id est `r unique(init$measurement_unit)` )
@@ -902,10 +655,13 @@ facet_grid("measurement_unit", scales = "free_y")})
 ```{r}
 
 map_unit_knit_list <- lapply(map, FUN = function_knitting)
+
 ```
 
 ```{r results='asis'}
+
 cat(unlist(map_unit_knit_list), sep = "\n")
+
 ```
 
 
@@ -930,15 +686,19 @@ ggplot(x) +
     labs(x = unique(x$Dimension))+guides(fill=guide_legend(title="Dataset"))
   })
 
-map_measurement_unit_knit_list_cumulated <- lapply(time_dimension_list_groupped_diff_cumulated, FUN = function_knitting)
+map_unit_knit_list_cumulated <- lapply(time_dimension_list_groupped_diff_cumulated, FUN = function_knitting)
 ```
 
 ```{r results='asis'}
+
 cat(unlist(map_unit_knit_list_cumulated), sep = "\n")
+
 ```
 
-```{r fig.cap=paste0("Cumulated ", parameter_fact, " evolution by unit for ", `titre_1`, " and ", `titre_2` , " dataset"), eval=FALSE}
+```{r cumulatedevolutionbyunit, fig.cap=paste0("Cumulated ", parameter_fact, " evolution by unit for ", `titre_1`, " and ", `titre_2` , " dataset"), eval=FALSE}
+
 ggplot_capt_time
+
 ```
 
 
@@ -979,7 +739,7 @@ map_unit_knit = function(map){
     'dimension_title <- gsub("_","..",unit_name_map)',
     '```',
     '',
-    '```{r,fig.cap = paste0("Distribution in value for the unit : ",(unit_name_map)), out.width = "100%"}',
+    '```{r distributioninvalueforunit, fig.cap = paste0("Distribution in value for the unit : ",(unit_name_map)), out.width = "100%"}',
     '',
     'map_for_knit',
     '```',
@@ -1002,7 +762,7 @@ map_unit <- lapply(unique(t$measurement_unit), FUN = fonction_empreinte_spatiale
 \clearpage
 
 ```{r eval=print_map,results='asis'}
-cat2("## Spatial coverage ")
+cat_title("## Spatial coverage ")
 ```
 
 
@@ -1022,18 +782,12 @@ knit_child_map_printing <- knitr::knit_child(text =c(
   '',
   '```',
   '',
-  'We represent spatial coverage, faceted by geographical category. The geographical category depends on the area of the geographic polygon. In this case there are `r number_of_GRIDTYPE` categories which are `r GRIDTYPE`. The category is made on the area, also different shapes could be included in the same geographical category (example 5x10, 10x5 and 25x2).', 
+  'We represent spatial coverage, faceted by geographical category. The geographical category depends on the area of the geographic polygon. In this case there are `r number_of_GRIDTYPE` categories which are `r GRIDTYPE`.', 
    '\n',
   ''
 
   ), envir = environment(), quiet= TRUE)
 
-
-```
-
-
-
-```{r eval=print_map,results='asis'}
 cat(knit_child_map_printing)
 ```
 
@@ -1053,14 +807,216 @@ cat(unlist(map_unit_knit_list), sep = "\n")
 
 ```{r results='asis'}
 
-cat2("## Repartition of the data for the other dimensions")
+cat_title("## Repartition of the data for the other dimensions")
 
 ```
 
 We check the distribution of the value of each dimension and each unit.
 
 ```{r }
-pie_chart_2_default <- studycatchesird::pie_chart_2
+pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titre_1 = "first", 
+  titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
+{
+  first[is.na(first)] <- "NA"
+  if (deparse(substitute(dimension)) == "X[[i]]") {
+    r <- dimension
+  }
+  else {
+    r <- deparse(substitute(dimension))
+  }
+  dimension <- gsub("\"", "", r)
+  if (dimension == "source_authority") {
+    topn = 6
+  }
+  name1 <- dplyr::enquo(titre_1)
+  name2 <- dplyr::enquo(titre_2)
+  all_class_i <- first %>% dplyr::group_by(across(c(dimension, 
+    "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
+    na.rm = TRUE)) %>% filter(measurement_value != 0) %>% 
+    select(-measurement_value)
+  colnames(all_class_i) <- c("class", "measurement_unit")
+  all_class_i <- all_class_i %>% mutate(class = paste(class, 
+    measurement_unit, sep = " / "))
+  provisoire_i <- na.omit(first) %>% dplyr::group_by(dplyr::across(c(dimension, 
+    "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
+    na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>% 
+    dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>% 
+    dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension), 
+      "Others"))) %>% dplyr::group_by(class, measurement_unit) %>% 
+    dplyr::summarise(measurement_value = sum(measurement_value, 
+      na.rm = TRUE)) %>% dplyr::ungroup() %>% dplyr::select(measurement_value, 
+    class, measurement_unit) %>% dplyr::group_by(measurement_unit) %>% 
+    dplyr::mutate(pourcentage = prop.table(measurement_value) * 
+      100) %>% dplyr::mutate(labels = paste0(pourcentage, 
+    " ", " % ")) %>% dplyr::arrange(desc(class)) %>% dplyr::mutate(ypos_ligne = cumsum(pourcentage) - 
+    0.5 * pourcentage) %>% dplyr::distinct() %>% dplyr::filter(!is.na(class))
+  if (!is.null(second)) {
+    all_class_t <- first %>% dplyr::group_by(across(c(dimension, 
+      "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
+      na.rm = TRUE)) %>% filter(measurement_value != 0) %>% 
+      select(-measurement_value)
+    colnames(all_class_t) <- c("class", "measurement_unit")
+    all_class_t <- all_class_t %>% mutate(class = paste(class, 
+      measurement_unit, sep = " / "))
+    provisoire_t <- na.omit(second) %>% dplyr::group_by(across(c(dimension, 
+      "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
+      na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>% 
+      dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>% 
+      dplyr::mutate(class = as.factor(ifelse(id < topn, 
+        !!rlang::sym(dimension), "Others"))) %>% dplyr::group_by(class, 
+      measurement_unit) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
+      na.rm = TRUE)) %>% dplyr::ungroup() %>% dplyr::select(measurement_value, 
+      class, measurement_unit) %>% dplyr::group_by(measurement_unit) %>% 
+      dplyr::mutate(pourcentage = prop.table(measurement_value) * 
+        100) %>% dplyr::mutate(labels = paste0(pourcentage, 
+      " ", " % ")) %>% dplyr::arrange(desc(class)) %>% 
+      dplyr::mutate(ypos_ligne = cumsum(pourcentage) - 
+        0.5 * pourcentage) %>% dplyr::distinct() %>% 
+      dplyr::filter(!is.na(class))
+  }
+  if (!is.null(second)) {
+    disappearing_stratas <- anti_join(all_class_i %>% select(class), 
+      all_class_t %>% select(class)) %>% distinct()
+    appearing_stratas <- anti_join(all_class_t %>% select(class), 
+      all_class_i %>% select(class)) %>% distinct()
+    number_disappearing_stratas <- nrow(disappearing_stratas)
+    number_appearing_stratas <- nrow(appearing_stratas)
+    summary_apparition <- ggdraw() + draw_label(paste0("Number of appearing stratas : ", 
+      number_appearing_stratas), size = 10)
+    if (number_appearing_stratas != 0) 
+      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ", 
+        paste((appearing_stratas %>% select(class) %>% 
+          distinct())$class, sep = ";")), size = 10)
+    summary_apparition <- summary_apparition + draw_label(paste0(" \nNumber of disappearing stratas : ", 
+      number_disappearing_stratas), size = 10)
+    if (number_disappearing_stratas != 0) 
+      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ", 
+        paste((disappearing_stratas %>% select(class) %>% 
+          distinct())$class, sep = ";")), size = 10)
+  }
+  set.seed(2)
+  if (!(is.null(second))) {
+    number <- length(unique(unlist(as.character(c(provisoire_i$class, 
+      provisoire_t$class)))))
+  }
+  else {
+    number <- length(unique(unlist(as.character(c(provisoire_i$class)))))
+  }
+  pal <- brewer.pal(number, "Paired")
+  if (!(is.null(second))) {
+    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class, 
+      provisoire_t$class)))))
+  }
+  else {
+    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class)))))
+  }
+  ggplot_i <- ggplot(provisoire_i %>% dplyr::filter(!is.na(class))) + 
+    aes(x = "", fill = class, group = class, weight = pourcentage) + 
+    geom_bar(position = "fill") + scale_fill_hue(direction = 1) + 
+    scale_color_hue(direction = 1) + theme_minimal() + coord_polar("y", 
+    start = 0) + geom_text(first = (provisoire_i %>% dplyr::filter(!is.na(class)) %>% 
+    dplyr::mutate_if(is.numeric, round)), size = 3, aes(x = 1, 
+    y = ypos_ligne/100, label = paste0(round(pourcentage), 
+      "%")), color = "black") + theme(axis.ticks.x = element_blank(), 
+    axis.text.x = element_blank()) + labs(x = "", y = "") + 
+    scale_fill_manual(values = pal) + guides(fill = guide_legend(title = toupper(r))) + 
+    facet_wrap("measurement_unit") + scale_fill_discrete(na.translate = F)
+  if (!is.null(second)) {
+    to_get_legend <- ggplot(rbind(provisoire_i %>% dplyr::filter(!is.na(class)), 
+      provisoire_t %>% dplyr::filter(!is.na(class)))) + 
+      aes(x = "", fill = class, group = class, weight = pourcentage) + 
+      geom_bar(position = "fill") + guides(fill = guide_legend(title = toupper(r)))
+    legend <- cowplot::get_legend(to_get_legend + scale_fill_discrete(na.translate = F))
+    ggplot_t <- ggplot(provisoire_t %>% dplyr::filter(!is.na(class))) + 
+      aes(x = "", fill = class, group = class, weight = pourcentage) + 
+      geom_bar(position = "fill") + scale_fill_hue(direction = 1) + 
+      scale_color_hue(direction = 1) + theme_minimal() + 
+      coord_polar("y", start = 0) + geom_text(first = (provisoire_t %>% 
+      dplyr::filter(!is.na(class)) %>% dplyr::mutate_if(is.numeric, 
+      round)), size = 3, aes(x = 1, y = ypos_ligne/100, 
+      label = paste0(round(pourcentage), "%")), color = "black") + 
+      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + 
+      labs(x = "", y = "") + scale_fill_manual(values = pal) + 
+      theme(legend.position = "none") + facet_wrap("measurement_unit") + 
+      scale_fill_discrete(na.translate = F)
+  }
+  else {
+    legend <- cowplot::get_legend(ggplot_i + scale_fill_discrete(na.translate = F))
+  }
+  if (title_yes_no) {
+    title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ", 
+      r), fontface = "bold", x = 0, hjust = 0) + theme(plot.margin = margin(0, 
+      0, 0, 7))
+  }
+  else {
+    title <- ggdraw() + draw_label(" \n ")
+  }
+  if (!is.null(second)) {
+    graph <- plot_grid(ggplot_i + theme(legend.position = "none"), 
+      ggplot_t, nrow = 2, labels = c(gsub("\"", "", gsub("~\"", 
+        "", deparse(substitute(name1)))), gsub("\"", 
+        "", gsub("~\"", "", deparse(substitute(name2))))), 
+      label_size = 10, vjust = 1.3, label_x = c(0, 0), 
+      label_y = 1.025, axis = "l", align = "v")
+    ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph, 
+      legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
+    if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) == 
+      0) {
+      title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ", 
+        r, "\n(same distribution to the nearest rounding for both datasets : \n", 
+        gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))), 
+        " and \n", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))), 
+        ")"), fontface = "bold", x = 0, hjust = 0, vjust = 0.5, 
+        size = 13) + theme(plot.margin = margin(0, 0, 
+        0, 7))
+      graph <- ggplot_i + theme(legend.position = "none")
+    }
+  }
+  else {
+    graph <- plot_grid(ggplot_i + theme(legend.position = "none"), 
+      nrow = 1, labels = c(gsub("\"", "", gsub("~\"", 
+        "", deparse(substitute(name1))))), label_size = 10, 
+      vjust = 1.3, label_x = c(0, 0), label_y = 0.8, axis = "l", 
+      align = "v")
+  }
+  if (title_yes_no) {
+    if (exists("provisoire_t")) 
+      if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) == 
+        0) {
+        title <- ggdraw() + draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n", 
+          gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))), 
+          " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))), 
+          ")"), fontface = "bold", x = 0, hjust = 0, 
+          vjust = 0.5, size = 13) + theme(plot.margin = margin(0, 
+          0, 0, 7))
+      }
+      else {
+        title <- ggdraw() + draw_label(" \n ")
+      }
+  }
+  ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph, 
+    legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
+  if (exists("summary_apparition") & dataframe) {
+    df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"), 
+      Number = c(number_appearing_stratas, number_disappearing_stratas), 
+      Detail = c(toString(paste((appearing_stratas %>% 
+        select(class) %>% mutate(class = gsub(" ", "", 
+        class)) %>% distinct())$class, sep = ";")), 
+        toString(paste((disappearing_stratas %>% select(class) %>% 
+          mutate(class = gsub(" ", "", class)) %>% distinct())$class, 
+          sep = ";"))), check.names = FALSE, fix.empty.names = FALSE)
+    if (number_disappearing_stratas == 0 & number_appearing_stratas == 
+      0) {
+      df <- df %>% select(-Detail)
+    }
+    list_df_plot <- list(plot = ploting_map, df = df)
+    return(list_df_plot)
+  }
+  else {
+    return(ploting_map)
+  }
+}
+
 formals(pie_chart_2_default)$titre_1 <- titre_1
 formals(pie_chart_2_default)$titre_2 <- titre_2
 # formals(pie_chart_2_default)$first <- init
@@ -1085,7 +1041,6 @@ if(unique_analyse){
 
 
 ```{r}
-
 if(!unique_analyse){pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, second = final, topn = 5)}else{pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, topn = 5, title_yes_no = FALSE )}
 
 ```
@@ -1109,7 +1064,7 @@ if(is_null_or_not_exist("dimension_title_subfigures")){
 
 ```
 
-```{r eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
+```{r subfigurespieplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
 
 for (i in figures){plot(i)}
 
@@ -1138,11 +1093,11 @@ cat(unlist(pie_chart_knit),  sep = "\n")
 \clearpage
 
 ```{r results='asis'}
-cat2("# Differences between the two datasets")
+cat_title("# Differences between the two datasets")
 ```
 
 ```{r results='asis'}
-cat2("## Differences in temporal data")
+cat_title("## Differences in temporal data")
 ```
 
 Here is represented the differences in percent for each year.
@@ -1181,7 +1136,7 @@ cat(unlist(map_unit_knit_list), sep = "\n")
 
 ```{r results='asis'}
 
-cat2("## Differences in geographical data")
+cat_title("## Differences in geographical data")
 
 ```
 
@@ -1252,8 +1207,6 @@ if (nrow(inner_join %>%dplyr::filter(`Impact on the data` == 'All data different
 ```
 
 
-
-
 Here is represented for each area the polygons keeping all the initial information, the ones losing a part and the ones losing all the information. 
 
 ```{r}
@@ -1275,7 +1228,7 @@ if(plotting_type == "plot"){image <- image  +tm_shape(continent)+tm_borders()}
 
 
 
-```{r results='asis', out.width="100%", fig.cap=paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset."), eval=print_map}
+```{r spatialdifferences, out.width="100%", fig.cap=paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset."), eval=print_map}
 
 
 image
@@ -1305,7 +1258,7 @@ The coverage difference is `r difference_coverage` km square. (`r gain_loss`)
 \clearpage
 
 ```{r results='asis'}
-cat2("## Loss and gain for each strata")
+cat_title("## Loss and gain for each strata")
 ```
 
 This section detail the differences that are observed between the dataframe ***`r titre_1`*** and ***`r titre_2`***.
@@ -1331,7 +1284,7 @@ topn <- (length(unique(init$species)))
 
 
 ```{r results='asis'}
-cat2("## The differences for each dimension")
+cat_title("## The differences for each dimension")
 ```
 
 
@@ -1408,7 +1361,7 @@ knitr::knit_exit(fully = FALSE)
 
 
 ```{r eval=!parameter_mapped, results='asis'}
-cat2("# Annexe")
+cat_title("# Annexe")
 ```
 
 ```{r eval=!parameter_mapped}
@@ -1521,7 +1474,7 @@ try(cat(unlist(map_plotted_percent), sep = "\\clearpage"))
 
 
 
-```{r eval = FALSE, echo=FALSE, fig.cap=paste0("Geographical differences in % between ", titre_1, " and ", titre_2), results='asis'}
+```{r geographicaldiff, eval = FALSE, echo=FALSE, fig.cap=paste0("Geographical differences in % between ", titre_1, " and ", titre_2), results='asis'}
 
 
 image
