@@ -125,13 +125,14 @@ recap_all_markdown <- function(action, entity, config, options){
     
     parameters_child_global <- list(action = action,
                                     entity = entity, config = config, debugging = FALSE, 
-                                    fig.path = paste0("tableau_recap_global_action/figures"))
+                                    fig.path = paste0("tableau_recap_global_action/figures/"))
     child_env_global = new.env()
     list2env(parameters_child_global, env = child_env_global)
     
     rmarkdown::render("tableau_recap_global_action_effort.Rmd"  , 
                       envir =  child_env_global, 
-                      output_file = paste0("tableau_recap_global_action/", "output.html"))
+                      output_file = paste0("output.html"),
+                      output_format = "html_document", output_dir = "tableau_recap_global_action")
 
 
     

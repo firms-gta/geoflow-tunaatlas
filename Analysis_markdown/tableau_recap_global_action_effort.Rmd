@@ -76,7 +76,7 @@ fancyhdr:
 knitr::opts_chunk$set(
 	echo = TRUE,
 	message = debugging,
-	warning = TRUE, fig.align = 'center', error = TRUE
+	warning = TRUE, fig.align = 'center', error = FALSE
 )
 
 
@@ -86,91 +86,29 @@ knitr::opts_chunk$set(
 formals(install.packages)$upgrade = "never"
 
 knitr::knit_hooks$set(inline = function(x) {   if(!is.numeric(x)){     x   }else{    prettyNum(round(x,2), big.mark=",")    } })
-if(!(require(base))){ 
-  install.packages("base") 
-  (require(base))} 
-if(!(require(flextable))){ 
-  install.packages("flextable") 
-  (require(flextable))} 
-if(!(require(remotes))){ 
-  install.packages("remotes") 
-  (require(remotes))} 
-if(!(require(utils))){ 
-  install.packages("utils") 
-  (require(utils))} 
-if(!(require(stringr))){ 
-  install.packages("stringr") 
-  (require(stringr))} 
-if(!(require(knitr))){ 
-  install.packages("knitr") 
-  (require(knitr))} 
-if(!(require(DBI))){ 
-  install.packages("DBI") 
-  (require(DBI))} 
-if(!(require(odbc))){ 
-  install.packages("odbc") 
-  (require(odbc))} 
-if(!(require(sf))){ 
-  install.packages("sf") 
-  (require(sf))} 
-if(!(require(dplyr))){ 
-  install.packages("dplyr") 
-  (require(dplyr))} 
-if(!(require(kableExtra))){ 
-  install.packages("kableExtra") 
-  (require(kableExtra))} 
-if(!(require(readxl))){ 
-  install.packages("readxl") 
-  (require(readxl))} 
-if(!(require(readr))){ 
-  install.packages("readr") 
-  (require(readr))} 
-if(!(require(tidyr))){ 
-  install.packages("tidyr") 
-  (require(tidyr))} 
-if(!(require(ggplot2))){ 
-  install.packages("ggplot2") 
-  (require(ggplot2))} 
-if(!(require(stats))){ 
-  install.packages("stats") 
-  (require(stats))} 
-if(!(require(RColorBrewer))){ 
-  install.packages("RColorBrewer") 
-  (require(RColorBrewer))} 
-if(!(require(cowplot))){ 
-  install.packages("cowplot") 
-  (require(cowplot))} 
-if(!require(studycatchesird)){
-  if(!require(remotes)){
-    install.packages("remotes")
+
+
+# Prevent package installation from upgrading
+formals(install.packages)$upgrade <- "never"
+
+# List of required packages
+required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
+                        "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
+                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata")
+
+# Check if each package is already installed, and if not, install and load it
+for (package in required_packages) {
+  if (!require(package, character.only = TRUE)) {
+    install.packages(package)
+    require(package)
   }
-  require(remotes)
-  if(!require(devtools)){
-    install.packages("devtools")
-  }
-  require(devtools)
-  out <- try(devtools::install_local("~/Documents/sutdycatchesird"))
-  try(require(studycatchesird))
-  if("try-error" %in% class(out)){
-
-  install_github("BastienIRD/sutdycatchesird")
-  require(studycatchesird)
-
 }
-}
-if(!(require(tmap))){ 
-  install.packages("tmap") 
-  (require(tmap))} 
-if(!(require(RPostgreSQL))){ 
-  install.packages("RPostgreSQL") 
-  (require(RPostgreSQL))} 
-if(!(require(officer))){ 
-  install.packages("officer") 
-  (require(officer))} 
-if(!(require(readtext))){ 
-  install.packages("readtext") 
-  (require(readtext))} 
 
+# Install and load sutdycatchesird package from GitHub if not already installed
+if(!require(sutdycatchesird)){
+  remotes::install_github("BastienIRD/sutdycatchesird")
+  require(sutdycatchesird)
+}
 ```
 
 ```{r include=FALSE}
@@ -249,10 +187,10 @@ parameters_child <- list(config = config, entity = entity,opts = opts ,action = 
 
 
 ```{r include=FALSE}
-# knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
+knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
 
 #set the table caption styling
-# autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # number the table, bkm (bookmark) is important as the cross-referencing is done using the bookmark
+autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # number the table, bkm (bookmark) is important as the cross-referencing is done using the bookmark
 set_flextable_defaults(
   font.size = 10,
   font.color = "black",
@@ -380,7 +318,10 @@ child_env_last$child_header <- "#"
 child_env_last$parameter_mapped <- TRUE
 child_env_last$last_to_first <- FALSE
 child_env_last$parameter_short <- FALSE
-child_env_last$fig.path = paste0("Comparisonfirsttolast/figures/")
+
+dir.create(paste0(fig.path, "Comparisonfirsttolast"), recursive = TRUE)
+
+child_env_last$fig.path = paste0(fig.path, "Comparisonfirsttolast/figures/")
 
 
 # rmarkdown::render("comparison.Rmd", envir = child_env_last, quiet = TRUE)
@@ -420,7 +361,10 @@ child_env_comp$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
 child_env_comp$last_to_first <- TRUE
 child_env_comp$parameter_mapped <- FALSE
 child_env_comp$parameter_short <- FALSE
-child_env_comp$fig.path = paste0("Comparison/",entity$identifiers[["id"]], "/figures/")
+
+dir.create(paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir_2[1]),"_", gsub("Markdown/","",sub_list_dir_2[length(sub_list_dir_2)]), "/figures/"), recursive = TRUE)
+
+child_env_comp$fig.path = paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir_2[1]),"_", gsub("Markdown/","",sub_list_dir_2[length(sub_list_dir_2)]), "/figures/")
 
 # rmarkdown::render("comparison.Rmd", envir = child_env_comp, quiet = TRUE)
 
@@ -661,7 +605,7 @@ qflextable2(reduced,captionn ="Evolution of Sum in hooks and Sum in fishing days
 ```
 
 
-```{r echo=FALSE, fig.cap='Evolution of captures in tons and number of fish during the process',results='asis', eval=(parameter_fact == "catch")}
+```{r evlocapturesduringprocess, echo=FALSE, fig.cap='Evolution of captures in tons and number of fish during the process',results='asis', eval=(parameter_fact == "catch")}
 
 
 
@@ -671,7 +615,7 @@ cowplot::plot_grid(tons_plot, no_fish_plot)
 
 ```
 
-```{r echo=FALSE, fig.cap='Evolution of captures in fishing days and hooks during the process',results='asis', eval=(parameter_fact == "effort")}
+```{r evlocapturesduringprocess, echo=FALSE, fig.cap='Evolution of captures in fishing days and hooks during the process',results='asis', eval=(parameter_fact == "effort")}
 
 cowplot::plot_grid(fishing_days_plot, hooks_plot)
 
@@ -718,6 +662,11 @@ child_env$parameter_short <- parameter_short
 child_env$child_header <- "##"
 child_env$step <- counting
 child_env$step_title <- paste0(" Treatment : " ,last_path(sub_list_dir[counting+1]))
+
+dir.create(paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]), "/figures/"), recursive = TRUE)
+
+child_env_comp$fig.path = paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]), "/figures/")
+
 
 if( identical(readRDS(paste0(as.character(child_env$parameter_init),"/rds.rds")),readRDS(paste0(as.character(child_env$parameter_final),"/rds.rds")) )){NA}else{
     res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
