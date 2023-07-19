@@ -611,11 +611,11 @@ list_return_init <- tidying_data_for_GTA(init,time_dim = time_dimension, shape =
 init <- list_return_init$dataframe
 final <- tidying_data_for_GTA(final, time_dim = time_dimension, shape = shape_without_geom)$dataframe
 
-if(!exists("print_map") | is.null(print_map)){
+if(!exists("print_map") || is.null(print_map)){
 print_map <- list_return_init$print_map
 } else {print_map <- print_map}
 
-if(!exists("print_map") | is.null(print_map)){
+if(!exists("print_map") || is.null(print_map)){
 print_map<- TRUE}
 
 ```
