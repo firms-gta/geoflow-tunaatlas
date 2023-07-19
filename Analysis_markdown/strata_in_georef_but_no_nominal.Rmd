@@ -10,7 +10,6 @@ knitr::opts_chunk$set(
 	message = FALSE,
 	warning = FALSE, error = TRUE
 )
-knitr::opts_chunk$set(fig.filename = paste0("figure_", knitr::opts_current$get("fig.cap"), ".png"), fig.path = fig.path)
 
 knitr::knit_hooks$set(fig_filename = function(before, options, envir) {
   if (before && !is.null(options$fig.cap)) {
@@ -389,7 +388,7 @@ georef_sup_to_nom <- join %>% filter(measurement_value_georef > measurement_valu
 
 ## Stratas with declaration superior in georeferenced than in nominal
 
-The species concerned by declaration (on a year) of georeferenced captures superior to nominal are : `r paste(unique(georef_sup_to_nom$species), sep = " ; ")`, for a total (by species of)
+The species concerned by declaration (on a year) of georeferenced captures superior to nominal are : `r paste(unique(georef_sup_to_nom$species), sep = " ; ")`, for a total (by species of) `length(unique(georef_sup_to_nom$species))`.
 
 
 ```{r strataswithpostivediff, fig.cap = "Stratas of georeferenced dataset being superior to nominal dataset for a specific year and species", eval=TRUE, include=FALSE}
