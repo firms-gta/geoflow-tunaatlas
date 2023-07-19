@@ -283,11 +283,11 @@ set_flextable_defaults(
 
 
 #set the dataset caption styling
-# knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
+knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
 
 #set the dataset caption styling
-if(!child){autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # number the table, bkm (bookmark) is important as the cross-referencing is done using the bookmark
-}
+autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # number the table, bkm (bookmark) is important as the cross-referencing is done using the bookmark
+
 
 ```
 
