@@ -7,7 +7,7 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   cat(paste0("\n mapping dimension ", dimension_to_map, " with code list mapping"))
   column_names_df_input <- colnames(df_input)
   colnames(df_mapping)[colnames(df_mapping) == "src_code"] <- dimension_to_map
-  df_input <- left_join(df_input, df_mapping)
+  df_input <- dplyr::left_join(df_input, df_mapping)
   
   not_mapped <- unique((df_input %>% filter(is.na(trg_code))) %>% dplyr::select({{dimension_to_map}})) %>% 
     dplyr::rename("Value" :={{dimension_to_map}} ) %>% 
