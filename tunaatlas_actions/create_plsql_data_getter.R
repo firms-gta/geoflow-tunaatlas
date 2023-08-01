@@ -138,5 +138,9 @@ create_plsql_data_getter <- function(action,entity, config){
 	LANGUAGE plpgsql;")
 	config$logger.info("Create or Replace PL/PSQL function to get dataset")
 	config$logger.info(paste("\n", sql_create))
+	
+	#to handle ERROR:  cannot change return type of existing function
+	dbSendQuery(con, "DROP FUNCTION IF EXISTS get_fact_dataset_catch(character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying);") 
+	
 	dbSendQuery(con, sql_create)
 }
