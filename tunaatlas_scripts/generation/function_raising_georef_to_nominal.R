@@ -71,6 +71,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                                            df_input_total = nominal_dataset_df,
                                                            df_rf = df_rf,
                                                            x_raising_dimensions = raising_dimensions,
+                                                           decrease_when_rf_inferior_to_one = TRUE,
                                                            threshold_rf = NULL)
     
     cat("function raise_incomplete_dataset_to_total_dataset has been executed ! \n")
