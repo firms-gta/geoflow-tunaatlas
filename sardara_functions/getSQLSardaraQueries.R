@@ -98,26 +98,26 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
     tables_views_materializedviews <- dbGetQuery(con, "\n    SELECT table_schema||'.'||table_name FROM information_schema.tables\n    union\n    SELECT oid::regclass::text FROM   pg_class WHERE  relkind = 'm'")$`?column?`
     where_clause_gear <- NULL
     where_clause_species <- NULL
-    if ("gear" %in% dataset_available_dimensions) {
+    if ("gear_type" %in% dataset_available_dimensions) {
       codelist_identifier <-  get_codelist_of_dimension(con, 
-                                                                   dataset_metadata, "gear")$identifier
+                                                                   dataset_metadata, "gear_type")$identifier
       if (codelist_identifier %in% c("isscfg_revision_1", 
                                      "gear_iotc", "gear_iccat", "gear_iattc", "gear_wcpfc")) {
         db_dimensions_parameters$sql_select_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
-                                                                          "gear")] <- paste0(db_dimensions_parameters$sql_select_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
-                                                                                                                                                               "gear")], "gear_group,")
+                                                                          "gear_type")] <- paste0(db_dimensions_parameters$sql_select_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
+                                                                                                                                                               "gear_type")], "gear_group,")
         db_dimensions_parameters$sql_select_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
-                                                                                "gear")] <- paste0(db_dimensions_parameters$sql_select_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
-                                                                                                                                                                           "gear")], "geargroup_label.codesource_gear as gear_group,")
+                                                                                "gear_type")] <- paste0(db_dimensions_parameters$sql_select_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
+                                                                                                                                                                           "gear_type")], "geargroup_label.codesource_gear_type as gear_group,")
         db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
-                                                                                       "gear")] <- paste0(db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
-                                                                                                                                                                                         "gear")], "geargroup_label.source_label as gear_group_label,")
+                                                                                       "gear_type")] <- paste0(db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
+                                                                                                                                                                                         "gear_type")], "geargroup_label.source_label as gear_group_label,")
         db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
-                                                                                 "gear")] <- paste0(db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
-                                                                                                                                                                             "gear")], "gear_group_label,")
+                                                                                 "gear_type")] <- paste0(db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
+                                                                                                                                                                             "gear_type")], "gear_group_label,")
         db_dimensions_parameters$sql_join_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
-                                                                              "gear")] <- paste0(db_dimensions_parameters$sql_join_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
-                                                                                                                                                                       "gear")], " LEFT OUTER JOIN gear.gear_mapping ON gear_mapping.gear_mapping_id_from=tab.id_gear LEFT JOIN gear.gear_labels geargroup_label ON geargroup_label.id_gear=gear_mapping.gear_mapping_id_to ")
+                                                                              "gear_type")] <- paste0(db_dimensions_parameters$sql_join_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension == 
+                                                                                                                                                                       "gear_type")], " LEFT OUTER JOIN gear_type.gear_type_mapping ON gear_type_mapping.gear_type_mapping_id_from=tab.id_gear_type LEFT JOIN gear_type.gear_type_labels geargroup_label ON geargroup_label.id_gear_type=gear_type_mapping.gear_type_mapping_id_to ")
         switch(codelist_identifier, isscfg_revision_1 = {
           geargroup_mapping_identifier <- "codelist_mapping_isscfg_revision_1_geargroup_tunaatlas"
         }, gear_iotc = {
@@ -129,8 +129,8 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
         }, gear_wcpfc = {
           geargroup_mapping_identifier <- "codelist_mapping_gear_wcpfc_geargroup_wcpfc"
         })
-        where_clause_gear <- paste0("(gear_mapping.id_metadata=(SELECT id_metadata FROM metadata.metadata WHERE identifier='", 
-                                    geargroup_mapping_identifier, "' ) OR  gear_mapping.gear_mapping_id_from=0) AND ")
+        where_clause_gear <- paste0("(gear_type_mapping.id_metadata=(SELECT id_metadata FROM metadata.metadata WHERE identifier='", 
+                                    geargroup_mapping_identifier, "' ) OR  gear_type_mapping.gear_type_mapping_id_from=0) AND ")
       }
     }
     if ("species" %in% dataset_available_dimensions) {
