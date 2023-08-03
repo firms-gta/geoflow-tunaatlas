@@ -35,7 +35,7 @@ recap_all_markdown <- function(action, entity, config, options){
     }
     opts <- action$options
     debugging <- if(!is.null(opts$debugging)) opts$debugging else FALSE
-    url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_Markdown/"
+    url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
     
     copyrmd <- function(x, url_path = url_analysis_markdown ){
       last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
@@ -51,7 +51,10 @@ recap_all_markdown <- function(action, entity, config, options){
              "comparison.Rmd", 
              "strata_conversion_factor_gihtub.Rmd", 
              "template.tex",
-             "dmk-format.csl")
+             "dmk-format.csl", 
+             "setup_markdown.Rmd", 
+             "strata_in_georef_but_no_nominal.Rmd"
+             )
       lapply(c,copyrmd)
     
     con <- config$software$input$dbi
@@ -63,9 +66,11 @@ recap_all_markdown <- function(action, entity, config, options){
     library(ows4R)
     WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
     sf = WFS$getFeatures("fifao:UN_CONTINENT2")
+    st_write(sf, "data/continent.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
+    
     
     WFS = WFSClient$new(url = url, serviceVersion = serviceVersion, logger = logger)
-    
+
     library(data.table)
     library(sf)
     library(sp)
@@ -74,7 +79,6 @@ recap_all_markdown <- function(action, entity, config, options){
     get_wfs_data <- function(url= "https://www.fao.org/fishery/geoserver/wfs", 
                              version = "1.0.0", 
                              layer_name, output_dir = "data",logger = "INFO") {
-      
       # create output directory if it doesn't exist
       if (!dir.exists(output_dir)) {
         dir.create(output_dir)
@@ -111,10 +115,6 @@ recap_all_markdown <- function(action, entity, config, options){
     # CWP_GRIDS <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
     shapefile.fix <- rbindlist(list(CWP11_ERASED, CWP55_ERASED, CWP1010_ERASED, CWP2020_ERASED, CWP3030_ERASED))
     st_write(shapefile.fix, "data/world_sf.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
-    
-    query <- "SELECT  code,st_area(geom), geom from area.gshhs_world_coastlines"
-    continent <- (st_read(con, query = query)%>%dplyr::filter(!st_is_empty(.)))
-    st_write(continent, "data/continent.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
     
     query <- "SELECT  * from area.areas_conversion_factors_numtoweigth_ird"
     areas_conversion_factors_numtoweigth_ird <- st_make_valid(st_read(con, query = query))%>% filter(!st_is_empty(.))
