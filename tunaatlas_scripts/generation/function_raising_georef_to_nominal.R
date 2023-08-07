@@ -46,7 +46,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                           df_input_total = nominal_dataset_df,
                           x_raising_dimensions = c(x_raising_dimensions,"measurement_unit")
     )
-    
+    saveRDS(df_rf, paste0("data/",gsub(Sys.time(),pattern = " ", replacement = "_"),"raisingfactordataset.rds"))
     cat(paste0("raise_get_rf function has",nrow(df_rf),"rows \n"))
     cat(paste0(" write csv file to check   \n"))
     # filename <- paste0("DFPartialInfo_rf_",gsub(Sys.time(),pattern = " ", replacement = "_"),".csv")
@@ -71,17 +71,16 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                                            df_input_total = nominal_dataset_df,
                                                            df_rf = df_rf,
                                                            x_raising_dimensions = raising_dimensions,
-                                                           decrease_when_rf_inferior_to_one = TRUE,
+                                                           decrease_when_rf_inferior_to_one = FALSE,
                                                            threshold_rf = NULL)
     
     cat("function raise_incomplete_dataset_to_total_dataset has been executed ! \n")
-    thisdf <- data_raised$df
     config$logger.info(paste0("Total catch for data_raised  is ",sum(thisdf$measurement_value),"  \n"))
     
     # data_raised$stats
     cat("END function_raise_data \n")
     
-    return(data_raised)
+    return(data_raised$df)
     
   }
   config$logger.info("Now executing function function_raise_data")
@@ -131,14 +130,13 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     if (raising_do_not_raise_wcfpc_data==TRUE){
       
-      data_WCPFC_CCSBT_raised<-rbind(dataset_to_raise %>% filter(source_authority=="WCPFC"),data_WCPFC_CCSBT_raised$df)
+      data_WCPFC_CCSBT_raised<-rbind(dataset_to_raise %>% filter(source_authority=="WCPFC"),data_WCPFC_CCSBT_raised)
       config$logger.info(paste0("Since option raising_do_not_raise_wcfpc_data==TRUE, kept rows number is  ",nrow(data_WCPFC_CCSBT_raised),"  \n"))
       config$logger.info(paste0("Total catch after raising before raising_do_not_raise_wcfpc_data==TRUE filter is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
       
       
     } else {
       
-      data_WCPFC_CCSBT_raised<-data_WCPFC_CCSBT_raised$df
       config$logger.info(paste0("Since option raising_do_not_raise_wcfpc_data==FALSE, kept rows number is  ",nrow(data_WCPFC_CCSBT_raised),"  \n"))
       config$logger.info(paste0("Total catch after raising before raising_do_not_raise_wcfpc_data==FALSE filter is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
       
@@ -167,7 +165,6 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                                       nominal_dataset_df = nominal_dataset_df,
                                                       x_raising_dimensions = x_raising_dimensions)
     
-    data_IOTC_ICCAT_IATTC_raised<-data_IOTC_ICCAT_IATTC_raised$df
     config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC after raising before further filters is ",sum(data_IOTC_ICCAT_IATTC_raised$measurement_value),"  \n"))
     
     
