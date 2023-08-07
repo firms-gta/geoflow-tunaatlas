@@ -65,7 +65,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     # raise dataset
     cat("Executing raise_incomplete_dataset_to_total_dataset \n")
-    source("~/Documents/geoflow-tunaatlas/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
     
     data_raised<-raise_incomplete_dataset_to_total_dataset(df_input_incomplete = dataset_to_raise,
                                                            df_input_total = nominal_dataset_df,
@@ -75,7 +75,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                                            threshold_rf = NULL)
     
     cat("function raise_incomplete_dataset_to_total_dataset has been executed ! \n")
-    config$logger.info(paste0("Total catch for data_raised  is ",sum(thisdf$measurement_value),"  \n"))
+    config$logger.info(paste0("Total catch for data_raised  is ",sum(data_raised$measurement_value),"  \n"))
     
     # data_raised$stats
     cat("END function_raise_data \n")
