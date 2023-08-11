@@ -4,6 +4,7 @@ date: "2023-07-19"
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(
   echo = FALSE,
   message = FALSE,
@@ -11,6 +12,7 @@ knitr::opts_chunk$set(
   fig.align = 'center',
   error = TRUE
 )
+
 ```
 
 
@@ -55,6 +57,12 @@ knit_child_map =function(list_map_unit){
     'unit_title <- gsub("_","..",unit_name_map)',
     '```',
     '',
+    '    ```{r setup, include=FALSE}',
+'knitr::opts_chunk$set(label = paste0("mapdiff", unit_title))', 
+'```',
+'', 
+'', 
+
     '',
     '```{r results="asis", fig.cap = paste0("Map of the differences between two datasets for the unit ", unit_title)}',
     '',
@@ -169,22 +177,36 @@ fonction_groupement = function(these_col, init, final){
   return(fulljoin)
 }
 
+save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path){
+  if(!is.null(folder) && !dir.exists(folder)){
+    dir.create(paste0(fig.path, folder))
+  }
+ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = paste0(fig.pathinside, folder))
+ggsave(paste0( make.names(title), ".pdf"), plot = plott,  device = "pdf", path = paste0(fig.pathinside, folder))
+
+}
+
 
 resume_knit_child = function(x){
-  
+  dimension_title <- gsub("_", "-", unique(x$dimension))
+
+  title_knit <- paste0("Distribution in value for the dimension : ",(dimension_title))
+  assign("dimension_title", gsub("_", "-", unique(x$dimension)), envir = environment())
+save_image(title_knit, x$pie_chart, folder = "Piechartsdimensions")
+  assign("x", x, envir = environment())
+
   knitr::knit_child(text = c(
-    '',
-    '```{r}', 
-    'dimension_title <- gsub("_","..",x$dimension)',
-    '',
-    '```',
+
     '',
     '',
+'', 
+
     '',
-    '```{r results = "asis" ,fig.cap = paste0("Distribution in value for the dimension : ",(dimension_title))}',
+    '```{r distribinvaluedim, results = "asis" ,fig.cap =`title_knit` }',
     '',
     'x$pie_chart',
-    '```',
+'',
+'```',
     '',
     '',
     '',
@@ -219,22 +241,37 @@ function_pie_chart_df = function(dimension, ...){
 
 
 function_knitting = function(x){
-  assign("Dimension2", gsub("_", "", unique(x$data$Dimension)), envir = environment())
+  assign("Dimension2", gsub("_", "-", unique(x$data$Dimension)))
   assign("y", x, envir = environment())
   title_knit <- paste0("Evolutions of values for the dimension ", Dimension2, " for ", `titre_1`, " and ",`titre_2`, " dataset ")
   if(nrow(final)==0){title_knit = paste0("Evolutions of values for the dimension ", Dimension2, " for ", `titre_1`, " dataset ")}
-  knitr::knit_child(text =c('```{r fig.cap=`title_knit`, fig.align = "center", out.widht = "100%"}',
+  save_image(title_knit,x,  folder = "Temporal")
+
+
+  knitr::knit_child(text =c(
+'', 
+    '```{r evolvaluedim, fig.cap=`title_knit`, fig.align = "center", out.widht = "100%"}',
                             '',
+
                             '',
                             '(y)',
                             '',
                             '```'), envir = environment(), quiet= TRUE)
 }
 function_knitting_difference = function(x){
-  assign("Dimension2", gsub("_", "", unique(x$data$Dimension)), envir = environment())
+
+  assign("Dimension2", gsub("_", "-", unique(x$data$Dimension)))
+  title_knit <- paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", `titre_1`, " and ",`titre_2`, " dataset ")
+save_image(title_knit,x,  folder = "Temporaldiff")
+
+
   assign("y", x, envir = environment())
-  knitr::knit_child(text =c('```{r fig.cap=paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", `titre_1`, " and ",`titre_2`, " dataset ")}',
+  knitr::knit_child(text =c(
+
+    '```{r difftempdim, fig.cap=`title_knit`}',
                             '',
+
+                            
                             '',
                             '(y)',
                             '',
@@ -294,7 +331,7 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 
 
 ```{r options, include=FALSE}
-base::options(scipen=999)
+base::options(scipen=9999)
 plotting_type <- "plot" 
 if (knitr::is_html_output()){plotting_type <- "view" }
 ```
