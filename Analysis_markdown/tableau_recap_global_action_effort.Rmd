@@ -71,16 +71,27 @@ fancyhdr:
 
 
 ```{r setupmain, include=FALSE}
-
-
 knitr::opts_chunk$set(
 	echo = TRUE,
 	message = debugging,
-	warning = TRUE, fig.align = 'center', error = FALSE
+	warning = TRUE, fig.align = 'center', error = TRUE
 )
 
 
+
 ```
+
+
+```{r logs}
+
+log_file <- paste0(getwd(), "/file.log")
+sink(log_file, append = TRUE)
+on.exit({
+  sink(NULL)
+})
+
+```
+
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 formals(install.packages)$upgrade = "never"
@@ -88,27 +99,26 @@ formals(install.packages)$upgrade = "never"
 knitr::knit_hooks$set(inline = function(x) {   if(!is.numeric(x)){     x   }else{    prettyNum(round(x,2), big.mark=",")    } })
 
 
-# Prevent package installation from upgrading
-formals(install.packages)$upgrade <- "never"
 
 # List of required packages
 required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
                         "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata")
+                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap")
 
 # Check if each package is already installed, and if not, install and load it
-for (package in required_packages) {
-  if (!require(package, character.only = TRUE)) {
-    install.packages(package)
-    require(package)
-  }
-}
-
+    required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
+                           "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
+                           "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap")
+    
+    # Check if each package is already installed, and if not, install and load it
+    for (package in required_packages) {
+      library(package, character.only = TRUE)
+    }
 # Install and load sutdycatchesird package from GitHub if not already installed
-if(!require(sutdycatchesird)){
-  remotes::install_github("BastienIRD/sutdycatchesird")
-  require(sutdycatchesird)
-}
+# if(!require(sutdycatchesird)){
+#   remotes::install_github("BastienIRD/sutdycatchesird")
+require(sutdycatchesird)
+# }
 ```
 
 ```{r include=FALSE}
@@ -117,19 +127,15 @@ knitr::opts_chunk$set(
 	message = FALSE,
 	warning = FALSE, error = TRUE
 )
-knitr::opts_chunk$set(fig.filename = paste0("figure_", knitr::opts_current$get("fig.cap"), ".png"), fig.path = fig.path)
 
-knitr::knit_hooks$set(fig_filename = function(before, options, envir) {
-  if (before && !is.null(options$fig.cap)) {
-    options$fig.filename <- paste0("figure_", gsub(" ", "_", options$fig.cap), ".png")
-  }
-  NULL
-})
+# Custom hook for knitr options
+# Custom hook for knitr options
+knitr::opts_chunk$set(fig.filename = paste0("figure_", knitr::opts_current$get("fig.cap"), ".png"), fig.path = fig.path)
 
 # Custom hook for kable
 knitr::knit_hooks$set(kable = function(before, options, envir) {
-  if (before && !is.null(options$fig.cap)) {
-    filename <- paste0(options$fig.cap, ".html")
+  if (before && is.null(options$tab.cap)) {
+    filename <- paste0(knitr::opts_current$get("label"), ".html")
     save_as_html(kable_table, filename)
   }
   NULL
@@ -137,8 +143,8 @@ knitr::knit_hooks$set(kable = function(before, options, envir) {
 
 # Custom hook for qflextable
 knitr::knit_hooks$set(qflextable = function(before, options, envir) {
-  if (before && !is.null(options$fig.cap)) {
-    filename <- paste0(options$fig.cap, ".docx")
+  if (before && is.null(options$tab.cap)) {
+    filename <- paste0(knitr::opts_current$get("label"), ".docx")
     save_as_docx(qflextable_table, filename)
   }
   NULL
@@ -146,25 +152,42 @@ knitr::knit_hooks$set(qflextable = function(before, options, envir) {
 
 # Custom hook for ggplot
 knitr::knit_hooks$set(ggplot = function(before, options, envir) {
-  if (before && !is.null(options$fig.cap)) {
-    filename_pdf <- paste0(options$fig.cap, ".pdf")
-    filename_png <- paste0(options$fig.cap, ".png")
-    filename_html <- paste0(options$fig.cap, ".html")
+  if (before) {
+    # Get the chunk label (chunk name)
+    chunk_label <- knitr::opts_chunk$get("label")
 
-    ggsave(filename_pdf, plot = ggplot_object, device = "pdf")
-    ggsave(filename_png, plot = ggplot_object, device = "png")
-    webshot::webshot(ggplot_object, file = filename_html)
+    # Check if the chunk label is not NULL
+    if (!is.null(chunk_label)) {
+      filename_pdf <- paste0(chunk_label, ".pdf")
+      filename_png <- paste0(chunk_label, ".png")
+      filename_html <- paste0(chunk_label, ".html")
+
+      ggsave(filename_pdf, plot = ggplot_object, device = "pdf")
+      ggsave(filename_png, plot = ggplot_object, device = "png")
+      webshot::webshot(ggplot_object, file = filename_html)
+    }
   }
   NULL
 })
-
-
 
 options(knitr.duplicate.label = "allow")
 ```
 
 
-```{r include=FALSE}
+```{r namingplots, include=FALSE}
+counter <- 1  # Initialize a counter
+
+knitr::opts_hooks$set(plot = function(options) {
+  if (!is.null(options$fig.cap)) {
+    filename <- paste0(options$label, "_", counter, ".pdf")
+    options$fig.path <- paste0(fig.path, "figures/", filename)
+    counter <<- counter + 1  # Increment the counter
+  }
+  options
+})
+```
+
+```{r include=FALSE, cache = FALSE}
 
 opts <- entity$data$actions[[1]]$options
 con <- config$software$input$dbi
@@ -319,9 +342,9 @@ child_env_last$parameter_mapped <- TRUE
 child_env_last$last_to_first <- FALSE
 child_env_last$parameter_short <- FALSE
 
-dir.create(paste0(fig.path, "Comparisonfirsttolast"), recursive = TRUE)
+dir.create(paste0(fig.path, "Reporton", entity$identifiers[["id"]], "/figures/"), recursive = TRUE)
 
-child_env_last$fig.path = paste0(fig.path, "Comparisonfirsttolast/figures/")
+child_env_last$fig.path = paste0(fig.path,"Reporton", entity$identifiers[["id"]], "/figures/")
 
 
 # rmarkdown::render("comparison.Rmd", envir = child_env_last, quiet = TRUE)
@@ -375,7 +398,7 @@ res <- knitr::knit_child("comparison.Rmd", envir = child_env_comp, quiet = TRUE)
 
 
 
-```{r echo=FALSE, results='asis'}
+```{r complastfirst, echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 
@@ -605,7 +628,7 @@ qflextable2(reduced,captionn ="Evolution of Sum in hooks and Sum in fishing days
 ```
 
 
-```{r evlocapturesduringprocess, echo=FALSE, fig.cap='Evolution of captures in tons and number of fish during the process',results='asis', eval=(parameter_fact == "catch")}
+```{r evolcapturesduringprocess, echo=FALSE, fig.cap='Evolution of captures in tons and number of fish during the process',results='asis', eval=(parameter_fact == "catch")}
 
 
 
@@ -615,7 +638,7 @@ cowplot::plot_grid(tons_plot, no_fish_plot)
 
 ```
 
-```{r evlocapturesduringprocess, echo=FALSE, fig.cap='Evolution of captures in fishing days and hooks during the process',results='asis', eval=(parameter_fact == "effort")}
+```{r evlocapturesduringprocesseffort, echo=FALSE, fig.cap='Evolution of captures in fishing days and hooks during the process',results='asis', eval=(parameter_fact == "effort")}
 
 cowplot::plot_grid(fishing_days_plot, hooks_plot)
 
@@ -646,7 +669,7 @@ For each treatment on the data, we provide a summary of what has been added, rem
 
 ```{r}
 
-function_all_comp = function(counting, parameters = parameters_child, parameter_short = TRUE, sub_list_dir = sub_list_dir_2){
+function_all_comp = function(counting, parameters = parameters_child, parameter_short = FALSE, sub_list_dir = sub_list_dir_2){
 step_mapping <- which(sub_list_dir=="Markdown/mapping_codelist")
 parameter_mapped <- ifelse(counting==step_mapping, FALSE, TRUE)
 child_env <- new.env()
@@ -663,9 +686,12 @@ child_env$child_header <- "##"
 child_env$step <- counting
 child_env$step_title <- paste0(" Treatment : " ,last_path(sub_list_dir[counting+1]))
 
+child_env$debug <- TRUE
+
+
 dir.create(paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]), "/figures/"), recursive = TRUE)
 
-child_env_comp$fig.path = paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]), "/figures/")
+child_env$fig.path = paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]), "/figures/")
 
 
 if( identical(readRDS(paste0(as.character(child_env$parameter_init),"/rds.rds")),readRDS(paste0(as.character(child_env$parameter_final),"/rds.rds")) )){NA}else{
@@ -744,19 +770,22 @@ if(file.exists("data/stats_irregular_areas.rds")){stats_irregular_areas <- readR
 ```
 
 ```{r statsirregularareasflextable,echo=FALSE, results='asis'}
+
 qflextable2(stats_irregular_areas, captionn ="Summary of the irregular area reallocation by unit", pgwidth = 6)
+
 ```
 
 
 
-
-
 ```{r not_mapped_total}
+
 if(file.exists("data/not_mapped_total.rds")){not_mapped_total <- readRDS("data/not_mapped_total.rds")} else {knitr::knit_exit()}
 
 ```
 
 ```{r summaryofthenotmappedfactors,echo=FALSE, results='asis'}
+
 qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and so replaced by 'UNK'", pgwidth = 6)
+
 ```
 

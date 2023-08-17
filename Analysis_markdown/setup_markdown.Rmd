@@ -75,25 +75,74 @@ knit_child_map =function(list_map_unit){
 }
 
 
-qflextable2 =function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, colour = FALSE){
-  y<-x
-  y <- y %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.character, ~str_replace_all( ., ",", ", \n" )) %>% 
-    dplyr::mutate_if(is.character,~str_replace_all( ., "_", "-" )) %>% dplyr::mutate_if(is.numeric, function(.){round(.,2)})
-  flextable <- flextable(y)
-  if(colour){
-    flextable <- flextable %>% 
-      color(~ `Difference (in % of tons)` < 0, color = "green",~ `Difference (in % of tons)`) %>% 
-      color(~ `Difference (in % of tons)` >0, color = "red",~ `Difference (in % of tons)`)%>%   color(~ `Difference (in % of fish)` < 0, color = "green",~ `Difference (in % of fish)`) %>% 
-      color(~ `Difference (in % of fish)` >0, color = "red",~ `Difference (in % of fish)`)%>%color(~ `Difference (in % of lines)` < 0, color = "green",~ `Difference (in % of lines)`) %>% 
-      color(~ `Difference (in % of lines)` >0, color = "red",~ `Difference (in % of lines)`)
-  } 
-  if(!is.null(captionn)){flextable_captionned <- set_caption(flextable, caption = captionn,  style = "Table Caption")} else {flextable_captionned <- flextable}
+qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = fig.path, grouped_data = NULL) {
+  if (all(class(x) == "flextable")) {
+    flextabley <- x
+  } else {
+    if (!(all(class(x) == "data.frame"))) {
+      x <- as.data.frame(x %>% dplyr::ungroup())
+    }
+    if (!is.null(save_folder)) {
+      if (!dir.exists(paste0(fig.pathinside, save_folder))) {
+        dir.create(paste0(fig.pathinside, save_folder))
+      }
+      save_path_data <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".csv" ))  # Adjust the file name as needed
+      fwrite(x, file = save_path_data)
+    }
+
+    y <- x %>% 
+      dplyr::ungroup() %>% 
+      dplyr::mutate_if(is.factor, as.character) %>% 
+      dplyr::mutate_if(is.character, ~ str_replace_all(., ",", ", \n" )) %>% 
+      dplyr::mutate_if(is.character, ~ str_replace_all(., "_", "-" )) %>% 
+      dplyr::mutate_if(is.numeric, function(.) { round(., 2) }) 
+
+    if(!is.null(grouped_data)){
+    y <- as_grouped_data(y, groups = grouped_data)
+  }
+
+if (!is.null(columns_to_color)) {
+    colormatrix <- ifelse(y %>% dplyr::select(all_of(columns_to_color)) < 0, "red", 
+                           ifelse(y %>% dplyr::select(all_of(columns_to_color)) > 0, "green", "white"))
+    flextabley <- flextable::flextable(y)
+    
+     flextabley <- flextabley %>% highlight(j = all_of(columns_to_color), color = colormatrix)
+    
+# my_color_fun <- function(x) {
+#   out <- rep("yellow", length(x))
+#   out[x < 0] <- "red"
+#   out[x > 0 ] <- "green"
+#   out[x  == 0 ] <- "black"
+#   out
+# }
+# ft <- highlight(ft, j = ~ drat + wt + qsec, color = my_color_fun)
+# ft
+
+    } else {    flextabley <- flextable::flextable(y)}
+    
+}
+
+if (!is.null(captionn)) {
+    flextable_captionned <- flextable::set_caption(flextabley, caption = captionn, style = "Table Caption")
+  } else {
+    flextable_captionned <- flextabley
+  }
+  
+
+  
   ft_out <- flextable_captionned %>% autofit()
-  ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
+  ft_out <- width(ft_out, width = dim(ft_out)$widths * pgwidth / flextable_dim(ft_out)$widths)
+  
+  if (!is.null(save_folder)) {
+    save_path_flextable <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".png"))  # Adjust the file name as needed
+    save_as_image(ft_out, path = save_path_flextable)
+  }
   
   return(ft_out)
-  
 }
+
+
+
 
 
 filtering_function= function(dataframe_to_filter, colnames_to_filter, matchingList, geo_dim, parameter_fact, parameter_UNK_for_not_standards_unit){
@@ -160,17 +209,17 @@ fonction_groupement = function(these_col, init, final){
     dplyr::mutate(loss = value_sum_1 - value_sum_2) %>%
     # Compute whether the difference in value is a gain or loss
     dplyr::mutate(`Loss / Gain` = dplyr::case_when(abs(loss) <= 1 ~ "Egal", loss > 1 ~"Loss",  loss < 1 ~"Gain")) %>%
-    dplyr::mutate(Loss_pourcent = 100*((value_sum_1 - value_sum_2)/value_sum_1)) %>%
+    dplyr::mutate(Loss_pourcent = - (100*((value_sum_1 - value_sum_2)/value_sum_1))) %>%
     dplyr::mutate(Dimension = colnames(groupement_1[1])) %>%
     dplyr::rename("Precision" = 1) %>%
     dplyr::mutate(Precision = as.character(Precision)) %>%
     dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    # Set Loss_pourcent to 100 if it is NA or -Inf
+    # Set Loss_pourcent to 100 if it is NA or -Inf or 0 
     dplyr::mutate(Loss_pourcent = base::ifelse(is.na(Loss_pourcent)|Loss_pourcent==-Inf, 100, Loss_pourcent)) %>%
     dplyr::ungroup() %>%
     # Compute the difference in the number of lines between the two dataframes
-    dplyr::mutate(loss_nb_ligne = number_lines1 - number_lines2) %>%
-    dplyr::mutate(`Difference in value`= (value_sum_2 - value_sum_1)) %>% #final - init
+    dplyr::mutate(loss_nb_ligne = - (number_lines1 - number_lines2)) %>%
+    dplyr::mutate(`Difference in value`= - (value_sum_1 - value_sum_2)) %>% #final - init
     dplyr::rename(`Difference (in %)` = Loss_pourcent,`Difference in number of lines` = loss_nb_ligne)%>%
     dplyr::mutate_if(is.numeric, list(~replace_na(., 0)))
   
@@ -181,6 +230,13 @@ save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside 
   if(!is.null(folder) && !dir.exists(folder)){
     dir.create(paste0(fig.path, folder))
   }
+  
+    if(all(class(plott) == "flextable")){
+      save_as_image(plott, title, path = paste0(fig.pathinside, folder))
+      
+
+    }
+
 ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = paste0(fig.pathinside, folder))
 ggsave(paste0( make.names(title), ".pdf"), plot = plott,  device = "pdf", path = paste0(fig.pathinside, folder))
 
@@ -303,7 +359,7 @@ for (package in required_packages) {
 
 # Install and load sutdycatchesird package from GitHub if not already installed
 if(!require(sutdycatchesird)){
-  remotes::install_github("BastienIRD/sutdycatchesird")
+  remotes::install_github("BastienIRD/sutdycatchesird", upgrade = "never")
   require(sutdycatchesird)
 }
 

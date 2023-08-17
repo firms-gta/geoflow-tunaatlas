@@ -498,12 +498,12 @@ nrowfinal <- nrow(final)
 join <- dplyr::full_join(init_group, final_group) %>% mutate(across(where(is.numeric), ~replace(., is.na(.), 0))) %>% dplyr::arrange(measurement_unit) %>%dplyr::rowwise() %>%  dplyr::mutate(measurement_unit = paste0(measurement_unit)) %>% dplyr::mutate(Difference = -titre_test1 + titre_test2)%>%mutate("Difference (in %)" = 100*(Difference /titre_test1)) %>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_1"))) := titre_test1)%>% dplyr::rename(!!as.symbol(eval(parse(text = "titre_2"))) := titre_test2)
 
 
-join <- qflextable(join%>% dplyr::mutate_if(is.numeric, function(.){round(.,2)})%>% dplyr::mutate(Difference= round(Difference)))%>% 
-          color(~ `Difference` > 0, color = "green",~ `Difference`) %>% 
-          color(~ `Difference` < 0, color = "red",~ `Difference`) %>% autofit()
-join <- width(join, width = dim(join)$widths*6 /(flextable_dim(join)$widths))
-
-join <- set_caption(join, "Summary of the difference between the two datasets")
+# join <- qflextable(join%>% dplyr::mutate_if(is.numeric, function(.){round(.,2)})%>% dplyr::mutate(Difference= round(Difference)))%>% 
+#           color(~ `Difference` > 0, color = "green",~ `Difference`) %>% 
+#           color(~ `Difference` < 0, color = "red",~ `Difference`) %>% autofit()
+# join <- width(join, width = dim(join)$widths*6 /(flextable_dim(join)$widths))
+# 
+# join <- set_caption(join, "Summary of the difference between the two datasets")
 
 
 
@@ -511,9 +511,7 @@ join <- set_caption(join, "Summary of the difference between the two datasets")
 
 
 ```{r eval=!unique_analyse,echo=FALSE, results='asis', out.width="100%"}
-
-join
-
+qflextable2(join, captionn = "Summary of the difference between the two datasets", columns_to_color = c("Difference"), save_folder = "Summary")
 ```
 
 
@@ -552,7 +550,7 @@ knit_child(text = c(
   '',
   'cat(knit_print(qflextable2(',
   '  groupe_df %>% dplyr::select(Dimension, measurement_unit, `Loss / Gain`, Precision, `Difference in millions` = `Difference in value`),',
-  '  captionn = paste0("Disappearing or appearing strata between ", titre_1, " and ", titre_2)',
+  '  captionn = paste0("Disappearing or appearing strata between ", titre_1, " and ", titre_2), columns_to_color = c("Difference in millions"), save_folder = "Diffstratas"',
   ')))',
   '',
   '```'
@@ -588,7 +586,7 @@ rownames(s) <- paste0("Number of ", rownames(s))
 if(!(require(tibble))){ 
   install.packages("tibble") 
   (require(tibble))} 
-qflextable2(s %>% tibble::rownames_to_column(" "), captionn = "Comparison of number of stratas between the two datasets")
+qflextable2(s %>% tibble::rownames_to_column(" "), captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), save_folder = "Diffstratas")
 
 ```
 
@@ -617,7 +615,7 @@ We first present the main characteristics of each dimension.
 cat_title("## Time coverage")
 ```
 
-We present the evolution of value in every unit available (id est `r unique(init$measurement_unit)` )
+We present the evolution of value in every unit available (id est **`r paste(unique(init$measurement_unit), sep = " , ")`** )
 
 ```{r include=FALSE}
 
@@ -815,7 +813,7 @@ cat_title("## Repartition of the data for the other dimensions")
 We check the distribution of the value of each dimension and each unit.
 
 ```{r }
-pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titre_1 = "first", 
+pie_chart_2_default = function (dimension, first, second = NULL, topn = 6, titre_1 = "first", 
   titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
 {
   first[is.na(first)] <- "NA"
@@ -834,11 +832,11 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titr
   all_class_i <- first %>% dplyr::group_by(across(c(dimension, 
     "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
     na.rm = TRUE)) %>% filter(measurement_value != 0) %>% 
-    select(-measurement_value)
+    dplyr::select(-measurement_value)
   colnames(all_class_i) <- c("class", "measurement_unit")
   all_class_i <- all_class_i %>% mutate(class = paste(class, 
     measurement_unit, sep = " / "))
-  provisoire_i <- na.omit(first) %>% dplyr::group_by(dplyr::across(c(dimension, 
+  provisoire_i <- first %>% dplyr::group_by(dplyr::across(c(dimension, 
     "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
     na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>% 
     dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>% 
@@ -855,11 +853,11 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titr
     all_class_t <- first %>% dplyr::group_by(across(c(dimension, 
       "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
       na.rm = TRUE)) %>% filter(measurement_value != 0) %>% 
-      select(-measurement_value)
+      dplyr::select(-measurement_value)
     colnames(all_class_t) <- c("class", "measurement_unit")
     all_class_t <- all_class_t %>% mutate(class = paste(class, 
       measurement_unit, sep = " / "))
-    provisoire_t <- na.omit(second) %>% dplyr::group_by(across(c(dimension, 
+    provisoire_t <- second %>% dplyr::group_by(across(c(dimension, 
       "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
       na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>% 
       dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>% 
@@ -876,23 +874,23 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titr
       dplyr::filter(!is.na(class))
   }
   if (!is.null(second)) {
-    disappearing_stratas <- anti_join(all_class_i %>% select(class), 
-      all_class_t %>% select(class)) %>% distinct()
-    appearing_stratas <- anti_join(all_class_t %>% select(class), 
-      all_class_i %>% select(class)) %>% distinct()
+    disappearing_stratas <- anti_join(all_class_i %>% dplyr::select(class), 
+      all_class_t %>% dplyr::select(class)) %>% distinct()
+    appearing_stratas <- anti_join(all_class_t %>% dplyr::select(class), 
+      all_class_i %>% dplyr::select(class)) %>% distinct()
     number_disappearing_stratas <- nrow(disappearing_stratas)
     number_appearing_stratas <- nrow(appearing_stratas)
     summary_apparition <- ggdraw() + draw_label(paste0("Number of appearing stratas : ", 
       number_appearing_stratas), size = 10)
     if (number_appearing_stratas != 0) 
       summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ", 
-        paste((appearing_stratas %>% select(class) %>% 
+        paste((appearing_stratas %>% dplyr::select(class) %>% 
           distinct())$class, sep = ";")), size = 10)
     summary_apparition <- summary_apparition + draw_label(paste0(" \nNumber of disappearing stratas : ", 
       number_disappearing_stratas), size = 10)
     if (number_disappearing_stratas != 0) 
       summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ", 
-        paste((disappearing_stratas %>% select(class) %>% 
+        paste((disappearing_stratas %>% dplyr::select(class) %>% 
           distinct())$class, sep = ";")), size = 10)
   }
   set.seed(2)
@@ -921,13 +919,14 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titr
       "%")), color = "black") + theme(axis.ticks.x = element_blank(), 
     axis.text.x = element_blank()) + labs(x = "", y = "") + 
     scale_fill_manual(values = pal) + guides(fill = guide_legend(title = toupper(r))) + 
-    facet_wrap("measurement_unit") + scale_fill_discrete(na.translate = F)
+    facet_wrap("measurement_unit")
   if (!is.null(second)) {
     to_get_legend <- ggplot(rbind(provisoire_i %>% dplyr::filter(!is.na(class)), 
       provisoire_t %>% dplyr::filter(!is.na(class)))) + 
       aes(x = "", fill = class, group = class, weight = pourcentage) + 
-      geom_bar(position = "fill") + guides(fill = guide_legend(title = toupper(r)))
-    legend <- cowplot::get_legend(to_get_legend + scale_fill_discrete(na.translate = F))
+      geom_bar(position = "fill") + guides(fill = guide_legend(title = toupper(r)))+ 
+      scale_fill_manual(values = pal)
+    legend <- cowplot::get_legend(to_get_legend)
     ggplot_t <- ggplot(provisoire_t %>% dplyr::filter(!is.na(class))) + 
       aes(x = "", fill = class, group = class, weight = pourcentage) + 
       geom_bar(position = "fill") + scale_fill_hue(direction = 1) + 
@@ -936,10 +935,11 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titr
       dplyr::filter(!is.na(class)) %>% dplyr::mutate_if(is.numeric, 
       round)), size = 3, aes(x = 1, y = ypos_ligne/100, 
       label = paste0(round(pourcentage), "%")), color = "black") + 
-      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank()) + 
-      labs(x = "", y = "") + scale_fill_manual(values = pal) + 
-      theme(legend.position = "none") + facet_wrap("measurement_unit") + 
-      scale_fill_discrete(na.translate = F)
+      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())  +
+      labs(x = "", y = "") +  scale_fill_manual(values = pal) +
+      guides(fill = guide_legend(title = toupper(r))) + 
+    facet_wrap("measurement_unit") + 
+      theme(legend.position = "none") 
   }
   else {
     legend <- cowplot::get_legend(ggplot_i + scale_fill_discrete(na.translate = F))
@@ -1001,14 +1001,14 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 4, titr
     df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"), 
       Number = c(number_appearing_stratas, number_disappearing_stratas), 
       Detail = c(toString(paste((appearing_stratas %>% 
-        select(class) %>% mutate(class = gsub(" ", "", 
-        class)) %>% distinct())$class, sep = ";")), 
-        toString(paste((disappearing_stratas %>% select(class) %>% 
+        dplyr::select(class) %>% mutate(class = gsub(" ", 
+        "", class)) %>% distinct())$class, sep = ";")), 
+        toString(paste((disappearing_stratas %>% dplyr::select(class) %>% 
           mutate(class = gsub(" ", "", class)) %>% distinct())$class, 
           sep = ";"))), check.names = FALSE, fix.empty.names = FALSE)
     if (number_disappearing_stratas == 0 & number_appearing_stratas == 
       0) {
-      df <- df %>% select(-Detail)
+      df <- df %>% dplyr::select(-Detail)
     }
     list_df_plot <- list(plot = ploting_map, df = df)
     return(list_df_plot)
@@ -1301,10 +1301,21 @@ unit <- t  %>% dplyr::filter(`Difference (in %)` %notin% c(0,100, -Inf) & (value
 
 if(nrow(unit) != 0){
   
-  unit <- unit%>%dplyr::mutate(`Loss / Gain` = base::ifelse(loss >= 0, "Loss", "Gain")) %>% dplyr::mutate(`Loss / Gain` = dplyr::case_when(is.na(`Loss / Gain`) ~ "Gain", value_sum_1 == value_sum_2 ~"Egal", TRUE ~ `Loss / Gain`))%>%dplyr::mutate(Dimension = as.factor(Dimension)) %>%  dplyr::group_by(Dimension, measurement_unit,`Loss / Gain`) %>% arrange(desc(`Difference (in %)`)) %>% dplyr::mutate(id = row_number())%>%  dplyr::mutate(Precision = as.factor(base::ifelse(id>(topn),paste0("Others"),paste0(as.character(Precision))))) %>% dplyr::ungroup() %>%dplyr::group_by(`Loss / Gain`,Dimension,Precision, measurement_unit) %>%dplyr::summarise(across(is.numeric, sum)) %>%dplyr::mutate(`Difference (in %)` = (`Difference in value`/value_sum_1)*100) %>%dplyr::select(-id, -number_lines2)%>%dplyr::group_by(`Loss / Gain`,Dimension,measurement_unit) %>%  arrange(Dimension,measurement_unit,desc(`Difference (in %)`)) %>% mutate(Other_column = ifelse(Precision == "Others", 1, 0)) 
+    unit <- unit %>% dplyr::mutate(`Loss / Gain` = base::ifelse(loss >= 0, "Loss", "Gain")) %>%
+    dplyr::mutate(`Loss / Gain` = dplyr::case_when(is.na(`Loss / Gain`) ~ "Gain", value_sum_1 == value_sum_2 ~"Egal", TRUE ~ `Loss / Gain`))%>%
+    dplyr::mutate(Dimension = as.factor(Dimension)) %>%  dplyr::group_by(Dimension, measurement_unit,`Loss / Gain`) %>% 
+    arrange(desc(abs(`Difference (in %)`))) %>%
+    dplyr::mutate(id = row_number()) %>%  
+    dplyr::mutate(Precision = as.factor(base::ifelse(id>(topn),paste0("Others"),paste0(as.character(Precision))))) %>%
+    dplyr::ungroup() %>%dplyr::group_by(`Loss / Gain`,Dimension,Precision, measurement_unit) %>%
+    dplyr::summarise(across(is.numeric, sum)) %>%
+    dplyr::mutate(`Difference (in %)` = (`Difference in value`/value_sum_1)*100) %>%
+    dplyr::select(-id, -number_lines2)%>%
+    dplyr::group_by(`Loss / Gain`,Dimension,measurement_unit) %>%  arrange(Dimension,measurement_unit,desc(`Difference (in %)`)) %>%
+    mutate(Other_column = ifelse(Precision == "Others", 1, 0)) 
 
 
-t3 <- as_grouped_data(unit %>% dplyr::ungroup() %>% 
+t3 <- unit %>% dplyr::ungroup() %>% 
                       dplyr::rename(`Values dataset 1` = "value_sum_1",
                                     `Values dataset 2` = "value_sum_2") %>% 
                       dplyr::filter(`Loss / Gain` != "Egal") %>% 
@@ -1313,8 +1324,7 @@ t3 <- as_grouped_data(unit %>% dplyr::ungroup() %>%
                        dplyr::mutate_if(is.numeric, base::round, digits=2) %>% 
                       dplyr::group_by(Dimension, measurement_unit, `Loss / Gain`) %>% 
                       dplyr::arrange(Dimension, measurement_unit, `Loss / Gain`, Other_column, desc(abs(`Difference in value`))) %>% 
-                      dplyr::select(-Other_column),
-                    groups = c("Dimension", "measurement_unit", "Loss / Gain"))
+                      dplyr::select(-Other_column)
 
 } else {to_cat <- "There are no differences between stratas aside the appearing and disappearing ones"}
 
@@ -1324,7 +1334,7 @@ t3 <- as_grouped_data(unit %>% dplyr::ungroup() %>%
 
 
 
-if(nrow(unit != 0)){qflextable2(t3, captionn = "Difference between stratas of the two datasets")} else{cat(to_cat)}
+if(nrow(unit != 0)){qflextable2(t3, captionn = "Difference between stratas of the two datasets", grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas")} else{cat(to_cat)}
 
 ```
 
@@ -1354,7 +1364,7 @@ rownames(s) <- paste0("Number of ", rownames(s))
 if(!(require(tibble))){ 
   install.packages("tibble") 
   (require(tibble))} 
-qflextable2(s %>% tibble::rownames_to_column(" "), captionn = "Comparison of number of stratas between the two datasets with including the differences due to the mapping of codelist")
+qflextable2(s %>% tibble::rownames_to_column(" "), captionn = "Comparison of number of stratas between the two datasets with including the differences due to the mapping of codelist", save_folder = "Summary")
 ```
 
 

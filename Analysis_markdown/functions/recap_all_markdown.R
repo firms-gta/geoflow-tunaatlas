@@ -33,15 +33,23 @@ recap_all_markdown <- function(action, entity, config, options){
       install.packages("bookdown")
       require(bookdown)
     }
+    required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
+                           "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
+                           "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap")
+    
+    # Check if each package is already installed, and if not, install and load it
+    for (package in required_packages) {
+      library(package, character.only = TRUE)
+    }
     opts <- action$options
     debugging <- if(!is.null(opts$debugging)) opts$debugging else FALSE
     url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
     
     copyrmd <- function(x, url_path = url_analysis_markdown ){
       last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
-      if(!file.exists(paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x)))))
+      if(!file.exists(here(paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x))))))
         use_github_file(repo_spec =paste0(url_path,x),
-                        save_as = paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x))),
+                        save_as = (paste0(as.character(getwd())), paste0("/", last_path(x))),
                         ref = NULL,
                         ignore = FALSE,
                         open = FALSE,
@@ -128,13 +136,17 @@ recap_all_markdown <- function(action, entity, config, options){
                                     fig.path = paste0("tableau_recap_global_action/figures/"))
     child_env_global = new.env()
     list2env(parameters_child_global, env = child_env_global)
+    require(kableExtra)
     
     rmarkdown::render("tableau_recap_global_action_effort.Rmd"  , 
                       envir =  child_env_global, 
-                      output_file = paste0("output.html"),
+                      output_file = "output.html",
                       output_format = "html_document", output_dir = "tableau_recap_global_action")
 
-
+    rmarkdown::render("tableau_recap_global_action_effort.Rmd", 
+                      envir =  child_env_global, 
+                      output_file = paste0("Recap.pdf"),output_dir = "tableau_recap_global_action")
+    
     
     
     
