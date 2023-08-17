@@ -133,7 +133,7 @@ function(action, entity, config) {
   stepLogger(level = 0, step = stepnumber, msg = "Retrieve georeferenced catch or effort (+ processings for IATTC) AND NOMINAL CATCH if asked")
   stepnumber = stepnumber+1
   #-------------------------------------------------------------------------------------------------------------------------------------
-  
+  if(!exists("data/rawdata.rds")){
   rawdata <- opts
   #by default, at this step we will skip specific processings applied to IATTC data. These processings are eventually done later in the script (if options are activated)
   rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
@@ -180,7 +180,9 @@ function(action, entity, config) {
         filter(time_start <= min_time_start)
     }
   }
-  
+  } else {
+    georef_dataset <- readRDS("data/rawdata.rds")
+  }
   if(recap_each_step){
 	  function_recap_each_step(
 		"rawdata",
@@ -198,6 +200,13 @@ function(action, entity, config) {
 	  saveRDS(georef_dataset, "data/rawdata.rds")
   }
   
+  
+  # for(files in list.files("data")){
+  #   if(str_contains("catch", "effort" does not contain "codelist" "conversion factors"))
+  #     
+  #   i <- read_csv()
+  #   i <- map_codelist(i)
+  # }
   # -------------------------------------------------------------------------
   # PROCESSINGS FOR IATTC data
   
@@ -225,8 +234,17 @@ function(action, entity, config) {
 		function_recap_each_step(
 		  "iattc enriched",
 		  georef_dataset,
-		  "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
-		  "get_rfmos_datasets_level0"  ,
+		  "This step is using the different datasets provided by IATTC (6 datasets) and creating a binded version of all of them.
+		     IATTC PS catch-and-effort are stratified as following:
+                        # - 1 dataset for tunas, stratified by type of school (but not fishingfleet)
+                        # - 1 dataset for tunas, stratified by fishingfleet (but not type of school)
+                        # - 1 dataset for billfishes, stratified by type of school (but not fishingfleet)
+                        # - 1 dataset for billfishes, stratified by fishingfleet (but not type of school)
+                        # - 1 dataset for sharks, stratified by type of school (but not fishingfleet)
+                        # - 1 dataset for sharks, stratified by fishingfleet (but not type of school)
+                        ## So in total there are 6 datasets.  
+      This step is merging the different datasets provided and extracting type of school and adding it to the fishing_fleet datasets.",
+		  "raise_datasets_by_dimension"  ,
 		  list(options_include_IATTC)
 		)
 	}
@@ -255,7 +273,14 @@ function(action, entity, config) {
 		function_recap_each_step(
 		  "iattc raised for billfish and shark",
 		  georef_dataset,
-		  "Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
+		  "The effort is expressed here in terms of number of sets. This means in the case of the EPO 
+		  that the effort given in some datasets may correspond to a part of the total effort allocated to a stratum since it is the observed effort, 
+		  i.e. for which there was an observer on board the purse seine vessel. 
+		  (1) The unique and homogeneous effort would be that of tropical tunas 
+		  (2) to standardize the set of catches per stratum, 
+		  it is necessary to calculate a ratio of shark catches per set (observed) and swordfish catches per set (observed) and
+		  then multiply them by the effort carried over for tropical tunas since this is considered to be the effort of the fishery 
+		  (which targets tunas). The raising factor is tuna effort/billfish effort and tuna effort/shark effort.",
 		  "get_rfmos_datasets_level0"  ,
 		  list(options_include_IATTC)
 		)
@@ -369,8 +394,9 @@ function(action, entity, config) {
 		  
 		  
 
-      }
-	  
+	  }
+    }
+  }
 	  #Filter on species under mandate for FIRMS level 0
 	  #-------------------------------------------------------------------------------------------------
 	  stepLogger(level = 0, step = stepnumber, msg = "Filter on species under mandate for FIRMS level 0")
@@ -408,8 +434,8 @@ function(action, entity, config) {
 	  }
 	  
       
-    }
-  }
+    
+  
   
   #--------Overlapping zone (IATTC/WCPFC)---------------------------------------------------------------------------------------------------------------------
   #Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
@@ -667,7 +693,6 @@ function(action, entity, config) {
   
   #--------irregular areas------------------------------------------------------------------------------------------------------------------------------------
   #Irregular areas handling
-  #TODO this step should be removed, as it should be managed by IOTC from now
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   spatial_curation = NULL
   if(!is.null(opts$irregular_area)) if (opts$irregular_area %in% c("remove", "reallocate")) {
@@ -886,24 +911,24 @@ function(action, entity, config) {
 				"catch",
 				mapping_dataset = mapping_dataset,
 				dataset_to_map = iotc_conv_fact,
-				mapping_keep_src_code = FALSE,
+				mapping_keep_src_code = TRUE,
 				source_authority_to_map = c("IOTC")
 			  )$dataset_mapped
 			
-			iotc_conv_fact_mapped$time_start <-
-			  as.Date(iotc_conv_fact_mapped$time_start)
-			iotc_conv_fact_mapped$time_start <-
-			  as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
-			iotc_conv_fact_mapped$time_end <-
-			  as.Date(iotc_conv_fact_mapped$time_end)
-			iotc_conv_fact_mapped$time_end <-
-			  as.character(
-				lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
-			  )
-
-			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
+			# iotc_conv_fact_mapped$time_start <-
+			#   as.Date(iotc_conv_fact_mapped$time_start)
+			# iotc_conv_fact_mapped$time_start <-
+			#   as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
+			# iotc_conv_fact_mapped$time_end <-
+			#   as.Date(iotc_conv_fact_mapped$time_end)
+			# iotc_conv_fact_mapped$time_end <-
+			#   as.character(
+			# 	lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
+			#   )
+			# 
+			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% select(-c(species_src_code, gear_type_src_code)) %>% 
 			  dplyr::group_by(across(setdiff(everything(), "measurement_value"))) %>%
-			  dplyr::summarise(measurement_value = mean(measurement_value))
+			  dplyr::summarise(measurement_value = mean(measurement_value)) %>% distinct()
 			
 			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
 			  dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t") ~ "t", measurement_unit %in% c("NO", "no") ~ "no", TRUE ~ measurement_unit)) %>% 
@@ -1128,7 +1153,7 @@ function(action, entity, config) {
 		  )
 		  nominal_catch <-
 			readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]),
-							guess_max = 0)
+							guess_max = 0) 
 		  class(nominal_catch$measurement_value) <- "numeric"
 		  mapping_dataset <-
 			read.csv(
@@ -1283,6 +1308,8 @@ function(action, entity, config) {
 			"\n"
 		  ))
 		  
+		  nominal_catch$fishing_fleet <- "UNK"
+		  
 		  georef_dataset <-
 			function_raising_georef_to_nominal(
 			  con = con,
@@ -1334,11 +1361,6 @@ function(action, entity, config) {
 				  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
 				  iattc_ps_catch_billfish_shark_raise_to_effort ,
 				  iccat_ps_include_type_of_school,
-				  include_IATTC,
-				  include_IOTC,
-				  include_ICCAT,
-				  include_CCSBT,
-				  include_WCPFC,
 				  fact,
 				  raising_do_not_raise_wcfpc_data,
 				  raising_raise_only_for_PS_LL
