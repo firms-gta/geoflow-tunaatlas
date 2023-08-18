@@ -735,15 +735,13 @@ function(action, entity, config) {
         url_scripts_create_own_tuna_atlas,
         "aggregate_resolution.R"
       )) #modified for geoflow
-      georef_dataset <- aggregate_resolution(con, georef_dataset, 6)
-      georef_dataset <- georef_dataset$df
+      aggregated <- aggregate_resolution(con, georef_dataset, 6)
+      df_input_not_aggregated <- aggregated$df_input_not_aggregated
+      stats_not_aggregated <- aggregated$stats_not_aggregated
+      georef_dataset <- aggregated$df
       
 	  #TODO this should be removed, we are not going to treat irregular areas from IOTC
 	  #not sure to understand why this appears here... 
-	  if(!is.null(opts$irregular_area)){
-		removed_irregular_areas <- spatial_curation$df_input_areas_not_curated
-		stats_irregular_areas <- spatial_curation$stats
-	  }
    
       config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
       
@@ -1796,7 +1794,8 @@ function(action, entity, config) {
 	#----------------------------------------------------------------------------------------------------------------------------
 
 	#we do an aggregation by dimensions
-	dataset <- georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset), "measurement_value")) %>% dplyr::summarise(measurement_value =
+	dataset <- 
+	  georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset), "measurement_value")) %>% dplyr::summarise(measurement_value =
 																										   sum(measurement_value))
 	dataset <- data.frame(dataset)
 	if(!is.na(any(dataset$measurement_unit) == "TRUE")) if(any(dataset$measurement_unit) == "TRUE") dataset[(dataset$measurement_unit) == "TRUE",]$measurement_unit <- "t" #patch because of https://github.com/firms-gta/geoflow-tunaatlas/issues/41
