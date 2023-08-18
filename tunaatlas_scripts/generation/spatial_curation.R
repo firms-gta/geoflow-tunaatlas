@@ -10,12 +10,12 @@ if(remove_reallocate == "remove"){
   
   if (!is.null(df_input_cwp_grid)) {
     sum_fact_to_reallocate <- df_input_cwp_grid %>% 
-      dplyr::group_by(unit) %>% dplyr::summarise(value_reallocate = sum(value))
-    sum_whole_df_input <- df_input %>% dplyr::group_by(unit) %>% 
-      dplyr::summarise(value = sum(value))
+      dplyr::group_by(measurement_unit) %>% dplyr::summarise(value_reallocate = sum(measurement_value))
+    sum_whole_df_input <- df_input %>% dplyr::group_by(measurement_unit) %>% 
+      dplyr::summarise(measurement_value = sum(measurement_value))
     stats_reallocated_data <- dplyr::left_join(sum_whole_df_input, 
                                         sum_fact_to_reallocate)
-    stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$value * 
+    stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$measurement_value * 
       100
   }
   else {
@@ -48,7 +48,7 @@ df_input_not_curated <- df_input_areas_to_curate %>% dplyr::left_join(areas_to_p
 
 df_input_curated <- df_input_curated %>% dplyr::group_by_(.dots = setdiff(c(columns_df_input, 
                                                                                "geographic_identifier_project"), c("geographic_identifier", 
-                                                                                                                   "value"))) %>% summarise(value = sum(value))
+                                                                                                                   "measurement_value"))) %>% summarise(measurement_value = sum(measurement_value))
 df_input_curated$geographic_identifier <- df_input_curated$geographic_identifier_project
 df_input_curated$geographic_identifier_project <- NULL
 
@@ -58,12 +58,12 @@ df_input_final_curated <- rbind(data.frame(df_input_cwp_grid),
 )
 if (!is.null(df_input_final_curated)) {
   sum_fact_to_reallocate <- df_input_final_curated %>% 
-    dplyr::group_by(unit) %>% dplyr::summarise(value_reallocate = sum(value))
-  sum_whole_df_input <- df_input %>% dplyr::group_by(unit) %>% 
-    dplyr::summarise(value = sum(value))
+    dplyr::group_by(measurement_unit) %>% dplyr::summarise(value_reallocate = sum(measurement_value))
+  sum_whole_df_input <- df_input %>% dplyr::group_by(measurement_unit) %>% 
+    dplyr::summarise(measurement_value = sum(measurement_value))
   stats_reallocated_data <- dplyr::left_join(sum_whole_df_input, 
                                       sum_fact_to_reallocate)
-  stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$value * 
+  stats_reallocated_data$percentage_reallocated <- stats_reallocated_data$value_reallocate/stats_reallocated_data$measurement_value * 
     100
 }
 else {
