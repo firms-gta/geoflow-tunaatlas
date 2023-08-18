@@ -55,8 +55,8 @@ aggregate_resolution =function (con, df_input, resolution)
                                                                 )
   if (!is.null(df_input_final_aggregated_on_resolution_to_aggregate)) {
     sum_fact_to_reallocate <- df_input_final_aggregated_on_resolution_to_aggregate %>% 
-      group_by(unit) %>% summarise(value_reallocate = sum(measurement_value))
-    sum_whole_df_input <- df_input %>% group_by(unit) %>% 
+      group_by(measurement_unit) %>% summarise(value_reallocate = sum(measurement_value))
+    sum_whole_df_input <- df_input %>% group_by(measurement_unit) %>% 
       summarise(measurement_value = sum(measurement_value))
     stats_reallocated_data <- left_join(sum_whole_df_input, 
                                         sum_fact_to_reallocate)
