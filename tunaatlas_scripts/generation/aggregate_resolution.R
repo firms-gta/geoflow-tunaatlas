@@ -67,5 +67,5 @@ aggregate_resolution =function (con, df_input, resolution)
     stats_reallocated_data = NULL
   }
   return(list(df = df_input_final_aggregated_on_resolution_to_aggregate, df_input_not_aggregated = df_input_not_aggregated,
-              stats = stats_reallocated_data))
+              stats_not_aggregated = stats_reallocated_data))
 }
