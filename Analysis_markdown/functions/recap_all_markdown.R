@@ -2,68 +2,49 @@ recap_all_markdown <- function(action, entity, config, options){
   if(!file.exists("Markdown")){
     return(NULL)
   } else {
-    if(!(require(here))){ 
-      install.packages("here") 
-      (require(here))} 
-    if(!(require(usethis))){ 
-      install.packages("usethis") 
-      (require(usethis))} 
-    if(!(require(flextable))){ 
-      install.packages("flextable") 
-      (require(flextable))} 
-    if(!(require(readtext))){ 
-      install.packages("readtext") 
-      (require(readtext))} 
-    if(!(require(sf))){ 
-      install.packages("sf") 
-      (require(sf))} 
-    if(!(require(dplyr))){ 
-      install.packages("dplyr") 
-      (require(dplyr))} 
+    required_packages <- c(
+      "here", "usethis", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+      "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
+      "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
+      "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap"
+    )
     
-    if(!require(stringr)){
-      install.packages("stringr")
-      require(stringr)
-    }
-    if(!require(tibble)){
-      install.packages("tibble")
-      require(tibble)
-    }
-    if(!require(bookdown)){
-      install.packages("bookdown")
-      require(bookdown)
-    }
-    required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
-                           "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                           "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap")
-    
-    # Check if each package is already installed, and if not, install and load it
     for (package in required_packages) {
+      if (!requireNamespace(package, quietly = TRUE)) {
+        install.packages(package, dependencies = TRUE)
+      }
       library(package, character.only = TRUE)
     }
+    
     opts <- action$options
     debugging <- if(!is.null(opts$debugging)) opts$debugging else FALSE
-    url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
+
+    last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
+    library(curl)
     
-    copyrmd <- function(x, url_path = url_analysis_markdown ){
-      last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
-      if(!file.exists(here(paste0(gsub(as.character(here::here()),"",as.character(getwd())), paste0("/", last_path(x))))))
-        use_github_file(repo_spec =paste0(url_path,x),
-                        save_as = (paste0(as.character(getwd())), paste0("/", last_path(x))),
-                        ref = NULL,
-                        ignore = FALSE,
-                        open = FALSE,
-                        host = NULL
-        ) }      
-      c <- c("tableau_recap_global_action_effort.Rmd", 
-             "comparison.Rmd", 
-             "strata_conversion_factor_gihtub.Rmd", 
-             "template.tex",
-             "dmk-format.csl", 
-             "setup_markdown.Rmd", 
-             "strata_in_georef_but_no_nominal.Rmd"
-             )
-      lapply(c,copyrmd)
+    url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
+    target_dir <- getwd()  # Current working directory
+    
+    copyrmd <- function(x, url_path = url_analysis_markdown) {
+      target_file <- file.path(target_dir, last_path(x))
+      
+      if (!file.exists(target_file)) {
+        download_url <- paste0(url_path, x)
+        curl_download(download_url, target_file)
+      }
+    }
+    
+    c <- c("tableau_recap_global_action_effort.Rmd", 
+           "comparison.Rmd", 
+           "strata_conversion_factor_gihtub.Rmd", 
+           "template.tex",
+           "dmk-format.csl", 
+           "setup_markdown.Rmd", 
+           "strata_in_georef_but_no_nominal.Rmd"
+    )
+    
+    lapply(c, copyrmd)
+    
     
     con <- config$software$input$dbi
     
