@@ -21,7 +21,7 @@ Area.codesource_area as geographic_identifier,","","","area_labels.source_label 
 LEFT JOIN area.area_labels USING (id_area)"
 measurement_type,measurement_type.measurement_type,id_measurement_type,id_measurement_type,codesource_measurement_type,tablesource_measurement_type,measurement_type,TRUE,"measurement_type,","measurement_type_labels.codesource_measurement_type AS measurement_type,","measurement_type,","measurement_type_labels.codesource_measurement_type AS measurement_type,
 ","measurement_type_labels.source_label AS measurement_type_label,","measurement_type_label,",LEFT OUTER JOIN measurement_type.measurement_type_labels USING (id_measurement_type)
-measurement_unit,measurement_unit.measurement_unit,id_measurement_unit,id_measurement_unit,codesource_measurement_unit,tablesource_measurement_unit,measurement_unit,TRUE,"measurement_unit,","measurement_unit_labels.codesource_measurement_unit AS measurement_unit,","measurement_unit,","catchmeasurement_unit_labels.codesource_catchmeasurement_unit as measurement_unit,
+measurement_unit,measurement_unit.measurement_unit,id_measurement_unit,id_measurement_unit,codesource_measurement_unit,tablesource_measurement_unit,measurement_unit,TRUE,"measurement_unit,","measurement_unit_labels.codesource_measurement_unit AS measurement_unit,","measurement_unit,","measurement_unit_labels.codesource_measurement_unit as measurement_unit,
 ","measurement_unit_labels.source_label as measurement_unit_label,","measurement_unit_label,",LEFT OUTER JOIN measurement_unit.measurement_unit_labels USING (id_measurement_unit)
 sex,sex.sex,id_sex,id_sex,codesource_sex,tablesource_sex,sex,TRUE,"sex,","sex_labels.codesource_sex as sex,
 ","sex,","sex_labels.codesource_sex as sex,
