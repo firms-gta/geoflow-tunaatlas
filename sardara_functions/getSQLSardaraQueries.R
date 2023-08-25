@@ -179,6 +179,9 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
       columns_netcdf <- strsplit(paste(db_dimensions_parameters$sql_select_netcdf_from_fact_table[which(db_dimensions_parameters$dimension %in% 
                                                                                                           dataset_available_dimensions)], collapse = ""), 
                                  split = ",")[[1]]
+      columns_netcdf[] <- unlist(lapply(columns_netcdf, trimws))
+      columns_netcdf <- subset(columns_netcdf, columns_netcdf != "")
+      
       columns_csv_wms_wfs_with_labels <- c(columns_csv_wms_wfs, 
                                            strsplit(paste(db_dimensions_parameters$sql_select_labels_csv_wms_wfs_from_fact_table[which(db_dimensions_parameters$dimension %in% 
                                                                                                                                          dataset_available_dimensions)], collapse = ""), 
@@ -200,6 +203,7 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
     geo_identifier_column <- dbGetQuery(con, paste0("select distinct(tablesource_area) from ", 
                                                     dataset_metadata$database_table_name, " tab join area.area tab_link on tab_link.id_area=tab.id_area where tab.id_area<>0 and tab.id_metadata=", 
                                                     dataset_metadata$id_metadata))$tablesource_area
+    
     if (tolower(static_metadata_table_view_name) %in% tables_views_materializedviews) {
       column_names_and_types_dataset <- dbGetQuery(con, 
                                                    paste0("SELECT a.attname,pg_catalog.format_type(a.atttypid, a.atttypmod)\n                                                      FROM pg_attribute a\n                                                      JOIN pg_class t on a.attrelid = t.oid\n                                                      JOIN pg_namespace s on t.relnamespace = s.oid\n                                                      WHERE a.attnum > 0 \n                                                      AND NOT a.attisdropped\n                                                      AND s.nspname||'.'||t.relname = '", 
