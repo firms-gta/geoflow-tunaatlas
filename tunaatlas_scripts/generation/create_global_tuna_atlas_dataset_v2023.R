@@ -92,6 +92,10 @@ function(action, entity, config) {
   source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
+  #for filtering if needed
+  source(file.path(url_scripts_create_own_tuna_atlas, "dimension_filtering_function.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
+  
+  
   #for level 1 - FIRMS (candidate)
   source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "double_unit_data_handling.R")) # new function for double unit
@@ -1747,49 +1751,18 @@ function(action, entity, config) {
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	config$logger.info("Apply filters if filter needed (Filter data by groups of everything) ")
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#THIS NEED DOCUMENTATION
-	parameter_filtering = if (!is.null(opts$filtering)) opts$filtering else list(species = NULL, fishing_fleet = NULL)
+	# Filtering data on multiple dimension if needed for a particular final data
+	
+	parameter_filtering = if (!is.null(opts$filtering)) opts$filtering else list(species = NULL, fishing_fleet = NULL) # if nothing provided filtering is null so we provided first dimension with no filtering
 	if (is.character(parameter_filtering)) {
 	parameter_filtering <-
 	  eval(parse(text = toString(parameter_filtering)))
-	}
+	} #if opts$filtering is provided, we need to read the filtering parameters provided in the entities table as following ex parameter_option_filtering:c(species = "YFT", gear = c("09.32", 09.39"))
 
 	matchingList <-
-	parameter_filtering %>% purrr::keep(~ !is.null(.))
+	parameter_filtering %>% purrr::keep(~ !is.null(.)) #removing null params in case no option is provided
 
-	filtering_function = function(dataframe_to_filter,
-								filtering_params = matchingList) {
-		colnames_to_filter <-
-		  colnames(dataframe_to_filter %>% select(names(filtering_params)))
-		names(filtering_params) <- colnames_to_filter
-
-		filtering_params <-
-		  lapply(filtering_params, function(x) {
-			#handling single filter
-			if (length(x) == 1) {
-			  x <- c(x, x)
-			} else {
-			  x
-			}
-		  })
-
-		if (length(matchingList) != 0) {
-		  dataframe_to_filter <-
-			dataframe_to_filter %>% filter(!!rlang::parse_expr(
-			  str_c(
-				colnames_to_filter,
-				matchingList,
-				sep = '%in%',
-				collapse = "&"
-			  )
-			))
-		} else{
-		  dataframe_to_filter
-		}
-
-	}
-
-	georef_dataset <- filtering_function(georef_dataset)
+	georef_dataset <- dimension_filtering_function(georef_dataset, filtering_params = matchingList)
 
 	#----------------------------------------------------------------------------------------------------------------------------
 
