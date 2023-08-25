@@ -30,7 +30,7 @@ map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code =
   df_input <- data.frame(df_input)
   stats_data_not_mapped <- df_input %>% dplyr::mutate(sum_mapped_unmapped = ifelse(is.na(df_input[, 
                                                                                                   dimension_to_map]), "sum_value_not_mapped", "sum_value_mapped")) %>% 
-    group_by(sum_mapped_unmapped, measurement_unit) %>% summarise(sum_value_by_dimension = sum(measurement_value))
+    dplyr::group_by(sum_mapped_unmapped, measurement_unit) %>% dplyr::summarise(sum_value_by_dimension = sum(measurement_value))
   
   if(dimension_to_map=="fishing_fleet"){
     replace_unk <- "NEI"
