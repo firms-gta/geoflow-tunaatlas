@@ -76,7 +76,7 @@ knitr::opts_chunk$set(
 	warning = TRUE, fig.align = 'center', error = TRUE
 )
 
-options(knitr.duplicate.label = "allow")
+base::options(knitr.duplicate.label = "allow")
 
 
 
