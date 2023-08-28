@@ -44,6 +44,14 @@ function(action, entity, config){
   source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
   
+  #for reporting
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copyrmd.R")
+  # Saving options in a csv file and creating a new variable for each options
+  write_options_to_csv(opts)
+  
+  
   #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
   config$logger.info("Retrieving RFMOs nominal catch...")
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
@@ -87,11 +95,21 @@ function(action, entity, config){
 	## Species RMJ -------------
 	nominal_catch <- nominal_catch %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM", TRUE ~ species))
 	
+  ## Measurement type for ICCAT and IOTC -------------
+  nominal_catch <- nominal_catch %>% 
+      dplyr::mutate(measurement_type = case_when(measurement_type == "landings" ~ "Landings",
+                                                 measurement_type == "discards" ~ "Discards",
+      TRUE ~ measurement_type))
+    
 	# Filtering on species under mandate --------------------------------------
 	# done base on mapping between source_authority (tRFMO) and species 
 	url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
 	species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
-	nominal_catch <- nominal_catch %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species", "source_authority" = "source_authority"))
+	nominal_catch <- nominal_catch %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species",
+  "source_authority" = "source_authority"))
+	
+	removed <- nominal_catch %>% dplyr::anti_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species",
+  "source_authority" = "source_authority"))
   
 	if(recap_each_step){
 	  function_recap_each_step(
@@ -114,8 +132,6 @@ function(action, entity, config){
   }
   
   
-  
-  
   #### 9) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
   
   if (!is.null(SBF_data_rfmo_to_keep)){
@@ -127,6 +143,18 @@ function(action, entity, config){
       nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
     }
     config$logger.info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
+    
+    if(recap_each_step){
+      function_recap_each_step(
+        "Filtering_SBF_data",
+        nominal_catch,
+        paste0(
+          "Filtering SBF data to keep only data from",SBF_data_rfmo_to_keep),
+        "inner_join"  ,
+        NULL
+      )
+    }
+    
   }
   
   #final step
