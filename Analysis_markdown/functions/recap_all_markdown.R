@@ -131,7 +131,7 @@ recap_all_markdown <- function(action, entity, config, options){
     
     
     
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_Markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
     
 
     gc()

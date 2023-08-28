@@ -12,12 +12,6 @@ output:
 date: '2022-03-23'
 params:
   final: "~/Documents/Tunaatlas_level1/jobs/20220927110301_global_catch/entities/global_catch_1deg_level1_final/Markdown/Modifying_IOTC_cwp_errors"
-  rawdata: "data/rawdata"
-  dbname: ""
-  host: ""
-  port: 
-  user: ""
-  password: ""
   plotting: "plot"
   world_coastline: "gshhs_world_coastlines"
   con: con
@@ -44,102 +38,6 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r include=FALSE}
-
-
-formals(install.packages)$upgrade = "never"
-
-base::options(scipen=999)
-
-knitr::knit_hooks$set(inline = function(x) {   if(!is.numeric(x)){     x   }else{    prettyNum(round(x,2), big.mark=",")    } })
-
-if(!(require(base))){ 
-  install.packages("base") 
-  (require(base))} 
-if(!(require(flextable))){ 
-  install.packages("flextable") 
-  (require(flextable))} 
-if(!(require(remotes))){ 
-  install.packages("remotes") 
-  (require(remotes))} 
-if(!(require(utils))){ 
-  install.packages("utils") 
-  (require(utils))} 
-if(!(require(stringr))){ 
-  install.packages("stringr") 
-  (require(stringr))} 
-if(!(require(knitr))){ 
-  install.packages("knitr") 
-  (require(knitr))} 
-if(!(require(DBI))){ 
-  install.packages("DBI") 
-  (require(DBI))} 
-if(!(require(odbc))){ 
-  install.packages("odbc") 
-  (require(odbc))} 
-if(!(require(rlang))){ 
-  install.packages("rlang") 
-  (require(rlang))} 
-if(!(require(sf))){ 
-  install.packages("sf") 
-  (require(sf))} 
-if(!(require(kableExtra))){ 
-  install.packages("kableExtra") 
-  (require(kableExtra))} 
-if(!(require(readxl))){ 
-  install.packages("readxl") 
-  (require(readxl))} 
-if(!(require(readr))){ 
-  install.packages("readr") 
-  (require(readr))} 
-if(!(require(tidyr))){ 
-  install.packages("tidyr") 
-  (require(tidyr))} 
-if(!(require(ggplot2))){ 
-  install.packages("ggplot2") 
-  (require(ggplot2))} 
-if(!(require(stats))){ 
-  install.packages("stats") 
-  (require(stats))} 
-if(!(require(RColorBrewer))){ 
-  install.packages("RColorBrewer") 
-  (require(RColorBrewer))} 
-if(!(require(cowplot))){ 
-  install.packages("cowplot") 
-  (require(cowplot))} 
-if(!require(sutdycatchesird)){
-  if(!require(remotes)){
-    install.packages("remotes")
-  }
-  require(remotes)
-  install_github("BastienIRD/sutdycatchesird")
-  require(sutdycatchesird)
-}
-if(!(require(tmap))){ 
-  install.packages("tmap") 
-  (require(tmap))} 
-if(!(require(RPostgreSQL))){ 
-  install.packages("RPostgreSQL") 
-  (require(RPostgreSQL))} 
-if(!(require(officer))){ 
-  install.packages("officer") 
-  (require(officer))} 
-if(!(require(lubridate))){ 
-  install.packages("lubridate") 
-  (require(lubridate))} 
-if(!(require(dplyr))){ 
-  install.packages("dplyr") 
-  (require(dplyr))} 
-
-set_flextable_defaults(
-  font.size = 10,
-  font.color = "black",
-  digits = 2,
-  theme_fun = "theme_box"
-)
-```
-
-
 ```{r}
 # RMFOs
 RFMO_LEVELS = c("IATTC", "ICCAT", "WCPFC", "IOTC", "CCSBT")
@@ -159,31 +57,10 @@ SPECIES_COL    = data.frame(SPECIES_CODE = SPECIES_LEVELS,
 
 if(exists("params")){for (i in 1:length(params)){assign(paste0("parameter_",names(params)[i]), params[i][[1]])}
 }
-# 
-# out <- try((con <- config$software$output$dbi), silent = TRUE)
-# if("try-error" %in% class(out)){con <- parameter_con}
-# 
-# query <- "SELECT code, st_area(geom), geom from area.cwp_grid"
-# out <- try((world_sf <- st_read(con, query = query)), silent = TRUE)
-# if("try-error" %in% class(out)){con <- DBI::dbConnect(RPostgres::Postgres() , dbname = parameter_dbname, host = parameter_host,   port = parameter_port,
-#                                                        user = parameter_user,
-#                                                        password = parameter_password)}
-# 
-# world_sf <- st_read(con, query = query)
-# 
-# shapefile.fix <- st_make_valid(world_sf)%>% filter(!st_is_empty(.)) %>%dplyr::mutate(cat_geo = as.factor(dplyr::case_when(st_area == 1 ~ "1_deg", st_area == 25 ~ "5_deg", TRUE ~ ">_5_deg")))
-# shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
-
 shapefile.fix <- st_read("data/world_sf.csv") %>% select(-WKT) %>% rename(geom = geometry)
 
 
-# shapefile.fix <- st_make_valid(world_sf)%>% dplyr::filter(!st_is_empty(.)) %>%dplyr::mutate(cat_geo = as.factor(dplyr::case_when(st_area == 1 ~ "1_deg", st_area == 25 ~ "5_deg", TRUE ~ ">_5_deg")))
 shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
-
-
-
-# query <- "SELECT  code,st_area(geom), geom from area.gshhs_world_coastlines"
-# continent <- fSpatPlan_Convert2PacificRobinson(st_read(con, query = query)%>%dplyr::filter(!st_is_empty(.)))
 
 continent <- st_read("data/continent.csv")%>% select(-WKT) %>% rename(geom = geometry)
 
@@ -266,67 +143,6 @@ list_pie_chart <- list(setdiff(colnames_to_keep, unlist(list(time_dimension, geo
 ```
 
 
-```{r}
-pie_chart_2_default <- studycatchesird::pie_chart_2
-
-```
-
-
-```{r}
-function_pie_chart_df = function(dimension, ...){
-  formals(pie_chart_2_default)$dimension <- dimension
-  dimension_returned <- dimension
-  pie_chart = pie_chart_2_default(...)
-  if(exists("pie_chart$df")){
-    df = pie_chart$df
-  pie_chart = pie_chart$plot} else{
-    pie_chart = pie_chart
-    df = NULL}
-
-if(!is.null(df)){
-df <- qflextable2(df, captionn = paste0("Strata movement for the dimension : ", dimension_returned))}
-  return(list(pie_chart=pie_chart,df=df, dimension=dimension_returned))
-}
-```
-
-
-
-```{r}
-resume_knit_child = function(x){
-  
-  knitr::knit_child(text = c(
-    '',
-    '```{r}', 
-    'dimension_title <- gsub("_","..",x$dimension)',
-    '',
-    '```',
-    '',
-    '',
-    '',
-    '```{r results = "asis" ,fig.cap = paste0("Distribution in value for the dimension : ",(dimension_title))}',
-    '',
-    'x$pie_chart',
-    '```',
-    '',
-    '',
-    '',
-    '```{r results = "asis", eval= !is.null(x$df)}',
-    'x$df',
-    '',
-    '',
-    '```',
-    '',
-    '', 
-    ''
-
-
-
-
-  ), envir = environment(), quiet= TRUE)
-}
-```
-
-
 
 <!-- There are `r nrow(strata_no)` strata at the end of level0 which are declared in number. -->
 <!-- There are `r nrow(strata_t)` strata at the end of level0 which are declared in tons. -->
@@ -347,32 +163,6 @@ conversion_factor_level0 <- rbind(inner_join(strata_nomt , strata_mtno, by = set
   )%>% distinct()%>%
   group_by(gear, time_start, time_end, geographic_identifier, species, source_authority, schooltype, catchtype ,fishingfleet) %>%
   summarise(NO = sum(NO), MT = sum(MT)) %>% mutate(conversion_factor = MT/NO) %>% distinct()
-```
-
-
-
-
-```{r}
-qflextable2 =function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, colour = FALSE){
- y<-x
- y <- y %>% dplyr::mutate_if(is.factor, as.character) %>% dplyr::mutate_if(is.character, ~str_replace_all( ., ",", ", \n" )) %>% 
-  dplyr::mutate_if(is.character,~str_replace_all( ., "_", "-" )) %>% dplyr::mutate_if(is.numeric, function(.){round(.,2)})
-  flextable <- flextable(y)
-  if(colour){
-  flextable <- flextable %>% 
-          color(~ `Difference (in % of tons)` < 0, color = "green",~ `Difference (in % of tons)`) %>% 
-          color(~ `Difference (in % of tons)` >0, color = "red",~ `Difference (in % of tons)`)%>%   color(~ `Difference (in % of fish)` < 0, color = "green",~ `Difference (in % of fish)`) %>% 
-          color(~ `Difference (in % of fish)` >0, color = "red",~ `Difference (in % of fish)`)%>%color(~ `Difference (in % of lines)` < 0, color = "green",~ `Difference (in % of lines)`) %>% 
-          color(~ `Difference (in % of lines)` >0, color = "red",~ `Difference (in % of lines)`)
-  } 
-  if(!is.null(captionn)){flextable_captionned <- set_caption(flextable, caption = captionn,  style = "Table Caption")} else {flextable_captionned <- flextable}
-  ft_out <- flextable_captionned %>% autofit()
-  ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
-
-  return(ft_out)
-
-}
-
 ```
 
 

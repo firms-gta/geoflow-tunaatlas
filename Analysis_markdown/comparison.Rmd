@@ -70,7 +70,7 @@ fancyhdr:
 if(!exists("child")){child = FALSE} else{child = child}
 ```
 
-```{r eval = !child, child = 'setup_markdown.Rmd'}
+```{r child = 'setup_markdown.Rmd'}
 
 ```
 
@@ -127,9 +127,6 @@ if(is_null_or_not_exist(time_dimension)){time_dimension = c("time_start")}
 
 if(is_null_or_not_exist(geographical_dimension)){geographical_dimension = "geographic_identifier"}
 
-
-
-matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
 ```
 
 ```{r shapefilereading, include=FALSE, error=0}
@@ -252,7 +249,7 @@ knitr::knit_hooks$set(ggplot = function(before, options, envir) {
 })
 
 
-options(knitr.duplicate.label = "allow")
+base::options(knitr.duplicate.label = "allow")
 ```
 
 
@@ -384,30 +381,21 @@ cat(knit_mapped)
 ```
 
 
-```{r filteringfunctionondata}
-
-
-colnames_to_filter <- colnames(init %>% select(names(matchingList)))
-
-names(matchingList) <- colnames_to_filter
-
-matchingList <- lapply(matchingList, function(x){ #handling single filter
-  if(length(x) == 1){
-  x <- c(x, x) }else {
-    x
-  }
-
-}
-  )
-
+```{r filteringfunctiononsetup}
 
 formals(filtering_function)$geo_dim = geographical_dimension
 formals(filtering_function)$parameter_fact = parameter_fact
 formals(filtering_function)$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
+formals(filtering_function)$parameter_filtering = parameter_filtering
 
-init <- filtering_function(dataframe_to_filter = init, colnames_to_filter = colnames_to_filter, matchingList = matchingList)
 
-if(unique_analyse){final <- init[0,]} else {final <- filtering_function(final, colnames_to_filter = colnames_to_filter, matchingList = matchingList)}
+```
+
+
+```{r filteringfunctionondata}
+init <- filtering_function(dataframe_to_filter = init)
+
+if(unique_analyse){final <- init[0,]} else {final <- filtering_function(final)}
 
 
 
@@ -813,7 +801,7 @@ cat_title("## Repartition of the data for the other dimensions")
 We check the distribution of the value of each dimension and each unit.
 
 ```{r }
-pie_chart_2_default = function (dimension, first, second = NULL, topn = 6, titre_1 = "first", 
+pie_chart_2_default = function (dimension, first, second = NULL, topn = 8, titre_1 = "first", 
   titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
 {
   first[is.na(first)] <- "NA"
@@ -942,7 +930,8 @@ pie_chart_2_default = function (dimension, first, second = NULL, topn = 6, titre
       theme(legend.position = "none") 
   }
   else {
-    legend <- cowplot::get_legend(ggplot_i + scale_fill_discrete(na.translate = F))
+    legend <- cowplot::get_legend(ggplot_i + 
+      scale_fill_manual(values = pal))
   }
   if (title_yes_no) {
     title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ", 

@@ -68,14 +68,15 @@ fancyhdr:
 
 \clearpage
 
-
-
 ```{r setupmain, include=FALSE}
+
 knitr::opts_chunk$set(
 	echo = TRUE,
 	message = debugging,
 	warning = TRUE, fig.align = 'center', error = TRUE
 )
+
+options(knitr.duplicate.label = "allow")
 
 
 
@@ -92,122 +93,26 @@ on.exit({
 
 ```
 
+```{r child = 'setup_markdown.Rmd'}
 
-```{r message=FALSE, warning=FALSE, include=FALSE}
-formals(install.packages)$upgrade = "never"
-
-knitr::knit_hooks$set(inline = function(x) {   if(!is.numeric(x)){     x   }else{    prettyNum(round(x,2), big.mark=",")    } })
-
-
-
-# List of required packages
-required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
-                        "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap")
-
-# Check if each package is already installed, and if not, install and load it
-    required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", "readtext",
-                           "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                           "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap")
-    
-    # Check if each package is already installed, and if not, install and load it
-    for (package in required_packages) {
-      library(package, character.only = TRUE)
-    }
-# Install and load sutdycatchesird package from GitHub if not already installed
-# if(!require(sutdycatchesird)){
-#   remotes::install_github("BastienIRD/sutdycatchesird")
-require(sutdycatchesird)
-# }
-```
-
-```{r include=FALSE}
-knitr::opts_chunk$set(
-	echo = FALSE,
-	message = FALSE,
-	warning = FALSE, error = TRUE
-)
-
-# Custom hook for knitr options
-# Custom hook for knitr options
-knitr::opts_chunk$set(fig.filename = paste0("figure_", knitr::opts_current$get("fig.cap"), ".png"), fig.path = fig.path)
-
-# Custom hook for kable
-knitr::knit_hooks$set(kable = function(before, options, envir) {
-  if (before && is.null(options$tab.cap)) {
-    filename <- paste0(knitr::opts_current$get("label"), ".html")
-    save_as_html(kable_table, filename)
-  }
-  NULL
-})
-
-# Custom hook for qflextable
-knitr::knit_hooks$set(qflextable = function(before, options, envir) {
-  if (before && is.null(options$tab.cap)) {
-    filename <- paste0(knitr::opts_current$get("label"), ".docx")
-    save_as_docx(qflextable_table, filename)
-  }
-  NULL
-})
-
-# Custom hook for ggplot
-knitr::knit_hooks$set(ggplot = function(before, options, envir) {
-  if (before) {
-    # Get the chunk label (chunk name)
-    chunk_label <- knitr::opts_chunk$get("label")
-
-    # Check if the chunk label is not NULL
-    if (!is.null(chunk_label)) {
-      filename_pdf <- paste0(chunk_label, ".pdf")
-      filename_png <- paste0(chunk_label, ".png")
-      filename_html <- paste0(chunk_label, ".html")
-
-      ggsave(filename_pdf, plot = ggplot_object, device = "pdf")
-      ggsave(filename_png, plot = ggplot_object, device = "png")
-      webshot::webshot(ggplot_object, file = filename_html)
-    }
-  }
-  NULL
-})
-
-options(knitr.duplicate.label = "allow")
-```
-
-
-```{r namingplots, include=FALSE}
-counter <- 1  # Initialize a counter
-
-knitr::opts_hooks$set(plot = function(options) {
-  if (!is.null(options$fig.cap)) {
-    filename <- paste0(options$label, "_", counter, ".pdf")
-    options$fig.path <- paste0(fig.path, "figures/", filename)
-    counter <<- counter + 1  # Increment the counter
-  }
-  options
-})
 ```
 
 ```{r include=FALSE, cache = FALSE}
 
 opts <- entity$data$actions[[1]]$options
 con <- config$software$input$dbi
+
 if(!exists("parameter_fact") | is.null("parameter_fact")){parameter_fact <-  opts$fact}
 if(!is.null(opts$filtering)){parameter_filtering <-opts$filtering} else{ parameter_filtering <-list(species = NULL, fishingfleet = NULL)}
 if(is.character(parameter_filtering)){
   parameter_filtering <- eval(parse(text=toString(parameter_filtering)))
 }
 
-
-# if(exists('params')){parameters <- params}else{
 parameters_child <- list(config = config, entity = entity,opts = opts ,action = action, parameter_filtering = parameter_filtering, parameter_fact = parameter_fact, parameter_con = con,parameter_host =config$software$input$dbi_config$parameters$host, parameter_port = config$software$input$dbi_config$parameters$port,  parameter_user = config$software$input$dbi_config$parameters$user,parameter_dbname=config$software$input$dbi_config$parameters$dbname, parameter_password = config$software$input$dbi_config$parameters$password,  child = TRUE, no_recap_options = TRUE, plotting_type = "plot",parameter_colnames_to_keep = c("fishing_fleet",         "gear_type",                 "time_start",                 
                       "geographic_identifier","fishing_mode",           "species",                       
                       "measurement_unit",                 "measurement_value",                "source_authority"), treatment = FALSE)
 
-# }
 ```
-
-
-
 
 ```{r include=FALSE}
 knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
@@ -220,34 +125,6 @@ set_flextable_defaults(
   digits = 2,
   theme_fun = "theme_box"
 )
-qflextable2 =function(x, captionn = NULL, autonumm = autonum, pgwidth = 4, colour = FALSE, coloured_columns = NULL){
-
-  y <- x %>% dplyr::mutate_if(is.factor, as.character) %>% 
-  dplyr::mutate_if(is.character,~str_replace_all( ., "_", "-" ))  %>%  dplyr::mutate_if(is.character,~str_replace_all( ., "\n", " " )) %>%  dplyr::mutate_if(is.character,~str_replace_all( ., "  ", " " ))%>%rowwise() %>% mutate_if(is.character, toString)%>% dplyr::mutate_if(is.numeric, function(.){round(.,2)})
-  flextable <- flextable(y)
-  if(colour){
-    flextable <- flextable %>% color()
-  flextable <- flextable %>% color(j = coloured_columns )
-          color(~ `Difference (in % of tons)` < 0, color = "green",~ `Difference (in % of tons)`) %>% 
-          color(~ `Difference (in % of tons)` >0, color = "red",~ `Difference (in % of tons)`)%>%   color(~ `Difference (in % of fish)` < 0, color = "green",~ `Difference (in % of fish)`) %>% 
-          color(~ `Difference (in % of fish)` >0, color = "red",~ `Difference (in % of fish)`)%>%color(~ `Difference (in % of lines)` < 0, color = "green",~ `Difference (in % of lines)`) %>% 
-          color(~ `Difference (in % of lines)` >0, color = "red",~ `Difference (in % of lines)`)
-  } 
-  if(!is.null(captionn)){flextable_captionned <- set_caption(flextable, caption = captionn,
-  style = "Table Caption")} else {flextable_captionned <- flextable}
-  # ft_out <- flextable_captionned%>%
-  # align(align = "left", part = "all") %>%
-  # set_table_properties(layout = "autofit")
-  ft_out <- flextable_captionned %>% autofit()
-
-  ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
-
-  # ft_out <- width(ft_out, width = dim(ft_out)$widths*pgwidth /(flextable_dim(ft_out)$widths))
-
-  knitr::knit_print(ft_out)
-
-}
-base::options(knitr.duplicate.label = "allow")#for duplicate chunk names
 
 ```
 
@@ -271,46 +148,24 @@ if (isNullList(parameter_filtering)){cat("There are no filter on this data in th
 ```{r include=FALSE}
 if(dir.exists("Markdown")){
 
-
   if(parameter_fact == "catch"){
-    nominal_dataset <- readr::read_csv(paste0(getwd(),"/data/global_nominal_catch_firms_level0.csv"))}else if (parameter_fact == "effort"){
-    nominal_dataset <- readr::read_csv(paste0(getwd(),"/data/global_nominal_catch_firms_level0.csv"))
+    nominal_dataset <- readr::read_csv(paste0("data/global_nominal_catch_firms_level0.csv"))}else if (parameter_fact == "effort"){
+    nominal_dataset <- readr::read_csv(paste0("data/global_nominal_catch_firms_level0.csv"))
     } 
   
-  else {nominal_dataset <- readr::read_csv(paste0(getwd(),"/data/global_nominal_catch_firms_level0.csv"))}
+  else {nominal_dataset <- readr::read_csv(paste0("data/global_nominal_catch_firms_level0.csv"))}
 
 
 }
 
 
-matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
-
-filtering_function = function(dataframe_to_filter, filtering_params = matchingList){
-  colnames_to_filter <- colnames(dataframe_to_filter %>% select(names(filtering_params)))
-  names(filtering_params) <- colnames_to_filter
-
-  filtering_params <- lapply(filtering_params, function(x){ #handling single filter
-  if(length(x) == 1){
-  x <- c(x, x) }else {
-    x
-  }
-  }
-    )
-  
-  if(length(filtering_params)!= 0){  dataframe_to_filter <- dataframe_to_filter%>% filter(!! rlang::parse_expr(str_c(colnames_to_filter, filtering_params, sep = '%in%', collapse="&")))} else{dataframe_to_filter}
-
-}
-
-
-nominal_dataset <- filtering_function(nominal_dataset)
-
-  
+nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
 
 ```
 
 \clearpage
 
-# Summary of the final provided data : `r entity$identifiers[["id"]]` 
+# Summary of the final provided data : `r gsub("_", "", entity$identifiers[["id"]])` 
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 
@@ -342,16 +197,13 @@ child_env_last$parameter_mapped <- TRUE
 child_env_last$last_to_first <- FALSE
 child_env_last$parameter_short <- FALSE
 
-dir.create(paste0(fig.path, "Reporton", entity$identifiers[["id"]], "/figures/"), recursive = TRUE)
+dir.create(paste0(fig.path, "Report_on_", entity$identifiers[["id"]], "/figures/"), recursive = TRUE)
 
 child_env_last$fig.path = paste0(fig.path,"Reporton", entity$identifiers[["id"]], "/figures/")
-
 
 # rmarkdown::render("comparison.Rmd", envir = child_env_last, quiet = TRUE)
 
 res2 <- knitr::knit_child("comparison.Rmd", envir = child_env_last, quiet = TRUE)
-
-
 
 ```
 
@@ -361,12 +213,9 @@ res2 <- knitr::knit_child("comparison.Rmd", envir = child_env_last, quiet = TRUE
 
 cat(res2, sep =  "\\clearpage")
 
-
 ```
 
-
 \clearpage
-
 
 # Summary of the treatment done on the data (comparison between the Initial data and the data resulting from treatments)
 
@@ -412,50 +261,35 @@ cat(res, sep =  "\\clearpage")
 
 The following table recap all the treatment done on the data provided by tRFMOs.
 
-```{r}
-matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
-matchingList <- lapply(matchingList, function(x){ #handling single filter
-  if(length(x) == 1){
-  x <- c(x, x) }else {
-    x
-  }
-
-}
-  )
-
-filtering_function= function(dataframe_to_filter, matchingList){
-  if(length(matchingList)!= 0){  
-    colnames_to_filter <- colnames(dataframe_to_filter %>% select(names(matchingList)))
-    names(matchingList) <- colnames_to_filter
-    dataframe_to_filter <- dataframe_to_filter%>% filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
-return(dataframe_to_filter)
-}
-```
-
-
-
 ```{r include=FALSE, eval=(parameter_fact == "catch")}
-if(!exists("nominal")){nominal <- 1}
+if(exists("nominal_dataset")){nominal <- sum(nominal_dataset$measurement_value)} else {nominal <- 1}
 df <- data.frame(matrix(ncol =13, nrow = 1))
       colnames(df) <- c(paste0(tail(str_split(paste0(sub_list_dir_2),"/")[[1]],n=1)),
                         "Explenation", "Fonctions", 
                         "Options", "Tons", "Number of fish", "Lines","Difference (in % of tons)","Difference in tons","Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", "Percentage of nominal"
       )
-          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), matchingList = matchingList)
+          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), parameter_filtering = parameter_filtering)
           tons_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("MTNO", "MT","t")))$measurement_value)
           nofish_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no")))$measurement_value)
           lines_init <- nrow(main)
-        # }
       for (i in sub_list_dir_2){
+        browser()
         Explenation <- readtext(paste0(i,"/explication.txt"))[2]
         Fonctions <- pull(readtext(paste0(i,"/fonctions.txt"))[2])
         if (file.exists(paste0(i,"/options_written.txt"))){
           Options <- pull(readtext(paste0(i,"/options_written.txt"))[2])} else {Options <- "Aucune"}
-          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), matchingList = matchingList)
+        if(length(matchingList) == 0){
+          sums <- read_csv(paste0(i,"/sums.csv"))
+        sum_t <- sums$somme_t
+        sum_no <- sums$somme_no
+        nrow <- sums$lines
+        } else {
+          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), parameter_filtering = parameter_filtering)
           sum_t <- sum((main %>% dplyr::filter(measurement_unit%in%c("MTNO", "MT","t")))$measurement_value)
           sum_no <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no")))$measurement_value)
-          nrow <- nrow(main)
-          
+         nrow <- nrow(main)
+
+        }
 
         step <- tail(str_split(paste0(i),"/")[[1]],n=1)
         Difference_percent <- -100*((tons_init - sum_t)/tons_init)
@@ -463,7 +297,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
         Difference_no <- -(nofish_init - sum_no)
         Difference_percent_lines <- -100*((lines_init - nrow)/lines_init)
         Difference_percent_no <- -100*((nofish_init - sum_no)/nofish_init)
-        percentage_of_nominal <- (sum_t*100)/nominal
+        percentage_of_nominal <- round((sum_t*100)/nominal, 1)
         sums <- as.data.frame(data.frame(sum_t, sum_no, nrow))
         data_i <- cbind(step,
                         Explenation, Fonctions, 
@@ -485,7 +319,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
      
 
       reduced <- df2 %>% mutate(`Millions of tons` = `Tons` / 1000000, `Millions of fish` = `Number of fish` / 1000000)%>% select(Step, `Millions of tons`, `Millions of fish`,# `Lines`,
-                                                                                                                                  "Difference (in % of tons)","Difference (in % of fish)")%>% dplyr::mutate(`Step number` = as.numeric(row_number()))
+                                                                "Difference (in % of tons)","Difference (in % of fish)", "Percentage of nominal")%>% dplyr::mutate(`Step number` = as.numeric(row_number()))
       reduced$Step <- factor(reduced$Step, levels = (reduced %>% arrange(`Step number`))$Step)
       
 
@@ -530,7 +364,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
                         "Options", "Sum in hooks", "Sum in fishing days", "Lines","Difference (in % of hooks)","Difference in hooks","Difference (in % of fishing days)","Difference in fishing days",  "Difference (in % of lines)", "Percentage of nominal"
       )
 
-          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), matchingList = matchingList)# %>% dplyr::filter(species%in%opts$species_filter)
+          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), parameter_filtering = parameter_filtering)# %>% dplyr::filter(species%in%opts$species_filter)
           hooks_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("HOOKS", "HOOKS")))$measurement_value)
           fishing_days_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("FDAYS", "FDAYS")))$measurement_value)
           lines_init <- nrow(main)
@@ -541,7 +375,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
         Fonctions <- pull(readtext(paste0(i,"/fonctions.txt"))[2])
         if (file.exists(paste0(i,"/options_written.txt"))){
           Options <- pull(readtext(paste0(i,"/options_written.txt"))[2])} else {Options <- "Aucune"}
-          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), matchingList = matchingList)# %>% dplyr::filter(species%in%filter_species)
+          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), parameter_filtering = parameter_filtering)# %>% dplyr::filter(species%in%filter_species)
           sum_hooks <- sum((main %>% dplyr::filter(measurement_unit%in%c("HOOKS", "HOOKS")))$measurement_value)
           sum_fdays <- sum((main %>% dplyr::filter(measurement_unit%in%c("FDAYS", "FDAYS")))$measurement_value)
           nrow <- nrow(main)
@@ -616,9 +450,9 @@ geom_line( aes(y=`Sum in millions of hooks`,group = 1), size=0.5)+theme(axis.tex
 
 ```
 
-
 ```{r echo=FALSE, results='asis', eval=(parameter_fact == "catch")}
-qflextable2(reduced, captionn ="Evolution of Tons and Number of fish and lines along the steps", pgwidth = 6)
+
+qflextable2(reduced, captionn ="Evolution of Tons and Number of fish and lines along the steps", pgwidth = 6, save_folder = "Summary", columns_to_color = c("Difference (in % of tons)","Difference (in % of fish)"), fig.pathinside = getwd())
 ```
 
 ```{r echo=FALSE, results='asis', eval=(parameter_fact == "effort")}
@@ -630,16 +464,14 @@ qflextable2(reduced,captionn ="Evolution of Sum in hooks and Sum in fishing days
 
 ```{r evolcapturesduringprocess, echo=FALSE, fig.cap='Evolution of captures in tons and number of fish during the process',results='asis', eval=(parameter_fact == "catch")}
 
-
-
+save_image(cowplot::plot_grid(tons_plot, no_fish_plot))
 cowplot::plot_grid(tons_plot, no_fish_plot)
-
-
 
 ```
 
 ```{r evlocapturesduringprocesseffort, echo=FALSE, fig.cap='Evolution of captures in fishing days and hooks during the process',results='asis', eval=(parameter_fact == "effort")}
 
+save_image(cowplot::plot_grid(fishing_days_plot, hooks_plot))
 cowplot::plot_grid(fishing_days_plot, hooks_plot)
 
 ```
@@ -658,8 +490,6 @@ try(cat(res3, sep =  "\\clearpage"))
 last_path = function(x){tail(stringr::str_split(x,"/")[[1]],n=1)}
 
 ```
-
-
 
 \clearpage
 

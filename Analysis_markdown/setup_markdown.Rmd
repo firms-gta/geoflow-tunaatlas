@@ -108,15 +108,6 @@ if (!is.null(columns_to_color)) {
     
      flextabley <- flextabley %>% highlight(j = all_of(columns_to_color), color = colormatrix)
     
-# my_color_fun <- function(x) {
-#   out <- rep("yellow", length(x))
-#   out[x < 0] <- "red"
-#   out[x > 0 ] <- "green"
-#   out[x  == 0 ] <- "black"
-#   out
-# }
-# ft <- highlight(ft, j = ~ drat + wt + qsec, color = my_color_fun)
-# ft
 
     } else {    flextabley <- flextable::flextable(y)}
     
@@ -141,15 +132,34 @@ if (!is.null(captionn)) {
   return(ft_out)
 }
 
+filtering_function= function(dataframe_to_filter, parameter_filtering, geo_dim = "geographic_identifier", parameter_fact = "catch", parameter_UNK_for_not_standards_unit = TRUE){
+  
+  matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
 
 
+  
+  if(length(matchingList)!= 0){  
+    
+        colnames_to_filter <- colnames(dataframe_to_filter %>% select(names(matchingList)))
 
+  names(matchingList) <- colnames_to_filter
 
-filtering_function= function(dataframe_to_filter, colnames_to_filter, matchingList, geo_dim, parameter_fact, parameter_UNK_for_not_standards_unit){
-  if(length(colnames_to_filter)!= 0){  dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
+  matchingList <- lapply(matchingList, function(x){ #handling single filter
+  if(length(x) == 1){
+  x <- c(x, x) }else {
+    x
+  }
+
+}
+  )
+
+    
+    dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
+  
   if(  parameter_UNK_for_not_standards_unit & parameter_fact == "effort"){
     dataframe_to_filter <- dataframe_to_filter %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit%in%c("HOOKS","FDAYS"), measurement_unit, "UNK" ))}
-  if("geographic_identifier"%in%colnames(dataframe_to_filter)){
+  
+  if(geo_dim != "geographic_identifier" && "geographic_identifier"%in%colnames(dataframe_to_filter)){
     dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("geographic_identifier" := {{geo_dim}})
   }
   return(dataframe_to_filter)
