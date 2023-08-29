@@ -14,12 +14,12 @@ dimension_filtering_function = function(dataframe_to_filter,
       }
     })
   
-  if (length(matchingList) != 0) {
+  if (length(filtering_params) != 0) {
     dataframe_to_filter <-
       dataframe_to_filter %>% filter(!!rlang::parse_expr(
         str_c(
           colnames_to_filter,
-          matchingList,
+          filtering_params,
           sep = '%in%',
           collapse = "&"
         )
