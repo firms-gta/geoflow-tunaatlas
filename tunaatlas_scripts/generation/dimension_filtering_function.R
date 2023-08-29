@@ -1,7 +1,7 @@
 dimension_filtering_function = function(dataframe_to_filter,
                               filtering_params = matchingList) {
   colnames_to_filter <-
-    colnames(dataframe_to_filter %>% select(names(filtering_params)))
+    colnames(dataframe_to_filter %>% dplyr::select(names(filtering_params)))
   names(filtering_params) <- colnames_to_filter
   
   filtering_params <-
