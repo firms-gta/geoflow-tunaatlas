@@ -90,11 +90,9 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   } else {aggBy <- c("geom_wkt","time_start")}
   
   
-  if(nchar(dimensions[1]) != 0 & !dimensions[1] %in% c('all','no') ){aggBy <- c(aggBy,dimensions)}
-  
-  if(tolower(dimensions)=='all' ){dimensions <- names(res_dimensions_and_variables)[-which( names(res_dimensions_and_variables) %in% c('measurement_value','geom_wkt','time_start','time_end'))];aggBy <- c(aggBy,dimensions)}
-  
-  if(tolower(dimensions)=='no' | nchar(dimensions[1]) == 0 ){dimensions = ''}
+  if(nchar(dimensions[1]) != 0 & !dimensions[1] %in% c('all','no') ){aggBy <- c(aggBy,dimensions)
+  } else if (tolower(dimensions)=='all' ){dimensions <- names(res_dimensions_and_variables)[-which( names(res_dimensions_and_variables) %in% c('measurement_value','geom_wkt','time_start','time_end'))];aggBy <- c(aggBy,dimensions)
+  } else if(tolower(dimensions)=='no' | nchar(dimensions[1]) == 0 ){dimensions = ''}
   
   # res_dimensions_and_variables <- aggregate(res_dimensions_and_variables['measurement_value'],setdiff(res_dimensions_and_variables[aggBy],"unit"),FUN=aggFun)
   res_dimensions_and_variables <- aggregate(res_dimensions_and_variables['measurement_value'],res_dimensions_and_variables[aggBy],FUN='sum')
@@ -295,7 +293,7 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   ncatt_put(nc,"crs","longitude_of_prime_meridian",0.0)
   ncatt_put(nc,"crs","semi_major_axis",6378137.0)
   ncatt_put(nc,"crs","inverse_flattening",298.257223563)
-  
+
   ncatt_put(nc,as.character(variable),"grid_mapping","crs")
   
   #################################
@@ -325,9 +323,6 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   MM <- format(as.Date(max(dateVector) - min(dateVector),origin = "0000-01-01 00:00:00"),'%m')
   DD <- format(as.Date(max(dateVector) - min(dateVector),origin = "0000-01-01 00:00:00"),'%d')
   ncatt_put(nc,0,"time_coverage_duration",paste("P",YY,"Y",as.numeric(MM)-1,"M",as.numeric(DD)-1,"D",sep=""))
-  # YY <- format(as.Date(dateVector[2] - min(dateVector),origin = "0000-01-01 00:00:00"),'%Y')
-  # MM <- format(as.Date(dateVector[2] - min(dateVector),origin = "0000-01-01 00:00:00"),'%m')
-  # DD <- format(as.Date(dateVector[2] - min(dateVector),origin = "0000-01-01 00:00:00"),'%d')
   YY <- 0
   MM <- 0
   ncatt_put(nc,0,"time_coverage_resolution",paste("P",YY,"Y",MM,"M",t_resolution,"D",sep=""))
@@ -344,12 +339,12 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   # ncatt_put(nc,0,"Conventions","CF 1.6")
   
   ##creator search
-  ncatt_put(nc,0,"creator_email","taha.imzilen@ird.fr julien.barde@ird.fr chloe.dalleau@ird.fr paul.taconet@ird.fr bastien.grasset@ird.fr")
-  ncatt_put(nc,0,"creator_name","IMZILEN.T BARDE.J DALLEAU.C TACONET.P")
+  ncatt_put(nc,0,"creator_email","julien.barde@ird.fr bastien.grasset@ird.fr emmanuel.blondel@fao.org")
+  ncatt_put(nc,0,"creator_name","BARDE.J GRASSET.B BLONDEL.E")
   ncatt_put(nc,0,"date_created", as.character(Sys.time()))
   ncatt_put(nc,0,"date_modified", as.character(Sys.time()))
-  ncatt_put(nc,0,"institution","Institut de Recherche pour le Developpement")
-  ncatt_put(nc,0,"contributor_name","ICCAT, IOTC, IATTC, WCPFC")
+  ncatt_put(nc,0,"institution","Institut de Recherche pour le Developpement, Food and Agriculture Organisation")
+  ncatt_put(nc,0,"contributor_name","ICCAT, IOTC, IATTC, WCPFC, CCSBT")
   ncatt_put(nc,0,"contributor_role","data provider")
   
   
@@ -413,7 +408,7 @@ if(length(unique(dataset$measurement_unit)) == 1){
 } else {return(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
 }
 #########!!!! 1.2 execution de la fonction pour transformer les données en Netcdf
-write_NetCDF(dataset_metadata,Variable='auto',dimensions='no', path = "data")
+write_NetCDF(dataset_metadata,Variable='auto',dimensions='all', path = "data")
 
 entity$addResource("netcdf", file.path("data",paste0(dataset_pid, ".nc")))
 
