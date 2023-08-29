@@ -120,7 +120,7 @@ function(action, entity, config){
 		  url_mapping_asfis_rfmo,
 		  " to keep only the species under mandate of tRFMOs. This file contains " ,
 		  as.character(length(nrow(
-			species_to_be_kept_in_level0
+		    species_to_be_kept_by_rfmo_in_level0
 		  ))),
 		  " species."
 		),
