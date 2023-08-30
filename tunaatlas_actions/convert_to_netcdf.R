@@ -361,7 +361,6 @@ dataset_pid <- entity$identifiers[["id"]]
 con <- config$software$output$dbi
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
 
-
 dataset_metadata<-dbGetQuery(con,paste0("SELECT * FROM metadata.metadata where identifier='",dataset_pid, "'"))
 query_netCDF<-getSQLSardaraQueries(con,dataset_metadata)$query_NetCDF
 dataset<-dbGetQuery(con,query_netCDF)
@@ -408,7 +407,7 @@ LEFT JOIN
 
 if(length(unique(dataset$measurement_unit)) == 1){
   dataset_metadata$measurement_unit <- unique(dataset$unit)
-} else {return(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
+} else {print(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
 }
 #########!!!! 1.2 execution de la fonction pour transformer les données en Netcdf
 write_NetCDF(dataset_metadata,Variable='auto',dimensions='all', path = "data")
@@ -416,3 +415,4 @@ write_NetCDF(dataset_metadata,Variable='auto',dimensions='all', path = "data")
 entity$addResource("netcdf", file.path("data",paste0(dataset_pid, ".nc")))
 
 }
+
