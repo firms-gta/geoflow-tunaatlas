@@ -1,5 +1,6 @@
 convert_to_netcdf = function(action, config, entity){
-
+  require(dplyr)
+  
   opts <- action$options
 wkt2spdf <- function(df, wkt_col_name, id_col_name, crs="+proj=longlat")
 {
@@ -52,7 +53,6 @@ wkt2spdf <- function(df, wkt_col_name, id_col_name, crs="+proj=longlat")
 }
 
 write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path = "data"){
-  browser()
   ########################
   #Used Packages:
   #######################
@@ -70,7 +70,7 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   ##netcdf name
   NetCDF_file_name <- file.path(path,paste0(dataset_metadata$identifier,".nc"))
   netCDF_CF_filename <-  NetCDF_file_name
-  sp_resolution <- dataset_metadata$sp_resolution
+  sp_resolution <- dataset_metadata$spatial_resolution
   
    if(!is.null(sp_resolution) && is.na(sp_resolution)){
     sp_resolution <- 5
@@ -357,6 +357,9 @@ dataset_pid <- entity$identifiers[["id"]]
 
 
 ## 1) Extract dataset in the appropriate structure
+
+con <- config$software$output$dbi
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/getSQLSardaraQueries.R")
 
 
 dataset_metadata<-dbGetQuery(con,paste0("SELECT * FROM metadata.metadata where identifier='",dataset_pid, "'"))
