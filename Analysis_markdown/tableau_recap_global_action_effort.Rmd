@@ -278,7 +278,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
         Fonctions <- pull(readtext(paste0(i,"/fonctions.txt"))[2])
         if (file.exists(paste0(i,"/options_written.txt"))){
           Options <- pull(readtext(paste0(i,"/options_written.txt"))[2])} else {Options <- "Aucune"}
-        if(length(matchingList) == 0){
+        if(length(parameter_filtering) == 0){
           sums <- read_csv(paste0(i,"/sums.csv"))
         sum_t <- sums$somme_t
         sum_no <- sums$somme_no
