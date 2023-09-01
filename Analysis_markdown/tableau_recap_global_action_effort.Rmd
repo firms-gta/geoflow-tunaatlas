@@ -273,7 +273,6 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
           nofish_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no")))$measurement_value)
           lines_init <- nrow(main)
       for (i in sub_list_dir_2){
-        browser()
         Explenation <- readtext(paste0(i,"/explication.txt"))[2]
         Fonctions <- pull(readtext(paste0(i,"/fonctions.txt"))[2])
         if (file.exists(paste0(i,"/options_written.txt"))){
