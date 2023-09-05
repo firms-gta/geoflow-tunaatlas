@@ -1,5 +1,5 @@
 #strata_in_georef_but_not_in_nominal_report
-copyrmd("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_Markdown/strata_in_georef_but_no_nominal.Rmd")
+copyrmd("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/strata_in_georef_but_no_nominal.Rmd")
 
 
 tryCatch({
