@@ -1016,7 +1016,7 @@ formals(pie_chart_2_default)$titre_2 <- titre_2
 # if ("Gear"%in% colnames(init) & "Gear"%in% colnames(final) ){
   # list_pie_chart <- list("fishing_fleet","source_authority","Gear")} else {
 
-list_pie_chart <- list(setdiff(colnames_to_keep, unlist(list(time_dimension, geographical_dimension, "measurement_unit", "measurement_value", "time_end"))))[[1]]
+list_pie_chart <- list(intersect(setdiff(colnames_to_keep, unlist(list(time_dimension, geographical_dimension, "measurement_unit", "measurement_value", "time_end"))), colnames(init)))[[1]]
     
 if(unique_analyse){
   formals(pie_chart_2_default)$titre_1 <- ""
