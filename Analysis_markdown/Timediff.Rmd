@@ -1,0 +1,71 @@
+---
+title: "Differenceintimedata"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+`r cat_title("## Differences in temporal data", child_headerinside = child_header)`
+
+```{r results='asis', eval=FALSE}
+cat_title("## Differences in temporal data")
+```
+
+Here is represented the differences in percent for each year.
+
+```{r timedimdiff}
+
+map <- lapply(parameter_time_dimension, function(filtering_unit, dataframe){ggplot(dataframe%>% dplyr::filter(Dimension == filtering_unit)%>%dplyr::mutate(Time = as.Date(Precision))) +
+aes(
+x = Time,
+y = `Difference (in %)`) +
+geom_line(size = 0.5) +
+scale_fill_hue(direction = 1) +
+theme(legend.position = "top") +
+facet_wrap(vars(measurement_unit), nrow = 2L)+theme_minimal()+
+labs(x = filtering_unit)+
+facet_grid("measurement_unit", scales = "free_y")}, dataframe = Groupped_all)
+
+```
+
+
+```{r timedimdiffmultipleplots}
+
+map_unit_knit_list <- lapply(map, function(x) {
+  tryCatch(
+    function_knitting(
+      x,
+      titre_init = titre_1,
+      titre_final = titre_2,
+      difference = TRUE,
+      find_and_print = outputonly,
+      folder = "Temporaldiff", fig.pathinside = fig.path
+    ),
+    error = function(e) {
+      # Handle the error here (you can print an error message or take other actions)
+      cat("Error occurred:", conditionMessage(e), "\n")
+      # Return a value or NULL to continue the loop
+      return(NULL)
+    }
+  )
+})
+```
+
+```{r timedimdiffmultipleplotsprinting, results='asis'}
+
+cat(unlist(map_unit_knit_list), sep = "\n")
+
+```
+

@@ -1,0 +1,69 @@
+---
+title: "Comparison Georef_to_nominal"
+output: html_document
+date: "2023-09-06"
+---
+
+
+```{r child = 'setup_markdown.Rmd'}
+
+```
+
+
+
+```{r eval = TRUE, include=FALSE}
+
+opts <- entity$data$actions[[1]]$options
+con <- config$software$output$dbi
+parameter_fact <-  opts$fact
+if(!is.null(opts$filtering)){parameter_filtering <-opts$filtering} else{ parameter_filtering <-list(species = NULL, fishing_fleet = NULL)}
+if(is.character(parameter_filtering)){
+  parameter_filtering <- eval(parse(text=toString(parameter_filtering)))
+}
+
+
+```
+
+
+# Comparison of the extend of nominal and georeferenced dataset
+
+```{r}
+
+
+parameters_child <- list(config = config, entity = entity,opts = opts ,action = action, parameter_filtering = parameter_filtering, parameter_fact = parameter_fact, parameter_con = con,parameter_host =config$software$input$dbi_config$parameters$host, parameter_port = config$software$input$dbi_config$parameters$port,  parameter_user = config$software$input$dbi_config$parameters$user,parameter_dbname=config$software$input$dbi_config$parameters$dbname, parameter_password = config$software$input$dbi_config$parameters$password,  child = TRUE, no_recap_options = TRUE, plotting_type = "plot",parameter_colnames_to_keep = c("fishing_fleet",         "gear_type",                 "year",   "fishing_mode",           "species",                       
+                      "measurement_unit",                 "measurement_value",                "source_authority"), treatment = FALSE)
+
+child_env_comp <- new.env()
+list2env(parameters_child, env = child_env_comp)
+
+child_env_comp$parameter_init <- "Markdown_nominal/nominal_catches"
+child_env_comp$parameter_final <- "Markdown_nominal/georef_for_nominal"
+child_env_comp$unique_analyse <- FALSE
+child_env_comp$parameter_titre_dataset_1 <- "Nominal catches"
+child_env_comp$parameter_titre_dataset_2 <- "Georeferenced data"
+child_env_comp$last_to_first <- FALSE
+child_env_comp$parameter_short <- FALSE
+child_env_comp$parameter_fact <- "catch"
+child_env_comp$time_dimension <- c("year")
+
+
+fig.pathchild <- paste0(fig.path, "Comparison/nominal_georef/figures/")
+dir.create(fig.pathchild, recursive = TRUE)
+
+child_env_comp$fig.path = fig.pathchild
+
+# rmarkdown::render("comparison.Rmd", envir = child_env_comp, quiet = TRUE)
+
+
+res <- knitr::knit_child("comparison.Rmd", envir = child_env_comp, quiet = TRUE)
+```
+
+
+
+
+```{r compgeorefnominal, echo=FALSE, results='asis'}
+
+cat(res, sep =  "\\clearpage")
+
+```
+

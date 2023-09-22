@@ -1,0 +1,110 @@
+---
+title: "Everyotherdimension"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+
+`r cat_title("## Repartition of the data for the other dimensions", child_headerinside = child_header)`
+
+```{r titleotherdim, results='asis', eval=FALSE}
+
+cat_title("## Repartition of the data for the other dimensions")
+
+```
+
+We check the distribution of the value of each dimension and each unit.
+
+```{r otherdimension-list-pie-chart}
+
+formals(pie_chart_2_default)$titre_1 <- titre_1
+formals(pie_chart_2_default)$titre_2 <- titre_2
+
+list_pie_chart <- list(intersect(setdiff(parameter_colnames_to_keep, unlist(list(parameter_time_dimension, parameter_geographical_dimension, "measurement_unit", "measurement_value", "time_end"))), colnames(init)))[[1]]
+    
+if(unique_analyse){
+  formals(pie_chart_2_default)$titre_1 <- ""
+}
+
+
+```
+
+
+
+```{r pie-charts-multiple-list}
+
+if(!unique_analyse){pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, second = final, topn = 5)}else{pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, topn = 5, title_yes_no = FALSE, fig. )}
+
+```
+
+```{r pie-charts-names, eval=unique_analyse}
+
+figures<- lapply(pie_charts_multiple, function(x){x$pie_chart})
+
+dimension_title_subfigures <- lapply(pie_charts_multiple, function(x){paste0("Distribution in value for the dimension : ", x$dimension)})
+
+
+```
+
+
+```{r dim-title-subfigures}
+
+if(!exists("dimension_title_subfigures") || is.null(dimension_title_subfigures)){
+
+  dimension_title_subfigures <- c("NULL","NULL")
+  saveRDS(dimension_title_subfigures,file.path(fig.path,  "dimension_title_subfigures.rds"))
+}
+
+
+
+```
+
+
+```{r outputonlyreading,eval=outputonly}
+
+
+dimension_title_subfigures <- readRDS(file.path("dimension_title_subfigures.rds"))
+
+```
+
+```{r subfigurespieplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
+
+for (i in figures){plot(i)}
+
+```
+
+
+
+
+```{r pie-charts-multiple, eval =!unique_analyse}
+
+pie_chart_knit <- lapply(pie_charts_multiple, function(x) {
+  tryCatch(
+    resume_knit_child(x, find_and_print = outputonly, fig.pathinside = fig.path),
+    error = function(e) {
+      # Handle the error here (you can print an error message or take other actions)
+      cat("Error occurred:", conditionMessage(e), "\n")
+      # Return a value or NULL to continue the loop
+      return(NULL)
+    }
+  )
+})
+
+```
+
+```{r unlist-pie-chart, results='asis', eval =!unique_analyse}
+cat(unlist(pie_chart_knit),  sep = "\n")
+```

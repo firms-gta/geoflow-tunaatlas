@@ -1,0 +1,99 @@
+---
+title: "Filereading_and_tidying"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+
+
+```{r filereading}
+init <- readRDS(paste0(as.character(parameter_init),"/rds.rds"))
+if(is_null_or_not_exist(parameter_final)){
+  final <- init[0,] 
+ unique_analyse <-  TRUE
+ } else{
+final <- readRDS(paste0(as.character(parameter_final),"/rds.rds")) 
+
+unique_analyse <- FALSE
+ }
+
+
+if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse){
+  titre_2 <- last_path_reduced(as.character(parameter_final))
+  } else if (unique_analyse) {
+  titre_2 <- "NONE"
+} else {
+    titre_2 <- parameter_titre_dataset_2
+}
+
+titre_2 <- gsub("_","-",titre_2)
+titre_1 <- gsub("_","-",titre_1)
+
+```
+
+
+```{r mappingifnot, include=FALSE, eval=TRUE}
+
+
+if(!parameter_mapped){
+  
+  con <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),
+host = config$software$input$dbi_config$parameters$host, port = config$software$input$dbi_config$parameters$port,  user = config$software$input$dbi_config$parameters$user,dbname=config$software$input$dbi_config$parameters$dbname, password = config$software$input$dbi_config$parameters$password)
+  
+mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
+      mapping_dataset <-
+        read.csv(
+          mapping_csv_mapping_datasets_url,
+          stringsAsFactors = F,
+          colClasses = "character"
+        )
+  mapping_keep_src_code <- FALSE
+
+  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/map_codelists.R")
+  init <- map_codelists(con = con, fact = parameter_fact, mapping_dataset = mapping_dataset, dataset_to_map = init, mapping_keep_src_code = FALSE, summary_mapping = TRUE)$dataset_mapped
+        
+  #this map condelist function is to retrieve the mapping dataset used
+  # final <- map_codelists(conn, parameter_fact, mapping_dataset, final, mapping_keep_src_code = FALSE, summary_mapping = FALSE)
+  dbDisconnect(con)
+}
+```
+
+```{r filetidying}
+
+list_return_init <- tidying_data_for_GTA(dataframe = init,time_dim = parameter_time_dimension, shape = shape_without_geom, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, species_group_dataframe = species_group,cl_cwp_gear_level2_dataframe = NULL)
+init <- list_return_init$dataframe
+final <- tidying_data_for_GTA(final,time_dim = parameter_time_dimension, shape = shape_without_geom, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, species_group_dataframe = species_group,cl_cwp_gear_level2_dataframe = NULL)$dataframe
+
+if(!exists("print_map") || is.null(print_map)){
+print_map <- list_return_init$print_map
+} else {print_map <- print_map}
+
+if(!exists("print_map") || is.null(print_map)){
+print_map<- TRUE}
+
+```
+
+
+```{r geographic-identifier-and-not-standards-effort}
+formals(function_geographic_identifier_renaming_and_not_standards_unit)$geo_dim = parameter_geographical_dimension
+formals(function_geographic_identifier_renaming_and_not_standards_unit)$parameter_fact = parameter_fact
+formals(function_geographic_identifier_renaming_and_not_standards_unit)$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
+
+init <- function_geographic_identifier_renaming_and_not_standards_unit(init)
+final <- function_geographic_identifier_renaming_and_not_standards_unit(final)
+
+
+```

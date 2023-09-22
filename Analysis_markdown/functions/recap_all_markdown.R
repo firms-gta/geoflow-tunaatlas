@@ -2,11 +2,11 @@ recap_all_markdown <- function(action, entity, config, options){
   if(!file.exists("Markdown")){
     return(NULL)
   } else {
-    required_packages <- c(
-      "here", "usethis", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+    required_packages <- c("webshot",
+      "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
       "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
       "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-      "cowplot", "tmap", "RPostgreSQL", "officer", "gdata", "tidyr", "knitr", "tmap"
+      "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
     )
     
     for (package in required_packages) {
@@ -20,7 +20,6 @@ recap_all_markdown <- function(action, entity, config, options){
     debugging <- if(!is.null(opts$debugging)) opts$debugging else FALSE
 
     last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
-    library(curl)
     
     url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
     target_dir <- getwd()  # Current working directory
@@ -34,16 +33,44 @@ recap_all_markdown <- function(action, entity, config, options){
       }
     }
     
-    c <- c("tableau_recap_global_action_effort.Rmd", 
-           "comparison.Rmd", 
-           "strata_conversion_factor_gihtub.Rmd", 
-           "template.tex",
-           "dmk-format.csl", 
-           "setup_markdown.Rmd", 
-           "strata_in_georef_but_no_nominal.Rmd"
+    # Existing files
+    c_existing <- c(
+      "tableau_recap_global_action_effort.Rmd", 
+      "comparison.Rmd", 
+      "strata_conversion_factor_gihtub.Rmd", 
+      "template.tex",
+      "dmk-format.csl", 
+      "setup_markdown.Rmd", 
+      "strata_in_georef_but_no_nominal.Rmd"
     )
     
-    lapply(c, copyrmd)
+    # Child Rmd files you want to include
+    c_child <- c(
+      "Setup_markdown.Rmd",
+      "Parameters_settings.Rmd",
+      "file_formatting.Rmd",
+      "Explenation.Rmd",
+      "Filtering_data.Rmd",
+      "Groupping_differences.Rmd",
+      "Strataloss.Rmd",
+      "Summarydifferences.Rmd",
+      "Compnumberstratas.Rmd",
+      "Timecoverage.Rmd",
+      "Spatialcoverage.Rmd",
+      "Otherdimensions.Rmd",
+      "Timediff.Rmd",
+      "Geographicdiff.Rmd",
+      "Differences_for_each_dimensions.Rmd",
+      "Recap_without_mapping.Rmd",
+      "Annexe.Rmd"
+    )
+    
+    # Combine existing and child Rmd files
+    c_all <- c(c_existing, c_child)
+    
+    # Download all files
+    lapply(c_all, copyrmd)
+    
     
     
     con <- config$software$input$dbi
@@ -52,7 +79,6 @@ recap_all_markdown <- function(action, entity, config, options){
     serviceVersion = "1.0.0" 
     logger = "INFO"
     # SOURCE: OGC ####
-    library(ows4R)
     WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
     sf = WFS$getFeatures("fifao:UN_CONTINENT2")
     st_write(sf, "data/continent.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
@@ -60,9 +86,6 @@ recap_all_markdown <- function(action, entity, config, options){
     
     WFS = WFSClient$new(url = url, serviceVersion = serviceVersion, logger = logger)
 
-    library(data.table)
-    library(sf)
-    library(sp)
     
     
     get_wfs_data <- function(url= "https://www.fao.org/fishery/geoserver/wfs", 
@@ -114,21 +137,23 @@ recap_all_markdown <- function(action, entity, config, options){
     
     parameters_child_global <- list(action = action,
                                     entity = entity, config = config, debugging = FALSE, 
-                                    fig.path = paste0("tableau_recap_global_action/figures/"))
+                                    fig.path = paste0("tableau_recap_global_action/figures/"), 
+                                    outputonly = FALSE)
     child_env_global = new.env()
     list2env(parameters_child_global, env = child_env_global)
-    require(kableExtra)
+    
+    source(file.path(url_analysis_markdown, "functions/species_and_gear_group.R"), child_env_global)
+    source(file.path(url_analysis_markdown, "functions/shapes.R"), child_env_global)
+    source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_global)
     
     rmarkdown::render("tableau_recap_global_action_effort.Rmd"  , 
                       envir =  child_env_global, 
-                      output_file = "output.html",
-                      output_format = "html_document", output_dir = "tableau_recap_global_action")
-
+                      output_dir = "tableau_recap_global_action")
+    
     rmarkdown::render("tableau_recap_global_action_effort.Rmd", 
                       envir =  child_env_global, 
-                      output_file = paste0("Recap.pdf"),output_dir = "tableau_recap_global_action")
-    
-    
+                      output_file = "Recap.pdf",
+                      output_dir = "tableau_recap_global_action")
     
     
     source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")

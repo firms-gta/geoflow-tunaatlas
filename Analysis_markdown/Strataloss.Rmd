@@ -1,0 +1,57 @@
+---
+title: "Strataloss"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+
+```{r stratasloss, eval=!unique_analyse, message=FALSE, warning=FALSE, include=FALSE}
+
+nb_ligne_init_millions <- nrow(init)
+nb_ligne_final_millions<- nrow(final)
+# 
+sum_valeur_init <- sum(init$measurement_value, na.rm = TRUE)
+sum_valeur_final <- sum(final$measurement_value, na.rm = TRUE)
+
+Groupped_all$Dimension <-as.character(Groupped_all$Dimension)
+Groupped_all$Precision <-as.character(Groupped_all$Precision)
+
+strates_perdues <- Groupped_all %>%dplyr::filter(value_sum_2 == 0 & `Loss / Gain` == "Loss")
+strates_gagnees <- Groupped_all %>%dplyr::filter(value_sum_1 == 0 & `Loss / Gain` == "Gain")
+nombre_strates_perdues <- nrow(strates_perdues)
+nombre_strates_gagnees <- nrow(strates_gagnees)
+nombres_de_strates_totales <- nrow(Groupped_all)
+pourcentage_strates_perdues <- 100-(100*((nombres_de_strates_totales-nombre_strates_perdues)/nombres_de_strates_totales))
+rm(init_no, init_t, final_no, final_t)
+gc()
+
+strates_perdues_first_10 <- rbind(strates_perdues,strates_gagnees) %>%dplyr::filter(`Loss / Gain` != 'Egal')%>%ungroup %>%dplyr::filter(Dimension!="geographic_identifier") %>%dplyr::group_by(`Loss / Gain`,Dimension,measurement_unit)%>%# slice(1:10) %>%
+  dplyr::select(Dimension, everything())
+
+if (nrow(strates_perdues_first_10)== 0){strates_perdues_first_10 <- rbind(strates_perdues,strates_gagnees) %>%dplyr::filter(`Loss / Gain` != 'Egal')%>%ungroup %>%dplyr::filter(Dimension!="geographic_identifier") %>%dplyr::group_by(`Loss / Gain`,Dimension,measurement_unit)%>% #slice(1:10) %>%
+  dplyr::select(Dimension, everything()) }
+
+strates_perdues_first_10[strates_perdues_first_10==""] <- "NA"
+strates_perdues_first_10[is.na(strates_perdues_first_10)] <- "NA"
+
+```
+
+```{r checkifnodiff,  eval=!unique_analyse , results='asis'}
+if (round(sum_valeur_init) == round(sum_valeur_final)&nrow(Groupped_all %>%dplyr::filter(`Loss / Gain` != 'Egal'))==0){
+  cat("There are no differences between the two datasets, this step is not changing the data in any way")
+  
+  knitr::knit_exit(fully = FALSE)}
+```

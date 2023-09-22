@@ -1,0 +1,72 @@
+---
+title: "Setup_markdown"
+author: "BastienG"
+date: "2023-09-13"
+output: html_document
+---
+
+```{r include=FALSE}
+
+knitr::opts_chunk$set(
+	echo = FALSE,
+	error = 0,
+	fig.align = "center",
+	message = FALSE,
+	warning = FALSE,
+	tab.cap.pre = "Table ",
+	tab.cap.sep = ": ", results = 'asis'
+)
+base::options(knitr.duplicate.label = "allow")
+```
+
+
+```{r options, include=FALSE}
+
+base::options(scipen=9999)
+plotting_type <- "plot" 
+if (knitr::is_html_output()){plotting_type <- "view" }
+tmap_mode(plotting_type)
+
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+set_flextable_defaults(
+  font.size = 10,
+  font.color = "black",
+  digits = 2,
+  theme_fun = "theme_box"
+)
+
+
+#set the dataset caption styling
+knitr::opts_chunk$set(tab.cap.pre = "Table ", tab.cap.sep = ": ")
+
+#set the dataset caption styling
+autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # number the table, bkm (bookmark) is important as the cross-referencing is done using the bookmark
+
+
+```
+
+
+
+```{r namingplots, eval=FALSE}
+
+counter <- 1  # Initialize a counter
+
+knitr::opts_hooks$set(plot = function(options) {
+  if (!is.null(options$fig.cap)) {
+    filename <- file.path(paste0(make.names(options$fig.cap), "_", counter))
+  } else if (!is.null(options$label)){ 
+    filename <- file.path(paste0(make.names(options$label), "_", counter))
+  } else {
+    filename <- file.path(paste0("unnamed_", counter))
+  }
+  options$fig.path <- file.path(fig.path, filename)
+  counter <<- counter + 1  # Increment the counter
+  
+})
+```
+
+

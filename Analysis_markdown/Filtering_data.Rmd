@@ -1,0 +1,51 @@
+---
+title: "Filtering_data"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+
+```{r filterprinting, echo=FALSE, results='asis'}
+
+if (isNullList(parameter_filtering)){cat("There is no filter on this data")} else {
+  
+  cat (paste0("The filter used on this data are:  \n "))
+  for (i in 1:length(parameter_filtering)){
+    if (parameter_filtering[i] %in% parameter_filtering & !is.null(parameter_filtering[[i]])){
+      cat(paste0("***- On ", names((parameter_filtering)[i]), " : ", paste((parameter_filtering)[[i]], collapse = " ; "),"*** \n"))
+    } else {""}
+  }
+}
+
+```
+
+
+
+```{r filteringfunctiononsetup}
+
+formals(filtering_function)$parameter_filtering = parameter_filtering
+
+
+```
+
+
+```{r filteringfunctionondata}
+
+init <- filtering_function(dataframe_to_filter = init)
+
+if(unique_analyse){final <- init[0,]} else {final <- filtering_function(final)}
+
+```

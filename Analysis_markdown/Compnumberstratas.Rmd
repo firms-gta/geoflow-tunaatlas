@@ -1,0 +1,95 @@
+---
+title: "Compnumberstratas"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+
+
+```{r diffstratas,echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE, results='asis'}
+
+
+
+strates_perdues_first_10 <- strates_perdues_first_10 %>% filter(Dimension %notin% parameter_geographical_dimension) %>% filter(Dimension %notin% parameter_time_dimension)
+
+if (nrow(strates_perdues_first_10)!=0){
+
+
+disapandap <- strates_perdues_first_10 %>%
+  dplyr::mutate(`Loss / Gain` = dplyr::case_when(
+    loss > 1 ~ "Loss",
+    abs(loss) <= 1 ~ "No differences",
+    loss < 1 ~ "Gain",
+    TRUE ~ NA_character_
+  )) %>%
+  dplyr::mutate(`Loss / Gain` = dplyr::case_when(
+    is.na(`Loss / Gain`) ~ "Gain",
+    value_sum_1 == value_sum_2 ~ "Egal",
+    TRUE ~ `Loss / Gain`
+  )) %>%
+  dplyr::ungroup() %>%
+  dplyr::rename(
+    `Values dataset 1` = "value_sum_1",
+    `Values dataset 2` = "value_sum_2"
+  ) %>%
+  dplyr::select(parameter_columns_to_keep) %>%
+  dplyr::group_by(Dimension, measurement_unit, `Loss / Gain`) %>%
+  dplyr::arrange(Dimension, measurement_unit, `Loss / Gain`, desc(`Difference in value`)) %>%
+  dplyr::ungroup() %>%  dplyr::select(Dimension, measurement_unit, `Loss / Gain`, Precision, `Difference in millions` = `Difference in value`)
+
+cat("The strata differences (completely lost or appearing) between the first one and the second one (representing ", round(pourcentage_strates_perdues), " % of the total number of strata) are :")
+
+} else {
+  cat("No stratum is gained nor lost")
+}
+
+```
+
+
+```{r disapandapflextable, eval = (nrow(strates_perdues_first_10)!=0),results="asis"}
+
+
+qflextable2(disapandap, captionn=paste0("Disappearing or appearing strata between ",`titre_1`," and ",`titre_2`),columns_to_color =c("Difference in millions"), grouped_data = c("Dimension" ,"measurement_unit",  "Loss / Gain" ))#,save_folder="Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE, find_and_print = FALSE)
+
+
+```
+
+```{r ,compnumberstratas}
+
+number_init_column <- as.data.frame(t(init %>% dplyr::select(-measurement_value) %>% summarise_all(list(~n_distinct(.))))) %>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_1"))) := V1)
+number_final_column <- as.data.frame(t(final %>% dplyr::select(-measurement_value) %>% summarise_all(list(~n_distinct(.)))))%>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_2"))) := V1)
+
+number_final_column<-number_final_column[order(row.names(number_final_column)), ,drop=F]
+number_init_column<-number_init_column[order(row.names(number_init_column)), ,drop=F]
+
+
+number_init_column_final_column <- cbind(number_init_column , number_final_column ) %>% mutate_all(as.numeric)
+number_init_column_final_column$Difference <- number_init_column_final_column[,2]-number_init_column_final_column[,1]
+
+rownames(number_init_column_final_column) <- paste0("Number of ", rownames(number_init_column_final_column))
+
+number_init_column_final_column <- as.data.frame(number_init_column_final_column %>% tibble::rownames_to_column(" "))
+
+```
+
+
+
+```{r compnumberstratascolumns,  results='asis', out.width="100%"}
+
+qflextable2(number_init_column_final_column, captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
+
+```
+

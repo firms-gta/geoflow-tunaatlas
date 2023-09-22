@@ -1,0 +1,36 @@
+---
+title: "Temporal_differences"
+author: "BastienG"
+date: "2023-09-08"
+output: html_document
+---
+
+```{r results='asis'}
+cat_title("## Differences in temporal data")
+```
+
+Here is represented the differences in percent for each year.
+
+```{r timedimdiff}
+
+map <- lapply(time_dimension, function(filtering_unit, dataframe){ggplot(dataframe%>% dplyr::filter(Dimension == filtering_unit)%>%dplyr::mutate(Time = as.Date(Precision))) +
+aes(
+x = Time,
+y = `Difference (in %)`) +
+geom_line(size = 0.5) +
+scale_fill_hue(direction = 1) +
+theme(legend.position = "top") +
+facet_wrap(vars(measurement_unit), nrow = 2L)+theme_minimal()+
+labs(x = filtering_unit)+
+facet_grid("measurement_unit", scales = "free_y")}, dataframe = Groupped_all)
+
+```
+
+
+```{r timedimdiffmultipleplots}
+map_unit_knit_list <- lapply(map, FUN = function_knitting)
+```
+
+```{r timedimdiffmultipleplotsprinting, results='asis'}
+cat(unlist(map_unit_knit_list), sep = "\n")
+```

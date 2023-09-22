@@ -1,0 +1,42 @@
+---
+title: "Grouppingdifferences"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+```{r firstfonctiongroupement, message=FALSE, warning=FALSE, include=FALSE}
+Dimensions <- colnames(init)[colnames(init) != "measurement_unit" & colnames(init)!= "measurement_value"& colnames(init)!= "SURFACE"]
+
+carte_init <- fonction_groupement(Dimensions[[1]],init %>% head(1), final%>% head(1))
+
+Groupped_all <- carte_init[0,]
+
+
+```
+
+
+
+```{r allfonctiongroupement,  message=FALSE, warning=FALSE, include=FALSE}
+
+for (i in Dimensions){
+  temporaire <- fonction_groupement(i,init, final)
+  assign(paste0("Groupped", i), temporaire)
+  
+  Groupped_all <- rbind(Groupped_all, temporaire)
+}
+
+```
+

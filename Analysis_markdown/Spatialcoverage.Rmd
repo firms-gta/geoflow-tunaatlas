@@ -1,0 +1,71 @@
+---
+title: "Spatialcoverage"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+\clearpage
+
+`r cat_title("## Spatial coverage ", child_headerinside = child_header)`
+
+```{r title-spatial-coverage, results='asis',eval=FALSE}
+cat_title("## Spatial coverage ")
+```
+
+
+```{r fonction-empreinte-spatial}
+
+map_unit <- lapply(unique(Groupped_all$measurement_unit), FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2)
+
+
+```
+
+```{r numbergridtype, results='asis'}
+
+
+number_of_GRIDTYPE <- length(unique(GrouppedGRIDTYPE$Precision))
+GRIDTYPE <- paste(as.list(unique(GrouppedGRIDTYPE$Precision)), collapse = " ; ")
+
+```
+
+```{r knitchildmapprintingdefinitionfunction, eval = print_map}
+knit_child_map_printing <- knitr::knit_child(text =c(
+    '',
+  '```{r results="asis"}', 
+  '',
+  '```',
+  '',
+  'We represent spatial coverage, faceted by geographical category. The geographical category depends on the area of the geographic polygon. In this case there are `r number_of_GRIDTYPE` categories which are `r GRIDTYPE`.', 
+   '\n',
+  ''
+
+  ), envir = environment(), quiet= TRUE)
+```
+
+```{r ,results='asis'}
+cat(knit_child_map_printing)
+```
+
+```{r echo=FALSE, results='asis'} 
+map_unit_knit_list <- lapply(map_unit, FUN = map_unit_knit,folder = "Geodistrib", find_and_print = outputonly )
+```
+
+
+```{r printingmaps, echo=FALSE, ,results='asis'}
+
+cat(unlist(map_unit_knit_list), sep = "\n")
+
+```

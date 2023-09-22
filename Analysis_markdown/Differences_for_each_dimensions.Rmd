@@ -1,0 +1,78 @@
+---
+title: "Differencesforeachdimensions"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+`r cat_title("## The differences for each other dimension", child_headerinside = child_header)`
+
+\clearpage
+
+This section detail the differences that are observed between the dataframe ***`r titre_1`*** and ***`r titre_2`***.
+
+```{r topn}
+
+topn <- 6
+
+```
+
+We will look for each dimension the `r topn` most important differences without presenting the stratas completely appearing or desappearing.
+
+```{r Groupped-not-disap-or-ap-stratas}
+
+Groupped_all_not_disap_or_app <- Groupped_all  %>% dplyr::filter(`Difference (in %)` %notin% c(0,100, -Inf) & (value_sum_1!=0 )& value_sum_2!=0 ) 
+
+Groupped_all_not_disap_or_app <- Groupped_all_not_disap_or_app %>% filter( Dimension %in% list_pie_chart)
+
+
+if(nrow(Groupped_all_not_disap_or_app) != 0){
+  
+    Groupped_all_not_disap_or_app <- Groupped_all_not_disap_or_app %>% dplyr::mutate(`Loss / Gain` = base::ifelse(loss >= 0, "Loss", "Gain")) %>%
+    dplyr::mutate(`Loss / Gain` = dplyr::case_when(is.na(`Loss / Gain`) ~ "Gain", value_sum_1 == value_sum_2 ~"Egal", TRUE ~ `Loss / Gain`))%>%
+    dplyr::mutate(Dimension = as.factor(Dimension)) %>%  dplyr::group_by(Dimension, measurement_unit,`Loss / Gain`) %>% 
+    arrange(desc(abs(.data[[parameter_diff_value_or_percent]]))) %>%
+    dplyr::mutate(id = row_number()) %>%  
+    dplyr::mutate(Precision = as.factor(base::ifelse(id>(topn),paste0("Others"),paste0(as.character(Precision))))) %>%
+    dplyr::ungroup() %>%dplyr::group_by(`Loss / Gain`,Dimension,Precision, measurement_unit) %>%
+    dplyr::summarise(across(is.numeric, sum)) %>%
+    dplyr::mutate(`Difference (in %)` = (`Difference in value`/value_sum_1)*100) %>%
+    dplyr::select(-id, -number_lines2)%>%
+    dplyr::group_by(`Loss / Gain`,Dimension,measurement_unit) %>%  arrange(Dimension,measurement_unit,desc(abs(.data[[parameter_diff_value_or_percent]]))) %>%
+    mutate(Other_column = ifelse(Precision == "Others", 1, 0)) 
+
+
+
+Groupped_all_not_disap_or_app_to_dysplay <- Groupped_all_not_disap_or_app %>% dplyr::ungroup() %>% 
+                      dplyr::rename(`Values dataset 1` = "value_sum_1",
+                                    `Values dataset 2` = "value_sum_2") %>% 
+                      dplyr::filter(`Loss / Gain` != "Egal") %>% 
+                      dplyr::select(parameter_columns_to_keep, Other_column) %>% 
+                      dplyr::mutate(across(c("Values dataset 1", "Values dataset 2", "Difference in value"),  ~ round(., digits = 0))) %>% 
+                       dplyr::mutate_if(is.numeric, base::round, digits=2) %>% 
+                      dplyr::group_by(Dimension, measurement_unit, `Loss / Gain`) %>% 
+dplyr::arrange(Dimension, measurement_unit, `Loss / Gain`, Other_column, desc(abs(.data[[parameter_diff_value_or_percent]]))) %>%                      dplyr::select(-Other_column)
+
+} else {no_diff_text <- "There are no differences between stratas aside the appearing and disappearing ones"}
+
+
+```
+
+```{r printing-table-diff-dimensions, paged.print=TRUE, results='asis'}
+
+if(nrow(Groupped_all_not_disap_or_app != 0)){qflextable2(Groupped_all_not_disap_or_app_to_dysplay, captionn = "Difference between stratas of the two datasets", grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", find_and_print = outputonly)} else{cat(no_diff_text)}
+
+```
+

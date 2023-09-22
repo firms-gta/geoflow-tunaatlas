@@ -70,21 +70,7 @@ fancyhdr:
 
 ```
 
-```{r}
 
-url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
-species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
-
-is_null_or_not_exist = function(x) {
-  if (!exists(deparse(substitute(x))) || is.null(x)) {
-    return(TRUE)
-  } else {
-    return(FALSE)
-  }
-}
-
-
-```
 
 ```{r eval = TRUE, include=FALSE}
 
@@ -95,10 +81,6 @@ if(!is.null(opts$filtering)){parameter_filtering <-opts$filtering} else{ paramet
 if(is.character(parameter_filtering)){
   parameter_filtering <- eval(parse(text=toString(parameter_filtering)))
 }
-
-parameters_child <- list(config = config, entity = entity,opts = opts ,action = action, parameter_filtering = parameter_filtering, parameter_fact = parameter_fact, parameter_con = con,parameter_host =config$software$input$dbi_config$parameters$host, parameter_port = config$software$input$dbi_config$parameters$port,  parameter_user = config$software$input$dbi_config$parameters$user,parameter_dbname=config$software$input$dbi_config$parameters$dbname, parameter_password = config$software$input$dbi_config$parameters$password,  child = TRUE, no_recap_options = TRUE)
-child_env = new.env()
-list2env(parameters_child, env = child_env)
 
 ```
 
@@ -123,50 +105,28 @@ if (!exists("parameter_filtering") || isNullList(parameter_filtering)){cat("Ther
 ```
 
 
-
 # Analysis of the data georeferenced not declared in nominal
 
+For the remaining of the analysis we only keep Dimension present in both dataset so refer to : to analyse the differences between the stratas fo the two datasets. 
+
 ```{r}
-
-nominal <- read_csv("data/global_nominal_catch_firms_level0.csv") %>% mutate(measurement_unit ="t")
-georef_mapped <- readRDS("Markdown/mapping_codelist/rds.rds")
-
-georef_mapped <- georef_mapped%>% semi_join(species_to_be_kept_by_rfmo_in_level0, by = c("species", "source_authority") )
-nominal <- nominal%>% semi_join(species_to_be_kept_by_rfmo_in_level0, by = c("species", "source_authority") )
 
 formals(filtering_function)$parameter_filtering = parameter_filtering
 
-georef_mapped <- filtering_function(georef_mapped) %>% mutate(year = lubridate::year(time_start)) %>% select("fishing_fleet"  ,   "species"    ,      "measurement_unit"          ,  "gear_type", "source_authority",
-"year", "measurement_value") %>% mutate(measurement_unit = ifelse(measurement_unit %in% c("MTNO", "MT"),"t",measurement_unit)) %>% filter(measurement_unit == "t") #%>% group_by(year) %>% summarise(measurement_value = sum(measurement_value))
-row.names(georef_mapped) <- NULL
-nominal <- filtering_function(nominal)%>% mutate(year = lubridate::year(time_start)) %>% select("fishing_fleet"  ,   "species"    ,      "measurement_unit"          ,  "gear_type",  "source_authority",
-"year","measurement_value")
-```
+georef_no_nominal <- readRDS(paste0(parameter_init, "/rds.rds"))
 
-```{r}
-georef_no_nominal <- dplyr::anti_join(georef_mapped,nominal, by = strata)
-```
+georef_no_nominal <- filtering_function(georef_no_nominal)
 
+georef <- filtering_function(readRDS(paste0(georef, "/rds.rds")))
 
-```{r}
-if (!exists("georef_no_nominal")) {
-  knitr::opts_knit$set(stop_on_error = FALSE)
-  stop("Table 'georef_no_nominal' does not exist.")
-}
-```
-
-
-```{r}
-georef_no_nominal <- georef_no_nominal %>% mutate(year = as.character(year))%>% mutate(year = paste0(year, "-01-01"))
-dir.create("data/georef_not_nominal")
-saveRDS(georef_no_nominal, "data/georef_not_nominal/rds.rds")
+nominal <- filtering_function(readRDS(paste0(nominal, "/rds.rds")))
 ```
 
 ## General overview of this inconsistent data 
 
-The measurement_value of catches in the georeferenced dataset but not in nominal is different depending on what we take as a strata. For now the strata kept are : 
+The measurement_value of catches in the georeferenced dataset but not in nominal is different depending on what we take as a strata. For now the strata kept are : **`r strata`**
 
-**`r strata`**, the corresponding measurement_values are : `r round(sum(georef_no_nominal$measurement_value)/1000000,2)` millions, which corresponds of a total of  `r round(100*sum(georef_no_nominal$measurement_value)/sum(nominal$measurement_value),2)` % of the nominal catch and `r round(100*sum(georef_no_nominal$measurement_value)/sum(georef_mapped$measurement_value),2)` % of the georeferenced catch.
+, the corresponding measurement_values are : `r round(sum(georef_no_nominal$measurement_value)/1000000,2)` millions, which corresponds of a total of  `r round(100*sum(georef_no_nominal$measurement_value)/sum(nominal$measurement_value),2)` % of the nominal catch and `r round(100*sum(georef_no_nominal$measurement_value)/sum(georef_mapped$measurement_value),2)` % of the georeferenced catch.
 
 
 ```{r}
@@ -213,7 +173,7 @@ ggplot(georef_no_nominal_groupped) +
 
 
 
-<!-- The number of row of the table of georef with no equivalent in nominal is `r nrow(georef_no_nominal)`.  -->
+The number of row of the table of georeferenced data with no equivalent in nominal is `r nrow(georef_no_nominal)`.
 
 <!-- ## Joining without gear_type -->
 
@@ -225,14 +185,18 @@ The number of stratas georeferenced with no equivalent in nominal is `r nrow(geo
 
 ```{r eval = TRUE}
 
+child_env <- new.env()
+list2env(parameters_child, env = child_env)
+
 child_env$parameter_titre_dataset_1 <- "Georeferenced but not nominal data"
-child_env$parameter_init <- "data/georef_not_nominal"
+child_env$parameter_init <- "Markdown_nominal/georef_not_nominal"
 child_env$parameter_final <- NULL
 child_env$parameter_colnames_to_keep <- c( "species",  "source_authority", "year", "measurement_unit", "measurement_value")
 child_env$child <- FALSE
 child_env$no_recap_options <- TRUE
 child_env$parameter_fact <- "catch"
 child_env$time_dimension <- c("year")
+child_env$parameter_filtering <- parameter_filtering
 
 res2 <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
 
@@ -258,14 +222,16 @@ georef_sup_to_nom <- join %>% filter(measurement_value_georef > measurement_valu
 
 ```
 
-## Stratas with declaration superior in georeferenced than in nominal
+## Stratas with declaration superior in georeferenced than in nominal 
 
-The species concerned by declaration (on a year) of georeferenced captures superior to nominal are : `r paste0(unique(georef_sup_to_nom$species), sep = " ; ")`, for a total (by species of) `r length(unique(georef_sup_to_nom$species))`.
+**For this analysis, we will only compare data with superior value in georeferenced than in nominal by species, year and tRFMOs.**
+
+The species concerned by declaration (on a year) of georeferenced captures superior to nominal are : `r paste0(unique(georef_sup_to_nom$species), sep = " ; ")`, for a total (species of) `r length(unique(georef_sup_to_nom$species))`.
 
 
-```{r strataswithpostivediff, fig.cap = "Stratas of georeferenced dataset being superior to nominal dataset for a specific year and species", eval=TRUE, include=FALSE}
+```{r strataswithpostivediff, eval=TRUE, include=FALSE}
 
-qflextable2(georef_sup_to_nom %>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ), save_folder = "georef_sup_nominal")
+qflextable2(georef_sup_to_nom %>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ) %>% filter(Difference != 0), save_folder = "georef_sup_nominal", captionn = "Stratas of georeferenced dataset being superior to nominal dataset for a specific year and species (only data superior to 1 ton are presented)")
 
 ```
 
@@ -273,14 +239,14 @@ qflextable2(georef_sup_to_nom %>% mutate_if(is.numeric, round)%>% arrange(desc(D
 <!-- Only the stratas for which year that there is more declaration in georef than in nominal which are groupped. -->
 
 
-```{r sumpositivesdiffeveryyear, fig.cap ="Sum of positive differences in every year between georeferenced and nominal"}
+```{r sumpositivesdiffeveryyear}
 
-qflextable2(georef_sup_to_nom %>% group_by(species, source_authority) %>% summarise(Difference = sum(Difference))%>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ), captionn = "Sum of positive differences in every year between georeferenced and nominal", save_folder = "georef_sup_nominal")
+qflextable2(georef_sup_to_nom %>% group_by(species, source_authority) %>% summarise(Difference = sum(Difference))%>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ) %>% filter(Difference != 0), captionn = "Sum of positive differences in every year between georeferenced and nominal", save_folder = "georef_sup_nominal")
 
 ```
 
 ```{r}
-georef_sup_to_nom <-ggplot(georef_sup_to_nom) +
+ggplotgeoref_sup_to_nom <-ggplot(georef_sup_to_nom) +
   aes(
     x = year,
     y = Difference,
@@ -294,7 +260,7 @@ georef_sup_to_nom <-ggplot(georef_sup_to_nom) +
   theme_minimal() +
   facet_wrap(vars(species), scales = "free")
 
-save_image(georef_sup_to_nom, folder = "georef_sup_nominal")
+save_image(title = "Plot of georeferenced dataset being superior to nominal dataset for a specific year and species", georef_sup_to_nom, folder = "georef_sup_nominal")
 
 ```
 

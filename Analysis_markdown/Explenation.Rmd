@@ -1,0 +1,53 @@
+---
+title: "Explenation"
+author: "BastienG"
+date: "2023-09-08"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
+    toc: TRUE
+---
+
+```{r explanationongainandloss, results='asis', eval=(!parameter_short && !unique_analyse)}
+
+knit_child_attention <- knitr::knit_child(text =c(
+  '',
+  '',
+  '*Attention ! In the following document :* \n ',
+  '-***All the differences inferior to 0 corresponds to gain in captures.***', 
+  '\n',
+  '-***The initial dataset, refered as, dataset 1 is `r titre_1`***',
+  '\n',
+'-***The final dataset, refered as, dataset 2 is `r titre_2`***', 
+  '\n',
+'', 
+''), envir = environment(), quiet= TRUE)
+
+try(cat(knit_child_attention))
+```
+
+```{r explanationonresultmapping, results='asis', eval=(!parameter_mapped &&  !unique_analyse) }
+
+knit_mapped <- knitr::knit_child(text =c(
+  '',
+      '```{r results="asis"}', 
+  '',
+  '```',
+  '',
+  'In this comparison, the differences due to the mapping thas is to say, the renaming of codes to harmonize data will not be presented. The recap of the mapping is presented in annexe.',
+
+'', 
+''), envir = environment(), quiet= TRUE)
+
+try(cat(knit_mapped))
+```
+
