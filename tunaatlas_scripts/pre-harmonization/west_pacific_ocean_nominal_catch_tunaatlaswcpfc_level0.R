@@ -64,6 +64,9 @@ wcpo_species = c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT")
 NC2<-read.csv(path_to_raw_dataset2)
 NC2<-NC2[NC2$SP_CODE %in% wcpo_species,]
 
+NC2$AreaName <- "WCPO"
+NC1$AreaName <- "WCPFC"
+
 #bind both sources
 NC <- rbind(NC1,NC2)
 
@@ -79,7 +82,6 @@ NC$CatchUnits <- "t"
 NC$SP_NAME <- NULL
 NC$FLEET_CODE <- NULL
 
-NC$AreaName<-"WCPFC"
 NCAreaCWPgrid<-NA
 NC$School<-"ALL"
 NC$CatchType<-"ALL"
