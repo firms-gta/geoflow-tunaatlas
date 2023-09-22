@@ -248,7 +248,10 @@ knitr::knit_exit(fully = FALSE)
 
 \clearpage
 
-`r cat_title("# Differences between the two datasets", child_headerinside = child_header)`
+
+```{r results='asis'}
+cat_title("# Differences between the two datasets", child_headerinside = child_header)
+```
 
 
 ```{r results='asis', eval=FALSE}

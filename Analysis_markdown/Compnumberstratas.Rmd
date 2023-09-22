@@ -22,7 +22,6 @@ output:
 ```{r diffstratas,echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE, results='asis'}
 
 
-
 strates_perdues_first_10 <- strates_perdues_first_10 %>% filter(Dimension %notin% parameter_geographical_dimension) %>% filter(Dimension %notin% parameter_time_dimension)
 
 if (nrow(strates_perdues_first_10)!=0){
@@ -67,7 +66,7 @@ qflextable2(disapandap, captionn=paste0("Disappearing or appearing strata betwee
 
 ```
 
-```{r ,compnumberstratas}
+```{r compnumberstratas}
 
 number_init_column <- as.data.frame(t(init %>% dplyr::select(-measurement_value) %>% summarise_all(list(~n_distinct(.))))) %>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_1"))) := V1)
 number_final_column <- as.data.frame(t(final %>% dplyr::select(-measurement_value) %>% summarise_all(list(~n_distinct(.)))))%>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_2"))) := V1)
