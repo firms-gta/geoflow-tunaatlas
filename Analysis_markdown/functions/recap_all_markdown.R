@@ -119,6 +119,8 @@ recap_all_markdown <- function(action, entity, config, options){
     }
     
     CWP11_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-1deg_x_1deg")
+    sf::st_crs(CWP11_ERASED) <- NA
+    
     CWP55_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-5deg_x_5deg")
     CWP1010_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-10deg_x_10deg")
     CWP2020_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-20deg_x_20deg")
