@@ -118,11 +118,11 @@ recap_all_markdown <- function(action, entity, config, options){
       return(cwp)
     }
     
-    CWP11_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-1deg_x_1deg_erased")
-    CWP55_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-5deg_x_5deg_erased")
-    CWP1010_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-10deg_x_10deg_erased")
-    CWP2020_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-20deg_x_20deg_erased")
-    CWP3030_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-30deg_x_30deg_erased")
+    CWP11_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-1deg_x_1deg")
+    CWP55_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-5deg_x_5deg")
+    CWP1010_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-10deg_x_10deg")
+    CWP2020_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-20deg_x_20deg")
+    CWP3030_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-30deg_x_30deg")
     
     # CWP_GRIDS <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
     shapefile.fix <- rbindlist(list(CWP11_ERASED, CWP55_ERASED, CWP1010_ERASED, CWP2020_ERASED, CWP3030_ERASED))
