@@ -45,7 +45,7 @@ if(unique_analyse){
 
 ```{r pie-charts-multiple-list}
 
-if(!unique_analyse){pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, second = final, topn = 5)}else{pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, topn = 5, title_yes_no = FALSE )}
+if(!unique_analyse){pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, second = final, topn = 10, titre_1 = titre_1, titre_2 = titre_2)}else{pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, topn = 10, title_yes_no = FALSE , titre_1 = titre_1)}
 
 ```
 
