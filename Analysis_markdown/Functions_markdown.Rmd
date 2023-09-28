@@ -125,14 +125,6 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
     if (!(all(class(x) == "data.frame"))) {
       x <- as.data.frame(x %>% dplyr::ungroup())
     }
-    require(stringi)
-    x[] <- lapply(x, function(column) {
-    if (is.character(column) | is.factor(column)) {
-      column <- as.character(column)
-      column <- stri_replace_all_regex(column, "[^\\p{ASCII}]", "")
-    }
-    return(column)
-  })
     if (!is.null(save_folder)) {
       if (!dir.exists(file.path(fig.pathinside, save_folder))) {
         dir.create(file.path(fig.pathinside, save_folder))
@@ -210,10 +202,11 @@ filtering_function= function(dataframe_to_filter, parameter_filtering){
   return(dataframe_to_filter)
 }
 
-tidying_data_for_GTA = function(dataframe, time_dim, shape = NULL, species_group_dataframe = NULL, cl_cwp_gear_level2_dataframe = NULL, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep){
-    dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
+tidying_data_for_GTA = function(dataframe, time_dim, shape, species_group_dataframe = species_group, cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep){
   
-  if("geographic_identifier"%in%colnames(dataframe) & !is.null(shape)){
+  dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
+  
+  if("geographic_identifier"%in%colnames(dataframe)){
     dataframe <- dataframe%>%  dplyr::left_join(shape, by = c("geographic_identifier"="CWP_CODE"))
     print_map <- TRUE
   } else {print_map <- FALSE}
@@ -224,12 +217,15 @@ tidying_data_for_GTA = function(dataframe, time_dim, shape = NULL, species_group
   if("GRIDTYPE"%in%colnames(dataframe)){
     dataframe <- dataframe%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
   }
-  if(!is.null(species_group_dataframe)){
+  
   dataframe <- dataframe %>% dplyr::left_join(species_group_dataframe%>% dplyr::distinct(), by = c("species"))
-  }
-  if("gear_type" %in%colnames(dataframe) &  !is.null(cl_cwp_gear_level2_dataframe)){
+  if("gear_type" %in%colnames(dataframe) ){
     dataframe <- dataframe %>% dplyr::left_join(cl_cwp_gear_level2_dataframe, by = c("gear_type" = "Code"))
   }
+  
+  
+  dataframe <- dataframe%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons", measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit)) 
+  
   return(list(dataframe = dataframe, print_map = print_map))
 }
 
