@@ -24,8 +24,8 @@ recap_all_markdown <- function(action, entity, config, options){
     url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
     target_dir <- getwd()  # Current working directory
     
-    copyrmd <- function(x, url_path = url_analysis_markdown) {
-      target_file <- file.path(target_dir, last_path(x))
+    copyrmd <- function(x, url_path = url_analysis_markdown, target_dirinside = target_dir) {
+      target_file <- file.path(target_dirinside, last_path(x))
       
       if (!file.exists(target_file)) {
         download_url <- paste0(url_path, x)
@@ -62,7 +62,7 @@ recap_all_markdown <- function(action, entity, config, options){
       "Geographicdiff.Rmd",
       "Differences_for_each_dimensions.Rmd",
       "Recap_without_mapping.Rmd",
-      "Annexe.Rmd"
+      "Annexe.Rmd", "Functions_markdown.Rmd"
     )
     
     # Combine existing and child Rmd files
