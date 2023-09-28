@@ -19,15 +19,13 @@ output:
 
 `r cat_title("## Differences in temporal data", child_headerinside = child_header)`
 
-```{r results='asis', eval=FALSE}
-cat_title("## Differences in temporal data")
-```
-
 Here is represented the differences in percent for each year.
 
 ```{r timedimdiff}
 
-map <- lapply(parameter_time_dimension, function(filtering_unit, dataframe){ggplot(dataframe%>% dplyr::filter(Dimension == filtering_unit)%>%dplyr::mutate(Time = as.Date(Precision))) +
+map <- lapply(parameter_time_dimension, 
+              function(filtering_unit,dataframe){
+                ggplot(dataframe%>% dplyr::filter(Dimension == filtering_unit)%>%dplyr::mutate(Time = as.Date(Precision))) +
 aes(
 x = Time,
 y = `Difference (in %)`) +
