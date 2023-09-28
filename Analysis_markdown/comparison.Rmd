@@ -13,8 +13,6 @@ author:
     affiliation:
       - IRD
       - MARBEC
-  - name: Paul Taconet 
-    affiliation: IRD
 address:
   - code: IRD
     address: Institut de Recherche pour le Développement (IRD), av. Jean Monnet, CS 30171, 34203 Sète cédex, France
@@ -121,11 +119,7 @@ if(!unique_analyse && child){
 
 ```
 
-```{r results='asis'}
-
-if(step_title_t_f){cat_title(step_title, child_headerinside = child_header)}
-
-```
+`r if(step_title_t_f){cat_title(step_title, child_headerinside = child_header)}`
 
 
 ```{r fileformatting, results='asis'}
@@ -162,12 +156,7 @@ cat(res, sep =  "\\clearpage")
 ```
 
 
-```{r results='asis'}
-if(!unique_analyse && parameter_short == FALSE ){cat_title("# Main differences \n ", child_headerinside = child_header)}
-```
-
-
-
+`r if(!unique_analyse && parameter_short == FALSE ){cat_title("# Main differences \n ", child_headerinside = child_header)}`
 
 
 ```{r SummarydifferencesRmd, eval=!unique_analyse, results='asis'}
@@ -199,9 +188,7 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 
 ```
 
-```{r results='asis'}
-if(!unique_analyse){cat_title("# Introduction to the two datasets")}
-```
+`r if(!unique_analyse){cat_title("# Introduction to the two datasets", child_headerinside = child_header)}`
 
 We first present the main characteristics of each dimension.
 
@@ -211,11 +198,6 @@ cat(res, sep =  "\\clearpage")
 ```
 
 \clearpage
-
-
-```{r eval= FALSE, child = "Timecoveragecumulated.Rmd", results='asis'}
-
-```
 
 \clearpage
 
@@ -249,16 +231,8 @@ knitr::knit_exit(fully = FALSE)
 \clearpage
 
 
-```{r results='asis'}
-cat_title("# Differences between the two datasets", child_headerinside = child_header)
-```
+`r cat_title("# Differences between the two datasets", child_headerinside = child_header)`
 
-
-```{r results='asis', eval=FALSE}
-
-cat_title("# Differences between the two datasets")
-
-```
 
 ```{r timediffchild, results='asis'}
 
