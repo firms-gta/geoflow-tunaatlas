@@ -118,15 +118,15 @@ cat(unlist(pie_chart_knit),  sep = "\n")
 bar_plot_default <- function(first, 
                              second = NULL, 
                              dimension, 
-                             topn = 6, 
-                             titre_1 = "First", 
-                             titre_2 = "Final", 
+                             topn = 10, 
+                             titre_1 = titre_1, 
+                             titre_2 = titre_2, 
                              fill_colors = NULL, 
                              outline_colors = NULL) {
 
   # Handle NA values and get dimension name
   init[is.na(init)] <- "NA"
-    name1 <- dplyr::enquo(titre_1)
+  name1 <- dplyr::enquo(titre_1)
   name2 <- dplyr::enquo(titre_2)
 
   
@@ -157,14 +157,16 @@ bar_plot_default <- function(first,
     
     # Create the bar plot
     plot <- ggplot(data = data_summary, aes(x = class, y = measurement_value, fill = class, color = class)) +
-      geom_col() +
-      labs(x = dimension, y = "Total Measurement") +
-      scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",")) +
-      theme(legend.position = "bottom", 
-            legend.title = element_blank(),
-            legend.text = element_text(size = 7), 
-            legend.key.size = unit(.4, "cm")) +
-      ggtitle(title)
+  geom_col() +
+  labs(x = dimension, y = "Total Measurement") +
+  scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",")) +
+  theme(legend.position = "bottom", 
+        legend.title = element_blank(),
+        legend.text = element_text(size = 7), 
+        legend.key.size = unit(.4, "cm"),
+        axis.text.x = element_blank()) + 
+  ggtitle(title)
+
     
     if (!is.null(fill_colors) && !is.null(outline_colors)) {
       plot <- plot +
