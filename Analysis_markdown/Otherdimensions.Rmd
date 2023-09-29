@@ -143,7 +143,7 @@ bar_plot_default <- function(first,
       dplyr::arrange(desc(ifelse(class == "Others", -Inf, measurement_value))) # Order data
     
     # Reorder class as a factor
-    data_summary$class <- factor(data_summary$class, levels = data_summary$class)
+    # data_summary$class <- factor(data_summary$class, levels = data_summary$class)
     
     # Create the bar plot
     plot <- ggplot(data = data_summary, aes(x = class, y = measurement_value, fill = class, color = class)) +
