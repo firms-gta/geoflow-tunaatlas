@@ -48,25 +48,3 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 
 
 ```
-
-
-
-```{r namingplots, eval=FALSE}
-
-counter <- 1  # Initialize a counter
-
-knitr::opts_hooks$set(plot = function(options) {
-  if (!is.null(options$fig.cap)) {
-    filename <- file.path(paste0(make.names(options$fig.cap), "_", counter))
-  } else if (!is.null(options$label)){ 
-    filename <- file.path(paste0(make.names(options$label), "_", counter))
-  } else {
-    filename <- file.path(paste0("unnamed_", counter))
-  }
-  options$fig.path <- file.path(fig.path, filename)
-  counter <<- counter + 1  # Increment the counter
-  
-})
-```
-
-
