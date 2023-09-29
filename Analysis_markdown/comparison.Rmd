@@ -76,7 +76,7 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = current_env
 
 ```{r sourcingfunctionsmarkdown}
 
-source("Functions_markdown.R")
+source("Functions_markdown.R", local = TRUE)
 
 knitr::opts_chunk$set(
 	echo = FALSE,
@@ -86,6 +86,7 @@ knitr::opts_chunk$set(
 	tab.cap.pre = "Table ",
 	tab.cap.sep = ": "
 )
+
 base::options(knitr.duplicate.label = "allow")
 
 ```
@@ -98,6 +99,7 @@ if(!exists("child")){child = FALSE} else{child = child}
 ```{r parameter-settings}
 
 res <- knitr::knit_child("Parameters_settings.Rmd", quiet = TRUE, envir = current_env)
+
 ```
 
 
@@ -108,12 +110,11 @@ res <- knitr::knit_child("Parameters_settings.Rmd", quiet = TRUE, envir = curren
 if(!exists("child_header")){child_header = "#"}
 
 if(!child){
-  cat_title <- cat
+  child_header <- ""
+  cat("\\clearpage")
 }
 
-if(!child){cat("\\clearpage")}
-
-if(!unique_analyse && child){
+if(step_title_t_f){
   child_header<- paste0("#", child_header)
 }
 
@@ -156,6 +157,7 @@ cat(res, sep =  "\\clearpage")
 ```
 
 
+
 `r if(!unique_analyse && parameter_short == FALSE ){cat_title("# Main differences \n ", child_headerinside = child_header)}`
 
 
@@ -165,9 +167,6 @@ res <- knitr::knit_child("Summarydifferences.Rmd", quiet = TRUE, envir = current
 cat(res, sep =  "\\clearpage")
 
 ```
-
-\clearpage
-
 
 
 ```{r Compnumberstratas,eval=!unique_analyse, echo=FALSE, results='asis'}
@@ -193,18 +192,21 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 We first present the main characteristics of each dimension.
 
 ```{r timecoverage, echo=FALSE, results='asis'}
+
 res <- knitr::knit_child("Timecoverage.Rmd", quiet = TRUE, envir = current_env)
 cat(res, sep =  "\\clearpage")
+
 ```
 
 \clearpage
 
-\clearpage
 
 
 ```{r eval= print_map, results='asis'}
+
 res <- knitr::knit_child("Spatialcoverage.Rmd", quiet = TRUE, envir = current_env)
 cat(res, sep =  "\\clearpage")
+
 ```
 
 \clearpage
@@ -277,3 +279,4 @@ cat(res, sep =  "\\clearpage")
 ```
 
 \clearpage
+

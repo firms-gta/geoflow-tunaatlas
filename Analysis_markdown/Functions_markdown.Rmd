@@ -55,9 +55,14 @@ is_null_or_not_exist = function(x) {
     return(FALSE)
   }
 }
-cat_title = function(x, child_headerinside = ifelse(exists("child_header"), child_header, "")) {
+cat_title = function(x, child_headerinside ="") {
+  if(child_headerinside == "-#"){
+    x <- sub("#", "", x)
+    child_headerinside = ""
+  }
+    
   output = paste0(child_headerinside, x, " \n")
-    return(output)
+  return(output)
 }
 
 ```
@@ -202,11 +207,11 @@ filtering_function= function(dataframe_to_filter, parameter_filtering){
   return(dataframe_to_filter)
 }
 
-tidying_data_for_GTA = function(dataframe, time_dim, shape, species_group_dataframe = species_group, cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep){
+tidying_data_for_GTA = function(dataframe, time_dim, shape = NULL, species_group_dataframe = NULL, cl_cwp_gear_level2_dataframe = NULL, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep){
   
   dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
   
-  if("geographic_identifier"%in%colnames(dataframe)){
+  if("geographic_identifier"%in%colnames(dataframe) & !is.null(shape)){
     dataframe <- dataframe%>%  dplyr::left_join(shape, by = c("geographic_identifier"="CWP_CODE"))
     print_map <- TRUE
   } else {print_map <- FALSE}
@@ -217,9 +222,10 @@ tidying_data_for_GTA = function(dataframe, time_dim, shape, species_group_datafr
   if("GRIDTYPE"%in%colnames(dataframe)){
     dataframe <- dataframe%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
   }
-  
+  if(!is.null(species_group_dataframe)){
   dataframe <- dataframe %>% dplyr::left_join(species_group_dataframe%>% dplyr::distinct(), by = c("species"))
-  if("gear_type" %in%colnames(dataframe) ){
+  }
+  if("gear_type" %in%colnames(dataframe) & !is.null(cl_cwp_gear_level2_dataframe) ){
     dataframe <- dataframe %>% dplyr::left_join(cl_cwp_gear_level2_dataframe, by = c("gear_type" = "Code"))
   }
   
@@ -379,19 +385,32 @@ save_image(title = title_knit, plott = x$pie_chart, folder = folder, fig.pathins
   }
 }
 
-function_pie_chart_df = function(dimension, ...){
-  formals(pie_chart_2_default)$dimension <- dimension
-  dimension_returned <- dimension
-  pie_chart = pie_chart_2_default(...)
-  if(exists("pie_chart$df")){
-    df = pie_chart$df
-    pie_chart = pie_chart$plot} else{
-      pie_chart = pie_chart
-      df = NULL}
+function_pie_chart_df <- function(dimension, ...) {
   
-  if(!is.null(df)){
-    df <- qflextable2(df, captionn = paste0("Strata movement for the dimension : ", dimension_returned))}
-  return(list(pie_chart=pie_chart,df=df, dimension=dimension_returned))
+  # Make a copy of the function to avoid modifying the original
+  local_pie_chart_2 <- pie_chart_2_default
+  
+  # Modify the dimension formal argument
+  formals(local_pie_chart_2)$dimension <- dimension
+  
+  # Call the function with the ... arguments
+  pie_chart_result <- local_pie_chart_2(...)
+  
+  # Check if pie_chart_result has a df element
+  if(is.list(pie_chart_result) && "df" %in% names(pie_chart_result)) {
+    df <- pie_chart_result$df
+    pie_chart <- pie_chart_result$plot
+  } else {
+    df <- NULL
+    pie_chart <- pie_chart_result
+  }
+  
+  # Process df if not null
+  if(!is.null(df)) {
+    df <- qflextable2(df, captionn = paste0("Strata movement for the dimension: ", dimension))
+  }
+  
+  return(list(pie_chart = pie_chart, df = df, dimension = dimension))
 }
 
 
@@ -457,8 +476,8 @@ pie_chart_2_default = function (dimension, first, second = NULL, topn = 10, titr
   if (dimension == "source_authority") {
     topn = 6
   }
-  name1 <- dplyr::enquo(titre_1)
-  name2 <- dplyr::enquo(titre_2)
+  name1 <- titre_1
+  name2 <- titre_2
   all_class_i <- first %>% dplyr::group_by(across(c(dimension, 
     "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value, 
     na.rm = TRUE)) %>% filter(measurement_value != 0) %>% 

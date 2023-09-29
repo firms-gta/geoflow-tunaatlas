@@ -7,8 +7,8 @@ output: html_document
 
 ```{r globalvariables, include=FALSE}
 
-formals(qflextable2)$fig.pathinside = fig.path
-formals(save_image)$fig.pathinside = fig.path
+formals(qflextable2, envir = current_env)$fig.pathinside = fig.path
+formals(save_image, envir = current_env)$fig.pathinside = fig.path
 
 if(!exists("step_title")){step_title_t_f = FALSE} else{step_title_t_f = TRUE}
 

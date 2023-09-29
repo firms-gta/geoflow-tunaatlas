@@ -33,7 +33,7 @@ Groupped_all <- carte_init[0,]
 
 for (i in Dimensions){
   temporaire <- fonction_groupement(i,init, final)
-  assign(paste0("Groupped", i), temporaire)
+  assign(paste0("Groupped", i), temporaire, envir = current_env)
   
   Groupped_all <- rbind(Groupped_all, temporaire)
 }

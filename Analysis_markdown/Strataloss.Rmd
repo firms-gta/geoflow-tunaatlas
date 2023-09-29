@@ -20,6 +20,7 @@ output:
 
 ```{r stratasloss, eval=!unique_analyse, message=FALSE, warning=FALSE, include=FALSE}
 
+
 nb_ligne_init_millions <- nrow(init)
 nb_ligne_final_millions<- nrow(final)
 # 

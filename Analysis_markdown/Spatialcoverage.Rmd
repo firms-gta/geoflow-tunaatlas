@@ -21,10 +21,6 @@ output:
 
 `r cat_title("## Spatial coverage ", child_headerinside = child_header)`
 
-```{r title-spatial-coverage, results='asis',eval=FALSE}
-cat_title("## Spatial coverage ")
-```
-
 
 ```{r fonction-empreinte-spatial}
 
@@ -34,7 +30,6 @@ map_unit <- lapply(unique(Groupped_all$measurement_unit), FUN = fonction_emprein
 ```
 
 ```{r numbergridtype, results='asis'}
-
 
 number_of_GRIDTYPE <- length(unique(GrouppedGRIDTYPE$Precision))
 GRIDTYPE <- paste(as.list(unique(GrouppedGRIDTYPE$Precision)), collapse = " ; ")

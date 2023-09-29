@@ -36,7 +36,7 @@ if (isNullList(parameter_filtering)){cat("There is no filter on this data")} els
 
 ```{r filteringfunctiononsetup}
 
-formals(filtering_function)$parameter_filtering = parameter_filtering
+formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
 
 
 ```

@@ -471,7 +471,7 @@ child_env$parameter_mapped <- parameter_mapped
 child_env$parameter_short <- parameter_short
 child_env$step <- counting
 child_env$step_title <- paste0(" Treatment : " ,last_path(sub_list_dir[counting+1]))
-child_env$child_header <- "##"
+child_env$child_header <- "#"
 child_env$unique_analyse <- FALSE
 
 child_env$debug <- TRUE
@@ -502,9 +502,10 @@ if( identical(readRDS(paste0(as.character(child_env$parameter_init),"/rds.rds"))
 }
 
 
-
-all <- lapply(1:(length(sub_list_dir_2)-1), function_all_comp)
-# all <- all[!is.na(all)]
+final_step <- (length(sub_list_dir_2)-1)
+# final_step <- 1
+all <- lapply(1:final_step, function_all_comp)
+all <- all[!is.na(all)]
 ```
 
 ```{r unlistallcomp,echo=FALSE, results='asis'}

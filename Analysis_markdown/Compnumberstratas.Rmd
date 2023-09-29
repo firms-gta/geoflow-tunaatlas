@@ -60,7 +60,6 @@ cat("The strata differences (completely lost or appearing) between the first one
 
 ```{r disapandapflextable, eval = (nrow(strates_perdues_first_10)!=0),results="asis"}
 
-
 qflextable2(disapandap, captionn=paste0("Disappearing or appearing strata between ",`titre_1`," and ",`titre_2`),columns_to_color =c("Difference in millions"), grouped_data = c("Dimension" ,"measurement_unit",  "Loss / Gain" ))#,save_folder="Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE, find_and_print = FALSE)
 
 
