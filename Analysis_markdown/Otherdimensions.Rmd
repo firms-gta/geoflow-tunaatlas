@@ -187,7 +187,7 @@ bar_plot_default <- function(first,
 
 
 ```{r bar-charts-multiple-list}
-browser()
+
 list_bar_chart <- list_pie_chart
 if(!unique_analyse){bar_charts_multiple <- lapply(list_bar_chart,FUN = bar_plot_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{bar_charts_multiple <- lapply(list_bar_chart,FUN = bar_plot_default, first= init,second = NULL, topn = 7 , titre_1 = titre_1, titre_2 = NULL)}
 
