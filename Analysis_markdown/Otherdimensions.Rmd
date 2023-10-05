@@ -24,7 +24,7 @@ We check the distribution of the value of each dimension and each unit.
 
 ```{r otherdimension-list-pie-chart}
 
-list_pie_chart <- list(intersect(setdiff(parameter_colnames_to_keep, unlist(list(parameter_time_dimension, parameter_geographical_dimension, "measurement_unit", "measurement_value", "time_end"))), colnames(init)))[[1]]
+list_pie_chart <- list(intersect(setdiff(parameter_colnames_to_keep, unlist(list(parameter_time_dimension, parameter_geographical_dimension, "measurement_unit", "measurement_value"))), colnames(init)))[[1]]
 
 ```
 

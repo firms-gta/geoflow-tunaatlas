@@ -26,8 +26,7 @@ strates_perdues_first_10 <- strates_perdues_first_10 %>% filter(Dimension %notin
 
 if (nrow(strates_perdues_first_10)!=0){
 
-
-disapandap <- strates_perdues_first_10 %>%
+  disapandap <- strates_perdues_first_10 %>%
   dplyr::mutate(`Loss / Gain` = dplyr::case_when(
     loss > 1 ~ "Loss",
     abs(loss) <= 1 ~ "No differences",
@@ -60,30 +59,10 @@ cat("The strata differences (completely lost or appearing) between the first one
 
 ```{r disapandapflextable, eval = (nrow(strates_perdues_first_10)!=0),results="asis"}
 
-qflextable2(disapandap, captionn=paste0("Disappearing or appearing strata between ",`titre_1`," and ",`titre_2`),columns_to_color =c("Difference in millions"), grouped_data = c("Dimension" ,"measurement_unit",  "Loss / Gain" ))#,save_folder="Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE, find_and_print = FALSE)
+qflextable2(disapandap, captionn=paste0("Disappearing or appearing strata between ",`titre_1`," and ",`titre_2`),columns_to_color =c("Difference in millions"), grouped_data = c("Dimension" ,"measurement_unit",  "Loss / Gain" ),save_folder="Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE, find_and_print = FALSE)
 
 
 ```
-
-```{r compnumberstratas}
-
-number_init_column <- as.data.frame(t(init %>% dplyr::select(-measurement_value) %>% summarise_all(list(~n_distinct(.))))) %>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_1"))) := V1)
-number_final_column <- as.data.frame(t(final %>% dplyr::select(-measurement_value) %>% summarise_all(list(~n_distinct(.)))))%>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_2"))) := V1)
-
-number_final_column<-number_final_column[order(row.names(number_final_column)), ,drop=F]
-number_init_column<-number_init_column[order(row.names(number_init_column)), ,drop=F]
-
-
-number_init_column_final_column <- cbind(number_init_column , number_final_column ) %>% mutate_all(as.numeric)
-number_init_column_final_column$Difference <- number_init_column_final_column[,2]-number_init_column_final_column[,1]
-
-rownames(number_init_column_final_column) <- paste0("Number of ", rownames(number_init_column_final_column))
-
-number_init_column_final_column <- as.data.frame(number_init_column_final_column %>% tibble::rownames_to_column(" "))
-
-```
-
-
 
 ```{r compnumberstratascolumns,  results='asis', out.width="100%"}
 
