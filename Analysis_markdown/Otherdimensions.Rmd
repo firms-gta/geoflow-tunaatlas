@@ -25,23 +25,19 @@ We check the distribution of the value of each dimension and each unit.
 ```{r otherdimension-list-pie-chart}
 
 list_pie_chart <- list(intersect(setdiff(parameter_colnames_to_keep, unlist(list(parameter_time_dimension, parameter_geographical_dimension, "measurement_unit", "measurement_value", "time_end"))), colnames(init)))[[1]]
-    
-
 
 ```
 
 
 ```{r pie-charts-multiple-list}
 
-if(!unique_analyse){pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= init, topn = 7, title_yes_no = FALSE , titre_1 = titre_1)}
+if(!unique_analyse){figures <- lapply(list_pie_chart,FUN = pie_chart_2_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{figures <- lapply(list_pie_chart,FUN = pie_chart_2_default, first= init, topn = 7, title_yes_no = FALSE , titre_1 = titre_1)}
+
 ```
 
-```{r pie-charts-names, eval=unique_analyse}
+```{r pie-charts-names}
 
-figures<- lapply(pie_charts_multiple, function(x){x$pie_chart})
-
-dimension_title_subfigures <- lapply(pie_charts_multiple, function(x){paste0("Distribution in value for the dimension : ", x$dimension)})
-
+dimension_title_subfigures <- paste0("Distribution in value for the dimension : ", list_pie_chart)
 
 ```
 
@@ -59,16 +55,10 @@ if(!exists("dimension_title_subfigures") || is.null(dimension_title_subfigures))
 ```
 
 
-```{r outputonlyreading,eval=outputonly}
-
-
-dimension_title_subfigures <- readRDS(file.path("dimension_title_subfigures.rds"))
-
-```
-
 ```{r subfigurespieplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
 
 for (i in figures){plot(i)}
+
 
 ```
 
@@ -77,119 +67,26 @@ for (i in figures){plot(i)}
 
 ```{r pie-charts-multiple, eval =!unique_analyse}
 
-pie_chart_knit <- lapply(pie_charts_multiple, function(x) {
-  tryCatch(
-    resume_knit_child(x, find_and_print = outputonly, fig.pathinside = fig.path),
-    error = function(e) {
-      # Handle the error here (you can print an error message or take other actions)
-      cat("Error occurred:", conditionMessage(e), "\n")
-      # Return a value or NULL to continue the loop
-      return(NULL)
-    }
-  )
-})
-
+pie_chart_knit <- mapply(FUN = knitting_plots_subfigures,
+                         plot = figures,
+                         title = dimension_title_subfigures,
+                         MoreArgs = list(folder = "Piechartdimensions", fig.pathinside = fig.path))
+                         
+                         
 ```
 
 ```{r unlist-pie-chart, results='asis', eval =!unique_analyse}
+
 cat(unlist(pie_chart_knit),  sep = "\n")
-```
-
-
-
-
-
-
-```{r}
-bar_plot_default <- function(first, 
-                             second = NULL, 
-                             dimension, 
-                             topn = 10, 
-                             titre_1 = "first", 
-                             titre_2= "second", 
-                             fill_colors = NULL, 
-                             outline_colors = NULL) {
-  
-  name1 = titre_1
-  name2 = titre_2
-
-
-  # Handle NA values and get dimension name
-  first[is.na(first)] <- "NA"
-
-  
-  if (deparse(substitute(dimension)) == "X[[i]]") {
-    r <- dimension
-  } else {
-    r <- deparse(substitute(dimension))
-  }
-  dimension <- gsub("\"", "", r)
-  
-  if (dimension == "source_authority") {
-    topn = 6
-  }
-  first$dataset <- name1
-  second$dataset <- name2
-  dataset <- rbind(first, second)
-  # Function to generate summary and plot
-  generate_plot <- function(data, title, dimensioninside, topninside, dataset) {
-
-        data_summary <- data %>%
-        dplyr::group_by(dplyr::across(c(dimensioninside,   "measurement_unit", dataset))) %>% dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>% dplyr::group_by(measurement_unit, dataset) %>% 
-    dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>% 
-    dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimensioninside), "Others"))) %>%       dplyr::group_by(class, measurement_unit, dataset) %>%
-      dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
-          group_by(measurement_unit, dataset) %>% 
-      dplyr::arrange(desc(ifelse(class == "Others", -Inf, measurement_value))) # Order data
-    
-    # Reorder class as a factor
-    # data_summary$class <- factor(data_summary$class, levels = data_summary$class)
-    
-    # Create the bar plot
-    plot <- ggplot(data = data_summary, aes(x = class, y = measurement_value, fill = class, color = class)) +
-  geom_col() +
-  labs(x = dimension, y = "Total Measurement") +
-  scale_y_continuous(labels = function(x) prettyNum(x, big.mark = ",")) +
-  theme(legend.position = "bottom", 
-        legend.title = element_blank(),
-        legend.text = element_text(size = 7), 
-        legend.key.size = unit(.4, "cm"),
-        axis.text.x = element_blank()) + 
-  ggtitle(title)+ 
-    facet_grid(c("measurement_unit", "dataset"))
-
-    
-    if (!is.null(fill_colors) && !is.null(outline_colors)) {
-      plot <- plot +
-        scale_fill_manual(values = fill_colors) + 
-        scale_color_manual(values = outline_colors)
-    }
-
-    return(plot)
-  }
-
-  # Generate plot for initial data
-  if(is.null(second)){
-    bar_plot <- generate_plot(first, title = NULL, dimensioninside = dimension, topninside = topn)
-  } else {
-  
-  # If final data is provided, generate plot for final data and return combined plot
-    second[is.na(second)] <- "NA"
-    bar_plot <- generate_plot(dataset,title =NULL, dimensioninside = dimension, topninside = topn)
-    # bar_plot <- plot_grid(bar_plot, bar_plot_final, ncol = 2)
-  }
-  return(list(pie_chart = bar_plot, dimension_returned = dimension))
-}
 
 ```
-
-
-
 
 ```{r bar-charts-multiple-list}
 
 list_bar_chart <- list_pie_chart
+
 if(!unique_analyse){bar_charts_multiple <- lapply(list_bar_chart,FUN = bar_plot_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{bar_charts_multiple <- lapply(list_bar_chart,FUN = bar_plot_default, first= init,second = NULL, topn = 7 , titre_1 = titre_1, titre_2 = NULL)}
+
 
 ```
 
