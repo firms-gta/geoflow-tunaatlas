@@ -99,7 +99,7 @@ if(is.character(parameter_filtering)){
 
 parameters_child <- list(config = config, entity = entity,opts = opts ,action = action, parameter_filtering = parameter_filtering, parameter_fact = parameter_fact, parameter_con = con,parameter_host =config$software$input$dbi_config$parameters$host, parameter_port = config$software$input$dbi_config$parameters$port,  parameter_user = config$software$input$dbi_config$parameters$user,parameter_dbname=config$software$input$dbi_config$parameters$dbname, parameter_password = config$software$input$dbi_config$parameters$password,  child = TRUE, no_recap_options = TRUE, plotting_type = "plot",parameter_colnames_to_keep = c("fishing_fleet",         "gear_type",                 "time_start",                 
                       "geographic_identifier","fishing_mode",           "species",                       
-                      "measurement_unit",                 "measurement_value",                "source_authority"), treatment = FALSE, shapefile.fix = shapefile.fix, shape_without_geom = shape_without_geom, continent = continent,species_group = species_group, cl_cwp_gear_level2 = cl_cwp_gear_level2, fig.path = fig.path, outputonly = FALSE)
+                      "measurement_unit",                 "measurement_value",                "source_authority"), treatment = FALSE, shapefile.fix = shapefile.fix, shape_without_geom = shape_without_geom, continent = continent,species_group = species_group, cl_cwp_gear_level2 = cl_cwp_gear_level2, fig.path = fig.path, outputonly = FALSE, print_map = TRUE)
 
 list2env(parameters_child, env = child_env_base)
 
@@ -158,6 +158,7 @@ dir.create(new_path, recursive = TRUE)
 
 child_env_last$fig.path = new_path
 
+# source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_last)
 # rmarkdown::render("comparison.Rmd", envir = child_env_last, quiet = TRUE)
 
 
@@ -184,7 +185,6 @@ cat(res2, sep =  "\\clearpage")
 ```{r complastfirst, include=FALSE, results='asis'}
 
 child_env_comp <- list2env(as.list(child_env_base), parent = child_env_base)
-# source(knitr::purl("Functions_markdown.Rmd", quiet=TRUE),child_env_comp)
 
 
 child_env_comp$parameter_init <- sub_list_dir_2[1]
@@ -203,7 +203,8 @@ dir.create(new_path, recursive = TRUE)
 
 child_env_comp$fig.path = new_path
 
-# rmarkdown::render("comparison.Rmd", envir = child_env_comp, quiet = TRUE)
+# source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_comp)
+# rmarkdown::render("comparison.Rmd", envir = child_env_comp, quiet = TRUE, output_file="test.pdf")
 
 res <- knitr::knit_child("comparison.Rmd", envir = child_env_comp, quiet = TRUE)
 

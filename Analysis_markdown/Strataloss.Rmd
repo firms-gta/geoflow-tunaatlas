@@ -51,8 +51,10 @@ strates_perdues_first_10[is.na(strates_perdues_first_10)] <- "NA"
 ```
 
 ```{r checkifnodiff,  eval=!unique_analyse , results='asis'}
+
 if (round(sum_valeur_init) == round(sum_valeur_final)&nrow(Groupped_all %>%dplyr::filter(`Loss / Gain` != 'Egal'))==0){
   cat("There are no differences between the two datasets, this step is not changing the data in any way")
   
   knitr::knit_exit(fully = FALSE)}
+
 ```

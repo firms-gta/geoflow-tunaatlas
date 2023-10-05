@@ -64,13 +64,10 @@ fancyhdr:
     footrulewidth: 0pt
 ---
 
-```{r}
-current_env <- current_env()
-```
 
 ```{r setuprmd}
 
-res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
 
 ```
 
@@ -78,84 +75,53 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = current_env
 
 source("Functions_markdown.R", local = TRUE)
 
-knitr::opts_chunk$set(
-	echo = FALSE,
-	fig.align = "center",
-	message = FALSE,
-	warning = FALSE,
-	tab.cap.pre = "Table ",
-	tab.cap.sep = ": "
-)
-
-base::options(knitr.duplicate.label = "allow")
-
 ```
 
-
-```{r child, include=FALSE}
-if(!exists("child")){child = FALSE} else{child = child}
-```
 
 ```{r parameter-settings}
 
-res <- knitr::knit_child("Parameters_settings.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Parameters_settings.Rmd", quiet = TRUE, envir = environment())
 
-```
-
-
-
-
-```{r childheader, include=FALSE, results='asis'}
-
-if(!exists("child_header")){child_header = "#"}
-
-if(!child){
-  child_header <- ""
-  cat("\\clearpage")
-}
-
-if(step_title_t_f){
-  child_header<- paste0("#", child_header)
-}
+# source("Parameters_settings.R", local = TRUE)
 
 ```
 
 `r if(step_title_t_f){cat_title(step_title, child_headerinside = child_header)}`
 
-
 ```{r fileformatting, results='asis'}
 
-res <- knitr::knit_child("file_formatting.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("file_formatting.Rmd", quiet = TRUE, envir = environment())
 
-```
+# source("file_formatting.R", local = TRUE)
 
-```{r explenation, results='asis'}
-
-res <- knitr::knit_child("Explenation.Rmd", quiet = TRUE, envir = current_env)
-cat(res)
 
 ```
 
 
 ```{r filtering-data, results='asis'}
 
-res <- knitr::knit_child("Filtering_data.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Filtering_data.Rmd", quiet = TRUE, envir = environment())
+
+# source("Filtering_data.R", local = TRUE)
+
 
 ```
 
 ```{r Groupping-datarmd, results='asis'}
 
-res <- knitr::knit_child("Groupping_differences.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Groupping_differences.Rmd", quiet = TRUE, envir = environment())
+
+# source("Groupping_differences.R", local = TRUE)
 
 ```
 
-```{r StratalossRmd, results='asis'}
+```{r explenation, results='asis'}
 
-res <- knitr::knit_child("Strataloss.Rmd", quiet = TRUE, envir = current_env)
-cat(res, sep =  "\\clearpage")
+res <- knitr::knit_child("Explenation.Rmd", quiet = TRUE, envir = environment())
+
+cat(res)
 
 ```
-
 
 
 `r if(!unique_analyse && parameter_short == FALSE ){cat_title("# Main differences \n ", child_headerinside = child_header)}`
@@ -163,15 +129,16 @@ cat(res, sep =  "\\clearpage")
 
 ```{r SummarydifferencesRmd, eval=!unique_analyse, results='asis'}
 
-res <- knitr::knit_child("Summarydifferences.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Summarydifferences.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
 
+```{r Compnumberstratas, eval=!unique_analyse, echo=FALSE, results='asis'}
 
-```{r Compnumberstratas,eval=!unique_analyse, echo=FALSE, results='asis'}
+res <- knitr::knit_child("Compnumberstratas.Rmd", quiet = TRUE, envir = environment())
 
-res <- knitr::knit_child("Compnumberstratas.Rmd", quiet = TRUE, envir = current_env)
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -181,7 +148,9 @@ cat(res, sep =  "\\clearpage")
 ```{r parametershort,  eval=parameter_short, results='asis'}
 
 exit <- "This document only presents the summary of the differences between the two datasets. If you need a more detailed summary please provide FALSE as argument for the 'short' parameter"
+
 if(child){exit <- ""}
+
 if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 
 
@@ -193,7 +162,8 @@ We first present the main characteristics of each dimension.
 
 ```{r timecoverage, echo=FALSE, results='asis'}
 
-res <- knitr::knit_child("Timecoverage.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Timecoverage.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -204,7 +174,8 @@ cat(res, sep =  "\\clearpage")
 
 ```{r eval= print_map, results='asis'}
 
-res <- knitr::knit_child("Spatialcoverage.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Spatialcoverage.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -214,31 +185,35 @@ cat(res, sep =  "\\clearpage")
 
 ```{r otherdim, results='asis'}
 
-res <- knitr::knit_child("Otherdimensions.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Otherdimensions.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
 
+```{r}
+knitr::knit_exit(fully = FALSE)
+```
 
 \clearpage
 
 
 
 ```{r eval=unique_analyse}
+
 knitr::knit_exit(fully = FALSE)
+
 ```
 
-
-
 \clearpage
-
 
 `r cat_title("# Differences between the two datasets", child_headerinside = child_header)`
 
 
 ```{r timediffchild, results='asis'}
 
-res <- knitr::knit_child("Timediff.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Timediff.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -247,14 +222,15 @@ cat(res, sep =  "\\clearpage")
 
 ```{r Geodiff, results='asis', eval = print_map}
 
-res <- knitr::knit_child("Geographicdiff.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Geographicdiff.Rmd", quiet = TRUE, envir = environment())
 cat(res, sep =  "\\clearpage")
 
 ```
 
 ```{r Diff-for-other-dimensions, results='asis'}
 
-res <- knitr::knit_child("Differences_for_each_dimensions.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Differences_for_each_dimensions.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -263,7 +239,8 @@ cat(res, sep =  "\\clearpage")
 
 ```{r recapwithout-mappingg,Diff-for-other-dimensions,eval = (!unique_analyse & !parameter_mapped), results='asis'}
 
-res <- knitr::knit_child("Recap_without_mapping.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Recap_without_mapping.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -273,7 +250,8 @@ cat(res, sep =  "\\clearpage")
 
 ```{r annexe, eval = FALSE, results='asis'}
 
-res <- knitr::knit_child("Annexe.Rmd", quiet = TRUE, envir = current_env)
+res <- knitr::knit_child("Annexe.Rmd", quiet = TRUE, envir = environment())
+
 cat(res, sep =  "\\clearpage")
 
 ```

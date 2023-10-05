@@ -17,20 +17,8 @@ output:
     toc: TRUE
 ---
 
-```{r summaryofdifferences, eval=!unique_analyse}
-
-units <- unique(c(unique(init$measurement_unit), unique(final$measurement_unit)))
-list_units <- unlist(as.vector(lapply(units, function(.)paste0("Value in ", .))))
-df <- data.frame(matrix(ncol =4, nrow = length(c(c( "Lines"), list_units ))))
-init_group <- init %>% dplyr::group_by(measurement_unit) %>% dplyr::summarise(titre_test1 = sum(measurement_value)) 
-final_group <- final %>% dplyr::group_by(measurement_unit) %>% dplyr::summarise(titre_test2 = sum(measurement_value)) 
-
-summary_of_differences <- dplyr::full_join(init_group, final_group) %>% mutate(across(where(is.numeric), ~replace(., is.na(.), 0))) %>% dplyr::arrange(measurement_unit) %>%dplyr::rowwise() %>%  dplyr::mutate(measurement_unit = paste0(measurement_unit)) %>% dplyr::mutate(Difference = -titre_test1 + titre_test2)%>%mutate("Difference (in %)" = 100*(Difference /titre_test1)) %>%  dplyr::rename(!!as.symbol(eval(parse(text = "titre_1"))) := titre_test1)%>% dplyr::rename(!!as.symbol(eval(parse(text = "titre_2"))) := titre_test2)
-
-```
-
-
 ```{r summarydiffplotting, eval=!unique_analyse ,echo=FALSE, results='asis', out.width="100%"}
+
 qflextable2(summary_of_differences, captionn = "Summary of the difference between the two datasets", columns_to_color = c("Difference"), save_folder = "Summary", interactive_plot = FALSE)
 
 ```

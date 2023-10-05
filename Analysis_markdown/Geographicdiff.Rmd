@@ -19,12 +19,6 @@ output:
 
 `r cat_title("## Differences in geographical data", child_headerinside = child_header)`
 
-```{r title-geo-diff, results='asis', eval=FALSE}
-
-cat_title("## Differences in geographical data")
-
-```
-
 Here is represented for each area the polygons keeping all the initial information, the ones losing a part and the ones losing all the information. 
 
 ```{r breaks-for-map}
@@ -69,9 +63,8 @@ spatial_coverage_final <- as.numeric(sum((final %>% dplyr::filter(measurement_va
 
 difference_coverage <- spatial_coverage_init - spatial_coverage_final / 1000000
 gain_loss <- ifelse(difference_coverage >0, "Loss" ,"Gain")
-```
 
-Coverage difference is :
+```
 
 ```{r eval=FALSE, include=FALSE, out.width="100%"}
 tmap_mode(plotting_type)

@@ -7,8 +7,8 @@ output: html_document
 
 ```{r globalvariables, include=FALSE}
 
-formals(qflextable2, envir = current_env)$fig.pathinside = fig.path
-formals(save_image, envir = current_env)$fig.pathinside = fig.path
+formals(qflextable2, envir = environment())$fig.pathinside = fig.path
+formals(save_image, envir = environment())$fig.pathinside = fig.path
 
 if(!exists("step_title")){step_title_t_f = FALSE} else{step_title_t_f = TRUE}
 
@@ -64,6 +64,10 @@ matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
 
 if(is_null_or_not_exist(outputonly)){
   outputonly <- FALSE
+}
+
+if(is_null_or_not_exist(print_map)){
+  print_map <- FALSE
 }
 
 ```

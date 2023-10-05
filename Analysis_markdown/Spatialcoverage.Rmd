@@ -24,7 +24,7 @@ output:
 
 ```{r fonction-empreinte-spatial}
 
-map_unit <- lapply(unique(Groupped_all$measurement_unit), FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2)
+map_unit <- lapply(units, FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2)
 
 
 ```
@@ -51,11 +51,15 @@ knit_child_map_printing <- knitr::knit_child(text =c(
 ```
 
 ```{r ,results='asis'}
+
 cat(knit_child_map_printing)
+
 ```
 
 ```{r echo=FALSE, results='asis'} 
+
 map_unit_knit_list <- lapply(map_unit, FUN = map_unit_knit,folder = "Geodistrib", find_and_print = outputonly )
+
 ```
 
 

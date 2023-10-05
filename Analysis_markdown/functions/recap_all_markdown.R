@@ -80,8 +80,8 @@ recap_all_markdown <- function(action, entity, config, options){
     logger = "INFO"
     # SOURCE: OGC ####
     WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
-    sf = WFS$getFeatures("fifao:UN_CONTINENT2")
-    st_write(sf, "data/continent.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
+    continent = WFS$getFeatures("fifao:UN_CONTINENT2")
+    st_write(continent, "data/continent.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
     
     
     WFS = WFSClient$new(url = url, serviceVersion = serviceVersion, logger = logger)
@@ -136,16 +136,42 @@ recap_all_markdown <- function(action, entity, config, options){
     
     dir.create(paste0("tableau_recap_global_action/figures"), recursive = TRUE, showWarnings = FALSE)
     
+    species_group <-  read_csv("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
+    cl_cwp_gear_level2 <- read_csv(file.path("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv")) %>% select(Code = code, Gear = label)
+    
+    shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
+    
+    
+    source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
+    
+    for(file in list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)){
+      print(file)
+      data <- readRDS(file)
+      if(is.null(colnames(rds))){
+        data <- data$dataframe
+        data <- data %>% head(1000)
+      }
+      data <- tidying_GTA_data_for_comparison(dataframe = data,
+      shape = shape_without_geom, 
+      species_group_dataframe = species_group,
+      cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
+      print("tidied")
+      saveRDS(file = file, object = data)
+      print(paste0(file, " is Saved"))
+      
+    }
+    
+    
     
     parameters_child_global <- list(action = action,
                                     entity = entity, config = config, debugging = FALSE, 
                                     fig.path = paste0("tableau_recap_global_action/figures/"), 
-                                    outputonly = FALSE)
+                                    outputonly = FALSE, shape_without_geom = shape_without_geom,
+                                    continent = continent, shapefile.fix = shapefile.fix)
     child_env_global = new.env()
     list2env(parameters_child_global, env = child_env_global)
     
-    source(file.path(url_analysis_markdown, "functions/species_and_gear_group.R"), child_env_global)
-    source(file.path(url_analysis_markdown, "functions/shapes.R"), child_env_global)
+    
     source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_global)
     
     rmarkdown::render("tableau_recap_global_action_effort.Rmd"  , 

@@ -20,6 +20,7 @@ output:
 
 
 ```{r filereading}
+
 init <- readRDS(paste0(as.character(parameter_init),"/rds.rds"))
 if(is_null_or_not_exist(parameter_final)){
   final <- init[0,] 
@@ -69,29 +70,22 @@ mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi
   # final <- map_codelists(conn, parameter_fact, mapping_dataset, final, mapping_keep_src_code = FALSE, summary_mapping = FALSE)
   dbDisconnect(con)
 }
+
 ```
 
 ```{r filetidying}
-list_return_init <- tidying_data_for_GTA(dataframe = init,time_dim = parameter_time_dimension, shape = shape_without_geom, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, species_group_dataframe = species_group,cl_cwp_gear_level2_dataframe = NULL)
 
-init <- list_return_init$dataframe
-
-final <- tidying_data_for_GTA(final,time_dim = parameter_time_dimension, shape = shape_without_geom, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, species_group_dataframe = species_group,cl_cwp_gear_level2_dataframe = NULL)$dataframe
-
-if(!exists("print_map") || is.null(print_map)){
-print_map <- list_return_init$print_map
-} else {print_map <- print_map}
-
-if(!exists("print_map") || is.null(print_map)){
-print_map<- TRUE}
+init <- tidying_data(init)
+final <- tidying_data(final)
 
 ```
 
 
 ```{r geographic-identifier-and-not-standards-effort}
-formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = current_env)$geo_dim = parameter_geographical_dimension
-formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = current_env)$parameter_fact = parameter_fact
-formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = current_env)$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
+
+formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim = parameter_geographical_dimension
+formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_fact = parameter_fact
+formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
 
 init <- function_geographic_identifier_renaming_and_not_standards_unit(init)
 final <- function_geographic_identifier_renaming_and_not_standards_unit(final)

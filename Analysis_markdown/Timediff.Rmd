@@ -23,7 +23,7 @@ Here is represented the differences in percent for each year.
 
 ```{r timedimdiff}
 
-map <- lapply(parameter_time_dimension, 
+timediffplot <- lapply(parameter_time_dimension, 
               function(filtering_unit,dataframe){
                 ggplot(dataframe%>% dplyr::filter(Dimension == filtering_unit)%>%dplyr::mutate(Time = as.Date(Precision))) +
 aes(
@@ -32,7 +32,7 @@ y = `Difference (in %)`) +
 geom_line(size = 0.5) +
 scale_fill_hue(direction = 1) +
 theme(legend.position = "top") +
-facet_wrap(vars(measurement_unit), nrow = 2L)+theme_minimal()+
+facet_wrap(vars(measurement_unit), nrow = 2L)+theme_bw()+
 labs(x = filtering_unit)+
 facet_grid("measurement_unit", scales = "free_y")}, dataframe = Groupped_all)
 
@@ -41,7 +41,7 @@ facet_grid("measurement_unit", scales = "free_y")}, dataframe = Groupped_all)
 
 ```{r timedimdiffmultipleplots}
 
-map_unit_knit_list <- lapply(map, function(x) {
+timediffplot_knit_list <- lapply(timediffplot, function(x) {
   tryCatch(
     function_knitting(
       x,
@@ -63,7 +63,7 @@ map_unit_knit_list <- lapply(map, function(x) {
 
 ```{r timedimdiffmultipleplotsprinting, results='asis'}
 
-cat(unlist(map_unit_knit_list), sep = "\n")
+cat(unlist(timediffplot_knit_list), sep = "\n")
 
 ```
 
