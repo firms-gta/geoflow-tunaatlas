@@ -156,14 +156,19 @@ recap_all_markdown <- function(action, entity, config, options){
       print(paste0(file, " is Saved"))
       
     }
+
     
     parameter_filtering <- opts$filtering
+    parameter_resolution_filter <- opts$resolution_filter
     
     parameters_child_global <- list(action = action,
                                     entity = entity, config = config, debugging = FALSE, 
                                     fig.path = paste0("tableau_recap_global_action/figures/"), 
                                     outputonly = FALSE, shape_without_geom = shape_without_geom,
-                                    continent = continent, shapefile.fix = shapefile.fix)
+                                    continent = continent, shapefile.fix = shapefile.fix, 
+                                    parameter_filtering = parameter_filtering, 
+                                    parameter_resolution_filter = parameter_resolution_filter)
+    
     child_env_global = new.env()
     list2env(parameters_child_global, env = child_env_global)
     
