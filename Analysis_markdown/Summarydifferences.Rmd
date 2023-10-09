@@ -2,19 +2,7 @@
 title: "Summarydifferences"
 author: "BastienG"
 date: "2023-09-12"
-output:
-  bookdown::pdf_document2:
-    extra_dependencies: ["adjustbox", "subfig", "flafter"]
-    toc: FALSE
-    keep_tex: TRUE
-    template: template.tex
-    #md_extensions: "-autolink_bare_uris"
-    number_sections: TRUE
-    citation_package: default # Can also be "natbib"
-  bookdown::html_document2:
-  bookdown::word_document2: 
-    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
-    toc: TRUE
+output: html_document
 ---
 
 ```{r summarydiffplotting, eval=!unique_analyse ,echo=FALSE, results='asis', out.width="100%"}

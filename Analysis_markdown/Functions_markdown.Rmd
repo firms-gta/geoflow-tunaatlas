@@ -39,6 +39,7 @@ for (package in required_packages) {
 `%notin%` <- Negate(`%in%`)
 
 last_path = function(x) {
+  x <- gsub("/rds.rds", "", x)
   substr(x, max(gregexpr("/", x)[[1]]) + 1, nchar(x))
 }
 
@@ -207,10 +208,10 @@ filtering_function= function(dataframe_to_filter, parameter_filtering){
   return(dataframe_to_filter)
 }
 
-tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dim){
+tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe, time_dimension){
   
   dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
-  dataframe <- dataframe %>% mutate_at(all_of(time_dim), as.character)
+  dataframe <- dataframe %>% mutate_at(all_of(time_dimension), as.character)
   return(dataframe)
 
 }
@@ -272,22 +273,10 @@ fonction_groupement = function(these_col, init, final){
 }
 
 save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
-  if(find_and_print){
-    filepath <- file.path(fig.pathinside, folder, paste0(make.names(title), ".png"))
-    knitr::knit_child(text =c(
-'', 
-    '```{r image, fig.cap=`title`, fig.align = "center", out.widht = "100%"}',
-                            '',
-
-                            '',
-                            'knitr::include_graphics(filepath)',
-                            '',
-                            '```'), envir = environment(), quiet= TRUE)
-  } else {
   current <- tmap_mode()
   if(!is.null(folder) && !dir.exists(folder)){
     dir.create(file.path(fig.pathinside, folder))
-  }
+  
     if(all(class(plott) == "flextable")){
     save_as_image(plott,path = file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png"))))
     } else if(all(class(plott) == "tmap")){
@@ -298,9 +287,9 @@ save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside 
   } else {
 ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder))
   }
+  } else { print("Cannot save the image the folder does not exist")}
   # plott
 
-}
 }
 
 resume_knit_child = function(x,find_and_print = FALSE, folder = "Piechartsdimensions", fig.pathinside = fig.path){
@@ -474,7 +463,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
         tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) + tm_shape(continent) + tm_borders()
     }
     
-    return(list(image = image, variable_affichee = variable_affichee))
+    return(image)
   }
 }
 
@@ -561,22 +550,45 @@ resume_knit_child <- function(x, find_and_print = FALSE, folder = "Piechartsdime
 # 
 # }
 
-knitting_plots_subfigures <- function(plot, title, general_title = NULL, folder = "Unknown_folder", fig.pathinside = fig.path) {
-  save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
-    assign("title", gsub("_", "-",title))
-
-  # chunk_header <- paste0('```{r ', title, ', fig.cap="', title, '", fig.align="center", out.width="100%", results="asis"}')
-  # chunk_footer <- '```'
-
-  knitr::knit_child(text = c(
-    '```{r plottingmultiples, results = "asis" ,fig.cap =`title`}',
-    '',
-    '',
-    'plot(plot)',
-    '',
-    '',
-'```'  ), envir = environment(), quiet = TRUE)
+is_ggplot <- function(obj) {
+  inherits(obj, "gg") || inherits(obj, "ggplot")
 }
+
+
+knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fig.pathinside = fig.path) {
+  # Check if the function is being run in a knitr environment
+  in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
+  
+  # Save the ggplot object in the current environment with a unique name
+  if(is_ggplot(plot)) {
+    save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
+    
+    if(in_knitr) {
+      # This will run if inside a knitr/RMarkdown environment
+      
+      # Adjust title for use in fig.cap
+      assign("title_adj", gsub("_", "-", title), envir = environment())
+      assign("plot_obj", plot, envir = environment())
+      
+      # Create the R chunk as a string referencing the ggplot object by its name
+      knitr::knit_child(text = c(
+        '```{r evolvaluedimdiff, fig.cap=`title_adj`, fig.align = "center", out.width = "100%", results= "asis"}',
+        '',
+        '',
+        'plot(plot_obj)',
+        '',
+        '```'
+      ), envir = environment(), quiet = TRUE)
+    } else {
+      # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
+      print(plot)
+    }
+  } else { 
+    stop("Not a ggplot object")
+  }
+}
+
+
 
 
 
@@ -647,26 +659,46 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
 
 ```{r functionprintingmaps}
 
-fonction_empreinte_spatiale = function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2"){
-  selection = function(x){x %>% dplyr::ungroup() %>% dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit)}
-  Initial_dataframe <-selection(initial_dataset)
-  Final_dataframe <-selection(final_dataset)
-  geo_data <- gdata::combine(`Initial_dataframe`, `Final_dataframe`)
-  rm(`Initial_dataframe`, `Final_dataframe`)
-  gc()
-  geo_data <- geo_data %>% dplyr::mutate(source = dplyr::case_when(source == "Initial_dataframe"~  eval(parse(text = "titre_1")),source == "Final_dataframe"~ eval(parse(text = "titre_2")), TRUE ~ "Error"))
-  inner_join <- st_as_sf(geo_data%>% dplyr::group_by(geographic_identifier, measurement_unit,source)  %>%  dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE))  %>% dplyr::filter(measurement_value != 0) %>% dplyr::inner_join(shapefile.fix, by = c("geographic_identifier"="CWP_CODE")))
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
+  selection <- function(x) {
+    x %>% 
+      dplyr::ungroup() %>% 
+      dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit)
+  }
   
-  if(nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0){
-     if (plotting_type == "view"){image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee))+
-      tm_fill("measurement_value", palette="RdYlGn", style="cont", n=8,
-              id="name", midpoint = 0) +
-      tm_layout(legend.outside = FALSE) + tm_facets(by=c("GRIDTYPE","source"), free.scales = TRUE)} else {image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee))+
-        tm_fill("measurement_value", palette="RdYlGn", style="cont", n=8,
-                id="name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by=c("GRIDTYPE","source"), free.scales = TRUE)+tm_shape(continent)+tm_borders()}
+  Initial_dataframe <- selection(initial_dataset)
+  Final_dataframe <- selection(final_dataset)
+  
+  geo_data <- gdata::combine(Initial_dataframe, Final_dataframe)
+  rm(Initial_dataframe, Final_dataframe)
+  gc()
+  
+  geo_data <- geo_data %>% 
+    dplyr::mutate(source = dplyr::case_when(
+      source == "Initial_dataframe" ~ eval(parse(text = "titre_1")),
+      source == "Final_dataframe" ~ eval(parse(text = "titre_2")),
+      TRUE ~ "Error"
+    ))
+  
+  inner_join <- st_as_sf(geo_data %>% 
+                           dplyr::group_by(geographic_identifier, measurement_unit, source) %>%
+                           dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
+                           dplyr::filter(measurement_value != 0) %>%
+                           dplyr::inner_join(shapefile.fix, by = c("geographic_identifier" = "CWP_CODE"))
+  )
+  
+  if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
+    if (plotting_type == "view") {
+      image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
+        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
+        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
+    } else {
+      image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
+        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
+        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) + tm_shape(continent) + tm_borders()
+    }
     
-    return(list(image = image, variable_affichee = variable_affichee))
+    return(image)
   }
 }
 
@@ -998,7 +1030,7 @@ bar_plot_default <- function(first,
     bar_plot <- generate_plot(dataset,title =NULL, dimensioninside = dimension, topninside = topn)
     # bar_plot <- plot_grid(bar_plot, bar_plot_final, ncol = 2)
   }
-  return(list(pie_chart = bar_plot, dimension_returned = dimension))
+  return(bar_plot)
 }
 ```
 

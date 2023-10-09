@@ -13,16 +13,6 @@ formals(save_image, envir = environment())$fig.pathinside = fig.path
 if(!exists("step_title")){step_title_t_f = FALSE} else{step_title_t_f = TRUE}
 
 
-
-
-if (exists("params")) {
-  for (i in 1:length(params)) {
-    if(!exists(paste0("parameter_", names(params)[i]))) {
-      assign(paste0("parameter_", names(params)[i]), params[i][[1]])
-    }
-  }
-}
-
 if(!exists("parameter_fact") || is.null(parameter_fact)){parameter_fact <-  "catch"}
 
 if(is_null_or_not_exist(parameter_short)){parameter_short <-  FALSE}

@@ -147,10 +147,6 @@ recap_all_markdown <- function(action, entity, config, options){
     for(file in list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)){
       print(file)
       data <- readRDS(file)
-      if(is.null(colnames(rds))){
-        data <- data$dataframe
-        data <- data %>% head(1000)
-      }
       data <- tidying_GTA_data_for_comparison(dataframe = data,
       shape = shape_without_geom, 
       species_group_dataframe = species_group,
@@ -161,7 +157,7 @@ recap_all_markdown <- function(action, entity, config, options){
       
     }
     
-    
+    parameter_filtering <- opts$filtering
     
     parameters_child_global <- list(action = action,
                                     entity = entity, config = config, debugging = FALSE, 

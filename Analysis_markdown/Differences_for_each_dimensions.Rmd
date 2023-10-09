@@ -28,7 +28,7 @@ We will look for each dimension the `r topn` most important differences without 
 
 ```{r printing-table-diff-dimensions, paged.print=TRUE, results='asis'}
 
-if(nrow(Groupped_all_not_disap_or_app != 0)){qflextable2(Groupped_all_not_disap_or_app_to_dysplay, captionn = "Difference between stratas of the two datasets", grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", find_and_print = outputonly)} else{cat(no_diff_text)}
+if(nrow(Groupped_all_not_disap_or_app != 0)){qflextable2(Groupped_all_not_disap_or_app_to_dysplay, captionn = "Difference between stratas of the two datasets", grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", find_and_print = outputonly, columns_to_color = c("Difference (in %)"))} else{cat(no_diff_text)}
 
 ```
 

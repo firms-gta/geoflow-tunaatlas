@@ -2,19 +2,7 @@
 title: "Everyotherdimension"
 author: "BastienG"
 date: "2023-09-12"
-output:
-  bookdown::pdf_document2:
-    extra_dependencies: ["adjustbox", "subfig", "flafter"]
-    toc: FALSE
-    keep_tex: TRUE
-    template: template.tex
-    #md_extensions: "-autolink_bare_uris"
-    number_sections: TRUE
-    citation_package: default # Can also be "natbib"
-  bookdown::html_document2:
-  bookdown::word_document2: 
-    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
-    toc: TRUE
+output: html_document
 ---
 
 
@@ -22,11 +10,6 @@ output:
 
 We check the distribution of the value of each dimension and each unit.
 
-```{r otherdimension-list-pie-chart}
-
-list_pie_chart <- list(intersect(setdiff(parameter_colnames_to_keep, unlist(list(parameter_time_dimension, parameter_geographical_dimension, "measurement_unit", "measurement_value"))), colnames(init)))[[1]]
-
-```
 
 
 ```{r pie-charts-multiple-list}
@@ -47,20 +30,25 @@ dimension_title_subfigures <- paste0("Distribution in value for the dimension : 
 if(!exists("dimension_title_subfigures") || is.null(dimension_title_subfigures)){
 
   dimension_title_subfigures <- c("NULL","NULL")
-  saveRDS(dimension_title_subfigures,file.path(fig.path,  "dimension_title_subfigures.rds"))
 }
 
 
 
 ```
 
+```{r subfigures, eval=unique_analyse}
 
-```{r subfigurespieplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
-
-for (i in figures){plot(i)}
-
+render_subfigures(plots_list = figures, titles_list = dimension_title_subfigures, general_title = "Other dimensions")
 
 ```
+
+
+<!-- ```{r subfigurespieplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"} -->
+
+<!-- for (i in figures){plot(i)} -->
+
+
+<!-- ``` -->
 
 
 
@@ -85,66 +73,40 @@ cat(unlist(pie_chart_knit),  sep = "\n")
 
 list_bar_chart <- list_pie_chart
 
-if(!unique_analyse){bar_charts_multiple <- lapply(list_bar_chart,FUN = bar_plot_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{bar_charts_multiple <- lapply(list_bar_chart,FUN = bar_plot_default, first= init,second = NULL, topn = 7 , titre_1 = titre_1, titre_2 = NULL)}
-
-
-```
-
-```{r bar-charts-names, eval=unique_analyse}
-
-barplots<- lapply(bar_charts_multiple, function(x){x$pie_chart})
-
-dimension_title_subfigures <- lapply(bar_charts_multiple, function(x){paste0("Distribution in value for the dimension : ", x$dimension)})
+if(!unique_analyse){barplots <- lapply(list_bar_chart,FUN = bar_plot_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{barplots <- lapply(list_bar_chart,FUN = bar_plot_default, first= init,second = NULL, topn = 7 , titre_1 = titre_1, titre_2 = NULL)}
 
 
 ```
 
 
-```{r dim-title-subfigures}
+<!-- ```{r subfiguresbarplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"} -->
 
-if(!exists("dimension_title_subfigures") || is.null(dimension_title_subfigures)){
+<!-- for (i in barplots){plot(i)} -->
 
-  dimension_title_subfigures <- c("NULL","NULL")
-  saveRDS(dimension_title_subfigures,file.path(fig.path,  "dimension_title_subfigures.rds"))
-}
+<!-- ``` -->
 
 
 
-```
+```{r subfigures, eval=unique_analyse}
 
-
-```{r outputonlyreading,eval=outputonly}
-
-
-dimension_title_subfigures <- readRDS(file.path("dimension_title_subfigures.rds"))
+render_subfigures(plots_list = barplots, titles_list = dimension_title_subfigures, general_title = "Other dimensions")
 
 ```
-
-```{r subfiguresbarplots, eval=unique_analyse, echo=FALSE,  fig.cap='Other dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
-
-for (i in barplots){plot(i)}
-
-```
-
-
 
 
 ```{r bar-charts-multiple, eval =!unique_analyse}
 
-bar_chart_knit <- lapply(bar_charts_multiple, function(x) {
-  tryCatch(
-    resume_knit_child(x, find_and_print = outputonly, fig.pathinside = fig.path, folder = "Barplot"),
-    error = function(e) {
-      # Handle the error here (you can print an error message or take other actions)
-      cat("Error occurred:", conditionMessage(e), "\n")
-      # Return a value or NULL to continue the loop
-      return(NULL)
-    }
-  )
-})
+bar_chart_knit <- mapply(FUN = knitting_plots_subfigures,
+                         plot = barplots,
+                         title = dimension_title_subfigures,
+                         MoreArgs = list(folder = "Barplot", fig.pathinside = fig.path))
 
 ```
 
 ```{r unlist-bar-chart, results='asis', eval =!unique_analyse}
+
 cat(unlist(bar_chart_knit),  sep = "\n")
+
 ```
+
+

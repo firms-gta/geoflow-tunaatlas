@@ -131,15 +131,12 @@ sub_list_dir_2 = rownames(details)
 
 
 ```{r analysislast, include=FALSE, results='asis'}
-
 child_env_last <- list2env(as.list(child_env_base), parent = child_env_base)
 
 # source(knitr::purl("Functions_markdown.Rmd", quiet=TRUE),child_env_last)
 
-
-
+child_env_last$parameter_init <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.rds")
 child_env_last$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
-child_env_last$parameter_init <- sub_list_dir_2[length(sub_list_dir_2)]
 child_env_last$parameter_final <- NULL
 child_env_last$child <- TRUE
 child_env_last$no_recap_options <- TRUE
@@ -161,7 +158,6 @@ child_env_last$fig.path = new_path
 # source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_last)
 # rmarkdown::render("comparison.Rmd", envir = child_env_last, quiet = TRUE)
 
-
 res2 <- knitr::knit_child("comparison.Rmd", envir = child_env_last, quiet = TRUE)
 
 
@@ -170,13 +166,13 @@ gc()
 
 ```
 
-
-
 ```{r echo=FALSE, results='asis'}
 
 cat(res2, sep =  "\\clearpage")
 
 ```
+
+
 
 ```{r include=FALSE}
 rm(res2)
@@ -192,8 +188,9 @@ gc()
 child_env_comp <- list2env(as.list(child_env_base), parent = child_env_base)
 
 
-child_env_comp$parameter_init <- sub_list_dir_2[1]
-child_env_comp$parameter_final <- sub_list_dir_2[length(sub_list_dir_2)]
+child_env_comp$parameter_init <- paste0(sub_list_dir_2[1], "/rds.rds")
+child_env_comp$parameter_final <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.rds")
+
 child_env_comp$unique_analyse <- FALSE
 child_env_comp$parameter_titre_dataset_1 <- "Initial_data"
 child_env_comp$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
@@ -473,8 +470,8 @@ parameter_mapped <- ifelse(counting!=step_mapping, TRUE, FALSE)
 child_env <- list2env(as.list(child_env_base), parent = child_env_base)
 # source(knitr::purl("Functions_markdown.Rmd", quiet=TRUE),child_env)
 
-child_env$parameter_init <- sub_list_dir[counting]
-child_env$parameter_final <- sub_list_dir[counting+1]
+child_env$parameter_init <- paste0(sub_list_dir[counting], "/rds.rds")
+child_env$parameter_final <- paste0(sub_list_dir[counting+1], "/rds.rds")
 child_env$parameter_titre_dataset_1 <- last_path(sub_list_dir[counting])
 child_env$parameter_titre_dataset_2 <- last_path(sub_list_dir[counting+1])
 
@@ -495,7 +492,7 @@ dir.create(new_path, recursive = TRUE)
 
 child_env$fig.path = new_path
 
-if( identical(readRDS(paste0(as.character(child_env$parameter_init),"/rds.rds")),readRDS(paste0(as.character(child_env$parameter_final),"/rds.rds")) )){NA}else{
+if( identical(readRDS(child_env$parameter_init),readRDS(child_env$parameter_final) )){NA}else{
       # knitr::knit_child(text =c('```{r child="comparison.Rmd"}',
       #                       '',
       #                       '',

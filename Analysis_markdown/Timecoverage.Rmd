@@ -2,31 +2,43 @@
 title: "Timecoverage"
 author: "BastienG"
 date: "2023-09-12"
+runtime: shiny_prerendered
 ---
 
 `r cat_title("## Time coverage", child_headerinside = child_header)`
 
 
-```{r temporalcoveragelistplot, results='asis'}
+```{r titles-time-cov}
 
-# paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", titre_init, " and ",titre_final, " dataset ")
-#     title_knit <- paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", titre_init, " and ",titre_final, " dataset ")
-#     folder = "Temporaldiff"
-# 
-#   } else {
-#   title_knit <- paste0("Evolutions of values for the dimension ", Dimension2, " for ", titre_init, " and ",titre_final, " dataset ")
-#   if(unique_analyse){title_knit = paste0("Evolutions of values for the dimension ", Dimension2, " for ", titre_init, " dataset ")}
-# 
+if(unique_analyse){
+  
+titles_time <-   paste0("Evolutions of values for the dimension ", parameter_time_dimension, " for ", titre_1, " dataset ")
 
+}else {
+  
+titles_time <-   paste0("Evolutions of values for the dimension ", parameter_time_dimension, " for ", titre_1, " and ",titre_2, " dataset ")}
 
-map_unit_knit_list <- lapply(time_dimension_list_groupped_diff_image, FUN = function_knitting, titre_init = titre_1, titre_final = titre_2,  folder = "Temporal", difference = FALSE, unique_analyse= unique_analyse,fig.pathinside = fig.path)
 
 ```
 
-```{r plottingtemporalcoverageplot, results='asis'}
 
-cat(unlist(map_unit_knit_list), sep = "\n")
+```{r temporalcoveragelistplot, echo=FALSE, results='asis'} 
+
+time_dimension_list_groupped_diff_image_knit <- mapply(FUN = knitting_plots_subfigures,
+                         plot = time_dimension_list_groupped_diff_image,
+                         title = titles_time,
+                         MoreArgs = list(folder = "Temporal", fig.pathinside = fig.path))
 
 ```
+
+```{r temporalcoveragelistplotknitting, echo=FALSE, results='asis'}
+
+cat(unlist(time_dimension_list_groupped_diff_image_knit, recursive = FALSE),  sep = "\n")
+
+```
+
+
+
+
 
 

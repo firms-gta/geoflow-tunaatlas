@@ -2,19 +2,7 @@
 title: "Spatialcoverage"
 author: "BastienG"
 date: "2023-09-12"
-output:
-  bookdown::pdf_document2:
-    extra_dependencies: ["adjustbox", "subfig", "flafter"]
-    toc: FALSE
-    keep_tex: TRUE
-    template: template.tex
-    #md_extensions: "-autolink_bare_uris"
-    number_sections: TRUE
-    citation_package: default # Can also be "natbib"
-  bookdown::html_document2:
-  bookdown::word_document2: 
-    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
-    toc: TRUE
+output: html_document
 ---
 
 \clearpage
@@ -22,19 +10,6 @@ output:
 `r cat_title("## Spatial coverage ", child_headerinside = child_header)`
 
 
-```{r fonction-empreinte-spatial}
-
-map_unit <- lapply(units, FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2)
-
-
-```
-
-```{r numbergridtype, results='asis'}
-
-number_of_GRIDTYPE <- length(unique(GrouppedGRIDTYPE$Precision))
-GRIDTYPE <- paste(as.list(unique(GrouppedGRIDTYPE$Precision)), collapse = " ; ")
-
-```
 
 ```{r knitchildmapprintingdefinitionfunction, eval = print_map}
 knit_child_map_printing <- knitr::knit_child(text =c(
@@ -50,20 +25,23 @@ knit_child_map_printing <- knitr::knit_child(text =c(
   ), envir = environment(), quiet= TRUE)
 ```
 
-```{r ,results='asis'}
+```{r ,results='asis', eval=print_map}
 
 cat(knit_child_map_printing)
 
 ```
 
-```{r echo=FALSE, results='asis'} 
+```{r echo=FALSE, results='asis', eval=print_map} 
 
-map_unit_knit_list <- lapply(map_unit, FUN = map_unit_knit,folder = "Geodistrib", find_and_print = outputonly )
+map_unit_knit_list <- mapply(FUN = knitting_plots_subfigures,
+                         plot = map_unit,
+                         title = titles,
+                         MoreArgs = list(folder = "Geodistrib", fig.pathinside = fig.path))
 
 ```
 
 
-```{r printingmaps, echo=FALSE, ,results='asis'}
+```{r printingmaps, echo=FALSE, ,results='asis', eval=print_map}
 
 cat(unlist(map_unit_knit_list), sep = "\n")
 

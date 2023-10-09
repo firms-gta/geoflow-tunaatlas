@@ -110,7 +110,6 @@ res <- knitr::knit_child("Filtering_data.Rmd", quiet = TRUE, envir = environment
 ```{r Groupping-datarmd, results='asis'}
 
 res <- knitr::knit_child("Groupping_differences.Rmd", quiet = TRUE, envir = environment())
-
 # source("Groupping_differences.R", local = TRUE)
 
 ```
