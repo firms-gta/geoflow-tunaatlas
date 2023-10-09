@@ -60,5 +60,9 @@ if(is_null_or_not_exist(print_map)){
   print_map <- FALSE
 }
 
+if(is_null_or_not_exist(parameter_resolution_filter)){
+  parameter_resolution_filter <- NULL
+}
+
 ```
 

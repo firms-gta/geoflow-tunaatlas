@@ -18,6 +18,8 @@ if (isNullList(parameter_filtering)){cat("There is no filter on this data")} els
   }
 }
 
+
+
 ```
 
 
@@ -26,6 +28,22 @@ if (isNullList(parameter_filtering)){cat("There is no filter on this data")} els
 
 formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
 
+
+```
+
+```{r filterprinting, echo=FALSE'}
+
+if (!is.null(parameter_resolution_filter)) {
+
+      filtering_resolution_filter <- function(datatable, first_digit) {
+        filtered_data <- datatable[substr(datatable$geographic_identifier, 1, 1) == first_digit, ]
+        return(filtered_data)
+      }
+    
+      init <- filtering_resolution_filter(init, opts$resolution_filter)
+      
+      final <- filtering_resolution_filter(final, opts$resolution_filter)
+    }
 
 ```
 
