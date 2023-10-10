@@ -7,11 +7,6 @@ function(action, entity, config) {
   ######################################################################
   # wps.des: id = create_own_tuna_atlas_catch_effort, title = Create your own georeferenced Tuna Atlas dataset of catch or efforts, abstract = This algorithm allows to create own regional or global tuna atlas of geo-referenced gridded catch or efforts. It takes as input the public domain datasets of the five Tuna Regional Fisheries Management Organizations (tRFMOs) (IOTC ICCAT WCPFC IATTC CCSBT) stored within the Tuna atlas database. It proposes a set of parameters to customize the computation of the tuna atlas. ;
   # wps.in: id = fact, type = string, title = Variable output of the tuna atlas (catch or effort), value = "catch|effort";
-  # wps.in: id = include_IOTC, type = string, title = Include IOTC data (Indian Ocean) in the atlas (TRUE or FALSE), value = "TRUE|FALSE";
-  # wps.in: id = include_ICCAT, type = string, title = Include ICCAT data (Atlantic Ocean) in the tuna atlas?, value = "TRUE|FALSE";
-  # wps.in: id = include_IATTC, type = string, title = Include IATTC data (Eastern Pacific Ocean) in the tuna atlas?, value = "TRUE|FALSE";
-  # wps.in: id = include_WCPFC, type = string, title = Include WCPFC data (Western Pacific Ocean) in the tuna atlas?, value = "TRUE|FALSE";
-  # wps.in: id = include_CCSBT, type = string, title = Include CCSBT data db(Southern hemisphere Oceans - only Southern Bluefin Tuna) in the atlas?, value = "TRUE|FALSE";
   # wps.in: id = datasets_year_release, type = string, title = Year of release of the datasets by the tRFMOs. First available year is 2017. Usually datasets released in the year Y contain the time series from the beginning of the fisheries (e.g. 1950) to year Y-2 (included). For instance 2017 will extract the datasets released in 2017 and that cover the time series from 1950 to 2015 (included), value = "2017";
   # wps.in: id = iccat_ps_include_type_of_school, type = string, title = Concerns ICCAT Purse Seine data. Use only if parameter include_ICCAT is set to TRUE. ICCAT disseminates two catch-and-efforts datasets: one that provides the detail of the type of school (Fad|Free school) for purse seine fisheries only and that starts in 1994 (called Task II catch|effort by operation mode Fad|Free school) and one that does not provide the information of the type of school and that covers all the time period (from 1950) (called Task II catch|effort). These data are redundant (i.e. the data from the dataset Task II catch|effort by operation mode are also available in the dataset Task II catch|effort but in the latter the information on the type of school is not available). Combine both datasets to produce a dataset with fishing mode information (Fad | Free school)? TRUE : both datasets will be combined to produce a dataset with fishing mode information (Fad | free school). FALSE : Only the dataset without the type of school will be used. In that case the output dataset will not have the information on the fishing mode for ICCAT., value = "TRUE|FALSE";
   # wps.in: id = iattc_ps_raise_flags_to_schooltype, type = string, title = Concerns IATTC Purse Seine data. Use only if parameter include_IATTC is set to TRUE. For confidentiality policies information on fishing country (flag) and type of school for the geo-referenced catches is available in separate files for the Eastern Pacific Ocean purse seine datasets. IATTC hence provides two public domain dataset: one with the information on the type of school and one with the information on the flag. Both datasets can be combined - using raising methods - to estimate the catches by both flag and type of school for purse seine fisheries. Combine both datasets? TRUE : both datasets (by fishing mode and by flag) will be combined - using raising methods i.e. dataset with the information on the flag will be raised to the dataset with the information on the type of school - to have the detail on both fishing mode and flag for each stratum. FALSE : Only one dataset will be used (either Flag or Type of school). The parameter dimension_to_use_if_no_raising_flags_to_schooltype allows to decide which dataset to use., value = "TRUE|FALSE";
@@ -194,11 +189,6 @@ function(action, entity, config) {
 		"Retrieve georeferenced catch or effort : In this step, the georeference data of the included (in options) rfmos, are binded.",
 		"get_rfmos_datasets_level0"  ,
 		list(
-		  options_include_IOTC,
-		  options_include_ICCAT,
-		  options_include_IATTC,
-		  options_include_WCPFC,
-		  options_include_CCSBT
 		)
 	  )
 	  saveRDS(georef_dataset, "data/rawdata.rds")
@@ -249,7 +239,6 @@ function(action, entity, config) {
                         ## So in total there are 6 datasets.  
       This step is merging the different datasets provided and extracting type of school and adding it to the fishing_fleet datasets.",
 		  "raise_datasets_by_dimension"  ,
-		  list(options_include_IATTC)
 		)
 	}
     ################
@@ -286,7 +275,6 @@ function(action, entity, config) {
 		  then multiply them by the effort carried over for tropical tunas since this is considered to be the effort of the fishery 
 		  (which targets tunas). The raising factor is tuna effort/billfish effort and tuna effort/shark effort.",
 		  "get_rfmos_datasets_level0"  ,
-		  list(options_include_IATTC)
 		)
 	}
     ################
@@ -445,9 +433,7 @@ function(action, entity, config) {
   #Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  if (opts$include_IATTC &&
-      opts$include_WCPFC &&
-      !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
+  if (!is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
 	stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
 	stepnumber = stepnumber+1
     if (!exists("opts$strata_overlap_iattc_wcpfc")) {
@@ -481,8 +467,6 @@ function(action, entity, config) {
 		  "In this step, the georeferenced data present on the overlapping zone between IATTC and WCPFC is handled. The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
 		  "function_overlapped" ,
 		  list(
-			options_include_IATTC,
-			options_include_WCPFC ,
 			options_overlapping_zone_iattc_wcpfc_data_to_keep,
 			options_strata_overlap_iattc_wcpfc
 		  )
@@ -495,9 +479,7 @@ function(action, entity, config) {
   #Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
-  if (opts$include_IOTC &&
-      opts$include_WCPFC &&
-      !is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
+  if (!is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
 	stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?")
 	stepnumber = stepnumber+1
     # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
@@ -553,8 +535,6 @@ function(action, entity, config) {
 		  ) ,
 		  "function_overlapped",
 		  list(
-			options_include_WCPFC,
-			options_include_IOTC,
 			options_overlapping_zone_iotc_wcpfc_data_to_keep,
 			options_strata_overlap_iotc_wcpfc
 		  )
@@ -579,8 +559,7 @@ function(action, entity, config) {
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    if (opts$include_WCPFC &&
-        opts$include_CCSBT) {
+    
 	  stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
 	  stepnumber = stepnumber+1
       config$logger.info("Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone...") 
@@ -607,19 +586,16 @@ function(action, entity, config) {
 			),
 			"function_overlapped",
 			list(
-			  options_include_CCSBT  ,
-			  options_include_WCPFC ,
 			  options_strata_overlap_sbf
 			)
 		  )
       }
-    }
+    
     
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    if (opts$include_ICCAT &&
-        opts$include_CCSBT ) {
+    
 		stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?")
 		stepnumber = stepnumber+1
 		config$logger.info("Keeping only data from CCSBT in the ICCAT/CCSBT overlapping zone...")
@@ -646,20 +622,17 @@ function(action, entity, config) {
 			
 			"function_overlapped",
 			list(
-			  options_include_CCSBT,
-			  options_include_ICCAT,
 			  options_strata_overlap_sbf
 			)
 		  )
 		}
       
-    }
+    
     
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	#Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?
     #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    if (opts$include_IOTC &&
-		opts$include_CCSBT) {
+    
 		stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
 		stepnumber = stepnumber+1
 		config$logger.info("Keeping only data from CCSBT in the IOTC/CCSBT overlapping zone...")
@@ -686,17 +659,15 @@ function(action, entity, config) {
 			
 			"function_overlapped",
 			list(
-			  options_include_CCSBT  ,
-			  options_include_IOTC ,
 			  options_strata_overlap_sbf
 			)
 		  )
 		}
-    }
+    
   
   
   #--------irregular areas------------------------------------------------------------------------------------------------------------------------------------
-  #Irregular areas handling
+  #Irregular areas handling in case of area not corresponding to cwp 
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   spatial_curation = NULL
   if(!is.null(opts$irregular_area)) if (opts$irregular_area %in% c("remove", "reallocate")) {
@@ -744,8 +715,6 @@ function(action, entity, config) {
       stats_not_aggregated <- aggregated$stats_not_aggregated
       georef_dataset <- aggregated$df
       
-	  #TODO this should be removed, we are not going to treat irregular areas from IOTC
-	  #not sure to understand why this appears here... 
    
       config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
       
@@ -1208,26 +1177,22 @@ function(action, entity, config) {
 			  "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
 			)
 			dataset_catch <- NULL
-			if (include_IOTC == "TRUE") {
 			  rfmo_dataset <-
 				get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
 			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
 			  rm(rfmo_dataset)
-			}
-			if (include_WCPFC == "TRUE") {
+			
 			  rfmo_dataset <-
 				get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
 			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
 			  rm(rfmo_dataset)
-			}
-			if (include_CCSBT == "TRUE") {
+			
 			  rfmo_dataset <-
 				get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
 			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
 			  rm(rfmo_dataset)
-			}
-			if (include_IATTC == "TRUE") {
-			  rfmo_dataset <- get_rfmos_datasets_level0(
+
+			  			  rfmo_dataset <- get_rfmos_datasets_level0(
 				"IATTC",
 				"catch",
 				datasets_year_release,
@@ -1240,16 +1205,14 @@ function(action, entity, config) {
 			  )
 			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
 			  rm(rfmo_dataset)
-			}
-			if (include_ICCAT == "TRUE") {
-			  rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
+
+			  			  rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
 														"catch",
 														datasets_year_release,
 														iccat_ps_include_type_of_school =
 														  iccat_ps_include_type_of_school)
 			  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
 			  rm(rfmo_dataset)
-			}
 			
 			
 			if (mapping_map_code_lists == "TRUE") {
@@ -1331,11 +1294,6 @@ function(action, entity, config) {
 		  
 		  rm(dataset_to_compute_rf)
 		  
-		  #@juldebar: pending => metadata elements below to be managed (commented for now)
-		  # metadata$description<-paste0(metadata$description,georef_dataset$description)
-		  # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		  # metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
-		  
 		  georef_dataset <- georef_dataset$dataset
 		  config$logger.info(paste0(
 			"Total ",
@@ -1370,170 +1328,6 @@ function(action, entity, config) {
 			  )
 			}
 		  
-		  
-		#   ### RF2
-		#   if (fact == "catch") {
-		# 	config$logger.info("Fact=catch !")
-		# 	dataset_to_compute_rf = georef_dataset
-		# 	#@juldebar why do we use "year' as time dimension here ?
-		# 	if (is.null(opts$x_raising_dimensions)) {
-		# 	  x_raising_dimensions = c("species", "year", "source_authority")
-		# 	}
-		# 	
-		# 	
-		#   } else if (fact == "effort") {
-		# 	## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
-		# 	cat(
-		# 	  "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
-		# 	)
-		# 	dataset_catch <- NULL
-		# 	if (include_IOTC == "TRUE") {
-		# 	  rfmo_dataset <-
-		# 		get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
-		# 	  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-		# 	  rm(rfmo_dataset)
-		# 	}
-		# 	if (include_WCPFC == "TRUE") {
-		# 	  rfmo_dataset <-
-		# 		get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
-		# 	  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-		# 	  rm(rfmo_dataset)
-		# 	}
-		# 	if (include_CCSBT == "TRUE") {
-		# 	  rfmo_dataset <-
-		# 		get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
-		# 	  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-		# 	  rm(rfmo_dataset)
-		# 	}
-		# 	if (include_IATTC == "TRUE") {
-		# 	  rfmo_dataset <- get_rfmos_datasets_level0(
-		# 		"IATTC",
-		# 		"catch",
-		# 		datasets_year_release,
-		# 		iattc_ps_raise_flags_to_schooltype =
-		# 		  iattc_ps_raise_flags_to_schooltype,
-		# 		iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
-		# 		  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-		# 		iattc_ps_catch_billfish_shark_raise_to_effort =
-		# 		  TRUE
-		# 	  )
-		# 	  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-		# 	  rm(rfmo_dataset)
-		# 	}
-		# 	if (include_ICCAT == "TRUE") {
-		# 	  rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
-		# 												"catch",
-		# 												datasets_year_release,
-		# 												iccat_ps_include_type_of_school =
-		# 												  iccat_ps_include_type_of_school)
-		# 	  dataset_catch <- rbind(dataset_catch, rfmo_dataset)
-		# 	  rm(rfmo_dataset)
-		# 	}
-		# 	
-		# 	
-		# 	if (mapping_map_code_lists == "TRUE") {
-		# 	  dataset_catch <-
-		# 		map_codelists(
-		# 		  "catch",
-		# 		  mapping_csv_mapping_datasets_url,
-		# 		  dataset_catch,
-		# 		  mapping_keep_src_code
-		# 		)$dataset_mapped
-		# 	}
-		# 	
-		# 	dataset_catch$time_start <-
-		# 	  substr(as.character(dataset_catch$time_start), 1, 10)
-		# 	dataset_catch$time_end <-
-		# 	  substr(as.character(dataset_catch$time_end), 1, 10)
-		# 	if (unit_conversion_convert == "TRUE") {
-		# 	  # We use our conversion factors (IRD). This should be an input parameter of the script
-		# 	  #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
-		# 	  dataset_catch <- do_unit_conversion(
-		# 		entity = entity,
-		# 		config = config,
-		# 		fact = "catch",
-		# 		unit_conversion_csv_conversion_factor_url =
-		# 		  opts$unit_conversion_csv_conversion_factor_url,
-		# 		unit_conversion_codelist_geoidentifiers_conversion_factors =
-		# 		  opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-		# 		mapping_map_code_lists = opts$mapping_map_code_lists,
-		# 		dataset_catch
-		# 	  )
-		# 	}
-		# 	
-		# 	dataset_to_compute_rf = dataset_catch
-		# 	#@juldebar insert patch below to fix error in raise_get_rf function
-		# 	
-		# 	rm(dataset_catch)
-		# 	#@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
-		# 	# x_raising_dimensions=c("species","gear","year","source_authority")
-		#   }
-		#   
-		#   class(dataset_to_compute_rf$measurement_value) <- "numeric"
-		#   
-		#   georef_dataset <-
-		# 	function_raising_georef_to_nominal(
-		# 	  con = con,
-		# 	  opts = opts ,
-		# 	  entity = entity,
-		# 	  config = config,
-		# 	  dataset_to_raise =
-		# 		georef_dataset,
-		# 	  nominal_dataset_df =
-		# 		nominal_catch,
-		# 	  # nominal_catch,
-		# 	  # dataset_to_compute_rf=nominal_catch,
-		# 	  dataset_to_compute_rf =
-		# 		dataset_to_compute_rf,
-		# 	  x_raising_dimensions =
-		# 		x_raising_dimensions
-		# 	)
-		#   georef_dataset <- georef_dataset$dataset
-		#   
-		#   rm(dataset_to_compute_rf)
-		#   
-		#   #@juldebar: pending => metadata elements below to be managed (commented for now)
-		#   # metadata$description<-paste0(metadata$description,georef_dataset$description)
-		#   # metadata$lineage<-c(metadata$lineage,georef_dataset$lineage)
-		#   # metadata$supplemental_information<-paste0(metadata$supplemental_information,georef_dataset$supplemental_information)
-		#   
-		#   config$logger.info(paste0(
-		# 	"Total ",
-		# 	fact,
-		# 	" after raising is now: ",
-		# 	sum(georef_dataset$measurement_value),
-		# 	"\n"
-		#   ))
-		#   config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))
-		#   config$logger.info(paste0(
-		# 	"Total catch for data after raising is ",
-		# 	sum(georef_dataset$measurement_value),
-		# 	"  \n"
-		#   ))
-		#   
-		#   if(recap_each_step){
-		# 	  function_recap_each_step(
-		# 		"Level2_RF2",
-		# 		georef_dataset,
-		# 		"In this step, the georeferenced data is raised to get closer of the nominal data. Aiming this, all the stratas having an equivalent (regarding the columns given in options) in nominal catches are raised to reach the equivalent. If the data is lower in nominal data for the strata, the data is lowed to reach the nominal amount ",
-		# 		fonctions = "function_raising_georef_to_nominal",
-		# 		list(
-		# 		  raising_georef_to_nominal ,
-		# 		  iattc_ps_raise_flags_to_schooltype ,
-		# 		  iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype ,
-		# 		  iattc_ps_catch_billfish_shark_raise_to_effort ,
-		# 		  iccat_ps_include_type_of_school,
-		# 		  include_IATTC,
-		# 		  include_IOTC,
-		# 		  include_ICCAT,
-		# 		  include_CCSBT,
-		# 		  include_WCPFC,
-		# 		  fact,
-		# 		  raising_do_not_raise_wcfpc_data,
-		# 		  raising_raise_only_for_PS_LL
-		# 		)
-		# 	  )
-		# 	}
 		  
 		}
 
