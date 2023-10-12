@@ -154,7 +154,6 @@ function(action, entity, config) {
   georef_dataset <- dataset
   class(georef_dataset$measurement_value) <- "numeric"
   rm(dataset)
-  ### next steps to correct identifier incorrect of iotc
   
   ### filtering on minimum time_start (TRUE  by default)
 
@@ -280,426 +279,75 @@ function(action, entity, config) {
     ################
   }
   
-  #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
-  stepLogger(level = 0, step = stepnumber, msg = "Standardizing unit of measures")
-  stepnumber = stepnumber+1
-  #-------------------------------------------------------------------------------------------------------------------------------------
-  unit_weight_to_remap = c("MT")
-  unit_number_to_remap = c("NO")
-  if(DATASET_LEVEL == 0){
-	#in the case we are tackling the production of a level 0, we need to replace MT,MTNO by "t" and NO,NOMT by "no"
-	#MTNO and NOMT are code artefacts created at preharmonization level (now targeting essentially IATTC for catch)
-	unit_weight_to_remap = c("MT", "MTNO")
-	unit_number_to_remap = c("NO", "NOMT")
-  }
-  georef_dataset <- georef_dataset %>% 
-	dplyr::mutate( 
-		measurement_unit = case_when(
-			measurement_unit %in% unit_weight_to_remap ~ "t", 
-			measurement_unit %in% unit_number_to_remap ~ "no", 
-			TRUE ~ measurement_unit
-		)
-	)
-  
-  #----------Map code lists -------------------------------------------------------------------------------------------------------------------------------------------------
-  #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
-  #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  options("OutDec" = ".")
-  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("CCSBT", "IATTC", "WCPFC")
-  
-  if (!is.null(opts$mapping_map_code_lists)){
-    if (opts$mapping_map_code_lists) {
-	  stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
-      stepnumber = stepnumber+1
-      config$logger.info(
-        "Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database."
-      )
-      mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
-      mapping_dataset <-
-        read.csv(
-          mapping_csv_mapping_datasets_url,
-          stringsAsFactors = F,
-          colClasses = "character"
-        )
-      mapping_keep_src_code <- if (!is.null(opts$mapping_keep_src_code)) opts$mapping_keep_src_code else FALSE
-      
-      config$logger.info("Mapping code lists of georeferenced datasets...")
-      mapping_codelist <-
-        map_codelists(
-          con,
-          opts$fact,
-          mapping_dataset = mapping_dataset,
-          dataset_to_map = georef_dataset,
-          mapping_keep_src_code,
-          summary_mapping = TRUE,
-          source_authority_to_map = source_authority_to_map
-        ) #this map condelist function is to retrieve the mapping dataset used
-      
-      georef_dataset <- mapping_codelist$dataset_mapped
-    
-      config$logger.info("Mapping code lists of georeferenced datasets OK")
-
-      
-	  if(recap_each_step){
-	  
-		  recap_mapping <- mapping_codelist$recap_mapping
-		  stats_total <- mapping_codelist$stats_total
-		  not_mapped_total <- mapping_codelist$not_mapped_total
-	  
-		  names_list <-
-			c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
-		  
-		  function_write_RDS = function(name) {
-			file_name <- paste0("data/", name, ".rds")
-			object_list <- mget(name, envir = globalenv())
-			if (!is.null(object_list[[1]])) {
-			  object_df <- object_list[[1]]
-			  saveRDS(object_df, file = file_name)
-			} else {
-			  config$logger.info(sprintf("Skipping %s: Object is NULL\n", name))
-			}
-		  }
-		  
-		  try(lapply(names_list, function_write_RDS))
-		  
-		  
-		  
-		  
-		  config$logger.info("Saving recap of mapping ok")
-		  
-		  function_recap_each_step(
-			"mapping_codelist",
-			georef_dataset,
-			"This step is to map all the data with the same codes for gears, species, and fishingfleet,
-	that is to say, to put all the data coming from different RFMOs in the same langage with the same
-	codes. Coding systems and nomenclatures used to describe the data may differ according to tRFMOs.
-	Codes used by the tuna RFMOs in their respective datasets were mapped with global code lists for
-	gear (ISSCFG), flag (ISO3 countries codes), and species (ASFIS). Some codes could not be mapped
-	to standard code lists, for some tRFMOs own-defined codes that usually are aggregation of existing
-	codes (e.g. flag ’IDPH’ standing for Indonesia and Philippines within WCPFC or the species “Otun”
-	standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For
-	species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
-	and groups of gears.",
-	"map_codelists",
-			list(options_mapping_map_code_lists)
-		  )
-		  
-		  
-
-	  }
-    }
-  }
-	  #Filter on species under mandate for FIRMS level 0
-	  #-------------------------------------------------------------------------------------------------
-	  stepLogger(level = 0, step = stepnumber, msg = "Filter on species under mandate for FIRMS level 0")
-      stepnumber = stepnumber+1
-	  
-	  # Temporary patch for ASFIS RMJ --> RMM
-	  georef_dataset <- georef_dataset %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM", TRUE ~ species))
-	  
-	  # Filtering on species under mandate --------------------------------------
-	  # done base on mapping between source_authority (tRFMO) and species
-	  stepLogger(level = 0, step = stepnumber, msg = "Filtering on species under mandate, targeted by GTA")
-	  stepnumber = stepnumber +1
-	  #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
-	  
-	  url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
-	  species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
-	  georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species", "source_authority" = "source_authority"))
-	  
-	  if(recap_each_step){
-		  function_recap_each_step(
-			"Filtering species",
-			georef_dataset,
-			paste0(
-			  "Filtering species on the base of the file ",
-			  url_mapping_asfis_rfmo,
-			  " to keep only the species under mandate of tRFMOs. This file contains " ,
-			  as.character(length(nrow(
-			    species_to_be_kept_by_rfmo_in_level0
-			  ))),
-			  " species."
-			),
-			"inner_join"  ,
-			NULL
-		  )
+  #--------Overlapping zones---------------------------------------------------------------------------------------------------------------------
+	  # This function handles the processing of overlapping zones.
+	  handle_overlap <- function(zone_key, rfmo_main, default_strata) {
+	    # Construct the names of options based on the zone key
+	    opts_key <- paste0("overlapping_zone_", zone_key, "_data_to_keep")
+	    strata_key <- paste0("strata_overlap_", zone_key)
+	    
+	    # Check if options for the zone are provided
+	    if (!is.null(opts[[opts_key]])) {
+	      # Log the current processing step
+	      stepLogger(level = 0, step = stepnumber, msg = paste0("Overlapping zone (", zone_key, "): keep data from ", rfmo_main, " or ", opts[[opts_key]], "?"))
+	      stepnumber <<- stepnumber + 1
+	      
+	      # Determine which strata options to use, default or provided
+	      if (!exists(paste0("opts$", strata_key))) {
+	        options_strata <- default_strata
+	      } else {
+	        options_strata <- unlist(strsplit(opts[[strata_key]], split = ","))
+	      }
+	      
+	      # Determine which RFMO data not to keep
+	      rfmo_not_to_keep <- ifelse(opts[[opts_key]] == rfmo_main, names(rfmo_main)[[1]], rfmo_main)
+	      
+	      # Call the overlapping function to process the dataset
+	      georef_dataset <<- function_overlapped(
+	        dataset = georef_dataset,
+	        con = con,
+	        rfmo_to_keep = opts[[opts_key]],
+	        rfmo_not_to_keep = rfmo_not_to_keep,
+	        strata = options_strata,
+	        opts = opts
+	      )
+	      
+	      # If required, recap the steps undertaken
+	      if(recap_each_step){
+	        function_recap_each_step(
+	          paste0("overlap_", zone_key),
+	          georef_dataset,
+	          paste0(
+	            "In this step, the georeferenced data present on the overlapping zone between ", rfmo_main, " and ", names(rfmo_main)[[1]], " is handled.",
+	            "The option for the strata overlapping allows handling the maximum similarities allowed between two data to keep both.",
+	            "In the case the data is identical on the stratas provided, the remaining data is from ", opts[[opts_key]]
+	          ),
+	          "function_overlapped",
+	          list(
+	            opts[[opts_key]],
+	            options_strata
+	          )
+	        )
+	      }
+	    }
 	  }
 	  
-      
-    
-  
-  
-  #--------Overlapping zone (IATTC/WCPFC)---------------------------------------------------------------------------------------------------------------------
-  #Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  if (!is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
-	stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
-	stepnumber = stepnumber+1
-    if (!exists("opts$strata_overlap_iattc_wcpfc")) {
-      options_strata_overlap_iattc_wcpfc <-
-        c("geographic_identifier",    "species", "year")
-    } else {
-      options_strata_overlap_iattc_wcpfc <-
-        unlist(strsplit(opts$strata_overlap_iattc_wcpfc , split = ","))
-    }
-    config$logger.info(paste0(options_strata_overlap_iattc_wcpfc))
-    
-    formals(function_overlapped)$opts <- opts
-    
-    georef_dataset <-
-      function_overlapped(
-        dataset = georef_dataset ,
-        con = con ,
-        rfmo_to_keep = overlapping_zone_iattc_wcpfc_data_to_keep,
-        rfmo_not_to_keep = (if (overlapping_zone_iattc_wcpfc_data_to_keep == "IATTC") {
-          "WCPFC"
-        } else {
-          "IATTC"
-        }),
-        strata = options_strata_overlap_iattc_wcpfc
-      )
+	  # Configuration for each overlapping zone checking the one having an impact later and be able to easily remove unusefull steps by commenting
+	  zones_config <- list(
+	    iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "species", "year")),
+	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year", "fishing_fleet")),
+	    wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")),
+	    iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),
+	    iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species"))
+	  )
 	  
-	if(recap_each_step){
-		function_recap_each_step(
-		  "overlap_iattc_wcpfc",
-		  georef_dataset,
-		  "In this step, the georeferenced data present on the overlapping zone between IATTC and WCPFC is handled. The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-		  "function_overlapped" ,
-		  list(
-			options_overlapping_zone_iattc_wcpfc_data_to_keep,
-			options_strata_overlap_iattc_wcpfc
-		  )
-		)
-    }
-    
-  }
-  
-  #--------Overlapping zone (IOTC/WCPFC)----------------------------------------------------------------------------------------------------------------------
-  #Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  if (!is.null(opts$overlapping_zone_iotc_wcpfc_data_to_keep)) {
-	stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IOTC/WCPFC): keep data from IOTC or WCPFC?")
-	stepnumber = stepnumber+1
-    # overlapping_zone_iotc_wcpfc_data_to_keep <- opts$overlapping_zone_iotc_wcpfc_data_to_keep
-    if (!exists("opts$strata_overlap_iotc_wcpfc")) {
-      options_strata_overlap_iotc_wcpfc <-
-        c("geographic_identifier",
-          "species",
-          "year",
-          "fishing_fleet")
-    } else {
-      options_strata_overlap_iotc_wcpfc <-
-        unlist(strsplit(opts$strata_overlap_iotc_wcpfc, split = ","))
-    }
-    
-    
-    georef_dataset <-
-      function_overlapped(
-        georef_dataset,
-        con,
-        rfmo_to_keep = opts$overlapping_zone_iotc_wcpfc_data_to_keep,
-        rfmo_not_to_keep = (if (opts$overlapping_zone_iotc_wcpfc_data_to_keep == "IOTC") {
-          "WCPFC"
-        } else {
-          "IOTC"
-        }) ,
-        strata = options_strata_overlap_iotc_wcpfc
-      )
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        opts$overlapping_zone_iotc_wcpfc_data_to_keep,
-        " in the IOTC/WCPFC overlapping zone..."
-      )
-    )
-    
-    config$logger.info(
-      paste0(
-        "Keeping only data from ",
-        opts$overlapping_zone_iotc_wcpfc_data_to_keep,
-        " in the IOTC/WCPFC overlapping zone OK"
-      )
-    )
-    
-	if(recap_each_step){
-		function_recap_each_step(
-		  "overlap_iotc_wcpfc",
-		  georef_dataset,
-		  paste0(
-			"In this step, the georeferenced data present on the overlapping zone between IOTC and WCPFC is handled.
-					   The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.
-					   In the case the data is identical on the stratas privided, the remaining data is from ",
-			opts$overlapping_zone_iotc_wcpfc_data_to_keep
-		  ) ,
-		  "function_overlapped",
-		  list(
-			options_overlapping_zone_iotc_wcpfc_data_to_keep,
-			options_strata_overlap_iotc_wcpfc
-		  )
-		)
-    }
-  }
+	  # Loop over each zone and handle overlap using the defined configuration
+	  for (zone_key in names(zones_config)) {
+	    handle_overlap(zone_key, zones_config[[zone_key]]$main, zones_config[[zone_key]]$default_strata)
+	  }    
   
   
-  #-------------Overlap sbf-------------------------------------------------------------------------------------------------------------------------------------
-  #Overlapping on SBF
-  #-------------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-	if(!exists("opts$strata_overlap_sbf")){
-		options_strata_overlap_sbf <- c("species")	
-	} else {  
-		config$logger.info("Attention you are providing options for Southern Bluefin Tuna possible overlapping data")
-		options_strata_overlap_sbf <- unlist(strsplit(opts$strata_overlap_sbf, split = ","))
-	}
-    
-	rfmo_to_keep = "CCSBT"
-	
-	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?
-    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    
-	  stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (WCPFC/CCSBT): keep data from WCPFC or CCSBT?")
-	  stepnumber = stepnumber+1
-      config$logger.info("Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone...") 
-      georef_dataset <-
-        function_overlapped(
-          dataset = georef_dataset,
-          con = con,
-          rfmo_to_keep = rfmo_to_keep,
-          rfmo_not_to_keep = "WCPFC",
-          strata = options_strata_overlap_sbf,
-		  opts = opts
-        )   
-      config$logger.info("Keeping only data from CCSBT in the WCPFC/CCSBT overlapping zone OK")
-      
-	  if(recap_each_step){
-		  function_recap_each_step(
-			"overlap_ccsbt_wcpfc",
-			georef_dataset,
-			paste0(
-			  "In this step, the georeferenced data present on the overlapping zone between CCSBT and WCPFC is handled.",
-			  "The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-			  "In the case the data is identical on the stratas privided, the remaining data is from ",
-			  rfmo_to_keep
-			),
-			"function_overlapped",
-			list(
-			  options_strata_overlap_sbf
-			)
-		  )
-      }
-    
-    
-    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?
-    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    
-		stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (ICCAT/CCSBT): keep data from ICCAT or CCSBT?")
-		stepnumber = stepnumber+1
-		config$logger.info("Keeping only data from CCSBT in the ICCAT/CCSBT overlapping zone...")
-		georef_dataset <- function_overlapped(
-          dataset = georef_dataset,
-          con = con,
-          rfmo_to_keep = "CCSBT",
-          rfmo_not_to_keep = "ICCAT",
-          strata = options_strata_overlap_sbf,
-		  opts = opts
-        )
-		config$logger.info("Keeping only data from ICCAT in the ICCAT/CCSBT overlapping zone OK")
-      
-		if(recap_each_step){
-		  function_recap_each_step(
-			"overlap_iccat_ccsbt",
-			georef_dataset,
-			paste0(
-			  "In this step, the georeferenced data present on the overlapping zone between ICCAT and CCSBT is handled.",
-			  "The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-			  "In the case the data is identical on the stratas privided, the remaining data is from ",
-			  rfmo_to_keep
-			),
-			
-			"function_overlapped",
-			list(
-			  options_strata_overlap_sbf
-			)
-		  )
-		}
-      
-    
-    
-    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-	#Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?
-    #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-    
-		stepLogger(level = 0, step = stepnumber, msg = "Overlapping zone (IOTC/CCSBT): keep data from IOTC or CCSBT?")
-		stepnumber = stepnumber+1
-		config$logger.info("Keeping only data from CCSBT in the IOTC/CCSBT overlapping zone...")
-		georef_dataset <- function_overlapped(
-          dataset = georef_dataset,
-          con = con,
-          rfmo_to_keep = "CCSBT",
-          rfmo_not_to_keep = "IOTC",
-          strata = options_strata_overlap_sbf,
-		  opts = opts
-        )
-		config$logger.info("Keeping only data from IOTC in the IOTC/CCSBT overlapping zone OK")
-      
-		if(recap_each_step){
-		  function_recap_each_step(
-			"overlap_iotc_ccsbt",
-			georef_dataset,
-			paste0(
-			  "In this step, the georeferenced data present on the overlapping zone between IOTC and CCSBT is handled.
-								The option for the strata overlapping allow to handle the maximum similarities allowed between two data to keep both.",
-			  "In the case the data is identical on the stratas privided, the remaining data is from ",
-			  rfmo_to_keep
-			),
-			
-			"function_overlapped",
-			list(
-			  options_strata_overlap_sbf
-			)
-		  )
-		}
-    
-  
-  
-  #--------irregular areas------------------------------------------------------------------------------------------------------------------------------------
-  #Irregular areas handling in case of area not corresponding to cwp 
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  spatial_curation = NULL
-  if(!is.null(opts$irregular_area)) if (opts$irregular_area %in% c("remove", "reallocate")) {
-	stepLogger(level = 0, step = stepnumber, msg = "Irregular areas handling")
-	stepnumber = stepnumber+1
-    source(file.path(url_scripts_create_own_tuna_atlas, 'spatial_curation.R'))
-    spatial_curation <-
-      spatial_curation(con, georef_dataset, opts$irregular_area)
-    georef_dataset <- spatial_curation$df
-    removed_irregular_areas <-
-      spatial_curation$df_input_areas_not_curated
-    stats_irregular_areas <- spatial_curation$stats
-    
-	if(recap_each_step){
-		function_recap_each_step(
-		  "irregular_area_handling",
-		  georef_dataset,
-		  paste0(
-			"In this step, we handle areas that does not match cwp grids norme"
-		  ) ,
-		  "function_overlapped",
-		  list(options_irregular_area)
-		)
-		names_list_irregular_areas <-
-		c("removed_irregular_areas", "stats_irregular_areas") #file we want to save
-	  
-		try(lapply(names_list_irregular_areas, function_write_RDS))
-    }
-  }
-
-  
-  #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
+   #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
   #Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
@@ -736,73 +384,6 @@ function(action, entity, config) {
       }  
 	}
 	
-	#-----------spatial_curation_data_mislocated------------------------------------------------------  
-	if(is.null(opts$spatial_curation_data_mislocated)) if(DATASET_LEVEL == 0) opts$spatial_curation_data_mislocated = "remove" #we force this in case option is not set for level 0
-	if(!is.null(opts$spatial_curation_data_mislocated)) if (opts$spatial_curation_data_mislocated %in% c("reallocate", "remove")) {
-	
-		if(DATASET_LEVEL == 0) opts$spatial_curation_data_mislocated = "remove" #we force this in case option is badly set for level 0
-		
-		stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$spatial_curation_data_mislocated))
-		stepnumber = stepnumber+1
-		
-		ntons_before_this_step <- round(georef_dataset %>% select(measurement_value)  %>% sum())
-		config$logger.info(
-		  sprintf(
-			"Gridded catch dataset before Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
-			nrow(georef_dataset),
-			ntons_before_this_step
-		  )
-		)
-		
-		georef_dataset <- spatial_curation_data_mislocated(
-		  entity = entity,
-		  config = config,
-		  df = georef_dataset,
-		  spatial_curation_data_mislocated = opts$spatial_curation_data_mislocated
-		)
-		
-		georef_dataset <- georef_dataset$dataset
-		ntons_after_mislocated <-
-		  round(georef_dataset %>% select(measurement_value)  %>% sum())
-		config$logger.info(
-		  sprintf(
-			"Gridded catch dataset after Reallocation of mislocated data has [%s] lines and total catch is [%s] Tons",
-			nrow(georef_dataset),
-			ntons_after_mislocated
-		  )
-		)
-		config$logger.info(
-		  sprintf(
-			"Reallocation of mislocated data generated [%s] additionnal tons",
-			ntons_after_mislocated - ntons_before_this_step
-		  )
-		)
-		if(recap_each_step){
-			function_recap_each_step(
-			  "Realocating_removing_mislocated_data",
-			  georef_dataset,
-			  "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
-			  "spatial_curation_data_mislocated",
-			  list(options_spatial_curation_data_mislocated)
-			)
-		}
-		gc()
-		
-	  } else{
-		config$logger.info(
-		  "-----------------------------------------------------------------------------------------------------"
-		)
-		config$logger.info(
-		  sprintf(
-			"Step for managing mislocated data not executed not executed  for file (since not selected in the workflow options, see column 'Data' of geoflow entities spreadsheet):  Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ",
-			opts$spatial_curation_data_mislocated
-		  )
-		)
-		config$logger.info(
-		  "-----------------------------------------------------------------------------------------------------"
-		)
-	  }
- 
 	#===========================================================================================================================================================
     #===========================================================================================================================================================
 	#>(||||*> LEVEL 1 FIRMS CANDIDATE PRODUCT
@@ -811,33 +392,6 @@ function(action, entity, config) {
 	#TODO review and clean
 	if(DATASET_LEVEL >= 1){ #with this condition code will be run to deal with dataset level 1 and above
 
-	  
-	  # Curation absurd converted data ------------------------------------------
-	  if (!is.null(opts$curation_absurd_converted_data)) {
-		source(
-		  file.path(
-			url_scripts_create_own_tuna_atlas,
-			"curation_absurd_converted_data.R"
-		  )
-		)
-		
-		max_conversion_factor <-
-		  read.csv("data/max_conversion_factor.csv")
-		
-		georef_dataset <-
-		  curation_absurd_converted_data(georef_dataset = georef_dataset,
-										 max_conversion_factor = max_conversion_factor)
-		
-		function_recap_each_step(
-		  "Removing_absurd_nomt",
-		  georef_dataset,
-		  "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
-					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
-		  "spatial_curation_data_mislocated",
-		  list(curation_absurd_converted_data)
-		)
-	  }
-	  
 	  
 	  # unit conversion already given factors -----------------------------------
 	  
