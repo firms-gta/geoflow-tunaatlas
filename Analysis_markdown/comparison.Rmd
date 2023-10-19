@@ -122,7 +122,6 @@ cat(res)
 
 ```
 
-
 `r if(!unique_analyse && parameter_short == FALSE ){cat_title("# Main differences \n ", child_headerinside = child_header)}`
 
 

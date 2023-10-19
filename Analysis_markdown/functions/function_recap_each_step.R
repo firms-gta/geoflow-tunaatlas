@@ -4,6 +4,7 @@ function_recap_each_step=function(nom_dossier, nomrds, explication="",fonctions=
   dir.create("Markdown")
   dir.create(paste0("Markdown/",nom_dossier))
   nom_dossier <- paste0("Markdown/",nom_dossier)
+  class(nomrds$measurement_value) <- "integer"
   rds_t <- (nomrds %>% filter(measurement_unit %in% c("t", "MTNO","MT"))) 
   rds_no <- (nomrds %>% filter(measurement_unit %in% c("no", "NOMT","NO"))) 
   somme_t <- sum(rds_t$measurement_value, na.rm = TRUE)

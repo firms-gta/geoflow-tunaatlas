@@ -5,14 +5,15 @@ species_group_dataframe = NULL, cl_cwp_gear_level2_dataframe = NULL ){
   }
   
   if("geographic_identifier"%in%colnames(dataframe) & !is.null(shape)){
-    dataframe <- dataframe%>%  dplyr::left_join(shape, by = c("geographic_identifier"="CWP_CODE"))
+    dataframe <- dataframe%>%  dplyr::left_join(shape%>% 
+                                                  dplyr::select(GRIDTYPE, cwp_code), by = c("geographic_identifier"="cwp_code")) 
     print_map <- TRUE
   } else {print_map <- FALSE}
   
   if("GRIDTYPE"%in%colnames(dataframe)){
     dataframe <- dataframe%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
   }
-  if(!is.null(species_group_dataframe)){
+  if(!is.null(species_group_dataframe) && ("species" %in% colnames(dataframe))){
     dataframe <- dataframe %>% dplyr::left_join(species_group_dataframe%>% dplyr::distinct(), by = c("species"))
   }
   if("gear_type" %in%colnames(dataframe) & !is.null(cl_cwp_gear_level2_dataframe) ){

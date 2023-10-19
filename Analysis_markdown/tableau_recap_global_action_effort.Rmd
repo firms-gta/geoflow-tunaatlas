@@ -99,7 +99,7 @@ if(is.character(parameter_filtering)){
 
 parameters_child <- list(config = config, entity = entity,opts = opts ,action = action, parameter_filtering = parameter_filtering, parameter_fact = parameter_fact, parameter_con = con,parameter_host =config$software$input$dbi_config$parameters$host, parameter_port = config$software$input$dbi_config$parameters$port,  parameter_user = config$software$input$dbi_config$parameters$user,parameter_dbname=config$software$input$dbi_config$parameters$dbname, parameter_password = config$software$input$dbi_config$parameters$password,  child = TRUE, no_recap_options = TRUE, plotting_type = "plot",parameter_colnames_to_keep = c("fishing_fleet",         "gear_type",                 "time_start",                 
                       "geographic_identifier","fishing_mode",           "species",                       
-                      "measurement_unit",                 "measurement_value",                "source_authority"), treatment = FALSE, shapefile.fix = shapefile.fix, shape_without_geom = shape_without_geom, continent = continent,species_group = species_group, cl_cwp_gear_level2 = cl_cwp_gear_level2, fig.path = fig.path, outputonly = FALSE, print_map = TRUE)
+                      "measurement_unit",                 "measurement_value",                "source_authority", "GRIDTYPE", "Gear", "species_group"), treatment = FALSE, shapefile.fix = shapefile.fix, shape_without_geom = shape_without_geom, continent = continent,species_group = species_group, cl_cwp_gear_level2 = cl_cwp_gear_level2, fig.path = fig.path, outputonly = FALSE, print_map = TRUE)
 
 list2env(parameters_child, env = child_env_base)
 
@@ -463,7 +463,7 @@ For each treatment on the data, we provide a summary of what has been added, rem
 
 ```{r functionallcomp, echo=FALSE, results='hide'}
 
-function_all_comp = function(counting, parameters = parameters_child, parameter_short = TRUE, sub_list_dir = sub_list_dir_2, child_env_baseinside =child_env_base){
+function_all_comp = function(counting, parameters = parameters_child, parameter_short = FALSE, sub_list_dir = sub_list_dir_2, child_env_baseinside =child_env_base){
   gc()
 step_mapping <- which(sub_list_dir=="Markdown/mapping_codelist")
 parameter_mapped <- ifelse(counting!=step_mapping, TRUE, FALSE)
@@ -546,62 +546,4 @@ knit_print(df3)
 
 ```
 
-
-
-
-```{r}
-
-errormapping <- try(df_mapping_final_this_dimension <-  readRDS("data/recap_mapping.rds"))
-if("try-error" %in% class(errormapping)){knitr::knit_exit(fully = FALSE)}
-
-```
-
-
-```{r}
-
-t <- df_mapping_final_this_dimension %>% dplyr::select(-trg_codingsystem)%>%dplyr::group_by(across(everything())) %>%  dplyr::mutate(src_codingsystem = unlist(str_split(src_codingsystem, "_"))[1]) %>% ungroup() %>% dplyr::mutate(src_code = as.character(src_code)) %>% dplyr::ungroup() %>%  dplyr::group_by(source_authority) %>%  dplyr::mutate(row = row_number()) %>% dplyr::filter(src_code != trg_code)
-
-i <-pivot_wider(t %>% dplyr::group_by(source_authority) , names_from = source_authority, names_prefix = "Ancient name for ", values_from = "src_code")  %>% dplyr::rename("New code" = trg_code) %>% dplyr::rename(Dimension = src_codingsystem)%>%
-    dplyr::relocate(Dimension) %>% dplyr::select(-row)
-
-ster <- i %>% dplyr::group_by(Dimension, `New code`) %>% dplyr::summarise_at(vars(-group_cols()),.funs = function(x){toString(x[!duplicated(x)])}) %>% mutate_all(.funs = function(x){gsub(",$", "",gsub(c("NA", ",NA", " NA"), "", gsub("  ","",gsub("NA,", "", x))))})
-
-
-
-
-
-```
-
-```{r echo=FALSE, results='asis'}
-
-qflextable2(ster, captionn = "Replacement code during the mapping codelist treatment", grouped_data = c("Dimension"), save_folder = "Summary")
-
-```
-
-
-```{r statsirregularareas}
-
-if(file.exists("data/stats_irregular_areas.rds")){stats_irregular_areas <- readRDS("data/stats_irregular_areas.rds")} else {knitr::knit_exit()}
-
-```
-
-```{r statsirregularareasflextable,echo=FALSE, results='asis'}
-
-qflextable2(stats_irregular_areas, captionn ="Summary of the irregular area reallocation by unit", pgwidth = 6,  save_folder = "Summary")
-
-```
-
-
-
-```{r not_mapped_total}
-
-if(file.exists("data/not_mapped_total.rds")){not_mapped_total <- readRDS("data/not_mapped_total.rds")} else {knitr::knit_exit()}
-
-```
-
-```{r summaryofthenotmappedfactors,echo=FALSE, results='asis'}
-
-qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and so replaced by 'UNK', '99.9', or 'NEI'", pgwidth = 6,  save_folder = "Summary")
-
-```
 

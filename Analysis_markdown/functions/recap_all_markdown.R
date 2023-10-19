@@ -75,76 +75,78 @@ recap_all_markdown <- function(action, entity, config, options){
     
     con <- config$software$input$dbi
     
-    url= "https://www.fao.org/fishery/geoserver/wfs" 
-    serviceVersion = "1.0.0" 
-    logger = "INFO"
     # SOURCE: OGC ####
     WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
     continent = WFS$getFeatures("fifao:UN_CONTINENT2")
-    st_write(continent, "data/continent.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
-    
-    
-    WFS = WFSClient$new(url = url, serviceVersion = serviceVersion, logger = logger)
 
+    # get_wfs_data <- function(url= "https://www.fao.org/fishery/geoserver/wfs", 
+    #                          version = "1.0.0", 
+    #                          layer_name, output_dir = "data",logger = "INFO") {
+    #   # create output directory if it doesn't exist
+    #   if (!dir.exists(output_dir)) {
+    #     dir.create(output_dir)
+    #   }
+    #   
+    #   # define file paths
+    #   shapefile_path <- file.path(output_dir, paste0(layer_name, ".shp"))
+    #   
+    #   # check if shapefile already exists
+    #   if (file.exists(shapefile_path)) {
+    #     message(paste0("Shapefile for layer '", layer_name, "' already exists, skipping download."))
+    #     return(sf::st_read(shapefile_path) %>% rename(the_geom = geometry))
+    #   }
+    #   
+    #   cwp_sf <- WFS$getFeatures(layer_name)
+    #   cwp <- as.data.table(cwp_sf)
+    #   if("gml_id.1" %in% colnames(cwp)){
+    #     cwp <- cwp %>% select(-"gml_id.1")
+    #   }
+    #   
+    #   # save data as shapefile
+    #   sf::st_write(cwp, shapefile_path, driver = "ESRI Shapefile")
+    #   
+    #   # return data
+    #   return(cwp)
+    # }
+    # 
+    # CWP11 <- get_wfs_data(layer_name = "cwp:cwp-grid-map-1deg_x_1deg")
+    # sf::st_crs(CWP11) <- NA
+    # 
+    # CWP55 <- get_wfs_data(layer_name = "cwp:cwp-grid-map-5deg_x_5deg")
+    # CWP1010 <- get_wfs_data(layer_name = "cwp:cwp-grid-map-10deg_x_10deg")
+    # CWP2020 <- get_wfs_data(layer_name = "cwp:cwp-grid-map-20deg_x_20deg")
+    # CWP3030 <- get_wfs_data(layer_name = "cwp:cwp-grid-map-30deg_x_30deg")    
+    # # CWP_GRIDS <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
+    # 
+    # shapefile.fix <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
+    shapefile.fix <- st_read(con,query = "SELECT * from area.cwp_grid")%>% 
+      dplyr::rename(GRIDTYPE = gridtype)
     
+    shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom) 
     
-    get_wfs_data <- function(url= "https://www.fao.org/fishery/geoserver/wfs", 
-                             version = "1.0.0", 
-                             layer_name, output_dir = "data",logger = "INFO") {
-      # create output directory if it doesn't exist
-      if (!dir.exists(output_dir)) {
-        dir.create(output_dir)
-      }
-      
-      # define file paths
-      shapefile_path <- file.path(output_dir, paste0(layer_name, ".shp"))
-      
-      # check if shapefile already exists
-      if (file.exists(shapefile_path)) {
-        message(paste0("Shapefile for layer '", layer_name, "' already exists, skipping download."))
-        return(sf::st_read(shapefile_path) %>% rename(the_geom = geometry))
-      }
-      
-      cwp_sf <- WFS$getFeatures(layer_name)
-      cwp <- as.data.table(cwp_sf)
-      if("gml_id.1" %in% colnames(cwp)){
-        cwp <- cwp %>% select(-"gml_id.1")
-      }
-      
-      # save data as shapefile
-      sf::st_write(cwp, shapefile_path, driver = "ESRI Shapefile")
-      
-      # return data
-      return(cwp)
-    }
+    # st_write(shapefile.fix, "data/world_sf.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
     
-    CWP11_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-1deg_x_1deg")
-    sf::st_crs(CWP11_ERASED) <- NA
-    
-    CWP55_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-5deg_x_5deg")
-    CWP1010_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-10deg_x_10deg")
-    CWP2020_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-20deg_x_20deg")
-    CWP3030_ERASED <- get_wfs_data(layer_name = "cwp:cwp-grid-map-30deg_x_30deg")
-    
-    # CWP_GRIDS <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
-    shapefile.fix <- rbindlist(list(CWP11_ERASED, CWP55_ERASED, CWP1010_ERASED, CWP2020_ERASED, CWP3030_ERASED))
-    st_write(shapefile.fix, "data/world_sf.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
-    
-    query <- "SELECT  * from area.areas_conversion_factors_numtoweigth_ird"
-    areas_conversion_factors_numtoweigth_ird <- st_make_valid(st_read(con, query = query))%>% filter(!st_is_empty(.))
-    st_write(areas_conversion_factors_numtoweigth_ird, "data/areas_conversion_factors_numtoweigth_ird.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
+    # query <- "SELECT  * from area.areas_conversion_factors_numtoweigth_ird"
+    # areas_conversion_factors_numtoweigth_ird <- st_make_valid(st_read(con, query = query))%>% filter(!st_is_empty(.))
+    # st_write(areas_conversion_factors_numtoweigth_ird, "data/areas_conversion_factors_numtoweigth_ird.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
     
     dir.create(paste0("tableau_recap_global_action/figures"), recursive = TRUE, showWarnings = FALSE)
     
     species_group <-  read_csv("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
     cl_cwp_gear_level2 <- read_csv(file.path("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv")) %>% select(Code = code, Gear = label)
     
-    shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
     
+    # source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
+    source("~/Documents/geoflow-tunaatlas/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
     
-    source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
+    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)
+    details = file.info(sub_list_dir_2)
+    details = file.info(sub_list_dir_2)
+    details = details[with(details, order(as.POSIXct(mtime))), ]
+    sub_list_dir_2 = rownames(details)
     
-    for(file in list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)){
+    for(file in sub_list_dir_2){
+      
       print(file)
       data <- readRDS(file)
       data <- tidying_GTA_data_for_comparison(dataframe = data,

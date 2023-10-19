@@ -193,6 +193,7 @@ dplyr::arrange(Dimension, measurement_unit, `Loss / Gain`, Other_column, desc(ab
 
 ```{r fonction-empreinte-spatial, eval=print_map}
 
+
 map_unit <- lapply(units, FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2)
 
 

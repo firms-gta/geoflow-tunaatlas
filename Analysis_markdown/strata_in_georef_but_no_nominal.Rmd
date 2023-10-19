@@ -113,13 +113,14 @@ For the remaining of the analysis we only keep Dimension present in both dataset
 
 formals(filtering_function)$parameter_filtering = parameter_filtering
 
-georef_no_nominal <- readRDS(paste0(parameter_init, "/rds.rds"))
+georef_no_nominal <- readRDS(paste0(parameter_init))
 
 georef_no_nominal <- filtering_function(georef_no_nominal)
 
-georef <- filtering_function(readRDS(paste0(georef, "/rds.rds")))
+georef <- filtering_function(readRDS(paste0(georef)))
 
 nominal <- filtering_function(readRDS(paste0(nominal, "/rds.rds")))
+
 ```
 
 ## General overview of this inconsistent data 
@@ -246,6 +247,7 @@ qflextable2(georef_sup_to_nom %>% group_by(species, source_authority) %>% summar
 ```
 
 ```{r}
+
 ggplotgeoref_sup_to_nom <-ggplot(georef_sup_to_nom) +
   aes(
     x = year,

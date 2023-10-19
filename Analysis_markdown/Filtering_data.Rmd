@@ -31,7 +31,7 @@ formals(filtering_function, envir = environment())$parameter_filtering = paramet
 
 ```
 
-```{r filterprinting, echo=FALSE'}
+```{r filterprinting, echo=FALSE}
 
 if (!is.null(parameter_resolution_filter)) {
 

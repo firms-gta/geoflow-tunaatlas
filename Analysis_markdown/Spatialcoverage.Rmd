@@ -2,7 +2,7 @@
 title: "Spatialcoverage"
 author: "BastienG"
 date: "2023-09-12"
-output: html_document
+output: pdf_document
 ---
 
 \clearpage
@@ -12,6 +12,8 @@ output: html_document
 
 
 ```{r knitchildmapprintingdefinitionfunction, eval = print_map}
+
+
 knit_child_map_printing <- knitr::knit_child(text =c(
     '',
   '```{r results="asis"}', 

@@ -6,7 +6,9 @@ output: html_document
 ---
 
 ```{r globalvariables, include=FALSE}
-
+if(!exists("fig.path")){
+  fig.path <- getwd()
+}
 formals(qflextable2, envir = environment())$fig.pathinside = fig.path
 formals(save_image, envir = environment())$fig.pathinside = fig.path
 
