@@ -78,7 +78,8 @@ recap_all_markdown <- function(action, entity, config, options){
     # SOURCE: OGC ####
     WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
     continent = WFS$getFeatures("fifao:UN_CONTINENT2")
-
+    rm(WFS)
+    gc()
     # get_wfs_data <- function(url= "https://www.fao.org/fishery/geoserver/wfs", 
     #                          version = "1.0.0", 
     #                          layer_name, output_dir = "data",logger = "INFO") {
@@ -132,9 +133,9 @@ recap_all_markdown <- function(action, entity, config, options){
     
     dir.create(paste0("tableau_recap_global_action/figures"), recursive = TRUE, showWarnings = FALSE)
     
-    species_group <-  read_csv("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
-    cl_cwp_gear_level2 <- read_csv(file.path("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv")) %>% select(Code = code, Gear = label)
-    
+    species_group <-  st_read(con,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
+    # cl_cwp_gear_level2 <- read_csv(file.path("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv")) %>% select(Code = code, Gear = label)
+    cl_cwp_gear_level2 <- st_read(con, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
     
     # source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
     source("~/Documents/geoflow-tunaatlas/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
@@ -158,7 +159,7 @@ recap_all_markdown <- function(action, entity, config, options){
       print(paste0(file, " is Saved"))
       
     }
-
+    gc()
     
     parameter_filtering <- opts$filtering
     parameter_resolution_filter <- opts$resolution_filter
@@ -175,7 +176,8 @@ recap_all_markdown <- function(action, entity, config, options){
     list2env(parameters_child_global, env = child_env_global)
     
     
-    source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_global)
+    # source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_global)
+    # source(file.path(url_analysis_markdown, "Functions_markdown.R"), local = child_env_global)
     
     rmarkdown::render("tableau_recap_global_action_effort.Rmd"  , 
                       envir =  child_env_global, 

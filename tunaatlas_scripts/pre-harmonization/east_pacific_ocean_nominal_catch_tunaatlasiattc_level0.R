@@ -64,7 +64,7 @@ colToKeep_NC<-c("AnoYear","BanderaFlag","ArteGear","EspeciesSpecies","t")
 NC_harm_IATTC<-NC[,colToKeep_NC]
 colnames(NC_harm_IATTC)<-c("Year", "Flag","Gear","Species","Catch")
 
-NC_harm_IATTC$AreaName<-"IATTC"
+NC_harm_IATTC$AreaName<-"EPO"
 NC_harm_IATTC$AreaCWPgrid<-NA
 NC_harm_IATTC$School<-"ALL"
 NC_harm_IATTC$CatchType<-"ALL"

@@ -13,13 +13,13 @@ formals(install.packages)$upgrade <- "never"
 # List of required packages
 required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", 
                         "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata","tibble")
+                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata","tibble", "readtext")
 
 # Check if each package is already installed, and if not, install and load it
 for (package in required_packages) {
   # if (!require(package, character.only = TRUE)) {
   #   install.packages(package)
-    require(package)
+    require(package, character.only = TRUE)
   # }
 }
 
@@ -424,7 +424,7 @@ function_knitting = function(x, titre_init = titre_1, titre_final = titre_2, fin
 
 ```{r}
 # Function to create spatial plots
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2",shapefile.fix) {
   selection <- function(x) {
     x %>% 
       dplyr::ungroup() %>% 
@@ -659,7 +659,7 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
 
 ```{r functionprintingmaps}
 
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", shapefile.fix) {
   selection <- function(x) {
     x %>% 
       dplyr::ungroup() %>% 

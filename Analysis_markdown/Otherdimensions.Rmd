@@ -20,7 +20,7 @@ if(!unique_analyse){figures <- lapply(list_pie_chart,FUN = pie_chart_2_default, 
 
 ```{r pie-charts-names}
 
-dimension_title_subfigures <- paste0("Distribution in value for the dimension : ", list_pie_chart)
+dimension_title_subfigures <- gsub("_", ".", paste0("Distribution in value for the dimension : ", list_pie_chart))
 
 ```
 
@@ -68,6 +68,12 @@ pie_chart_knit <- mapply(FUN = knitting_plots_subfigures,
 cat(unlist(pie_chart_knit),  sep = "\n")
 
 ```
+
+```{r}
+knitr::knit_exit(fully = FALSE)
+```
+
+
 
 ```{r bar-charts-multiple-list}
 

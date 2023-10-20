@@ -178,6 +178,7 @@ cat(res, sep =  "\\clearpage")
 
 ```
 
+
 \clearpage
 
 
@@ -189,9 +190,6 @@ cat(res, sep =  "\\clearpage")
 
 ```
 
-```{r}
-knitr::knit_exit(fully = FALSE)
-```
 
 \clearpage
 

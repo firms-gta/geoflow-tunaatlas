@@ -33,6 +33,7 @@ cat(knit_child_map_printing)
 
 ```
 
+
 ```{r echo=FALSE, results='asis', eval=print_map} 
 
 map_unit_knit_list <- mapply(FUN = knitting_plots_subfigures,

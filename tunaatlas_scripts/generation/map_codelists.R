@@ -14,6 +14,10 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
   }
   data_not_to_map <- dataset_to_map[!dataset_to_map$source_authority %in% source_authority_to_map,]
   dataset_to_map <- dataset_to_map[dataset_to_map$source_authority %in% source_authority_to_map,]
+  if(nrow(dataset_to_map) == 0){
+    return(list(dataset_mapped = data_not_to_map, recap_mapping  =NULL, stats_total = NULL, 
+                not_mapped_total = NULL))
+  }
   mapping_dataset <- mapping_dataset[mapping_dataset$source_authority %in% source_authority_to_map,]
   
   recap_mapping <- NULL
@@ -30,7 +34,10 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
         if(!"source_authority" %in% colnames(df_mapping)) df_mapping$source_authority<-mapping_dataset_this_dimension$source_authority[j]  # Add the dimension "source_authority" to the mapping dataset. That dimension is not included in the code list mapping datasets. However, it is necessary to map the code list.
         df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)
       }
-      if(summary_mapping) recap_mapping <- rbind(df_mapping_final_this_dimension, recap_mapping)
+      successful_mappings <- df_mapping_final_this_dimension %>%
+        dplyr::filter(src_code %in% dataset_to_map[[dimension]])  
+      
+      if(summary_mapping) recap_mapping <- rbind(successful_mappings, recap_mapping)
       
       mapping <- map_codelist(dataset_to_map,df_mapping_final_this_dimension,dimension,mapping_keep_src_code)
       dataset_to_map <- mapping$df  # Codes are mapped by tRFMOs (source_authority)

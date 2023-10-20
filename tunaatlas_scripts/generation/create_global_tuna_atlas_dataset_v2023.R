@@ -84,7 +84,7 @@ function(action, entity, config) {
   #for level 0 - FIRMS
   source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
+  # source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
   #for filtering if needed
@@ -222,6 +222,27 @@ function(action, entity, config) {
       rbind(georef_dataset %>% filter(source_authority != "IATTC"),
             iattc)
     rm(iattc)
+    if (filtering_on_minimum_year_declared) {
+      stepLogger(level = 0, step = stepnumber, msg = "Filtering on minimum time_start")
+      stepnumber = stepnumber+1
+      
+      # extract the maximum year of declaration for each source_authority
+      max_years <- georef_dataset %>%
+        group_by(source_authority) %>%
+        summarise(max_time_start = max(time_start))
+      
+      # check if not all the source_authority columns have the same maximum year of declaration
+      if (length(unique(max_years$max_time_start)) > 1) {
+        config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
+        
+        # get the minimum time_start of all the maximum time_start of each source_authority
+        min_time_start <- min(max_years$max_time_start)
+        
+        # filter the georef_dataset based on the minimum time_start of all the maximum time_start of each source_authority
+        georef_dataset <- georef_dataset %>%
+          filter(time_start <= min_time_start)
+      }
+    }
     
 	if(recap_each_step){
 		function_recap_each_step(
@@ -260,6 +281,27 @@ function(action, entity, config) {
       rbind(georef_dataset %>% filter(source_authority != "IATTC"),
             iattc)
     rm(iattc)
+    if (filtering_on_minimum_year_declared) {
+      stepLogger(level = 0, step = stepnumber, msg = "Filtering on minimum time_start")
+      stepnumber = stepnumber+1
+      
+      # extract the maximum year of declaration for each source_authority
+      max_years <- georef_dataset %>%
+        group_by(source_authority) %>%
+        summarise(max_time_start = max(time_start))
+      
+      # check if not all the source_authority columns have the same maximum year of declaration
+      if (length(unique(max_years$max_time_start)) > 1) {
+        config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
+        
+        # get the minimum time_start of all the maximum time_start of each source_authority
+        min_time_start <- min(max_years$max_time_start)
+        
+        # filter the georef_dataset based on the minimum time_start of all the maximum time_start of each source_authority
+        georef_dataset <- georef_dataset %>%
+          filter(time_start <= min_time_start)
+      }
+    }
     
 	if(recap_each_step){
 		function_recap_each_step(
@@ -287,9 +329,17 @@ function(action, entity, config) {
 	    strata_key <- paste0("strata_overlap_", zone_key)
 	    
 	    # Check if options for the zone are provided
-	    if (!is.null(opts[[opts_key]])) {
+	    if (is.null(opts[[opts_key]])) {
+	      if(rfmo_main[[1]]=="CCSBT"){
+	        opts[[opts_key]] <- "CCSBT"
+	      } else {
+	      config$logger.info(paste0("Please provide a source authority to keep for overlapping zone ", opts_key))
+	        return()
+	      }
+	    }
+	    
 	      # Log the current processing step
-	      stepLogger(level = 0, step = stepnumber, msg = paste0("Overlapping zone (", zone_key, "): keep data from ", rfmo_main, " or ", opts[[opts_key]], "?"))
+	      stepLogger(level = 0, step = stepnumber, msg = paste0("Overlapping zone (", zone_key, "): keep data from ", opts[[opts_key]]))
 	      stepnumber <<- stepnumber + 1
 	      
 	      # Determine which strata options to use, default or provided
@@ -300,8 +350,7 @@ function(action, entity, config) {
 	      }
 	      
 	      # Determine which RFMO data not to keep
-	      rfmo_not_to_keep <- ifelse(opts[[opts_key]] == rfmo_main, names(rfmo_main)[[1]], rfmo_main)
-	      
+	      rfmo_not_to_keep <- ifelse(opts[[opts_key]] == rfmo_main[[1]], names(rfmo_main)[[1]], rfmo_main[[1]])
 	      # Call the overlapping function to process the dataset
 	      georef_dataset <<- function_overlapped(
 	        dataset = georef_dataset,
@@ -329,13 +378,15 @@ function(action, entity, config) {
 	          )
 	        )
 	      }
+	    
 	    }
-	  }
+	  
 	  
 	  # Configuration for each overlapping zone checking the one having an impact later and be able to easily remove unusefull steps by commenting
-	  zones_config <- list(
+	  
+  zones_config <- list(
 	    iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "species", "year")),
-	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year", "fishing_fleet")),
+	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year")),
 	    wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")),
 	    iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),
 	    iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species"))
@@ -343,9 +394,19 @@ function(action, entity, config) {
 	  
 	  # Loop over each zone and handle overlap using the defined configuration
 	  for (zone_key in names(zones_config)) {
-	    handle_overlap(zone_key, zones_config[[zone_key]]$main, zones_config[[zone_key]]$default_strata)
-	  }    
-  
+	    print(paste0("Processing zone: ", zone_key))  # Log before processing
+	    
+	    # It's a good practice to use tryCatch to understand if errors in handle_overlap are stopping the loop
+	    tryCatch({
+	      handle_overlap(zone_key, zones_config[[zone_key]]$main, zones_config[[zone_key]]$default_strata)
+	    }, error = function(e) {
+	      message(paste0("Error encountered: ", e))  # Print errors to the console
+	    })
+	    
+	    print(paste0("Finished processing zone: ", zone_key))  # Log after processing
+	  }
+	  
+	  
   
    #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
   #Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)

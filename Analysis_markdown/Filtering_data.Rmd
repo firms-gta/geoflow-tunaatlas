@@ -53,5 +53,6 @@ if (!is.null(parameter_resolution_filter)) {
 init <- filtering_function(dataframe_to_filter = init)
 
 if(unique_analyse){final <- init[0,]} else {final <- filtering_function(final)}
+gc()
 
 ```
