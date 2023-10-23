@@ -1,4 +1,6 @@
 Summarising_invalid_data = function(main_dir, connectionDB){
+  ancient_wd <- getwd()
+  setwd(main_dir)
   path = getwd()
   
   species_group <-  st_read(con,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
@@ -309,5 +311,5 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   # drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
   
   
-  
+  setwd(ancient_wd)
 }
