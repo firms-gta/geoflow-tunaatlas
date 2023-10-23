@@ -459,7 +459,7 @@ For each treatment on the data, we provide a summary of what has been added, rem
 
 ```{r functionallcomp, echo=FALSE, results='hide'}
 
-function_all_comp = function(counting, parameters = parameters_child, parameter_short = TRUE, sub_list_dir = sub_list_dir_2, child_env_baseinside =child_env_base){
+function_all_comp = function(counting, parameters = parameters_child, parameter_short = FALSE, sub_list_dir = sub_list_dir_2, child_env_baseinside =child_env_base){
   gc()
 step_mapping <- sum(which(sub_list_dir=="Markdown/mapping_codelist"))
 
