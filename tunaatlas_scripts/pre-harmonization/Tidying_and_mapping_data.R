@@ -46,6 +46,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
+  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
   
 
   # Additional scripts for reporting and functions
