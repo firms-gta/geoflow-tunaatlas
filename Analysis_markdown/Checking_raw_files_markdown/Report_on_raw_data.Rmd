@@ -111,7 +111,7 @@ Only the squares where the integrity of the area is located on land are consider
 child_env$parameter_init<- paste0(directory, "/data/areas_in_land.rds")
 
 child_env$parameter_titre_1  <- "On_continent"
-      res <- knitr::knit_child("~/Documents/geoflow-tunaatlas/Analysis_markdown/comparison.Rmd", envir = child_env, quiet = TRUE)
+      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
         gc()
@@ -140,7 +140,7 @@ Some square does not correspond to the cwp grid standards")
 child_env$parameter_init<- paste0(directory, "/data/removed_irregular_areas.rds")
 
 child_env$parameter_titre_dataset_1  <- "Not_cwp"
-      res <- knitr::knit_child("~/Documents/geoflow-tunaatlas/Analysis_markdown/comparison.Rmd", envir = child_env, quiet = TRUE)
+      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
         gc()
@@ -163,7 +163,7 @@ Some data provided in Number of fish and tons are not plausible")
 child_env$parameter_init<- paste0(directory,  "not_conform_conversion_factors.rds")
 child_env$parameter_titre_1  <- "Not_conform_conversions_factors"
 
-      res <- knitr::knit_child("~/Documents/geoflow-tunaatlas/Analysis_markdown/comparison.Rmd", envir = child_env, quiet = TRUE)
+      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
         gc()
@@ -185,7 +185,7 @@ Some data are provided with a measurement_value inferior or equal to 0 ")
 child_env$parameter_init<- paste0(directory,  "negative_values.rds")
 child_env$parameter_titre_1  <- "Negative_or_null_values"
 
-      res <- knitr::knit_child("~/Documents/geoflow-tunaatlas/Analysis_markdown/comparison.Rmd", envir = child_env, quiet = TRUE)
+      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
         
