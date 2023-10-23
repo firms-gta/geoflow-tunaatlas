@@ -55,9 +55,12 @@ load_dataset <- function(action,entity, config){
   entity$enrichWithMetadata()
   
   #----------------------------------------------------------------------------------------------------------------------------
-  
   #resources
-  path_to_dataset <- entity$resources$harmonized
+  path_to_dataset <- entity$resources$mapped
+  if(is.null(path_to_dataset)){
+    path_to_dataset <- gsub("harmonized", "mapped", entity$resources$harmonized)
+    
+  }
   path_to_codelists <- entity$resources$codelists
   
   #names
