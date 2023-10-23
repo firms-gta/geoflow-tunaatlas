@@ -1,0 +1,48 @@
+---
+title: "Recap on pre-harmonisation"
+author: "BastienG"
+date: "2023-10-18"
+output: html_document
+---
+
+```{r}
+
+invalid_data <- readRDS(file.path(path, "grouped_results_invalid_data.rds")) %>%ungroup() %>% arrange(tRFMO)%>%  distinct()
+```
+
+```{r echo=FALSE, results='asis'}
+
+qflextable2(invalid_data, captionn = "Recap of the issues with each dataframe", grouped_data = c("tRFMO"))
+
+```
+
+
+
+
+```{r}
+
+recap_mapping <- readRDS(file.path(path,"all_not_mapped_data.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct()
+
+```
+
+
+```{r echo=FALSE, results='asis'}
+
+qflextable2(recap_mapping, captionn = "All the code not being mapped during the pre-harmonisation", grouped_data = c("source_authority"))
+
+```
+
+
+
+```{r}
+
+recap_mapping <- readRDS(file.path(path,"recap_mapping.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct()
+
+```
+
+
+```{r echo=FALSE, results='asis'}
+
+qflextable2(recap_mapping, captionn = "All the code being mapped during the pre-harmonisation", grouped_data = c("source_authority"))
+
+```

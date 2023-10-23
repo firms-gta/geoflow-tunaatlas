@@ -2,16 +2,15 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   species_group <-  st_read(con,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
   cl_cwp_gear_level2 <- st_read(con, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
-
+  
   shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
     dplyr::rename(GRIDTYPE = gridtype)
   
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
-  # source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
-  source("~/Documents/geoflow-tunaatlas/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
-
-    required_packages <- c("webshot",
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+  
+  required_packages <- c("webshot",
                          "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
                          "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
                          "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
@@ -121,7 +120,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   saveRDS(all_not_mapped_data, file.path(main_dir, "all_not_mapped_data.rds"))
   
-  not_mapped_data_list <- list()
+  recap_mapping_data_list <- list()
+  browser()
   
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
@@ -144,7 +144,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   saveRDS(all_recap_mapping_data, file.path(main_dir, "all_recap_mapping.rds"))
   
   # PART 3: Generate a summary CSV for each entity
-  
+  `%notin%` <- Negate(`%in%`)
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
     entity_data <- combined_results[combined_results$Entity == entity_name, ]
@@ -164,13 +164,13 @@ Summarising_invalid_data = function(main_dir, connectionDB){
         
         
       } else if ("quadrant" %notin% colnames(data_list)){
-      data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
-                                              shape = shape_without_geom, 
-                                              species_group_dataframe = species_group,
-                                              cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
+        data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
+                                                     shape = shape_without_geom, 
+                                                     species_group_dataframe = species_group,
+                                                     cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
       }
       if("gridtype"%in% colnames(data_list)){
-      data_list <- data_list %>% rename(GRIDTYPE = gridtype)
+        data_list <- data_list %>% rename(GRIDTYPE = gridtype)
       }
       saveRDS(data_list, file = data_path)
       
@@ -194,10 +194,10 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   
   
-
+  
   # Directory for the R Markdown template
   base::options(knitr.duplicate.label = "allow")
-  rmd_file <- "~/Documents/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Report_on_raw_data.Rmd"
+  
   
   # Parameters for child Rmd
   # load(here(".RData"))
@@ -209,7 +209,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   continent = WFS$getFeatures("fifao:UN_CONTINENT2")
   
   
-parameters_child <- list(
+  parameters_child <- list(
     parameter_colnames_to_keep = c("fishing_fleet", "gear_type", "geographic_identifier",
                                    "fishing_mode", "species", "measurement_unit", "measurement_value", 
                                    "Gear", "species_group", "GRIDTYPE"),
@@ -223,7 +223,7 @@ parameters_child <- list(
   
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source(knitr::purl("~/Documents/geoflow-tunaatlas/Analysis_markdown/Functions_markdown.Rmd", quiet=TRUE), child_env_base)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
   
@@ -252,10 +252,15 @@ parameters_child <- list(
       render_env$fig.path <- entity_dir
       # Render the R Markdown file
       require(fs)
-      copy_project_files <- function(original_repo_path = "~/Documents/geoflow-tunaatlas/Analysis_markdown", new_repo_path) {
-        # Ensure the new repository directory exists, if not, create it
+      copy_project_files <- function(original_repo_path, new_repo_path) {
+        # Ensure the new repository directory exists; if not, create it
         if (!dir.exists(new_repo_path)) {
-          dir.create(new_repo_path, recursive = TRUE)
+          dir.create(new_repo_path, recursive = TRUE, showWarnings = TRUE)
+        }
+        
+        # Check if original_repo_path is a local directory. If not, you may need to clone/download it first.
+        if (!dir.exists(original_repo_path)) {
+          stop("The original_repo_path does not exist or is not accessible. Please make sure it's a local path.")
         }
         
         # Define the patterns for the file types we're interested in
@@ -264,7 +269,7 @@ parameters_child <- list(
         # Function to copy files based on pattern
         copy_files <- function(pattern) {
           # Find files that match the pattern
-          files_to_copy <- fs::dir_ls(original_repo_path, regexp = pattern, recurse = TRUE)
+          files_to_copy <- list.files(original_repo_path, pattern = pattern, full.names = TRUE, recursive = TRUE)
           
           # Copy each file to the new repository
           for (file in files_to_copy) {
@@ -281,8 +286,10 @@ parameters_child <- list(
         # Message to show it's done
         message("Files have been copied to the new repository.")
       }
-      copy_project_files(new_repo = entity_dir)
-      rmarkdown::render(rmd_file,
+      
+      # Use the function (make sure to use the correct local paths)
+      copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
+      rmarkdown::render("Report_on_raw_data.Rmd",
                         output_file = output_dir,
                         envir = render_env
       )
@@ -292,7 +299,7 @@ parameters_child <- list(
   
   
   path = getwd()
-  rmarkdown::render("~/Documents/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Recap_on_pre_harmo.Rmd",
+  rmarkdown::render("Recap_on_pre_harmo.Rmd",
                     output_dir = getwd(),
                     envir = environment()
   )
@@ -300,6 +307,6 @@ parameters_child <- list(
   folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
   drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
   
-    
+  
   
 }
