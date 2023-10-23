@@ -88,7 +88,7 @@ The data displayed by tRFMOs is supposed to concern the spatial area of the juri
 
 child_env$parameter_init<- paste0(directory, "/data/outside_juridiction.rds")
 
-      res <- knitr::knit_child("~/Documents/geoflow-tunaatlas/Analysis_markdown/comparison.Rmd", envir = child_env, quiet = TRUE)
+      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
         gc()
@@ -208,7 +208,7 @@ Some data provided does not correspond to any mapping")
 # child_env$parameter_init<- paste0(directory, "/data/not_mapped_total.rds")
 # child_env$parameter_titre_1  <- "not_mapped"
 # 
-#       res <- knitr::knit_child("~/Documents/geoflow-tunaatlas/Analysis_markdown/comparison.Rmd", envir = child_env, quiet = TRUE)
+#       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
 #         
 #         
 #         gc()
