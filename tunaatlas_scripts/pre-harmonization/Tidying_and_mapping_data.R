@@ -39,32 +39,24 @@ Tidying_and_mapping_data = function(action, entity, config) {
   }
   
   # Define the base URL for scripts
-  base_url <- "~/Documents/geoflow-tunaatlas/tunaatlas_scripts/generation"
+  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/"
   
   # Source scripts from URLs
-  scripts <- c(
-    "map_codelists.R"
-  )
-  source("~/Documents/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R")
-  source("~/Documents/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R")
+  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
+  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
+  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
+  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
   
-  lapply(scripts, function(script) source(file.path(base_url, script)))
-  
-  source("~/Documents/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/outside_juridiction.R")
-  
-  # Local script sourcing
-  local_scripts <- file.path("~/Documents/geoflow-tunaatlas/Analysis_markdown/", scripts)
-  
+
   # Additional scripts for reporting and functions
   reporting_functions <- c(
     "functions/write_options_to_csv.R",
     "functions/function_recap_each_step.R",
-    "functions/copyrmd.R",
-    "functions/function_write_RDS.R"
+    "functions/copyrmd.R"
   )
   
   lapply(reporting_functions, function(func) {
-    source(file.path("~/Documents/geoflow-tunaatlas/Analysis_markdown/", func))})
+    source(file.path(base_url, "Analysis_markdown/", func))})
   
   # Save options in a CSV file
   write_options_to_csv(opts)
@@ -93,7 +85,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   stepnumber = stepnumber+1
 
   max_conversion_factor <-
-    read.csv("~/Documents/geoflow-tunaatlas/data/max_conversion_factor.csv")
+    read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/data/max_conversion_factor.csv")
 
   curation_absurd_converted_data_list <-
     curation_absurd_converted_data(georef_dataset = df_to_load,
