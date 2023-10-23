@@ -1,4 +1,5 @@
 Summarising_invalid_data = function(main_dir, connectionDB){
+  path = getwd()
   
   species_group <-  st_read(con,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
   cl_cwp_gear_level2 <- st_read(con, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
@@ -121,7 +122,6 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   saveRDS(all_not_mapped_data, file.path(main_dir, "all_not_mapped_data.rds"))
   
   recap_mapping_data_list <- list()
-  browser()
   
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
@@ -226,6 +226,43 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
+  copy_project_files <- function(original_repo_path, new_repo_path) {
+    # Ensure the new repository directory exists; if not, create it
+    if (!dir.exists(new_repo_path)) {
+      dir.create(new_repo_path, recursive = TRUE, showWarnings = TRUE)
+    }
+    
+    # Check if original_repo_path is a local directory. If not, you may need to clone/download it first.
+    if (!dir.exists(original_repo_path)) {
+      stop("The original_repo_path does not exist or is not accessible. Please make sure it's a local path.")
+    }
+    
+    # Define the patterns for the file types we're interested in
+    file_patterns <- c("\\.Rmd$")  # add other file types if needed
+    
+    # Function to copy files based on pattern
+    copy_files <- function(pattern) {
+      # Find files that match the pattern
+      files_to_copy <- list.files(original_repo_path, pattern = pattern, full.names = TRUE, recursive = TRUE)
+      
+      # Copy each file to the new repository
+      for (file in files_to_copy) {
+        new_file_path <- file.path(new_repo_path, basename(file))
+        file.copy(file, new_file_path)
+      }
+    }
+    
+    # Run the copy for each pattern
+    for (pattern in file_patterns) {
+      copy_files(pattern)
+    }
+    
+    # Message to show it's done
+    message("Files have been copied to the new repository.")
+  }
+  
+  copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
+  copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
   
   
@@ -252,43 +289,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       render_env$fig.path <- entity_dir
       # Render the R Markdown file
       require(fs)
-      copy_project_files <- function(original_repo_path, new_repo_path) {
-        # Ensure the new repository directory exists; if not, create it
-        if (!dir.exists(new_repo_path)) {
-          dir.create(new_repo_path, recursive = TRUE, showWarnings = TRUE)
-        }
-        
-        # Check if original_repo_path is a local directory. If not, you may need to clone/download it first.
-        if (!dir.exists(original_repo_path)) {
-          stop("The original_repo_path does not exist or is not accessible. Please make sure it's a local path.")
-        }
-        
-        # Define the patterns for the file types we're interested in
-        file_patterns <- c("\\.Rmd$")  # add other file types if needed
-        
-        # Function to copy files based on pattern
-        copy_files <- function(pattern) {
-          # Find files that match the pattern
-          files_to_copy <- list.files(original_repo_path, pattern = pattern, full.names = TRUE, recursive = TRUE)
-          
-          # Copy each file to the new repository
-          for (file in files_to_copy) {
-            new_file_path <- file.path(new_repo_path, basename(file))
-            file.copy(file, new_file_path)
-          }
-        }
-        
-        # Run the copy for each pattern
-        for (pattern in file_patterns) {
-          copy_files(pattern)
-        }
-        
-        # Message to show it's done
-        message("Files have been copied to the new repository.")
-      }
       
       # Use the function (make sure to use the correct local paths)
-      copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
       rmarkdown::render("Report_on_raw_data.Rmd",
                         output_file = output_dir,
                         envir = render_env
@@ -298,14 +300,13 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   }
   
   
-  path = getwd()
   rmarkdown::render("Recap_on_pre_harmo.Rmd",
-                    output_dir = getwd(),
+                    output_dir = path,
                     envir = environment()
   )
-  
-  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
-  drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
+  # 
+  # folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+  # drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
   
   
   
