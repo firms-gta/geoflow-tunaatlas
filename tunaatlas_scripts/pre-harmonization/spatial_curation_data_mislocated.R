@@ -11,7 +11,7 @@ spatial_curation_data_mislocated<-function(entity,config,df,spatial_curation_dat
   
   # areas_in_land<-spatial_curation_intersect_areas(con , georef_dataset ,"areas_tuna_rfmos_task2","gshhs_world_coastlines")
   areas_in_land<-identification_data_on_land_cwp(con , georef_dataset)
-  
+  dataset_in_land <- georef_dataset %>% dplyr::filter(geographic_identifier %in%areas_in_land)
   
   areas_with_no_spatial_information<-c("UNK/IND",NA)
   
@@ -44,7 +44,7 @@ spatial_curation_data_mislocated<-function(entity,config,df,spatial_curation_dat
     cat("Reallocating data that are in land areas OK\n")
   }
   
-  return(list(dataset=georef_dataset,lineage=lineage,description=description))
+  return(list(dataset=georef_dataset, areas_in_land = dataset_in_land))
   
   
 }
