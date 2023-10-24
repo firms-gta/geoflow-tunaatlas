@@ -59,9 +59,20 @@ invalid_data <- readRDS(file.path(path, "grouped_results_invalid_data.rds")) %>%
 ```
 
 ```{r echo=FALSE, results='asis'}
+ft <- qflextable2(invalid_data, captionn = "Recap of the issues with each dataframe", grouped_data = c("tRFMO"))
 
-qflextable2(invalid_data, captionn = "Recap of the issues with each dataframe", grouped_data = c("tRFMO"))
+columns_to_color <- names(invalid_data)[-c(1,1)]
 
+# Apply conditional formatting for each column
+for (colname in columns_to_color) {
+  ft <- color(ft, i = ~ get(colname) == TRUE, j = colname, color = "red") 
+  ft <- color(ft, i = ~ get(colname) == FALSE, j = colname, color = "green")
+}
+```
+
+
+```{r echo=FALSE, results='asis'}
+ft
 ```
 
 
@@ -69,14 +80,14 @@ qflextable2(invalid_data, captionn = "Recap of the issues with each dataframe", 
 
 ```{r}
 
-recap_mapping <- readRDS(file.path(path,"all_not_mapped_data.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct()
+recap_mapping <- readRDS(file.path(path,"all_not_mapped_data.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct() %>% arrange(Dimension)
 
 ```
 
 
 ```{r echo=FALSE, results='asis'}
 
-qflextable2(recap_mapping, captionn = "All the code not being mapped during the pre-harmonisation", grouped_data = c("source_authority"))
+qflextable2(recap_mapping, captionn = "All the code not being mapped during the pre-harmonisation", grouped_data = c("source_authority", "Dimension"))
 
 ```
 
@@ -84,13 +95,13 @@ qflextable2(recap_mapping, captionn = "All the code not being mapped during the 
 
 ```{r}
 
-recap_mapping <- readRDS(file.path(path,"all_recap_mapping.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct() %>% filter(src_code != trg_code)
+recap_mapping <- readRDS(file.path(path,"all_recap_mapping.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct() %>% filter(src_code != trg_code) 
 
 ```
 
 
 ```{r echo=FALSE, results='asis'}
 
-qflextable2(recap_mapping, captionn = "All the code being mapped during the pre-harmonisation (not displayed if identical)", grouped_data = c("source_authority"))
+qflextable2(recap_mapping, captionn = "All the code being mapped during the pre-harmonisation (not displayed if identical)", grouped_data = c("source_authority", "src_codingsystem"))
 
 ```
