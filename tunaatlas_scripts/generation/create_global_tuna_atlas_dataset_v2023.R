@@ -386,10 +386,11 @@ function(action, entity, config) {
 	  
   zones_config <- list(
 	    iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "species", "year")),
-	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year")),
+
 	    # wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")), # not usefull anymore as handled in pre harmo
 	    # iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),
-	    # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species"))
+	    # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species")),
+	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year"))
 	  )
 	  
 	  # Loop over each zone and handle overlap using the defined configuration
