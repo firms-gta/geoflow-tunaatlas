@@ -387,9 +387,9 @@ function(action, entity, config) {
   zones_config <- list(
 	    iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "species", "year")),
 	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year")),
-	    wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")),
-	    iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),
-	    iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species"))
+	    # wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")), # not usefull anymore as handled in pre harmo
+	    # iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),
+	    # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species"))
 	  )
 	  
 	  # Loop over each zone and handle overlap using the defined configuration
@@ -408,45 +408,9 @@ function(action, entity, config) {
 	  
 	  
   
-   #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
-  #Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
-	  stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
-	  stepnumber = stepnumber+1
-      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-      source(file.path(
-        url_scripts_create_own_tuna_atlas,
-        "aggregate_resolution.R"
-      )) #modified for geoflow
-      aggregated <- aggregate_resolution(con, georef_dataset, 6)
-      df_input_not_aggregated <- aggregated$df_input_not_aggregated
-      stats_not_aggregated <- aggregated$stats_not_aggregated
-      georef_dataset <- aggregated$df
-      
-   
-      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-      
-	  if(recap_each_step){
-		  names_list_aggregation <-
-			c("df_input_not_aggregated", "stats_not_aggregated") #file we want to save
-		  
-		  try(lapply(names_list_aggregation, function_write_RDS))
-
-		  function_recap_each_step(
-			"Aggregation",
-			georef_dataset,
-			"This step is to aggregate data on resolution lower than 5° in 5°.",
-			"spatial_curation_upgrade_resolution",
-			list(
-			  options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg
-			)
-		  )
-      }  
-	}
-	
+  
 	#===========================================================================================================================================================
-    #===========================================================================================================================================================
+  #===========================================================================================================================================================
 	#>(||||*> LEVEL 1 FIRMS CANDIDATE PRODUCT
 	#===========================================================================================================================================================
 	#===========================================================================================================================================================
@@ -1128,6 +1092,46 @@ function(action, entity, config) {
 		}
 		gc()
 	}
+  
+  
+  #------Spatial aggregation of data------------------------------------------------------------------------------------------------------------------------
+  #Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
+    stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
+    stepnumber = stepnumber+1
+    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+    source(file.path(
+      url_scripts_create_own_tuna_atlas,
+      "aggregate_resolution.R"
+    )) #modified for geoflow
+    aggregated <- aggregate_resolution(con, georef_dataset, 6)
+    df_input_not_aggregated <- aggregated$df_input_not_aggregated
+    stats_not_aggregated <- aggregated$stats_not_aggregated
+    georef_dataset <- aggregated$df
+    
+    
+    config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+    
+    if(recap_each_step){
+      names_list_aggregation <-
+        c("df_input_not_aggregated", "stats_not_aggregated") #file we want to save
+      
+      try(lapply(names_list_aggregation, function_write_RDS))
+      
+      function_recap_each_step(
+        "Aggregation",
+        georef_dataset,
+        "This step is to aggregate data on resolution lower than 5° in 5°.",
+        "spatial_curation_upgrade_resolution",
+        list(
+          options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg
+        )
+      )
+    }  
+  }
+  
+  
   
 	#===========================================================================================================================================================
 	#===========================================================================================================================================================
