@@ -65,10 +65,7 @@ Summarising_step = function(main_dir, connectionDB, config){
   
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   i <- 1
-  
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-  browser()
-  copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
   
   for (entity_dir in entity_dirs) {
@@ -80,6 +77,8 @@ Summarising_step = function(main_dir, connectionDB, config){
     i <- i+1
     entity_name <- basename(entity_dir)
     setwd(entity_dir)
+    copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
+    
     
       output_file_name <- paste0(entity_name, "_report.html") # name of the output file
       output_dir <- file.path(entity_dir, output_file_name) # where to save the output file
@@ -90,10 +89,10 @@ Summarising_step = function(main_dir, connectionDB, config){
       render_env$fig.path <- entity_dir
       render_env$entity <- entity
       # Render the R Markdown file
-      require(fs)
+     
       rmarkdown::render("tableau_recap_global_action_effort.Rmd",
                         output_file = output_dir,
-                        envir = render_env
+                        envir = render_env, output_format = "html_document2"
       )
       rm(render_env)
     }
