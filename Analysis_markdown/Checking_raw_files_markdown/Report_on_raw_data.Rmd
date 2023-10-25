@@ -91,7 +91,7 @@ child_env$parameter_init<- file.path(directory, "/data/outside_juridiction.rds")
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
@@ -114,7 +114,7 @@ child_env$parameter_titre_1  <- "On_continent"
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
@@ -143,7 +143,7 @@ child_env$parameter_titre_dataset_1  <- "Not_cwp"
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
@@ -166,7 +166,7 @@ child_env$parameter_titre_1  <- "Not_conform_conversions_factors"
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
@@ -211,7 +211,7 @@ Some data provided does not correspond to any mapping")
 #       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
 #         
 #         
-#         gc()
+#         
         
 ```
 
