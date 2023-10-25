@@ -422,26 +422,26 @@ function(action, entity, config) {
 	  # unit conversion already given factors -----------------------------------
 	  
 	  if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
-		  georef_dataset <-
-			double_unit_data_handling(
-			  con = con,
-			  entity = entity,
-			  config = config,
-			  fact = fact,
-			  unit_conversion_csv_conversion_factor_url =
-				opts$unit_conversion_csv_conversion_factor_url,
-			  unit_conversion_codelist_geoidentifiers_conversion_factors =
-				opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-			  mapping_map_code_lists = opts$mapping_map_code_lists,
-			  georef_dataset = georef_dataset
-			)
-		  function_recap_each_step(
-			"Removing NOMT and converting MTNO in MT",
-			georef_dataset,
-			"In this step, we target the data provided in Tons and Number of fish. The data initially in MTNO will be converted in MT and the data in NTMO will be removed.",
-			"",
-			list("")
-		  )
+		#   georef_dataset <-
+		# 	double_unit_data_handling(
+		# 	  con = con,
+		# 	  entity = entity,
+		# 	  config = config,
+		# 	  fact = fact,
+		# 	  unit_conversion_csv_conversion_factor_url =
+		# 		opts$unit_conversion_csv_conversion_factor_url,
+		# 	  unit_conversion_codelist_geoidentifiers_conversion_factors =
+		# 		opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+		# 	  mapping_map_code_lists = opts$mapping_map_code_lists,
+		# 	  georef_dataset = georef_dataset
+		# 	)
+		#   function_recap_each_step(
+		# 	"Removing NOMT and converting MTNO in MT",
+		# 	georef_dataset,
+		# 	"In this step, we target the data provided in Tons and Number of fish. The data initially in MTNO will be converted in MT and the data in NTMO will be removed.",
+		# 	"",
+		# 	list("")
+		#   )
 		  
 		  new_version_iotc_raising_available <- TRUE
 		  if (file.exists("data/conversion_factors_IOTC.csv")) {
