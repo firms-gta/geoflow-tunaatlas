@@ -67,8 +67,7 @@ Summarising_step = function(main_dir, connectionDB, config){
   i <- 1
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-  
-  copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
+  browser()
   copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
   
@@ -92,7 +91,6 @@ Summarising_step = function(main_dir, connectionDB, config){
       render_env$entity <- entity
       # Render the R Markdown file
       require(fs)
-      
       rmarkdown::render("tableau_recap_global_action_effort.Rmd",
                         output_file = output_dir,
                         envir = render_env

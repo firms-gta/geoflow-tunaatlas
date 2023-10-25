@@ -10,7 +10,7 @@ copy_project_files <- function(original_repo_path, new_repo_path) {
   }
   
   # Define the patterns for the file types we're interested in
-  file_patterns <- c("\\.Rmd$")  # add other file types if needed
+  file_patterns <- c("\\.Rmd$", "\\.tex$", "\\.csl$")  # add other file types if needed
   
   # Function to copy files based on pattern
   copy_files <- function(pattern) {
