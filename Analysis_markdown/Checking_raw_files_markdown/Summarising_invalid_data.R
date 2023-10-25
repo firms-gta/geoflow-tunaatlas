@@ -226,7 +226,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Functions_markdown.R", local = child_env_base)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
   

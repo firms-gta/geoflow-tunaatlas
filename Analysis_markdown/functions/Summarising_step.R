@@ -2,7 +2,7 @@ Summarising_step = function(main_dir, connectionDB, config){
   ancient_wd <- getwd()
   setwd(main_dir)
   path = getwd()
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/copy_project_files.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   
   copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
