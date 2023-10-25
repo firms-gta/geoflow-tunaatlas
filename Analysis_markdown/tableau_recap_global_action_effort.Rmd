@@ -72,15 +72,16 @@ fancyhdr:
 
 \clearpage
 
-```{r child="Setup_markdown.Rmd", include=FALSE}
+```{r setup, include=FALSE}
+
+res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
 
 ```
 
 ```{r child-env-base}
 
 child_env_base <- new.env(parent = environment())
-# source(knitr::purl("Functions_markdown.Rmd", quiet=TRUE),child_env_base)
-source("Functions_markdown.R", local = child_env_base)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
 
 
 ```
@@ -122,9 +123,8 @@ sub_list_dir_2 = rownames(details)
 
 
 ```{r analysislast, include=FALSE, results='asis'}
-child_env_last <- list2env(as.list(child_env_base), parent = child_env_base)
 
-# source(knitr::purl("Functions_markdown.Rmd", quiet=TRUE),child_env_last)
+child_env_last <- list2env(as.list(child_env_base), parent = child_env_base)
 
 child_env_last$parameter_init <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.rds")
 child_env_last$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
@@ -146,7 +146,6 @@ dir.create(new_path, recursive = TRUE)
 
 child_env_last$fig.path = new_path
 
-# source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_last)
 # rmarkdown::render("comparison.Rmd", envir = child_env_last, quiet = TRUE)
 
 res2 <- knitr::knit_child("comparison.Rmd", envir = child_env_last, quiet = TRUE)
