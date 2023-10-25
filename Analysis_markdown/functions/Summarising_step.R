@@ -94,7 +94,7 @@ Summarising_step = function(main_dir, connectionDB, config){
         }
         
         # Define the patterns for the file types we're interested in
-        file_patterns <- c("\\.Rmd$")  # add other file types if needed
+        file_patterns <- c("\\.Rmd$", "\\.tex", "\\.csl")  # add other file types if needed
         
         # Function to copy files based on pattern
         copy_files <- function(pattern) {
