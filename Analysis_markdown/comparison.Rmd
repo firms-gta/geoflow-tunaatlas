@@ -73,7 +73,7 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment
 
 ```{r sourcingfunctionsmarkdown}
 
-source("https://github.com/firms-gta/geoflow-tunaatlas/Analysis_markdown/Functions_markdown.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
 ```
 
 
