@@ -84,7 +84,8 @@ function(action, entity, config) {
   #for level 0 - FIRMS
   source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R")) #modified for geoflow
+  try(source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R"))) #modified for geoflow
+  try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
   #for filtering if needed
@@ -455,6 +456,15 @@ function(action, entity, config) {
 			  )
 			) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit, 
 			                    gear_type  = gear)#this map condelist function is to retrieve the mapping dataset used
+			
+			mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
+			mapping_dataset <-
+			  read.csv(
+			    mapping_csv_mapping_datasets_url,
+			    stringsAsFactors = F,
+			    colClasses = "character"
+			  )
+			mapping_keep_src_code <- FALSE
 			
 			iotc_conv_fact_mapped <-
 			  map_codelists(
