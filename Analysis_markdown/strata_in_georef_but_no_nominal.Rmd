@@ -66,41 +66,7 @@ fancyhdr:
     footrulewidth: 0pt
 ---
 
-```{r child = 'setup_markdown.Rmd'}
-
-```
-
-
-
-```{r eval = TRUE, include=FALSE}
-
-opts <- entity$data$actions[[1]]$options
-con <- config$software$output$dbi
-parameter_fact <-  opts$fact
-if(!is.null(opts$filtering)){parameter_filtering <-opts$filtering} else{ parameter_filtering <-list(species = NULL, fishing_fleet = NULL)}
-if(is.character(parameter_filtering)){
-  parameter_filtering <- eval(parse(text=toString(parameter_filtering)))
-}
-
-```
-
-
-
-```{r echo=FALSE, results='asis'}
-
-isNullList = function(x) all(!lengths(x))
-if (!exists("parameter_filtering") || isNullList(parameter_filtering)){cat("There are no filter on this data in the following report.")
-  parameter_filtering <- list(species = NULL, source_authority = NULL)} else {
-  
-  cat (paste0("The filter used on the data in the following report are:  \n "))
-  for (i in 1:length(parameter_filtering)){
-    if (!is.null(parameter_filtering[[i]])){
-      cat(paste0("***- On ", names((parameter_filtering)[i]), " : ", paste((parameter_filtering)[[i]], collapse = " ; "),"*** \n"))
-    } else {""}
-  }
-}
-
-
+```{r child = 'Setup_markdown.Rmd'}
 
 ```
 
@@ -109,19 +75,6 @@ if (!exists("parameter_filtering") || isNullList(parameter_filtering)){cat("Ther
 
 For the remaining of the analysis we only keep Dimension present in both dataset so refer to : to analyse the differences between the stratas fo the two datasets. 
 
-```{r}
-
-formals(filtering_function)$parameter_filtering = parameter_filtering
-
-georef_no_nominal <- readRDS(paste0(parameter_init))
-
-georef_no_nominal <- filtering_function(georef_no_nominal)
-
-georef <- filtering_function(readRDS(paste0(georef)))
-
-nominal <- filtering_function(readRDS(paste0(nominal, "/rds.rds")))
-
-```
 
 ## General overview of this inconsistent data 
 
@@ -129,34 +82,17 @@ The measurement_value of catches in the georeferenced dataset but not in nominal
 
 , the corresponding measurement_values are : `r round(sum(georef_no_nominal$measurement_value)/1000000,2)` millions, which corresponds of a total of  `r round(100*sum(georef_no_nominal$measurement_value)/sum(nominal$measurement_value),2)` % of the nominal catch and `r round(100*sum(georef_no_nominal$measurement_value)/sum(georef_mapped$measurement_value),2)` % of the georeferenced catch.
 
-
 ```{r}
-if(nrow(georef_no_nominal)==0){knitr::knit_exit()}
-```
 
-
-
-
-
-```{r}
 georef_no_nominal <- georef_no_nominal%>% mutate(year = lubridate::year(year))
 
-georef_no_nominal_groupped <- georef_no_nominal  %>% group_by(year) %>% summarise(measurement_value = sum(measurement_value/1000000))
-
-
-# ggplot(georef_no_nominal) +
-#   aes(x = year, y = measurement_value) +
-#   geom_point(shape = "circle", size = 1.5, colour = "#112446") +
-#   labs(
-#     title = paste0("Tonnages in georef but not in nominal \n depending on the year (in millions of tons): \n Joined by", str_remove(toString(strata), "year,")) 
-#   ) +
-#   theme_minimal()
-
 georef_no_nominal_groupped <- georef_no_nominal %>% group_by(year, species, source_authority) %>% summarise(measurement_value = sum(measurement_value))
+
 ```
 
 
 ```{r georefnotnominalgrouppedbyyear}
+
 ggplot(georef_no_nominal_groupped) +
   aes(
     x = year,
@@ -170,14 +106,10 @@ ggplot(georef_no_nominal_groupped) +
   labs(x = "Year", y = "Value (in tons)") +
   theme_minimal() +
   facet_wrap(vars(source_authority), scales = "free")
+
 ```
 
-
-
 The number of row of the table of georeferenced data with no equivalent in nominal is `r nrow(georef_no_nominal)`.
-
-<!-- ## Joining without gear_type -->
-
 
 The number of stratas georeferenced with no equivalent in nominal is `r nrow(georef_no_nominal)`. (Around `r round(100-(((nrow(georef_mapped)-nrow(georef_no_nominal))/nrow(georef_mapped))*100),2)` % of the georeferenced stratas total.
 
@@ -190,9 +122,9 @@ child_env <- new.env()
 list2env(parameters_child, env = child_env)
 
 child_env$parameter_titre_dataset_1 <- "Georeferenced but not nominal data"
-child_env$parameter_init <- "Markdown_nominal/georef_not_nominal"
+child_env$parameter_init <- georef_no_nominal
 child_env$parameter_final <- NULL
-child_env$parameter_colnames_to_keep <- c( "species",  "source_authority", "year", "measurement_unit", "measurement_value")
+child_env$parameter_colnames_to_keep <-parameter_colnames_to_keep
 child_env$child <- FALSE
 child_env$no_recap_options <- TRUE
 child_env$parameter_fact <- "catch"
@@ -209,19 +141,6 @@ cat(res2, sep =  "\\clearpage")
 
 ```
 
-
-
-```{r}
-
-nominal_year_species_source_auth <- nominal %>% group_by(species, year, source_authority) %>% summarise(measurement_value_nominal = sum(measurement_value, na.rm = TRUE))
-
-georef_year_species_source_auth <- georef_mapped %>% group_by(species, year, source_authority) %>% summarise(measurement_value_georef = sum(measurement_value, na.rm = TRUE))
-
-join <- full_join(georef_year_species_source_auth, nominal_year_species_source_auth, by = c("species", "year", "source_authority")) %>% mutate(measurement_value_georef = round(measurement_value_georef, 3), measurement_value_nominal = round(measurement_value_nominal))
-
-georef_sup_to_nom <- join %>% filter(measurement_value_georef > measurement_value_nominal) %>% mutate(Difference = measurement_value_georef - measurement_value_nominal)
-
-```
 
 ## Stratas with declaration superior in georeferenced than in nominal 
 
