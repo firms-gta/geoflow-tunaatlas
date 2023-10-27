@@ -68,121 +68,121 @@ fig.path = directory
 
 ```{r statsirregularareas}
 
-if(file.exists(paste0(directory, "/data/stats_irregular_areas.rds"))){stats_irregular_areas <- readRDS(paste0(directory, "/data/stats_irregular_areas.rds"))
+if(file.exists(file.path(directory, "/data/stats_irregular_areas.rds"))){stats_irregular_areas <- readRDS(file.path(directory, "/data/stats_irregular_areas.rds"))
 }
 
 ```
 
 ```{r not_mapped_total}
 
-if(file.exists(paste0(directory, "/data/not_mapped_total.rds"))){not_mapped_total <- readRDS(paste0(directory, "/data/not_mapped_total.rds"))} 
+if(file.exists(file.path(directory, "/data/not_mapped_total.rds"))){not_mapped_total <- readRDS(file.path(directory, "/data/not_mapped_total.rds"))} 
 
 ```
 
 
-```{r results = 'asis', eval=file.exists(paste0(directory, "/data/outside_juridiction.rds"))}
+```{r results = 'asis', eval=file.exists(file.path(directory, "/data/outside_juridiction.rds"))}
 
 cat("# Outside juridiction area\n
 
 The data displayed by tRFMOs is supposed to concern the spatial area of the juridiction of the tRFMO. However, some data is displayed outside.")
 
-child_env$parameter_init<- paste0(directory, "/data/outside_juridiction.rds")
+child_env$parameter_init<- file.path(directory, "/data/outside_juridiction.rds")
 
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
-```{r complastfirstcat, eval=file.exists(paste0(directory, "/data/outside_juridiction.rds")), echo=FALSE, results='asis'}
+```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/outside_juridiction.rds")), echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 
 ```
 
 
-```{r results = 'asis', eval=file.exists(paste0(directory, "/data/areas_in_land.rds"))}
+```{r results = 'asis', eval=file.exists(file.path(directory, "/data/areas_in_land.rds"))}
 
 cat("# Overview of data located on land\n
 
 Only the squares where the integrity of the area is located on land are considered in the analysis.")
 
-child_env$parameter_init<- paste0(directory, "/data/areas_in_land.rds")
+child_env$parameter_init<- file.path(directory, "/data/areas_in_land.rds")
 
 child_env$parameter_titre_1  <- "On_continent"
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
-```{r statsirregularareasflextable,echo=FALSE, results = 'asis', eval=file.exists(paste0(directory, "/data/stats_irregular_areas.rds"))}
+```{r statsirregularareasflextable,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/stats_irregular_areas.rds"))}
 
 qflextable2(stats_irregular_areas, captionn ="Summary of the irregular area reallocation by unit", pgwidth = 6,  save_folder = "Summary")
 
 ```
 
-```{r complastfirstcat, eval=file.exists(paste0(directory, "/data/areas_in_land.rds")), echo=FALSE, results='asis'}
+```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/areas_in_land.rds")), echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 
 ```
 
 
-```{r results = 'asis', eval=file.exists(paste0(directory, "/data/removed_irregular_areas.rds"))}
+```{r results = 'asis', eval=file.exists(file.path(directory, "/data/removed_irregular_areas.rds"))}
 
 cat("# Area not in cwp grid\n
 
 Some square does not correspond to the cwp grid standards")
 
-child_env$parameter_init<- paste0(directory, "/data/removed_irregular_areas.rds")
+child_env$parameter_init<- file.path(directory, "/data/removed_irregular_areas.rds")
 
 child_env$parameter_titre_dataset_1  <- "Not_cwp"
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
-```{r complastfirstcat, eval=file.exists(paste0(directory, "/data/removed_irregular_areas.rds")), echo=FALSE, results='asis'}
+```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/removed_irregular_areas.rds")), echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 
 ```
 
 
-```{r results = 'asis', eval=file.exists(paste0(directory, "/data/not_conform_conversion_factors.rds"))}
+```{r results = 'asis', eval=file.exists(file.path(directory, "/data/not_conform_conversion_factors.rds"))}
 
 cat("# Not conform conversion factors\n
 
 Some data provided in Number of fish and tons are not plausible")
 
-child_env$parameter_init<- paste0(directory,  "not_conform_conversion_factors.rds")
+child_env$parameter_init<- file.path(directory,  "not_conform_conversion_factors.rds")
 child_env$parameter_titre_1  <- "Not_conform_conversions_factors"
 
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        gc()
+        
         
 ```
 
-```{r complastfirstcat, eval=file.exists(paste0(directory, "/data/not_conform_conversion_factors.rds")), echo=FALSE, results='asis'}
+```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/not_conform_conversion_factors.rds")), echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 
 ```
 
-```{r results = 'asis', eval=file.exists(paste0(directory, "/data/negative_values.rds"))}
+```{r results = 'asis', eval=file.exists(file.path(directory, "/data/negative_values.rds"))}
 
 cat("# Negative or null values in provided data\n
 
 Some data are provided with a measurement_value inferior or equal to 0 ")
 
-child_env$parameter_init<- paste0(directory,  "negative_values.rds")
+child_env$parameter_init<- file.path(directory,  "negative_values.rds")
 child_env$parameter_titre_1  <- "Negative_or_null_values"
 
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
@@ -191,7 +191,7 @@ child_env$parameter_titre_1  <- "Negative_or_null_values"
         
 ```
 
-```{r complastfirstcat, eval=file.exists(paste0(directory, "/data/not_conform_conversion_factors.rds")), echo=FALSE, results='asis'}
+```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/not_conform_conversion_factors.rds")), echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 
@@ -199,29 +199,29 @@ cat(res, sep =  "\\clearpage")
 
 
 
-```{r results = 'asis', eval=file.exists(paste0(directory, "/data/not_mapped_total.rds"))}
+```{r results = 'asis', eval=file.exists(file.path(directory, "/data/not_mapped_total.rds"))}
 
 cat("# Not mapped data \n
 
 Some data provided does not correspond to any mapping")
 
-# child_env$parameter_init<- paste0(directory, "/data/not_mapped_total.rds")
+# child_env$parameter_init<- file.path(directory, "/data/not_mapped_total.rds")
 # child_env$parameter_titre_1  <- "not_mapped"
 # 
 #       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
 #         
 #         
-#         gc()
+#         
         
 ```
 
-<!-- ```{r complastfirstcat, eval=file.exists(paste0(directory, "/data/not_mapped_total.rds")), echo=FALSE, results='asis'} -->
+<!-- ```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/not_mapped_total.rds")), echo=FALSE, results='asis'} -->
 
 <!-- cat(res, sep =  "\\clearpage") -->
 
 <!-- ``` -->
 
-```{r summaryofthenotmappedfactors,echo=FALSE, results = 'asis', eval=file.exists(paste0(directory, "/data/not_mapped_total.rds"))}
+```{r summaryofthenotmappedfactors,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/not_mapped_total.rds"))}
 
 qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and so replaced by 'UNK', '99.9', or 'NEI'", pgwidth = 6,  save_folder = "Summary", fig.path = getwd())
 
