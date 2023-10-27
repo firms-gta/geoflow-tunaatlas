@@ -82,7 +82,7 @@
   	{
 		"id": "load_dataset",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
-		"run": true,
+		"run": false,
 		"options": {
 			"upload_to_db": true,
 			"create_materialized_view" : true,
@@ -93,12 +93,12 @@
 	{
 		"id": "enrich_metadata",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
-		"run": true
+		"run": false
 	},
 	{
 		"id": "enrich_for_db_services",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
-		"run": true
+		"run": false
 	},
 	{		"id": "comparison_each_step",
 		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
@@ -108,7 +108,7 @@
 	{
 		"id": "load_metadata",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
-		"run": true
+		"run": false
 	}
 	
 
