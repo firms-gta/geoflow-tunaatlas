@@ -82,7 +82,8 @@ function(action, entity, config) {
   #scripts
   url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   #for level 0 - FIRMS
-  source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+  # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   try(source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R"))) #modified for geoflow
   try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
@@ -1279,7 +1280,7 @@ function(action, entity, config) {
 		codelists = df_codelists #in case the entity was provided with a link to codelists
 	)
 
-
+  browser()
 	# if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
 	#   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
 	#   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
@@ -1297,7 +1298,10 @@ function(action, entity, config) {
 	dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
 	dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
 	dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
-	dataset_enriched = dataset_enriched[,c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")]
+	columns_to_keep <- c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")
+	columns_to_keep <- intersect(colnames(dataset_enriched), columns_to_keep)
+	
+	dataset_enriched = dataset_enriched[,columns_to_keep]
 	readr::write_csv(dataset_enriched, output_name_dataset_public)
 	
 	#-------------------------------------------------------
