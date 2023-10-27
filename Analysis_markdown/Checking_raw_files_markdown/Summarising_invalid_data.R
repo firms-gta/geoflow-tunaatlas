@@ -3,8 +3,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   setwd(main_dir)
   path = getwd()
   
-  species_group <-  st_read(con,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
-  cl_cwp_gear_level2 <- st_read(con, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
+  species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
+  cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
   
   shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
     dplyr::rename(GRIDTYPE = gridtype)
