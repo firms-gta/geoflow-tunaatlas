@@ -33,14 +33,8 @@ Summarising_step = function(main_dir, connectionDB, config){
     continent = WFS$getFeatures("fifao:UN_CONTINENT2")
     
   }
+  
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
-  
-  
-  # source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
-  
-
-  
   
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
@@ -67,11 +61,13 @@ Summarising_step = function(main_dir, connectionDB, config){
   i <- 1
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-  browser()
+
   copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
   
   for (entity_dir in entity_dirs) {
+    
+    
     
     entity <- config$metadata$content$entities[[i]]
     action <- entity$data$actions[[1]]
@@ -81,14 +77,44 @@ Summarising_step = function(main_dir, connectionDB, config){
     entity_name <- basename(entity_dir)
     setwd(entity_dir)
     
+    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)
+    details = file.info(sub_list_dir_2)
+    details = file.info(sub_list_dir_2)
+    details = details[with(details, order(as.POSIXct(mtime))), ]
+    sub_list_dir_2 = rownames(details)
+    
+    for(file in sub_list_dir_2){
+      
+    
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+      data <- readRDS(file)
+      data <- tidying_GTA_data_for_comparison(dataframe = data,
+                                              shape = shape_without_geom, 
+                                              species_group_dataframe = species_group,
+                                              cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
+      saveRDS(file = file, object = data)
+      
+    if("gridtype"%in% colnames(data_list)){
+      data_list <- data_list %>% rename(GRIDTYPE = gridtype)
+    }
+    }
+    
+    parameter_filtering <- opts$filtering
+    parameter_resolution_filter <- opts$resolution_filter
+    
+    parameters_child_global <- list(fig.path = paste0("tableau_recap_global_action/figures/"), 
+                                    parameter_filtering = parameter_filtering, 
+                                    parameter_resolution_filter = parameter_resolution_filter)
+    
+    
+    
       output_file_name <- paste0(entity_name, "_report.html") # name of the output file
       output_dir <- file.path(entity_dir, output_file_name) # where to save the output file
       
       # Set new environment for rendering the Rmd file, so it doesn't affect the current environment
       render_env <- new.env(parent = child_env)
-      render_env$parameter_directory <- entity_dir
-      render_env$fig.path <- entity_dir
-      render_env$entity <- entity
+      list2env(render_env, parameters_child_global)
+      
       # Render the R Markdown file
       require(fs)
       rmarkdown::render("tableau_recap_global_action_effort.Rmd",
