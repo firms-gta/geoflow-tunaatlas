@@ -133,12 +133,46 @@ function(action, entity, config) {
   stepLogger(level = 0, step = stepnumber, msg = "Retrieve georeferenced catch or effort (+ processings for IATTC) AND NOMINAL CATCH if asked")
   stepnumber = stepnumber+1
   #-------------------------------------------------------------------------------------------------------------------------------------
-  if(!exists("data/rawdata.rds")){
+  
   rawdata <- opts
   #by default, at this step we will skip specific processings applied to IATTC data. These processings are eventually done later in the script (if options are activated)
   rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
   rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
   rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_fleet"
+  
+  if(opts$fact == "CPUE"){
+    variable <- NULL
+    variable$fact <- "catch"
+    datasetcatch <-
+      do.call("rbind",
+              lapply(
+                c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"),
+                get_rfmos_datasets_level0,
+                entity,
+                config,
+                variable
+              ))
+    variable <- NULL
+    variable$fact <- "effort"
+    dataseteffort <-
+      do.call("rbind",
+              lapply(
+                c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"),
+                get_rfmos_datasets_level0,
+                entity,
+                config,
+                variable
+              ))
+    
+    dataset <- inner_join(datasetcatch, dataseteffort) %>% 
+      mutate(measurement_unit = paste0(measurement_unit.x , " / ", measurement_unit.y)) %>% 
+      mutate(measurement_value = measurement_value.x / measurement_value.y) %>% 
+      select(-c(measurement_value.x, measurement_value.y, measurement_unit.x, measurement_unit.y))
+    
+    catch_no_effort <- semi_join(datasetcatch, dataseteffort) #shouldn't exist
+    effort_no_catch <- semi_join(dataseteffort, datasetcatch) # try again
+    
+  }
   
   dataset <-
     do.call("rbind",
@@ -149,6 +183,7 @@ function(action, entity, config) {
               config,
               rawdata
             ))
+  
   dataset$time_start <-
     substr(as.character(dataset$time_start), 1, 10)
   dataset$time_end <- substr(as.character(dataset$time_end), 1, 10)
@@ -159,8 +194,8 @@ function(action, entity, config) {
   ### filtering on minimum time_start (TRUE  by default)
 
   if (filtering_on_minimum_year_declared) {
-	stepLogger(level = 0, step = stepnumber, msg = "Filtering on minimum time_start")
-	stepnumber = stepnumber+1
+    stepLogger(level = 0, step = stepnumber, msg = "Filtering on minimum time_start")
+    stepnumber = stepnumber+1
     
     # extract the maximum year of declaration for each source_authority
     max_years <- georef_dataset %>%
@@ -170,7 +205,7 @@ function(action, entity, config) {
     # check if not all the source_authority columns have the same maximum year of declaration
     if (length(unique(max_years$max_time_start)) > 1) {
       config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
-
+      
       # get the minimum time_start of all the maximum time_start of each source_authority
       min_time_start <- min(max_years$max_time_start)
       
@@ -179,9 +214,7 @@ function(action, entity, config) {
         filter(time_start <= min_time_start)
     }
   }
-  } else {
-    georef_dataset <- readRDS("data/rawdata.rds")
-  }
+  
   if(recap_each_step){
 	  function_recap_each_step(
 		"rawdata",
@@ -387,16 +420,15 @@ function(action, entity, config) {
 	  
   zones_config <- list(
 	    iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "species", "year")),
-
 	    # wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")), # not usefull anymore as handled in pre harmo
-	    # iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),
-	    # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species")),
+	    # iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),# not usefull anymore as handled in pre harmo
+	    # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species")),# not usefull anymore as handled in pre harmo
 	    iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year"))
 	  )
 	  
 	  # Loop over each zone and handle overlap using the defined configuration
 	  for (zone_key in names(zones_config)) {
-	    print(paste0("Processing zone: ", zone_key))  # Log before processing
+	    config$logger.info(paste0("Processing zone: ", zone_key))  # Log before processing
 	    
 	    # It's a good practice to use tryCatch to understand if errors in handle_overlap are stopping the loop
 	    tryCatch({
@@ -405,7 +437,7 @@ function(action, entity, config) {
 	      message(paste0("Error encountered: ", e))  # Print errors to the console
 	    })
 	    
-	    print(paste0("Finished processing zone: ", zone_key))  # Log after processing
+	    config$logger.info(paste0("Finished processing zone: ", zone_key))  # Log after processing
 	  }
 	  
 	  
@@ -418,7 +450,8 @@ function(action, entity, config) {
 	#===========================================================================================================================================================
 	#TODO review and clean
 	if(DATASET_LEVEL >= 1){ #with this condition code will be run to deal with dataset level 1 and above
-
+	  config$logger.info("Level 1 start")
+	  
 	  
 	  # unit conversion already given factors -----------------------------------
 	  
