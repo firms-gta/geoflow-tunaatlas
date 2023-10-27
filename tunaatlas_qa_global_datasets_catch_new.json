@@ -17,7 +17,7 @@
     "entities" : [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1JhS1ADsnqTpWOEEvljk-c9EdzBurkc8A8__JOHJmkOk/edit#gid=163629835"
+      "source": "https://docs.google.com/spreadsheets/d/1JhS1ADsnqTpWOEEvljk-c9EdzBurkc8A8__JOHJmkOk/edit#gid=1243274109"
       }
     ],
     "contacts" : [
@@ -72,29 +72,29 @@
 	
 	{
 		"id": "load_dataset",
-		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
-		"run": true,
+		"script": "./tunaatlas_actions/load_dataset.R",
+		"run": false,
 		"options": {
-			"upload_to_db": true,
-			"create_materialized_view" : true,
-			"add_sql_comments" : true,
-			"upload_to_googledrive": true
+			"upload_to_db": false,
+			"create_materialized_view" : false,
+			"add_sql_comments" : false,
+			"upload_to_googledrive": false
 		}
 	},
 	{
 		"id": "enrich_metadata",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
-		"run": true
+		"run": false
 	},
 	{
 		"id": "enrich_for_db_services",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
-		"run": true
+		"run": false
 	},
 	{
 		"id": "load_metadata",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
-		"run": true
+		"run": false
 	},
 	{		"id": "recap_all_markdown",
 		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
