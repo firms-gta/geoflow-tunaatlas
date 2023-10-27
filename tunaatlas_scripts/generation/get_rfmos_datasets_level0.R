@@ -98,17 +98,6 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       #For  IATTC, some special data procesings, see below
                       iattc_data <- NULL
                       if(options$include_IATTC){
-                        config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_iattc <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-                                                               regexpr("ps", names(dataset_files)) < 0 & 
-                                                               regexpr("effort", names(dataset_files)) < 0 &
-                                                               regexpr("iattc", names(dataset_files)) > 0]
-                        iattc_data <- do.call("rbind", lapply(dataset_files_iattc, readr::read_csv, guess_max = 0))
-                        iattc_data <- as.data.frame(iattc_data)
-                        
-                        # Deal with special case of IATTC PS
-                        iattc_data <- unique(iattc_data)
-                        iattc_data <- iattc_data[, columns_to_keep]
                         
                         
                         ## IATTC PS catch-and-effort are stratified as following:
@@ -156,6 +145,19 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         
                         #for catch fact
                         if(variable == "catch") {
+                          
+                          config$logger.info(sprintf("Get %s data", rfmo))
+                          dataset_files_iattc <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                                                                 regexpr("ps", names(dataset_files)) < 0 & 
+                                                                 regexpr("effort", names(dataset_files)) < 0 &
+                                                                 regexpr("iattc", names(dataset_files)) > 0]
+                          iattc_data <- do.call("rbind", lapply(dataset_files_iattc, readr::read_csv, guess_max = 0))
+                          iattc_data <- as.data.frame(iattc_data)
+                          
+                          # Deal with special case of IATTC PS
+                          iattc_data <- unique(iattc_data)
+                          iattc_data <- iattc_data[, columns_to_keep]
+                          
                           
                           config$logger.info(sprintf("Case %s data", variable))
                           

@@ -236,6 +236,7 @@ function(action, entity, config) {
   # }
   # -------------------------------------------------------------------------
   # PROCESSINGS FOR IATTC data
+  if(opts$fact == "catch"){
   
   if (opts$iattc_ps_raise_flags_to_schooltype) {
     rawdata$iattc_ps_raise_flags_to_schooltype <-
@@ -353,6 +354,8 @@ function(action, entity, config) {
 		)
 	}
     ################
+  }
+    
   }
   
   #--------Overlapping zones---------------------------------------------------------------------------------------------------------------------
