@@ -190,7 +190,7 @@ child_env_comp$parameter_mapped <- TRUE
 child_env_comp$parameter_short <- FALSE
 child_env_comp$child_header <- "#"
 
-new_path <- paste0(fig.path, "Comparison/initfinal_",gsub("Markdown/","",sub_list_dir_2[1]),"_", gsub("Markdown/","",sub_list_dir_2[length(sub_list_dir_2)]))
+new_path <- file.path(fig.path, "/Comparison/initfinal_",gsub("Markdown/","",sub_list_dir_2[1]),"_", gsub("Markdown/","",sub_list_dir_2[length(sub_list_dir_2)]))
 
 dir.create(new_path, recursive = TRUE)
 
@@ -482,7 +482,7 @@ child_env$unique_analyse <- FALSE
 
 child_env$debug <- TRUE
 
-new_path <- paste0(fig.path, "Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]))
+new_path <- file.path(fig.path, "/Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]))
 
 dir.create(new_path, recursive = TRUE)
 
