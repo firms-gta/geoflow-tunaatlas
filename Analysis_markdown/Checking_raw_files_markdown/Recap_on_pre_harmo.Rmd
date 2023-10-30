@@ -57,10 +57,10 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 
 invalid_data <- readRDS(file.path(path, "grouped_results_invalid_data.rds")) %>%ungroup() %>% arrange(tRFMO)%>%  distinct()
 
-columns_to_color <- names(invalid_data)[-c(1,1)]
+columns_to_color <- names(invalid_data)[-c(1,2)]
 
 
-invalid_data <- invalid_data %>% ungroup() %>% mutate(All_good = ifelse(sum(across(columns_to_color)) ==0, TRUE, FALSE)) %>% arrange(All_good, tRFMO) %>% group_by(All_good, tRFMO)
+invalid_data <- invalid_data %>% ungroup() %>%dplyr::rowwise() %>% dplyr::mutate(All_good = ifelse(sum(across(columns_to_color)) ==0, TRUE, FALSE)) %>% arrange(All_good, tRFMO) %>% group_by(All_good, tRFMO)
 
 
 ```
@@ -104,7 +104,7 @@ qflextable2(recap_mapping, captionn = "All the code not being mapped during the 
 
 ```{r all-recap-mapping}
 
-recap_mapping <- readRDS(file.path(path,"all_recap_mapping.rds")) %>%ungroup() %>% arrange(source_authority, Dimension)%>% dplyr::select(-Entity)  %>% filter(src_code != trg_code) %>% distinct()
+recap_mapping <- readRDS(file.path(path,"all_recap_mapping.rds")) %>%ungroup() %>% arrange(source_authority)%>% dplyr::select(-Entity)  %>% filter(src_code != trg_code) %>% distinct()
 
 ```
 
