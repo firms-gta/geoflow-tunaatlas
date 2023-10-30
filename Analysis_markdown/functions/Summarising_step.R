@@ -94,7 +94,7 @@ Summarising_step = function(main_dir, connectionDB, config){
                                               cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
       saveRDS(file = file, object = data)
       
-    if("gridtype"%in% colnames(data_list)){
+    if("gridtype"%in% colnames(data)){
       data_list <- data_list %>% rename(GRIDTYPE = gridtype)
     }
     }
@@ -104,7 +104,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     
     parameters_child_global <- list(fig.path = paste0("tableau_recap_global_action/figures/"), 
                                     parameter_filtering = parameter_filtering, 
-                                    parameter_resolution_filter = parameter_resolution_filter)
+                                    parameter_resolution_filter = parameter_resolution_filter, parameter_time_dimension = c("time_start"))
     
     
     
@@ -112,8 +112,9 @@ Summarising_step = function(main_dir, connectionDB, config){
       output_dir <- file.path(entity_dir, output_file_name) # where to save the output file
       
       # Set new environment for rendering the Rmd file, so it doesn't affect the current environment
-      render_env <- new.env(parent = child_env)
-      list2env(render_env, parameters_child_global)
+      render_env <- list2env(as.list(child_env), parent = child_env)
+      
+      list2env(parameters_child_global,render_env)
       
       # Render the R Markdown file
      
