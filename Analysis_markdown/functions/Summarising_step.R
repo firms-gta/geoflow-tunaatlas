@@ -72,6 +72,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     i <- i+1
     entity_name <- basename(entity_dir)
     setwd(entity_dir)
+    
     copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
     
     
@@ -80,7 +81,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     details = file.info(sub_list_dir_2)
     details = details[with(details, order(as.POSIXct(mtime))), ]
     sub_list_dir_2 = rownames(details)
-    browser()
+    
     for(file in sub_list_dir_2){
       
     
@@ -104,6 +105,8 @@ Summarising_step = function(main_dir, connectionDB, config){
                                     parameter_filtering = parameter_filtering, 
                                     parameter_resolution_filter = parameter_resolution_filter,
                                     parameter_time_dimension = c("time_start"), 
+                                    parameter_geographical_dimension = "geographic_identifier", 
+                                    parameter_geographical_dimension_groupping = "GRIDTYPE",
                                     entity = entity, config = config)
     
     

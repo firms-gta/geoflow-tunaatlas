@@ -10,9 +10,10 @@
 units <- unique(c(unique(init$measurement_unit), unique(final$measurement_unit)))
 
 Other_dimensions <- colnames(init)[colnames(init) != "measurement_unit" & 
-  colnames(init)!= "measurement_value" & 
-    colnames(init) %notin% parameter_time_dimension] &
-  colnames(init) %notin% parameter_geographical_dimension & colnames(init) %notin% parameter_geographical_dimension_groupping
+                                     colnames(init)!= "measurement_value" & 
+                                     colnames(init) %notin% parameter_time_dimension &
+                                     colnames(init) %notin% parameter_geographical_dimension & 
+                                     colnames(init) %notin% parameter_geographical_dimension_groupping]
 
 Dimensions <- Other_dimensions
 
@@ -33,8 +34,11 @@ Groupped_all$Precision <-as.character(Groupped_all$Precision)
 
 ## ----fonction-grouppement-for-geographic-dimension, include=FALSE----
 
-geographic_dimension <-  lapply(parameter_geographical_dimension, fonction_groupement, init = init, final = final)
+geographic_dimension <-  fonction_groupement(list(parameter_geographical_dimension, parameter_geographical_dimension_groupping), 
+init = init, final = final)
 
+GrouppedGRIDTYPE <-  fonction_groupement(parameter_geographical_dimension_groupping, 
+                                             init = init, final = final)
 
 #' 
 #' 

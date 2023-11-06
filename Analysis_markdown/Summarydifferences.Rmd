@@ -5,7 +5,15 @@ date: "2023-09-12"
 output: html_document
 ---
 
-```{r summarydiffplotting, eval=!unique_analyse ,echo=FALSE, results='asis', out.width="100%"}
+
+```{r summaryofdifferences}
+
+summary_of_differences <- compute_summary_of_differences(init, final, titre_1, titre_2)
+
+```
+
+
+```{r summarydiffplotting ,echo=FALSE, results='asis', out.width="100%"}
 
 qflextable2(summary_of_differences, captionn = "Summary of the difference between the two datasets", columns_to_color = c("Difference"), save_folder = "Summary", interactive_plot = FALSE)
 

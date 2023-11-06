@@ -1,31 +1,3 @@
-## ----libraries,message=FALSE, warning=FALSE, include=FALSE----
-
-
-
-# Prevent package installation from upgrading
-formals(install.packages)$upgrade <- "never"
-
-# List of required packages
-required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "flextable", "remotes", 
-                        "utils", "DBI", "odbc", "rlang", "sf", "kableExtra", "readr", "tidyr", "ggplot2", 
-                        "stats", "RColorBrewer", "cowplot", "tmap", "RPostgreSQL", "officer", "gdata","tibble")
-
-# Check if each package is already installed, and if not, install and load it
-for (package in required_packages) {
-  # if (!require(package, character.only = TRUE)) {
-  #   install.packages(package)
-    require(package)
-  # }
-}
-
-# Install and load sutdycatchesird package from GitHub if not already installed
-# if(!require(sutdycatchesird)){
-  # remotes::install_github("BastienIRD/sutdycatchesird", upgrade = "never")
-  require(sutdycatchesird)
-# }
-
-
-
 ## ----utilityfunctions, include=FALSE----------
 
 
@@ -1022,5 +994,56 @@ bar_plot_default <- function(first,
     # bar_plot <- plot_grid(bar_plot, bar_plot_final, ncol = 2)
   }
   return(bar_plot)
+}
+
+
+#' Compute Summary of Differences Between Two Datasets
+#'
+#' This function computes the differences between two datasets based on their measurement units.
+#' It returns a summary dataframe that shows the differences in values and percentages for each unit.
+#'
+#' @param init A dataframe representing the initial dataset.
+#' @param final A dataframe representing the final dataset.
+#' @param titre_1 A string representing the name for the title of the initial dataset in the summary.
+#' @param titre_2 A string representing the name for the title of the final dataset in the summary.
+#' 
+#' @return A dataframe summarizing the differences between the two datasets.
+#' @examples
+#' \dontrun{
+#' init_dataset <- data.frame(measurement_unit = c("unit1", "unit2"), measurement_value = c(10, 20))
+#' final_dataset <- data.frame(measurement_unit = c("unit1", "unit2"), measurement_value = c(15, 25))
+#' summary <- compute_summary_of_differences(init_dataset, final_dataset, "Initial Data", "Final Data")
+#' print(summary)
+#' }
+#' @export
+compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
+
+    # Group and summarize initial dataset
+  init_group <- init %>%
+    dplyr::group_by(measurement_unit) %>%
+    dplyr::summarise(titre_test1 = sum(measurement_value)) 
+  
+  # Group and summarize final dataset
+  final_group <- final %>%
+    dplyr::group_by(measurement_unit) %>%
+    dplyr::summarise(titre_test2 = sum(measurement_value))
+  
+  # Compute summary of differences
+  summary <- dplyr::full_join(init_group, final_group) %>%
+    dplyr::mutate(across(where(is.numeric), ~replace(., is.na(.), 0))) %>%
+    dplyr::arrange(measurement_unit) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(
+      measurement_unit = paste0(measurement_unit),
+      Difference = -titre_test1 + titre_test2,
+      `Difference (in %)` = 100 * (Difference / titre_test1)
+    ) %>%
+    dplyr::rename_with(~ case_when(
+      .x == "titre_test1" ~ titre_1,
+      .x == "titre_test2" ~ titre_2,
+      TRUE ~ .x
+    ))
+  
+  return(summary)
 }
 

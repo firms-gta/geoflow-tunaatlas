@@ -20,7 +20,7 @@ copy_project_files <- function(original_repo_path, new_repo_path) {
     # Copy each file to the new repository
     for (file in files_to_copy) {
       new_file_path <- file.path(new_repo_path, basename(file))
-      file.copy(file, new_file_path)
+      file.copy(file, new_file_path, overwrite = TRUE)
     }
   }
   

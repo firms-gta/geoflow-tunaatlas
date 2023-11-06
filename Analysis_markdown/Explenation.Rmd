@@ -32,7 +32,7 @@ if(!parameter_mapped && !unique_analyse){
 
 ```{r checkifnodiff,  eval=!unique_analyse , results='asis'}
 
-if (round(sum_valeur_init) == round(sum_valeur_final) & nrow(Groupped_all %>% dplyr::filter(`Loss / Gain` != 'Egal')) == 0) {
+if (identical(init, final)) {
   
   cat("There are no differences between the two datasets; this step is not changing the data in any way")
   
@@ -41,3 +41,27 @@ if (round(sum_valeur_init) == round(sum_valeur_final) & nrow(Groupped_all %>% dp
 }
 
 ```
+
+
+```{r filterprinting, echo=FALSE, results='asis'}
+
+if (!isNullList(parameter_filtering)){
+  cat (paste0("The filter used on this data are:  \n "))
+  for (i in 1:length(parameter_filtering)){
+    if (parameter_filtering[i] %in% parameter_filtering & !is.null(parameter_filtering[[i]])){
+      cat(paste0("***- On ", names((parameter_filtering)[i]), " : ", paste((parameter_filtering)[[i]], collapse = " ; "),"*** \n"))
+    } else {""}
+  }
+}
+
+if (!is.null(parameter_resolution_filter)) {
+
+  cat (paste0("The geographical filter used on this data is:  \n "))
+
+  cat(parameter_resolution_filter)
+    
+  }
+
+
+```
+

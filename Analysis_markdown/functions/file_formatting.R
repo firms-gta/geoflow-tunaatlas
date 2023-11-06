@@ -8,14 +8,13 @@ init <- readRDS(paste0(as.character(parameter_init)))
 
 if(unique_analyse){
   final <- init[0,]
-
-   if(is.character(parameter_final)){
-final <- readRDS(paste0(as.character(parameter_final)))}
-   else {
-     final <- parameter_final
-   }
-
- }
+} else{
+  if(is.character(parameter_final)){
+    final <- readRDS(paste0(as.character(parameter_final)))}
+  else {
+    final <- parameter_final
+  }
+}
 
 if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse){
   titre_2 <- last_path_reduced(as.character(parameter_final))
@@ -29,7 +28,7 @@ titre_2 <- gsub("_","-",titre_2)
 titre_1 <- gsub("_","-",titre_1)
 
 ## ----filetidying----------------------------------------------
-
+parameter_colnames_to_keep <- unique(c(parameter_colnames_to_keep, parameter_geographical_dimension_groupping, parameter_geographical_dimension))
 init <- tidying_data(init, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
 final <- tidying_data(final, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
 

@@ -23,7 +23,7 @@ Here is represented for each area the polygons keeping all the initial informati
 
 ```{r breaks-for-map}
 
-breaks <- dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision")) %>%dplyr::mutate(`Impact on the data` = dplyr::case_when(`Difference (in %)` == Inf ~"Appearing data", Inf>`Difference (in %)`  & `Difference (in %)`>= 100 ~"Gain (more than double)" ,  100>`Difference (in %)`  & `Difference (in %)`>0 ~ "Gain",`Difference (in %)`==0~"No differences" , 0>`Difference (in %)`  & -100 < `Difference (in %)` ~ "Loss",`Difference (in %)` ==-100 ~  "All data lost" ))
+breaks <- dplyr::inner_join(shapefile.fix %>% dplyr::select(-GRIDTYPE),geographic_dimension, by = c("cwp_code"="Precision")) %>%dplyr::mutate(`Impact on the data` = dplyr::case_when(`Difference (in %)` == Inf ~"Appearing data", Inf>`Difference (in %)`  & `Difference (in %)`>= 100 ~"Gain (more than double)" ,  100>`Difference (in %)`  & `Difference (in %)`>0 ~ "Gain",`Difference (in %)`==0~"No differences" , 0>`Difference (in %)`  & -100 < `Difference (in %)` ~ "Loss",`Difference (in %)` ==-100 ~  "All data lost" ))
 
 breaks <- breaks %>% ungroup()
 
@@ -76,21 +76,21 @@ gain_loss <- ifelse(difference_coverage >0, "Loss" ,"Gain")
 tmap_mode(plotting_type)
 formals(tm_shape)$drop.empty_facets <- FALSE
 
-inner_join <- dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision"))%>%dplyr::mutate(`Impact on the data` = as.factor(dplyr::case_when(`Difference (in %)` == 0 ~ 'No differences', `Difference (in %)` == 100~'All data different',`Difference (in %)` < 0 ~ "Gain", TRUE ~ 'Loss')))
+inner_join <- dplyr::inner_join(shapefile.fix,geographic_dimension , by = c("cwp_code"="Precision"))%>%dplyr::mutate(`Impact on the data` = as.factor(dplyr::case_when(`Difference (in %)` == 0 ~ 'No differences', `Difference (in %)` == 100~'All data different',`Difference (in %)` < 0 ~ "Gain", TRUE ~ 'Loss')))
 
 if (nrow(inner_join %>%dplyr::filter(`Impact on the data` == 'All data different'))!=0 & nrow(inner_join %>%dplyr::filter(`Impact on the data` == 'No differences'))!=0){
   if(plotting_type == "plot"){
-    image <- tm_shape(dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision")) %>% dplyr::filter("Difference (in %)" != 100 & "Difference (in %)" != 0 )) +
+    image <- tm_shape(dplyr::inner_join(shapefile.fix,geographic_dimension , by = c("cwp_code"="Precision")) %>% dplyr::filter("Difference (in %)" != 100 & "Difference (in %)" != 0 )) +
       tm_fill("Difference (in %)", palette="RdYlGn", style="cont", n=8,
               id="name", midpoint = 0)+ tm_shape(inner_join %>%dplyr::filter(`Impact on the data` == 'No differences')) + tm_borders(col="skyblue")+tm_shape(inner_join %>%dplyr::filter(`Impact on the data` == 'All data different')) +tm_borders(col="red")+tm_facets(by = c("measurement_unit", "GRIDTYPE"),free.coords = FALSE, free.scales = FALSE)+
-      tm_layout(legend.outside = TRUE)+tm_shape(continent)+tm_borders()} else {image <- tm_shape(dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision"))%>% dplyr::filter("Difference (in %)" != 100 & "Difference (in %)" != 0 )) +
+      tm_layout(legend.outside = TRUE)+tm_shape(continent)+tm_borders()} else {image <- tm_shape(dplyr::inner_join(shapefile.fix,geographic_dimension , by = c("cwp_code"="Precision"))%>% dplyr::filter("Difference (in %)" != 100 & "Difference (in %)" != 0 )) +
         tm_fill("Difference (in %)", palette="RdYlGn", style="cont", n=8,
                 id="name", midpoint = 0)+ tm_shape(inner_join %>%dplyr::filter(`Impact on the data` == 'No differences')) + tm_borders(col="skyblue")+tm_shape(inner_join %>%dplyr::filter(`Impact on the data` == 'All data different')) +tm_borders(col="red")+tm_facets(by = c("measurement_unit", "GRIDTYPE"),free.coords = FALSE, free.scales = FALSE)+
         tm_layout(legend.outside = TRUE)}
   image
 } else{
   
-  image <- tm_shape(dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision"))%>% dplyr::filter("Difference (in %)" != 100 & "Difference (in %)" != 0 )) +
+  image <- tm_shape(dplyr::inner_join(shapefile.fix,geographic_dimension , by = c("cwp_code"="Precision"))%>% dplyr::filter("Difference (in %)" != 100 & "Difference (in %)" != 0 )) +
     tm_fill("Difference (in %)", palette="RdYlGn", style="cont", n=8,
             id="name", midpoint = 0)+ tm_facets(by = c("measurement_unit", "GRIDTYPE"),free.coords = FALSE, free.scales = FALSE)+
     tm_layout(legend.outside = TRUE) +tm_shape(continent)+tm_borders()
@@ -106,9 +106,9 @@ if (nrow(inner_join %>%dplyr::filter(`Impact on the data` == 'All data different
 tmap_mode(plotting_type)
 formals(tm_shape)$drop.empty_facets <- FALSE
 
-inner_join <- dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision"))%>%dplyr::mutate(`Impact on the data` = as.factor(dplyr::case_when(`Difference (in %)` == 0 ~ 'No differences', `Difference (in %)` == 100~'All data different',`Difference (in %)` < 0 ~ "Gain", TRUE ~ 'Loss'))) 
+inner_join <- dplyr::inner_join(shapefile.fix,geographic_dimension, by = c("cwp_code"="Precision"))%>%dplyr::mutate(`Impact on the data` = as.factor(dplyr::case_when(`Difference (in %)` == 0 ~ 'No differences', `Difference (in %)` == 100~'All data different',`Difference (in %)` < 0 ~ "Gain", TRUE ~ 'Loss'))) 
 minimum <- abs(min(Groupped_all$`Difference (in %)`))
-t_filtered <- dplyr::inner_join(shapefile.fix,(Groupped_all %>%dplyr::filter(Dimension == "geographic_identifier")) , by = c("cwp_code"="Precision")) %>% dplyr::group_by(measurement_unit,GRIDTYPE) %>%  dplyr::mutate(`Difference (in %)` = log(`Difference (in %)` + abs(min(`Difference (in %)`)) +1)) %>% dplyr::filter(!(value_sum_1 ==0 & value_sum_2==0))
+t_filtered <- dplyr::inner_join(shapefile.fix,geographic_dimension , by = c("cwp_code"="Precision")) %>% dplyr::group_by(measurement_unit,GRIDTYPE) %>%  dplyr::mutate(`Difference (in %)` = log(`Difference (in %)` + abs(min(`Difference (in %)`)) +1)) %>% dplyr::filter(!(value_sum_1 ==0 & value_sum_2==0))
 if (nrow(inner_join %>%dplyr::filter(`Impact on the data` == 'All data different'))!=0 & nrow(inner_join %>%dplyr::filter(`Impact on the data` == 'No differences'))!=0){
   if(plotting_type == "plot"){
     image <- tm_shape(t_filtered)  +

@@ -6,6 +6,7 @@ if(!exists("fig.path")){
 
 formals(qflextable2, envir = environment())$fig.pathinside = fig.path
 formals(save_image, envir = environment())$fig.pathinside = fig.path
+formals(exists)$envir = environment()
 
 if(!exists("step_title")){step_title_t_f = FALSE} else{step_title_t_f = TRUE}
 
