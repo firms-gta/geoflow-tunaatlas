@@ -78,15 +78,11 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
   
   if(find_and_print){
     filepath <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".png"))
-    knitr::knit_child(text =c(
-'', 
-    '```{r evolvaluedim, fig.cap=`captionn`, fig.align = "center", out.widht = "100%"}',
-                            '',
-
-                            '',
-                            'knitr::include_graphics(filepath)',
-                            '',
-                            '```'), envir = environment(), quiet= TRUE)
+    knitr::knit_child(text = paste0(
+      '\n```{r evolvaluedim, fig.cap="', captionn, '", fig.align="center", out.width="100%"}',
+      '\nknitr::include_graphics("', filepath, '")',
+      '\n```\n'
+    ), envir = environment(), quiet = TRUE)
   } else {
   if (all(class(x) == "flextable")) {
     flextabley <- x
@@ -265,7 +261,7 @@ resume_knit_child = function(x,find_and_print = FALSE, folder = "Piechartsdimens
   titles <- gsub(".", "", i)
     knitr::knit_child(text =c(
 '', 
-    '```{r otherdim, fig.cap=`titles`, fig.align = "center", out.widht = "100%"}',
+    '```{r otherdim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
                             '',
 
                             '',
@@ -350,7 +346,7 @@ function_knitting = function(x, titre_init = titre_1, titre_final = titre_2, fin
   titles <- gsub(".", "", i)
     knitr::knit_child(text =c(
 '', 
-    '```{r evolvaluedim, fig.cap=`titles`, fig.align = "center", out.widht = "100%"}',
+    '```{r evolvaluedim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
                             '',
 
                             '',
@@ -374,7 +370,7 @@ function_knitting = function(x, titre_init = titre_1, titre_final = titre_2, fin
 
   knitr::knit_child(text =c(
 '', 
-    '```{r evolvaluedimdiff, fig.cap=`title_knit`, fig.align = "center", out.widht = "100%"}',
+    '```{r evolvaluedimdiff, fig.cap=`title_knit`, fig.align = "center", out.width = "100%"}',
                             '',
 
                             '',
@@ -474,7 +470,7 @@ resume_knit_child <- function(x, find_and_print = FALSE, folder = "Piechartsdime
     for (i in files(folder)) {
       titles <- gsub(".", "", i)
       knitr::knit_child(text = c(
-        '```{r otherdim, fig.cap=`titles`, fig.align = "center", out.widht = "100%"}',
+        '```{r otherdim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
         '',
         '',
         'knitr::include_graphics(file.path(fig.path, file.path(folder, i)))',
@@ -585,7 +581,7 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
     for (i in files(folder)) {
       titles <- gsub(".", "", i)
       knitr::knit_child(text = c(
-        '```{r evolvaluedim, fig.cap=`titles`, fig.align = "center", out.widht = "100%"}',
+        '```{r evolvaluedim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
         '',
         '',
         'knitr::include_graphics(file.path(fig.pathinside, file.path(folder, i)))',
@@ -610,7 +606,7 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
     save_image(title = title_knit, plott = y, folder = folder, fig.pathinside = fig.pathinside)
     
     knitr::knit_child(text = c(
-      '```{r evolvaluedimdiff, fig.cap=`title_knit`, fig.align = "center", out.widht = "100%"}',
+      '```{r evolvaluedimdiff, fig.cap=`title_knit`, fig.align = "center", out.width = "100%"}',
       '',
       '',
       'y',
@@ -673,7 +669,7 @@ map_unit_knit = function(map, find_and_print = FALSE,folder = "Geodistrib", fig.
   titles <- gsub(".", "", i)
     knitr::knit_child(text =c(
 '', 
-    '```{r distributioninvalueforunitonlyoutput, fig.cap=`titles`, fig.align = "center", out.widht = "100%"}',
+    '```{r distributioninvalueforunitonlyoutput, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
                             '',
 
                             '',
