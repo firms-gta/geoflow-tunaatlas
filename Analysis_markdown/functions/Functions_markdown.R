@@ -415,7 +415,7 @@ shapefile.fix) {
                            dplyr::group_by(geographic_identifier, measurement_unit, source) %>%
                            dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
                            dplyr::filter(measurement_value != 0) %>%
-                           dplyr::inner_join(shapefile.fix %>% dplyr::select(-GRIDTYPE), by = c("geographic_identifier" = "CWP_CODE"))
+                           dplyr::inner_join(shapefile.fix %>% dplyr::select(-GRIDTYPE), by = c("geographic_identifier" = "cwp_code"))
   )
   
   if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
