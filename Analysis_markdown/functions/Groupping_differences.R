@@ -34,9 +34,6 @@ Groupped_all$Precision <-as.character(Groupped_all$Precision)
 
 ## ----fonction-grouppement-for-geographic-dimension, include=FALSE----
 
-geographic_dimension <-  fonction_groupement(list(parameter_geographical_dimension, parameter_geographical_dimension_groupping), 
-init = init, final = final)
-
 GrouppedGRIDTYPE <-  fonction_groupement(parameter_geographical_dimension_groupping, 
                                              init = init, final = final)
 
