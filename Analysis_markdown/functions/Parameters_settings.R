@@ -58,7 +58,7 @@ if(is_null_or_not_exist(parameter_resolution_filter)){
   parameter_resolution_filter <- NULL
 }
 
-is_null_or_not_exist(parameter_final) {
+if(is_null_or_not_exist(parameter_final)) {
   unique_analyse <- TRUE } else {
     unique_analyse <- FALSE}
 
