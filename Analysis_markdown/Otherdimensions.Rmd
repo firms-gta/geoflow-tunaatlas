@@ -21,7 +21,7 @@ if(!unique_analyse){figures <- lapply(Other_dimensions,FUN = pie_chart_2_default
 
 ```{r pie-charts-names}
 
-dimension_title_subfigures <- gsub("_", ".", paste0("Distribution in value for the dimension : ", list_pie_chart))
+dimension_title_subfigures <- gsub("_", ".", paste0("Distribution in value for the dimension : ", Other_dimensions))
 
 ```
 
