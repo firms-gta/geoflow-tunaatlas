@@ -139,6 +139,7 @@ child_env_last$parameter_mapped <- TRUE
 child_env_last$last_to_first <- FALSE
 child_env_last$parameter_short <- FALSE
 child_env_last$child_header <- ""
+child_env_last$coverage <- TRUE
 
 new_path <- file.path(fig.path, paste0("Report_on_", entity$identifiers[["id"]]))
 
