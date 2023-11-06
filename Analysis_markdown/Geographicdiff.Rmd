@@ -23,6 +23,9 @@ Here is represented for each area the polygons keeping all the initial informati
 
 ```{r breaks-for-map}
 
+geographic_dimension <-  fonction_groupement(list(parameter_geographical_dimension, parameter_geographical_dimension_groupping), 
+init = init, final = final)
+
 breaks <- dplyr::inner_join(shapefile.fix %>% dplyr::select(-GRIDTYPE),geographic_dimension, by = c("cwp_code"="Precision")) %>%dplyr::mutate(`Impact on the data` = dplyr::case_when(`Difference (in %)` == Inf ~"Appearing data", Inf>`Difference (in %)`  & `Difference (in %)`>= 100 ~"Gain (more than double)" ,  100>`Difference (in %)`  & `Difference (in %)`>0 ~ "Gain",`Difference (in %)`==0~"No differences" , 0>`Difference (in %)`  & -100 < `Difference (in %)` ~ "Loss",`Difference (in %)` ==-100 ~  "All data lost" ))
 
 breaks <- breaks %>% ungroup()
