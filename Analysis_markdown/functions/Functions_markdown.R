@@ -423,26 +423,6 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
 
 
 
-# Function to create pie chart with df
-# function_pie_chart_df <- function(dimension, ...) {
-#   local_pie_chart_2 <- pie_chart_2_default
-#   formals(local_pie_chart_2)$dimension <- dimension
-#   pie_chart_result <- local_pie_chart_2(...)
-#   
-#   if (is.list(pie_chart_result) && "df" %in% names(pie_chart_result)) {
-#     df <- pie_chart_result$df
-#     pie_chart <- pie_chart_result$plot
-#   } else {
-#     df <- NULL
-#     pie_chart <- pie_chart_result
-#   }
-#   
-#   if (!is.null(df)) {
-#     df <- qflextable2(df, captionn = paste0("Strata movement for the dimension: ", dimension))
-#   }
-#   
-#   return(list(pie_chart = pie_chart, df = df, dimension = dimension))
-# }
 
 # Function to knit child with title and optional difference
 function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, find_and_print = FALSE, folder, difference = FALSE, fig.pathinside = fig.path, unique_analyse = FALSE) {
@@ -490,42 +470,19 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
 ## ----functionprintingmaps---------------------
 
 
-map_unit_knit = function(map, find_and_print = FALSE,folder = "Geodistrib", fig.pathinside = fig.path){
-  if(find_and_print){
-    for (i in files(folder)){
-  titles <- gsub(".", "", i)
-    knitr::knit_child(text =c(
-'', 
-    '```{r distributioninvalueforunitonlyoutput, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
-                            '',
-
-                            '',
-                            'knitr::include_graphics(file.path(fig.pathinside, file.path(folder, i)))',
-                            '',
-                            '```'), envir = environment(), quiet= TRUE)
-}
-
-  } else {
-  assign("unit_name_map", map[2][[1]], envir = environment())
-  assign("map_for_knit", map[1][[1]], envir = environment())
-  dimension_title <- gsub("_","..",unit_name_map)
-save_image(title = paste0("Distribution in value for the unit : ",(unit_name_map)),plott = map_for_knit,  folder = folder, fig.pathinside = fig.pathinside)
+map_unit_knit = function(map, title, find_and_print = FALSE,folder = "Geodistrib", fig.pathinside = fig.path){
+save_image(title = title,plott = map,  folder = folder, fig.pathinside = fig.pathinside)
   
   knitr::knit_child(text = c(
     '',
+    '```{r distributioninvalueforunit, fig.cap = title, out.width = "100%"}',
     '',
-    '```{r}', 
-    'dimension_title <- gsub("_","..",unit_name_map)',
-    '```',
-    '',
-    '```{r distributioninvalueforunit, fig.cap = paste0("Distribution in value for the unit : ",(unit_name_map)), out.width = "100%"}',
-    '',
-    'map_for_knit',
+    'map',
     '```',
     '',
     ''
  ), envir = environment(), quiet= TRUE)
-  }
+  
     }
 
 
