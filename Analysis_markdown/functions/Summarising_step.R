@@ -80,7 +80,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     details = file.info(sub_list_dir_2)
     details = details[with(details, order(as.POSIXct(mtime))), ]
     sub_list_dir_2 = rownames(details)
-    
+    browser()
     for(file in sub_list_dir_2){
       
     

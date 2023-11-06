@@ -1,5 +1,5 @@
 ---
-title: 'Comparison of two data sets at different levels/options of the tuna atlas'
+title: 'Comparison of two data sets'
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 author:
   - name: Bastien Grasset
@@ -7,8 +7,6 @@ author:
     affiliation:
       - IRD
       - MARBEC
-  - name: Emmanuel Blondel
-    affiliation: FAO
   - name: Julien Barde
     affiliation:
       - IRD
@@ -52,14 +50,14 @@ graphics: TRUE # Needed to be able to include images
 tables: TRUE # Needed to be able to include tables
 fancyhdr:
   first:
-    headleft: "Global Tuna Atlas comparison between two datasets"
-    headright: "GTA"
+    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
+    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
     headrulewidth: 0pt
     #footleft: A left foot
     footrulewidth: 0pt
   subsequent:
-    headleft: "Global Tuna Atlas comparison between two datasets"
-    headright: "GTA"
+    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
+    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
     headrulewidth: 1pt
     footrulewidth: 0pt
 ---
@@ -74,14 +72,13 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment
 ```{r sourcingfunctionsmarkdown}
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
+
 ```
 
 
 ```{r parameter-settings}
 
-res <- knitr::knit_child("Parameters_settings.Rmd", quiet = TRUE, envir = environment())
-
-# source("Parameters_settings.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Parameters_settings.R", local = TRUE)
 
 ```
 
@@ -89,29 +86,24 @@ res <- knitr::knit_child("Parameters_settings.Rmd", quiet = TRUE, envir = enviro
 
 ```{r fileformatting, results='asis'}
 
-res <- knitr::knit_child("file_formatting.Rmd", quiet = TRUE, envir = environment())
-
-# source("file_formatting.R", local = TRUE)
-
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/file_formatting.R", local = TRUE)
 
 ```
 
-
-```{r filtering-data, results='asis'}
-
-res <- knitr::knit_child("Filtering_data.Rmd", quiet = TRUE, envir = environment())
-
-# source("Filtering_data.R", local = TRUE)
-
-
-```
 
 ```{r Groupping-datarmd, results='asis'}
 
-res <- knitr::knit_child("Groupping_differences.Rmd", quiet = TRUE, envir = environment())
-# source("Groupping_differences.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Groupping_differences.R", local = TRUE)
 
 ```
+
+```{r checkifnodiff,  eval=!unique_analyse , results='asis'}
+
+if (round(sum_valeur_init) == round(sum_valeur_final) & nrow(Groupped_all %>%dplyr::filter(`Loss / Gain` != 'Egal'))==0){
+  cat("There are no differences between the two datasets, this step is not changing the data in any way")}
+
+```
+
 
 ```{r explenation, results='asis'}
 
@@ -140,8 +132,6 @@ cat(res, sep =  "\\clearpage")
 
 ```
 
-
-
 ```{r parametershort,  eval=parameter_short, results='asis'}
 
 exit <- "This document only presents the summary of the differences between the two datasets. If you need a more detailed summary please provide FALSE as argument for the 'short' parameter"
@@ -153,13 +143,17 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 
 ```
 
-`r if(!unique_analyse){cat_title("# Introduction to the two datasets", child_headerinside = child_header)}`
+```{r Main-caracteristics-of-dataset, results='asis', eval=!unique_analyse}
 
-We first present the main characteristics of each dimension.
+res <- knitr::knit_child("Main_differences.Rmd", quiet = TRUE, envir = environment())
 
-```{r timecoverage, echo=FALSE, results='asis'}
+cat(res, sep =  "\\clearpage")
 
-res <- knitr::knit_child("Timecoverage.Rmd", quiet = TRUE, envir = environment())
+```
+
+```{r Main-caracteristics-of-dataset, results='asis', eval = coverage}
+
+res <- knitr::knit_child("Main_caracteristics_of_dataset.Rmd", quiet = TRUE, envir = environment())
 
 cat(res, sep =  "\\clearpage")
 
@@ -168,71 +162,7 @@ cat(res, sep =  "\\clearpage")
 \clearpage
 
 
-
-```{r eval= print_map, results='asis'}
-
-res <- knitr::knit_child("Spatialcoverage.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-
-\clearpage
-
-
-```{r otherdim, results='asis'}
-
-res <- knitr::knit_child("Otherdimensions.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-
-\clearpage
-
-
-
-```{r eval=unique_analyse}
-
-knitr::knit_exit(fully = FALSE)
-
-```
-
-\clearpage
-
-`r cat_title("# Differences between the two datasets", child_headerinside = child_header)`
-
-
-```{r timediffchild, results='asis'}
-
-res <- knitr::knit_child("Timediff.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-\clearpage
-
-```{r Geodiff, results='asis', eval = print_map}
-
-res <- knitr::knit_child("Geographicdiff.Rmd", quiet = TRUE, envir = environment())
-cat(res, sep =  "\\clearpage")
-
-```
-
-```{r Diff-for-other-dimensions, results='asis'}
-
-res <- knitr::knit_child("Differences_for_each_dimensions.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-\clearpage
-
-```{r recapwithout-mappingg,Diff-for-other-dimensions,eval = (!unique_analyse & !parameter_mapped), results='asis'}
+```{r recapwithout-mappingg, Diff-for-other-dimensions,eval = (!unique_analyse & !parameter_mapped), results='asis'}
 
 res <- knitr::knit_child("Recap_without_mapping.Rmd", quiet = TRUE, envir = environment())
 
