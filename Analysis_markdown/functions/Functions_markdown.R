@@ -14,7 +14,7 @@ required_packages <- c("dplyr", "knitr", "stringr", "purrr", "readxl", "base", "
 for (package in required_packages) {
   # if (!require(package, character.only = TRUE)) {
   #   install.packages(package)
-    require(package, character.only = TRUE)
+    require(package)
   # }
 }
 
@@ -26,7 +26,7 @@ for (package in required_packages) {
 
 
 
-## ----utilityfunctions, include=FALSE-------------------
+## ----utilityfunctions, include=FALSE----------
 
 
 `%notin%` <- Negate(`%in%`)
@@ -61,7 +61,7 @@ cat_title = function(x, child_headerinside ="") {
 
 
 
-## ----GTAMARKDOWNFUNCTIONS------------------------------
+## ----GTAMARKDOWNFUNCTIONS---------------------
 
 fSpatPlan_Convert2PacificRobinson = function(df, buff = 0){
   
@@ -411,11 +411,9 @@ function_knitting = function(x, titre_init = titre_1, titre_final = titre_2, fin
 
 
 
-## ------------------------------------------------------
+## ---------------------------------------------
 # Function to create spatial plots
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
-                                        shapefile.fix) {
-  plotting_type < tmap_mode()
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
   selection <- function(x) {
     x %>% 
       dplyr::ungroup() %>% 
@@ -440,7 +438,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                            dplyr::group_by(geographic_identifier, measurement_unit, source) %>%
                            dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
                            dplyr::filter(measurement_value != 0) %>%
-                           dplyr::inner_join(shapefile.fix, by = c("geographic_identifier" = "cwp_code"))
+                           dplyr::inner_join(shapefile.fix, by = c("geographic_identifier" = "CWP_CODE"))
   )
   
   if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
@@ -546,17 +544,12 @@ is_ggplot <- function(obj) {
 }
 
 
-library(ggplot2)
-library(tmap)
-
 knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fig.pathinside = fig.path) {
   # Check if the function is being run in a knitr environment
   in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
   
   # Save the ggplot object in the current environment with a unique name
-  is_valid_plot <- is_ggplot(plot) || inherits(plot, "tmap")
-  
-  if (is_valid_plot) {
+  if(is_ggplot(plot)) {
     save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
     
     if(in_knitr) {
@@ -565,7 +558,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       # Adjust title for use in fig.cap
       assign("title_adj", gsub("_", "-", title), envir = environment())
       assign("plot_obj", plot, envir = environment())
-      if(is_ggplot(plot)){
+      
       # Create the R chunk as a string referencing the ggplot object by its name
       knitr::knit_child(text = c(
         '```{r evolvaluedimdiff, fig.cap=`title_adj`, fig.align = "center", out.width = "100%", results= "asis"}',
@@ -575,28 +568,15 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
         '',
         '```'
       ), envir = environment(), quiet = TRUE)
-      } else if (inherits(plot, "tmap")){
-        # current <- tmap_mode()
-        # tmap_mode("plot")
-        knitr::knit_child(text = c(
-          '```{r evolvaluedimdiff, fig.cap=`title_adj`, fig.align = "center", out.width = "100%", results= "asis"}',
-          '',
-          '',
-          'plot_obj',
-          '',
-          '```'
-        ), envir = environment(), quiet = TRUE)
-        # tmap_mode(current)
-        
-      }
     } else {
       # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
       print(plot)
     }
   } else { 
-    stop("Not a ggplot or tmap object")
+    stop("Not a ggplot object")
   }
 }
+
 
 
 
@@ -665,10 +645,9 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
 
 
 
-## ----functionprintingmaps------------------------------
+## ----functionprintingmaps---------------------
 
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
-                                        shapefile.fix) {
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
   selection <- function(x) {
     x %>% 
       dplyr::ungroup() %>% 
@@ -693,7 +672,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                            dplyr::group_by(geographic_identifier, measurement_unit, source) %>%
                            dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
                            dplyr::filter(measurement_value != 0) %>%
-                           dplyr::inner_join(shapefile.fix, by = c("geographic_identifier" = "cwp_code"))
+                           dplyr::inner_join(shapefile.fix, by = c("geographic_identifier" = "CWP_CODE"))
   )
   
   if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
@@ -750,7 +729,7 @@ save_image(title = paste0("Distribution in value for the unit : ",(unit_name_map
     }
 
 
-## ----function-bar-plot-pie-plot------------------------
+## ----function-bar-plot-pie-plot---------------
 
 pie_chart_2_default = function (dimension, first, second = NULL, topn = 10, titre_1 = "first", 
   titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
@@ -1040,83 +1019,4 @@ bar_plot_default <- function(first,
   }
   return(bar_plot)
 }
-
-
-render_subfigures <- function(plots_list, titles_list, general_title) {
-  library(ggplot2)
-  
-  # Check if the function is being run in a knitr environment
-  in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
-  
-  # Check if the lists are of the same length
-  if (length(plots_list) != length(titles_list)) {
-    stop("The lengths of plots_list and titles_list are not the same.")
-  }
-  
-  # Check if all plots are ggplots
-  if (!all(sapply(plots_list, inherits, "gg"))) { 
-    stop("Not all items in plots_list are ggplot objects.")
-  }
-  
-  if (in_knitr) {
-    # Create subcaptions
-    subcaps <- lapply(titles_list, function(title) paste0("(", title, ")"))
-    
-    # Start creating the dynamic R chunk as a string
-    chunk_header <- sprintf(
-      '```{r subfigures, fig.cap="%s", fig.subcap=c(%s), fig.ncol=2, out.width="50%%", fig.align="center"}',
-      general_title,
-      paste0('"', subcaps, '"', collapse=", ")
-    )
-    
-    # Assign each plot in plots_list to a new variable in the environment
-    for (i in seq_along(plots_list)) {
-      assign(paste0("plot_", i), plots_list[[i]], envir = environment())
-    }
-    
-    # Create a string for each plot command, referring to the correct plot objects
-    plot_commands <- lapply(seq_along(plots_list), function(i) {
-      paste0("print(plot_", i, ")")
-    })
-    
-    # Combine all elements into a single character string
-    chunk_text <- paste(chunk_header, paste(plot_commands, collapse = '\n'), '```', sep = '\n')
-    
-    # Render the chunk
-    result <- knitr::knit_child(text = chunk_text, envir = environment(), quiet = TRUE)
-    
-    cat(result)
-  } else {
-    # If not in a knitr environment, just print the plots
-    for (plot in plots_list) {
-      print(plot)
-    }
-  }
-}
-
-library(httr)
-
-knit_remote_child <- function(url) {
-  # Send a request to the URL (the raw Rmd file on GitHub)
-  response <- GET(url)
-  
-  # Check if the request was successful
-  if (status_code(response) == 200) {
-    # Get the content of the response, which is the Rmd file, and write it to a temporary file
-    temp_rmd <- tempfile(fileext = ".Rmd")
-    writeBin(content(response, "raw"), temp_rmd)
-    
-    # Use knitr to knit the child document
-    res <- knitr::knit_child(temp_rmd, quiet = TRUE)
-    
-    # Clean up the temporary file if you want
-    unlink(temp_rmd)
-    
-    return(res)
-  } else {
-    stop("Failed to download the Rmd file from ", url)
-  }
-}
-
-
 
