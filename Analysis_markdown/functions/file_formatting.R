@@ -28,35 +28,6 @@ if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse){
 titre_2 <- gsub("_","-",titre_2)
 titre_1 <- gsub("_","-",titre_1)
 
-
-
-## ----mappingifnot, include=FALSE, eval=TRUE-------------------
-
-
-if(!parameter_mapped){
-  
-  con <- DBI::dbConnect(RPostgreSQL::PostgreSQL(),
-host = config$software$input$dbi_config$parameters$host, port = config$software$input$dbi_config$parameters$port,  user = config$software$input$dbi_config$parameters$user,dbname=config$software$input$dbi_config$parameters$dbname, password = config$software$input$dbi_config$parameters$password)
-  
-mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
-      mapping_dataset <-
-        read.csv(
-          mapping_csv_mapping_datasets_url,
-          stringsAsFactors = F,
-          colClasses = "character"
-        )
-  mapping_keep_src_code <- FALSE
-
-  source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/map_codelists.R")
-  init <- map_codelists(con = con, fact = parameter_fact, mapping_dataset = mapping_dataset, dataset_to_map = init, mapping_keep_src_code = FALSE, summary_mapping = TRUE)$dataset_mapped
-        
-  #this map condelist function is to retrieve the mapping dataset used
-  # final <- map_codelists(conn, parameter_fact, mapping_dataset, final, mapping_keep_src_code = FALSE, summary_mapping = FALSE)
-  dbDisconnect(con)
-}
-
-
-
 ## ----filetidying----------------------------------------------
 
 init <- tidying_data(init, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
@@ -74,6 +45,7 @@ final <- final %>% dplyr::select(colnames_intersect)
 formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim = parameter_geographical_dimension
 formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_fact = parameter_fact
 formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
+formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim_group = parameter_geographical_dimension_groupping
 
 init <- function_geographic_identifier_renaming_and_not_standards_unit(init)
 final <- function_geographic_identifier_renaming_and_not_standards_unit(final)

@@ -61,10 +61,8 @@ Summarising_step = function(main_dir, connectionDB, config){
   i <- 1
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
 
-  copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
   for (entity_dir in entity_dirs) {
-    
     
     
     entity <- config$metadata$content$entities[[i]]
@@ -104,7 +102,9 @@ Summarising_step = function(main_dir, connectionDB, config){
     
     parameters_child_global <- list(fig.path = paste0("tableau_recap_global_action/figures/"), 
                                     parameter_filtering = parameter_filtering, 
-                                    parameter_resolution_filter = parameter_resolution_filter, parameter_time_dimension = c("time_start"))
+                                    parameter_resolution_filter = parameter_resolution_filter,
+                                    parameter_time_dimension = c("time_start"), 
+                                    entity = entity, config = config)
     
     
     
