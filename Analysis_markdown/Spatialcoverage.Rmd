@@ -11,7 +11,7 @@ output: pdf_document
 
 ```{r fonction-empreinte-spatial, eval=print_map}
 
-map_unit <- lapply(units, FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2, shapefile.fix = shapefile.fix)
+map_unit <- lapply(units, FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2, shapefile.fix = shapefile.fix, plotting_type = plotting_type, continent = continent)
 
 
 titles <- paste0("Distribution in value for the unit : ",units)

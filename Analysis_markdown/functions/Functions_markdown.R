@@ -255,61 +255,6 @@ ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path =
 
 }
 
-resume_knit_child = function(x,find_and_print = FALSE, folder = "Piechartsdimensions", fig.pathinside = fig.path){
-    if(find_and_print){
-    for (i in files(folder)){
-  titles <- gsub(".", "", i)
-    knitr::knit_child(text =c(
-'', 
-    '```{r otherdim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
-                            '',
-
-                            '',
-                            'knitr::include_graphics(file.path(fig.path, file.path(folder, i)))',
-                            '',
-                            '```'), envir = environment(), quiet= TRUE)
-}
-
-  } else {
-
-  dimension_title <- gsub("_", "-", unique(x$dimension))
-
-  title_knit <- paste0("Distribution in value for the dimension : ",(dimension_title))
-  
-  assign("dimension_title", gsub("_", "-", unique(x$dimension)), envir = environment())
-save_image(title = title_knit, plott = x$pie_chart, folder = folder, fig.pathinside = fig.pathinside)
-  assign("x", x, envir = environment())
-
-  knitr::knit_child(text = c(
-
-    '',
-    '',
-'', 
-
-    '',
-    '```{r distribinvaluedim, results = "asis" ,fig.cap =`title_knit`}',
-    '',
-    'x$pie_chart',
-'',
-'```',
-    '',
-    '',
-    '',
-    '```{r results = "asis", eval= !is.null(x$df)}',
-    'x$df',
-    '',
-    '',
-    '```',
-    '',
-    '', 
-    ''
-    
-    
-    
-    
-  ), envir = environment(), quiet= TRUE)
-  }
-}
 
 function_pie_chart_df <- function(dimension, ...) {
   
@@ -340,53 +285,12 @@ function_pie_chart_df <- function(dimension, ...) {
 }
 
 
-function_knitting = function(x, titre_init = titre_1, titre_final = titre_2, find_and_print = FALSE,folder, difference = FALSE, fig.pathinside = fig.path, unique_analyse = FALSE){
-  if(find_and_print){
-    for (i in files(folder)){
-  titles <- gsub(".", "", i)
-    knitr::knit_child(text =c(
-'', 
-    '```{r evolvaluedim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
-                            '',
-
-                            '',
-                            'knitr::include_graphics(file.path(fig.pathinside, file.path(folder, i)))',
-                            '',
-                            '```'), envir = environment(), quiet= TRUE)
-}
-
-  } else {
-  assign("Dimension2", gsub("_", "-", unique(x$data$Dimension)))
-  assign("y", x, envir = environment())
-  if(difference){
-    title_knit <- paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", titre_init, " and ",titre_final, " dataset ")
-    folder = "Temporaldiff"
-
-  } else {
-  title_knit <- paste0("Evolutions of values for the dimension ", Dimension2, " for ", titre_init, " and ",titre_final, " dataset ")
-  if(unique_analyse){title_knit = paste0("Evolutions of values for the dimension ", Dimension2, " for ", titre_init, " dataset ")}
-  }
-
-
-  knitr::knit_child(text =c(
-'', 
-    '```{r evolvaluedimdiff, fig.cap=`title_knit`, fig.align = "center", out.width = "100%"}',
-                            '',
-
-                            '',
-                            'save_image(title = title_knit, plott = y, folder = folder, fig.pathinside = fig.pathinside)',
-                            '',
-                            '```'), envir = environment(), quiet= TRUE)
-}
-}
-
-
-
-
 ## ---------------------------------------------
 # Function to create spatial plots
 fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
-shapefile.fix) {
+shapefile.fix, plotting_type = "plot", continent) {
+  continent <- sf::st_as_sf(continent)
+
   selection <- function(x) {
     x %>% 
       dplyr::ungroup() %>% 
@@ -408,12 +312,11 @@ shapefile.fix) {
     ))
   
   inner_join <- st_as_sf(geo_data %>% 
-                           dplyr::group_by(geographic_identifier, measurement_unit, source) %>%
+                           dplyr::group_by(geographic_identifier, measurement_unit, source, GRIDTYPE) %>%
                            dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
                            dplyr::filter(measurement_value != 0) %>%
                            dplyr::inner_join(shapefile.fix %>% dplyr::select(-GRIDTYPE), by = c("geographic_identifier" = "cwp_code"))
   )
-  
   if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
     if (plotting_type == "view") {
       image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
@@ -429,40 +332,6 @@ shapefile.fix) {
   }
 }
 
-# Function to create map unit
-map_unit_knit <- function(map, find_and_print = FALSE, folder = "Geodistrib", fig.pathinside = fig.path) {
-  if (find_and_print) {
-    for (i in files(folder)) {
-      titles <- gsub(".", "", i)
-      knitr::knit_child(text = c(
-        '```{r distributioninvalueforunitonlyoutput, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
-        '',
-        '',
-        'knitr::include_graphics(file.path(fig.pathinside, file.path(folder, i)))',
-        '',
-        '```'
-      ), envir = environment(), quiet = TRUE)
-    }
-  } else {
-    assign("unit_name_map", map[2][[1]], envir = environment())
-    assign("map_for_knit", map[1][[1]], envir = environment())
-    
-    dimension_title <- gsub("_", "..", unit_name_map)
-    save_image(title = paste0("Distribution in value for the unit : ", unit_name_map), plott = map_for_knit, folder = folder, fig.pathinside = fig.pathinside)
-    
-    knitr::knit_child(text = c(
-      '```{r}', 
-      'dimension_title <- gsub("_","..",unit_name_map)',
-      '```',
-      '',
-      '```{r distributioninvalueforunit, fig.cap = paste0("Distribution in value for the unit : ",(unit_name_map)), out.width = "100%"}',
-      '',
-      'map_for_knit',
-      '```',
-      ''
-    ), envir = environment(), quiet = TRUE)
-  }
-}
 
 # Function to create resume knit child
 resume_knit_child <- function(x, find_and_print = FALSE, folder = "Piechartsdimensions", fig.pathinside = fig.path) {
@@ -620,48 +489,6 @@ function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, fi
 
 ## ----functionprintingmaps---------------------
 
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
-  selection <- function(x) {
-    x %>% 
-      dplyr::ungroup() %>% 
-      dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit)
-  }
-  
-  Initial_dataframe <- selection(initial_dataset)
-  Final_dataframe <- selection(final_dataset)
-  
-  geo_data <- gdata::combine(Initial_dataframe, Final_dataframe)
-  rm(Initial_dataframe, Final_dataframe)
-  gc()
-  
-  geo_data <- geo_data %>% 
-    dplyr::mutate(source = dplyr::case_when(
-      source == "Initial_dataframe" ~ eval(parse(text = "titre_1")),
-      source == "Final_dataframe" ~ eval(parse(text = "titre_2")),
-      TRUE ~ "Error"
-    ))
-  
-  inner_join <- st_as_sf(geo_data %>% 
-                           dplyr::group_by(geographic_identifier, measurement_unit, source) %>%
-                           dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
-                           dplyr::filter(measurement_value != 0) %>%
-                           dplyr::inner_join(shapefile.fix, by = c("geographic_identifier" = "CWP_CODE"))
-  )
-  
-  if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
-    if (plotting_type == "view") {
-      image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
-    } else {
-      image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) + tm_shape(continent) + tm_borders()
-    }
-    
-    return(image)
-  }
-}
 
 map_unit_knit = function(map, find_and_print = FALSE,folder = "Geodistrib", fig.pathinside = fig.path){
   if(find_and_print){
@@ -1042,5 +869,46 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
     ))
   
   return(summary)
+}
+
+render_subfigures <- function(plots_list, titles_list, general_title) {
+  # Check if the function is being run in a knitr environment
+  in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
+  # Check if the lists are of the same length
+  if (length(plots_list) != length(titles_list)) {
+    stop("The lengths of plots_list and titles_list are not the same.")
+  }
+  # Check if all plots are ggplots
+  if (!all(sapply(plots_list, inherits, "gg"))) {
+    stop("Not all items in plots_list are ggplot objects.")
+  }
+  if (in_knitr) {
+    # Create subcaptions
+    subcaps <- lapply(titles_list, function(title) paste0("(", title, ")"))
+    # Start creating the dynamic R chunk as a string
+    chunk_header <- sprintf(
+      '```{r subfigures, fig.cap="%s", fig.subcap=c(%s), fig.ncol=2, out.width="50%%", fig.align="center"}',
+      general_title,
+      paste0('"', subcaps, '"', collapse=", ")
+    )
+    # Assign each plot in plots_list to a new variable in the environment
+    for (i in seq_along(plots_list)) {
+      assign(paste0("plot_", i), plots_list[[i]], envir = environment())
+    }
+    # Create a string for each plot command, referring to the correct plot objects
+    plot_commands <- lapply(seq_along(plots_list), function(i) {
+      paste0("print(plot_", i, ")")
+    })
+    # Combine all elements into a single character string
+    chunk_text <- paste(chunk_header, paste(plot_commands, collapse = '\n'), '```', sep = '\n')
+    # Render the chunk
+    result <- knitr::knit_child(text = chunk_text, envir = environment(), quiet = TRUE)
+    cat(result)
+  } else {
+    # If not in a knitr environment, just print the plots
+    for (plot in plots_list) {
+      print(plot)
+    }
+  }
 }
 
