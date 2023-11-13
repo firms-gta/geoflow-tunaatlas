@@ -1,6 +1,6 @@
 function(action, entity, config) {
   opts <- action$options
-  con <- config$software$input$dbi
+  con <- config$software$output$dbi
   options(encoding = "UTF-8")
   ######################################################################
   ##### 52North WPS annotations ##########
@@ -482,57 +482,66 @@ function(action, entity, config) {
 		#   )
 		  
 		  new_version_iotc_raising_available <- TRUE
-		  if (file.exists("data/conversion_factors_IOTC.csv")) {
+		  if (file.exists("data/IOTC_conv_fact_mapped.csv")) {
+		    
+		    iotc_conv_fact_mapped <- read_csv("data/IOTC_conv_fact_mapped.csv",
+		                                        col_types = cols(
+		                                      	geographic_identifier = col_character(),
+		                                      	time_start = col_character(),
+		                                      	time_end = col_character()
+		                                        ))
+		    
 			# unit conversion IOTC given factors -----------------------------------
-			iotc_conv_fact <- read_csv(
-			  "data/conversion_factors_IOTC.csv",
-			  col_types = cols(
-				geographic_identifier = col_character(),
-				time_start = col_character(),
-				time_end = col_character()
-			  )
-			) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit, 
-			                    gear_type  = gear)#this map condelist function is to retrieve the mapping dataset used
-			
-			mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
-			mapping_dataset <-
-			  read.csv(
-			    mapping_csv_mapping_datasets_url,
-			    stringsAsFactors = F,
-			    colClasses = "character"
-			  )
-			mapping_keep_src_code <- FALSE
-			
-			iotc_conv_fact_mapped <-
-			  map_codelists(
-				con = con,
-				"catch",
-				mapping_dataset = mapping_dataset,
-				dataset_to_map = iotc_conv_fact,
-				mapping_keep_src_code = TRUE,
-				source_authority_to_map = c("IOTC")
-			  )$dataset_mapped
-			
-			# iotc_conv_fact_mapped$time_start <-
-			#   as.Date(iotc_conv_fact_mapped$time_start)
-			# iotc_conv_fact_mapped$time_start <-
-			#   as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
-			# iotc_conv_fact_mapped$time_end <-
-			#   as.Date(iotc_conv_fact_mapped$time_end)
-			# iotc_conv_fact_mapped$time_end <-
-			#   as.character(
-			# 	lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
+			# iotc_conv_fact <- read_csv(
+			#   "data/iotc_conv_fact_mapped.csv",
+			#   col_types = cols(
+			# 	geographic_identifier = col_character(),
+			# 	time_start = col_character(),
+			# 	time_end = col_character()
 			#   )
+			# ) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit, 
+			#                     gear_type  = gear)#this map condelist function is to retrieve the mapping dataset used
 			# 
-			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% select(-c(species_src_code, gear_type_src_code)) %>% 
-			  dplyr::group_by(across(setdiff(everything(), "measurement_value"))) %>%
-			  dplyr::summarise(measurement_value = mean(measurement_value)) %>% distinct()
+			# mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
+			# mapping_dataset <-
+			#   read.csv(
+			#     mapping_csv_mapping_datasets_url,
+			#     stringsAsFactors = F,
+			#     colClasses = "character"
+			#   )
+			# mapping_keep_src_code <- FALSE
+			# 
+			# iotc_map_codelists <- map_codelists(
+			#   con = con,
+			#   "catch",
+			#   mapping_dataset = mapping_dataset,
+			#   dataset_to_map = iotc_conv_fact,
+			#   mapping_keep_src_code = TRUE,
+			#   source_authority_to_map = c("IOTC")
+			# )
+			# 
+			# iotc_conv_fact_mapped <-iotc_map_codelists$dataset_mapped
+			# 
+			# # iotc_conv_fact_mapped$time_start <-
+			# #   as.Date(iotc_conv_fact_mapped$time_start)
+			# # iotc_conv_fact_mapped$time_start <-
+			# #   as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
+			# # iotc_conv_fact_mapped$time_end <-
+			# #   as.Date(iotc_conv_fact_mapped$time_end)
+			# # iotc_conv_fact_mapped$time_end <-
+			# #   as.character(
+			# # 	lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
+			# #   )
+			# # 
+			# iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% dplyr::select(-c(species_src_code, gear_type_src_code)) %>% 
+			#   dplyr::group_by(across(setdiff(everything(), "measurement_value"))) %>%
+			#   dplyr::summarise(measurement_value = mean(measurement_value)) %>% distinct()
+			# 
+			# iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
+			#   dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t") ~ "t", measurement_unit %in% c("NO", "no") ~ "no", TRUE ~ measurement_unit)) %>% 
+			#   dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t") ~ "t", unit_target %in% c("NO", "no")~ "no" , TRUE ~ unit_target)) 
 			
-			iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
-			  dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t") ~ "t", measurement_unit %in% c("NO", "no") ~ "no", TRUE ~ measurement_unit)) %>% 
-			  dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t") ~ "t", unit_target %in% c("NO", "no")~ "no" , TRUE ~ unit_target)) 
-			
-			iotc_data <- georef_dataset %>% filter(source_authority == "IOTC")
+			iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
 			
 			iotc_data_converted <- do_unit_conversion(
 			  entity = entity,
@@ -616,7 +625,7 @@ function(action, entity, config) {
 		  config$logger.info("STEP 2/5: END do_unit_conversion() function")
 		  
 		  ntons_after_conversion <-
-			round(georef_dataset %>% select(measurement_value)  %>% sum())
+			round(georef_dataset %>% dplyr::select(measurement_value)  %>% sum())
 		  config$logger.info(
 			sprintf(
 			  "STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons",
@@ -1280,7 +1289,7 @@ function(action, entity, config) {
 		codelists = df_codelists #in case the entity was provided with a link to codelists
 	)
 
-  browser()
+
 	# if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
 	#   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
 	#   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
