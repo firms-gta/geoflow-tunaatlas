@@ -5,15 +5,14 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                              nominal_dataset_df,
                                              x_raising_dimensions){
   
-  # options <- entity$data$actions[[1]]$options
   fact <- opts$fact
   raising_do_not_raise_wcfpc_data <- opts$raising_do_not_raise_wcfpc_data
   raising_raise_only_for_PS_LL <- opts$raising_raise_only_for_PS_LL
-  include_WCPFC <- opts$include_WCPFC
-  include_CCSBT <- opts$include_CCSBT
-  include_IOTC <- opts$include_IOTC
-  include_IATTC <- opts$include_IATTC
-  include_ICCAT <- opts$include_ICCAT
+  include_WCPFC <- TRUE
+  include_CCSBT <- TRUE
+  include_IOTC <- TRUE
+  include_IATTC <- TRUE
+  include_ICCAT <- TRUE
   
   
   cat("Raising georeferenced dataset to nominal dataset\n")
