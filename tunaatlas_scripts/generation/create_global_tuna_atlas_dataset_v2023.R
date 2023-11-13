@@ -80,7 +80,7 @@ function(action, entity, config) {
   stepnumber <- 1
   
   #scripts
-  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
+  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation"
   #for level 0 - FIRMS
   # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
@@ -610,6 +610,7 @@ function(action, entity, config) {
 		  )
 		  
 		  config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
+		  source(file.path(url_scripts_create_own_tuna_atlas, "do_unit_conversion.R"))
 		  
 		  georef_dataset <- do_unit_conversion(
 			entity = entity,
