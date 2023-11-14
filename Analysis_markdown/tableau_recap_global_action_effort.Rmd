@@ -190,7 +190,7 @@ child_env_comp$parameter_mapped <- TRUE
 child_env_comp$parameter_short <- FALSE
 child_env_comp$child_header <- "#"
 
-new_path <- file.path(fig.path, "/Comparison/initfinal_",gsub("Markdown/","",sub_list_dir_2[1]),"_", gsub("Markdown/","",sub_list_dir_2[length(sub_list_dir_2)]))
+new_path <- file.path(fig.path, paste0("/Comparison/initfinal_",gsub("Markdown/","",sub_list_dir_2[1]),"_", gsub("Markdown/","",sub_list_dir_2[length(sub_list_dir_2)])))
 
 dir.create(new_path, recursive = TRUE)
 
