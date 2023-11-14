@@ -1,0 +1,38 @@
+---
+title: "Main_differences"
+author: "BastienG"
+date: "2023-11-03"
+output: html_document
+---
+
+`r cat_title("# Differences between the two datasets", child_headerinside = child_header)`
+
+
+```{r timediffchild, results='asis'}
+
+res <- knitr::knit_child("Timediff.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```
+
+\clearpage
+
+```{r Geodiff, results='asis', eval = print_map}
+
+res <- knitr::knit_child("Geographicdiff.Rmd", quiet = TRUE, envir = environment())
+cat(res, sep =  "\\clearpage")
+
+```
+
+\clearpage
+
+```{r Diff-for-other-dimensions, results='asis'}
+
+res <- knitr::knit_child("Differences_for_each_dimensions.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```
+
+\clearpage
