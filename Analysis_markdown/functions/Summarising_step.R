@@ -82,21 +82,21 @@ Summarising_step = function(main_dir, connectionDB, config){
     details = details[with(details, order(as.POSIXct(mtime))), ]
     sub_list_dir_2 = rownames(details)
     
-    for(file in sub_list_dir_2){
-      
-    
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
-      data <- readRDS(file)
-      data <- tidying_GTA_data_for_comparison(dataframe = data,
-                                              shape = shape_without_geom, 
-                                              species_group_dataframe = species_group,
-                                              cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
-      saveRDS(file = file, object = data)
-      
-    if("gridtype"%in% colnames(data)){
-      data_list <- data_list %>% rename(GRIDTYPE = gridtype)
-    }
-    }
+    # for(file in sub_list_dir_2){
+    #   
+    # 
+    # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+    #   data <- readRDS(file)
+    #   data <- tidying_GTA_data_for_comparison(dataframe = data,
+    #                                           shape = shape_without_geom, 
+    #                                           species_group_dataframe = species_group,
+    #                                           cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
+    #   saveRDS(file = file, object = data)
+    #   
+    # if("gridtype"%in% colnames(data)){
+    #   data_list <- data_list %>% rename(GRIDTYPE = gridtype)
+    # }
+    # }
     
     parameter_filtering <- opts$filtering
     parameter_resolution_filter <- opts$resolution_filter
