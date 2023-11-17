@@ -70,7 +70,7 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   ##netcdf name
   NetCDF_file_name <- file.path(path,paste0(dataset_metadata$identifier,".nc"))
   netCDF_CF_filename <-  NetCDF_file_name
-  sp_resolution <- dataset_metadata$spatial_resolution
+  sp_resolution <- dataset_metadata$sp_resolution
   
    if(!is.null(sp_resolution) && is.na(sp_resolution)){
     sp_resolution <- 5
@@ -195,6 +195,9 @@ write_NetCDF <- function(dataset_metadata,Variable=NULL, dimensions='all', path 
   ##### CREATE EMPTY NETCDF FILE  ##########  # create netCDF file and put arrays
   ######################################################################
   # netCDF_CF_filename <- paste("SARDARA_",variables,"_",paste(dimensions,collapse = "-"),"_",sp_resolution,"deg_",t_resolution,'D',dateVector1[1],"_",dateVector1[length(dateVector1)],".nc",sep="")
+  if(file.exists(netCDF_CF_filename)){
+    file.remove(netCDF_CF_filename)
+  }
   nc <- nc_create(netCDF_CF_filename,list(varproj,varXd),force_v4 = TRUE)
   cat("netCDF File created")
   ######################################################################
@@ -366,7 +369,7 @@ query_netCDF<-getSQLSardaraQueries(con,dataset_metadata)$query_NetCDF
 dataset<-dbGetQuery(con,query_netCDF)
 ## 2) Extract metadata in the appropriate structure
 # unit
-paste("Data are expressed in one of these units: ",paste(unique(dataset$unit),collapse = ",",sep=""))
+paste("Data are expressed in one of these units: ",paste(unique(dataset$measurement_unit),collapse = ",",sep=""))
 # variable
 dataset_metadata$variable<-sub('.*\\.', '',dataset_metadata$database_table_name )
 # spatial_resolution and spatial_resolution_unit
