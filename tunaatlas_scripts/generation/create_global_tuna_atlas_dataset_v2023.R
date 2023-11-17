@@ -80,7 +80,7 @@ function(action, entity, config) {
   stepnumber <- 1
   
   #scripts
-  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation"
+  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   #for level 0 - FIRMS
   # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
@@ -460,6 +460,8 @@ function(action, entity, config) {
 	  # unit conversion already given factors -----------------------------------
 	  
 	  if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
+	  mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
+	    
 		#   georef_dataset <-
 		# 	double_unit_data_handling(
 		# 	  con = con,
@@ -502,7 +504,6 @@ function(action, entity, config) {
 			# ) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit, 
 			#                     gear_type  = gear)#this map condelist function is to retrieve the mapping dataset used
 			# 
-			# mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
 			# mapping_dataset <-
 			#   read.csv(
 			#     mapping_csv_mapping_datasets_url,
@@ -546,7 +547,7 @@ function(action, entity, config) {
 			iotc_data_converted <- do_unit_conversion(
 			  entity = entity,
 			  config = config,
-			  fact = fact,
+			  fact = opts$fact,
 			  unit_conversion_csv_conversion_factor_url =
 				iotc_conv_fact_mapped,
 			  unit_conversion_codelist_geoidentifiers_conversion_factors =
@@ -600,7 +601,7 @@ function(action, entity, config) {
 			)
 		  
 		  ntons_before_this_step <-
-			round(georef_dataset %>% filter(measurement_unit == "t")  %>% select(measurement_value)  %>% sum())
+			round(georef_dataset %>% filter(measurement_unit == "t")  %>% dplyr::select(measurement_value)  %>% sum())
 		  config$logger.info(
 			sprintf(
 			  "STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons",
@@ -610,12 +611,13 @@ function(action, entity, config) {
 		  )
 		  
 		  config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
-		  source(file.path(url_scripts_create_own_tuna_atlas, "do_unit_conversion.R"))
+		  
+		  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation/do_unit_conversion.R")
 		  
 		  georef_dataset <- do_unit_conversion(
 			entity = entity,
 			config = config,
-			fact = fact,
+			fact = opts$fact,
 			unit_conversion_csv_conversion_factor_url =
 			  opts$unit_conversion_csv_conversion_factor_url,
 			unit_conversion_codelist_geoidentifiers_conversion_factors =

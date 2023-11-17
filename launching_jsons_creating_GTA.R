@@ -130,6 +130,12 @@ lapply(paste0(paste0("jobs/", list("tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_
 lapply(paste0("jobs/", list("tunaatlas_qa_global_datasets_catch", "tunaatlas_qa_global_datasets_effort")),
                                    dir.create)
 
+file.path <- executeWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Summarising_step.R")
+config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
+con <- config$software$output$dbi
+Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
+
 
 
 file.path <- executeWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
