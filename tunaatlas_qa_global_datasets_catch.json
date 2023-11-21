@@ -95,10 +95,6 @@
 		"id": "load_metadata",
 		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
 		"run": true
-	},
-	{		"id": "recap_all_markdown",
-		"script": "https://raw.githubusercontent.com/BastienIRD/Tunaatlas_level1/main/recap_all_markdown.R",
-		"run": false
 	}
 	
 
