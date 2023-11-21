@@ -2,7 +2,6 @@
 title: "Timecoverage"
 author: "BastienG"
 date: "2023-09-12"
-runtime: shiny_prerendered
 ---
 
 `r cat_title("## Time coverage", child_headerinside = child_header)`

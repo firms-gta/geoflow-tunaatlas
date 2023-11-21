@@ -12,21 +12,17 @@ copy_project_files <- function(original_repo_path, new_repo_path) {
   # Define the patterns for the file types we're interested in
   file_patterns <- c("\\.Rmd$", "\\.tex$", "\\.csl$")  # add other file types if needed
   
-  # Function to copy files based on pattern
-  copy_files <- function(pattern) {
-    # Find files that match the pattern
-    files_to_copy <- list.files(original_repo_path, pattern = pattern, full.names = TRUE, recursive = TRUE)
-    
-    # Copy each file to the new repository
-    for (file in files_to_copy) {
-      new_file_path <- file.path(new_repo_path, basename(file))
-      file.copy(file, new_file_path, overwrite = TRUE)
-    }
-  }
   
   # Run the copy for each pattern
   for (pattern in file_patterns) {
-    copy_files(pattern)
+    files_to_copy <- list.files(original_repo_path, pattern = pattern, full.names = TRUE, recursive = FALSE)
+    
+    for (file in files_to_copy) {
+      new_file_path <- file.path(new_repo_path, basename(file))
+      file.copy(file, new_file_path, overwrite = TRUE)
+      message(paste0("Copy of ", file, " in ", new_file_path))
+    }
+    
   }
   
   # Message to show it's done
