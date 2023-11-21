@@ -128,9 +128,9 @@ lapply(paste0(paste0("jobs/", list("tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_
 # executeWorkflow(here("tunaatlas_qa_datasets_iccat_effort.json")) # 
 
 lapply(paste0("jobs/", list("tunaatlas_qa_global_datasets_catch", "tunaatlas_qa_global_datasets_effort")),
-                                   dir.create)
+       dir.create)
 
-file.path <- executeWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
+file.path <- executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Summarising_step.R")
 config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
 con <- config$software$output$dbi
@@ -144,10 +144,19 @@ config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
 con <- config$software$output$dbi
 Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
 
+#netcdf creation
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_actions/convert_to_netcdf.R")
+entity_dirs <- list.dirs(file.path(file.path, "entities"), full.names = TRUE, recursive = FALSE)
 
-executeWorkflow(here("tunaatlas_qa_global_datasets_catch_new.json"))
+for (entity in length(entity_dirs)){
+  entity <- config$metadata$content$entities[[entity]]
+  action <- entity$data$actions[[1]]
+  convert_to_netcdf(action, config, entity)
+} #could also be in global action but keep in mind it is very long
 
-executeWorkflow("tunaatlas_qa_global_datasets_effort.json", dir = "jobs/tunaatlas_qa_global_datasets_effort")
+# executeWorkflow(here("tunaatlas_qa_global_datasets_catch_new.json"))
+
+# executeWorkflow("tunaatlas_qa_global_datasets_effort.json", dir = "jobs/tunaatlas_qa_global_datasets_effort")
 
 dir.create("jobs/tunaatlas_qa_services")
 executeWorkflow("tunaatlas_qa_services.json")
