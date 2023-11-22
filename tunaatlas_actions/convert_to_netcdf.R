@@ -60,6 +60,8 @@ convert_to_netcdf = function(action, config, entity){
     require(raster)
     require(ncdf4)
     library(plyr)
+    config$logger.info("Beginning function write Netcdf")
+    
     
     ##Lecture du tableau de données (2 CAS: SARDARA/ TRAJECTOIRE)
     
@@ -67,6 +69,7 @@ convert_to_netcdf = function(action, config, entity){
     query_netcdf<-getSQLSardaraQueries(con,dataset_metadata)$query_NetCDF
     res_dimensions_and_variables<-dbGetQuery(con,query_netcdf)
     res_dimensions_and_variables2 <-res_dimensions_and_variables
+    
     ##netcdf name
     NetCDF_file_name <- file.path(path,paste0(dataset_metadata$identifier,".nc"))
     netCDF_CF_filename <-  NetCDF_file_name
@@ -396,7 +399,7 @@ LEFT JOIN
     if(length(resolution$gridtype) == 1){
       position<-regexpr('deg', resolution$gridtype)[1]
       dataset_metadata$sp_resolution <-as.numeric(substr(resolution$gridtype, position-1, position-1))
-      dataset_metadata$sp_resolution<-"degree"
+      dataset_metadata$sp_resolution_unit<-"degree"
     } else if(length(resolution$gridtype) > 1){
       #to be handled
       resolution_type <- "multiple_resolution"
