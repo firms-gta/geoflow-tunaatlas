@@ -414,9 +414,30 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
       print(plot)
     }
-  } else { 
-    stop("Not a ggplot object")
-  }
+  } else if (class(plott) == "tmap"){
+    if(in_knitr) {
+      # This will run if inside a knitr/RMarkdown environment
+      
+      # Adjust title for use in fig.cap
+      assign("title_adj", gsub("_", "-", title), envir = environment())
+      assign("plot_obj", plot, envir = environment())
+      
+      # Create the R chunk as a string referencing the ggplot object by its name
+      knitr::knit_child(text = c(
+        '```{r evolvaluedimdiff, fig.cap=`title_adj`, fig.align = "center", out.width = "100%", results= "asis"}',
+        '',
+        '',
+        'plot_obj',
+        '',
+        '```'
+      ), envir = environment(), quiet = TRUE)
+    } else {
+      # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
+      plot
+    }
+  } else {
+    stop("Not a ggplot or tmap object")
+      }
 }
 
 
