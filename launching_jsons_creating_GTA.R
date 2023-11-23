@@ -96,20 +96,17 @@ if(file.exists(here("geoserver_cines.env"))){
 require(here)
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
 
-lapply(paste0("jobs/", list("tunaatlas_qa_dbmodel+codelists", "tunaatlas_qa_mappings", "tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_datasets_iccat",
-                            "tunaatlas_qa_datasets_wcpfc", "tunaatlas_qa_datasets_iattc", "tunaatlas_qa_datasets_iotc")), dir.create)
+# Create usefull datasets: 
+# - Aggregation
+# - Disaggregation
 
 executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) # works
 executeWorkflow(here("tunaatlas_qa_mappings.json"))
 
 
-# executeWorkflow(here("tunaatlas_qa_datasets_iccat.json")) # ok
-# executeWorkflow(here("tunaatlas_qa_datasets_ccsbt.json")) #ok
-# executeWorkflow(here("tunaatlas_qa_datasets_wcpfc.json")) #  ok
-# executeWorkflow(here("tunaatlas_qa_datasets_iotc.json")) # ok
-# executeWorkflow(here("tunaatlas_qa_datasets_iattc.json")) # ok
+
+# Pre-harmonizing catch and efforts
 
 file.path <- executeWorkflow(here("All_raw_data_georef.json"))
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
@@ -117,47 +114,34 @@ config <- initWorkflow(here("All_raw_data_georef.json"))
 con <- config$software$output$dbi
 Summarising_invalid_data(file.path, connectionDB = con)
 
+# Create 4 datasets
 
-lapply(paste0(paste0("jobs/", list("tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_datasets_iccat",
-                                   "tunaatlas_qa_datasets_wcpfc", "tunaatlas_qa_datasets_iattc", "tunaatlas_qa_datasets_iotc")),"_effort"), dir.create)
-
-# executeWorkflow(here("tunaatlas_qa_datasets_ccsbt_effort.json")) #ok
-# executeWorkflow(here("tunaatlas_qa_datasets_wcpfc_effort.json")) # ok
-# executeWorkflow(here("tunaatlas_qa_datasets_iattc_effort.json")) # ok
-# executeWorkflow(here("tunaatlas_qa_datasets_iotc_effort.json")) # ok
-# executeWorkflow(here("tunaatlas_qa_datasets_iccat_effort.json")) # 
-
-lapply(paste0("jobs/", list("tunaatlas_qa_global_datasets_catch", "tunaatlas_qa_global_datasets_effort")),
-       dir.create)
-
-file.path <- executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
-config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 con <- config$software$output$dbi
-Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
-
-
-
-file.path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
-config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
-con <- config$software$output$dbi
-Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
 #netcdf creation
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_actions/convert_to_netcdf.R")
-entity_dirs <- list.dirs(file.path(file.path, "entities"), full.names = TRUE, recursive = FALSE)
+entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 
 wd <- getwd()
 
 for (entitynumber in 1:length(config$metadata$content$entities)){
   entity <- config$metadata$content$entities[[entitynumber]]
   dataset_pid <- entity$identifiers[["id"]]
-  setwd(file.path("entity", dataset_pid))
+  setwd(file.path(file.path,"entities", dataset_pid))
   action <- entity$data$actions[[1]]
   convert_to_netcdf(action, config, entity)
 } #could also be in global action but keep in mind it is very long
 setwd(wd)
+
+
+all_files <- list.files(getwd(), pattern = "\\.nc$", full.names = TRUE, recursive = TRUE)
+netcdf_file_to_enrich <- all_files[!grepl("nominal", all_files)]
+
+
 # executeWorkflow(here("tunaatlas_qa_global_datasets_catch_new.json"))
 
 # executeWorkflow("tunaatlas_qa_global_datasets_effort.json", dir = "jobs/tunaatlas_qa_global_datasets_effort")
