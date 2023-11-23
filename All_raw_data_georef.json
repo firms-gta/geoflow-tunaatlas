@@ -65,8 +65,8 @@
     
     {
       "id": "load_dataset",
-      "script": "~/Documents/geoflow-tunaatlas/tunaatlas_actions/load_dataset.R",
-      "run": false,
+      "script": "./tunaatlas_actions/load_dataset.R",
+      "run": true,
       "options": {
         "upload_to_db": false,
         "create_materialized_view": false,
