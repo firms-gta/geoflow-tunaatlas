@@ -1,7 +1,8 @@
 Summarising_invalid_data = function(main_dir, connectionDB){
   ancient_wd <- getwd()
   setwd(main_dir)
-  path = getwd()
+  dir.create("Recap_on_pre_harmo")
+  path = file.path(getwd(), "Recap_on_pre_harmo")
   
   species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
@@ -273,6 +274,13 @@ Summarising_invalid_data = function(main_dir, connectionDB){
                     output_dir = path,
                     envir = environment()
   )
+  
+  all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
+  
+  sapply(all_files, function(file) {
+    destination_file <- file.path("Recap_on_pre_harmo", basename(file))
+    file.copy(file, destination_file)
+  })  
   # 
   # folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
   # drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
