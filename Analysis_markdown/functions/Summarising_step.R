@@ -24,15 +24,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     dplyr::rename(GRIDTYPE = gridtype)
   
   
-  # continent <- st_read(connectionDB,query = "SELECT * from area.gshhs_world_coastlines") # to be changed
-  
-  continent <- NULL
-  if(is.null(continent)){
-    library(ows4R)
-    WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
-    continent = WFS$getFeatures("fifao:UN_CONTINENT2")
-    
-  }
+  continent <- st_read(connectionDB,query = "SELECT * from public.continent") 
   
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
