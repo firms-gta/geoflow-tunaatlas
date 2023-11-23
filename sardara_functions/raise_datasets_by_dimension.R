@@ -5,16 +5,19 @@ raise_datasets_by_dimension <- function (df1, df2, dimension_missing_df1, dimens
   colnames_input_dataset <- unique(c(colnames(df1), c(colnames(df2))))
   RaisingDataset_RaisingDimensionsColNames <- setdiff(colnames_input_dataset, 
                                                       c(dimension_missing_df1, "measurement_value"))
+  
   RaisedDataset_RaisedDimensionsColNames <- setdiff(colnames_input_dataset, 
                                                     c(dimension_missing_df2, "measurement_value"))
+  
   RaisedDataset_RaisedDimension <- dimension_missing_df1
   RaisingDataset_RaisingDimension <- dimension_missing_df2
-  RaisingDataset_ByEachRaisingDimension <- group_by_(df1, 
+  RaisingDataset_ByEachRaisingDimension <- group_by_(df1 %>% ungroup(), 
                                                      .dots = RaisingDataset_RaisingDimensionsColNames) %>% 
-    summarise(measurement_value = sum(measurement_value))
+    dplyr::summarise(measurement_value = sum(measurement_value))
   RaisingDataset_AllRaisingDimension <- group_by_(df1, .dots = setdiff(RaisingDataset_RaisingDimensionsColNames, 
-                                                                       RaisingDataset_RaisingDimension)) %>% summarise(measurement_value = sum(measurement_value))
-  Percentage_made_in_each_stratum_byeachRaisingDimension <- merge(RaisingDataset_ByEachRaisingDimension, 
+                                                                       RaisingDataset_RaisingDimension)) %>% dplyr::summarise(measurement_value = sum(measurement_value))
+  
+  Percentage_made_in_each_stratum_byeachRaisingDimension <- base::merge(RaisingDataset_ByEachRaisingDimension, 
                                                                   RaisingDataset_AllRaisingDimension, by = setdiff(RaisingDataset_RaisingDimensionsColNames, 
                                                                                                                    RaisingDataset_RaisingDimension), all.x = TRUE)
   Percentage_made_in_each_stratum_byeachRaisingDimension$rf <- Percentage_made_in_each_stratum_byeachRaisingDimension$measurement_value.x/Percentage_made_in_each_stratum_byeachRaisingDimension$measurement_value.y

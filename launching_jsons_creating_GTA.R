@@ -83,7 +83,7 @@ require(here)
 
 default_file = ".env"
 
-if(file.exists("geoserver_sdi_lab.env")){
+if(file.exists(here::here("geoserver_sdi_lab.env"))){
   default_file <- "geoserver_sdi_lab.env"
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
@@ -95,7 +95,7 @@ if(file.exists(here("geoserver_cines.env"))){
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 require(here)
 
-load_dot_env(file = here(default_file)) # to be replaced by the one used
+load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
 
 lapply(paste0("jobs/", list("tunaatlas_qa_dbmodel+codelists", "tunaatlas_qa_mappings", "tunaatlas_qa_datasets_ccsbt", "tunaatlas_qa_datasets_iccat",
@@ -131,15 +131,15 @@ lapply(paste0("jobs/", list("tunaatlas_qa_global_datasets_catch", "tunaatlas_qa_
        dir.create)
 
 file.path <- executeWorkflow("tunaatlas_qa_global_datasets_catch.json")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Summarising_step.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
 con <- config$software$output$dbi
 Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
 
 
 
-file.path <- executeWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Summarising_step.R")
+file.path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here("tunaatlas_qa_global_datasets_catch.json"))
 con <- config$software$output$dbi
 Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
@@ -148,12 +148,16 @@ Summarising_step(main_dir = file.path, connectionDB = con, config  =config)
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_actions/convert_to_netcdf.R")
 entity_dirs <- list.dirs(file.path(file.path, "entities"), full.names = TRUE, recursive = FALSE)
 
-for (entity in length(entity_dirs)){
-  entity <- config$metadata$content$entities[[entity]]
+wd <- getwd()
+
+for (entitynumber in 1:length(config$metadata$content$entities)){
+  entity <- config$metadata$content$entities[[entitynumber]]
+  dataset_pid <- entity$identifiers[["id"]]
+  setwd(file.path("entity", dataset_pid))
   action <- entity$data$actions[[1]]
   convert_to_netcdf(action, config, entity)
 } #could also be in global action but keep in mind it is very long
-
+setwd(wd)
 # executeWorkflow(here("tunaatlas_qa_global_datasets_catch_new.json"))
 
 # executeWorkflow("tunaatlas_qa_global_datasets_effort.json", dir = "jobs/tunaatlas_qa_global_datasets_effort")

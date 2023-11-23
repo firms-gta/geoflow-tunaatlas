@@ -60,7 +60,8 @@ Summarising_step = function(main_dir, connectionDB, config){
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   i <- 1
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+  
   
   for (entity_dir in entity_dirs) {
     
@@ -82,10 +83,10 @@ Summarising_step = function(main_dir, connectionDB, config){
     details = details[with(details, order(as.POSIXct(mtime))), ]
     sub_list_dir_2 = rownames(details)
     
+    
     for(file in sub_list_dir_2){
 
     `%notin%` <- Negate(`%in%`)
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
       data <- readRDS(file)
       if("GRIDTYPE" %notin% colnames(data)){
       data <- tidying_GTA_data_for_comparison(dataframe = data,
