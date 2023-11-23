@@ -414,7 +414,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
       print(plot)
     }
-  } else if (class(plott) == "tmap"){
+  } else if (class(plot) == "tmap"){
     if(in_knitr) {
       # This will run if inside a knitr/RMarkdown environment
       
