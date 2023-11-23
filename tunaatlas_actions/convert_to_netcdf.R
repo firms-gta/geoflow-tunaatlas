@@ -338,18 +338,16 @@ convert_to_netcdf = function(action, config, entity){
     
     ## Text search
     ##for SARDARA
-    # title <- paste("Global",variable,"of tuna",sep=" ")
-    # ncatt_put(nc,0,"title",title)
-    # ncatt_put(nc,0,"summary",paste("This file is a time series of the global",variable,"of tuna aggregated by time and by space",sep=" "))
-    # ncatt_put(nc,0,"keywords",paste("tuna, fisheries, ",variable,",tuna RFMOs",sep=""))
-    # ncatt_put(nc,0,"history","This dataset has been produced by merging geo-spatial data of tuna ,catches coming from four tuna regional fisheries management organizations: IOTC, ICCAT, IATTC, WCPFC. Some processes have been applied by the French Research institute for sustainable development (IRD) to the raw data: mainly conversion from number of fishes catched to weight of fishes (for catches originally expressed in number), and raisings.")
-    # ncatt_put(nc,0,"comment","Data extracted from SARDARA database")
-    # ncatt_put(nc,0,"source","SARDARA database")
-    # ncatt_put(nc,0,"Conventions","CF 1.6")
+    ncatt_put(nc,0,"title",entity$titles)
+    ncatt_put(nc,0,"summary",entity$descriptions$abstract)
+    ncatt_put(nc,0,"keywords",paste("tuna, fisheries, ",variable,",tuna RFMOs",sep=""))
+    ncatt_put(nc,0,"comment",entity$descriptions$info)
+    ncatt_put(nc,0,"source","SARDARA database")
+    ncatt_put(nc,0,"Conventions","CF 1.6")
     
     ##creator search
-    ncatt_put(nc,0,"creator_email","julien.barde@ird.fr bastien.grasset@ird.fr emmanuel.blondel@fao.org")
-    ncatt_put(nc,0,"creator_name","BARDE.J GRASSET.B BLONDEL.E")
+    ncatt_put(nc,0,"creator_email","julien.barde@ird.fr emmanuel.blondel@fao.org bastien.grasset@ird.fr")
+    ncatt_put(nc,0,"creator_name","BARDE.J BLONDEL.E GRASSET.B ")
     ncatt_put(nc,0,"date_created", as.character(Sys.time()))
     ncatt_put(nc,0,"date_modified", as.character(Sys.time()))
     ncatt_put(nc,0,"institution","Institut de Recherche pour le Developpement, Food and Agriculture Organisation")
