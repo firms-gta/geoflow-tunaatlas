@@ -1,7 +1,7 @@
 {
   
   "profile": {
-    "id": "tuna-atlas-datasets-iotc",
+    "id": "tuna-atlas-datasets-iccat",
     "mode": "entity",
   	"project": "FIRMS Tuna Atlas",
   	"organization": "FIRMS Tuna Atlas",
@@ -18,7 +18,7 @@
     "entities": [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1wwovnGbx8VQ4ErC5sGAX_PidSlXP2ATrXMTg42Gdmh0/edit?usp=sharing"
+      "source": "https://docs.google.com/spreadsheets/d/1tHkgvLNAPjAytLaRDqdjtDae_OBO8Yke0XWvgNl7DRk/edit#gid=0"
       }
     ],
     "contacts" : [
@@ -56,16 +56,25 @@
   ],
   "actions": [
 	{
-		"id": "load_dataset",
-		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
+		"id": "check_on_data",
+		"script": "~/Documents/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
 		"run": true,
 		"options": {
+			"recap_each_step": true
+		}
+	}, 
+		{
+		"id": "load_dataset",
+		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
+		"run": false,
+		"options": {
 			"upload_to_db": true,
-			"create_materialized_view": true,
-			"add_sql_comments": true,
+			"create_materialized_view": false,
+			"add_sql_comments": false,
 			"upload_to_googledrive": true
 		}
 	}
+
   
   ]
 }

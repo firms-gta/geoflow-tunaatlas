@@ -1,7 +1,7 @@
 {
   
   "profile": {
-    "id": "tuna-atlas-datasets-ccsbt",
+    "id": "tuna-atlas-datasets-iotc",
     "mode": "entity",
   	"project": "FIRMS Tuna Atlas",
   	"organization": "FIRMS Tuna Atlas",
@@ -11,14 +11,14 @@
   		"http://www.umr-marbec.fr/images/logo-ird-en.png"
   	],
   	"options": {
-  	  "line_separator": "_\n"
+  	"line_separator": "_\n"
     }
   },
   "metadata": {
     "entities": [
       {
       "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1591BqDuehrmTHRN6C8s5ss8Z5jiTwA7jNdfnn_kvVRs/edit#gid=0"
+      "source": "https://docs.google.com/spreadsheets/d/1wwovnGbx8VQ4ErC5sGAX_PidSlXP2ATrXMTg42Gdmh0/edit?usp=sharing"
       }
     ],
     "contacts" : [
@@ -55,10 +55,19 @@
 	}
   ],
   "actions": [
+    	{
+		"id": "check_on_data",
+		"script": "~/Documents/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+		"run": true,
+		"options": {
+			"recap_each_step": true
+		}
+	}, 
+
 	{
 		"id": "load_dataset",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_dataset.R",
-		"run": true,
+		"run": false,
 		"options": {
 			"upload_to_db": true,
 			"create_materialized_view": true,
