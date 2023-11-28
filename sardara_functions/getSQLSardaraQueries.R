@@ -278,7 +278,7 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
     }
     dataset_available_dimensions <- setdiff(dataset_available_dimensions, 
                                             c("time", "area", "sizeclass"))
-    if (!(geo_identifier_column %in% c("area_wkt", "areas_tuna_rfmos_task2", 
+    if (!is.null(geo_identifier_column) || !(geo_identifier_column %in% c("area_wkt", "areas_tuna_rfmos_task1", 
                                        "cwp_grid"))) {
       dataset_available_dimensions <- c(dataset_available_dimensions, 
                                         "geographic_identifier")
