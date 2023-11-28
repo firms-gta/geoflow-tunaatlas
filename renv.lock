@@ -20,6 +20,23 @@
       ],
       "Hash": "b2866e62bab9378c3cc9476a1954226b"
     },
+    "DT": {
+      "Package": "DT",
+      "Version": "0.29",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "crosstalk",
+        "htmltools",
+        "htmlwidgets",
+        "httpuv",
+        "jquerylib",
+        "jsonlite",
+        "magrittr",
+        "promises"
+      ],
+      "Hash": "02f42b77a951a5ea7c891ef5c187d774"
+    },
     "KernSmooth": {
       "Package": "KernSmooth",
       "Version": "2.23-22",
@@ -101,18 +118,6 @@
         "R"
       ],
       "Hash": "45f0398006e83a5b10b72a90663d8d8c"
-    },
-    "RCurl": {
-      "Package": "RCurl",
-      "Version": "1.98-1.12",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "bitops",
-        "methods"
-      ],
-      "Hash": "1d6ed2d006d483f31c6d5531f3a39923"
     },
     "RPostgreSQL": {
       "Package": "RPostgreSQL",
@@ -210,16 +215,6 @@
         "utils"
       ],
       "Hash": "4f57884290cc75ab22f4af9e9d4ca862"
-    },
-    "antiword": {
-      "Package": "antiword",
-      "Version": "1.3.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "sys"
-      ],
-      "Hash": "d99c267c57e790c428cb595755e4676e"
     },
     "askpass": {
       "Package": "askpass",
@@ -324,13 +319,6 @@
         "utils"
       ],
       "Hash": "9fe98599ca456d6552421db0d6772d8f"
-    },
-    "bitops": {
-      "Package": "bitops",
-      "Version": "1.0-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b7d8d8ee39869c18d8846a184dd8a1af"
     },
     "blob": {
       "Package": "blob",
@@ -943,6 +931,20 @@
       ],
       "Hash": "fc0b272e5847c58cd5da9b20eedbd026"
     },
+    "gdata": {
+      "Package": "gdata",
+      "Version": "2.19.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "gtools",
+        "methods",
+        "stats",
+        "utils"
+      ],
+      "Hash": "c62b8cf5c03602e852c66ad623d385fa"
+    },
     "gdtools": {
       "Package": "gdtools",
       "Version": "0.3.3",
@@ -1268,6 +1270,18 @@
         "rlang"
       ],
       "Hash": "b44addadb528a0d227794121c00572a0"
+    },
+    "gtools": {
+      "Package": "gtools",
+      "Version": "3.9.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "methods",
+        "stats",
+        "utils"
+      ],
+      "Hash": "88bb96eaf7140cdf29e374ef74182220"
     },
     "here": {
       "Package": "here",
@@ -1805,19 +1819,6 @@
       "Repository": "CRAN",
       "Hash": "a7b262641ef4659767d415c6bb78413f"
     },
-    "ndjson": {
-      "Package": "ndjson",
-      "Version": "0.9.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "Rcpp",
-        "data.table",
-        "tibble"
-      ],
-      "Hash": "9d50f0353c90f841dbaf81c1e6c39098"
-    },
     "nlme": {
       "Package": "nlme",
       "Version": "3.1-162",
@@ -1831,23 +1832,6 @@
         "utils"
       ],
       "Hash": "0984ce8da8da9ead8643c5cbbb60f83e"
-    },
-    "odbc": {
-      "Package": "odbc",
-      "Version": "1.3.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "DBI",
-        "R",
-        "Rcpp",
-        "bit64",
-        "blob",
-        "hms",
-        "methods",
-        "rlang"
-      ],
-      "Hash": "d42c4f464e14ce542718a17525265e05"
     },
     "officer": {
       "Package": "officer",
@@ -1897,17 +1881,6 @@
         "terra"
       ],
       "Hash": "a7b8ccac2cc5d0cf39148ba130a73c48"
-    },
-    "pdftools": {
-      "Package": "pdftools",
-      "Version": "3.3.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "Rcpp",
-        "qpdf"
-      ],
-      "Hash": "8072f379ae37e914e5adc0a3fd8c513c"
     },
     "pillar": {
       "Package": "pillar",
@@ -2154,18 +2127,6 @@
       ],
       "Hash": "d71c815267c640f17ddbf7f16144b4bb"
     },
-    "qpdf": {
-      "Package": "qpdf",
-      "Version": "1.3.2",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "Rcpp",
-        "askpass",
-        "curl"
-      ],
-      "Hash": "e233fd211c74cb9297f4ab898ea2c18a"
-    },
     "ragg": {
       "Package": "ragg",
       "Version": "1.2.5",
@@ -2247,22 +2208,6 @@
       ],
       "Hash": "efc11b41f74a95ea84a6beb3d6bb377b"
     },
-    "readODS": {
-      "Package": "readODS",
-      "Version": "1.8.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "cellranger",
-        "purrr",
-        "readr",
-        "stringi",
-        "utils",
-        "xml2"
-      ],
-      "Hash": "6cbfab165a9d86363941727612bddf19"
-    },
     "readr": {
       "Package": "readr",
       "Version": "2.1.4",
@@ -2285,30 +2230,6 @@
         "vroom"
       ],
       "Hash": "b5047343b3825f37ad9d3b5d89aa1078"
-    },
-    "readtext": {
-      "Package": "readtext",
-      "Version": "0.90",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "antiword",
-        "data.table",
-        "digest",
-        "httr",
-        "jsonlite",
-        "pdftools",
-        "pillar",
-        "readODS",
-        "readxl",
-        "streamR",
-        "stringi",
-        "striprtf",
-        "utils",
-        "xml2"
-      ],
-      "Hash": "26a335a31d724daf521682d478e1a17b"
     },
     "readxl": {
       "Package": "readxl",
@@ -2416,16 +2337,6 @@
         "utils"
       ],
       "Hash": "2eab4e0f0b131f018bfb3e81857f9767"
-    },
-    "rjson": {
-      "Package": "rjson",
-      "Version": "0.2.21",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R"
-      ],
-      "Hash": "f9da75e6444e95a1baf8ca24909d63b9"
     },
     "rlang": {
       "Package": "rlang",
@@ -2693,6 +2604,33 @@
       ],
       "Hash": "f7f201522eedbc95f10ef323b100ff29"
     },
+    "shinydashboard": {
+      "Package": "shinydashboard",
+      "Version": "0.7.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "htmltools",
+        "promises",
+        "shiny",
+        "utils"
+      ],
+      "Hash": "e418b532e9bb4eb22a714b9a9f1acee7"
+    },
+    "shinyjs": {
+      "Package": "shinyjs",
+      "Version": "2.1.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "digest",
+        "jsonlite",
+        "shiny"
+      ],
+      "Hash": "802e4786b353a4bb27116957558548d5"
+    },
     "snakecase": {
       "Package": "snakecase",
       "Version": "0.11.0",
@@ -2757,19 +2695,6 @@
       ],
       "Hash": "0d21d113b13665f130af954f785d0051"
     },
-    "streamR": {
-      "Package": "streamR",
-      "Version": "0.4.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "RCurl",
-        "ndjson",
-        "rjson"
-      ],
-      "Hash": "5956a234de8d4d49744dc51e8b39534c"
-    },
     "stringi": {
       "Package": "stringi",
       "Version": "1.7.12",
@@ -2800,19 +2725,26 @@
       ],
       "Hash": "671a4d384ae9d32fc47a14e98bfa3dc8"
     },
-    "striprtf": {
-      "Package": "striprtf",
-      "Version": "0.5.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
+    "studycatchesird": {
+      "Package": "studycatchesird",
+      "Version": "0.0.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "bastienird",
+      "RemoteRepo": "sutdycatchesird",
+      "RemoteRef": "main",
+      "RemoteSha": "3f65825eb22795dd1188bcb3ce8c7c1e575fe2d6",
       "Requirements": [
-        "R",
-        "Rcpp",
-        "magrittr",
-        "stringr",
-        "utils"
+        "RColorBrewer",
+        "cowplot",
+        "dplyr",
+        "ggplot2",
+        "knitr",
+        "rlang",
+        "scales"
       ],
-      "Hash": "737c6d8ca88c95cba31199f4e4f2265c"
+      "Hash": "b71b06a3b9c64e8bcbf069d19183641f"
     },
     "svglite": {
       "Package": "svglite",

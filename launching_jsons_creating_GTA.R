@@ -1,10 +1,10 @@
 
-# if(!require(renv)){
-#     install.packages("renv")
-#     require(renv)
-#   }
-# renv::restore()
-# #
+if(!require(renv)){
+    install.packages("renv")
+    require(renv)
+  }
+renv::restore()
+#
 if(!require(remotes)){
   install.packages("remotes")
   require(remotes)
@@ -87,26 +87,39 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
   default_file <- "geoserver_sdi_lab.env"
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
-load_dot_env(file ="~/Documents/geoflow-tunaatlas/geoserver_cines.env") # to be replaced by the one used
-load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
-
 if(file.exists(here("geoserver_cines.env"))){
   default_file <- here("geoserver_cines.env")
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 require(here)
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
+# load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
 
 # Create usefull datasets: 
 # - Aggregation
 # - Disaggregation
+# - Continent shape
 
-executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) # works
+# As aggregation and disagreggation dataset are really long to create (around 1 to 2 days) they are stored in the googledrive and this is launched only if necessary, the code are here to keep track of the creation but these dataset should not change
+
+executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) 
 executeWorkflow(here("tunaatlas_qa_mappings.json"))
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
 
 
-# Pre-harmonizing catch and efforts
+# Pre-harmonizing 
+
+## nominal data
+
+file.path <- executeWorkflow(here("Nominal_catch.json"))
+config <- initWorkflow(here("Nominal_catch.json"))
+con <- config$software$output$dbi
+Summarising_invalid_data(file.path, connectionDB = con)
+
+
+
+## georef catch
 
 file.path <- executeWorkflow(here("All_raw_data_georef.json"))
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
@@ -114,7 +127,17 @@ config <- initWorkflow(here("All_raw_data_georef.json"))
 con <- config$software$output$dbi
 Summarising_invalid_data(file.path, connectionDB = con)
 
-# Create 4 datasets
+## georeferenced effort
+
+file.path <- executeWorkflow(here("All_raw_data_georef_effort.json"))
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+config <- initWorkflow(here("All_raw_data_georef_effort.json"))
+con <- config$software$output$dbi
+Summarising_invalid_data(file.path, connectionDB = con)
+
+
+
+# Create 4 datasets catch and effort
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
@@ -140,6 +163,10 @@ setwd(wd)
 
 all_files <- list.files(getwd(), pattern = "\\.nc$", full.names = TRUE, recursive = TRUE)
 netcdf_file_to_enrich <- all_files[!grepl("nominal", all_files)]
+
+# Some checking on created data
+
+#check on georef not nominal etc.
 
 
 # executeWorkflow(here("tunaatlas_qa_global_datasets_catch_new.json"))

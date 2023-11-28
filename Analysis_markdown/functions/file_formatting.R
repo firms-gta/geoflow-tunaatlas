@@ -1,18 +1,37 @@
 ## ----filereading----------------------------------------------
 
-if(is.character(parameter_init)){
-init <- readRDS(paste0(as.character(parameter_init)))
-} else {
-  init <- parameter_init
+library(readr)
+
+# Function to read data based on file type
+read_data <- function(file_path) {
+  if (grepl("\\.rds$", file_path)) {
+    readRDS(file_path)
+  } else if (grepl("\\.csv$", file_path)) {
+    fread(file_path)
+  } else {
+    stop("File type not supported")
+  }
 }
 
-if(unique_analyse){
-  final <- init[0,]
-} else{
-  if(is.character(parameter_final)){
-    final <- readRDS(paste0(as.character(parameter_final)))}
-  else {
+# Process 'parameter_init'
+if (is.character(parameter_init)) {
+  init <- read_data(parameter_init)
+} else if (is.data.frame(parameter_init)) {
+  init <- parameter_init
+} else {
+  stop("Invalid 'parameter_init'")
+}
+
+# Process 'parameter_final'
+if (unique_analyse) {
+  final <- init[0, ]
+} else {
+  if (is.character(parameter_final)) {
+    final <- read_data(parameter_final)
+  } else if (is.data.frame(parameter_final)) {
     final <- parameter_final
+  } else {
+    stop("Invalid 'parameter_final'")
   }
 }
 
@@ -29,6 +48,7 @@ titre_1 <- gsub("_","-",titre_1)
 
 ## ----filetidying----------------------------------------------
 parameter_colnames_to_keep <- unique(c(parameter_colnames_to_keep, parameter_geographical_dimension_groupping, parameter_geographical_dimension))
+
 init <- tidying_data(init, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
 final <- tidying_data(final, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
 
@@ -77,6 +97,67 @@ init <- filtering_function(dataframe_to_filter = init)
 
 if(unique_analyse){final <- init[0,]} else {final <- filtering_function(final)}
 
-
-
-
+#' #' Process Datasets
+#' #'
+#' #' @param parameter_init Initial parameter, can be a path to a file or a dataframe.
+#' #' @param parameter_final Final parameter, can be a path to a file or a dataframe.
+#' #' @param unique_analyse Logical, whether to perform unique analysis.
+#' #' @param parameter_titre_dataset_2 Title of the second dataset, optional.
+#' #' @param parameter_colnames_to_keep Names of columns to keep.
+#' #' @param parameter_geographical_dimension_groupping Geographical dimension grouping.
+#' #' @param parameter_time_dimension Time dimension parameter.
+#' #' @param parameter_geographical_dimension Geographical dimension parameter.
+#' #' @param parameter_fact Fact parameter.
+#' #' @param parameter_UNK_for_not_standards_unit UNK parameter for non-standard units.
+#' #' @param parameter_resolution_filter Resolution filter parameter, optional.
+#' #' @param parameter_filtering Filtering parameter.
+#' #' @return A list containing processed initial and final datasets and their title
+#' #' @export
+#' process_datasets <- function(parameter_init, parameter_final, unique_analyse, parameter_titre_dataset_2 = NULL,
+#'                              parameter_colnames_to_keep, parameter_geographical_dimension_groupping, 
+#'                              parameter_time_dimension, parameter_geographical_dimension,
+#'                              parameter_fact, parameter_UNK_for_not_standards_unit = TRUE, 
+#'                              parameter_resolution_filter = NULL, parameter_filtering) {
+#'   # Read data based on file type
+#'   read_data <- function(file_path) {
+#'     if (grepl("\\.rds$", file_path)) {
+#'       readRDS(file_path)
+#'     } else if (grepl("\\.csv$", file_path)) {
+#'       fread(file_path)
+#'     } else {
+#'       stop("File type not supported")
+#'     }
+#'   }
+#'   
+#'   # Process 'parameter_init'
+#'   if (is.character(parameter_init)) {
+#'     init <- read_data(parameter_init)
+#'   } else if (is.data.frame(parameter_init)) {
+#'     init <- parameter_init
+#'   } else {
+#'     stop("Invalid 'parameter_init'")
+#'   }
+#'   
+#'   # Process 'parameter_final'
+#'   if (unique_analyse) {
+#'     final <- init[0, ]
+#'   } else {
+#'     if (is.character(parameter_final)) {
+#'       final <- read_data(parameter_final)
+#'     } else if (is.data.frame(parameter_final)) {
+#'       final <- parameter_final
+#'     } else {
+#'       stop("Invalid 'parameter_final'")
+#'     }
+#'   }
+#'   
+#'   # Other processing steps...
+#'   # This includes handling of 'titre_2', 'titre_1', 'init', and 'final' as per the original script.
+#'   # ...
+#'   
+#'   return(list(init = init, final = final, titre_1 = titre_1, titre_2 = titre_2))
+#' }
+#' 
+#' 
+#' 
+#' 

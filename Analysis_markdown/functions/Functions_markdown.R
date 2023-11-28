@@ -1,17 +1,11 @@
-## ----utilityfunctions, include=FALSE----------
-
-
 `%notin%` <- Negate(`%in%`)
-
 last_path = function(x) {
   x <- gsub("/rds.rds", "", x)
   substr(x, max(gregexpr("/", x)[[1]]) + 1, nchar(x))
 }
-
 last_path_reduced = function(x) {
   gsub("georef_dataset", "", last_path(x))
 }
-
 is_null_or_not_exist = function(x) {
   var_name <- deparse(substitute(x))
   if (!exists(var_name, envir = parent.frame()) || 
@@ -30,47 +24,48 @@ cat_title = function(x, child_headerinside ="") {
   output = paste0(child_headerinside, x, " \n")
   return(output)
 }
-
-
-
-## ----GTAMARKDOWNFUNCTIONS---------------------
-
-fSpatPlan_Convert2PacificRobinson = function(df, buff = 0){
+isNullList = function(x) all(!lengths(x))
+filtering_function= function(dataframe_to_filter, parameter_filtering){
   
-  if(!exists("df_robinson")){
-    df_robinson <- df}
-  return(df_robinson)
+  matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
+  if(length(matchingList)!= 0){  
+    
+    colnames_to_filter <- colnames(dataframe_to_filter %>% dplyr::select(names(matchingList)))
+    
+    names(matchingList) <- colnames_to_filter
+    
+    matchingList <- lapply(matchingList, function(x){ #handling single filter
+      if(length(x) == 1){
+        x <- c(x, x) }else {
+          x
+        }
+      
+    }
+    )
+    dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
+  return(dataframe_to_filter)
+}
+tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe, time_dimension){
+  
+  dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
+  dataframe <- dataframe %>% mutate_at(all_of(time_dimension), as.character)
+  return(dataframe)
   
 }
-
-knit_child_map =function(list_map_unit, fig.pathinside = fig.path, folder = "Geographicdiff"){
-  assign("unit_name_map", list_map_unit[2][[1]], envir = environment())
-  assign("map_for_knit", list_map_unit[1][[1]], envir = environment())
+function_geographic_identifier_renaming_and_not_standards_unit= function(dataframe_to_filter, geo_dim , parameter_fact, parameter_UNK_for_not_standards_unit = TRUE, geo_dim_group){
+  if(  parameter_UNK_for_not_standards_unit & parameter_fact == "effort"){
+    dataframe_to_filter <- dataframe_to_filter %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit%in%c("HOOKS","FDAYS"), measurement_unit, "UNK" ))}
   
-  unit_title <- gsub("_","..",unit_name_map)
-  save_image(title = paste0("Map of the differences between two datasets for the unit ", unit_title),folder = folder,  plott = map_for_knit,fig.pathinside = fig.pathinside)
-  
-  knit_child(text = c(
-    '```{r results = "asis"}',
-    '',
-    'unit_title <- gsub("_","..",unit_name_map)',
-    '```',
-    '',
-#     '    ```{r setup, include=FALSE}',
-# 'knitr::opts_chunk$set(label = paste0("mapdiff", unit_title))', 
-# '```',
-'', 
-'', 
-
-    '',
-    '```{r results="asis", fig.cap = paste0("Map of the differences between two datasets for the unit ", unit_title)}',
-    '',
-    'map_for_knit',
-    '',
-    '```',
-    '',
-    '',''),
-    envir = environment(), quiet= TRUE)
+  if(geo_dim != "geographic_identifier" && "geographic_identifier"%notin%colnames(dataframe_to_filter)){
+    dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("geographic_identifier" := {{geo_dim}})
+  }
+  if(geo_dim_group != "GRIDTYPE" && "GRIDTYPE"%notin%colnames(dataframe_to_filter)){
+    dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("GRIDTYPE" := {{geo_dim_group}})
+  }
+  dataframe_to_filter
+}
+is_ggplot <- function(obj) {
+  inherits(obj, "gg") || inherits(obj, "ggplot")
 }
 
 
@@ -143,52 +138,6 @@ if (!is.null(captionn)) {
   ft_out
   }
 }
-
-isNullList = function(x) all(!lengths(x))
-
-filtering_function= function(dataframe_to_filter, parameter_filtering){
-  
-  matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
-  if(length(matchingList)!= 0){  
-    
-        colnames_to_filter <- colnames(dataframe_to_filter %>% dplyr::select(names(matchingList)))
-
-  names(matchingList) <- colnames_to_filter
-
-  matchingList <- lapply(matchingList, function(x){ #handling single filter
-  if(length(x) == 1){
-  x <- c(x, x) }else {
-    x
-  }
-
-}
-  )
-    dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
-  return(dataframe_to_filter)
-}
-
-tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe, time_dimension){
-  
-  dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
-  dataframe <- dataframe %>% mutate_at(all_of(time_dimension), as.character)
-  return(dataframe)
-
-}
-
-function_geographic_identifier_renaming_and_not_standards_unit= function(dataframe_to_filter, geo_dim , parameter_fact, parameter_UNK_for_not_standards_unit = TRUE, 
-                                                                         geo_dim_group){
-  if(  parameter_UNK_for_not_standards_unit & parameter_fact == "effort"){
-    dataframe_to_filter <- dataframe_to_filter %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit%in%c("HOOKS","FDAYS"), measurement_unit, "UNK" ))}
-  
-  if(geo_dim != "geographic_identifier" && "geographic_identifier"%notin%colnames(dataframe_to_filter)){
-    dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("geographic_identifier" := {{geo_dim}})
-  }
-  if(geo_dim_group != "GRIDTYPE" && "GRIDTYPE"%notin%colnames(dataframe_to_filter)){
-    dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("GRIDTYPE" := {{geo_dim_group}})
-  }
-  dataframe_to_filter
-}
-
 fonction_groupement = function(these_col, init, final){
   
   # Compute sum of values for each combination of the columns in "these_col" and "measurement_unit" in the "init" dataframe
@@ -234,7 +183,6 @@ fonction_groupement = function(these_col, init, final){
   
   return(fulljoin)
 }
-
 save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
   current <- tmap_mode()
   if(!is.null(folder) && !dir.exists(folder)){
@@ -255,38 +203,7 @@ ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path =
 
 }
 
-
-function_pie_chart_df <- function(dimension, ...) {
-  
-  # Make a copy of the function to avoid modifying the original
-  local_pie_chart_2 <- pie_chart_2_default
-  
-  # Modify the dimension formal argument
-  formals(local_pie_chart_2)$dimension <- dimension
-  
-  # Call the function with the ... arguments
-  pie_chart_result <- local_pie_chart_2(...)
-  
-  # Check if pie_chart_result has a df element
-  if(is.list(pie_chart_result) && "df" %in% names(pie_chart_result)) {
-    df <- pie_chart_result$df
-    pie_chart <- pie_chart_result$plot
-  } else {
-    df <- NULL
-    pie_chart <- pie_chart_result
-  }
-  
-  # Process df if not null
-  if(!is.null(df)) {
-    df <- qflextable2(df, captionn = paste0("Strata movement for the dimension: ", dimension))
-  }
-  
-  return(list(pie_chart = pie_chart, df = df, dimension = dimension))
-}
-
-
-## ---------------------------------------------
-# Function to create spatial plots
+# Function to create spatial plots from init final variable
 fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
 shapefile.fix, plotting_type = "plot", continent) {
   continent <- sf::st_as_sf(continent)
@@ -331,60 +248,6 @@ shapefile.fix, plotting_type = "plot", continent) {
     return(image)
   }
 }
-
-
-# Function to create resume knit child
-resume_knit_child <- function(x, find_and_print = FALSE, folder = "Piechartsdimensions", fig.pathinside = fig.path) {
-  if (find_and_print) {
-    for (i in files(folder)) {
-      titles <- gsub(".", "", i)
-      knitr::knit_child(text = c(
-        '```{r otherdim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
-        '',
-        '',
-        'knitr::include_graphics(file.path(fig.path, file.path(folder, i)))',
-        '',
-        '```'
-      ), envir = environment(), quiet = TRUE)
-    }
-  } else {
-    dimension_title <- gsub("_", "-", unique(x$dimension))
-    title_knit <- paste0("Distribution in value for the dimension : ", dimension_title)
-    assign("dimension_title", gsub("_", "-", unique(x$dimension)), envir = environment())
-    save_image(title = title_knit, plott = x$pie_chart, folder = folder, fig.pathinside = fig.pathinside)
-    assign("x", x, envir = environment())
-    
-    knitr::knit_child(text = c(
-      '```{r distribinvaluedim, results = "asis" ,fig.cap =`title_knit`}',
-      '',
-      'x$pie_chart',
-      '```',
-      '',
-      '',
-      '```{r results = "asis", eval= !is.null(x$df)}',
-      'x$df',
-      '```',
-      ''
-    ), envir = environment(), quiet = TRUE)
-  }
-}
-
-# knitting_subfig <- function(plots, titles, general_title = "General title", folder = "Unknown_folder", fig.pathinside = fig.path){
-#     lapply(titles, plots,  folder = folder, fig.pathinside = fig.pathinside, FUN = save_image)
-#     
-#     knitr::knit_child(text = c(
-# '```{r `general_title`, echo=FALSE,  fig.cap=`general_title`, fig.subcap=c(unlist(`titles`)), fig.ncol = 2, out.width = "50%", fig.align = "center"}',
-# '',
-# 'for (i in plots){plot(i)}',
-# '```'
-#     ), envir = environment(), quiet = TRUE)
-# 
-# }
-
-is_ggplot <- function(obj) {
-  inherits(obj, "gg") || inherits(obj, "ggplot")
-}
-
 
 knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fig.pathinside = fig.path) {
   # Check if the function is being run in a knitr environment
@@ -440,71 +303,46 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       }
 }
 
-
-
-
-
-
-# Function to knit child with title and optional difference
-function_knitting <- function(x, titre_init = titre_1, titre_final = titre_2, find_and_print = FALSE, folder, difference = FALSE, fig.pathinside = fig.path, unique_analyse = FALSE) {
-  if (find_and_print) {
-    for (i in files(folder)) {
-      titles <- gsub(".", "", i)
-      knitr::knit_child(text = c(
-        '```{r evolvaluedim, fig.cap=`titles`, fig.align = "center", out.width = "100%"}',
-        '',
-        '',
-        'knitr::include_graphics(file.path(fig.pathinside, file.path(folder, i)))',
-        '',
-        '```'
-      ), envir = environment(), quiet = TRUE)
+render_subfigures <- function(plots_list, titles_list, general_title) {
+  # Check if the function is being run in a knitr environment
+  in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
+  # Check if the lists are of the same length
+  if (length(plots_list) != length(titles_list)) {
+    stop("The lengths of plots_list and titles_list are not the same.")
+  }
+  # Check if all plots are ggplots
+  if (!all(sapply(plots_list, inherits, "gg"))) {
+    stop("Not all items in plots_list are ggplot objects.")
+  }
+  if (in_knitr) {
+    # Create subcaptions
+    subcaps <- lapply(titles_list, function(title) paste0("(", title, ")"))
+    # Start creating the dynamic R chunk as a string
+    chunk_header <- sprintf(
+      '```{r subfigures, fig.cap="%s", fig.subcap=c(%s), fig.ncol=2, out.width="50%%", fig.align="center"}',
+      general_title,
+      paste0('"', subcaps, '"', collapse=", ")
+    )
+    # Assign each plot in plots_list to a new variable in the environment
+    for (i in seq_along(plots_list)) {
+      assign(paste0("plot_", i), plots_list[[i]], envir = environment())
     }
+    # Create a string for each plot command, referring to the correct plot objects
+    plot_commands <- lapply(seq_along(plots_list), function(i) {
+      paste0("print(plot_", i, ")")
+    })
+    # Combine all elements into a single character string
+    chunk_text <- paste(chunk_header, paste(plot_commands, collapse = '\n'), '```', sep = '\n')
+    # Render the chunk
+    result <- knitr::knit_child(text = chunk_text, envir = environment(), quiet = TRUE)
+    cat(result)
   } else {
-    assign("Dimension2", gsub("_", "-", unique(x$data$Dimension)))
-    assign("y", x, envir = environment())
-    
-    if (difference) {
-      title_knit <- paste0("Differences in percent of value for temporal dimension :  ", Dimension2, " between ", titre_init, " and ", titre_final, " dataset ")
-      folder = "Temporaldiff"
-    } else {
-      title_knit <- paste0("Evolutions of values for the dimension ", Dimension2, " for ", titre_init, " and ", titre_final, " dataset ")
-      if (unique_analyse) {
-        title_knit <- paste0("Evolutions of values for the dimension ", Dimension2, " for ", titre_init, " dataset ")
-      }
+    # If not in a knitr environment, just print the plots
+    for (plot in plots_list) {
+      print(plot)
     }
-    
-    save_image(title = title_knit, plott = y, folder = folder, fig.pathinside = fig.pathinside)
-    
-    knitr::knit_child(text = c(
-      '```{r evolvaluedimdiff, fig.cap=`title_knit`, fig.align = "center", out.width = "100%"}',
-      '',
-      '',
-      'y',
-      '',
-      '```'
-    ), envir = environment(), quiet = TRUE)
   }
 }
-
-
-
-## ----functionprintingmaps---------------------
-
-
-map_unit_knit = function(map, title, find_and_print = FALSE,folder = "Geodistrib", fig.pathinside = fig.path){
-save_image(title = title,plott = map,  folder = folder, fig.pathinside = fig.pathinside)
-  
-  knitr::knit_child(text = c(
-    '',
-    '```{r distributioninvalueforunit, fig.cap = title, out.width = "100%"}',
-    '',
-    'map',
-    '```',
-    '',
-    ''
- ), envir = environment(), quiet= TRUE)
-  
-    }
 
 
 ## ----function-bar-plot-pie-plot---------------
@@ -849,44 +687,4 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
   return(summary)
 }
 
-render_subfigures <- function(plots_list, titles_list, general_title) {
-  # Check if the function is being run in a knitr environment
-  in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
-  # Check if the lists are of the same length
-  if (length(plots_list) != length(titles_list)) {
-    stop("The lengths of plots_list and titles_list are not the same.")
-  }
-  # Check if all plots are ggplots
-  if (!all(sapply(plots_list, inherits, "gg"))) {
-    stop("Not all items in plots_list are ggplot objects.")
-  }
-  if (in_knitr) {
-    # Create subcaptions
-    subcaps <- lapply(titles_list, function(title) paste0("(", title, ")"))
-    # Start creating the dynamic R chunk as a string
-    chunk_header <- sprintf(
-      '```{r subfigures, fig.cap="%s", fig.subcap=c(%s), fig.ncol=2, out.width="50%%", fig.align="center"}',
-      general_title,
-      paste0('"', subcaps, '"', collapse=", ")
-    )
-    # Assign each plot in plots_list to a new variable in the environment
-    for (i in seq_along(plots_list)) {
-      assign(paste0("plot_", i), plots_list[[i]], envir = environment())
-    }
-    # Create a string for each plot command, referring to the correct plot objects
-    plot_commands <- lapply(seq_along(plots_list), function(i) {
-      paste0("print(plot_", i, ")")
-    })
-    # Combine all elements into a single character string
-    chunk_text <- paste(chunk_header, paste(plot_commands, collapse = '\n'), '```', sep = '\n')
-    # Render the chunk
-    result <- knitr::knit_child(text = chunk_text, envir = environment(), quiet = TRUE)
-    cat(result)
-  } else {
-    # If not in a knitr environment, just print the plots
-    for (plot in plots_list) {
-      print(plot)
-    }
-  }
-}
 

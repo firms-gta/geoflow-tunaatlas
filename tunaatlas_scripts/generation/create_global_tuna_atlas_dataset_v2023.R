@@ -1165,10 +1165,14 @@ function(action, entity, config) {
       url_scripts_create_own_tuna_atlas,
       "aggregate_resolution.R"
     )) #modified for geoflow
-    aggregated <- aggregate_resolution(con, georef_dataset, 6)
-    df_input_not_aggregated <- aggregated$df_input_not_aggregated
-    stats_not_aggregated <- aggregated$stats_not_aggregated
-    georef_dataset <- aggregated$df
+    
+    georef_dataset <- georef_dataset %>% rowwise() %>% 
+      dplyr::mutate(geographic_identifier = transform_cwp_code_from_1deg_to_5deg(geographic_identifier))
+    df_input_not_aggregated <- georef_dataset %>% dplyr::filter(is.null(geographic_identifier))
+    # aggregated <- aggregate_resolution(con, georef_dataset, 6) deprecated to a much efficient and faster function
+    # df_input_not_aggregated <- aggregated$df_input_not_aggregated
+    # stats_not_aggregated <- aggregated$stats_not_aggregated
+    # georef_dataset <- aggregated$df
     
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
