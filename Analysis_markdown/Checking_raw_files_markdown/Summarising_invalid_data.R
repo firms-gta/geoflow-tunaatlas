@@ -1,4 +1,18 @@
 Summarising_invalid_data = function(main_dir, connectionDB){
+  required_packages <- c("webshot",
+                         "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+                         "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
+                         "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
+                         "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
+  )
+  
+  for (package in required_packages) {
+    if (!requireNamespace(package, quietly = TRUE)) {
+      install.packages(package, dependencies = TRUE)
+    }
+    library(package, character.only = TRUE)
+  }
+  
   ancient_wd <- getwd()
   setwd(main_dir)
   dir.create("Recap_on_pre_harmo")
@@ -100,7 +114,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
     # group_by(tRFMO) %>%
     # summarise(across(where(is.logical), sum)) %>% 
     distinct()
-  saveRDS(grouped_results, file.path(main_dir, "grouped_results_invalid_data.rds"))
+  saveRDS(grouped_results, file.path(path, "grouped_results_invalid_data.rds"))
   
   not_mapped_data_list <- list()
   
@@ -122,7 +136,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   # Bind all collected data.frames into one
   all_not_mapped_data <- bind_rows(not_mapped_data_list) %>% distinct()
   
-  saveRDS(all_not_mapped_data, file.path(main_dir, "all_not_mapped_data.rds"))
+  saveRDS(all_not_mapped_data, file.path(path, "all_not_mapped_data.rds"))
   
   recap_mapping_data_list <- list()
   
@@ -144,7 +158,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   # Bind all collected data.frames into one
   all_recap_mapping_data <- bind_rows(recap_mapping_data_list) %>% distinct()
   
-  saveRDS(all_recap_mapping_data, file.path(main_dir, "all_recap_mapping.rds"))
+  saveRDS(all_recap_mapping_data, file.path(path, "all_recap_mapping.rds"))
   
   # PART 3: Generate a summary CSV for each entity
   `%notin%` <- Negate(`%in%`)
@@ -159,14 +173,14 @@ Summarising_invalid_data = function(main_dir, connectionDB){
     problematic_data <- lapply(problematic_files, function(file) {
       data_path <- file.path(entity_dir, "data", file)
       data_list <- readRDS(data_path)
-      if("quadrant.y" %in% colnames(data_list)){
+      if("Gear.x" %in% colnames(data_list)){
         # Removing columns that end in '.y' and renaming '.x' columns
         data_list <- data_list %>%
           select(-matches("\\.y$")) %>%  # This removes columns ending in '.y'
           rename_with(~ gsub("\\.x$", "", .x), matches("\\.x$"))  # This renames columns, removing '.x'
         
         
-      } else if ("quadrant" %notin% colnames(data_list)){
+      } else if ("GRIDTYPE" %notin% colnames(data_list)){
         data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
                                                      shape = shape_without_geom, 
                                                      species_group_dataframe = species_group,
@@ -261,7 +275,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       require(fs)
       
       # Use the function (make sure to use the correct local paths)
-      rmarkdown::render("Report_on_raw_data.Rmd",
+      rmarkdown::render("Recap_on_pre_harmo/Report_on_raw_data.Rmd",
                         output_file = output_dir,
                         envir = render_env
       )
@@ -270,7 +284,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   }
   
   
-  rmarkdown::render("Recap_on_pre_harmo.Rmd",
+  rmarkdown::render(file.path(path,"Recap_on_pre_harmo.Rmd"),
                     output_dir = path,
                     envir = environment()
   )
