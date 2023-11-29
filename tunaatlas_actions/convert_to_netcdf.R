@@ -178,13 +178,12 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     ######################################################################
     ##### DEFINE VARIABLES  ##########
     ######################################################################
-    #modif : 16-02-2018
     
     if('FillValue' %in% names(dataset_metadata) ){
       nonAvailable <- dataset_metadata$Fillvalue
     } else { nonAvailable <- -9999 }
     if(is.na(nonAvailable)| is.null(nonAvailable)){nonAvailable <- -9999}
-    
+
     varproj <-  ncvar_def(name="crs", units="", dim=NULL, missval=nonAvailable, prec="integer")
     # varproj <- ncvar_def(name="crs", units="", dim=NULL, missval=nonAvailable, prec="integer") #compression does not work with current version
     
@@ -258,14 +257,14 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     
     ###add a fishing_fleets meaning Automatically to Non-numerical dimensions
     ################################################################
-    if(nchar(dimensions[1])!=0){
-      for(indD in 1: length(dimensions)){
-        loc <-  match(dimensions[indD], unlist(meaningValue$names))
-        if(!is.na(loc)){
-          ncatt_put(nc,dimensions[indD],"fishing_fleet_values",paste((meaningValue$ref[[loc]]),collapse = ","))
-          ncatt_put(nc,dimensions[indD],"fishing_fleet_meanings",paste(gsub(" ","_",as.character(meaningValue$values[[loc]])),collapse=" "))
-          ncatt_put(nc,dimensions[indD],"valid_range",paste(c(min(meaningValue$ref[[loc]]),max(meaningValue$ref[[loc]])),collapse = ","))}
-      }}
+    # if(nchar(dimensions[1])!=0){
+    #   for(indD in 1: length(dimensions)){
+    #     loc <-  match(dimensions[indD], unlist(meaningValue$names))
+    #     if(!is.na(loc)){
+    #       ncatt_put(nc,dimensions[indD],"fishing_fleet_values",paste((meaningValue$ref[[loc]]),collapse = ","))
+    #       ncatt_put(nc,dimensions[indD],"fishing_fleet_meanings",paste(gsub(" ","_",as.character(meaningValue$values[[loc]])),collapse=" "))
+    #       ncatt_put(nc,dimensions[indD],"valid_range",paste(c(min(meaningValue$ref[[loc]]),max(meaningValue$ref[[loc]])),collapse = ","))}
+    #   }}
     
     ######################################################################
     #####  DIM VAR ATTRIBUTES  ##########
@@ -338,7 +337,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     
     ## Text search
     ##for SARDARA
-    ncatt_put(nc,0,"title",entity$titles)
+    ncatt_put(nc,0,"title",entity$titles$title)
     ncatt_put(nc,0,"summary",entity$descriptions$abstract)
     ncatt_put(nc,0,"keywords",paste("tuna, fisheries, ",variable,",tuna RFMOs",sep=""))
     ncatt_put(nc,0,"comment",entity$descriptions$info)
