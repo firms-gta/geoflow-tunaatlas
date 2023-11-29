@@ -456,7 +456,31 @@ function(action, entity, config) {
 	if(DATASET_LEVEL >= 1){ #with this condition code will be run to deal with dataset level 1 and above
 	  config$logger.info("Level 1 start")
 	  
+	  # Filtering on species for level 1 --------------------------------------
+	  config$logger.info("Filtering on species for level 1")
+	  url_asfis_list_level1 <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
+	  species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1) %>% dplyr::select(code)
+	  georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
 	  
+	  # Removing all the fishingfleet from the georef_dataset
+	  georef_dataset$fishing_fleet <- "UNK"
+	  
+	  function_recap_each_step(
+	    "Filtering species level 1",
+	    georef_dataset,
+	    paste0(
+	      "Filtering species on the base of the file ",
+	      url_asfis_list_level1,
+	      " to keep only the species. This file contains " ,
+	      as.character(length(nrow(
+	        species_to_be_kept_in_level1
+	      ))),
+	      " species."
+	    ),
+	    "inner_join"  ,
+	    NULL
+	  )
+	 
 	  # unit conversion already given factors -----------------------------------
 	  
 	  if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
@@ -493,54 +517,6 @@ function(action, entity, config) {
 		                                      	time_end = col_character()
 		                                        ))
 		    
-			# unit conversion IOTC given factors -----------------------------------
-			# iotc_conv_fact <- read_csv(
-			#   "data/iotc_conv_fact_mapped.csv",
-			#   col_types = cols(
-			# 	geographic_identifier = col_character(),
-			# 	time_start = col_character(),
-			# 	time_end = col_character()
-			#   )
-			# ) %>% dplyr::rename(measurement_value = conversion_factor, measurement_unit = unit, 
-			#                     gear_type  = gear)#this map condelist function is to retrieve the mapping dataset used
-			# 
-			# mapping_dataset <-
-			#   read.csv(
-			#     mapping_csv_mapping_datasets_url,
-			#     stringsAsFactors = F,
-			#     colClasses = "character"
-			#   )
-			# mapping_keep_src_code <- FALSE
-			# 
-			# iotc_map_codelists <- map_codelists(
-			#   con = con,
-			#   "catch",
-			#   mapping_dataset = mapping_dataset,
-			#   dataset_to_map = iotc_conv_fact,
-			#   mapping_keep_src_code = TRUE,
-			#   source_authority_to_map = c("IOTC")
-			# )
-			# 
-			# iotc_conv_fact_mapped <-iotc_map_codelists$dataset_mapped
-			# 
-			# # iotc_conv_fact_mapped$time_start <-
-			# #   as.Date(iotc_conv_fact_mapped$time_start)
-			# # iotc_conv_fact_mapped$time_start <-
-			# #   as.character(lubridate::floor_date(iotc_conv_fact_mapped$time_start, "year"))
-			# # iotc_conv_fact_mapped$time_end <-
-			# #   as.Date(iotc_conv_fact_mapped$time_end)
-			# # iotc_conv_fact_mapped$time_end <-
-			# #   as.character(
-			# # 	lubridate::ceiling_date(iotc_conv_fact_mapped$time_end, "year") - lubridate::days(1)
-			# #   )
-			# # 
-			# iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% dplyr::select(-c(species_src_code, gear_type_src_code)) %>% 
-			#   dplyr::group_by(across(setdiff(everything(), "measurement_value"))) %>%
-			#   dplyr::summarise(measurement_value = mean(measurement_value)) %>% distinct()
-			# 
-			# iotc_conv_fact_mapped <- iotc_conv_fact_mapped %>% 
-			#   dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t") ~ "t", measurement_unit %in% c("NO", "no") ~ "no", TRUE ~ measurement_unit)) %>% 
-			#   dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t") ~ "t", unit_target %in% c("NO", "no")~ "no" , TRUE ~ unit_target)) 
 			
 			iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
 			
@@ -683,36 +659,7 @@ function(action, entity, config) {
 			"-----------------------------------------------------------------------------------------------------"
 		  )
 		}
-	  
-
-		# Filtering on species for level 1 --------------------------------------
-		config$logger.info("Filtering on species for level 1")
-		url_asfis_list_level1 <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level1.csv"
-		species_to_be_kept_in_level1 <- read_csv(url_asfis_list_level1) %>% dplyr::select(code)
-		georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_in_level1, by = c("species" = "code"))
-
-		# Removing all the fishingfleet from the georef_dataset
-		georef_dataset$fishing_fleet <- "UNK"
-		
-		function_recap_each_step(
-			"Filtering species level 1",
-			georef_dataset,
-			paste0(
-			  "Filtering species on the base of the file ",
-			  url_asfis_list_level1,
-			  " to keep only the species. This file contains " ,
-			  as.character(length(nrow(
-				species_to_be_kept_in_level1
-			  ))),
-			  " species."
-			),
-			"inner_join"  ,
-			NULL
-		)
-	
-		
-		
-	}
+	  	}
 	# -------------------------------------------------------------------------
   
 	#===========================================================================================================================================================
@@ -761,8 +708,9 @@ function(action, entity, config) {
 		  config$logger.info(
 			"Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
 		  )
+		  if(file.exists("data/nominal_catch.csv")){
 		  nominal_catch <-
-			readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]),
+			readr::read_csv("data/nominal_catch.csv",
 							guess_max = 0) 
 		  class(nominal_catch$measurement_value) <- "numeric"
 		  mapping_dataset <-
@@ -786,8 +734,9 @@ function(action, entity, config) {
 		  if (any(nominal_catch$measurement_unit == "no"))
 			nominal_catch[nominal_catch$measurement_unit == "no",]$measurement_unit <- "no"
 		  class(nominal_catch$measurement_value) <- "numeric"
+		  }
 		  #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
-		  if (nrow(nominal_catch) == 0) {
+		  else {
 			nominal_catch <- retrieve_nominal_catch(entity, config, opts)
 		  }
 		  config$logger.info(sprintf("Nominal catch dataset has [%s] lines", nrow(nominal_catch)))
@@ -889,8 +838,6 @@ function(action, entity, config) {
 			#@juldebar insert patch below to fix error in raise_get_rf function
 			
 			rm(dataset_catch)
-			#@juldebar : update with the new name of "flag" dimension (now "fishingfleet")
-			# x_raising_dimensions=c("fishingfleet","gear","year","source_authority")
 		  }
 		  
 		  class(dataset_to_compute_rf$measurement_value) <- "numeric"
@@ -1161,18 +1108,15 @@ function(action, entity, config) {
     stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
     stepnumber = stepnumber+1
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    source(file.path(
-      url_scripts_create_own_tuna_atlas,
-      "aggregate_resolution.R"
-    )) #modified for geoflow
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
     
-    georef_dataset <- georef_dataset %>% rowwise() %>% 
+    one_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
+    five_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
+    one_degree <- one_degree %>% rowwise() %>% 
       dplyr::mutate(geographic_identifier = transform_cwp_code_from_1deg_to_5deg(geographic_identifier))
-    df_input_not_aggregated <- georef_dataset %>% dplyr::filter(is.null(geographic_identifier))
-    # aggregated <- aggregate_resolution(con, georef_dataset, 6) deprecated to a much efficient and faster function
-    # df_input_not_aggregated <- aggregated$df_input_not_aggregated
-    # stats_not_aggregated <- aggregated$stats_not_aggregated
-    # georef_dataset <- aggregated$df
+    # df_input_not_aggregated <- georef_dataset %>% dplyr::filter(is.null(geographic_identifier))
+    # fwrite(df_input_not_aggregated, "data/df_input_not_aggregated.csv")
+    georef_dataset <- rbind(one_degree, five_degree)
     
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")

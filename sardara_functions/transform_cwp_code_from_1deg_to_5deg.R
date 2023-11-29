@@ -32,8 +32,9 @@ transform_cwp_code_from_1deg_to_5deg <- function(input_identifier) {
   input_str <- as.character(input_identifier)
   
   if (nchar(input_str) != 7 || substr(input_str, 1, 1) != "5") {
-    stop("Invalid CWP code. The code must be a 7-digit number representing a 1-degree square.")
-  }
+    print("Invalid CWP code. The code must be a 7-digit number representing a 1-degree square.")
+    return(input_str)
+    }
   
   quadrant <- as.numeric(substr(input_str, 2, 2))
   latitude <- as.numeric(substr(input_str, 3, 4))
