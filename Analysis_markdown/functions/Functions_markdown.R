@@ -211,7 +211,8 @@ shapefile.fix, plotting_type = "plot", continent) {
   selection <- function(x) {
     x %>% 
       dplyr::ungroup() %>% 
-      dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit)
+      dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit) %>%
+      dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
   }
   
   Initial_dataframe <- selection(initial_dataset)
