@@ -1,4 +1,4 @@
-convert_to_netcdf = function(action, config, entity){
+convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   require(dplyr)
   
   opts <- action$options
@@ -52,7 +52,7 @@ convert_to_netcdf = function(action, config, entity){
     }
   }
   
-  write_NetCDF <- function(con, dataset_metadata,Variable=NULL, dimensions='all', path = "data"){
+  write_NetCDF <- function(config, con, dataset_metadata,Variable=NULL, dimensions='all', path = "data"){
     ########################
     #Used Packages:
     #######################
@@ -422,9 +422,15 @@ LEFT JOIN
   } else {print(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
   }
   #########!!!! 1.2 execution de la fonction pour transformer les données en Netcdf
-  write_NetCDF(con = con, dataset_metadata,Variable='auto',dimensions='all', path = "data")
+  write_NetCDF(config = config, con = con, dataset_metadata,Variable='auto',dimensions='all', path = "data")
   
   entity$addResource("netcdf", file.path("data",paste0(dataset_pid, ".nc")))
+  if(uploadgoogledrive){
+  config$logger.info("Upload netcdf to Google Drive")
+  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+  path_to_dataset_new <- file.path(getwd(), "data", paste0(dataset_pid, ".nc"))
+  id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
+  }
   
 }
 
