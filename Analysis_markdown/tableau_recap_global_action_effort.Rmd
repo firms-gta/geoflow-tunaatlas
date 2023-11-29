@@ -126,7 +126,7 @@ sub_list_dir_2 = rownames(details)
 
 child_env_last <- list2env(as.list(child_env_base), parent = child_env_base)
 
-child_env_last$parameter_init <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.rds")
+child_env_last$parameter_init <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.csv")
 child_env_last$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
 child_env_last$parameter_final <- NULL
 child_env_last$child <- TRUE
@@ -179,8 +179,8 @@ gc()
 child_env_comp <- list2env(as.list(child_env_base), parent = child_env_base)
 
 
-child_env_comp$parameter_init <- paste0(sub_list_dir_2[1], "/rds.rds")
-child_env_comp$parameter_final <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.rds")
+child_env_comp$parameter_init <- paste0(sub_list_dir_2[1], "/rds.csv")
+child_env_comp$parameter_final <- paste0(sub_list_dir_2[length(sub_list_dir_2)], "/rds.csv")
 
 child_env_comp$unique_analyse <- FALSE
 child_env_comp$parameter_titre_dataset_1 <- "Initial_data"
@@ -239,7 +239,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
                         "Explenation", "Fonctions", 
                         "Options", "Tons", "Number of fish", "Lines","Difference (in % of tons)","Difference in tons","Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", "Percentage of nominal"
       )
-          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), parameter_filtering = parameter_filtering)
+          main <- filtering_function(fread(paste0(sub_list_dir_2[1],"/rds.csv")), parameter_filtering = parameter_filtering)
           tons_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("MTNO", "MT","t", "Tons")))$measurement_value)
           nofish_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no", "Number of fish")))$measurement_value)
           lines_init <- nrow(main)
@@ -254,7 +254,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
         sum_no <- sums$somme_no
         nrow <- sums$lines
         } else {
-          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), parameter_filtering = parameter_filtering)
+          main <- filtering_function(fread(paste0(i,"/rds.csv")), parameter_filtering = parameter_filtering)
           sum_t <- sum((main %>% dplyr::filter(measurement_unit%in%c("MTNO", "MT","t", "Tons")))$measurement_value)
           sum_no <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no", "Number of fish")))$measurement_value)
          nrow <- nrow(main)
@@ -334,7 +334,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
                         "Options", "Sum in hooks", "Sum in fishing days", "Lines","Difference (in % of hooks)","Difference in hooks","Difference (in % of fishing days)","Difference in fishing days",  "Difference (in % of lines)", "Percentage of nominal"
       )
 
-          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), parameter_filtering = parameter_filtering)# %>% dplyr::filter(species%in%opts$species_filter)
+          main <- filtering_function(fread(paste0(sub_list_dir_2[1],"/rds.csv")), parameter_filtering = parameter_filtering)# %>% dplyr::filter(species%in%opts$species_filter)
           hooks_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("HOOKS", "HOOKS")))$measurement_value)
           fishing_days_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("FDAYS", "FDAYS")))$measurement_value)
           lines_init <- nrow(main)
@@ -345,7 +345,7 @@ df <- data.frame(matrix(ncol =13, nrow = 1))
         Fonctions <- pull(readtext(paste0(i,"/fonctions.txt"))[2])
         if (file.exists(paste0(i,"/options_written.txt"))){
           Options <- pull(readtext(paste0(i,"/options_written.txt"))[2])} else {Options <- "Aucune"}
-          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), parameter_filtering = parameter_filtering)# %>% dplyr::filter(species%in%filter_species)
+          main <- filtering_function(fread(paste0(i,"/rds.csv")), parameter_filtering = parameter_filtering)# %>% dplyr::filter(species%in%filter_species)
           sum_hooks <- sum((main %>% dplyr::filter(measurement_unit%in%c("HOOKS", "HOOKS")))$measurement_value)
           sum_fdays <- sum((main %>% dplyr::filter(measurement_unit%in%c("FDAYS", "FDAYS")))$measurement_value)
           nrow <- nrow(main)
@@ -466,8 +466,8 @@ parameter_mapped <- ifelse(counting!=step_mapping, TRUE, FALSE)
 child_env <- list2env(as.list(child_env_base), parent = child_env_base)
 # source(knitr::purl("Functions_markdown.Rmd", quiet=TRUE),child_env)
 
-child_env$parameter_init <- paste0(sub_list_dir[counting], "/rds.rds")
-child_env$parameter_final <- paste0(sub_list_dir[counting+1], "/rds.rds")
+child_env$parameter_init <- paste0(sub_list_dir[counting], "/rds.csv")
+child_env$parameter_final <- paste0(sub_list_dir[counting+1], "/rds.csv")
 child_env$parameter_titre_dataset_1 <- last_path(sub_list_dir[counting])
 child_env$parameter_titre_dataset_2 <- last_path(sub_list_dir[counting+1])
 
@@ -488,7 +488,7 @@ dir.create(new_path, recursive = TRUE)
 
 child_env$fig.path = new_path
 
-if( identical(readRDS(child_env$parameter_init),readRDS(child_env$parameter_final) )){NA}else{
+if( identical(fread(child_env$parameter_init),fread(child_env$parameter_final) )){NA}else{
       # knitr::knit_child(text =c('```{r child="comparison.Rmd"}',
       #                       '',
       #                       '',
