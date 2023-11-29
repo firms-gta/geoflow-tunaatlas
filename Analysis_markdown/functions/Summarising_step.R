@@ -69,7 +69,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
     
     
-    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)
+    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = "rds.csv", full.names = TRUE)
     details = file.info(sub_list_dir_2)
     details = file.info(sub_list_dir_2)
     details = details[with(details, order(as.POSIXct(mtime))), ]
@@ -79,7 +79,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     for(file in sub_list_dir_2){
 
     `%notin%` <- Negate(`%in%`)
-      data <- readRDS(file)
+      data <- fread(file)
       if("GRIDTYPE" %notin% colnames(data)){
       data <- tidying_GTA_data_for_comparison(dataframe = data,
                                               shape = shape_without_geom,
@@ -89,7 +89,7 @@ Summarising_step = function(main_dir, connectionDB, config){
         data <- data %>% rename(GRIDTYPE = gridtype)
       }
       
-      saveRDS(file = file, object = data)
+      fwrite(data, file = file)
       }
 
     }
