@@ -80,13 +80,13 @@ function(action, entity, config) {
   stepnumber <- 1
   
   #scripts
-  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
+  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation"
   #for level 0 - FIRMS
   # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   try(source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R"))) #modified for geoflow
-  try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
+  try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
   #for filtering if needed
@@ -108,9 +108,9 @@ function(action, entity, config) {
   }
   
   #for reporting
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copyrmd.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/write_options_to_csv.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copyrmd.R")
   # Saving options in a csv file and creating a new variable for each options
   write_options_to_csv(opts)
   
@@ -1232,7 +1232,7 @@ function(action, entity, config) {
 	}
 
 
-	#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
+	#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/Developement/workflow_etl/scripts/generate_dataset.R
 	dataset <- list(
 		dataset = dataset,
 		additional_metadata = NULL,
