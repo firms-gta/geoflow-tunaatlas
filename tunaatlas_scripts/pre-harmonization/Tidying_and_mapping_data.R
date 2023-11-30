@@ -136,6 +136,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   negative_values <- georef_dataset %>% dplyr::filter(measurement_value <= 0)
+  georef_dataset <- georef_dataset %>% dplyr::filter(measurement_value > 0)
   if(nrow(negative_values)!=0){
     if(recap_each_step){
       function_recap_each_step(
