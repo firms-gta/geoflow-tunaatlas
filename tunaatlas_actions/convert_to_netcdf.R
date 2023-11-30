@@ -157,7 +157,6 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
         config$logger.info(dim)
         dimvals <- unique(res_dimensions_and_variables[[dim]])
         if(is.numeric(dimvals)){
-          ##Taha: modif 07/09/2017 :: sort num dim
           dimVector = sort(dimvals)
           if(grepl('_',dim)){unit=unlist(strsplit(dim,'_'))[2]}
           dim=unlist(strsplit(dim,'_'))[1]
@@ -183,7 +182,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
       nonAvailable <- dataset_metadata$Fillvalue
     } else { nonAvailable <- -9999 }
     if(is.na(nonAvailable)| is.null(nonAvailable)){nonAvailable <- -9999}
-
+    
     varproj <-  ncvar_def(name="crs", units="", dim=NULL, missval=nonAvailable, prec="integer")
     # varproj <- ncvar_def(name="crs", units="", dim=NULL, missval=nonAvailable, prec="integer") #compression does not work with current version
     
@@ -203,14 +202,13 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     if(file.exists(netCDF_CF_filename)){
       file.remove(netCDF_CF_filename)
     }
-    nc <- nc_create(netCDF_CF_filename,list(varproj, varXd),force_v4 = TRUE, verbose = TRUE)
+    nc <- nc_create(netCDF_CF_filename,list(varXd,varproj),force_v4 = TRUE, verbose = TRUE)
     cat("netCDF File created")
     ######################################################################
     ##### ADD VALUES TO VARIABLES  ##########
     ######################################################################
     ###Generic loops for The dimensions
     ####################################
-    ##Taha modif 07/09/2017 new method to create loops
     if(nchar(dimensions[1])!=0){
       gridDimInd2 <- res_dimensions_and_variables[dimensions]
       for(dim1 in dimensions ){
@@ -255,16 +253,16 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
       
     }
     
-    ###add a fishing_fleets meaning Automatically to Non-numerical dimensions
+    ###add a meaning Automatically to Non-numerical dimensions
     ################################################################
-    # if(nchar(dimensions[1])!=0){
-    #   for(indD in 1: length(dimensions)){
-    #     loc <-  match(dimensions[indD], unlist(meaningValue$names))
-    #     if(!is.na(loc)){
-    #       ncatt_put(nc,dimensions[indD],"fishing_fleet_values",paste((meaningValue$ref[[loc]]),collapse = ","))
-    #       ncatt_put(nc,dimensions[indD],"fishing_fleet_meanings",paste(gsub(" ","_",as.character(meaningValue$values[[loc]])),collapse=" "))
-    #       ncatt_put(nc,dimensions[indD],"valid_range",paste(c(min(meaningValue$ref[[loc]]),max(meaningValue$ref[[loc]])),collapse = ","))}
-    #   }}
+    if(nchar(dimensions[1])!=0){
+      for(indD in 1: length(dimensions)){
+        loc <-  match(dimensions[indD], unlist(meaningValue$names))
+        if(!is.na(loc)){
+          ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_values"),paste((meaningValue$ref[[loc]]),collapse = ","))
+          ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_meanings"),paste(gsub(" ","_",as.character(meaningValue$values[[loc]])),collapse=" "))
+          ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_valid_range"),paste(c(min(meaningValue$ref[[loc]]),max(meaningValue$ref[[loc]])),collapse = ","))}
+      }}
     
     ######################################################################
     #####  DIM VAR ATTRIBUTES  ##########
@@ -303,6 +301,10 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     ncatt_put(nc,"crs","inverse_flattening",298.257223563)
     
     ncatt_put(nc,as.character(variable),"grid_mapping","crs")
+    # Coordinate reference system variable
+    crs_var <- ncvar_def('crs', 'Coordinate Reference System', NULL)
+    crs_val <- '+proj=longlat +datum=WGS84'
+    ncvar_put(nc, crs_var, crs_val)
     
     #################################
     ##### GLOBAL ATTRIBUTES  ##########
@@ -425,10 +427,10 @@ LEFT JOIN
   
   entity$addResource("netcdf", file.path("data",paste0(dataset_pid, ".nc")))
   if(uploadgoogledrive){
-  config$logger.info("Upload netcdf to Google Drive")
-  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
-  path_to_dataset_new <- file.path(getwd(), "data", paste0(dataset_pid, ".nc"))
-  id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
+    config$logger.info("Upload netcdf to Google Drive")
+    folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+    path_to_dataset_new <- file.path(getwd(), "data", paste0(dataset_pid, ".nc"))
+    id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
   }
   
 }
