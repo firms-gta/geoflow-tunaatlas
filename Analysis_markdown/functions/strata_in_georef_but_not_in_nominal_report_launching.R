@@ -138,6 +138,25 @@ georef_no_nominal_all <- georef_no_nominal_all %>%
   ungroup() %>% 
   dplyr::select(-geographic_identifier)
 
+# Define directories
+source_directory <- file.path(getwd(),"georef_not_nominal_markdown")
+target_directory <- source_directory
+
+# List all HTML files
+files <- list.files(source_directory, recursive = TRUE, full.names = TRUE, pattern = "\\.html$")
+
+# Function to create a new name based on the directory path
+create_new_name <- function(file_path) {
+  parts <- unlist(strsplit(file_path, "/"))
+  new_name <- paste(paste(parts[length(parts)-2],paste(parts[length(parts)-1], parts[length(parts)], sep = "_")))
+  return(new_name)
+}
+
+# Copy and rename files
+for (file in files) {
+  new_name <- create_new_name(file)
+  file.copy(file, file.path(target_directory, new_name))
+}
 
 upgradded_nominal <- rbind(nominal,georef_no_nominal_all)
 setwd(ancient_wd)
