@@ -94,12 +94,14 @@ tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("json/tuna
 
 ## Recapitulation of all the treatment done for each final dataset
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
-con <- initWorkflow(here("json/DB_connection.json"))$software$input$dbi
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), handleMetadata = FALSE)
+con <- config$software$input$dbi
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
 ## Netcdf creation (24h for level 2)
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_actions/convert_to_netcdf.R")
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 
 wd <- getwd()
 
@@ -114,10 +116,8 @@ setwd(wd)
 
 # Checking on created data
 
-
-
-# Check on georef not nominal etc.
-
+upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
+                    connectionDB = con)
 
 # Putting dataset on geoserver, geonetwork and zenodo
 tunaatlas_qa_services <- executeWorkflow("tunaatlas_qa_services.json")
