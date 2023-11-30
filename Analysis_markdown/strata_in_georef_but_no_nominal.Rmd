@@ -1,5 +1,5 @@
 ---
-title: 'Stratas in georeferenced data but not in nominal'
+title: 'Analysis of the data georeferenced not declared in nominal'
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 author:
   - name: Bastien Grasset
@@ -54,141 +54,125 @@ graphics: TRUE # Needed to be able to include images
 tables: TRUE # Needed to be able to include tables
 fancyhdr:
   first:
-    headleft: "Global Tuna Atlas comparison between two datasets"
-    headright: "GTA"
+    headleft: ""
+    headright: ""
     headrulewidth: 0pt
     #footleft: A left foot
     footrulewidth: 0pt
   subsequent:
-    headleft: "Global Tuna Atlas comparison between two datasets"
-    headright: "GTA"
+    headleft: ""
+    headright: ""
     headrulewidth: 1pt
     footrulewidth: 0pt
 ---
 
-```{r child = 'Setup_markdown.Rmd'}
+```{r setuprmd,include = FALSE}
+
+res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
 
 ```
 
+```{r sourcingfunctionsmarkdown,include = FALSE}
 
-# Analysis of the data georeferenced not declared in nominal
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
 
-For the remaining of the analysis we only keep Dimension present in both dataset so refer to : to analyse the differences between the stratas fo the two datasets. 
+```
 
+For the remaining of the analysis we only keep Dimension present in both dataset. 
 
-## General overview of this inconsistent data 
+# General overview of this inconsistent data 
 
-The measurement_value of catches in the georeferenced dataset but not in nominal is different depending on what we take as a strata. For now the strata kept are : **`r strata`**
+The measurement_value of catches in the georeferenced dataset but not in nominal is different depending on what we take as a strata. The strata kept in this report are : **`r strata`**, the corresponding measurement_values are : `r round(sum(georef_no_nominal_groupped$measurement_value)/1000000,2)` millions, which corresponds of a total of  `r round(100*sum(georef_no_nominal_groupped$measurement_value)/sum(nominal_groupped$measurement_value),2)` % of the nominal catch.
 
-, the corresponding measurement_values are : `r round(sum(georef_no_nominal$measurement_value)/1000000,2)` millions, which corresponds of a total of  `r round(100*sum(georef_no_nominal$measurement_value)/sum(nominal$measurement_value),2)` % of the nominal catch and `r round(100*sum(georef_no_nominal$measurement_value)/sum(georef_mapped$measurement_value),2)` % of the georeferenced catch.
 
 ```{r}
-
-georef_no_nominal <- georef_no_nominal%>% mutate(year = lubridate::year(year))
-
-georef_no_nominal_groupped <- georef_no_nominal %>% group_by(year, species, source_authority) %>% summarise(measurement_value = sum(measurement_value))
-
+if(nrow(georef_no_nominal_groupped)==0){parameter_georef_no_nom = FALSE} else {parameter_georef_no_nom= TRUE}
 ```
 
 
-```{r georefnotnominalgrouppedbyyear}
+```{r georefnotnominalgrouppedbyyear , eval=parameter_georef_no_nom}
 
-ggplot(georef_no_nominal_groupped) +
-  aes(
-    x = year,
-    y = measurement_value,
-    fill = species,
-    colour = species
-  ) +
-  geom_area() +
-  scale_fill_hue(direction = 1) +
-  scale_color_hue(direction = 1) +
+ggplot(georef_no_nominal_groupped %>% 
+         mutate(year = lubridate::year(year))) +
+ aes(x = year, y = measurement_value, fill = species, colour = species) +
+ geom_col() +
+ scale_fill_hue(direction = 1) +
+ scale_color_hue(direction = 1) +
   labs(x = "Year", y = "Value (in tons)") +
-  theme_minimal() +
-  facet_wrap(vars(source_authority), scales = "free")
+
+ theme_minimal() +
+ facet_wrap(vars(species_group), scales = "free")
 
 ```
 
-The number of row of the table of georeferenced data with no equivalent in nominal is `r nrow(georef_no_nominal)`.
 
-The number of stratas georeferenced with no equivalent in nominal is `r nrow(georef_no_nominal)`. (Around `r round(100-(((nrow(georef_mapped)-nrow(georef_no_nominal))/nrow(georef_mapped))*100),2)` % of the georeferenced stratas total.
+```{r eval = parameter_georef_no_nom}
 
-
-## Analyzis of the data having a declaration in georeferenced with `r strata` but no equivalent in nominal
-
-```{r eval = TRUE}
-
+georef_no_nominal_groupped$GRIDTYPE <- "GRIDTYPE"
 child_env <- new.env()
-list2env(parameters_child, env = child_env)
 
 child_env$parameter_titre_dataset_1 <- "Georeferenced but not nominal data"
-child_env$parameter_init <- georef_no_nominal
+child_env$parameter_init <- georef_no_nominal_groupped
 child_env$parameter_final <- NULL
-child_env$parameter_colnames_to_keep <-parameter_colnames_to_keep
-child_env$child <- FALSE
-child_env$no_recap_options <- TRUE
+child_env$parameter_colnames_to_keep <- c( "species",  "source_authority", "year", "measurement_unit", "measurement_value", "Gear", "species_group")
 child_env$parameter_fact <- "catch"
-child_env$time_dimension <- c("year")
-child_env$parameter_filtering <- parameter_filtering
+child_env$parameter_geographical_dimension <- "geographic_identifier"
+child_env$parameter_geographical_dimension_groupping <- "GRIDTYPE"
+child_env$parameter_time_dimension <- "year"
+child_env$shapefile.fix <- shapefile.fix
+child_env$child_header <- ""
 
+# rmarkdown::render("comparison.Rmd", envir = child_env, quiet = TRUE)
 res2 <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
 
 ```
 
-```{r eval = TRUE , echo=FALSE, results='asis'}
+```{r eval=parameter_georef_no_nom , echo=FALSE, results='asis'}
 
 cat(res2, sep =  "\\clearpage")
 
 ```
 
-
 ## Stratas with declaration superior in georeferenced than in nominal 
 
-**For this analysis, we will only compare data with superior value in georeferenced than in nominal by species, year and tRFMOs.**
+**For this analysis, we will only compare data with superior value in georeferenced than in nominal by `r strata`**
 
 The species concerned by declaration (on a year) of georeferenced captures superior to nominal are : `r paste0(unique(georef_sup_to_nom$species), sep = " ; ")`, for a total (species of) `r length(unique(georef_sup_to_nom$species))`.
 
+```{r}
+table2 <- georef_sup_to_nom %>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ) %>% filter(Difference != 0)
+```
 
-```{r strataswithpostivediff, eval=TRUE, include=FALSE}
+```{r strataswithpostivediff, eval=TRUE}
 
-qflextable2(georef_sup_to_nom %>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ) %>% filter(Difference != 0), save_folder = "georef_sup_nominal", captionn = "Stratas of georeferenced dataset being superior to nominal dataset for a specific year and species (only data superior to 1 ton are presented)")
+qflextable2(table2, captionn = "Stratas of georeferenced dataset being superior to nominal dataset for a specific year and species (only data superior to 1 ton are presented)")
 
 ```
 
-
-<!-- Only the stratas for which year that there is more declaration in georef than in nominal which are groupped. -->
-
-
 ```{r sumpositivesdiffeveryyear}
 
-qflextable2(georef_sup_to_nom %>% group_by(species, source_authority) %>% summarise(Difference = sum(Difference))%>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ) %>% filter(Difference != 0), captionn = "Sum of positive differences in every year between georeferenced and nominal", save_folder = "georef_sup_nominal")
+qflextable2(georef_sup_to_nom %>% group_by(species, source_authority) %>% summarise(Difference = sum(Difference))%>% mutate_if(is.numeric, round)%>% arrange(desc(Difference) ) %>% filter(Difference != 0), captionn = "Sum of positive differences in every year between georeferenced and nominal")
 
 ```
 
 ```{r}
 
-ggplotgeoref_sup_to_nom <-ggplot(georef_sup_to_nom) +
-  aes(
-    x = year,
-    y = Difference,
-    fill = source_authority,
-    colour = source_authority,
-    group = source_authority
-  ) +
-  geom_jitter(size = 1.5) +
-  scale_fill_hue(direction = 1) +
-  scale_color_hue(direction = 1) +
-  theme_minimal() +
-  facet_wrap(vars(species), scales = "free")
+ggplotgeoref_sup_to_nom <- ggplot(georef_sup_to_nom) +
+ aes(x = year, y = Difference, fill = species, colour = species) +
+ geom_col() +
+ scale_fill_hue(direction = 1) +
+ scale_color_hue(direction = 1) +
+ theme_minimal() +
+ facet_wrap(vars(species_group), scales = "free")
 
-save_image(title = "Plot of georeferenced dataset being superior to nominal dataset for a specific year and species", georef_sup_to_nom, folder = "georef_sup_nominal")
+# save_image(title = "Plot of georeferenced dataset being superior to nominal dataset for a specific year and species", ggplotgeoref_sup_to_nom)
 
 ```
 
 
 ```{r plotgeorefsuptonom, fig.cap = "Plot of georeferenced dataset being superior to nominal dataset for a specific year and species"}
 
-georef_sup_to_nom
+ggplotgeoref_sup_to_nom
 
 
 ```
