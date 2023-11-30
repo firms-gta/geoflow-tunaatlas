@@ -81,6 +81,8 @@ Summarising_step = function(main_dir, connectionDB, config){
     `%notin%` <- Negate(`%in%`)
       data <- fread(file)
       if("GRIDTYPE" %notin% colnames(data)){
+      data <- data %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier), 
+                                     gear_type = as.character(gear_type))
       data <- tidying_GTA_data_for_comparison(dataframe = data,
                                               shape = shape_without_geom,
                                               species_group_dataframe = species_group,
