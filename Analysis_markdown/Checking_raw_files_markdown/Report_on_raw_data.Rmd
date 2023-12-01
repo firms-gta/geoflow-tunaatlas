@@ -1,5 +1,5 @@
 ---
-title: "`r paste0('Report on raw data for dataset: ', ifelse(exists('dataset'), dataset, 'NULL'))`"
+title: "`r paste0('Report on raw data for dataset: ', ifelse(exists('dataset', envir = environment()), dataset, 'NULL'))`"
 author: "BastienG"
 date: "2023-10-12"
 output: html_document
@@ -57,13 +57,15 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R")
 
+
 ```
 
 ```{r first}
 
-directory <-ifelse(exists("parameter_directory"), parameter_directory, "~/Documents/geoflow-tunaatlas/jobs/20231013172118/entities/catch_1deg_1m_bb_iattc_level0__tuna_byflag/")
+directory <-ifelse(exists("parameter_directory",envir = environment()), parameter_directory, "~/Documents/geoflow-tunaatlas/jobs/20231013172118/entities/catch_1deg_1m_bb_iattc_level0__tuna_byflag/")
 
 fig.path = directory
+
 ```
 
 ```{r statsirregularareas}
@@ -88,9 +90,10 @@ The data displayed by tRFMOs is supposed to concern the spatial area of the juri
 
 child_env$parameter_init<- file.path(directory, "/data/outside_juridiction.rds")
 
-      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-        
-        
+res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
+
+child_env$parameter_init <- NULL
+child_env$parameter_titre_1 <- NULL
         
         
 ```
@@ -111,9 +114,11 @@ Only the squares where the integrity of the area is located on land are consider
 child_env$parameter_init<- file.path(directory, "/data/areas_in_land.rds")
 
 child_env$parameter_titre_1  <- "On_continent"
-      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
+res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
-        
+child_env$parameter_init <- NULL
+child_env$parameter_titre_1 <- NULL
+
         
         
 ```
@@ -140,10 +145,12 @@ Some square does not correspond to the cwp grid standards")
 child_env$parameter_init<- file.path(directory, "/data/removed_irregular_areas.rds")
 
 child_env$parameter_titre_dataset_1  <- "Not_cwp"
-      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
+res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         
         
-        
+child_env$parameter_init <- NULL
+child_env$parameter_titre_1 <- NULL
+
         
 ```
 
@@ -163,9 +170,11 @@ Some data provided in Number of fish and tons are not plausible")
 child_env$parameter_init<- file.path(directory,  "not_conform_conversion_factors.rds")
 child_env$parameter_titre_1  <- "Not_conform_conversions_factors"
 
-      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-        
-        
+res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
+
+child_env$parameter_init <- NULL
+child_env$parameter_titre_1 <- NULL
+       
         
         
 ```
@@ -185,13 +194,16 @@ Some data are provided with a measurement_value inferior or equal to 0 ")
 child_env$parameter_init<- file.path(directory,  "negative_values.rds")
 child_env$parameter_titre_1  <- "Negative_or_null_values"
 
-      res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
+res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
+
+child_env$parameter_init <- NULL
+child_env$parameter_titre_1 <- NULL
         
         
         
 ```
 
-```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/not_conform_conversion_factors.rds")), echo=FALSE, results='asis'}
+```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/negative_values.rds")), echo=FALSE, results='asis'}
 
 cat(res, sep =  "\\clearpage")
 

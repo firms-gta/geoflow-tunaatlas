@@ -63,16 +63,16 @@ columns_to_color <- names(invalid_data)[-c(1,2)]
 invalid_data <- invalid_data %>% ungroup() %>%dplyr::rowwise() %>% dplyr::mutate(All_good = ifelse(sum(across(columns_to_color)) ==0, TRUE, FALSE)) %>% arrange(All_good, tRFMO) %>% group_by(All_good, tRFMO)
 
 
+
 ```
 
 ```{r echo=FALSE, results='asis'}
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R")
 ft <- qflextable2(invalid_data, captionn = "Recap of the issues with each dataframe", grouped_data = c("All_good", "tRFMO"))
-
-# Apply conditional formatting for each column
-for (colname in columns_to_color) {
-  ft <- color(ft, i = ~ get(colname) == TRUE, j = colname, color = "red") 
-  ft <- color(ft, i = ~ get(colname) == FALSE, j = colname, color = "green")
+for (i in columns_to_color){
+  ft$body$styles$text$color$data[,i] <- ifelse(is.na(ft$body$dataset[,i]), "blue", ifelse(ft$body$dataset[,i], "red", "green"))
+  
 }
 
 ```
