@@ -9,8 +9,8 @@ check_install_package <- function(package_name) {
 }
 
 # 'renv' for project-specific environments
-check_install_package("renv")
-renv::restore() # Restore the project library
+# check_install_package("renv")
+# renv::restore() # Restore the project library
 
 # General utility packages
 check_install_package("remotes")   # Package management
@@ -60,25 +60,25 @@ load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
 
 # First step is creation of the database model and loading of the codelist (around 1/2 hour)
-db_model <- executeWorkflow(here("json/tunaatlas_qa_dbmodel+codelists.json")) 
+db_model <- executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) 
 
 # Second step is the loading of the mappings (1h)
-mappings <- executeWorkflow(here("json/tunaatlas_qa_mappings.json"))
+mappings <- executeWorkflow(here("tunaatlas_qa_mappings.json"))
 
 # Third step is pre-harmonizing the datasets provide by tRFMOs: This step is divided in 3 
 # substep depending on the type of the data:
 
 ## Nominal data
 
-nominal_catch <- executeWorkflow(here("json/Nominal_catch.json"))
+nominal_catch <- executeWorkflow(here("Nominal_catch.json"))
 
 ## Georeferenced catch
 
-raw_data_georef <- executeWorkflow(here("json/All_raw_data_georef.json"))
+raw_data_georef <- executeWorkflow(here("All_raw_data_georef.json"))
 
 ## Goereferenced effort
 
-raw_data_georef_effort <- executeWorkflow(here("json/All_raw_data_georef_effort.json"))
+raw_data_georef_effort <- executeWorkflow(here("All_raw_data_georef_effort.json"))
 
 
 ## Summarising the invalid data for all the datasets pre-harmonized
@@ -89,7 +89,7 @@ Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
 
 # Create 5 datasets catch and effort
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("json/tunaatlas_qa_global_datasets_catch.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), dir = here::here())
 
 
 ## Recapitulation of all the treatment done for each final dataset
@@ -104,11 +104,12 @@ entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "ent
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 
 wd <- getwd()
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 
 for (entitynumber in 1:length(config$metadata$content$entities)){
   entity <- config$metadata$content$entities[[entitynumber]]
   dataset_pid <- entity$identifiers[["id"]]
-  setwd(file.path(file.path,"entities", dataset_pid))
+  setwd(file.path(tunaatlas_qa_global_datasets_catch_path,"entities", dataset_pid))
   action <- entity$data$actions[[1]]
   convert_to_netcdf(action, config, entity, uploadgoogledrive = TRUE)
 } #could also be in global action but keep in mind it is very long

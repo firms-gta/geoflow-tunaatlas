@@ -80,13 +80,13 @@ function(action, entity, config) {
   stepnumber <- 1
   
   #scripts
-  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation"
+  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   #for level 0 - FIRMS
   # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   try(source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R"))) #modified for geoflow
-  try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
+  try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
   #for filtering if needed
@@ -227,7 +227,6 @@ function(action, entity, config) {
     )
     saveRDS(georef_dataset, "data/rawdata.rds")
   }
-  
   
   # for(files in list.files("data")){
   #   if(str_contains("catch", "effort" does not contain "codelist" "conversion factors"))
@@ -1109,14 +1108,14 @@ function(action, entity, config) {
     stepnumber = stepnumber+1
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
     source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
-    
+  
     one_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
     five_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
-    one_degree <- one_degree %>% rowwise() %>% 
+    one_degree_aggregated <- one_degree %>% rowwise() %>% 
       dplyr::mutate(geographic_identifier = transform_cwp_code_from_1deg_to_5deg(geographic_identifier))
     # df_input_not_aggregated <- georef_dataset %>% dplyr::filter(is.null(geographic_identifier))
     # fwrite(df_input_not_aggregated, "data/df_input_not_aggregated.csv")
-    georef_dataset <- rbind(one_degree, five_degree)
+    georef_dataset <- as.data.frame(rbind(one_degree_aggregated, five_degree))
     
     
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
@@ -1323,7 +1322,7 @@ function(action, entity, config) {
 	}
 
 
-	#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/Developement/workflow_etl/scripts/generate_dataset.R
+	#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
 	dataset <- list(
 		dataset = dataset,
 		additional_metadata = NULL,
