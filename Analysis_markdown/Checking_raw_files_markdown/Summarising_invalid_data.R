@@ -24,6 +24,16 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
     dplyr::rename(GRIDTYPE = gridtype)
   
+  try(continent <- st_read(connectionDB, query = "SELECT * from public.continent"))
+  if(is.null(continent)){
+    url= "https://www.fao.org/fishery/geoserver/wfs" 
+    serviceVersion = "1.0.0" 
+    logger = "INFO"
+    # SOURCE: OGC ####
+    WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
+    continent = WFS$getFeatures("fifao:UN_CONTINENT2")
+    
+  }
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
@@ -218,12 +228,6 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   # Parameters for child Rmd
   # load(here(".RData"))
-  url= "https://www.fao.org/fishery/geoserver/wfs" 
-  serviceVersion = "1.0.0" 
-  logger = "INFO"
-  # SOURCE: OGC ####
-  WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
-  continent = WFS$getFeatures("fifao:UN_CONTINENT2")
   
   
   parameters_child <- list(
@@ -244,7 +248,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-  
+  # 
   copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
   copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
@@ -273,31 +277,28 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       render_env$fig.path <- entity_dir
       # Render the R Markdown file
       require(fs)
-      
       # Use the function (make sure to use the correct local paths)
       rmarkdown::render("Recap_on_pre_harmo/Report_on_raw_data.Rmd",
                         output_file = output_dir,
                         envir = render_env
       )
-      rm(render_env)
+      rm(render_env, envir = environment())
     }
   }
-  
   
   rmarkdown::render(file.path(path,"Recap_on_pre_harmo.Rmd"),
                     output_dir = path,
                     envir = environment()
   )
-  
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
   
   sapply(all_files, function(file) {
-    destination_file <- file.path("Recap_on_pre_harmo", basename(file))
+    destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
     file.copy(file, destination_file)
-  })  
+  })
   # 
-  # folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
-  # drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
+  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+  drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
   
   
   setwd(ancient_wd)
