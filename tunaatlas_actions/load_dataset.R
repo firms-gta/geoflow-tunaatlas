@@ -72,35 +72,34 @@ load_dataset <- function(action,entity, config){
   #whether view has to been created
   go_view = upload_to_db && create_materialized_view && !is.na(database_view_name)
   
-  	#-------------------------------------------------------------------------------------------------------------------------
-	#we upload the dataset (in its public enriched form) as it is to public schema
-	#this will be used for services from now, so we can bypass all the materialized view flow that is too time consuming 
-	#-------------------------------------------------------------------------------------------------------------------------
-	#upload to DB public schema
-	if(upload_to_db_public && !is.null(entity$resources$public)){
-		dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public, col_types = list(measurement_unit = col_character())))
-		class(dfenriched_to_load$year) = "integer"
-		class(dfenriched_to_load$month) = "integer"
-		class(dfenriched_to_load$quarter) = "integer"
-		
-		geoflow::writeWorkflowJobDataResource(
-			entity = entity,
-			config = config,
-			obj = dfenriched_to_load,
-			useFeatures = FALSE,
-			resourcename = entity$identifiers$id,
-			useUploadSource = FALSE,
-			createIndexes = TRUE,
-			overwrite = TRUE,
-			append = FALSE,
-			chunk.size = 0L,
-			type = "dbtable"
-		)
-	}
+  #-------------------------------------------------------------------------------------------------------------------------
+  #we upload the dataset (in its public enriched form) as it is to public schema
+  #this will be used for services from now, so we can bypass all the materialized view flow that is too time consuming 
+  #-------------------------------------------------------------------------------------------------------------------------
+  #upload to DB public schema
+  if(upload_to_db_public && !is.null(entity$resources$public)){
+    dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public, col_types = list(measurement_unit = col_character())))
+    class(dfenriched_to_load$year) = "integer"
+    class(dfenriched_to_load$month) = "integer"
+    class(dfenriched_to_load$quarter) = "integer"
+    
+    geoflow::writeWorkflowJobDataResource(
+      entity = entity,
+      config = config,
+      obj = dfenriched_to_load,
+      useFeatures = FALSE,
+      resourcename = entity$identifiers$id,
+      useUploadSource = FALSE,
+      createIndexes = TRUE,
+      overwrite = TRUE,
+      append = FALSE,
+      chunk.size = 0L,
+      type = "dbtable"
+    )
+  }
   
-	#upload to DB sardara schema (complementary, still used for queries in particular on metadata)
-	if(upload_to_db){
-	
+  #upload to DB sardara schema (complementary, still used for queries in particular on metadata)
+  if(upload_to_db){
     #read sources
     df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
     df_codelists <- as.data.frame(readr::read_csv(path_to_codelists, guess_max=0))
@@ -375,7 +374,9 @@ load_dataset <- function(action,entity, config){
       config$logger.info(sprintf("Metadata loaded for dataset '%s'", dataset_pid))
     }else{
       config$logger.info(sprintf("Metadata already existing in DB for dataset '%s'. Skipping metadata insert...", dataset_pid))
-      #TODO update
+      config$logger.info("Removing already existing data to prevent duplicates loading of updated dataset")
+      query_removing_existing_data <- paste0("DELETE FROM " , InputMetadataset$database_table_name, " WHERE id_metadata = ",InputMetadataset$id_metadata)
+      
     }
     dataset_metadata <- dbGetQuery(con, sql)
     PK_metadata<-as.integer(dataset_metadata$id_metadata)
@@ -405,12 +406,12 @@ load_dataset <- function(action,entity, config){
     
     ## Update some metadata elements
     # first drop materialized view
-	if(go_view){
-		config$logger.info(sprintf("Droping materialized view '%s'", dataset_pid))
-		dataset_drop_view_sql <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";"))
-		config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
-		dbSendQuery(con, dataset_drop_view_sql)
-	}
+    if(go_view){
+      config$logger.info(sprintf("Droping materialized view '%s'", dataset_pid))
+      dataset_drop_view_sql <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";"))
+      config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
+      dbSendQuery(con, dataset_drop_view_sql)
+    }
     
     # sql_query_dataset_extraction
     sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
@@ -426,199 +427,198 @@ load_dataset <- function(action,entity, config){
     #TODO --> update new metadataDCMI table?
     dbSendQuery(con,paste0("UPDATE metadata.metadata SET spatial_coverage='",sp_extent,"' WHERE identifier='",InputMetadataset$identifier,"'"))
     
-    
     # metadata_mapping
     # 1) dataset-codelists (le dataset x utilise les codelist x,y,z) 
     for (i in 1:nrow(df_codelists_input)){
       id_metadata_code_list<-dbGetQuery(con,paste0("SELECT id_metadata from metadata.metadata where identifier='",df_codelists_input$code_list_identifier[i],"'"))
       if(nrow(id_metadata_code_list)){
-        dbSendQuery(con,paste0("INSERT INTO metadata.metadata_mapping(metadata_mapping_id_from,metadata_mapping_id_to) VALUES (",PK_metadata,",",id_metadata_code_list,")"))
+        dbSendQuery(con, paste0("INSERT INTO metadata.metadata_mapping(metadata_mapping_id_from, metadata_mapping_id_to) VALUES (", PK_metadata, ",", id_metadata_code_list, ") ON CONFLICT (metadata_mapping_id_from, metadata_mapping_id_to) DO UPDATE SET metadata_mapping_id_from = EXCLUDED.metadata_mapping_id_from, metadata_mapping_id_to = EXCLUDED.metadata_mapping_id_to"))
       }
     }
     # 2) dataset-mappings (le dataset x utilise les mappings x,y,z) -> PAS ENCORE GERE
     # 3) dataset-dataset  (le dataset x utilise les dataset x,y,z) -> PAS ENCORE GERE
     
     
-	}
+  }
   
-    # Create the materialized view if set in the metadata
-
-    # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
-    if(go_view){
-      
-      config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
-      # Check if schema exists
-      list_of_schemas <- dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
-      # Get schema name where to store the materialized view
-      # schema_name_for_view<-sub('\\..*', '', database_view_name)
-      # Create the schema if it does not exist
-      #TODO --> IF fact_tables is used now, then this piece of of code is probably useless and we can remove it
-      if (!(schema_name_for_view %in% list_of_schemas)){
-        config$logger.info(sprintf("Schema '%s' doesn't exist. Creating it...", schema_name_for_view))
-        schema_create_sql <- paste0("CREATE SCHEMA ",schema_name_for_view,"; GRANT USAGE ON SCHEMA ",schema_name_for_view," TO ",user_postgres,";ALTER DEFAULT PRIVILEGES IN SCHEMA ",schema_name_for_view," GRANT SELECT ON TABLES TO ",user_postgres,";")
-        config$logger.info(sprintf("SQL: %s", schema_create_sql))
-        dbSendQuery(con,schema_create_sql)
-      }
-      
-      config$logger.info(sprintf("Dropping materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
-      sql_drop_materialized_view <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";")
-      config$logger.info(sprintf("SQL: %s", sql_drop_materialized_view))
-      dbSendQuery(con, sql_drop_materialized_view)
-      
-      config$logger.info(sprintf("Creating materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
-      sql_create_materialized_view <- paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV,";")
-      config$logger.info(sprintf("SQL: %s", sql_create_materialized_view))
-      dbSendQuery(con, sql_create_materialized_view)
-      
-      #create indexes for main columns
-      if(index_materialized_view){
-        config$logger.info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
-        this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
-        column_names <- colnames(this_view)
-        time_dimensions <- c("time_start", "time_end", "year", "quarter", "month")
-        columns_to_index <- c(column_names[column_names %in% dimensions], time_dimensions)
-        for(column_name in columns_to_index){
-          create_index_sql <- sprintf("CREATE INDEX %s_%s_idx  ON %s.%s (%s);", database_view_name, column_name, schema_name_for_view, database_view_name, column_name)
-          config$logger.info(sprintf("SQL: %s", create_index_sql))
-          dbSendQuery(con, create_index_sql)
-        }
-      }
-      
-      #comment DB materialized view columns
-      if(comment_materialized_view){
-        dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
-        this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
-        column_names <- colnames(this_view)
-        column_comments <-NULL
-        
-        dictionary <- config$getDictionary()
-        if(!is.null(dictionary)){
-          ft <- dictionary$getFeatureTypeById(variable_name)
-          for(i in 1:length(column_names)){
-            member <- ft$getMemberById(column_names[i])
-            if(!is.null(member)){
-              config$logger.info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
-              new_comment <- paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".", column_names[i]),"  IS '",member$def,"';")
-              column_comments <- paste0(column_comments,new_comment)
-            }else{
-              config$logger.warn(sprintf("No dictionary definition for column '%s'. Skip adding comment to materialized view column", column_names[i]))
-            }
-          }
-        }else{
-          for(i in 1:length(column_names)){
-            new_comment <- switch(column_names[i],
-                                  "source_authority" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority"),"  IS 'Source authority in charge of producing the source statistics collated and harmonized.';"),
-                                  "source_authority_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority_label")," IS 'source_authority_label.';"),
-                                  "fishing_fleet" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_fleet")," IS 'Fishing fleet. A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).';"),
-                                  "fishing_fleet_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_fleet_label")," IS 'fishing_fleet_label.';"),
-                                  "gear_type" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_type"),"  IS 'Fishing gear used. Fishing gear are grouped by categories, in accordance with the International Standard Statitical Classficiation of Fishing Gear (ISSCFG) endorsed by the CWP. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "gear_type_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_type_label")," IS 'gear_type_label.';"),
-                                  "gear_group" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group"),"  IS 'Group of fishing gears.';"),
-                                  "gear_group_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group_label")," IS 'gear_group_label.';"),
-                                  "species" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species"),"  IS 'Species captured. The main tuna species are available in all the RFMOs Depending on the RFMO, some non-target species (e.g. some sharks or turtles) are also reported. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "species_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species_label")," IS 'species_label.';"),
-                                  "fishing_mode" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_mode"),"  IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
-                                  "schooltype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_mode_label")," IS 'Type of school.';"),
-                                  "time" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time"),"  IS 'Dating of the fact. In Sardara, the dating is provided as two columns: time_start gives the first date of availability of the measure (included) and time_end gives the last date of availability of the measure (not included). The data in Sardara are mainly defined over the following time steps: 1) Nominal catch are mostly defined on 1 year resolution. 2) Georeferenced catch-and-effort and catch-at-size are mostly defined on 1 month resolution.  This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "time_period" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_period")," IS 'Interval of time over which the measure is defined.';"),
-                                  "time_start" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_start")," IS 'Start time of the fact. Starting time - first date of availability of the measure (inclusive).';"),
-                                  "time_end" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_end")," IS 'End time of the fact.Ending time - last date of availability of the measure (exclusive).';"),
-                                  "month" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".month")," IS 'Month over which the measure is defined (coded as integer from 1 to 12). First month in case of a measure defined over more than one month.';"),
-                                  "quarter" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".quarter")," IS 'Quarter over which the measure is defined (coded as integer from 1 to 4). First quarter in case of a measure defined over more than one quarter.';"),
-                                  "year" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".year")," IS 'Year over which the measure is defined. First year in case of a measure defined over more than one year.';"),
-                                  "id_area" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".id_area")," IS 'Spatial area (zone) where the fact has taken place. The data in Sardara are mainly defined on the following areas: 1) Nominal catch are mostly defined on the areas of competence of the RFMOs. For some RFMOs, the spatial stratification can be thinner: IOTC gives nominal catch at the FAO areas scale and ICCAT gives it at the sampling area scale. 2) Georeferenced catch and effort and catch-at-size are mostly defined on 1 or 5 degree square resolution. In some cases irregular areas are also used (e.g. in IOTC). This may happen when the reporting country/institution does not provide the data at 1/5 degree resolution. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "geographic_identifier" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier")," IS 'String-based Geographic identifier (conventional code name, grid code, transect identifier, location code, etc).';"),
-                                  "geographic_identifier_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier_label")," IS 'geographic_identifier_label.';"),
-                                  # "geom_wkt" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geom_wkt")," IS 'WKT .';"),
-                                  "the_geom" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".the_geom" )," IS 'Geometry in one of the standard data formats (e.g. GML, WKT).';"),
-                                  "longitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".longitude" )," IS 'Longitude of the centroid of the pixel or point location (EPSG:4326).';"),
-                                  "latitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".latitude")," IS 'Latitude of the centroid of the pixel or point location (EPSG:4326).';"),
-                                  "measurement_type" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_type"),"  IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
-                                  "measurement_type_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_type_label")," IS 'measurement_type_label.';"),
-                                  "measurement_value" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_value" )," IS 'the measure of the fact (variable).';"),
-                                  "measurement_unit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_unit")," IS 'measurement_unit.';"),
-                                  "measurement_unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_unit_label" )," IS 'unit_label.';")
-                                  # "catchunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchunit")," IS 'Unit of catch.';"),
-                                  # "effortunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".effortunit")," IS 'Unit of effort.';"),		             
-                                  # "cmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".cmax" )," IS 'cmax';"),
-                                  # "cmin" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".cmin" )," IS 'cmin';"),
-                                  # "ctid" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".ctid" )," IS 'ctid';"),
-                                  # "tableoid" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".tableoid" )," IS 'tableoid';"),
-                                  # "xmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmax" )," IS 'xmax';"),
-                                  # "xmin" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmin" )," IS 'xmin';")
-            )
-            column_comments <- paste0(column_comments,new_comment)
-          }
-        }
-        dbSendQuery(con,column_comments)
+  # Create the materialized view if set in the metadata
+  
+  # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
+  if(go_view){
+    
+    config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
+    # Check if schema exists
+    list_of_schemas <- dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
+    # Get schema name where to store the materialized view
+    # schema_name_for_view<-sub('\\..*', '', database_view_name)
+    # Create the schema if it does not exist
+    #TODO --> IF fact_tables is used now, then this piece of of code is probably useless and we can remove it
+    if (!(schema_name_for_view %in% list_of_schemas)){
+      config$logger.info(sprintf("Schema '%s' doesn't exist. Creating it...", schema_name_for_view))
+      schema_create_sql <- paste0("CREATE SCHEMA ",schema_name_for_view,"; GRANT USAGE ON SCHEMA ",schema_name_for_view," TO ",user_postgres,";ALTER DEFAULT PRIVILEGES IN SCHEMA ",schema_name_for_view," GRANT SELECT ON TABLES TO ",user_postgres,";")
+      config$logger.info(sprintf("SQL: %s", schema_create_sql))
+      dbSendQuery(con,schema_create_sql)
+    }
+    
+    config$logger.info(sprintf("Dropping materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+    sql_drop_materialized_view <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";")
+    config$logger.info(sprintf("SQL: %s", sql_drop_materialized_view))
+    dbSendQuery(con, sql_drop_materialized_view)
+    
+    config$logger.info(sprintf("Creating materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+    sql_create_materialized_view <- paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV,";")
+    config$logger.info(sprintf("SQL: %s", sql_create_materialized_view))
+    dbSendQuery(con, sql_create_materialized_view)
+    
+    #create indexes for main columns
+    if(index_materialized_view){
+      config$logger.info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+      this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
+      column_names <- colnames(this_view)
+      time_dimensions <- c("time_start", "time_end", "year", "quarter", "month")
+      columns_to_index <- c(column_names[column_names %in% dimensions], time_dimensions)
+      for(column_name in columns_to_index){
+        create_index_sql <- sprintf("CREATE INDEX %s_%s_idx  ON %s.%s (%s);", database_view_name, column_name, schema_name_for_view, database_view_name, column_name)
+        config$logger.info(sprintf("SQL: %s", create_index_sql))
+        dbSendQuery(con, create_index_sql)
       }
     }
     
-    #upload dataset to Google drive
-    if(upload_to_googledrive){
-	  
-	  entity$data$access <- "googledrive"
-	
-	  #DATA
-      config$logger.info("Upload dataset (CSV) to Google Drive")
-      # folder_datasets_id <- drive_get("~/geoflow_tunaatlas/data/outputs/datasets")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
-      #standard harmonized dataset
-	  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
-      path_to_dataset_new <- file.path(getwd(), "data", paste0(entity$identifiers[["id"]], ".csv"))
-      file.rename(from = path_to_dataset, to = path_to_dataset_new)
-      id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
+    #comment DB materialized view columns
+    if(comment_materialized_view){
+      dbSendQuery(con,paste0("COMMENT ON MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," IS '",InputMetadataset$title,"';"))
+      this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
+      column_names <- colnames(this_view)
+      column_comments <-NULL
       
-	  #public dataset
-	  if(upload_to_db_public && !is.null(entity$resources$public)){
-		id_csv_dataset_public <- drive_upload(file.path(getwd(), entity$resources$public), as_id(folder_datasets_id), overwrite = TRUE)$id
-	  }
-	  
-	  #VIEWS
-	  config$logger.info("Upload SQL queries (view/data) to Google Drive")
-      # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
-      folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
-	  
-	  #google drive uploads related to sardara db model (SQL query file)
-      if(upload_to_db){
-        
-        #store SQL files on job dir google drive
-        config$logger.info("Write SQL queries (view/data) to job directory")
-        sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
-        file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
-		writeLines(sql_data, file.path("data", file_sql_data))
-		drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
-        entity$data$source <- list(file_sql_data)
-        
-      }
-	  
-	  #google drive uploads related to sardara db model (in case of materialized view)
-	  if(go_view){
-		  
-		  file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
-          file_csv_view <- paste0(entity$identifiers[["id"]],"_view.csv")
-          file_csv_view_without_geom <- paste0(entity$identifiers[["id"]],"_view (without geom).csv")
-		
-		  sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
-          writeLines(sql_view, file.path("data", file_sql_view))
-          this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name),";"))
-          readr::write_csv(this_view, file.path("data", file_csv_view))
-          if("geom_wkt" %in% colnames(this_view)){
-            this_view_without_geom = this_view
-            this_view_without_geom$geom_wkt <- NULL
-            readr::write_csv(this_view_without_geom, file.path("data", file_csv_view_without_geom))
-            drive_upload(file.path("data", file_csv_view_without_geom), as_id(folder_views_id), overwrite = TRUE)
-          }
-          drive_upload(file.path("data", file_csv_view), as_id(folder_views_id), overwrite = TRUE)
-          drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
-          
-          if("geom_wkt" %in% colnames(this_view)){
-            entity$data$source <- list(file_csv_view, file_csv_view_without_geom, file_sql_view, file_sql_data)
+      dictionary <- config$getDictionary()
+      if(!is.null(dictionary)){
+        ft <- dictionary$getFeatureTypeById(variable_name)
+        for(i in 1:length(column_names)){
+          member <- ft$getMemberById(column_names[i])
+          if(!is.null(member)){
+            config$logger.info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
+            new_comment <- paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".", column_names[i]),"  IS '",member$def,"';")
+            column_comments <- paste0(column_comments,new_comment)
           }else{
-            entity$data$source <- list(file_csv_view, file_sql_view, file_sql_data)
+            config$logger.warn(sprintf("No dictionary definition for column '%s'. Skip adding comment to materialized view column", column_names[i]))
           }
-       }
- 
+        }
+      }else{
+        for(i in 1:length(column_names)){
+          new_comment <- switch(column_names[i],
+                                "source_authority" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority"),"  IS 'Source authority in charge of producing the source statistics collated and harmonized.';"),
+                                "source_authority_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".source_authority_label")," IS 'source_authority_label.';"),
+                                "fishing_fleet" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_fleet")," IS 'Fishing fleet. A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).';"),
+                                "fishing_fleet_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_fleet_label")," IS 'fishing_fleet_label.';"),
+                                "gear_type" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_type"),"  IS 'Fishing gear used. Fishing gear are grouped by categories, in accordance with the International Standard Statitical Classficiation of Fishing Gear (ISSCFG) endorsed by the CWP. The number of gears varies a lot depending on the RFMOs. ICCAT, for instance, has around 60 gears while IATTC has 10 gears. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                "gear_type_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_type_label")," IS 'gear_type_label.';"),
+                                "gear_group" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group"),"  IS 'Group of fishing gears.';"),
+                                "gear_group_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".gear_group_label")," IS 'gear_group_label.';"),
+                                "species" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species"),"  IS 'Species captured. The main tuna species are available in all the RFMOs Depending on the RFMO, some non-target species (e.g. some sharks or turtles) are also reported. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                "species_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".species_label")," IS 'species_label.';"),
+                                "fishing_mode" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_mode"),"  IS 'A school is a group of fishes evolving together. The type of school indicates the nature of the school on which the catch has been made: free school, log school, unknown, dolphin.';"),
+                                "schooltype_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".fishing_mode_label")," IS 'Type of school.';"),
+                                "time" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time"),"  IS 'Dating of the fact. In Sardara, the dating is provided as two columns: time_start gives the first date of availability of the measure (included) and time_end gives the last date of availability of the measure (not included). The data in Sardara are mainly defined over the following time steps: 1) Nominal catch are mostly defined on 1 year resolution. 2) Georeferenced catch-and-effort and catch-at-size are mostly defined on 1 month resolution.  This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                "time_period" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_period")," IS 'Interval of time over which the measure is defined.';"),
+                                "time_start" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_start")," IS 'Start time of the fact. Starting time - first date of availability of the measure (inclusive).';"),
+                                "time_end" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".time_end")," IS 'End time of the fact.Ending time - last date of availability of the measure (exclusive).';"),
+                                "month" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".month")," IS 'Month over which the measure is defined (coded as integer from 1 to 12). First month in case of a measure defined over more than one month.';"),
+                                "quarter" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".quarter")," IS 'Quarter over which the measure is defined (coded as integer from 1 to 4). First quarter in case of a measure defined over more than one quarter.';"),
+                                "year" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".year")," IS 'Year over which the measure is defined. First year in case of a measure defined over more than one year.';"),
+                                "id_area" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".id_area")," IS 'Spatial area (zone) where the fact has taken place. The data in Sardara are mainly defined on the following areas: 1) Nominal catch are mostly defined on the areas of competence of the RFMOs. For some RFMOs, the spatial stratification can be thinner: IOTC gives nominal catch at the FAO areas scale and ICCAT gives it at the sampling area scale. 2) Georeferenced catch and effort and catch-at-size are mostly defined on 1 or 5 degree square resolution. In some cases irregular areas are also used (e.g. in IOTC). This may happen when the reporting country/institution does not provide the data at 1/5 degree resolution. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                "geographic_identifier" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier")," IS 'String-based Geographic identifier (conventional code name, grid code, transect identifier, location code, etc).';"),
+                                "geographic_identifier_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geographic_identifier_label")," IS 'geographic_identifier_label.';"),
+                                # "geom_wkt" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".geom_wkt")," IS 'WKT .';"),
+                                "the_geom" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".the_geom" )," IS 'Geometry in one of the standard data formats (e.g. GML, WKT).';"),
+                                "longitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".longitude" )," IS 'Longitude of the centroid of the pixel or point location (EPSG:4326).';"),
+                                "latitude" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".latitude")," IS 'Latitude of the centroid of the pixel or point location (EPSG:4326).';"),
+                                "measurement_type" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_type"),"  IS 'Fate of the catch, i.e. landed, discarded, unknown. Given the nature of the data, only landing data are currently available in SARDARA, with a very few exceptions of discarded fishes for ICCAT. This table is a dimension of the data warehouse: a list of codes which gives the context of the values stored in the fact table.';"),
+                                "measurement_type_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_type_label")," IS 'measurement_type_label.';"),
+                                "measurement_value" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_value" )," IS 'the measure of the fact (variable).';"),
+                                "measurement_unit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_unit")," IS 'measurement_unit.';"),
+                                "measurement_unit_label" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".measurement_unit_label" )," IS 'unit_label.';")
+                                # "catchunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".catchunit")," IS 'Unit of catch.';"),
+                                # "effortunit" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".effortunit")," IS 'Unit of effort.';"),		             
+                                # "cmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".cmax" )," IS 'cmax';"),
+                                # "cmin" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".cmin" )," IS 'cmin';"),
+                                # "ctid" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".ctid" )," IS 'ctid';"),
+                                # "tableoid" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".tableoid" )," IS 'tableoid';"),
+                                # "xmax" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmax" )," IS 'xmax';"),
+                                # "xmin" = paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".xmin" )," IS 'xmin';")
+          )
+          column_comments <- paste0(column_comments,new_comment)
+        }
+      }
+      dbSendQuery(con,column_comments)
     }
-
+  }
+  
+  #upload dataset to Google drive
+  if(upload_to_googledrive){
+    
+    entity$data$access <- "googledrive"
+    
+    #DATA
+    config$logger.info("Upload dataset (CSV) to Google Drive")
+    # folder_datasets_id <- drive_get("~/geoflow_tunaatlas/data/outputs/datasets")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
+    #standard harmonized dataset
+    folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+    path_to_dataset_new <- file.path(getwd(), "data", paste0(entity$identifiers[["id"]], ".csv"))
+    file.rename(from = path_to_dataset, to = path_to_dataset_new)
+    id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id
+    
+    #public dataset
+    if(upload_to_db_public && !is.null(entity$resources$public)){
+      id_csv_dataset_public <- drive_upload(file.path(getwd(), entity$resources$public), as_id(folder_datasets_id), overwrite = TRUE)$id
+    }
+    
+    #VIEWS
+    config$logger.info("Upload SQL queries (view/data) to Google Drive")
+    # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
+    folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
+    
+    #google drive uploads related to sardara db model (SQL query file)
+    if(upload_to_db){
+      
+      #store SQL files on job dir google drive
+      config$logger.info("Write SQL queries (view/data) to job directory")
+      sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
+      file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
+      writeLines(sql_data, file.path("data", file_sql_data))
+      drive_upload(file.path("data", file_sql_data), as_id(folder_views_id), overwrite = TRUE)
+      entity$data$source <- list(file_sql_data)
+      
+    }
+    
+    #google drive uploads related to sardara db model (in case of materialized view)
+    if(go_view){
+      
+      file_sql_view <-  paste0(entity$identifiers[["id"]],"_view.sql")
+      file_csv_view <- paste0(entity$identifiers[["id"]],"_view.csv")
+      file_csv_view_without_geom <- paste0(entity$identifiers[["id"]],"_view (without geom).csv")
+      
+      sql_view <- sprintf("SELECT * FROM fact_tables.%s", entity$identifiers[["id"]])
+      writeLines(sql_view, file.path("data", file_sql_view))
+      this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name),";"))
+      readr::write_csv(this_view, file.path("data", file_csv_view))
+      if("geom_wkt" %in% colnames(this_view)){
+        this_view_without_geom = this_view
+        this_view_without_geom$geom_wkt <- NULL
+        readr::write_csv(this_view_without_geom, file.path("data", file_csv_view_without_geom))
+        drive_upload(file.path("data", file_csv_view_without_geom), as_id(folder_views_id), overwrite = TRUE)
+      }
+      drive_upload(file.path("data", file_csv_view), as_id(folder_views_id), overwrite = TRUE)
+      drive_upload(file.path("data", file_sql_view), as_id(folder_views_id), overwrite = TRUE)
+      
+      if("geom_wkt" %in% colnames(this_view)){
+        entity$data$source <- list(file_csv_view, file_csv_view_without_geom, file_sql_view, file_sql_data)
+      }else{
+        entity$data$source <- list(file_csv_view, file_sql_view, file_sql_data)
+      }
+    }
+    
+  }
+  
   
 }
