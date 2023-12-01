@@ -376,6 +376,7 @@ load_dataset <- function(action,entity, config){
       config$logger.info(sprintf("Metadata already existing in DB for dataset '%s'. Skipping metadata insert...", dataset_pid))
       config$logger.info("Removing already existing data to prevent duplicates loading of updated dataset")
       query_removing_existing_data <- paste0("DELETE FROM " , InputMetadataset$database_table_name, " WHERE id_metadata = ",InputMetadataset$id_metadata)
+      dataset_metadata <- dbSendQuery(con, query_removing_existing_data)
       
     }
     dataset_metadata <- dbGetQuery(con, sql)
