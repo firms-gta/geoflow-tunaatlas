@@ -70,19 +70,21 @@ mappings <- executeWorkflow(here("tunaatlas_qa_mappings.json"))
 
 ## Nominal data
 
-nominal_catch <- executeWorkflow(here("Nominal_catch.json"))
+nominal_catch <- executeWorkflow(here::here("Nominal_catch.json"))
 
 ## Georeferenced catch
 
-raw_data_georef <- executeWorkflow(here("All_raw_data_georef.json"))
+raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
 
 ## Goereferenced effort
 
-raw_data_georef_effort <- executeWorkflow(here("All_raw_data_georef_effort.json"))
+raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))
 
 
 ## Summarising the invalid data for all the datasets pre-harmonized
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+config <- initWorkflow(here::here("All_raw_data_georef.json"), handleMetadata = FALSE)
+con <- config$software$output$dbi
 Summarising_invalid_data(raw_data_georef, connectionDB = con)
 Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
 
