@@ -52,9 +52,9 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
   default_file <- "geoserver_sdi_lab.env"
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
-if(file.exists(here("geoserver_cines.env"))){
-  default_file <- here("geoserver_cines.env")
-} # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
+# if(file.exists(here("geoserver_cines.env"))){
+#   default_file <- here("geoserver_cines.env")
+# } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
