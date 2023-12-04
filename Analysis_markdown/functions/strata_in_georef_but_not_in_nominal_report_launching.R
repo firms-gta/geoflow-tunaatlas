@@ -1,10 +1,9 @@
 strata_in_georef_but_not_in_nominal_report_launching = function(main.dir, connectionDB ){
   ancient_wd <- getwd()
-  setwd(main_dir)
+  setwd(main.dir)
   path = getwd()
   if(file.exists(file.path(main.dir, "entities/global_nominal_catch_firms/data/global_nominal_catch_firms_harmonized.csv"))){
 #strata_in_georef_but_not_in_nominal_report
-# copyrmd("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/strata_in_georef_but_no_nominal.Rmd")
 
 nominal <- as.data.frame(read_csv(file.path(main.dir,"entities/global_nominal_catch_firms/data/global_nominal_catch_firms_harmonized.csv")) %>% 
                            mutate(measurement_unit ="Tons")) %>% 
@@ -12,9 +11,6 @@ nominal <- as.data.frame(read_csv(file.path(main.dir,"entities/global_nominal_ca
   dplyr::mutate(gear_type = as.character(gear_type))
 try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.rds")))
 try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.rds")))
-georef_mapped <- read_csv("~/Téléchargements/rds.csv", 
-                col_types = cols(gear_type = col_character())) %>% 
-  dplyr::select(-c(GRIDTYPE.x,GRIDTYPE.y,Gear.x, Gear.y, species_group.y, species_group.x))
 
 georef_mapped <- georef_mapped %>% dplyr::mutate(year =lubridate::year(time_start)) %>% 
   dplyr::select("fishing_fleet"  ,"geographic_identifier",   "species"    ,      "measurement_unit"          ,  "gear_type", "source_authority",
@@ -92,6 +88,9 @@ georef_no_nominal_groupped_all <- tidying_GTA_data_for_comparison(dataframe = ge
 
 
 concerned_trfmos <- unique(c(unique(georef_no_nominal$source_authority),unique(georef_sup_nominal$source_authority)))
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+# 
+copy_project_files(original_repo_path = here::here("Analysis_markdown/"), new_repo_path = getwd())
 
 tryCatch({
   for (i in concerned_trfmos){
@@ -115,6 +114,7 @@ tryCatch({
     
     
     child_env_global = new.env()
+    
     list2env(parameters_child_global, env = child_env_global)
     rmarkdown::render("strata_in_georef_but_no_nominal.Rmd",
                       envir = child_env_global,
