@@ -52,9 +52,9 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
   default_file <- "geoserver_sdi_lab.env"
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
-if(file.exists(here("geoserver_cines.env"))){
-  default_file <- here("geoserver_cines.env")
-} # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
+# if(file.exists(here("geoserver_cines.env"))){
+#   default_file <- here("geoserver_cines.env")
+# } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
@@ -97,7 +97,7 @@ tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas
 ## Recapitulation of all the treatment done for each final dataset
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), handleMetadata = FALSE)
-con <- config$software$input$dbi
+con <- config$software$output$dbi
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
 ## Netcdf creation (24h for level 2)
@@ -118,6 +118,19 @@ for (entitynumber in 1:length(config$metadata$content$entities)){
 setwd(wd)
 
 # Checking on created data
+required_packages <- c("webshot",
+                       "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+                       "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
+                       "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
+                       "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
+)
+
+for (package in required_packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package, dependencies = TRUE)
+  }
+  library(package, character.only = TRUE)
+}
 
 upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
                     connectionDB = con)

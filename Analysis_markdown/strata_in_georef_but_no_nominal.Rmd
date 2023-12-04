@@ -133,6 +133,13 @@ cat(res2, sep =  "\\clearpage")
 
 ```
 
+```{r exitifnosup}
+if(nrow(georef_sup_to_nom)==0){
+  knitr::knit_exit()
+}
+```
+
+
 ## Stratas with declaration superior in georeferenced than in nominal 
 
 **For this analysis, we will only compare data with superior value in georeferenced than in nominal by `r strata`**
