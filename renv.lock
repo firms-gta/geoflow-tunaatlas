@@ -964,15 +964,15 @@
     },
     "geoflow": {
       "Package": "geoflow",
-      "Version": "0.20230720",
+      "Version": "0.20231109",
       "Source": "GitHub",
       "Remotes": "eblondel/geometa, eblondel/geonode4R",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "geoflow",
-      "RemoteUsername": "bastienird",
+      "RemoteUsername": "eblondel",
       "RemoteRef": "HEAD",
-      "RemoteSha": "4adef1f9d33d010b53da0e64fb6ff6d29fbfb974",
+      "RemoteSha": "7dc16da98cb20026c330eeb1698599a6d964651e",
       "Requirements": [
         "R",
         "R6",
@@ -998,7 +998,7 @@
         "xml2",
         "zip"
       ],
-      "Hash": "b1b3ffa3db3b99788033208af79fa320"
+      "Hash": "52787f06e95581c621147f1ec492afb3"
     },
     "geojsonsf": {
       "Package": "geojsonsf",
