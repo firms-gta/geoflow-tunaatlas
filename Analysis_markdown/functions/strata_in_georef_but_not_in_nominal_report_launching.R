@@ -160,7 +160,7 @@ for (file in files) {
 
 if(uploadgoogledrive){
   # config$logger.info("Upload netcdf to Google Drive")
-  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
+  folder_datasets_id <- "1vvmdaT80ZFHnDZcJyhyIOsf_mOJjB5tA"
   path_to_dataset_new <- file.path(file)
   drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
 }

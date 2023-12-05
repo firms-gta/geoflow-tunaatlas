@@ -118,11 +118,13 @@ Summarising_step = function(main_dir, connectionDB, config){
       list2env(parameters_child_global,render_env)
       
       # Render the R Markdown file
-     
+      folder_datasets_id <- "1IcKW65t4Dlj2lv4YTUiM-WGwbaiigmXb"
       rmarkdown::render("tableau_recap_global_action_effort.Rmd",
                         output_file = output_dir,
                         envir = render_env, output_format = "html_document2"
       )
+      drive_upload(file.path(output_dir,"tableau_recap_global_action_effort.html"), as_id(folder_datasets_id), overwrite = TRUE)
+      
       rm(render_env)
     }
   }
