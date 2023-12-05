@@ -68,15 +68,15 @@ mappings <- executeWorkflow(here("tunaatlas_qa_mappings.json"))
 # Third step is pre-harmonizing the datasets provide by tRFMOs: This step is divided in 3 
 # substep depending on the type of the data:
 
-## Nominal data
+## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory
 
 nominal_catch <- executeWorkflow(here::here("Nominal_catch.json"))
 
-## Georeferenced catch
+## Georeferenced catch: These datasets contains catch AND EFFORT for some data as effort are used to raise catch data for level 0 to 2
 
 raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
 
-## Goereferenced effort
+## Goereferenced effort: These datasets are used to create the georeferenced effort
 
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))
 
@@ -88,19 +88,22 @@ con <- config$software$output$dbi
 Summarising_invalid_data(raw_data_georef, connectionDB = con)
 Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
 
+## These two lines of codes creates a recap for each entity of the irregularities of the data for the datasets. 
+# They also creates a report summarising the irregular data for each entity so it is easier to target them
 
-# Create 5 datasets catch and effort
+
+# Create 5 datasets catch and effort. These entities are the final one published on zenodo. 
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), dir = here::here())
 
 
-## Recapitulation of all the treatment done for each final dataset
+## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), handleMetadata = FALSE)
 con <- config$software$output$dbi
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
-## Netcdf creation (24h for level 2)
+## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_actions/convert_to_netcdf.R")
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
@@ -132,11 +135,21 @@ for (package in required_packages) {
   library(package, character.only = TRUE)
 }
 
+# These step is to be done once nominal and georeferenced data are created. It extract irregular data that is :
+# - Existing on the georeferenced dataset but not in the nominal
+# - Superior in the georeferenced dataset than in the nominal
+# The strata_in_georef_but_not_in_nominal_report_launching function return several html files for each tRFMO and 
+# for several stratas used to inspect the data (more details in the report)
+
+# This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
+
 upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
                     connectionDB = con)
 
-# Putting dataset on geoserver, geonetwork and zenodo
-tunaatlas_qa_services <- executeWorkflow("tunaatlas_qa_services.json")
+
+
+# Putting dataset on geoserver, geonetwork and zenodo #For now zenodo does not work due to issue with api
+tunaatlas_qa_services <- initWorkflow("tunaatlas_qa_services.json")
 
 # Enriching data with copernicus data
 all_files <- list.files(getwd(), pattern = "\\.nc$", full.names = TRUE, recursive = TRUE)
