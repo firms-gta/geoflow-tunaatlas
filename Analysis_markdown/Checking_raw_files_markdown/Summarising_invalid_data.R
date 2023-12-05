@@ -290,15 +290,19 @@ Summarising_invalid_data = function(main_dir, connectionDB){
                     output_dir = path,
                     envir = environment()
   )
+  folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
+  
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
   
   sapply(all_files, function(file) {
     destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
     file.copy(file, destination_file)
+    path_to_dataset_new <- file.path(file)
+    drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
+    
   })
   # 
-  folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
-  drive_upload(file.path(getwd(),"Recap_on_pre_harmo.pdf"), "Recap_on_pre_harmo.pdf", overwrite = TRUE)
+  drive_upload(file.path(getwd(),"Recap_on_pre_harmo.html"), as_id(folder_datasets_id), overwrite = TRUE)
   
   
   setwd(ancient_wd)

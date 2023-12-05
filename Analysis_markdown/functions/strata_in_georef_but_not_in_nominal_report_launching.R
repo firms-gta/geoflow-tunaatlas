@@ -1,4 +1,4 @@
-strata_in_georef_but_not_in_nominal_report_launching = function(main.dir, connectionDB ){
+strata_in_georef_but_not_in_nominal_report_launching = function(main.dir, connectionDB,uploadgoogledrive = TRUE ){
   ancient_wd <- getwd()
   setwd(main.dir)
   path = getwd()
@@ -156,7 +156,16 @@ create_new_name <- function(file_path) {
 for (file in files) {
   new_name <- create_new_name(file)
   file.copy(file, file.path(target_directory, new_name))
+
+
+if(uploadgoogledrive){
+  # config$logger.info("Upload netcdf to Google Drive")
+  folder_datasets_id <- "1vvmdaT80ZFHnDZcJyhyIOsf_mOJjB5tA"
+  path_to_dataset_new <- file.path(file)
+  drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
 }
+}
+
 
 upgradded_nominal <- rbind(nominal,georef_no_nominal_all)
 setwd(ancient_wd)
