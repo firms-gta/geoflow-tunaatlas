@@ -135,7 +135,7 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 
 ```
 
-```{r Main-caracteristics-of-dataset, results='asis', eval=!unique_analyse}
+```{r Main-differences, results='asis', eval=!unique_analyse}
 
 res <- knitr::knit_child("Main_differences.Rmd", quiet = TRUE, envir = environment())
 
