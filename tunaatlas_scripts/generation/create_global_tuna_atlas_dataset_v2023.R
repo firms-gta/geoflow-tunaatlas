@@ -191,17 +191,17 @@ function(action, entity, config) {
   georef_dataset <- dataset
   class(georef_dataset$measurement_value) <- "numeric"
   rm(dataset)
+  browser()
   
   ### filtering on minimum time_start (TRUE  by default)
-  
   if (filtering_on_minimum_year_declared) {
     stepLogger(level = 0, step = stepnumber, msg = "Filtering on minimum time_start")
     stepnumber = stepnumber+1
     
     # extract the maximum year of declaration for each source_authority
     max_years <- georef_dataset %>%
-      group_by(source_authority) %>%
-      summarise(max_time_start = max(time_start))
+      dplyr::group_by(source_authority) %>%
+      dplyr::summarise(max_time_start = max(time_start))
     
     # check if not all the source_authority columns have the same maximum year of declaration
     if (length(unique(max_years$max_time_start)) > 1) {
@@ -263,8 +263,8 @@ function(action, entity, config) {
         
         # extract the maximum year of declaration for each source_authority
         max_years <- georef_dataset %>%
-          group_by(source_authority) %>%
-          summarise(max_time_start = max(time_start))
+          dplyr::group_by(source_authority) %>%
+          dplyr::summarise(max_time_start = max(time_start))
         
         # check if not all the source_authority columns have the same maximum year of declaration
         if (length(unique(max_years$max_time_start)) > 1) {
@@ -322,8 +322,8 @@ function(action, entity, config) {
         
         # extract the maximum year of declaration for each source_authority
         max_years <- georef_dataset %>%
-          group_by(source_authority) %>%
-          summarise(max_time_start = max(time_start))
+          dplyr::group_by(source_authority) %>%
+          dplyr::summarise(max_time_start = max(time_start))
         
         # check if not all the source_authority columns have the same maximum year of declaration
         if (length(unique(max_years$max_time_start)) > 1) {
@@ -1108,7 +1108,7 @@ function(action, entity, config) {
     stepnumber = stepnumber+1
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
     source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
-  
+    
     one_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
     five_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
     one_degree_aggregated <- one_degree %>% rowwise() %>% 
@@ -1284,95 +1284,95 @@ function(action, entity, config) {
   rm(georef_dataset)
   
   gc()
-	#----------------------------------------------------------------------------------------------------------------------------
-	#@eblondel additional formatting for next time support
-	dataset$time_start <- as.Date(dataset$time_start)
-	dataset$time_end <- as.Date(dataset$time_end)
-	#we enrich the entity with temporal coverage
-	dataset_temporal_extent <-
-	paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
-	entity$setTemporalExtent(dataset_temporal_extent)
-
-	#if there is any entity relation with name 'codelists' we read the file
-	df_codelists <- NULL
-	cl_relations <-
-	entity$relations[sapply(entity$relations, function(x) {
-	  x$name == "codelists"
-	})]
-	if (length(cl_relations) > 0) {
-		config$logger.info("Appending codelists to global dataset generation action output")
-		googledrive_baseurl <- "https://drive.google.com/open?id="
-		if (startsWith(cl_relations[[1]]$link, googledrive_baseurl)) {
-		  #managing download through google drive
-		  config$logger.info("Downloading file using Google Drive R interface")
-		  drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
-		  drive_id <-
-			unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-		  googledrive::drive_download(file = googledrive::as_id(drive_id),
-									  path = file.path("data", paste0(
-										entity$identifiers[["id"]], "_codelists.csv"
-									  )), overwrite = TRUE)
-		  df_codelists <-
-			read.csv(file.path("data", paste0(
-			  entity$identifiers[["id"]], "_codelists.csv"
-			)))
-		} else{
-		  df_codelists <- read.csv(cl_relations[[1]]$link)
-		}
-	}
-
-
-	#@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-	dataset <- list(
-		dataset = dataset,
-		additional_metadata = NULL,
-		#nothing here
-		codelists = df_codelists #in case the entity was provided with a link to codelists
-	)
-
-
-	# if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
-	#   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
-	#   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
-	# }
-	# ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
-
-	#@geoflow -> export as csv
-	#-------------------------------------------------------
-	output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-	readr::write_csv(dataset$dataset, output_name_dataset)
-	#-------------------------------------------------------
-	
-	output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
-	dataset_enriched = dataset$dataset
-	dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
-	dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
-	dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
-	columns_to_keep <- c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")
-	columns_to_keep <- intersect(colnames(dataset_enriched), columns_to_keep)
-	
-	dataset_enriched = dataset_enriched[,columns_to_keep]
-	readr::write_csv(dataset_enriched, output_name_dataset_public)
-	
-	#-------------------------------------------------------
-	output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
-	write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
-	# ---------------------------------------------------------------------------------------------------------------------------
-	entity$addResource("harmonized", output_name_dataset)
-	entity$addResource("public", output_name_dataset_public)
-	entity$addResource("codelists", output_name_codelists)
-	entity$addResource("geom_table", opts$geom_table)
-	#### END
-	config$logger.info(
-	"-----------------------------------------------------------------------------------------------------"
-	)
-	config$logger.info("End: Your tuna atlas dataset has been created!")
-	config$logger.info(
-	"-----------------------------------------------------------------------------------------------------"
-	)
-	# write.csv(options)
-
-	rm(georef_dataset)
-
-	gc()
+  #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
+  dataset$time_start <- as.Date(dataset$time_start)
+  dataset$time_end <- as.Date(dataset$time_end)
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <-
+    paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
+  entity$setTemporalExtent(dataset_temporal_extent)
+  
+  #if there is any entity relation with name 'codelists' we read the file
+  df_codelists <- NULL
+  cl_relations <-
+    entity$relations[sapply(entity$relations, function(x) {
+      x$name == "codelists"
+    })]
+  if (length(cl_relations) > 0) {
+    config$logger.info("Appending codelists to global dataset generation action output")
+    googledrive_baseurl <- "https://drive.google.com/open?id="
+    if (startsWith(cl_relations[[1]]$link, googledrive_baseurl)) {
+      #managing download through google drive
+      config$logger.info("Downloading file using Google Drive R interface")
+      drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
+      drive_id <-
+        unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
+      googledrive::drive_download(file = googledrive::as_id(drive_id),
+                                  path = file.path("data", paste0(
+                                    entity$identifiers[["id"]], "_codelists.csv"
+                                  )), overwrite = TRUE)
+      df_codelists <-
+        read.csv(file.path("data", paste0(
+          entity$identifiers[["id"]], "_codelists.csv"
+        )))
+    } else{
+      df_codelists <- read.csv(cl_relations[[1]]$link)
+    }
+  }
+  
+  
+  #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
+  dataset <- list(
+    dataset = dataset,
+    additional_metadata = NULL,
+    #nothing here
+    codelists = df_codelists #in case the entity was provided with a link to codelists
+  )
+  
+  
+  # if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
+  #   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
+  #   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
+  # }
+  # ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
+  
+  #@geoflow -> export as csv
+  #-------------------------------------------------------
+  output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
+  readr::write_csv(dataset$dataset, output_name_dataset)
+  #-------------------------------------------------------
+  
+  output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
+  dataset_enriched = dataset$dataset
+  dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
+  dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
+  dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
+  columns_to_keep <- c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")
+  columns_to_keep <- intersect(colnames(dataset_enriched), columns_to_keep)
+  
+  dataset_enriched = dataset_enriched[,columns_to_keep]
+  readr::write_csv(dataset_enriched, output_name_dataset_public)
+  
+  #-------------------------------------------------------
+  output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
+  write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
+  # ---------------------------------------------------------------------------------------------------------------------------
+  entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("public", output_name_dataset_public)
+  entity$addResource("codelists", output_name_codelists)
+  entity$addResource("geom_table", opts$geom_table)
+  #### END
+  config$logger.info(
+    "-----------------------------------------------------------------------------------------------------"
+  )
+  config$logger.info("End: Your tuna atlas dataset has been created!")
+  config$logger.info(
+    "-----------------------------------------------------------------------------------------------------"
+  )
+  # write.csv(options)
+  
+  rm(georef_dataset)
+  
+  gc()
 }
