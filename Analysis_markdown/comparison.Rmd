@@ -1,5 +1,5 @@
 ---
-title: 'Comparison of two data sets'
+title: "`r ifelse(exists('title'), title, 'Comparison of two datasets')`"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 author:
   - name: Bastien Grasset
@@ -50,14 +50,14 @@ graphics: TRUE # Needed to be able to include images
 tables: TRUE # Needed to be able to include tables
 fancyhdr:
   first:
-    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
-    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
+    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
+    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
     headrulewidth: 0pt
     #footleft: A left foot
     footrulewidth: 0pt
   subsequent:
-    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
-    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparaison')`"
+    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
+    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
     headrulewidth: 1pt
     footrulewidth: 0pt
 ---
@@ -151,6 +151,7 @@ res <- knitr::knit_child("Main_differences.Rmd", quiet = TRUE, envir = environme
 cat(res, sep =  "\\clearpage")
 
 ```
+
 
 ```{r Main-caracteristics-of-dataset, results='asis', eval = coverage}
 
