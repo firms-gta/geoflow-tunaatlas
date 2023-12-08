@@ -115,7 +115,7 @@ tryCatch({
     
     child_env_global = new.env()
     
-    list2env(parameters_child_global, env = child_env_global)
+    list2env(parameters_child_global, envir = child_env_global)
     rmarkdown::render("strata_in_georef_but_no_nominal.Rmd",
                       envir = child_env_global,
                       output_file = "strata_in_georef_but_no_nominal.html", 
