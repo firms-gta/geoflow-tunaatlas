@@ -69,6 +69,14 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment
 
 ```
 
+```{r eval=exists("Add_lines") && file.exists(Add_lines), results='asis'}
+
+res <- knitr::knit_child(Add_lines, quiet = TRUE, envir = environment())
+cat(res)
+
+```
+
+
 ```{r sourcingfunctionsmarkdown,include = FALSE}
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
@@ -96,6 +104,7 @@ source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developeme
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Groupping_differences.R", local = TRUE)
 
 ```
+
 
 ```{r explenation, results='asis'}
 
