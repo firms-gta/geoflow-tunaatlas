@@ -302,7 +302,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
     
   })
   # 
-  drive_upload(file.path(getwd(),"Recap_on_pre_harmo.html"), as_id(folder_datasets_id), overwrite = TRUE)
+  path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
+  drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
   
   
   setwd(ancient_wd)

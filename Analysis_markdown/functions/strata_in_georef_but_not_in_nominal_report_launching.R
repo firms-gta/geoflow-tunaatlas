@@ -9,15 +9,15 @@ nominal <- as.data.frame(read_csv(file.path(main.dir,"entities/global_nominal_ca
                            mutate(measurement_unit ="Tons")) %>% 
   dplyr::mutate(gear_type = as.numeric(gear_type)) %>% 
   dplyr::mutate(gear_type = as.character(gear_type))
-try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.rds")))
-try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.rds")))
+try(georef_mapped <- fread(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.csv")))
+try(georef_mapped <- fread(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.csv")))
 
 georef_mapped <- georef_mapped %>% dplyr::mutate(year =lubridate::year(time_start)) %>% 
   dplyr::select("fishing_fleet"  ,"geographic_identifier",   "species"    ,      "measurement_unit"          ,  "gear_type", "source_authority",
   "year", "measurement_value") %>%
   dplyr::filter(measurement_unit %in% c("t", "Tons"))%>%
   dplyr::mutate(year = as.character(year))%>%
-  dplyr::mutate(year = paste0(year, "-01-01")) 
+  dplyr::mutate(year = paste0(year, "-01-01")) %>% dplyr::mutate(gear_type = as.character(gear_type))
 
 row.names(georef_mapped) <- NULL
 nominal <- (nominal)%>% mutate(year = lubridate::year(time_start)) %>% 
