@@ -748,7 +748,7 @@ function(action, entity, config) {
         
         config$logger.info("Start raising process")
         
-        if (fact == "catch") {
+        if (opts$fact == "catch") {
           config$logger.info("Fact=catch !")
           dataset_to_compute_rf = georef_dataset
           # year is used as a dimension to match the conversion factors dimension 
@@ -757,46 +757,34 @@ function(action, entity, config) {
           }
           
           
-        } else if (fact == "effort") {
+        } else if (opts$fact == "effort") {
           ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
           cat(
             "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
           )
           dataset_catch <- NULL
           rfmo_dataset <-
-            get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
+            get_rfmos_datasets_level0("IOTC", entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
           rfmo_dataset <-
-            get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
+            get_rfmos_datasets_level0("WCPFC", entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
           rfmo_dataset <-
-            get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
+            get_rfmos_datasets_level0("CCSBT", entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
           rfmo_dataset <- get_rfmos_datasets_level0(
-            "IATTC",
-            "catch",
-            datasets_year_release,
-            iattc_ps_raise_flags_to_schooltype =
-              iattc_ps_raise_flags_to_schooltype,
-            iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
-              iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-            iattc_ps_catch_billfish_shark_raise_to_effort =
-              TRUE
-          )
+            "IATTC",entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
-          rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
-                                                    "catch",
-                                                    datasets_year_release,
-                                                    iccat_ps_include_type_of_school =
-                                                      iccat_ps_include_type_of_school)
+          rfmo_dataset <- get_rfmos_datasets_level0(
+            "ICCAT",entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
@@ -815,7 +803,7 @@ function(action, entity, config) {
             substr(as.character(dataset_catch$time_start), 1, 10)
           dataset_catch$time_end <-
             substr(as.character(dataset_catch$time_end), 1, 10)
-          if (unit_conversion_convert == "TRUE") {
+          if (opts$unit_conversion_convert == "TRUE") {
             # We use our conversion factors (IRD). This is now an input parameter of the script
             #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
             #
