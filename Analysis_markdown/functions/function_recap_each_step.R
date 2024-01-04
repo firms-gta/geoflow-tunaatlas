@@ -23,7 +23,7 @@ function_recap_each_step=function(nom_dossier, nomrds, explication="",fonctions=
   } else {options_written = "NONE"}
   options_written_total <- assign("options_written_total", paste0(options_written_total, options_written), envir = .GlobalEnv)
   explenation_total <- assign("explenation_total", paste0(explenation_total, explication), envir = .GlobalEnv)
-  fwrite(nomrds,paste0(nom_dossier,"/rds.csv"))
+  saveRDS(nomrds,paste0(nom_dossier,"/rds.rds"))
   write(explication, paste0(nom_dossier,"/explication.txt")) 
   write(explenation_total, paste0(nom_dossier,"/explenation_total.txt")) 
   write(fonctions, paste0(nom_dossier,"/fonctions.txt"))
