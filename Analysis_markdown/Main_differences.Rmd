@@ -27,7 +27,7 @@ cat(res, sep =  "\\clearpage")
 
 \clearpage
 
-```{r Diff-for-other-dimensions, results='asis', eval = (length(Other_dimensions != 0))}
+```{r Diff-for-other-dimensions, results='asis', eval = (length(Other_dimensions) != 0)}
 
 res <- knitr::knit_child("Differences_for_each_dimensions.Rmd", quiet = TRUE, envir = environment())
 
