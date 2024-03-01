@@ -81,7 +81,7 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment
 ```{r child-env-base, include = FALSE}
 
 child_env_base <- new.env(parent = environment())
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
 
 
 ```
