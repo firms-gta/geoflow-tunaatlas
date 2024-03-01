@@ -279,7 +279,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       require(fs)
       # Use the function (make sure to use the correct local paths)
       rmarkdown::render("Recap_on_pre_harmo/Report_on_raw_data.Rmd",
-                        output_file = output_dir,
+                        output_dir = entity_dir, output_file =output_file_name ,
                         envir = render_env
       )
       rm(render_env, envir = environment())
