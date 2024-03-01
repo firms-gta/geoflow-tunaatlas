@@ -54,7 +54,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   
   # PART 1: Identify entities and their respective tRFMOs
-  entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
+  entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
   
   # Function to determine tRFMO from entity name
   determine_tRFMO <- function(entity_name) {
