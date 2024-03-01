@@ -1,5 +1,4 @@
 Tidying_and_mapping_data = function(action, entity, config) {
-  
   # Define all required packages
   required_packages <- c(
     "webshot", "here", "usethis", "ows4R", "sp", "data.table", "flextable", 
@@ -284,7 +283,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
     }
     
   }
-  
   #----------Map code lists -------------------------------------------------------------------------------------------------------------------------------------------------
   #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
   #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -305,7 +303,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
         colClasses = "character"
       )
     mapping_keep_src_code <- if (!is.null(opts$mapping_keep_src_code)) opts$mapping_keep_src_code else FALSE
-    
     config$logger.info("Mapping code lists of georeferenced datasets...")
     mapping_codelist <-
       map_codelists(
@@ -317,15 +314,15 @@ Tidying_and_mapping_data = function(action, entity, config) {
         summary_mapping = TRUE,
         source_authority_to_map = source_authority_to_map
       ) #this map condelist function is to retrieve the mapping dataset used
-    
+
     georef_dataset <- mapping_codelist$dataset_mapped
     if(opts$fact == "catch"){
-      georef_dataset <- georef_dataset %>% mutate(ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
-                                                  ifelse(species == "UNK", "MZZ", species),
-                                                  ifelse(gear_type == "UNK", "99.9", gear_type))
+      georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
+                                                  species = ifelse(species == "UNK", "MZZ", species),
+                                                  gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
     } else {
-      georef_dataset <- georef_dataset %>% mutate(ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
-                                                  ifelse(gear_type == "UNK", "99.9", gear_type))
+      georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
+                                                  gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
       
     }
     

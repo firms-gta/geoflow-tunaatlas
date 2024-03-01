@@ -41,6 +41,18 @@ if (!require(geoflow)) {
   require(geoflow)
 }
 
+executeAndRename <- function(executed_file, suffix) {
+  # Execute workflow
+  # executed_file <- executeWorkflow(here::here(executed_file))
+  
+  # Derive folder and file names
+  folder_file <- file.path("jobs", basename(executed_file))
+  
+  # Rename the file with the given suffix
+  file.rename(folder_file, paste0("jobs/", basename(executed_file), suffix))
+  return(paste0("jobs/", basename(executed_file), suffix))
+}
+
 # Note: This script assumes that the internet connection is available and
 # the CRAN/GitHub repositories are accessible for package installation.
 
@@ -61,29 +73,35 @@ load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 
 # First step is creation of the database model and loading of the codelist (around 1/2 hour)
 db_model <- executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) 
+db_model <- executeAndRename(db_model, "_db_model")
 
 # Second step is the loading of the mappings (1h)
 mappings <- executeWorkflow(here("tunaatlas_qa_mappings.json"))
+mappings <- executeAndRename(mappings, "_mappings")
 
 # Third step is pre-harmonizing the datasets provide by tRFMOs: This step is divided in 3 
 # substep depending on the type of the data:
 
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory
 
-nominal_catch <- executeWorkflow(here::here("Nominal_catch.json"))
+raw_nominal_catch <- executeWorkflow(here::here("Raw_nominal_catch.json"))
+raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch")
 
 ## Georeferenced catch: These datasets contains catch AND EFFORT for some data as effort are used to raise catch data for level 0 to 2
 
 raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
+raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef")
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))
+raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
 
 
 ## Summarising the invalid data for all the datasets pre-harmonized
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
 config <- initWorkflow(here::here("All_raw_data_georef.json"), handleMetadata = FALSE)
+unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 Summarising_invalid_data(raw_data_georef, connectionDB = con)
 Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
@@ -94,17 +112,19 @@ Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
 
 # Create 5 datasets catch and effort. These entities are the final one published on zenodo. 
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), dir = here::here())
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_tunaatlas_qa_global_datasets_catch_path")
 
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Summarising_step.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), handleMetadata = FALSE)
+unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
 ## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_actions/convert_to_netcdf.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_actions/convert_to_netcdf.R")
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 
@@ -120,7 +140,7 @@ for (entitynumber in 1:length(config$metadata$content$entities)){
 } #could also be in global action but keep in mind it is very long
 setwd(wd)
 
-# Checking on created data
+# Pakcages for markdown
 required_packages <- c("webshot",
                        "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
                        "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
@@ -144,8 +164,14 @@ for (package in required_packages) {
 # This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
 
 upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
-                    connectionDB = con)
+                                                                         connectionDB = con)
 
+CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
+                                                                         connectionDB = con)
+
+
+
+# Check on CPUE data for georeferenced in case some catch are not displayed with any effort
 
 
 # Putting dataset on geoserver, geonetwork and zenodo #For now zenodo does not work due to issue with api

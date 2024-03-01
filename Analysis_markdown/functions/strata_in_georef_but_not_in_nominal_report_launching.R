@@ -9,15 +9,15 @@ nominal <- as.data.frame(read_csv(file.path(main.dir,"entities/global_nominal_ca
                            mutate(measurement_unit ="Tons")) %>% 
   dplyr::mutate(gear_type = as.numeric(gear_type)) %>% 
   dplyr::mutate(gear_type = as.character(gear_type))
-try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.rds")))
-try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.rds")))
+try(georef_mapped <- fread(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.csv")))
+try(georef_mapped <- fread(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.csv")))
 
 georef_mapped <- georef_mapped %>% dplyr::mutate(year =lubridate::year(time_start)) %>% 
   dplyr::select("fishing_fleet"  ,"geographic_identifier",   "species"    ,      "measurement_unit"          ,  "gear_type", "source_authority",
   "year", "measurement_value") %>%
   dplyr::filter(measurement_unit %in% c("t", "Tons"))%>%
   dplyr::mutate(year = as.character(year))%>%
-  dplyr::mutate(year = paste0(year, "-01-01")) 
+  dplyr::mutate(year = paste0(year, "-01-01")) %>% dplyr::mutate(gear_type = as.character(gear_type))
 
 row.names(georef_mapped) <- NULL
 nominal <- (nominal)%>% mutate(year = lubridate::year(time_start)) %>% 
@@ -34,7 +34,7 @@ shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>%
 
 shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
 
 
 # we only keep georef data for which we have an equivalent year in nominal
@@ -88,7 +88,7 @@ georef_no_nominal_groupped_all <- tidying_GTA_data_for_comparison(dataframe = ge
 
 
 concerned_trfmos <- unique(c(unique(georef_no_nominal$source_authority),unique(georef_sup_nominal$source_authority)))
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
 # 
 copy_project_files(original_repo_path = here::here("Analysis_markdown/"), new_repo_path = getwd())
 

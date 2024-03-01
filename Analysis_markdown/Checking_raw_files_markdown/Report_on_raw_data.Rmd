@@ -55,7 +55,7 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 
 ```{r sourcingfunctionsmarkdown}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R")
 
 
 ```

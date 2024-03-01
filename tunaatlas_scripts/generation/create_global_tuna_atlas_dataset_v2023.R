@@ -139,7 +139,7 @@ function(action, entity, config) {
   #by default, at this step we will skip specific processings applied to IATTC data. These processings are eventually done later in the script (if options are activated)
   rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
   rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
-  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_fleet"
+  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_mode"
   
   if(opts$fact == "CPUE"){
     variable <- NULL
@@ -191,7 +191,6 @@ function(action, entity, config) {
   georef_dataset <- dataset
   class(georef_dataset$measurement_value) <- "numeric"
   rm(dataset)
-  browser()
   
   ### filtering on minimum time_start (TRUE  by default)
   if (filtering_on_minimum_year_declared) {
@@ -749,7 +748,7 @@ function(action, entity, config) {
         
         config$logger.info("Start raising process")
         
-        if (fact == "catch") {
+        if (opts$fact == "catch") {
           config$logger.info("Fact=catch !")
           dataset_to_compute_rf = georef_dataset
           # year is used as a dimension to match the conversion factors dimension 
@@ -758,46 +757,34 @@ function(action, entity, config) {
           }
           
           
-        } else if (fact == "effort") {
+        } else if (opts$fact == "effort") {
           ## If we raise the efforts, the RF is calculated using the georeferenced catch data. Hence, we need to retrieve the georeferenced catch data.
           cat(
             "Catch datasets must be retrieved and processed in order to raise efforts. \nRetrieving georeferenced catch datasets from the Tuna atlas database...\n"
           )
           dataset_catch <- NULL
           rfmo_dataset <-
-            get_rfmos_datasets_level0("IOTC", "catch", datasets_year_release)
+            get_rfmos_datasets_level0("IOTC", entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
           rfmo_dataset <-
-            get_rfmos_datasets_level0("WCPFC", "catch", datasets_year_release)
+            get_rfmos_datasets_level0("WCPFC", entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
           rfmo_dataset <-
-            get_rfmos_datasets_level0("CCSBT", "catch", datasets_year_release)
+            get_rfmos_datasets_level0("CCSBT", entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
           rfmo_dataset <- get_rfmos_datasets_level0(
-            "IATTC",
-            "catch",
-            datasets_year_release,
-            iattc_ps_raise_flags_to_schooltype =
-              iattc_ps_raise_flags_to_schooltype,
-            iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype =
-              iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype,
-            iattc_ps_catch_billfish_shark_raise_to_effort =
-              TRUE
-          )
+            "IATTC",entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
-          rfmo_dataset <- get_rfmos_datasets_level0("ICCAT",
-                                                    "catch",
-                                                    datasets_year_release,
-                                                    iccat_ps_include_type_of_school =
-                                                      iccat_ps_include_type_of_school)
+          rfmo_dataset <- get_rfmos_datasets_level0(
+            "ICCAT",entity, config, rawdata)
           dataset_catch <- rbind(dataset_catch, rfmo_dataset)
           rm(rfmo_dataset)
           
@@ -816,7 +803,7 @@ function(action, entity, config) {
             substr(as.character(dataset_catch$time_start), 1, 10)
           dataset_catch$time_end <-
             substr(as.character(dataset_catch$time_end), 1, 10)
-          if (unit_conversion_convert == "TRUE") {
+          if (opts$unit_conversion_convert == "TRUE") {
             # We use our conversion factors (IRD). This is now an input parameter of the script
             #@juldebar URL for unit_conversion_csv_conversion_factor_url of should not be hard coded, temporary patch
             #
@@ -1193,97 +1180,6 @@ function(action, entity, config) {
   dataset <- data.frame(dataset)
   if(!is.na(any(dataset$measurement_unit) == "TRUE")) if(any(dataset$measurement_unit) == "TRUE") dataset[(dataset$measurement_unit) == "TRUE",]$measurement_unit <- "t" #patch because of https://github.com/firms-gta/geoflow-tunaatlas/issues/41
   
-  #----------------------------------------------------------------------------------------------------------------------------
-  #@eblondel additional formatting for next time support
-  dataset$time_start <- as.Date(dataset$time_start)
-  dataset$time_end <- as.Date(dataset$time_end)
-  #we enrich the entity with temporal coverage
-  dataset_temporal_extent <-
-    paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
-  entity$setTemporalExtent(dataset_temporal_extent)
-  
-  #if there is any entity relation with name 'codelists' we read the file
-  df_codelists <- NULL
-  cl_relations <-
-    entity$relations[sapply(entity$relations, function(x) {
-      x$name == "codelists"
-    })]
-  if (length(cl_relations) > 0) {
-    config$logger.info("Appending codelists to global dataset generation action output")
-    googledrive_baseurl <- "https://drive.google.com/open?id="
-    if (startsWith(cl_relations[[1]]$link, googledrive_baseurl)) {
-      #managing download through google drive
-      config$logger.info("Downloading file using Google Drive R interface")
-      drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
-      drive_id <-
-        unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-      googledrive::drive_download(file = googledrive::as_id(drive_id),
-                                  path = file.path("data", paste0(
-                                    entity$identifiers[["id"]], "_codelists.csv"
-                                  )), overwrite = TRUE)
-      df_codelists <-
-        read.csv(file.path("data", paste0(
-          entity$identifiers[["id"]], "_codelists.csv"
-        )))
-    } else{
-      df_codelists <- read.csv(cl_relations[[1]]$link)
-    }
-  }
-  
-  
-  #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-  dataset <- list(
-    dataset = dataset,
-    additional_metadata = NULL,
-    #nothing here
-    codelists = df_codelists #in case the entity was provided with a link to codelists
-  )
-  
-  
-  # if (fact=="effort" & DATA_LEVEL %in% c("1", "2")){
-  #   # Levels 1 and 2 of non-global datasets should be expressed with tRFMOs code lists. However, for the effort unit code list and in those cases, we take the tuna atlas effort unit codes although this is not perfect. but going back to tRFMOs codes is too complicated
-  #   df_codelists$code_list_identifier[which(df_codelists$dimension=="unit")]<-"effortunit_rfmos"
-  # }
-  # ltx_combine(combine = wd, out = "alltex.tex", clean = 0)
-  
-  #@geoflow -> export as csv
-  #-------------------------------------------------------
-  output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-  readr::write_csv(dataset$dataset, output_name_dataset)
-  #-------------------------------------------------------
-  
-  output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
-  dataset_enriched = dataset$dataset
-  dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
-  dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
-  dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
-  columns_to_keep <- c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")
-  columns_to_keep <- intersect(colnames(dataset_enriched), columns_to_keep)
-  
-  dataset_enriched = dataset_enriched[,columns_to_keep]
-  readr::write_csv(dataset_enriched, output_name_dataset_public)
-  
-  #-------------------------------------------------------
-  output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
-  write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
-  # ---------------------------------------------------------------------------------------------------------------------------
-  entity$addResource("harmonized", output_name_dataset)
-  entity$addResource("public", output_name_dataset_public)
-  entity$addResource("codelists", output_name_codelists)
-  entity$addResource("geom_table", opts$geom_table)
-  #### END
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  config$logger.info("End: Your tuna atlas dataset has been created!")
-  config$logger.info(
-    "-----------------------------------------------------------------------------------------------------"
-  )
-  # write.csv(options)
-  
-  rm(georef_dataset)
-  
-  gc()
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
   dataset$time_start <- as.Date(dataset$time_start)

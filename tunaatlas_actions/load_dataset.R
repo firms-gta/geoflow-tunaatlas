@@ -103,7 +103,6 @@ load_dataset <- function(action,entity, config){
     #read sources
     df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
     df_codelists <- as.data.frame(readr::read_csv(path_to_codelists, guess_max=0))
-    
     config$logger.info(sprintf("Dataset '%s' will be loaded in table '%s'",dataset_pid, table_name))
     config$logger.info(sprintf("Load dataset from jobdir file '%s'", path_to_dataset))
     
@@ -238,25 +237,26 @@ load_dataset <- function(action,entity, config){
       df_to_load <- df_to_load[!varsToDelete]
       
     }
+    print(TablesToUpdateInDB)
+    print(missingCodesInTableInDB)
     
     # These are the codes that are missing in the tables within the DB. The tables of the DB have to be filled with these values before the dataset is uploaded in the DB.
-    #missingCodes_dataframe<- data.frame(TablesToUpdateInDB,missingCodesInTableInDB)
-    #missingCodes_dataframe<-missingCodes_dataframe[! (missingCodes_dataframe$missingCodesInTableInDB %in% c("ALL","UNK")),]
+    missingCodes_dataframe<- data.frame(TablesToUpdateInDB,missingCodesInTableInDB)
+    missingCodes_dataframe<-missingCodes_dataframe[! (missingCodes_dataframe$missingCodesInTableInDB %in% c("ALL","UNK")),]
     
-    #if (nrow(missingCodes_dataframe)>0){
+    # if (nrow(missingCodes_dataframe)>0){
     #  missingCodes_dataframe<-missingCodes_dataframe[!is.na(missingCodes_dataframe$missingCodesInTableInDB),]
     #  print(missingCodes_dataframe)
     #  stop("Some code(s) exist in the dataset to upload but do not exist in the corresponding code list. You should update the tables of Sardara with these code(s) (and the mapping if relevant) before uploading the dataset in Sardara.")
-    #} else {
-    
+    # } else {
+
     #replace NA by 'NA'. These values will be set to NULL in the DB. These values are the ones that were set to "ALL" in the dataset to upload
-    #df_to_load<-replace(df_to_load, is.na(df_to_load), "NA") 
+    df_to_load<-replace(df_to_load, is.na(df_to_load), "NA")
     
     ## Now deal with non-code list like dimensions (time,sizeclass). For these dimensions, the column names on the dataset to upload MUST BE the sames as the DBs ones. i.e. for time, the dataset to upload must have a "time_start" and a "time_end" column , and the DB table "time" must also have the same "time_start" and "time_end" columns
     
     #Keep only the dimensions that are non-code list
     db_nondf_inputlike_dimensions_parameters<-db_dimensions_parameters[ which(db_dimensions_parameters$codelist_table==FALSE), ]
-    
     # One by one, retrieve the numeric codes
     for (dim in 1:nrow(db_nondf_inputlike_dimensions_parameters)){
       
@@ -362,12 +362,12 @@ load_dataset <- function(action,entity, config){
     }
     
     cat("Data merged with code lists of database\n")
-    
-    
     # Load metadata	  
     # Retrieve the PK of the metadata for the line just inserted
     sql<- sprintf("SELECT * FROM metadata.metadata where identifier = '%s'", dataset_pid)
     dataset_metadata <- dbGetQuery(con, sql)
+    
+    
     if(nrow(dataset_metadata)==0){
       config$logger.info(sprintf("Loading metadata for dataset '%s'", dataset_pid))
       rs<-FUNUploadDatasetToTableInDB(con,InputMetadataset,"metadata.metadata")
@@ -375,15 +375,15 @@ load_dataset <- function(action,entity, config){
     }else{
       config$logger.info(sprintf("Metadata already existing in DB for dataset '%s'. Skipping metadata insert...", dataset_pid))
       config$logger.info("Removing already existing data to prevent duplicates loading of updated dataset")
-      query_removing_existing_data <- paste0("DELETE FROM " , InputMetadataset$database_table_name, " WHERE id_metadata = ",InputMetadataset$id_metadata)
+      query_removing_existing_data <- paste0("DELETE FROM " , InputMetadataset$database_table_name, " WHERE id_metadata = ",as.integer(dataset_metadata$id_metadata))
       dataset_metadata <- dbSendQuery(con, query_removing_existing_data)
       
     }
+    
     dataset_metadata <- dbGetQuery(con, sql)
     PK_metadata<-as.integer(dataset_metadata$id_metadata)
     InputMetadataset$id_metadata <- PK_metadata
     df_to_load$id_metadata<-PK_metadata
-    
     # For the dataset to upload, keep only rows that are in the database table (i.e. remove all other columns)  (is it really necessary? TO CHECK)
     # This first line is to change the metric column name
     # colnames(df_to_load)[which(colnames(df_to_load) == metric_colname_dftoupload)] <- metric_colname_db
@@ -413,7 +413,6 @@ load_dataset <- function(action,entity, config){
       config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
       dbSendQuery(con, dataset_drop_view_sql)
     }
-    
     # sql_query_dataset_extraction
     sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
     config$logger.info(sprintf("Update metadata sql_query_dataset_extraction' field for '%s'",dataset_pid))

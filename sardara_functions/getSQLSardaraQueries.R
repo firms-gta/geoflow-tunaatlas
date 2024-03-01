@@ -99,9 +99,9 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
     where_clause_gear <- NULL
     where_clause_species <- NULL
     if ("gear_type" %in% dataset_available_dimensions) {
-      codelist_identifier <-  get_codelist_of_dimension(con, 
-                                                                   dataset_metadata, "gear_type")$identifier
-      if (codelist_identifier %in% c("isscfg_revision_1", 
+      get_codelist_of_dimension <- get_codelist_of_dimension(con, dataset_metadata, "gear_type")
+      codelist_identifier <-  get_codelist_of_dimension$identifier
+      if(nrow(get_codelist_of_dimension) != 0 && codelist_identifier %in% c("isscfg_revision_1", 
                                      "gear_iotc", "gear_iccat", "gear_iattc", "gear_wcpfc")) {
         db_dimensions_parameters$sql_select_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
                                                                           "gear_type")] <- paste0(db_dimensions_parameters$sql_select_csv_wms_wfs_from_view[which(db_dimensions_parameters$dimension == 
@@ -131,6 +131,9 @@ getSQLSardaraQueries <-  function (con, dataset_metadata)
         })
         where_clause_gear <- paste0("(gear_type_mapping.id_metadata=(SELECT id_metadata FROM metadata.metadata WHERE identifier='", 
                                     geargroup_mapping_identifier, "' ) OR  gear_type_mapping.gear_type_mapping_id_from=0) AND ")
+      
+        } else if (nrow(get_codelist_of_dimension) == 0){
+          codelist_identifier <- "UNK"
       }
     }
     if ("species" %in% dataset_available_dimensions) {

@@ -30,7 +30,7 @@ cat(res, sep =  "\\clearpage")
 \clearpage
 
 
-```{r otherdim, results='asis', eval = (length(Other_dimensions != 0))}
+```{r otherdim, results='asis', eval = (length(Other_dimensions) != 0)}
 
 res <- knitr::knit_child("Otherdimensions.Rmd", quiet = TRUE, envir = environment())
 
