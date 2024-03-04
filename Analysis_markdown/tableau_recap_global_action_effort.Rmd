@@ -324,6 +324,7 @@ no_fish_plot <- ggplot(reduced,aes(x = Step,group = 1)) +geom_line( aes(y=`Milli
       
 tons_plot <- ggplot(reduced,aes(x = Step,group = 1)) +
 geom_line( aes(y=`Millions of tons`,group = 1), size=0.5)+theme(axis.text.x = element_text(angle = 90))
+
 ```
 
 ```{r include=FALSE , eval=(parameter_fact == "effort")}

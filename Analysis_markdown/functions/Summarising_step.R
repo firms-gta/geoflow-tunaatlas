@@ -62,7 +62,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     entity_name <- basename(entity_dir)
     
     copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
-    
+    setwd(entity_dir)
     
     sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = "rds.rds", full.names = TRUE)
     details = file.info(sub_list_dir_2)
@@ -83,7 +83,7 @@ Summarising_step = function(main_dir, connectionDB, config){
                                               species_group_dataframe = species_group,
                                               cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
       if("gridtype"%in% colnames(data)){
-        data <- data %>% rename(GRIDTYPE = gridtype)
+        data <- data %>% dplyr::rename(GRIDTYPE = gridtype)
       }
       
       saveRDS(data, file = file)
@@ -114,7 +114,6 @@ Summarising_step = function(main_dir, connectionDB, config){
       
       # Render the R Markdown file
       folder_datasets_id <- "1IcKW65t4Dlj2lv4YTUiM-WGwbaiigmXb"
-      setwd(entity_dir)
       rmarkdown::render("tableau_recap_global_action_effort.Rmd",
                         envir = render_env, output_format = "html_document2"
       )
