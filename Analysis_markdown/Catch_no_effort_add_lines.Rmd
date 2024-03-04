@@ -1,0 +1,4 @@
+
+This report present all the data in the georeferenced catch dataset but not in the georeferenced effort to highlights gap in the effort dataset which could result in the raising of effort dataset on the basis of the catches. 
+
+The measurement_value of data in the georeferenced catch dataset but not in the georeferenced effort is different depending on what we take as a strata. The strata kept in this report are : **`r strata`**.
