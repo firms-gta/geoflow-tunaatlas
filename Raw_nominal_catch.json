@@ -17,7 +17,7 @@
     "entities": [
       {
         "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/13SJB2PYkCCdrzw8HNJMPFg0yXs0OSYY2mUOAl5dagUc/edit#gid=373007742"
+        "source": "https://docs.google.com/spreadsheets/d/13SJB2PYkCCdrzw8HNJMPFg0yXs0OSYY2mUOAl5dagUc/edit#gid=374572086"
       }
     ],
     "contacts" : [
@@ -56,7 +56,7 @@
   "actions": [
     {
       "id": "Tidying_and_mapping_data",
-      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
       "run": true,
       "options": {
         "recap_each_step": true

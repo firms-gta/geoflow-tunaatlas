@@ -1,8 +1,6 @@
 Summarising_step = function(main_dir, connectionDB, config){
   ancient_wd <- getwd()
-  setwd(main_dir)
-  path = getwd()
-  
+
     required_packages <- c("webshot",
                          "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
                          "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
@@ -45,15 +43,13 @@ Summarising_step = function(main_dir, connectionDB, config){
   
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
   
-  entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   i <- 1
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
-  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
   
   for (entity_dir in entity_dirs) {
     
@@ -64,12 +60,11 @@ Summarising_step = function(main_dir, connectionDB, config){
     
     i <- i+1
     entity_name <- basename(entity_dir)
-    setwd(entity_dir)
     
     copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = entity_dir)
     
     
-    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = "rds.csv", full.names = TRUE)
+    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = "rds.rds", full.names = TRUE)
     details = file.info(sub_list_dir_2)
     details = file.info(sub_list_dir_2)
     details = details[with(details, order(as.POSIXct(mtime))), ]
@@ -79,7 +74,7 @@ Summarising_step = function(main_dir, connectionDB, config){
     for(file in sub_list_dir_2){
 
     `%notin%` <- Negate(`%in%`)
-      data <- fread(file)
+      data <- readRDS(file)
       if("GRIDTYPE" %notin% colnames(data)){
       data <- data %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier), 
                                      gear_type = as.character(gear_type))
@@ -91,7 +86,7 @@ Summarising_step = function(main_dir, connectionDB, config){
         data <- data %>% rename(GRIDTYPE = gridtype)
       }
       
-      fwrite(data, file = file)
+      saveRDS(data, file = file)
       }
 
     }
@@ -119,13 +114,15 @@ Summarising_step = function(main_dir, connectionDB, config){
       
       # Render the R Markdown file
       folder_datasets_id <- "1IcKW65t4Dlj2lv4YTUiM-WGwbaiigmXb"
+      setwd(entity_dir)
       rmarkdown::render("tableau_recap_global_action_effort.Rmd",
-                        output_file = output_dir,
                         envir = render_env, output_format = "html_document2"
       )
-      drive_upload(output_dir, as_id(folder_datasets_id), overwrite = TRUE)
+      drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
       
       rm(render_env)
-    }
+      setwd(ancient_wd)
+      
+  }
   }
   

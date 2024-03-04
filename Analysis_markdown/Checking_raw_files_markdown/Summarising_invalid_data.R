@@ -36,7 +36,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   }
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
   
   required_packages <- c("webshot",
                          "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
@@ -54,7 +54,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   
   # PART 1: Identify entities and their respective tRFMOs
-  entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
+  entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
   
   # Function to determine tRFMO from entity name
   determine_tRFMO <- function(entity_name) {
@@ -244,10 +244,10 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
   # 
   copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
   copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
@@ -279,7 +279,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       require(fs)
       # Use the function (make sure to use the correct local paths)
       rmarkdown::render("Recap_on_pre_harmo/Report_on_raw_data.Rmd",
-                        output_file = output_dir,
+                        output_dir = entity_dir, output_file =output_file_name ,
                         envir = render_env
       )
       rm(render_env, envir = environment())
@@ -302,7 +302,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
     
   })
   # 
-  drive_upload(file.path(getwd(),"Recap_on_pre_harmo.html"), as_id(folder_datasets_id), overwrite = TRUE)
+  # path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
+  # drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
   
   
   setwd(ancient_wd)

@@ -68,7 +68,7 @@ invalid_data <- invalid_data %>% ungroup() %>%dplyr::rowwise() %>% dplyr::mutate
 
 ```{r echo=FALSE, results='asis'}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developement/Analysis_markdown/functions/Functions_markdown.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R")
 ft <- qflextable2(invalid_data, captionn = "Recap of the issues with each dataframe", grouped_data = c("All_good", "tRFMO"))
 for (i in columns_to_color){
   ft$body$styles$text$color$data[,i] <- ifelse(is.na(ft$body$dataset[,i]), "blue", ifelse(ft$body$dataset[,i], "red", "green"))
