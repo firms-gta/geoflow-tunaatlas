@@ -14,3 +14,12 @@ _targets.R
 _targets.Rmd
 tableau_recap_global_action
 outputs
+Recap_on_pre_harmo
+Recap_on_pre_harmo.html
+Analysis_markdown/*.md
+Analysis_markdown/*.html
+Analysis_markdown/Diffstratas
+Summary
+Temporal
+Analysis_markdown/figure
+core
