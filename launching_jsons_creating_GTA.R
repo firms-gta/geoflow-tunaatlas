@@ -118,7 +118,7 @@ tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Summarising_step.R")
-config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"), handleMetadata = FALSE)
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
@@ -142,7 +142,7 @@ setwd(wd)
 
 # Pakcages for markdown
 required_packages <- c("webshot",
-                       "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+                       "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble","xfun",
                        "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
                        "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
                        "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
@@ -172,6 +172,8 @@ CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_pa
 
 
 # Check on CPUE data for georeferenced in case some catch are not displayed with any effort
+global_catch_firms_level0_public <- read_csv(file.path(tunaatlas_qa_global_datasets_catch_path,"entities/global_catch_firms_level0_/data/global_catch_firms_level0__public.csv"))
+cwp_catch <- unique(global_catch_firms_level0_public$geographic_identifier)
 
 
 # Putting dataset on geoserver, geonetwork and zenodo #For now zenodo does not work due to issue with api
