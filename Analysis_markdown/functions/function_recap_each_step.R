@@ -4,7 +4,7 @@ function_recap_each_step=function(nom_dossier, nomrds, explication="",fonctions=
   dir.create("Markdown")
   dir.create(paste0("Markdown/",nom_dossier))
   nom_dossier <- paste0("Markdown/",nom_dossier)
-  class(nomrds$measurement_value) <- "integer"
+  nomrds$measurement_value <- as.numeric(nomrds$measurement_value)
   rds_t <- (nomrds %>% filter(measurement_unit %in% c("t", "MTNO","MT"))) 
   rds_no <- (nomrds %>% filter(measurement_unit %in% c("no", "NOMT","NO"))) 
   somme_t <- sum(rds_t$measurement_value, na.rm = TRUE)
@@ -23,6 +23,7 @@ function_recap_each_step=function(nom_dossier, nomrds, explication="",fonctions=
   } else {options_written = "NONE"}
   options_written_total <- assign("options_written_total", paste0(options_written_total, options_written), envir = .GlobalEnv)
   explenation_total <- assign("explenation_total", paste0(explenation_total, explication), envir = .GlobalEnv)
+  
   saveRDS(nomrds,paste0(nom_dossier,"/rds.rds"))
   write(explication, paste0(nom_dossier,"/explication.txt")) 
   write(explenation_total, paste0(nom_dossier,"/explenation_total.txt")) 
