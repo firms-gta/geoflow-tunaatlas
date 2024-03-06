@@ -75,6 +75,7 @@ Summarising_step = function(main_dir, connectionDB, config){
 
     `%notin%` <- Negate(`%in%`)
       data <- readRDS(file)
+      file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.rds", file))
       if("GRIDTYPE" %notin% colnames(data)){
       data <- data %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier), 
                                      gear_type = as.character(gear_type))

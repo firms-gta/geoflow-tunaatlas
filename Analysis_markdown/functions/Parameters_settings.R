@@ -21,8 +21,8 @@ if(is_null_or_not_exist(parameter_columns_to_keep)){
                                  "Difference in value")
 }
 if(is_null_or_not_exist("parameter_diff_value_or_percent")){
-     parameter_diff_value_or_percent <- "Difference (in %)" 
-    }
+  parameter_diff_value_or_percent <- "Difference (in %)" 
+}
 if(is_null_or_not_exist(parameter_UNK_for_not_standards_unit)){
   parameter_UNK_for_not_standards_unit <- TRUE
 }
@@ -40,7 +40,13 @@ if(is_null_or_not_exist(coverage)){coverage = TRUE}
 if(is_null_or_not_exist(parameter_colnames_to_keep)){parameter_colnames_to_keep <-NULL}
 
 if (!exists("parameter_titre_dataset_1") || is.null(parameter_titre_dataset_1)){
-  titre_1 <- last_path_reduced(as.character(parameter_init))
+  if(!is.data.frame(parameter_init)){
+    
+    
+    titre_1 <- last_path_reduced(as.character(parameter_init))
+  } else {
+    titre_1 <- "Dataset 1"
+  }
 } else {
   titre_1 <- parameter_titre_dataset_1
 }
@@ -62,4 +68,3 @@ if(is_null_or_not_exist(parameter_resolution_filter)){
 if(is_null_or_not_exist(parameter_final)) {
   unique_analyse <- TRUE } else {
     unique_analyse <- FALSE}
-

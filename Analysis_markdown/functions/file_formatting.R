@@ -36,8 +36,15 @@ if (unique_analyse) {
 }
 
 if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse){
-  titre_2 <- last_path_reduced(as.character(parameter_final))
-  } else if (unique_analyse) {
+  
+  if(!is.data.frame(parameter_final)){
+    
+    
+    titre_2 <- last_path_reduced(as.character(parameter_final))
+  } else {
+    titre_2 <- "Dataset 2"
+  }
+} else if (unique_analyse) {
   titre_2 <- "NONE"
 } else {
     titre_2 <- parameter_titre_dataset_2

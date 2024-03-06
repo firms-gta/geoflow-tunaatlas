@@ -141,7 +141,9 @@ child_env_last$parameter_short <- FALSE
 child_env_last$child_header <- ""
 child_env_last$coverage <- TRUE
 
-new_path <- file.path(fig.path, paste0("Report_on_", entity$identifiers[["id"]]))
+filename <- paste0("Report_on_", entity$identifiers[["id"]], ".pdf")
+
+new_path <- file.path(fig.path, filename)
 
 dir.create(new_path, recursive = TRUE)
 
@@ -328,6 +330,7 @@ geom_line( aes(y=`Millions of tons`,group = 1), size=0.5)+theme(axis.text.x = el
 ```
 
 ```{r include=FALSE , eval=(parameter_fact == "effort")}
+
 nominal <- 1
 df <- data.frame(matrix(ncol =13, nrow = 1))
       colnames(df) <- c(paste0(tail(str_split(paste0(sub_list_dir_2),"/")[[1]],n=1)),
