@@ -10,7 +10,8 @@ check_install_package <- function(package_name) {
 
 # 'renv' for project-specific environments
 # check_install_package("renv")
-# renv::restore() # Restore the project library
+renv:init()
+renv::restore() # Restore the project library
 
 # General utility packages
 check_install_package("remotes")   # Package management
@@ -23,6 +24,7 @@ check_install_package("janitor")   # Data cleaning
 check_install_package("dotenv")    # Environment variable management
 check_install_package("data.table") # Data manipulation (Note: Marked for removal)
 check_install_package("here") # Handling path
+check_install_package("xfun") # Handling path
 
 # Database related packages
 check_install_package("RSQLite")    # SQLite interface
