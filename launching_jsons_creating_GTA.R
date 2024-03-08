@@ -9,7 +9,7 @@ check_install_package <- function(package_name) {
 }
 
 # 'renv' for project-specific environments
-# check_install_package("renv")
+check_install_package("renv")
 renv::init()
 renv::restore() # Restore the project library
 
