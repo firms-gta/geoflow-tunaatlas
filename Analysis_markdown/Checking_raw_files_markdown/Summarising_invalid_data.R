@@ -1,18 +1,4 @@
 Summarising_invalid_data = function(main_dir, connectionDB){
-  required_packages <- c("webshot",
-                         "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
-                         "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
-                         "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-                         "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
-  )
-  
-  for (package in required_packages) {
-    if (!requireNamespace(package, quietly = TRUE)) {
-      install.packages(package, dependencies = TRUE)
-    }
-    library(package, character.only = TRUE)
-  }
-  
   ancient_wd <- getwd()
   setwd(main_dir)
   dir.create("Recap_on_pre_harmo")
@@ -38,19 +24,6 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
   
-  required_packages <- c("webshot",
-                         "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
-                         "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
-                         "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-                         "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
-  )
-  
-  for (package in required_packages) {
-    if (!requireNamespace(package, quietly = TRUE)) {
-      install.packages(package, dependencies = TRUE)
-    }
-    library(package, character.only = TRUE)
-  }
   
   
   # PART 1: Identify entities and their respective tRFMOs

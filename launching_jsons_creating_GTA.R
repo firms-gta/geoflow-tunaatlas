@@ -32,9 +32,14 @@ check_install_package("RPostgreSQL") # PostgreSQL interface
 check_install_package("RPostgres")   # Alternative PostgreSQL interface
 check_install_package("DBI")        # Database interface
 check_install_package("rpostgis")   # PostGIS interface
-remove.packages("rgeos")
+# remove.packages("rgeos")
 check_install_package("terra")
 check_install_package("sf")
+
+if(!require(tinytex)) {
+  check_install_package("tinytex")
+  tinytex::install_tinytex()
+}
 
 # Geospatial packages
 # check_install_package("rgeos")     # Geospatial operations
