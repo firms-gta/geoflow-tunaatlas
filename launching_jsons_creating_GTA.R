@@ -10,8 +10,8 @@ check_install_package <- function(package_name) {
 
 # 'renv' for project-specific environments
 check_install_package("renv")
-renv::init()
-renv::restore() # Restore the project library
+# renv::activate()
+renv::restore(prompt = FALSE) # Restore the project library
 
 # General utility packages
 check_install_package("remotes")   # Package management
@@ -32,9 +32,12 @@ check_install_package("RPostgreSQL") # PostgreSQL interface
 check_install_package("RPostgres")   # Alternative PostgreSQL interface
 check_install_package("DBI")        # Database interface
 check_install_package("rpostgis")   # PostGIS interface
+remove.packages("rgeos")
+check_install_package("terra")
+check_install_package("sf")
 
 # Geospatial packages
-check_install_package("rgeos")     # Geospatial operations
+# check_install_package("rgeos")     # Geospatial operations
 
 # Additional, project-specific packages
 # 'geoflow' package from GitHub for workflow management
