@@ -24,7 +24,7 @@ check_install_package("janitor")   # Data cleaning
 check_install_package("dotenv")    # Environment variable management
 check_install_package("data.table") # Data manipulation (Note: Marked for removal)
 check_install_package("here") # Handling path
-check_install_package("xfun") # Handling path
+check_install_package("xfun") 
 
 # Database related packages
 check_install_package("RSQLite")    # SQLite interface
