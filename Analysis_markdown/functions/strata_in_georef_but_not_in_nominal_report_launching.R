@@ -9,8 +9,8 @@ nominal <- as.data.frame(read_csv(file.path(main.dir,"entities/global_nominal_ca
                            mutate(measurement_unit ="Tons")) %>% 
   dplyr::mutate(gear_type = as.numeric(gear_type)) %>% 
   dplyr::mutate(gear_type = as.character(gear_type))
-try(georef_mapped <- fread(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.csv")))
-try(georef_mapped <- fread(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.csv")))
+try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0/Markdown/rawdata/rds.rds")))
+try(georef_mapped <- readRDS(file.path(main.dir,"entities/global_catch_firms_level0_/Markdown/rawdata/rds.rds")))
 
 georef_mapped <- georef_mapped %>% dplyr::mutate(year =lubridate::year(time_start)) %>% 
   dplyr::select("fishing_fleet"  ,"geographic_identifier",   "species"    ,      "measurement_unit"          ,  "gear_type", "source_authority",
@@ -98,12 +98,12 @@ tryCatch({
     dir.create(file.path(getwd(),"georef_not_nominal_markdown/",i, "/", name, "/figures/georef_sup_nominal"),recursive = TRUE )
     georef_no_nominal_groupped <- georef_no_nominal_groupped_all %>% dplyr::filter(source_authority == i)
     georef_sup_to_nom <- georef_sup_to_nom_all %>% dplyr::filter(source_authority == i)
-    nominal_groupped <- nominal_groupped %>% dplyr::filter(source_authority == i)
+    nominal_groupped_filtered <- nominal_groupped %>% dplyr::filter(source_authority == i)
     if(nrow(georef_sup_to_nom) != 0 | nrow(georef_no_nominal_groupped)!= 0){
     parameters_child_global <- list(strata = strata, 
                                     fig.path = paste0("georef_not_nominal_markdown/",i, "/figures/"), 
                                     parameter_init = georef_no_nominal_groupped, 
-                                    nominal_groupped = nominal_groupped,
+                                    nominal_groupped = nominal_groupped_filtered,
                                     parameter_colnames_to_keep = c("fishing_fleet", "gear_type", "geographic_identifier",
                                                                    "fishing_mode", "species", "measurement_unit", "measurement_value", 
                                                                    "Gear", "species_group", "GRIDTYPE"),

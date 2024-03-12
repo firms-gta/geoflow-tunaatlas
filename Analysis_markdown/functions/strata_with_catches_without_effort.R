@@ -141,7 +141,7 @@ strata_with_catches_without_effort = function(main.dir, connectionDB,uploadgoogl
   dplyr::rename(measurement_unit_catch = measurement_unit, measurement_value_catch= measurement_value), 
   as.data.frame(global_georeferenced_effort_firms_harmonized) %>% 
     dplyr::rename(measurement_unit_effort = measurement_unit, measurement_value_effort= measurement_value),
-  by = c("geographic_identifier", "source_authority", "time_start", "time_end", "fishing_mode"))
+  by = c("geographic_identifier", "source_authority", "time_start", "time_end"))
     
     # CPUE <- CPUE %>% dplyr::mutate(across(measurement_value_effort, measurement_value_catch))
     
