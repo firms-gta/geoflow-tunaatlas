@@ -40,7 +40,14 @@
         "port": "{{DB_PORT}}",
         "dbname": "{{DB_NAME}}"
       },
-      "properties" : {}
+      		"properties" : {
+			"user": "{{DB_USER}}",
+			"onend_r": {
+				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/Developpement/tunaatlas_scripts/create_materialized_view_for_shiny_apps.R",
+				"fun": "create_materialized_view_for_shiny_apps"
+			}
+		}
+
     },
     {
       "id": "my-database-write",
