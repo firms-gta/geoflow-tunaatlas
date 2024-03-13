@@ -1,24 +1,5 @@
 Tidying_and_mapping_data = function(action, entity, config) {
-  # Define all required packages
-  required_packages <- c(
-    "webshot", "here", "usethis", "ows4R", "sp", "data.table", "flextable", 
-    "readtext", "sf", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
-    "purrr", "readxl", "base", "remotes", "utils", "DBI", "odbc", "rlang", 
-    "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-    "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "googledrive",
-    "R3port", "reshape2", "tools" 
-  )
-  
-  # Install and load required packages
-  install_and_load <- function(package) {
-    if (!requireNamespace(package, quietly = TRUE)) {
-      install.packages(package, dependencies = TRUE)
-    }
-    library(package, character.only = TRUE)
-  }
-  
-  lapply(required_packages, install_and_load)
-  
+
   # Set options and configurations
   harmonized <- entity$resources$harmonized
   output_name_dataset_mapped <- gsub("harmonized", "mapped", harmonized)

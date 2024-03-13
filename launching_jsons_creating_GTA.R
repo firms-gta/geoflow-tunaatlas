@@ -1,43 +1,25 @@
 # This script ensures that required R packages are installed and loaded.
 
 # Function to check, install, and load a package
-check_install_package <- function(package_name) {
-  if (!require(package_name, character.only = TRUE)) {
-    install.packages(package_name)
-    require(package_name, character.only = TRUE)
-  }
-}
-
-
-
 # 'renv' for project-specific environments
-# require("renv")
+require("renv")
 # renv::activate()
-renv::restore() # Restore the project library
+renv::restore()
+# Restore the project library
 
-# General utility packages
-require("remotes")   # Package management
-require("tinytex")   # LaTeX support
-require("googledrive")  # Google Drive integration
-require("gsheet")    # Google Sheets integration
-require("readr")     # Data import
-require("plotrix")   # Plotting utilities
-require("janitor")   # Data cleaning
-require("dotenv")    # Environment variable management
-require("data.table") # Data manipulation (Note: Marked for removal)
-require("here") # Handling path
-require("xfun") # Handling path
+# Define all required packages
+required_packages <- c(
+  "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
+  "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
+  "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
+  "flextable", "readtext", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
+  "purrr", "readxl", "base", "utils", "odbc", "rlang", "kableExtra", "tidyr", 
+  "ggplot2", "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
+  "gdata", "R3port", "reshape2", "tools"
+)
 
-# Database related packages
-require("RPostgreSQL") # PostgreSQL interface
-require("RPostgres")   # Alternative PostgreSQL interface
-require("DBI")        # Database interface
-require("rpostgis")   # PostGIS interface
-# remove.packages("rgeos")
-require("terra")
-require("sf")
-require("tinytex")
-require("RSQLite")    # SQLite interface
+# Apply the function to each required package
+lapply(required_packages, require)
 
 # 
 # if(!require(tinytex)) {
@@ -118,7 +100,7 @@ running_time_of_workflow(raw_nominal_catch)
 
 
 ## Georeferenced catch: These datasets contains catch AND EFFORT for some data as effort are used to raise catch data for level 0 to 2
-# Around 1.01 hours
+# Around 1.2 hours
 raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef")
 running_time_of_workflow(raw_data_georef)
@@ -151,7 +133,7 @@ time_Summarising_invalid_data_georef <- system.time({
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_tunaatlas_qa_global_datasets_catch_path")
-
+### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
 create_materialized_view <- ""
@@ -191,17 +173,7 @@ setwd(wd)
 
 # This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
-require(rlang)
-required_packages <- c("webshot",
-                       "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble","xfun",
-                       "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
-                       "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-                       "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
-)
 
-for (package in required_packages) {
-  library(package, character.only = TRUE)
-}
 upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
                                                                          connectionDB = con)
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/strata_with_catches_without_effort.R")
