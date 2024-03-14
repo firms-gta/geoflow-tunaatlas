@@ -1,25 +1,33 @@
-# This script ensures that required R packages are installed and loaded.
 
-# Function to check, install, and load a package
-# 'renv' for project-specific environments
-require("renv")
+# Load 'renv' for project-specific environments
+if (!require("renv")) install.packages("renv")
+library(renv)
+# Activate the project environment (if using project-specific libraries)
 # renv::activate()
+# Restore the project library (if using renv)
 renv::restore()
-# Restore the project library
 
-# Define all required packages
+# Define all required packages (excluding 'base' and 'utils' as they are always available)
 required_packages <- c(
   "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
   "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
   "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
   "flextable", "readtext", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
-  "purrr", "readxl", "base", "utils", "odbc", "rlang", "kableExtra", "tidyr", 
-  "ggplot2", "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
+  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
+  "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
   "gdata", "R3port", "reshape2", "tools"
 )
 
+# Function to check, install (if necessary), and load a package
+install_and_load <- function(package) {
+  if (!require(package, character.only = TRUE)) {
+    install.packages(package)
+    library(package, character.only = TRUE)
+  }
+}
+
 # Apply the function to each required package
-lapply(required_packages, require)
+sapply(required_packages, install_and_load)
 
 # 
 # if(!require(tinytex)) {
@@ -107,7 +115,7 @@ running_time_of_workflow(raw_data_georef)
 
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
-# Around 23 minutes
+# Around 30 minutes
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
 running_time_of_workflow(raw_data_georef_effort)
