@@ -43,7 +43,7 @@
       		"properties" : {
 			"user": "{{DB_USER}}",
 			"onend_r": {
-				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/Developpement/tunaatlas_scripts/create_materialized_view_for_shiny_apps.R",
+				"script": "./tunaatlas_scripts/create_materialized_view_for_shiny_apps.R",
 				"fun": "create_materialized_view_for_shiny_apps"
 			}
 		}
