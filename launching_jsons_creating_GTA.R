@@ -1,6 +1,6 @@
 
 # Load 'renv' for project-specific environments
-if (!require("renv")) install.packages("renv")
+# if (!require("renv")) install.packages("renv")
 library(renv)
 # Activate the project environment (if using project-specific libraries)
 # renv::activate()
@@ -21,7 +21,7 @@ required_packages <- c(
 # Function to check, install (if necessary), and load a package
 install_and_load <- function(package) {
   if (!require(package, character.only = TRUE)) {
-    install.packages(package)
+    # install.packages(package)
     library(package, character.only = TRUE)
   }
 }
@@ -40,10 +40,12 @@ sapply(required_packages, install_and_load)
 
 # Additional, project-specific packages
 # 'geoflow' package from GitHub for workflow management
-if (!require(geoflow)) {
-  remotes::install_github("eblondel/geoflow")
-  require(geoflow)
-}
+# if (!require(geoflow)) {
+#   remotes::install_github("eblondel/geoflow")
+#   require(geoflow)
+# }
+require(geoflow)
+
 
 executeAndRename <- function(executed_file, suffix) {
   # Execute workflow
@@ -186,11 +188,11 @@ upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatl
                                                                          connectionDB = con)
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/strata_with_catches_without_effort.R")
 CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
-                                                                         connectionDB = con)
+                                           connectionDB = con)
 
 catch_without_effort <- CPUE %>% dplyr::filter(((is.na(measurement_value_effort) | measurement_value_effort == 0)) & measurement_value_catch != 0)
 effort_without_catch <- CPUE %>% dplyr::filter(((is.na(measurement_value_catch) | measurement_value_catch == 0)) & measurement_value_effort != 0)
-  
+
 # Check on CPUE data for georeferenced in case some catch are not displayed with any effort
 global_catch_firms_level0_public <- read_csv(file.path(tunaatlas_qa_global_datasets_catch_path,"entities/global_catch_firms_level0/data/global_catch_firms_level0_public.csv"))
 cwp_catch <- unique(global_catch_firms_level0_public$geographic_identifier)
