@@ -1,58 +1,86 @@
 convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   require(dplyr)
+  require(RPostgreSQL)
   
   opts <- action$options
-  wkt2spdf <- function(df, wkt_col_name, id_col_name, crs="+proj=longlat")
-  {
-    if(require("rgeos")==FALSE)
-    {
-      stop("You have to install the \"rgeos\" library.")
+  library(sf)
+  
+  wkt2sfd <- function(df, wkt_col_name, id_col_name, crs="+proj=longlat +datum=WGS84") {
+    if (!wkt_col_name %in% names(df)) {
+      stop(paste("Cannot find the specified WKT column name (\"", wkt_col_name, "\") in the specified data frame.", sep=""))
     }
     
-    if(length(which(names(df)==wkt_col_name))==0)
-    {
-      stop(paste("Cannot found the specified WKT column name (\"", wkt_col_name, "\") in the specified data frame.", sep=""))
+    if (!id_col_name %in% names(df)) {
+      stop(paste("Cannot find the specified ID column name (\"", id_col_name, "\") in the specified data frame.", sep=""))
     }
     
-    if(length(which(names(df)==id_col_name))==0)
-    {
-      stop(paste("Cannot found the specified ID column name (\"", id_col_name, "\") in the specified data frame.", sep=""))
+    if(any(duplicated(df[[id_col_name]]))) {
+      stop("The ID is not unique in the specified data frame.")
     }
     
-    if(length(which(duplicated(df[,which(names(df)==id_col_name)])==TRUE)) > 0)
-    {
-      stop(paste("The ID is not unique in the specified data frame.", sep=""))
-    }
+    # Convert WKT to sf object
+    sf_object <- st_as_sf(df, wkt = wkt_col_name, crs = crs)
     
-    wkt2sp <- function(wkt, id)
-    {
-      readWKT(wkt, p4s=CRS(crs), id=as.character(id))
-    }
-    sp_object_list <- mapply(wkt2sp, df[,which(names(df)==wkt_col_name)], df[,which(names(df)==id_col_name)])
+    # Ensure the ID column is kept
+    sf_object[[id_col_name]] <- df[[id_col_name]]
     
-    if(length(sp_object_list) == 0)
-    {
-      stop("Empty list.")
-    }
-    
-    names(sp_object_list) <- df[,which(names(df)==id_col_name)]
-    sp_object_collection <- do.call(rbind, sp_object_list)
-    row.names(df) <- df[,which(names(df)==id_col_name)]
-    
-    if(class(sp_object_list[[1]])=="SpatialPolygons")
-    {
-      return(SpatialPolygonsDataFrame(sp_object_collection, data=df))
-    } else {
-      if(class(sp_object_list[[1]])=="SpatialPoints")
-      {
-        return(SpatialPointsDataFrame(sp_object_collection, data=df))
-      } else {
-        stop(paste("Type ", class(sp_object_list[[1]]), " not yet implmented."), sep="")
-      }
-    }
+    return(sf_object)
   }
   
-  write_NetCDF <- function(config, con, dataset_metadata,Variable=NULL, dimensions='all', path = "data"){
+  
+  
+  
+  # wkt2spdf <- function(df, wkt_col_name, id_col_name, crs="+proj=longlat")
+  # {
+  #   # if(require("rgeos")==FALSE)
+  #   # {
+  #   #   stop("You have to install the \"rgeos\" library.")
+  #   # }
+  #   
+  #   if(length(which(names(df)==wkt_col_name))==0)
+  #   {
+  #     stop(paste("Cannot found the specified WKT column name (\"", wkt_col_name, "\") in the specified data frame.", sep=""))
+  #   }
+  #   
+  #   if(length(which(names(df)==id_col_name))==0)
+  #   {
+  #     stop(paste("Cannot found the specified ID column name (\"", id_col_name, "\") in the specified data frame.", sep=""))
+  #   }
+  #   
+  #   if(length(which(duplicated(df[,which(names(df)==id_col_name)])==TRUE)) > 0)
+  #   {
+  #     stop(paste("The ID is not unique in the specified data frame.", sep=""))
+  #   }
+  #   
+  #   wkt2sp <- function(wkt, id)
+  #   {
+  #     readWKT(wkt, p4s=CRS(crs), id=as.character(id))
+  #   }
+  #   sp_object_list <- mapply(wkt2sp, df[,which(names(df)==wkt_col_name)], df[,which(names(df)==id_col_name)])
+  #   
+  #   if(length(sp_object_list) == 0)
+  #   {
+  #     stop("Empty list.")
+  #   }
+  #   
+  #   names(sp_object_list) <- df[,which(names(df)==id_col_name)]
+  #   sp_object_collection <- do.call(rbind, sp_object_list)
+  #   row.names(df) <- df[,which(names(df)==id_col_name)]
+  #   
+  #   if(class(sp_object_list[[1]])=="SpatialPolygons")
+  #   {
+  #     return(SpatialPolygonsDataFrame(sp_object_collection, data=df))
+  #   } else {
+  #     if(class(sp_object_list[[1]])=="SpatialPoints")
+  #     {
+  #       return(SpatialPointsDataFrame(sp_object_collection, data=df))
+  #     } else {
+  #       stop(paste("Type ", class(sp_object_list[[1]]), " not yet implmented."), sep="")
+  #     }
+  #   }
+  # }
+  
+  write_NetCDF <- function(config, con, dataset_metadata,Variable=NULL, dimensions='all', path = "data",res_dimensions_and_variables, specie){
     ########################
     #Used Packages:
     #######################
@@ -62,16 +90,10 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     library(plyr)
     config$logger.info("Beginning function write Netcdf")
     
-    
-    ##Lecture du tableau de données (2 CAS: SARDARA/ TRAJECTOIRE)
-    
-    #cas SARDARA
-    query_netcdf<-getSQLSardaraQueries(con,dataset_metadata)$query_NetCDF
-    res_dimensions_and_variables<-dbGetQuery(con,query_netcdf)
-    res_dimensions_and_variables2 <-res_dimensions_and_variables
+    # res_dimensions_and_variables2 <-res_dimensions_and_variables
     
     ##netcdf name
-    NetCDF_file_name <- file.path(path,paste0(dataset_metadata$identifier,".nc"))
+    NetCDF_file_name <- file.path(path,paste0(specie,dataset_metadata$identifier,".nc"))
     netCDF_CF_filename <-  NetCDF_file_name
     sp_resolution <- dataset_metadata$sp_resolution
     
@@ -96,7 +118,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     
     
     if(nchar(dimensions[1]) != 0 & !dimensions[1] %in% c('all','no') ){aggBy <- c(aggBy,dimensions)
-    } else if (tolower(dimensions)=='all' ){dimensions <- names(res_dimensions_and_variables)[-which( names(res_dimensions_and_variables) %in% c('measurement_value','geom_wkt','time_start','time_end'))];aggBy <- c(aggBy,dimensions)
+    } else if (tolower(dimensions)=='all' ){dimensions <- names(res_dimensions_and_variables)[-which( names(res_dimensions_and_variables) %in% c('measurement_value','geom_wkt','time_start','time_end', "source_authority", "measurement_type"))];aggBy <- c(aggBy,dimensions)
     } else if(tolower(dimensions)=='no' | nchar(dimensions[1]) == 0 ){dimensions = ''}
     
     # res_dimensions_and_variables <- aggregate(res_dimensions_and_variables['measurement_value'],setdiff(res_dimensions_and_variables[aggBy],"unit"),FUN=aggFun)
@@ -108,14 +130,16 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     if('spatial_coverage' %in% names(dataset_metadata)){
       geom_wkt <- dataset_metadata$spatial_coverage
       test <- data.frame(wkt=unique(geom_wkt),id=1)
-      sptest <- wkt2spdf(df = test,wkt_col_name = 'wkt',id_col_name = 'id')
-      box <- bbox(sptest)
+      sptest <- wkt2sfd(df = test,wkt_col_name = 'wkt',id_col_name = 'id')
+      box <- st_bbox(sptest)
+      
     } else {
       geom_wkt <- res_dimensions_and_variables$geom_wkt
       #####test exact box:
       test <- data.frame(wkt=unique(geom_wkt),id=1:length(unique(geom_wkt)))
-      sptest <- wkt2spdf(df = test,wkt_col_name = 'wkt',id_col_name = 'id')
-      box <- bbox(sptest)
+      sptest <- wkt2sfd(df = test,wkt_col_name = 'wkt',id_col_name = 'id')
+      box <- st_bbox(sptest)
+      
     }
     ##################
     ##DEFINE DIMENSIONS FOR NETCDF:
@@ -127,9 +151,15 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     dateVector <- julian(x=as.numeric(format(as.Date(dateVector1),'%m')),d=as.numeric(format(as.Date(dateVector1),'%d')),y=as.numeric(format(as.Date(dateVector1),'%Y')),origin.=c(month = 1, day = 1, year = 1950))
     
     ##### SPATIAL DIMENSION  ##########
-    if(!is.null(sp_resolution)){
-      longitudeVector = seq(from=box['x','min']+(sp_resolution/2), to=box['x','max']-(sp_resolution/2), by=sp_resolution)
-      latitudeVector = seq(from=box['y','min']+(sp_resolution/2), to=box['y','max']-(sp_resolution/2), by=sp_resolution)}
+    if(!is.null(sp_resolution)) {
+      longitudeVector <- seq(from = box["xmin"] + (sp_resolution / 2), 
+                             to = box["xmax"] - (sp_resolution / 2), 
+                             by = sp_resolution)
+      
+      latitudeVector <- seq(from = box["ymin"] + (sp_resolution / 2), 
+                            to = box["ymax"] - (sp_resolution / 2), 
+                            by = sp_resolution)
+    }
     
     ######################################################################
     ##### DEFINE SPATIAL and TEMPORAL DIMENSIONS  ##########
@@ -184,7 +214,6 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     if(is.na(nonAvailable)| is.null(nonAvailable)){nonAvailable <- -9999}
     
     varproj <-  ncvar_def(name="crs", units="", dim=NULL, missval=nonAvailable, prec="integer")
-    # varproj <- ncvar_def(name="crs", units="", dim=NULL, missval=nonAvailable, prec="integer") #compression does not work with current version
     
     if('measurement_unit' %in% names(dataset_metadata)){
       unite <- dataset_metadata$measurement_unit
@@ -194,7 +223,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     #         'effort' = unite <- '???',
     #         'catch_at_size' = unite <- '???')
     varXd <- ncvar_def(name=as.character(variable),  units=as.character(unite), dim=listDims, missval=nonAvailable, prec="float", compression = compression)
-    # varXd <- ncvar_def(name=as.character(variable),  units=as.character(unite), dim=listDims, missval=nonAvailable, prec="float") # compression does not work with current version
+
     ######################################################################
     ##### CREATE EMPTY NETCDF FILE  ##########  # create netCDF file and put arrays
     ######################################################################
@@ -202,8 +231,10 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     if(file.exists(netCDF_CF_filename)){
       file.remove(netCDF_CF_filename)
     }
+    
     nc <- nc_create(netCDF_CF_filename,list(varXd,varproj),force_v4 = TRUE, verbose = TRUE)
     cat("netCDF File created")
+    
     ######################################################################
     ##### ADD VALUES TO VARIABLES  ##########
     ######################################################################
@@ -212,13 +243,13 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     if(nchar(dimensions[1])!=0){
       gridDimInd2 <- res_dimensions_and_variables[dimensions]
       for(dim1 in dimensions ){
-        if(!(dim1 %in% meaningValue$names) & is.numeric(res_dimensions_and_variables[[dim1]])){mapvalues(gridDimInd2[[dim1]], from =sort(unique(gridDimInd2[[dim1]])), to= 1:length(unique(gridDimInd2[[dim1]]))) }
-        if(dim1 %in% meaningValue$names){gridDimInd2[[dim1]]=mapvalues(gridDimInd2[[dim1]], from = meaningValue$values[[ which( meaningValue$names %in% dim1)]], to = meaningValue$ref[[ which( meaningValue$names %in% dim1)]])}
+        if(!(dim1 %in% meaningValue$names) & is.numeric(res_dimensions_and_variables[[dim1]])){plyr::mapvalues(gridDimInd2[[dim1]], from =sort(unique(gridDimInd2[[dim1]])), to= 1:length(unique(gridDimInd2[[dim1]]))) }
+        if(dim1 %in% meaningValue$names){gridDimInd2[[dim1]]=plyr::mapvalues(gridDimInd2[[dim1]], from = meaningValue$values[[ which( meaningValue$names %in% dim1)]], to = meaningValue$ref[[ which( meaningValue$names %in% dim1)]])}
       }
     }else {gridDimInd2= data.frame(time_start=rep(NA,nrow(res_dimensions_and_variables)))}
     
     gridDimInd2$time_start <- julian(x=as.numeric(format(as.Date(res_dimensions_and_variables$time_start),'%m')),d=as.numeric(format(as.Date(res_dimensions_and_variables$time_start),'%d')),y=as.numeric(format(as.Date(res_dimensions_and_variables$time_start),'%Y')),origin.=c(month = 1, day = 1, year = 1950))
-    gridDimInd2$time_start <- mapvalues(gridDimInd2$time_start, from = dimT$vals, to = 1:length(dimT$vals))
+    gridDimInd2$time_start <- plyr::mapvalues(gridDimInd2$time_start, from = dimT$vals, to = 1:length(dimT$vals))
     if(nchar(dimensions[1])!=0){
       res_dimensions_and_variables[dimensions] <- gridDimInd2[dimensions]}
     res_dimensions_and_variables$time_start <- gridDimInd2$time_start
@@ -230,28 +261,61 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     } else {cols = "time_start" 
     gridDimInd_InTab <- res_dimensions_and_variables[ , cols ]}
     gridDimInd_InTab <- gsub(' ','',gridDimInd_InTab)
-    for(i in 1:nrow(gridDimInd2)){
-      config$logger.info(paste('couche ',i,' sur ',nrow(gridDimInd2),sep=''))
-      tot <- unlist(as.vector(lapply(gridDimInd2[i,], as.character)))
-      resTD <- res_dimensions_and_variables[which(gridDimInd_InTab %in% paste0(tot,collapse='_')),]
-      if(!is.null(sp_resolution)){
-        resTD$fake_id <- seq(1:nrow(resTD))
-        spDF <- wkt2spdf(resTD, "geom_wkt", "fake_id")
-        # head(spDF)
-        # rast <- rasterize(spDF, raster(ncol=72, nrow=36, xmn=-180, xmx=180, ymn=-90, ymx=90, crs=CRS("+init=epsg:4326")), "v_catch")
-        #resolution a automatiser
-        rast <- rasterize(spDF, raster(ncol=as.numeric(diff(box['x',]))/sp_resolution, nrow=as.numeric(diff(box['y',]))/sp_resolution, xmn=box['x','min'], xmx=box['x','max'], ymn=box['y','min'], ymx=box['y','max'], crs=CRS("+init=epsg:4326")), 'measurement_value')
-        data <- as.matrix(rast)
-        data <- t(data[nrow(data):1,])
-        data <- replace(data, is.na(data), -9999)
-        strt <- as.numeric(gridDimInd2[i,])
-        ncvar_put(nc=nc, varid=varXd, vals=data, start = c(1, 1, strt),  count = c(-1, -1, rep(1,ncol(gridDimInd2))))
+    # for(i in 1:nrow(gridDimInd2)){
+    #   config$logger.info(paste('couche ',i,' sur ',nrow(gridDimInd2),sep=''))
+    #   tot <- unlist(as.vector(lapply(gridDimInd2[i,], as.character)))
+    #   resTD <- res_dimensions_and_variables[which(gridDimInd_InTab %in% paste0(tot,collapse='_')),]
+    #   if(!is.null(sp_resolution)){
+    #     resTD$fake_id <- seq(1:nrow(resTD))
+    #     spDF <- wkt2spdf(resTD, "geom_wkt", "fake_id")
+    #     # head(spDF)
+    #     # rast <- rasterize(spDF, raster(ncol=72, nrow=36, xmn=-180, xmx=180, ymn=-90, ymx=90, crs=CRS("+init=epsg:4326")), "v_catch")
+    #     #resolution a automatiser
+    #     rast <- rasterize(spDF, raster(ncol=as.numeric(diff(box['x',]))/sp_resolution, nrow=as.numeric(diff(box['y',]))/sp_resolution, xmn=box['x','min'], xmx=box['x','max'], ymn=box['y','min'], ymx=box['y','max'], crs=CRS("+init=epsg:4326")), 'measurement_value')
+    #     data <- as.matrix(rast)
+    #     data <- t(data[nrow(data):1,])
+    #     data <- replace(data, is.na(data), -9999)
+    #     strt <- as.numeric(gridDimInd2[i,])
+    #     ncvar_put(nc=nc, varid=varXd, vals=data, start = c(1, 1, strt),  count = c(-1, -1, rep(1,ncol(gridDimInd2))))
+    #   }
+    #   if(is.null(sp_resolution)){ strt <- as.numeric(gridDimInd2[i,])
+    #   ncvar_put(nc=nc, varid=varXd, vals=resTD[['measurement_value']], start = c( strt),  count = c( rep(1,ncol(gridDimInd2))))}
+    #   
+    #   
+    # }
+    
+    #test no to use rgoes anymore library(sf)
+    library(terra) # terra replaces raster and is more recent and efficient
+    
+    res_dimensions_and_variables_sf <- st_as_sf(res_dimensions_and_variables, wkt = "geom_wkt", crs = 4326)
+    
+    for(i in 1:nrow(gridDimInd2)) {
+      config$logger.info(paste('Layer ', i, ' of ', nrow(gridDimInd2), sep = ''))
+      tot <- unlist(as.vector(lapply(gridDimInd2[i, ], as.character)))
+      # Subset the sf object 
+      resTD_sf <- res_dimensions_and_variables_sf[which(gridDimInd_InTab %in% paste0(tot, collapse = '_')), ]
+      
+      if(!is.null(sp_resolution)) {
+        # Create a raster template with resolution and extent matching 'box'
+        rast_template <- rast(nrows = as.integer(diff(c(box["ymin"], box["ymax"])) / sp_resolution), 
+                              ncols = as.integer(diff(c(box["xmin"], box["xmax"])) / sp_resolution),
+                              extent = ext(box["xmin"], box["xmax"], box["ymin"], box["ymax"]), 
+                              crs = crs(resTD_sf))
+        
+        # Rasterize the 'measurement_value' from sf object
+        rast_resTD <- rasterize(resTD_sf, rast_template, field = 'measurement_value', fun = sum, background = -9999)
+        
+        data <- values(rast_resTD)
+        strt <- as.numeric(gridDimInd2[i, ])
+        ncvar_put(nc = nc, varid = varXd, vals = data, start = c(1, 1, strt), count = c(-1, -1, rep(1, ncol(gridDimInd2))))
       }
-      if(is.null(sp_resolution)){ strt <- as.numeric(gridDimInd2[i,])
-      ncvar_put(nc=nc, varid=varXd, vals=resTD[['measurement_value']], start = c( strt),  count = c( rep(1,ncol(gridDimInd2))))}
       
-      
+      if(is.null(sp_resolution)) {
+        strt <- as.numeric(gridDimInd2[i, ])
+        ncvar_put(nc = nc, varid = varXd, vals = resTD_sf[['measurement_value']], start = c(strt), count = c(rep(1, ncol(gridDimInd2))))
+      }
     }
+    
     
     ###add a meaning Automatically to Non-numerical dimensions
     ################################################################
@@ -260,6 +324,8 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
         loc <-  match(dimensions[indD], unlist(meaningValue$names))
         if(!is.na(loc)){
           ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_values"),paste((meaningValue$ref[[loc]]),collapse = ","))
+          config$logger.info(paste(paste0(dimensions[indD],paste0(meaningValue$names[[loc]],"_values"),paste((meaningValue$ref[[loc]]),collapse = ","))
+          ))
           ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_meanings"),paste(gsub(" ","_",as.character(meaningValue$values[[loc]])),collapse=" "))
           ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_valid_range"),paste(c(min(meaningValue$ref[[loc]]),max(meaningValue$ref[[loc]])),collapse = ","))}
       }}
@@ -276,18 +342,21 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     }
     
     if(!is.null(sp_resolution)){
-      ncatt_put(nc,"longitude","standard_name","longitude")
-      ncatt_put(nc,"longitude","axis","X") 
-      ncatt_put(nc,"longitude","_CoordinateAxisType","longitude")
-      ncatt_put(nc,"longitude","valid_min",box['x','min'])
-      ncatt_put(nc,"longitude","valid_max",box['x','max'])
+      # Longitude attributes
+      ncatt_put(nc, varid = "longitude", attname = "standard_name", attval = "longitude")
+      ncatt_put(nc, varid = "longitude", attname = "axis", attval = "X") 
+      ncatt_put(nc, varid = "longitude", attname = "_CoordinateAxisType", attval = "Lon")
+      ncatt_put(nc, varid = "longitude", attname = "valid_min", attval = box["xmin"])
+      ncatt_put(nc, varid = "longitude", attname = "valid_max", attval = box["xmax"])
       
-      ncatt_put(nc,"latitude","standard_name","latitude")
-      ncatt_put(nc,"latitude","axis","Y")
-      ncatt_put(nc,"latitude","_CoordinateAxisType","latitude")
-      ncatt_put(nc,"latitude","valid_min",box['y','min'])
-      ncatt_put(nc,"latitude","valid_max",box['y','max'])
+      # Latitude attributes
+      ncatt_put(nc, varid = "latitude", attname = "standard_name", attval = "latitude")
+      ncatt_put(nc, varid = "latitude", attname = "axis", attval = "Y")
+      ncatt_put(nc, varid = "latitude", attname = "_CoordinateAxisType", attval = "Lat")
+      ncatt_put(nc, varid = "latitude", attname = "valid_min", attval = box["ymin"])
+      ncatt_put(nc, varid = "latitude", attname = "valid_max", attval = box["ymax"])
     }
+    
     ncatt_put(nc,"time","standard_name","time")
     ncatt_put(nc,"time","axis","T")
     ncatt_put(nc,"time","_CoordinateAxisType","time")
@@ -312,11 +381,13 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     
     ##Extent Search
     if(!is.null(sp_resolution)){
-      ncatt_put(nc,0,"geospatial_lat_min",box['y','min'])
-      ncatt_put(nc,0,"geospatial_lat_max",box['y','max'])
-      ncatt_put(nc,0,"geospatial_lon_min",box['x','min'])
-      ncatt_put(nc,0,"geospatial_lon_max",box['x','max'])
+      # Global geospatial attributes
+      ncatt_put(nc, varid = 0, attname = "geospatial_lat_min", attval = box["ymin"])
+      ncatt_put(nc, varid = 0, attname = "geospatial_lat_max", attval = box["ymax"])
+      ncatt_put(nc, varid = 0, attname = "geospatial_lon_min", attval = box["xmin"])
+      ncatt_put(nc, varid = 0, attname = "geospatial_lon_max", attval = box["xmax"])
     }
+    
     
     ncatt_put(nc,0,"time_coverage_start",as.character(min(as.Date(dateVector1))))
     ncatt_put(nc,0,"time_coverage_end",as.character(max(as.Date(dateVector1))))
@@ -360,7 +431,6 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     
   }
   
-  require(RPostgreSQL)
   dataset_pid <- entity$identifiers[["id"]]
   
   if(!(!grepl("nominal_catch",dataset_pid) | !grepl("deg",dataset_pid) | grepl("0",dataset_pid))){
@@ -418,12 +488,34 @@ LEFT JOIN
     
   }
   
-  if(length(unique(dataset$measurement_unit)) == 1){
-    dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
-  } else {print(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
-  }
+  # if(length(unique(dataset$measurement_unit)) == 1){
+  #   dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
+  # } else {print(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
+  # }
+  # dataset_groupped <- dataset %>% dplyr::group_by(species)# %>% dplyr::slice_head(n = 1000) %>% dplyr::filter(species%in% c("YFT", "ALB", "SKJ", "SBF", "BET"))
   #########!!!! 1.2 execution de la fonction pour transformer les données en Netcdf
-  write_NetCDF(config = config, con = con, dataset_metadata,Variable='auto',dimensions='all', path = "data")
+  
+  # start_time <- Sys.time()
+  # 
+  # for (specie in unique(dataset_groupped$species)){
+  #   dataset_species_filtered <- dataset_groupped %>% dplyr::filter(species == specie)
+  #   write_NetCDF(config = config, con = con, dataset_metadata,Variable='auto',dimensions='all', res_dimensions_and_variables = dataset_species_filtered, path = "data", 
+  #                specie = specie)
+  # }
+  # 
+  # end_time <- Sys.time()
+  # time_each_species <- difftime(start_time, end_time)
+  
+  ### all in one 
+  # start_time <- Sys.time()
+  
+  write_NetCDF(config = config, con = con, dataset_metadata,Variable='auto',dimensions='all', res_dimensions_and_variables = dataset, path = "data", 
+                 specie = "all")
+  
+  # end_time <- Sys.time()
+  # time_all_in_one <- difftime(start_time, end_time)
+  
+  # write_NetCDF(config = config, con = con, dataset_metadata,Variable='auto',dimensions='all', path = "data")
   
   entity$addResource("netcdf", file.path("data",paste0(dataset_pid, ".nc")))
   if(uploadgoogledrive){
