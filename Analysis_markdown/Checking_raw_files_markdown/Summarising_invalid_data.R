@@ -2,7 +2,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   ancient_wd <- getwd()
   setwd(main_dir)
   dir.create("Recap_on_pre_harmo")
-  path = file.path(getwd(), "Recap_on_pre_harmo")
+  path = file.path(getwd())#, "Recap_on_pre_harmo")
   
   species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
@@ -10,7 +10,13 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
     dplyr::rename(GRIDTYPE = gridtype)
   
-  try(continent <- st_read(connectionDB, query = "SELECT * from public.continent"))
+  continent <- tryCatch({
+    st_read(connectionDB, query = "SELECT * from public.continent")
+  }, error = function(e) {
+    cat("An error occurred:", e$message, "\n")
+    NULL  
+  })
+  
   if(is.null(continent)){
     url= "https://www.fao.org/fishery/geoserver/wfs" 
     serviceVersion = "1.0.0" 
@@ -251,7 +257,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       # Render the R Markdown file
       require(fs)
       # Use the function (make sure to use the correct local paths)
-      rmarkdown::render("Recap_on_pre_harmo/Report_on_raw_data.Rmd",
+      rmarkdown::render("Report_on_raw_data.Rmd",
                         output_dir = entity_dir, output_file =output_file_name ,
                         envir = render_env
       )

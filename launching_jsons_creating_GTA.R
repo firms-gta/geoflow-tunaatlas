@@ -15,7 +15,7 @@ required_packages <- c(
   "flextable", "readtext", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
   "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools"
+  "gdata", "R3port", "reshape2", "tools", "BH", "plogr", "plotrix", "rpostgis", "RPostgres", "RSQLite"
 )
 
 # Function to check, install (if necessary), and load a package
@@ -87,7 +87,6 @@ running_time_of_workflow <- function(folder){
   
   return(time_difference)
 }
-
 
 # First step is creation of the database model and loading of the codelist (around 5 minutes)
 db_model <- executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) 

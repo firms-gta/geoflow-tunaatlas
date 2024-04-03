@@ -62,13 +62,15 @@ columns_to_color <- names(invalid_data)[-c(1,2)]
 
 invalid_data <- invalid_data %>% ungroup() %>%dplyr::rowwise() %>% dplyr::mutate(All_good = ifelse(sum(across(columns_to_color)) ==0, TRUE, FALSE)) %>% arrange(All_good, tRFMO) %>% group_by(All_good, tRFMO)
 
-column_names = colnames(invalid_data)
+issued_dataframes <- invalid_data%>% dplyr::filter(All_good == FALSE) %>% dplyr::select(-All_good)
+
+column_names = colnames(issued_dataframes)
 
 # Remove '.rds' from each column name
 cleaned_column_names <- gsub(".rds", "", column_names)
 
-colnames(invalid_data) <- cleaned_column_names
-
+colnames(issued_dataframes) <- cleaned_column_names
+columns_to_color <- names(issued_dataframes)[-c(1,2)]
 
 
 ```
@@ -76,9 +78,9 @@ colnames(invalid_data) <- cleaned_column_names
 ```{r echo=FALSE, results='asis'}
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R")
-issued_dataframes <- qflextable2(invalid_data %>% dplyr::filter(All_good == FALSE) %>% dplyr::select(-All_good), captionn = "Recap of the issues with each dataframe", grouped_data = c( "tRFMO"))
+issued_dataframes <- qflextable2(issued_dataframes , captionn = "Recap of the issues with each dataframe", grouped_data = c( "tRFMO"))
 for (i in columns_to_color){
-  ft$body$styles$text$color$data[,i] <- ifelse(is.na(ft$body$dataset[,i]), "blue", ifelse(ft$body$dataset[,i], "red", "green"))
+  issued_dataframes$body$styles$text$color$data[,i] <- ifelse(is.na(issued_dataframes$body$dataset[,i]), "blue", ifelse(issued_dataframes$body$dataset[,i], "red", "green"))
   
 }
 
