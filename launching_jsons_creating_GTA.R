@@ -15,7 +15,7 @@ required_packages <- c(
   "flextable", "readtext", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
   "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools", "BH", "plogr", "plotrix", "rpostgis", "RPostgres", "RSQLite"
+  "gdata", "R3port", "reshape2", "tools", "plogr", "plotrix", "rpostgis", "RPostgres", "RSQLite"
 )
 
 # Function to check, install (if necessary), and load a package
