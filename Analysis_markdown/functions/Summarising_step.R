@@ -1,7 +1,7 @@
 Summarising_step = function(main_dir, connectionDB, config){
   ancient_wd <- getwd()
-
-    required_packages <- c("webshot",
+  
+  required_packages <- c("webshot",
                          "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
                          "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
                          "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
@@ -22,7 +22,22 @@ Summarising_step = function(main_dir, connectionDB, config){
     dplyr::rename(GRIDTYPE = gridtype)
   
   
-  continent <- st_read(connectionDB,query = "SELECT * from public.continent") 
+  continent <- tryCatch({
+    st_read(connectionDB, query = "SELECT * from public.continent")
+  }, error = function(e) {
+    cat("An error occurred:", e$message, "\n")
+    NULL  
+  })
+  
+  if(is.null(continent)){
+    url= "https://www.fao.org/fishery/geoserver/wfs" 
+    serviceVersion = "1.0.0" 
+    logger = "INFO"
+    # SOURCE: OGC ####
+    WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
+    continent = WFS$getFeatures("fifao:UN_CONTINENT2")
+    
+  }
   
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
@@ -72,24 +87,24 @@ Summarising_step = function(main_dir, connectionDB, config){
     
     
     for(file in sub_list_dir_2){
-
-    `%notin%` <- Negate(`%in%`)
+      
+      `%notin%` <- Negate(`%in%`)
       data <- readRDS(file)
       file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.rds", file))
       if("GRIDTYPE" %notin% colnames(data)){
-      data <- data %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier), 
-                                     gear_type = as.character(gear_type))
-      data <- tidying_GTA_data_for_comparison(dataframe = data,
-                                              shape = shape_without_geom,
-                                              species_group_dataframe = species_group,
-                                              cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
-      if("gridtype"%in% colnames(data)){
-        data <- data %>% dplyr::rename(GRIDTYPE = gridtype)
+        data <- data %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier), 
+                                       gear_type = as.character(gear_type))
+        data <- tidying_GTA_data_for_comparison(dataframe = data,
+                                                shape = shape_without_geom,
+                                                species_group_dataframe = species_group,
+                                                cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
+        if("gridtype"%in% colnames(data)){
+          data <- data %>% dplyr::rename(GRIDTYPE = gridtype)
+        }
+        
+        saveRDS(data, file = file)
       }
       
-      saveRDS(data, file = file)
-      }
-
     }
     
     parameter_filtering <- opts$filtering
@@ -105,24 +120,24 @@ Summarising_step = function(main_dir, connectionDB, config){
     
     
     
-      output_file_name <- paste0(entity_name, "_report.html") # name of the output file
-      output_dir <- file.path(entity_dir, output_file_name) # where to save the output file
-      
-      # Set new environment for rendering the Rmd file, so it doesn't affect the current environment
-      render_env <- list2env(as.list(child_env), parent = child_env)
-      
-      list2env(parameters_child_global,render_env)
-      
-      # Render the R Markdown file
-      folder_datasets_id <- "1IcKW65t4Dlj2lv4YTUiM-WGwbaiigmXb"
-      rmarkdown::render("tableau_recap_global_action_effort.Rmd",
-                        envir = render_env, output_format = "html_document2"
-      )
-      drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
-      
-      rm(render_env)
-      setwd(ancient_wd)
-      
+    output_file_name <- paste0(entity_name, "_report.html") # name of the output file
+    output_dir <- file.path(entity_dir, output_file_name) # where to save the output file
+    
+    # Set new environment for rendering the Rmd file, so it doesn't affect the current environment
+    render_env <- list2env(as.list(child_env), parent = child_env)
+    
+    list2env(parameters_child_global,render_env)
+    
+    # Render the R Markdown file
+    folder_datasets_id <- "1IcKW65t4Dlj2lv4YTUiM-WGwbaiigmXb"
+    rmarkdown::render("tableau_recap_global_action_effort.Rmd",
+                      envir = render_env, output_format = "html_document2"
+    )
+    drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
+    
+    rm(render_env)
+    setwd(ancient_wd)
+    
   }
-  }
-  
+}
+
