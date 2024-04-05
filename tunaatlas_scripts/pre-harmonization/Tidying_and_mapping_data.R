@@ -1,3 +1,18 @@
+#' Tidy and Map Data for Harmonization and Mapping Processes
+#'
+#' This function prepares and maps data for harmonization and mapping processes based on predefined configurations. It involves a series of steps including setting options and configurations, sourcing scripts for pre-harmonization, handling negative or null values, standardizing units of measure, dealing with irregular areas, and mapping to CWP standard codelists. The function is designed to work within a larger framework that utilizes external configuration, action, and entity objects to manage the harmonization and mapping workflow.
+#'
+#' @param action A geoflow object containing options and configurations for actions.
+#' @param entity An geoflow object containing the dataset to be processed, including resources like harmonized data paths.
+#' @param config A geoflow object that includes software configurations and a logger for information logging.
+#' @return Updates the entity object with the processed dataset and logs various steps of the process.
+#' @importFrom readr read_csv
+#' @importFrom dplyr mutate filter inner_join group_by summarise
+#' @importFrom stringr str_detect
+#' @export
+#' @examples
+#' Tidying_and_mapping_data(action, entity, config)
+
 Tidying_and_mapping_data = function(action, entity, config) {
 
   # Set options and configurations
