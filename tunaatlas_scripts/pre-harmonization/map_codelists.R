@@ -1,3 +1,33 @@
+#' Map Code Lists Across Tuna Atlas Datasets
+#'
+#' This function maps dimensions such as gear type, species, fishing fleet, fishing mode, and measurement 
+#' type or unit from one dataset to another using specified mapping datasets. It allows for the mapping 
+#' of data according to source authority (e.g., IATTC, CCSBT, WCPFC) and provides options to keep source 
+#' codes and to generate summary mappings.
+#'
+#' @param con A database connection object, the Global Tuna Atlas database which is created by the beginning of the workflow.
+#' @param fact The fact type to be mapped, either "catch" or "effort".
+#' @param mapping_dataset A dataset containing the mapping instructions between different code lists.
+#' @param dataset_to_map The dataset for which the code lists need to be mapped.
+#' @param mapping_keep_src_code Logical, indicating whether to keep the source codes in the mapped dataset.
+#' @param summary_mapping Logical, indicating whether to generate a summary of the mappings performed.
+#' @param source_authority_to_map A character vector specifying the source authorities to be mapped.
+#' @return A list containing the mapped dataset, a recap of the mappings, total statistics of the mappings, 
+#' and details of the codes that were not mapped.
+#' @examples
+#' \donotshow{
+#' # Assuming 'con' is a database connection, and 'mapping_dataset' is available
+#' mapped_data <- map_codelists(con, fact = "catch",
+#'                              mapping_dataset = your_mapping_dataset,
+#'                              dataset_to_map = your_dataset_to_map,
+#'                              mapping_keep_src_code = FALSE,
+#'                              summary_mapping = TRUE,
+#'                              source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
+#' }
+#' @export
+#' @importFrom dplyr filter bind_rows
+#' @seealso \code{\link{extract_dataset}}, \code{\link{list_metadata_datasets}}
+#'
 #re-written from https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/tunaatlas_world/create_own_tuna_atlas/sourced_scripts/map_code_lists.R
 map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")){
   # Get the dimensions to map from the mapping_dataset
@@ -42,11 +72,11 @@ map_codelists<-function(con, fact, mapping_dataset,dataset_to_map, mapping_keep_
       mapping <- map_codelist(dataset_to_map,df_mapping_final_this_dimension,dimension,mapping_keep_src_code)
       dataset_to_map <- mapping$df  # Codes are mapped by tRFMOs (source_authority)
       if(summary_mapping){
-		  stats <- mapping$stats
-		  not_mapped <- mapping$not_mapped
-		  not_mapped_total <- rbind(not_mapped_total, not_mapped)
-		  stats_total <- rbind(stats_total, stats)
-	  }
+        stats <- mapping$stats
+        not_mapped <- mapping$not_mapped
+        not_mapped_total <- rbind(not_mapped_total, not_mapped)
+        stats_total <- rbind(stats_total, stats)
+      }
     }
   }
   
