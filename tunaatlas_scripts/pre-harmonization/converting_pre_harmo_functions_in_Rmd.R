@@ -19,7 +19,7 @@
 #' 
 
 # Définir le chemin vers les scripts R
-path_to_scripts <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization"
+path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
 
 # Obtenir la liste des fichiers scripts R
 scripts <- fs::dir_ls(path = path_to_scripts, glob = "*.R")
