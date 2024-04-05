@@ -17,7 +17,7 @@
 #' @importFrom fs dir_ls
 #' 
 #' 
-
+require(stringr)
 # Définir le chemin vers les scripts R
 path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
 
@@ -39,9 +39,10 @@ clean_script <- function(script_path) {
   lines_reversed[which(str_detect(lines_reversed, "\\}$"))[1]] <- str_remove(lines_reversed[which(str_detect(lines_reversed, "\\}$"))[1]], "\\}$")
   # Rétablir l'ordre original des lignes
   lines <- rev(lines_reversed)
-  
+  #enlever les espaces devant le #
+  lines <- gsub("^\\s*#", "#", lines)
   # Enlever les lignes spécifiques à `entity`, `action`,  `config` et codelists
-  lines <- lines[!str_detect(lines, "entity|action|config|codelists")]
+  lines <- lines[!str_detect(lines, "entity|action|config|codelists|geoflow|eblondel")]
   
   # Retourner le code nettoyé qui sera écrit dans un autre fichier avant d'être transformé en Rmd 
   #(il vaut mieux passer par un fichier R je pense mais on peut s'en détacher en rentrant directement le texte dans knitr::spin )
