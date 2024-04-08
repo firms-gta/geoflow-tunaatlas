@@ -74,10 +74,11 @@ NC_harm_IATTC$Ocean<-"PAC_E"
 
 NC_harm_IATTC$MonthStart<-1
 NC_harm_IATTC$Period<-12
+
 #Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
+
 NC_harm_IATTC<-format_time_db_format(NC_harm_IATTC)
 
-#NC <- NC_harm_IATTC  %>%  filter( ! Catch %in% 0 )
 NC <- NC_harm_IATTC[NC_harm_IATTC$Catch != 0,]
 
 rm(NC_harm_IATTC)
@@ -87,16 +88,9 @@ colnames(NC)[colnames(NC)=="Flag"] <- "FishingFleet"
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-NC[,colToKeep_captures]
 # remove 0 and NA values 
-#NC <- NC  %>% 
-#  filter( ! Catch %in% 0 ) %>%
-#  filter( ! is.na(Catch)) 
 NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
-#NC <- NC %>% 
-#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
-#  summarise(Catch = sum(Catch))
-#NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(

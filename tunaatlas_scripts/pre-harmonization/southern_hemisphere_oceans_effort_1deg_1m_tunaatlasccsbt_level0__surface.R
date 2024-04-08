@@ -1,10 +1,38 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface, title = Harmonize data structure of CCSBT Surface effort datasets, abstract = Harmonize the structure of CCSBT catch-and-effort datasets: 'Surface' (pid of output file = southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/TokY4i, value = "https://goo.gl/TokY4i";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
+#' Harmonize CCSBT Surface Effort Datasets
+#'
+#' Harmonizes the structure of CCSBT catch-and-effort datasets specifically for 'Surface' effort data.
+#' This involves reading the raw dataset, performing various data transformations including renaming,
+#' mutating, and selecting columns, and calculating new fields. The output is a harmonized dataset suitable
+#' for integration into the Tuna Atlas database.
+#'
+#' @param action Action parameter, currently unused but reserved for future extension.
+#' @param entity An entity object that contains dataset metadata and methods for data resource management.
+#' @param config A configuration object that includes settings and utilities, such as logging.
+#'
+#' @details
+#' The function performs the following key steps:
+#' - Reads the raw dataset and metadata file from specified paths.
+#' - Applies renaming and transformation logic to align with the database schema.
+#' - Calculates conversion factors and standardizes time format.
+#' - Generates harmonized dataset and metadata files, which are then saved to CSV.
+#'
+#' The harmonization process is tailored to CCSBT 'Surface' datasets and assumes specific column names
+#' and data structure. It enriches the entity with temporal coverage information based on the dataset's
+#' date range and exports the harmonized data, metadata, and code lists as CSV files.
+#'
+#' @return Void. The function does not return a value but writes output files and updates the entity object.
+#'
+#' @examples
+#' \dontrun{
+#'   harmonize_ccsbt_surface_effort(action, entity, config)
+#' }
+#'
+#' @importFrom dplyr filter mutate group_by summarise
+#' @importFrom readxl read_excel
+#' @importFrom lubridate as_date ceiling_date
+#' @export
+#' 
+#' 
 
 function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_5.R")

@@ -29,27 +29,10 @@ install_and_load <- function(package) {
 # Apply the function to each required package
 sapply(required_packages, install_and_load)
 
-# 
-# if(!require(tinytex)) {
-#   require("tinytex")
-#   tinytex::install_tinytex()
-# }
-
-# Geospatial packages
-# require("rgeos")     # Geospatial operations
-
-# Additional, project-specific packages
-# 'geoflow' package from GitHub for workflow management
-# if (!require(geoflow)) {
-#   remotes::install_github("eblondel/geoflow")
-#   require(geoflow)
-# }
 require(geoflow)
 
 
 executeAndRename <- function(executed_file, suffix) {
-  # Execute workflow
-  # executed_file <- executeWorkflow(here::here(executed_file))
   
   # Derive folder and file names
   folder_file <- file.path("jobs", basename(executed_file))

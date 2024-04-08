@@ -98,17 +98,10 @@ NC <- NC[NC$Catch !=0 ,] #not sure if needed
 NC <-NC[c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")]
 
 # remove 0 and NA values 
-#NC <- NC  %>% 
-#  filter( ! Catch %in% 0 ) %>%
-#  filter( ! is.na(Catch)) 
-# remove 0 and NA values 
 NC <- NC[!is.na(NC$Catch),]
 NC <- NC[NC$Catch != 0,]
 
 #NC <- NC %>% 
-#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
-#  summarise(Catch = sum(Catch))
-#NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(

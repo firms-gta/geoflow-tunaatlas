@@ -24,6 +24,8 @@ path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
 # Obtenir la liste des fichiers scripts R
 scripts <- fs::dir_ls(path = path_to_scripts, glob = "*.R")
 
+# scripts <- list_github_paths listightub path from downloading pre harmo sheet
+
 # Fonction pour nettoyer chaque script enlever les appels à geoflow, la gestion des codelist
 clean_script <- function(script_path) {
   # Lire le contenu du script

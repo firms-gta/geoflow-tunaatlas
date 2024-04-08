@@ -104,16 +104,8 @@ catches <-RFMO_CE[colToKeep_captures]
 catches[,c("AreaName","FishingFleet")]<-as.data.frame(apply(catches[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 
 # remove 0 and NA values 
-#catches <- catches  %>% 
-#  filter( ! Catch %in% 0 ) %>%
-#  filter( ! is.na(Catch)) 
 catches <- catches[!is.na(catches$Catch),]
 catches <- catches[catches$Catch != 0,]
-
-#catches <- catches %>% 
-#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
-#  summarise(Catch = sum(Catch))
-#catches<-as.data.frame(catches)
 
 catches <- aggregate(catches$Catch, FUN = sum,
 	by = list(
