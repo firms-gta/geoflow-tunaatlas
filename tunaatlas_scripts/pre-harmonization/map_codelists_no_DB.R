@@ -102,6 +102,11 @@ if(!is.data.frame(mapping_dataset)){
       }
     }
     
+    successful_mappings <- df_mapping_final_this_dimension %>%
+      dplyr::filter(src_code %in% dataset_to_map[[dimension]])  
+    
+    if(summary_mapping) recap_mapping <- rbind(successful_mappings, recap_mapping)
+    
     if (!is.null(df_mapping_final_this_dimension) && nrow(df_mapping_final_this_dimension) > 0) {
       mapping <- map_codelist(dataset_to_map, df_mapping_final_this_dimension, dimension, mapping_keep_src_code)
       dataset_to_map <- mapping$df  # Codes are mapped by tRFMOs (source_authority)
@@ -118,7 +123,6 @@ if(!is.data.frame(mapping_dataset)){
   dataset_mapped <- rbind(dataset_to_map, data_not_to_map)
   dataset_mapped <- list(dataset_mapped = dataset_mapped, recap_mapping = recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   
-
   
   return(dataset_mapped)
 }
