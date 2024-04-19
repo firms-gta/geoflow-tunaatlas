@@ -145,7 +145,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   # -----------spatial_curation_data_mislocated------------------------------------------------------
   
-  opts$spatial_curation_data_mislocated <- "remove"
   
   stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$spatial_curation_data_mislocated))
   stepnumber = stepnumber+1
