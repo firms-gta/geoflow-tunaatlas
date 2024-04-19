@@ -105,7 +105,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
 					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
       "curation_absurd_converted_data"
     )
-    saveRDS(not_conform_conversion_factors, "Markdown/report/not_conform_conversion_factors.rds")
+    saveRDS(not_conform_conversion_factors, "data/not_conform_conversion_factors.rds")
     
   }
   
