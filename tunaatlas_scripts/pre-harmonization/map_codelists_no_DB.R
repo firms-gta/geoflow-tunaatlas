@@ -36,7 +36,7 @@
 #'   dimensions_to_map = c("gear_type", "species"),
 #'   db_mapping_dataset_name = c("codelist_gear_iattc", "codelist_species_wcpfc")
 #' )
-#' mapped_data <- map_codelists(
+#' mapped_data <- map_codelists_no_DB(
 #'   fact = "catch",
 #'   mapping_dataset = mapping_dataset,
 #'   dataset_to_map = dataset_to_map,
@@ -118,15 +118,7 @@ if(!is.data.frame(mapping_dataset)){
   dataset_mapped <- rbind(dataset_to_map, data_not_to_map)
   dataset_mapped <- list(dataset_mapped = dataset_mapped, recap_mapping = recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   
-  if(fact == "catch"){
-    dataset_mapped <- dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
-                                                       species = ifelse(species == "UNK", "MZZ", species),
-                                                       gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
-  } else {
-    dataset_mapped <- dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
-                                                       gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
-    
-  }
+
   
   return(dataset_mapped)
 }

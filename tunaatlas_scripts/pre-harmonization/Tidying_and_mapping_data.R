@@ -253,9 +253,19 @@ Tidying_and_mapping_data = function(action, entity, config) {
                                            dataset_to_map = georef_dataset, 
                                            mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) 
 
-    
+
     georef_dataset <- mapping_codelist$dataset_mapped
 
+    
+    if(fact == "catch"){
+      georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
+                                                         species = ifelse(species == "UNK", "MZZ", species),
+                                                         gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
+    } else {
+      georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
+                                                         gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
+      
+    }
     
     config$logger.info("Mapping code lists of georeferenced datasets OK")
     
