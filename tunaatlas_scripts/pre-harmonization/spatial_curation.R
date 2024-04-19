@@ -1,6 +1,32 @@
 spatial_curation =function (con, df_input, remove_reallocate){
 
-cwp_grid <- DBI::dbGetQuery(con, "SELECT cwp_code from area.cwp_grid") %>% dplyr::rename(geographic_identifier = cwp_code)
+  tryCatch({
+    # Votre requête DBI::dbGetQuery
+    cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P,cwp_code from area.cwp_grid") %>%
+      dplyr::rename(geographic_identifier = cwp_code)
+  }, error = function(e) {
+    message("no connexion to DB trying to unzip file")
+    csv_file <- here::here("data/cl_areal_grid.csv")
+    if(!file.exists(csv_file)){
+      message("no connexion to DB nor zip, downloading cwp_grid")
+      
+      # Téléchargement du fichier ZIP depuis l'URL
+      zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
+      local_file <- here::here("data", "cwp_grid.zip")
+      download.file(zip_url, local_file, mode = "wb")
+      
+      # Extraction du contenu du fichier ZIP
+      unzip(local_file, exdir = here::here("data"))
+      
+      # Lecture du fichier CSV extrait
+      
+    } 
+    cwp_grid <- read.csv(csv_file)
+    
+    # Renommage de colonnes
+    cwp_grid <- cwp_grid %>% dplyr::select(ON_LAND_P, CWP_CODE) %>% 
+      dplyr::rename(geographic_identifier = CWP_CODE)
+  })
 
 df_input_cwp_grid <- df_input %>% dplyr::inner_join(cwp_grid)
   

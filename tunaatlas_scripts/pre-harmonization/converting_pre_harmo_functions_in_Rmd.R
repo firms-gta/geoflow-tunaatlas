@@ -89,3 +89,4 @@ for(script in scripts) {
   })
 }
 
+scripts <- "~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R"

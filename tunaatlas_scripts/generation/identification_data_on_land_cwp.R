@@ -15,7 +15,7 @@ identification_data_on_land_cwp = function(con, df_input){
   # Essayer d'exécuter la requête DBI::dbGetQuery
   tryCatch({
     # Votre requête DBI::dbGetQuery
-    cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P,cwp_code from area.cwp_grid") %>%
+    cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P, cwp_code from area.cwp_grid") %>%
       dplyr::rename(geographic_identifier = cwp_code)
   }, error = function(e) {
     message("no connexion to DB trying to unzip file")
@@ -38,9 +38,9 @@ identification_data_on_land_cwp = function(con, df_input){
     
     # Renommage de colonnes
     cwp_grid <- cwp_grid %>% dplyr::select(ON_LAND_P, CWP_CODE) %>% 
-      dplyr::rename(geographic_identifier = CWP_CODE)
+      dplyr::rename(geographic_identifier = CWP_CODE, on_land_p = ON_LAND_P)
   })
-  
+
   
   # Merge 5x5 catch data with grid
   CA_WITH_GRIDS = merge(df_input, cwp_grid, by = "geographic_identifier")

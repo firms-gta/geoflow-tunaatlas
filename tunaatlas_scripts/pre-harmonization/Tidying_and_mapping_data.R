@@ -82,12 +82,11 @@ Tidying_and_mapping_data = function(action, entity, config) {
   stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
   stepnumber = stepnumber+1
   
-  max_conversion_factor <-
-    read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/data/max_conversion_factor.csv")
+  
   
   curation_absurd_converted_data_list <-
     curation_absurd_converted_data(georef_dataset = df_to_load,
-                                   max_conversion_factor = max_conversion_factor)
+                                   max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/data/max_conversion_factor.csv")
   
   georef_dataset <- curation_absurd_converted_data_list$georef_dataset
   
@@ -129,80 +128,22 @@ Tidying_and_mapping_data = function(action, entity, config) {
     )
   
   #--------Negative or null values ------------------------------------------------------------------------------------------------------------------------------------
-  #Negative or null values 
+  # Negative or null values 
   #-----------------------------------------------------------------------------------------------------------------------------------------------------------
   
   negative_values <- georef_dataset %>% dplyr::filter(measurement_value <= 0)
   georef_dataset <- georef_dataset %>% dplyr::filter(measurement_value > 0)
   if(nrow(negative_values)!=0){
     if(recap_each_step){
-      function_recap_each_step(
-        "negative_values",
-        georef_dataset,
-        paste0(
-          "In this step,handle negative values in the measurement_values of the data"
-        ) 
-        
-      )
+      function_recap_each_step("negative_values",georef_dataset,paste0("In this step,handle negative values in the measurement_values of the data"))
       
       saveRDS(negative_values,"data/negative_values.rds")
       
-      # names_list_irregular_areas <-
-      #   c("negative_values") #file we want to save
-      # 
-      # try(lapply(names_list_irregular_areas, function_write_RDS))
     }
   }
   
   
-  #--------irregular areas------------------------------------------------------------------------------------------------------------------------------------
-  #Irregular areas handling in case of area not corresponding to cwp
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  opts$irregular_area <- "remove"
-  stepLogger(level = 0, step = stepnumber, msg = "Irregular areas handling")
-  stepnumber = stepnumber+1
-  
-  spatial_curation <-
-    spatial_curation(con, georef_dataset, opts$irregular_area)
-  georef_dataset <- spatial_curation$df
-  
-  if(exists("removed_irregular_areas")){
-    rm(removed_irregular_areas)
-  }
-  
-  removed_irregular_areas <- spatial_curation$df_input_areas_not_curated
-  stats_irregular_areas <- spatial_curation$stats
-  
-  
-  
-  if (!is.null(removed_irregular_areas) && is.data.frame(removed_irregular_areas) && nrow(removed_irregular_areas) != 0) {
-    
-    
-    if(recap_each_step){
-      function_recap_each_step(
-        "irregular_area_handling",
-        georef_dataset,
-        paste0(
-          "In this step, we handle areas that does not match cwp grids norme"
-        ) ,
-        "function_overlapped"
-      )
-      
-      saveRDS(removed_irregular_areas,"data/removed_irregular_areas.rds")
-      
-      # names_list_irregular_areas <-
-      #   c("removed_irregular_areas", "stats_irregular_areas") #file we want to save
-      # 
-      # try(lapply(names_list_irregular_areas, function_write_RDS))
-    }
-    
-  }
-  
-  
-  
-  
-  #-----------spatial_curation_data_mislocated------------------------------------------------------
+  # -----------spatial_curation_data_mislocated------------------------------------------------------
   
   opts$spatial_curation_data_mislocated <- "remove"
   
@@ -210,12 +151,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   stepnumber = stepnumber+1
   
   
-  spatial_curation_data_mislocated_list <- spatial_curation_data_mislocated(
-    entity = entity,
-    config = config,
-    df = georef_dataset,
-    spatial_curation_data_mislocated = opts$spatial_curation_data_mislocated
-  )
+  spatial_curation_data_mislocated_list <- spatial_curation_data_mislocated(config = config,df = georef_dataset,action_on_mislocated = "remove")
   
   if(exists("areas_in_land")){
     rm(areas_in_land)
@@ -223,6 +159,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   georef_dataset <- spatial_curation_data_mislocated_list$dataset
   areas_in_land <- spatial_curation_data_mislocated_list$areas_in_land
+  dataset_not_cwp_grid <- spatial_curation_data_mislocated_list$dataset_not_cwp_grid
   
   if (!is.null(areas_in_land) && is.data.frame(areas_in_land) && nrow(areas_in_land) != 0) {
     
@@ -244,14 +181,35 @@ Tidying_and_mapping_data = function(action, entity, config) {
     
     
   }
+  if (!is.null(dataset_not_cwp_grid) && is.data.frame(dataset_not_cwp_grid) && nrow(dataset_not_cwp_grid) != 0) {
+    
+    if(recap_each_step){
+      function_recap_each_step(
+        "Realocating_removing_mislocated_data",
+        georef_dataset,
+        "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
+        "spatial_curation_data_mislocated"
+      )
+      saveRDS(dataset_not_cwp_grid,"data/removed_irregular_areas.rds")
+      # names_list_irregular_areas <-
+      #   c("dataset_not_cwp_grid") #file we want to save
+      # 
+      # try(lapply(names_list_irregular_areas, function_write_RDS))
+      
+    }
+    gc()
+    
+    
+  }
   
   
   
-  if(!is.null(NULL)){
+  
+  if(!is.null(!NULL)){
+    
     # Outside juridiction -----------------------------------------------------
     
-    function_outside_juridiction <- function_outside_juridiction(georef_dataset,
-                                                                 con)
+    function_outside_juridiction <- function_outside_juridiction(georef_dataset,con)
     if(exists("outside_juridiction")){
       rm(outside_juridiction)
     }
@@ -272,10 +230,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
         )
         saveRDS(outside_juridiction,"data/outside_juridiction.rds")
         
-        # names_outside_juridiction <-
-        #   c("outside_juridiction") #file we want to save
-        # 
-        # try(lapply(names_outside_juridiction, function_write_RDS))
       }
       
     }
@@ -290,39 +244,19 @@ Tidying_and_mapping_data = function(action, entity, config) {
   if(any(unique(georef_dataset$source_authority)%in%source_authority_to_map)){
     stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
     stepnumber = stepnumber+1
-    config$logger.info(
-      "Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database."
-    )
-    mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
-    mapping_dataset <-
-      read.csv(
-        mapping_csv_mapping_datasets_url,
-        stringsAsFactors = F,
-        colClasses = "character"
-      )
-    mapping_keep_src_code <- if (!is.null(opts$mapping_keep_src_code)) opts$mapping_keep_src_code else FALSE
+    config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
+    
+    # mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
+    # mapping_dataset <-read.csv(mapping_csv_mapping_datasets_url,stringsAsFactors = F,colClasses = "character")
     config$logger.info("Mapping code lists of georeferenced datasets...")
-    mapping_codelist <-
-      map_codelists(
-        con,
-        opts$fact,
-        mapping_dataset = mapping_dataset,
-        dataset_to_map = georef_dataset,
-        mapping_keep_src_code,
-        summary_mapping = TRUE,
-        source_authority_to_map = source_authority_to_map
-      ) #this map condelist function is to retrieve the mapping dataset used
+    # mapping_codelist <-map_codelists(con, opts$fact, mapping_dataset = mapping_dataset,dataset_to_map = georef_dataset, mapping_keep_src_code,summary_mapping = TRUE,source_authority_to_map = source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
+    mapping_codelist <-map_codelists_no_DB(opts$fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", 
+                                           dataset_to_map = georef_dataset, 
+                                           mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) 
 
+    
     georef_dataset <- mapping_codelist$dataset_mapped
-    if(opts$fact == "catch"){
-      georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
-                                                  species = ifelse(species == "UNK", "MZZ", species),
-                                                  gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
-    } else {
-      georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
-                                                  gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
-      
-    }
+
     
     config$logger.info("Mapping code lists of georeferenced datasets OK")
     

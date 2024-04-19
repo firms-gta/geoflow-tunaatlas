@@ -1,17 +1,27 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = atlantic_ocean_effort_tunaatlasiccat_level0__noschool, title = Harmonize data structure of ICCAT effort dataset, abstract = Harmonize the structure of ICCAT catch-and-effort datasets: (pid of output file = atlantic_ocean_effort_tunaatlasiccat_level0__noschool). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize (Miscroft Access (.mdb)). The input database being voluminous, the execution of the function might take long time. Input file must be structured as follow: https://goo.gl/A6qVhb, value = "https://goo.gl/A6qVhb";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.in: id = keep_fleet_instead_of_flag, type = Boolean, title = By default the column "flag" is kept. By setting this argument to TRUE the column "fleet" will be kept (and "flag" will be removed), value = FALSE;
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' 
-#' @keywords Internal Commission for the Conservation of Atlantic Tuna tuna RFMO Sardara Global database on tuna fishieries
+#' Harmonize Data Structure of ICCAT Effort Dataset
 #'
-#' @seealso \code{\link{convertDSD_iccat_ce_task2_ByOperationMode}} to convert ICCAT task 2 "by operation mode", \code{\link{convertDSD_iccat_nc}} to convert ICCAT nominal catch data structure
+#' This function harmonizes the data structure of ICCAT effort datasets from voluminous Microsoft Access databases.
+#' It handles datasets by potentially including metadata and code lists for integration within the Tuna Atlas database.
+#' Depending on the parameter settings, either 'fleet' or 'flag' column will be kept in the output.
+#'
+#' @param action Specifies the action to be executed within the function.
+#' @param entity Specifies the entity (dataset) being processed.
+#' @param config Provides configuration specifics for processing.
+#' @param keep_fleet_instead_of_flag Boolean parameter to decide whether to keep 'fleet' instead of 'flag'.
+#' @return Writes a harmonized dataset, metadata file, and code lists to CSV files.
+#' @export
+#'
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#'
+#' @keywords International Commission for the Conservation of Atlantic Tunas (ICCAT), RFMO, Sardara Global Database
+#'
+#' @seealso \code{\link{convertDSD_iccat_ce_task2_ByOperationMode}}, \code{\link{convertDSD_iccat_nc}} for other ICCAT data structure conversions.
+#'
+#' @examples
+#' # Assuming 'action', 'entity', 'config', and 'keep_fleet_instead_of_flag' are predefined and suitable for processing
+#' harmonize_iccat_effort_dataset(action, entity, config, keep_fleet_instead_of_flag = FALSE)
+#'
+#'
 
 function(action, entity, config){
   
@@ -20,7 +30,6 @@ keep_fleet_instead_of_flag=FALSE
 
 #packages
 
-  
 if(!require(readr)){
   install.packages("readr")
   require(readr)
@@ -70,9 +79,6 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 
 keep_fleet_instead_of_flag=FALSE  
 
-
-# Requires library(Hmisc)
-# Open the tables directly from the access database  
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 
@@ -81,7 +87,7 @@ config$logger.info(paste0("BEGIN  function   \n"))
 
 # data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
 
-##Efforts
+## Efforts
 
 ## Reach the efforts pivot DSD using a function in ICCAT_functions.R
 
@@ -93,16 +99,12 @@ efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCA
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
 
-#School
+# School
 efforts_pivot_ICCAT$School<-"ALL"
 
-#Flag
+# Flag
 efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
 
-# if(keep_fleet_instead_of_flag==TRUE){
-#   efforts_pivot_ICCAT$FishingFleet<-NULL
-#   names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
-# } 
 names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
@@ -113,7 +115,6 @@ colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 efforts$source_authority<-"ICCAT"
 
 #----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
 efforts$time_start <- as.Date(efforts$time_start)
 efforts$time_end <- as.Date(efforts$time_end)
 #we enrich the entity with temporal coverage
@@ -125,7 +126,6 @@ dataset_temporal_extent <- paste(
 
 entity$setTemporalExtent(dataset_temporal_extent)
 
-#@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)

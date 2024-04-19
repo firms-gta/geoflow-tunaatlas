@@ -1,4 +1,9 @@
-curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor) {
+curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/data/max_conversion_factor.csv") {
+  
+  if(!is.data.frame(max_conversion_factor)){
+    max_conversion_factor <-
+      read.csv(max_conversion_factor)
+  }
 
   colnames_georef_dataset_groupping <- setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit"))
   

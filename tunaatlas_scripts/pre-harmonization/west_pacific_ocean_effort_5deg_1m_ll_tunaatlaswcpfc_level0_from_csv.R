@@ -1,18 +1,26 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = west_pacific_ocean_effort_5deg_1m_ll_tunaatlaswcpfc_level0_from_csv, title = Harmonize data structure of WCPFC Longline effort datasets from the csv files provided by WCPFC in their website, abstract = Harmonize the structure of WCPFC catch-and-effort datasets: 'longline_60' 'longline_70' 'longline_80' 'longline_90' 'longline_00'  The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/pLHB56, value = "https://goo.gl/pLHB56";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-#' This script works with any dataset that has the first 5 columns named and ordered as follow: {YY|MM|LAT5|LON5|HHOOKS} followed by a list of columns specifing the species codes with "_N" for catches expressed in number and "_T" for catches expressed in tons
-#' 
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' 
-#' @keywords Western and Central Pacific Fisheries Commission WCPFC tuna RFMO Sardara Global database on tuna fishieries
+#' Harmonize Data Structure of WCPFC Longline Effort Datasets
 #'
-#' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}} to convert WCPFC task 2 Drifnet data structure, \code{\link{convertDSD_wcpfc_ce_Longline}} to convert WCPFC task 2 Longline data structure, \code{\link{convertDSD_wcpfc_ce_Pole_and_line}} to convert WCPFC task 2 Pole-and-line data structure, \code{\link{convertDSD_wcpfc_ce_PurseSeine}} to convert WCPFC task 2 Purse seine data structure, \code{\link{convertDSD_wcpfc_nc}} to convert WCPFC task 1 data structure  
+#' This function harmonizes the data structure of WCPFC Longline effort datasets from CSV files provided by WCPFC. 
+#' It includes handling datasets such as 'longline_60' 'longline_70' 'longline_80' 'longline_90' 'longline_00'.
+#' The function also manages optional metadata and code lists for integration within the Tuna Atlas database.
+#'
+#' @param action Specifies the action to be executed within the function.
+#' @param entity Specifies the entity (dataset) being processed.
+#' @param config Provides configuration specifics for processing.
+#' @return Creates a CSV file with harmonized data structure along with metadata and code lists files.
+#' @export
+#'
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}, Bastien Grasset, IRD \email{bastien.grassset@ird.fr}
+#'
+#' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}}, \code{\link{convertDSD_wcpfc_ce_Longline}},
+#' \code{\link{convertDSD_wcpfc_ce_Pole_and_line}}, \code{\link{convertDSD_wcpfc_ce_PurseSeine}},
+#' \code{\link{convertDSD_wcpfc_nc}} for other specific conversions within WCPFC datasets.
+#'
+#' @examples
+#' # Assuming 'action', 'entity', and 'config' are predefined and suitable for processing
+#' harmonize_wcpfc_datasets(action, entity, config)
+#'
+
 function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_time_2.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")

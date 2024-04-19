@@ -54,7 +54,12 @@ library(dplyr)
 # Re-written function to map code lists without a database
 
 
-map_codelists_no_DB <- function(fact, mapping_dataset, dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) {
+map_codelists_no_DB <- function(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) {
+  
+if(!is.data.frame(mapping_dataset)){
+  mapping_dataset <-read.csv(mapping_dataset,stringsAsFactors = F,colClasses = "character")
+}  
+  
   base_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/regional-to-global/"
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/map_codelist.R")
   
@@ -112,6 +117,16 @@ map_codelists_no_DB <- function(fact, mapping_dataset, dataset_to_map, mapping_k
   
   dataset_mapped <- rbind(dataset_to_map, data_not_to_map)
   dataset_mapped <- list(dataset_mapped = dataset_mapped, recap_mapping = recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
+  
+  if(fact == "catch"){
+    dataset_mapped <- dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
+                                                       species = ifelse(species == "UNK", "MZZ", species),
+                                                       gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
+  } else {
+    dataset_mapped <- dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
+                                                       gear_type = ifelse(gear_type == "UNK", "99.9", gear_type))
+    
+  }
   
   return(dataset_mapped)
 }
