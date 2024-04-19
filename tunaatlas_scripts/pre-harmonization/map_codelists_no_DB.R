@@ -134,4 +134,3 @@ if(!is.data.frame(mapping_dataset)){
 
 
 
-test <- map_codelists("catch", mapping_dataset = mapping_dataset, dataset_to_map = CEData_Surface_harmonized)

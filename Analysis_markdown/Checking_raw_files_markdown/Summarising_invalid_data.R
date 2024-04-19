@@ -276,8 +276,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   sapply(all_files, function(file) {
     destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
     file.copy(file, destination_file)
-    path_to_dataset_new <- file.path(file)
-    drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
+    # path_to_dataset_new <- file.path(file)
+    # drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
     
   })
   # 
