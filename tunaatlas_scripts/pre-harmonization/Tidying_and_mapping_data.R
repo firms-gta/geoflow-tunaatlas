@@ -205,7 +205,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   
   
-  if(!is.null(!NULL)){
+  if(!is.null(NULL)){
     
     # Outside juridiction -----------------------------------------------------
     
