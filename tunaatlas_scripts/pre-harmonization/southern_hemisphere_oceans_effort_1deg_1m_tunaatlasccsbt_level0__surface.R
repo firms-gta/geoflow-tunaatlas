@@ -79,8 +79,6 @@ function(action, entity, config){
   opts <- options()
   options(encoding = "UTF-8")
   
-#library(readxl) # devtools::install_github("hadley/readxl") 
-#RFMO_CE<-read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
 
   RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
   
@@ -94,6 +92,7 @@ function(action, entity, config){
   write.csv(summary(as.data.frame(RFMO_CE)), "test1", row.names = FALSE)
   
   #Remove lines that are read in the Excel but that are not real
+  
   RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
   RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
   RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
@@ -104,7 +103,9 @@ function(action, entity, config){
   
   #Gear
   RFMO_CE$Gear<-RFMO_CE$GEAR_CODE
+  
   # replace PS by Purse Seine and BB by Pole and Line
+  
   RFMO_CE$Gear[RFMO_CE$Gear == "PS"] <- "Purse Seine"
   RFMO_CE$Gear[RFMO_CE$Gear == "BB"] <- "Pole and Line"
   
@@ -135,10 +136,12 @@ efforts <-efforts[colToKeep_efforts]
 
 
 #remove whitespaces on columns that should not have withespace
+
 efforts[,c("AreaName","FishingFleet")]<-as.data.frame(apply(efforts[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 write.csv(summary(as.data.frame(efforts)), "test3", row.names = FALSE)
 
 # remove 0 and NA values 
+
 efforts <- efforts  %>% 
   filter( ! Effort %in% 0 ) %>%
   filter( ! is.na(Effort)) 

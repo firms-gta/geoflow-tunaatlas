@@ -19,10 +19,11 @@
 #' 
 require(stringr)
 # Définir le chemin vers les scripts R
+source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/extract_urls_from_column.R")
+source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/downloading_pre_harmo_gsheet.R")
 path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
-
-# Obtenir la liste des fichiers scripts R
-scripts <- fs::dir_ls(path = path_to_scripts, glob = "*.R")
+scripts = file.path(path_to_scripts, basename(list_github_paths))
+scripts <- gsub(".R_", ".R", scripts)
 
 # scripts <- list_github_paths listightub path from downloading pre harmo sheet
 

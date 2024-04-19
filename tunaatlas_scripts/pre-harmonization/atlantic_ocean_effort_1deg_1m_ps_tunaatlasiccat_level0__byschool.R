@@ -61,17 +61,14 @@ options(encoding = "UTF-8")
 # Belize   PS 2009-08-01 2009-09-01  5402000     FS   Hours.STD  37.10
 # Belize   PS 2009-09-01 2009-10-01  5202006     LS   FISH.HOUR  12.10
 
-#library(readxl) # devtools::install_github("hadley/readxl") 
-
 
 ##Catches
 
-#RFMO_CE<-read_excel(path_to_raw_dataset, sheet = "ds_t2cePSbySchool", col_names = TRUE, col_types = NULL,na = "", skip = 6)
-#RFMO_CE<-as.data.frame(RFMO_CE)
 RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
 names(RFMO_CE)[names(RFMO_CE) == 'Flag'] <- 'FishingFleet'
 
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
+
 if(keep_fleet_instead_of_flag==TRUE){
   RFMO_CE$Flag<-NULL
   names(RFMO_CE)[names(RFMO_CE) == 'Fishingfleet'] <- 'Flag'
@@ -80,7 +77,6 @@ if(keep_fleet_instead_of_flag==TRUE){
 ##Efforts
 
 last_column_not_catch_value=22
-#efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_with_schooltype(RFMO_CE,last_column_not_catch_value)
 RFMO_CE<-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")

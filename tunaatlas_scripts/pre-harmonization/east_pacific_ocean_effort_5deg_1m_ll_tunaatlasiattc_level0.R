@@ -89,23 +89,12 @@ function(action, entity, config){
   # DType code 3 means that the data was submitted as weight only
   
   #Initialisation
-  # efforts$CatchUnits<-'NA'
-  
-  
-  # Merge catches and efforts to have the strata in the catch file
-  # catches<-left_join(catches,efforts,by=c("Record"))
-  # efforts <- efforts[c("Spp","value","EffortUnits","Year","Month","FlagAbv","Lat","Lon")]
-  # 
-  # colnames(catches)<-c("variable","value","CatchUnits","Year","Month","Flag","Lat","Lon")
   
   efforts$SquareSize<-5
   efforts$CodeSquareSize<-6
   efforts$Gear<-"LL"
   efforts$SetType<-"ALL"
   efforts <- efforts %>% select(-Record)
-  # efforts$variable[which(efforts[,"variable"]=="BuM")]<-"BUM"
-  
-  # colnames(efforts)[colnames(efforts)=="Flag"] <- "FishingFleet"
   
   # Reach the catches harmonized DSD using a function in IATTC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName", "School","EffortUnits","Effort")

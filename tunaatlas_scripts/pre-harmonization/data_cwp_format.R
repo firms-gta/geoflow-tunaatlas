@@ -48,7 +48,7 @@ function(action, entity, config){
   options(encoding = "UTF-8")
   #----------------------------------------------------------------------------------------------------------------------------
   
-  ##Catches
+  ## Catches
   if(fishingfleet %in%colnames(catches)){
   catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
   }
@@ -76,7 +76,6 @@ function(action, entity, config){
   dataset_temporal_extent <- paste(min(catches$time_start),max(catches$time_end),sep = "/")
   entity$setTemporalExtent(dataset_temporal_extent)
   
-  #@geoflow -> export as csv
   output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
   write.csv(catches, output_name_dataset, row.names = FALSE)
   

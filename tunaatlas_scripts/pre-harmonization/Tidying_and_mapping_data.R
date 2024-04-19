@@ -41,6 +41,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
+  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
   
   
@@ -103,7 +104,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       georef_dataset,
       "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
 					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
-      "spatial_curation_data_mislocated"
+      "curation_absurd_converted_data"
     )
     saveRDS(not_conform_conversion_factors, "Markdown/report/not_conform_conversion_factors.rds")
     

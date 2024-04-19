@@ -68,6 +68,7 @@ if(!require(dplyr)){
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 #get data from geoflow current job dir
+  
 filename1 <- entity$data$source[[1]] #data
 filename2 <- entity$data$source[[2]] #structure
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
@@ -80,27 +81,25 @@ options(encoding = "UTF-8")
 ##Catches
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-#catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
 #-------------
-#2020-22-13 @eblondel - pickup code from rtunaatlas::FUN_catches_WCPFC_CE_allButPurseSeine
 #Changes:
 #	- switch to csv
 #	- switch to upper colnames
 #	- CWP grid (removed for the timebeing to apply rtunaatlas codes)
 #	- toupper applied to Species/CatchUnits
+
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
-DF$CWP_GRID <- NULL #@eblondel CWP grid (removed for the timebeing to apply rtunaatlas codes)
-# DF <- melt(DF, id = c(colnames(DF[1:5]))) #@juldebar error with melt function from reshape package
-# DF<-melt(as.data.table(DF), id=c(colnames(DF[1:5])))
+DF$CWP_GRID <- NULL 
+
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
 
 DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
 DF$variable <- as.character(DF$variable)
 colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
 DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
-DF$CatchUnits <- toupper(DF$CatchUnits) #@eblondel to upper
-DF$Species <- toupper(DF$Species) #@eblondel to upper
+DF$CatchUnits <- toupper(DF$CatchUnits) 
+DF$Species <- toupper(DF$Species) 
 DF$Species <- sub("_C", "", DF$Species)
 DF$Species <- sub("_N", "", DF$Species)
 DF$School <- "OTH"
@@ -123,7 +122,7 @@ catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "no"
 catches_pivot_WCPFC$School<-"ALL"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
-#@juldebar => patch to fit old data structure : restore "Flag" label
+
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 
@@ -131,7 +130,6 @@ colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 catches$source_authority<-"WCPFC"
 
 #----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
 catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage

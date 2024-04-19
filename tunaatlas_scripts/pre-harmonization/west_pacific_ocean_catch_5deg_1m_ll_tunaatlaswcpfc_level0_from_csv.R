@@ -134,16 +134,16 @@ catches_pivot_WCPFC$School<-"ALL"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-#catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
-#2020-11-13 @eblondel
+
 catches_pivot_WCPFC$RFMO <- "WCPFC"
 catches_pivot_WCPFC$Ocean <- "PAC_W"
-catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID #@eblondel added
+catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID
+
 catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
-catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, 
-	"LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
 catches_pivot_WCPFC$CatchType <- "ALL"
+
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
 catches <- catches_pivot_WCPFC[colToKeep_captures]
 rm(catches_pivot_WCPFC)
