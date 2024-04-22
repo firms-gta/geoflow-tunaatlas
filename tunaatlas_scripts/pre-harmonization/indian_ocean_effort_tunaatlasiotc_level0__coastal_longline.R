@@ -59,7 +59,6 @@ function(action, entity, config){
 
   filename1 <- entity$data$source[[1]] #data
 # Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Coastal_1950-2021.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Longline_1950-2021.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename2 <- entity$data$source[[2]] #structure
 # Historical name for the dataset at source  iotc_effort_code_lists_2023.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
