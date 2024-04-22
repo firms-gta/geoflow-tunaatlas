@@ -173,7 +173,7 @@ clean_script <- function(script_path) {
   return(lines)
 }
 
-url_function <- function(config){
+url_function <- function(config)
   for (entitynumber in 1:length(config$metadata$content$entities)){
     entity <- config$metadata$content$entities[[entitynumber]]
     
