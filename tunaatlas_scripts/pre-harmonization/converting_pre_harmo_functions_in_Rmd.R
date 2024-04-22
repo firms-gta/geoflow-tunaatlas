@@ -62,6 +62,7 @@ rewrite_scripts <- function(config, ) {
         matches <- regmatches(lines[i], regexec("entity\\$data\\$source\\[\\[(\\d+)\\]\\]", lines[i]))
         if (length(matches[[1]]) > 1) {  # Ensure there's a match
           index <- matches[[1]][2]  # Corrected to get the captured group, not the entire match
+          comment_line = sprintf("# Historical name for the dataset at source  %s, if multiple, this means this function is used for several dataset, keep the same order to match data", eval(parse(text = paste0("entity$data$source[[", index, "]]"))))
           new_lines <- c(new_lines, comment_line)
         }
       }
@@ -69,7 +70,6 @@ rewrite_scripts <- function(config, ) {
       # Add additional authors if Paul Taconet's email is mentioned
       if (grepl("paul.taconet@ird.fr", lines[i])) {
         if (!author_added) {
-          comment_line = sprintf("# Historical name for the dataset at source  %s, if multiple, this means this function is used for several dataset, keep the same order to match data", eval(parse(text = paste0("entity$data$source[[", index, "]]"))))
           author_line_b = "#' @author Bastien Grasset, IRD \\email{bastien.grasset@ird.fr}"
           author_line_m = "#' @author Emmanuel Blondel, FAO \\email{emmanuel.blondel@fao.org}"
           author_line_j = "#' @author Bastien Grasset, IRD \\email{julien.barde@ird.fr}"
