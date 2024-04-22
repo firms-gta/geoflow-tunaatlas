@@ -9,6 +9,8 @@
 # '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
 #'
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' 
 #' @keywords Inter-American-Tropical-Tuna-Commission IATTC tuna RFMO Sardara Global database on tuna fishieries
 #'
@@ -24,7 +26,13 @@ function(action, entity, config){
 #entity --> the entity you are managing
 #get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  PublicPSSharkSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicPSBillfishSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicPSTunaSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  iattc_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iattc_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iattc_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()

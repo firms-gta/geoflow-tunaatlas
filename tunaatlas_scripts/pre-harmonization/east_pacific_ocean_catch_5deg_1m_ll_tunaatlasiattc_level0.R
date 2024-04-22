@@ -9,6 +9,8 @@
 
 
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' 
 #' @keywords Inter-American-Tropical-Tuna-Commission IATTC tuna RFMO Sardara Global database on tuna fishieries
 #'
@@ -57,8 +59,14 @@ if(!require(tidyr)){
 #entity --> the entity you are managing
 #get data from geoflow current job dir
 filename_catch <- entity$data$source[[1]] #catch data
+# Historical name for the dataset at source  PublicCatchOrigFormatTunaBillfish.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicCatchOrigFormatShark.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename_effort <- entity$data$source[[2]] #effort data
+# Historical name for the dataset at source  PublicEffortOrigFormatTunaBillfish.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicEffortOrigFormatShark.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename_str <- entity$data$source[[3]] #structure
+# Historical name for the dataset at source  iattc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iattc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset_catch <- entity$getJobDataResource(config, filename_catch)
 path_to_raw_dataset_effort <- entity$getJobDataResource(config, filename_effort)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
