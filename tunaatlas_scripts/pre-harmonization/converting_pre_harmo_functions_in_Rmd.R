@@ -91,6 +91,9 @@ rewrite_scripts <- function(config, ) {
 }
 # rewrite_scripts
 clean_script <- function(script_path) {
+  # if(script_path == "/home/jovyan/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_effort_5deg_1m_ll_tunaatlasiattc_level0.R"){
+  #   browser()
+  # }
   # Read the script file line by line
   lines <- readLines(script_path)
   
@@ -127,10 +130,10 @@ clean_script <- function(script_path) {
   
   lines_add <- ''
   
-  if(sum(grepl("path_to_raw_dataset_catch",  lines))>1){
+  if(sum(grepl("path_to_raw_dataset_catch",  as.character(lines)))>0){
     lines_add <- c(lines_add, 'path_to_raw_dataset_catch <- ') 
-  
     lines_add <- c(lines_add, 'path_to_raw_dataset_effort <- ') 
+    
   } else if(sum(grepl("path_to_raw_dataset",  lines))) {
     lines_add <- c(lines_add, 'path_to_raw_dataset <- ') 
   }
@@ -159,8 +162,8 @@ clean_script <- function(script_path) {
       "mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = 'https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv', dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c('IATTC', 'CCSBT', 'WCPFC'))",
       "# Handle unmapped values and save the results",
       "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), species = ifelse(species == 'UNK', 'MZZ', species), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
-      "fwrite(mapping_codelist$recap_mapping, 'data/recap_mapping.csv')",
-      "fwrite(mapping_codelist$not_mapped_total, 'data/not_mapped_total.csv')",
+      "fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')",
+      "fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')",
       "# Display the first few rows of the mapping summaries",
       "print(head(mapping_codelist$recap_mapping))",
       "print(head(mapping_codelist$not_mapped_total))"
@@ -173,7 +176,8 @@ clean_script <- function(script_path) {
   return(lines)
 }
 
-url_function <- function(config)
+url_function <- function(config){
+  list_url <-c()
   for (entitynumber in 1:length(config$metadata$content$entities)){
     entity <- config$metadata$content$entities[[entitynumber]]
     
@@ -190,8 +194,16 @@ get_trfmo_folder <- function(filename) {
   trfmos <- c("iotc", "iccat", "iattc", "ccsbt", "wcpfc")
   for(trfmo in trfmos) {
     if(str_detect(filename, trfmo)) {
-      return(trfmo)
+      name <- trfmo
+      if(str_detect(filename, "effort")) {
+        name <- file.path(name, "effort")
+      } else {
+        name <- file.path(name, "catch")
+      }
+      return(name)
     }
+    
+
   }
   return("Other")
 }
@@ -217,7 +229,7 @@ for(script in scripts) {
     
     # Créer le dossier s'il n'existe pas
     if(!dir.exists(trfmo_path)) {
-      dir.create(trfmo_path)
+      dir.create(trfmo_path, recursive = TRUE)
     }
     
     new_filename <- str_replace(basename(script), ".R", "_cleaned.R")
