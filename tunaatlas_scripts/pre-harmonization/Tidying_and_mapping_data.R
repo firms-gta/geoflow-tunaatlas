@@ -146,7 +146,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   # -----------spatial_curation_data_mislocated------------------------------------------------------
   
   
-  stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$spatial_curation_data_mislocated))
+  stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$action_on_mislocated))
   stepnumber = stepnumber+1
   
   
@@ -331,7 +331,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
   if(any(file.exists(files_to_check))) {
     parameter_directory <- getwd()
     base::options(knitr.duplicate.label = "allow")
-    # rmarkdown::render("~/Documents/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Report_on_raw_data.Rmd",
     #                   envir = environment(),
     #                   output_dir = getwd())
   }

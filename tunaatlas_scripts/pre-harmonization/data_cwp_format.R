@@ -37,7 +37,6 @@
 function(action, entity, config){
   
   require(dplyr)
-  
   catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
 
   filename1 <- entity$data$source[[1]]
@@ -49,7 +48,7 @@ function(action, entity, config){
   #----------------------------------------------------------------------------------------------------------------------------
   
   ## Catches
-  if(fishingfleet %in%colnames(catches)){
+  if("fishingfleet" %in%colnames(catches)){
   catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
   }
   
