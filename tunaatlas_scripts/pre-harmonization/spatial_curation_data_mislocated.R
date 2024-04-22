@@ -58,7 +58,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
       dplyr::rename(geographic_identifier = CWP_CODE, on_land_p = ON_LAND_P)
   })
   
-  # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/identification_data_on_land_cwp.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/identification_data_on_land_cwp.R")
   cat("Reallocating data that are in land areas")
   
   cat("Executing spatial_curation_intersect_areas")
