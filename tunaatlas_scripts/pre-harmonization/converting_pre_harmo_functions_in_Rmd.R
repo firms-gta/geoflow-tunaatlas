@@ -89,8 +89,8 @@ list_url <- rewrite_scripts(config)
 # rewrite_scripts(config)
 
 
-source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/extract_urls_from_column.R")
-source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/downloading_pre_harmo_gsheet.R")
+# source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/extract_urls_from_column.R")
+# source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/downloading_pre_harmo_gsheet.R")
 
 path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
 scripts = file.path(path_to_scripts, basename(list_url))
@@ -120,6 +120,16 @@ clean_script <- function(script_path, add_extra_lines = TRUE) {
   
   # Add extra lines for data processing if specified
   if(add_extra_lines) {
+    
+    intro_lines <- c(
+      "# # Introduction",
+      "# This R Markdown document is designed to transform data that is not in CWP format into CWP format.",
+      "# Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.",
+      "# A summary of the mapping process is provided. Please specify `path_to_raw_dataset`, the historical name as received from tRFMOs is specified",
+      "# Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.",
+      "# If you are interested in further details, the results and codes are available for review."
+    )
+    
     extra_lines <- c(
       "# Load pre-harmonization scripts and apply mappings",
       "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
@@ -133,7 +143,7 @@ clean_script <- function(script_path, add_extra_lines = TRUE) {
       "print(head(mapping_codelist$recap_mapping))",
       "print(head(mapping_codelist$not_mapped_total))"
     )
-    lines <- c(lines, extra_lines)
+    lines <- c(intro_lines, lines, extra_lines)
   }
   
   

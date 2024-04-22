@@ -9,6 +9,8 @@
 #' This script works with any dataset that has the first 11 columns named and ordered as follow: {Fleet|Gear|Year|MonthStart|MonthEnd|iGrid|Grid|Effort|EffortUnits|QualityCode|Source} followed by a list of columns specifing the species codes with ".NO" for catches expressed in number and ".MT" for catches expressed in tons
 #'
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' 
 #' @keywords Indian Ocean Tuna Commission IOTC tuna RFMO Sardara Global database on tuna fishieries
 #'
@@ -47,7 +49,11 @@ function(action, entity, config){
 #  AUS HAND 2001-07-01 2001-08-01  5225113    IND        DAYS      1
 
   filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Coastal_1950-2021.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Longline_1950-2021.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  iotc_effort_code_lists_2023.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iotc_effort_code_lists_2023.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()

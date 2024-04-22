@@ -8,6 +8,7 @@
 # wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
 
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' 
 #' @keywords Internal Commission for the Conservation of Atlantic Tuna tuna RFMO Sardara Global database on tuna fishieries
 #'
@@ -31,7 +32,9 @@ if(!require(dplyr)){
 #entity --> the entity you are managing
 #get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  t2ce_bySchool.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  iccat_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()

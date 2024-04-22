@@ -8,6 +8,7 @@
 
 #'
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' 
 #' @keywords Commission for the Conservation of Southern Bluefin Tuna CCSBT tuna RFMO Sardara Global database on tuna fishieries
 #'
@@ -52,7 +53,9 @@ function(action, entity, config){
   #entity --> the entity you are managing
   #get data from geoflow current job dir
   filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  CEData_Longline.xlsx, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  ccsbt_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()
