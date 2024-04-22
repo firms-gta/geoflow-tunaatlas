@@ -1,19 +1,28 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = indian_ocean_effort_tunaatlasiotc_level0__surface, title = Harmonize data structure of IOTC Surface effort datasets, abstract = Harmonize the structure of IOTC catch-and-effort datasets: 'Surface' (pid of output file = indian_ocean_effort_tunaatlasiotc_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/bSsmaK, value = "https://goo.gl/bSsmaK";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-#' This script works with any dataset that has the first 12 columns named and ordered as follow: {Fleet|Gear|Year|MonthStart|MonthEnd|iGrid|Grid|Effort|EffortUnits|QualityCode|Source|CatchUnits} followed by a list of columns specifing the species codes with ".FS" for catches on free schools and ".LS" for catches for catches on log schools and ".UNCL" for catches on unclassied schools
+#' Harmonize IOTC Surface Effort Datasets
 #'
+#' This function processes and harmonizes Indian Ocean Tuna Commission (IOTC) surface effort datasets.
+#' It prepares the data for integration into the Tuna Atlas database by ensuring compliance with
+#' data standardization requirements and optionally includes metadata if the dataset is intended for database loading.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to include only essential fields, performs any necessary calculations
+#'          for effort units, and standardizes the format for date fields and geographical identifiers.
+#'          Metadata integration is contingent on the final use of the dataset within the Tuna Atlas database.
+#'
+#' @importFrom dplyr filter mutate
+#' @importFrom readr read_csv write_csv
+#' @seealso \code{\link{FUN_efforts_IOTC_CE}} for initial effort data processing,
+#'          \code{\link{IOTC_CE_effort_pivotDSD_to_harmonizedDSD}} for converting effort data to a standardized structure.
+#' @export
+#' @keywords IOTC, tuna, fisheries, data harmonization, effort data
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' 
-#' @keywords Indian Ocean Tuna Commission IOTC tuna RFMO Sardara Global database on tuna fishieries
-#'
-#' @seealso \code{\link{convertDSD_iotc_ce_LonglineCoastal}} to convert IOTC task 2 CECoastal and CELongline data structure, \code{\link{convertDSD_iotc_nc}} to convert IOTC nominal catch data structure
 function(action, entity, config){
   
 if(!require(readr)){
@@ -77,13 +86,11 @@ require(readr)
   
 ##Efforts
 
-# Reach the efforts pivot DSD using a function in ICCAT_functions.R
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_IOTC_CE.R")
-  efforts_pivot_IOTC<-FUN_efforts_IOTC_CE(path_to_raw_dataset,12)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_IOTC_CE.R")
+efforts_pivot_IOTC<-FUN_efforts_IOTC_CE(path_to_raw_dataset,12)
 efforts_pivot_IOTC$CatchUnits<-NULL
 efforts_pivot_IOTC$Source<-NULL
 
-# Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/IOTC_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts<-IOTC_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_IOTC,colToKeep_efforts)

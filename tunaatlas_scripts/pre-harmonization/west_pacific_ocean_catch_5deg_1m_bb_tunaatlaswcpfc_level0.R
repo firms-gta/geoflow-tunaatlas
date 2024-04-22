@@ -1,19 +1,28 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_5deg_1m_bb_wcpfc_level0, title = Harmonize data structure of WCPFC Pole-and-line catch datasets, abstract = Harmonize the structure of WCPFC catch-and-effort datasets: 'Pole-and-line' (pid of output file = west_pacific_ocean_catch_5deg_1m_bb_tunaatlaswcpfc_level0). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/niIjsk, value = "https://goo.gl/niIjsk";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-#' This script works with any dataset that has the first 5 columns named and ordered as follow: {YY|MM|LAT5|LON5|DAYS} followed by a list of columns specifing the species codes with "_N" for catches expressed in number and "_T" for catches expressed in tons
-#' 
+#' Harmonize WCPFC Pole-and-Line Catch Datasets
+#'
+#' This function processes and harmonizes the structure of Western and Central Pacific Fisheries Commission (WCPFC)
+#' pole-and-line catch datasets. The output is tailored for integration into the Tuna Atlas database, aligning with 
+#' the requirements for data standardization and optionally including metadata if the dataset is intended for database loading.
+#'
+#' @param action Contextual action data provided by the geoflow framework, used for controlling workflow processes.
+#' @param entity Contextual entity data describing the dataset within the geoflow framework.
+#' @param config Configuration settings provided by the geoflow framework.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets, optional metadata, and code lists for database integration.
+#'
+#' @details The function restructures datasets to include only essential fields, performs any necessary calculations for catch units, 
+#'          and standardizes the format for date fields and geographical identifiers. Metadata incorporation is contingent on the final 
+#'          data usage within the Tuna Atlas database.
+#'
+#' @importFrom dplyr mutate filter select
+#' @importFrom readr read_csv write_csv
+#' @importFrom tidyr gather
+#' @importFrom reshape2 melt
+#' @seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} for detailed data structuring operations.
+#' @export
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' 
-#' @keywords Western and Central Pacific Fisheries Commission WCPFC tuna RFMO Sardara Global database on tuna fishieries
-#'
-#' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}} to convert WCPFC task 2 Drifnet data structure, \code{\link{convertDSD_wcpfc_ce_Longline}} to convert WCPFC task 2 Longline data structure, \code{\link{convertDSD_wcpfc_ce_Pole_and_line}} to convert WCPFC task 2 Pole-and-line data structure, \code{\link{convertDSD_wcpfc_ce_PurseSeine}} to convert WCPFC task 2 Purse seine data structure, \code{\link{convertDSD_wcpfc_nc}} to convert WCPFC task 1 data structure  
+#' @keywords WCPFC, tuna, fisheries, data harmonization, pole-and-line catch
 
 # Input data sample:
 # YY MM LAT5 LON5 DAYS SKJ_C YFT_C OTH_C

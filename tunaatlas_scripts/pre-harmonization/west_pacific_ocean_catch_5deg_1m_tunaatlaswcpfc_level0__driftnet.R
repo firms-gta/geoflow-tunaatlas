@@ -1,11 +1,30 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_5deg_1m_driftnet_wcpfc_level0, title = Harmonize data structure of WCPFC Drifnet catch dataset, abstract = Harmonize the structure of WCPFC catch-and-effort dataset: 'Driftnet' (pid of output file = west_pacific_ocean_catch_5deg_1m_tunaatlasWCPFC_level0__driftnet). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. If it is an Excel file, it must be converted to CSV before using this function. Input file must be structured as follow: https://goo.gl/R5EbrB, value = "https://goo.gl/R5EbrB";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
+#' Harmonize WCPFC Driftnet Catch Datasets
+#'
+#' This function processes and harmonizes Western and Central Pacific Fisheries Commission (WCPFC)
+#' driftnet catch datasets. It prepares the data for integration into the Tuna Atlas database,
+#' ensuring compliance with data standardization requirements and optionally including metadata.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to include only essential fields, performs necessary
+#'          recalculations for catch units, and standardizes the format for date fields and geographical identifiers.
+#'          Metadata integration is contingent on the final use of the dataset within the Tuna Atlas database.
+#'
+#' @importFrom readr read_csv write_csv
+#' @importFrom dplyr filter mutate
+#' @importFrom tidyr gather
+#' @importFrom foreign read.dbf
+#' @importFrom reshape2 melt
+#' @seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} for specific data structuring operations.
+#' @export
+#' @keywords WCPFC, tuna, fisheries, data harmonization, driftnet catch
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' This script works with any dataset that has the first 5 columns named and ordered as follow: {YY|MM|LAT5|LON5|DAYS} followed by a list of columns specifing the species codes with "_N" for catches expressed in number and "_T" for catches expressed in tons
   
   # Input data sample:
@@ -72,18 +91,9 @@ options(encoding = "UTF-8")
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-#catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
-#202-11-13 @eblondel changes for Tuna atlas updates
-#Changes
-#	- change from dbf to csv
-#	- switch to upper colnames
-#	- toupper applied to Species/CatchUnits
-#--------------------------------------------------
 
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
-# DF <- melt(DF, id = c(colnames(DF[1:5]))) #@juldebar error with melt function from reshape package
-# DF <- melt(as.data.table(DF), id=c(colnames(DF[1:5])))
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
 
 DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
