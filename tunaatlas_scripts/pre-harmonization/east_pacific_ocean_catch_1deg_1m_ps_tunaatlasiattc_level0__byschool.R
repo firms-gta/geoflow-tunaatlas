@@ -33,7 +33,6 @@ function(action, entity, config){
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow
 #entity --> the entity you are managing
-#get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
 # Historical name for the dataset at source  PublicPSTunaSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 # Historical name for the dataset at source  PublicPSBillfishSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
