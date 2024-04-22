@@ -83,23 +83,14 @@ rewrite_scripts <- function(config) {
   }
   return(list_url)
 }
+config <- initWorkflow(here::here("All_raw_data_georef.json"))
 list_url <- rewrite_scripts(config)
-# Example usage:
-# Suppose your R scripts are stored in 'path/to/your/scripts'
-# rewrite_scripts(config)
-
-
-# source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/extract_urls_from_column.R")
-# source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/downloading_pre_harmo_gsheet.R")
 
 path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
 scripts = file.path(path_to_scripts, basename(list_url))
 scripts <- gsub(".R_", ".R", scripts)
 
-# scripts <- list_github_paths listightub path from downloading pre harmo sheet
-
-# Fonction pour nettoyer chaque script enlever les appels à geoflow, la gestion des codelist
-clean_script <- function(script_path, add_extra_lines = TRUE) {
+clean_script <- function(script_path) {
   # Read the script file line by line
   lines <- readLines(script_path)
   
@@ -116,16 +107,46 @@ clean_script <- function(script_path, add_extra_lines = TRUE) {
   # Remove spaces in front of the hash symbol for comments
   lines <- gsub("^\\s*#", "#", lines)
   # Remove lines containing specific keywords
-  lines <- lines[!str_detect(lines, "entity|action|config|codelists|geoflow|eblondel")]
+  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|eblondel")]
+
+  # Replace 'output_name_dataset' assignments with a specific fixed string
+  lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
+  
+  # Update write.csv lines and add a line for georef_dataset assignment
+  for (i in seq_along(lines)) {
+    if (str_detect(lines[i], "write\\.csv")) {
+      dataset_name <- str_extract(lines[i], "(?<=write\\.csv\\()(.*?)(?=,)")
+      georef_line <- sprintf("georef_dataset <- %s", dataset_name)
+      lines <- append(lines, georef_line, after = i)
+    }
+  }  
+  
+  if(grepl("effort",  script_path)){
+    line_fact <- 'fact <- "effort"' 
+  } else { line_fact <- 'fact <- "catch"'}
+  
+  lines_add <- ''
+  
+  if(sum(grepl("path_to_raw_dataset_catch",  lines))>1){
+    lines_add <- c(lines_add, 'path_to_raw_dataset_catch <- ') 
+  
+    lines_add <- c(lines_add, 'path_to_raw_dataset_effort <- ') 
+  } else if(sum(grepl("path_to_raw_dataset",  lines))) {
+    lines_add <- c(lines_add, 'path_to_raw_dataset <- ') 
+  }
+  
+
+
+  
   
   # Add extra lines for data processing if specified
-  if(add_extra_lines) {
     
     intro_lines <- c(
       "# # Introduction",
       "# This R Markdown document is designed to transform data that is not in CWP format into CWP format.",
       "# Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.",
-      "# A summary of the mapping process is provided. Please specify `path_to_raw_dataset`, the historical name as received from tRFMOs is specified",
+      "# This markdown is created from a function so the documentation keep the format of roxygen2 skeleton",
+      "# A summary of the mapping process is provided. Please specify `path_to_raw_dataset`, `path_to_raw_dataset_catch` or/and `path_to_raw_dataset_effort`, the historical name as received from tRFMOs is specified in the markdown",
       "# Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.",
       "# If you are interested in further details, the results and codes are available for review."
     )
@@ -134,7 +155,8 @@ clean_script <- function(script_path, add_extra_lines = TRUE) {
       "# Load pre-harmonization scripts and apply mappings",
       "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
       "source('local_map_codelists_no_DB.R')",
-      "mapping_codelist <- map_codelists_no_DB(opts$fact, mapping_dataset = 'https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv', dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c('IATTC', 'CCSBT', 'WCPFC'))",
+      line_fact,
+      "mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = 'https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv', dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c('IATTC', 'CCSBT', 'WCPFC'))",
       "# Handle unmapped values and save the results",
       "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), species = ifelse(species == 'UNK', 'MZZ', species), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
       "fwrite(mapping_codelist$recap_mapping, 'data/recap_mapping.csv')",
@@ -143,8 +165,9 @@ clean_script <- function(script_path, add_extra_lines = TRUE) {
       "print(head(mapping_codelist$recap_mapping))",
       "print(head(mapping_codelist$not_mapped_total))"
     )
-    lines <- c(intro_lines, lines, extra_lines)
-  }
+    
+    lines <- c(intro_lines,lines_add,  lines, extra_lines)
+    
   
   
   return(lines)
@@ -163,7 +186,40 @@ get_trfmo_folder <- function(filename) {
 }
 
 
-# Boucle pour nettoyer et sauvegarder les scripts
+# Boucle pour nettoyer et sauvegarder les scripts catch 
+
+for(script in scripts) {
+  tryCatch({
+    cleaned_code <- clean_script(script)
+    trfmo_folder <- get_trfmo_folder(basename(script))
+    trfmo_path <- file.path(dirname(script), trfmo_folder)
+    
+    # Créer le dossier s'il n'existe pas
+    if(!dir.exists(trfmo_path)) {
+      dir.create(trfmo_path)
+    }
+    
+    new_filename <- str_replace(basename(script), ".R", "_cleaned.R")
+    new_filepath <- file.path(trfmo_path, new_filename)
+    writeLines(cleaned_code, new_filepath)
+    knitr::spin(new_filepath,knit =FALSE, 
+                doc = "^#\\s*",
+                precious = TRUE)
+    
+  }, error = function(e) {
+    cat("An error occurred in processing script", basename(script), ":", e$message, "\n")
+  })
+}
+
+# Boucle pour nettoyer et sauvegarder les scripts effots
+config <- initWorkflow(here::here("All_raw_data_georef_effort.json"))
+list_url <- rewrite_scripts(config)
+
+path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
+scripts = file.path(path_to_scripts, basename(list_url))
+scripts <- gsub(".R_", ".R", scripts)
+
+
 for(script in scripts) {
   tryCatch({
     cleaned_code <- clean_script(script)

@@ -1,17 +1,25 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = CCSBT_Global_Catch.xlsx, title = Harmonize data structure of CCSBT nominal catch, abstract = Harmonize the structure of CCSBT nominal catch dataset (pid of output file = southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/033iit, value = "https://goo.gl/033iit";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv. , value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-# This function is to harmonize dataset provided by the CCSBT prior to integration in the Global Tuna Atlas workflow. 
-# The output dataset follows the CWP Standard for Reference Harmonization.
-
-
+#' Harmonize CCSBT Nominal Catch Dataset
+#'
+#' This function harmonizes the nominal catch dataset provided by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT), preparing it for integration into the Tuna Atlas database.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including a harmonized dataset,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details The function processes input datasets to match the standardized format required for integration into the Tuna Atlas,
+#'          including adjustments to column names, units conversion, and data aggregation.
+#'          Metadata integration is conditional, based on whether it will be loaded into the Tuna Atlas database.
+#'
+#' @importFrom dplyr %>% filter select mutate group_by summarise
+#' @importFrom readxl read_excel
+#' @importFrom reshape melt
+#' @seealso \code{\link{format_time_db_format}} for converting CCSBT Longline data structure.
+#' @export
+#' @keywords data harmonization, fisheries, CCSBT, tuna
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' 
-#' @keywords Commission for the Conservation of Southern Bluefin Tuna CCSBT tuna RFMO Sardara Global database on tuna fishieries
 #'
 
 ##Catches
