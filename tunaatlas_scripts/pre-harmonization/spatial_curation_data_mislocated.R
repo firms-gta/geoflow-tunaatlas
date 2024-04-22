@@ -67,9 +67,9 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   areas_in_land<-identification_data_on_land_cwp(con , georef_dataset)
   dataset_in_land <- georef_dataset %>% dplyr::filter(geographic_identifier %in%areas_in_land)
   
-  df_input_cwp_grid <- cwp_grid %>% dplyr::inner_join(cwp_grid) %>% dplyr::select(-c(on_land_p))
+  df_input_cwp_grid <- georef_dataset %>% dplyr::inner_join(cwp_grid) %>% dplyr::select(-c(on_land_p))
   
-  not_cwp_grid <- cwp_grid %>% dplyr::anti_join(cwp_grid)
+  not_cwp_grid <- georef_dataset %>% dplyr::anti_join(cwp_grid)
   
   # if (!is.null(not_cwp_grid)) {
   #   sum_fact_to_reallocate <- not_cwp_grid %>% 
