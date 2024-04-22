@@ -1,18 +1,26 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool, title = Harmonize data structure of ICCAT by operation mode effort datasets, abstract = Harmonize the structure of ICCAT catch-and-effort datasets: 'by operation mode' (pid of output file = atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__bySchool). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/dDXf5D, value = "https://goo.gl/dDXf5D";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.in: id = keep_fleet_instead_of_flag, type = Boolean, title = By default the column "flag" is kept. By setting this argument to TRUE the column "fleet" will be kept (and "flag" will be removed), value = FALSE;
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
+#' Harmonize data structure of ICCAT by operation mode effort datasets
+#'
+#' This function harmonizes the structure of ICCAT catch-and-effort datasets
+#' based on operation modes. It adapts the dataset structure for compatibility with
+#' the Tuna Atlas database, considering only specific fields as mandatory. The
+#' function also handles optional metadata integration if provided.
+#'
+#' @param action The action context from geoflow, typically involving workflow control.
+#' @param entity The entity context from geoflow, managing specific dataset handling.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#' @param keep_fleet_instead_of_flag Logical, defaults to FALSE. Determines whether to
+#'        replace the 'flag' column with the 'fleet' column in the output dataset.
+#'
+#' @return None; this function performs data manipulation and outputs files directly.
+#'
+#' @import dplyr
+#' @importFrom stringr str_detect str_replace
+#' @importFrom readr read_csv write_csv
+#' @seealso \code{\link{FUN_efforts_ICCAT_CE_keep_all_efforts}} for converting ICCAT task 2,
+#' @export
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' 
-#' @keywords Internal Commission for the Conservation of Atlantic Tuna tuna RFMO Sardara Global database on tuna fishieries
-#'
-#' @seealso \code{\link{convertDSD_iccat_ce_task2}} to convert ICCAT task 2 , \code{\link{convertDSD_iccat_nc}} to convert ICCAT nominal catch data structure
+#' @keywords ICCAT, tuna, fisheries, data harmonization
 function(action, entity, config){
   
 

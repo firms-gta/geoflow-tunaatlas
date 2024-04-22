@@ -1,20 +1,26 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_1deg_1m_bb_iattc_level0__byflag, title = Harmonize data structure of IATTC LP (Pole-and-line) catch datasets, abstract = Harmonize the structure of IATTC catch-and-effort datasets: 'LPTunaFlag' (pid of output file = pacific_ocean_catch_1deg_1m_bb_tunaatlasIATTC_level0__tuna_byFlag). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/nl6Q0m, value = "https://goo.gl/nl6Q0m";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-# '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets} followed by a list of columns specifing the species
+#' Harmonize data structure of IATTC LP (Pole-and-line) catch datasets
 #'
+#' This function harmonizes the structure of IATTC catch-and-effort datasets specifically for
+#' LP (Pole-and-line) catches under the 'LPTunaFlag' designation. The function transforms raw
+#' dataset inputs into a harmonized format suitable for integration into the Tuna Atlas database.
+#' The function assumes specific initial data columns and outputs a structured dataset with
+#' additional metadata and code lists as needed.
+#'
+#' @param action The action context from geoflow.
+#' @param entity The entity context from geoflow.
+#' @param config The configuration context from geoflow.
+#'
+#' @return This function does not return a value but outputs harmonized datasets and
+#'         related files specified by the process for integration within the Tuna Atlas database.
+#'
+#' @importFrom dplyr %>% select mutate
+#' @import reshape
+#' @seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType}} to convert IATTC nominal catch data structure,
+#'          \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} to convert IATTC LLTunaBillfish and LLShark data structure,
+#' @keywords IATTC, tuna, fisheries, data harmonization
+#' @export
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' 
-#' @keywords Inter-American-Tropical-Tuna-Commission IATTC tuna RFMO Sardara Global database on tuna fishieries
-#'
-#' @seealso \code{\link{convertDSD_iattc_nc}} to convert IATTC nominal catch data structure, code{\link{convertDSD_iattc_ce_LLTunaBillfish_LLShark}} to convert IATTC task 2 LLTunaBillfish and LLShark data structure, \code{\link{convertDSD_iattc_ce_LPTunaFlag}} to convert IATTC task 2 LPTunaFlag data structure, \code{\link{convertDSD_iattc_ce_LLOrigFormat}} to convert IATTC task 2 Longline original format data structure, \code{\link{convertDSD_iattc_ce_PSSharkSetType}} to convert IATTC task 2 'PublicPSSharkSetType' data structure, \code{\link{convertDSD_iattc_ce_PSSharkFlag}} to convert IATTC task 2 'PublicPSSharkFlag' data structure, \code{\link{convertDSD_iattc_ce_PSSharkFlag}} to convert IATTC task 2 'PublicPSBillfishSetType' and 'PublicPSSharkSetType' and 'PublicPSTunaSetType' data structure, \code{\link{convertDSD_iattc_ce_PSFlag}} to convert IATTC task 2 'PublicPSBillfishFlag' and 'PublicPSSharkFlag' and 'PublicPSTunaFlag' data structure
-#'
 
   # Input data sample:
   # Year Month Flag LatC1  LonC1 NumSets ALB BET BKJ BZX PBF   SKJ TUN  YFT
@@ -33,9 +39,9 @@
   #  USA   LL 1993-05-01 1993-06-01  6425135    ALL     BSH       ALL         NO    24
   #  USA   LL 1994-03-01 1994-04-01  6425135    ALL     BSH       ALL         NO    14
   #  USA   LL 1994-03-01 1994-04-01  6430135    ALL     BSH       ALL         NO     4
-function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
 
+function(action, entity, config){
+  
 #packages
 
 if(!require(reshape)){
@@ -66,6 +72,7 @@ options(encoding = "UTF-8")
 ##Catches
 
 # Reach the catches pivot DSD using a function stored in IATTC_functions.R
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
 catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"Flag","LP")
 catches_pivot_IATTC$NumSets<-NULL
 
