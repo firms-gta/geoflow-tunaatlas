@@ -1,3 +1,29 @@
+#' Clean and Prepare Script for Reporting
+#'
+#' This function takes a path to a script and performs a series of cleaning operations to prepare it for reporting.
+#' The script is fetched remotely, cleaned of certain elements, and transformed to meet specific requirements.
+#'
+#' @param script_path The URL path to the script that needs to be cleaned.
+#'
+#' @details The cleaning process includes:
+#' - Removing function definitions and their opening braces.
+#' - Reversing the script lines to handle closing braces correctly.
+#' - Stripping spaces before comment hashes and removing specific keywords.
+#' - Adjusting variable assignments and updating lines that write CSV files.
+#' - Adding lines dynamically based on the content of the script, such as setting specific dataset paths.
+#' - Injecting an introduction and additional processing lines at the beginning and end of the script respectively.
+#'
+#' The function modifies the script by removing and replacing parts of the code that are not needed
+#' for the final report and by adding necessary clarifications and data processing steps.
+#'
+#' @return A character vector containing the lines of the modified script.
+#'
+#' @examples
+#' script_path <- "https://path.to.your/script.R"
+#' cleaned_script <- clean_script(script_path)
+#' writeLines(cleaned_script, "path/to/your/cleaned_script.R")
+#'
+#' @import httr
 clean_script <- function(script_path) {
   require(httr)
   # uncomment thos lines to create the Global action for geoflow to be done
