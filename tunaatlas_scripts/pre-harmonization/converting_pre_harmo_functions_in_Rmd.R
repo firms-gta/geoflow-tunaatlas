@@ -18,87 +18,18 @@
 #' 
 #' 
 require(stringr)
-# Définir le chemin vers les scripts R
+require(geoflow)
 
 
-# Function to rewrite R scripts by adding comments when 'entity$data$source' is mentioned
-rewrite_scripts <- function(config, ) {
-  
-  list_url <- c()
-  for (entitynumber in 1:length(config$metadata$content$entities)){
-    entity <- config$metadata$content$entities[[entitynumber]]
-
-    action <- entity$data$actions[[1]]
-    script_path <- action$script
-    list_url <- c(list_url, script_path)
-    print(list_url)
-    # List all R files in the specified directory
-    file_path <- file.path(here::here("tunaatlas_scripts/pre-harmonization",basename(script_path)))
-    history_comments_added <- FALSE
-    author_added = FALSE
-    # Loop through each file
-    print(file_path)
-    # Read the content of the file
-    lines <- readLines(file_path, warn = FALSE)
-    
-    # Initialize a vector to store the new lines
-    new_lines <- character()
-    
-    # Check for existing author line
-    if (sum(grepl("bastien.grasset", as.character(lines)))>1) {
-      author_added = TRUE
-    }
-    
-    
-    # Loop through each line of the file
-    for (i in seq_along(lines)) {
-      print(i)
-      # Add the current line to the new vector of lines
-      new_lines <- c(new_lines, lines[i])
-      
-      # Check if the line contains 'entity$data$source'
-      if (grepl("entity\\$data\\$source", lines[i])) {
-        # Extract any potential source index if it exists
-        matches <- regmatches(lines[i], regexec("entity\\$data\\$source\\[\\[(\\d+)\\]\\]", lines[i]))
-        if (length(matches[[1]]) > 1) {  # Ensure there's a match
-          index <- matches[[1]][2]  # Corrected to get the captured group, not the entire match
-          comment_line = sprintf("# Historical name for the dataset at source  %s, if multiple, this means this function is used for several dataset, keep the same order to match data", eval(parse(text = paste0("entity$data$source[[", index, "]]"))))
-          new_lines <- c(new_lines, comment_line)
-        }
-      }
-      
-      # Add additional authors if Paul Taconet's email is mentioned
-      if (grepl("paul.taconet@ird.fr", lines[i])) {
-        if (!author_added) {
-          author_line_b = "#' @author Bastien Grasset, IRD \\email{bastien.grasset@ird.fr}"
-          author_line_m = "#' @author Emmanuel Blondel, FAO \\email{emmanuel.blondel@fao.org}"
-          author_line_j = "#' @author Bastien Grasset, IRD \\email{julien.barde@ird.fr}"
-          new_lines <- c(new_lines, author_line_b, author_line_m, author_line_j)
-          # Write the new lines into the file, overwriting the original
-          new_file_path <- file.path(here::here("tunaatlas_scripts/pre-harmonization/",str_replace(basename(file_path), ".R", ".R")))
-          writeLines(new_lines, new_file_path)
-        }
-        return("Attention c'est dangereux ça quand même")
-      }
-    }
-    
-    # Write the new lines into the file, overwriting the original
-    new_file_path <- file.path(here::here("tunaatlas_scripts/pre-harmonization/",str_replace(basename(file_path), ".R", ".R")))
-    
-    writeLines(new_lines, new_file_path)
-  }
-  return(list_url)
-}
 # rewrite_scripts
 clean_script <- function(script_path) {
-  # if(script_path == "/home/jovyan/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_effort_5deg_1m_ll_tunaatlasiattc_level0.R"){
-  #   browser()
-  # }
-  # Read the script file line by line
-  lines <- readLines(script_path)
-  
+  content_lines <- readLines(script_path)
+  require(httr)
+  # uncomment thos lines to create the Global action for geoflow to be done
+  # response <- GET(script_path)
+  # content_lines <- readLines(textConnection(content(response, "text")))  
   # Remove function definitions and the opening braces following them
-  lines <- str_remove_all(lines, "^function.*\\{")
+  lines <- str_remove_all(content_lines, "^function.*\\{")
   
   # Reverse the array to handle the closing brace
   lines_reversed <- rev(lines)
@@ -110,7 +41,7 @@ clean_script <- function(script_path) {
   # Remove spaces in front of the hash symbol for comments
   lines <- gsub("^\\s*#", "#", lines)
   # Remove lines containing specific keywords
-  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|eblondel")]
+  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current")]
 
   # Replace 'output_name_dataset' assignments with a specific fixed string
   lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
@@ -123,6 +54,7 @@ clean_script <- function(script_path) {
       lines <- append(lines, georef_line, after = i)
     }
   }  
+  
   
   if(grepl("effort",  script_path)){
     line_fact <- 'fact <- "effort"' 
@@ -137,15 +69,12 @@ clean_script <- function(script_path) {
   } else if(sum(grepl("path_to_raw_dataset",  lines))) {
     lines_add <- c(lines_add, 'path_to_raw_dataset <- ') 
   }
-  
 
-
-  
-  
-  # Add extra lines for data processing if specified
+    # Add extra lines for data processing 
     
     intro_lines <- c(
       "# # Introduction",
+      "# ",
       "# This R Markdown document is designed to transform data that is not in CWP format into CWP format.",
       "# Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.",
       "# This markdown is created from a function so the documentation keep the format of roxygen2 skeleton",
@@ -188,7 +117,6 @@ url_function <- function(config){
   return(list_url)
 }
 
-
 # Fonction pour déterminer le dossier de la tRFMO
 get_trfmo_folder <- function(filename) {
   trfmos <- c("iotc", "iccat", "iattc", "ccsbt", "wcpfc")
@@ -213,13 +141,17 @@ get_trfmo_folder <- function(filename) {
 config_catch <- initWorkflow(here::here("All_raw_data_georef.json"))
 # list_url_catch <- rewrite_scripts(config_catch)
 config_effort <- initWorkflow(here::here("All_raw_data_georef_effort.json"))
+config_nominal <- initWorkflow(here::here("Raw_nominal_catch.json"))
 # list_url_effort <- rewrite_scripts(config_effort)
 list_url_effort <- url_function(config_effort)
+list_url_nominal_catch <- url_function(config_nominal)
 list_url_catch <- url_function(config_catch)
 path_to_scripts <- here::here("tunaatlas_scripts/pre-harmonization")
-list_url <- c(list_url_catch, list_url_effort)
+list_url <- c(list_url_catch, list_url_effort, list_url_nominal_catch)
 scripts = file.path(path_to_scripts, basename(list_url))
 scripts <- gsub(".R_", ".R", scripts)
+
+# function(config, entity, action){}
 
 for(script in scripts) {
   tryCatch({
@@ -236,7 +168,7 @@ for(script in scripts) {
     new_filepath <- file.path(trfmo_path, new_filename)
     writeLines(cleaned_code, new_filepath)
     knitr::spin(new_filepath,knit =FALSE, 
-                doc = "^#\\s*",
+                doc = "^#\\s*|^#+'[ ]?",
                 precious = TRUE)
     file.remove(new_filepath)
     
@@ -244,8 +176,6 @@ for(script in scripts) {
     cat("An error occurred in processing script", basename(script), ":", e$message, "\n")
   })
 }
-
-
 
 
 # scripts <- "~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R"
