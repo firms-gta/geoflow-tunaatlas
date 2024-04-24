@@ -26,5 +26,5 @@ create_report_global_action = function(config, entity, action){
   knitr::spin(new_filename,knit =FALSE, 
               doc = "^#\\s*|^#+'[ ]?",
               precious = TRUE)
-  file.remove(new_filepath)
+  file.remove(new_filename)
 }
