@@ -22,9 +22,8 @@ create_report_global_action = function(config, entity, action){
   script_path <- entity$data$actions[[1]]$script
   cleaned_code <- clean_script(script_path)
   new_filename <- str_replace(basename(script_path), ".R", "_Report.R")
-  # new_filepath <- file.path(trfmo_path, new_filename)
   writeLines(cleaned_code, new_filename)
-  knitr::spin(new_filepath,knit =FALSE, 
+  knitr::spin(new_filename,knit =FALSE, 
               doc = "^#\\s*|^#+'[ ]?",
               precious = TRUE)
   file.remove(new_filepath)
