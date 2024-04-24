@@ -28,7 +28,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   }
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
   
   
   
@@ -223,10 +223,10 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
   # 
   copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
   copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)

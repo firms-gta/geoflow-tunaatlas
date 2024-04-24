@@ -180,7 +180,7 @@ function(action, entity, config) {
   url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   #for level 0 - FIRMS
   # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R") #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   try(source(file.path(url_scripts_create_own_tuna_atlas, "map_codelists.R"))) #modified for geoflow
   try(source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonisation/map_codelists.R")) #modified for geoflow
@@ -206,7 +206,7 @@ function(action, entity, config) {
   
   #for reporting
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copyrmd.R")
   # Saving options in a csv file and creating a new variable for each options
   write_options_to_csv(opts)
@@ -683,7 +683,7 @@ function(action, entity, config) {
       
       config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
       
-      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/generation/do_unit_conversion.R")
+      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/do_unit_conversion.R")
       
       georef_dataset <- do_unit_conversion(
         entity = entity,
@@ -1191,7 +1191,7 @@ function(action, entity, config) {
     stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
     stepnumber = stepnumber+1
     config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
     
     one_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
     five_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")

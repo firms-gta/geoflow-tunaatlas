@@ -1,4 +1,4 @@
-curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/data/max_conversion_factor.csv") {
+curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/max_conversion_factor.csv") {
   
   if(!is.data.frame(max_conversion_factor)){
     max_conversion_factor <-

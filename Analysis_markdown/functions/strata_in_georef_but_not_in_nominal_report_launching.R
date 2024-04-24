@@ -34,7 +34,7 @@ shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>%
 
 shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
 
 
 # we only keep georef data for which we have an equivalent year in nominal
@@ -88,7 +88,7 @@ georef_no_nominal_groupped_all <- tidying_GTA_data_for_comparison(dataframe = ge
 
 
 concerned_trfmos <- unique(c(unique(georef_no_nominal$source_authority),unique(georef_sup_nominal$source_authority)))
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
 # 
 copy_project_files(original_repo_path = here::here("Analysis_markdown/"), new_repo_path = getwd())
 

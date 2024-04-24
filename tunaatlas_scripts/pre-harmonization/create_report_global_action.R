@@ -18,7 +18,7 @@
 #' @return The function does not return any value; it performs file I/O and script processing.
 #'
 create_report_global_action = function(config, entity, action){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/pre-harmonization/clean_script_for_report.R")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/clean_script_for_report.R")
   script_path <- entity$data$actions[[1]]$script
   cleaned_code <- clean_script(script_path)
   new_filename <- str_replace(basename(script_path), ".R", "_Report.R")

@@ -25,7 +25,7 @@ strata_with_catches_without_effort = function(main.dir, connectionDB,uploadgoogl
     
     shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
     
-    # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+    # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
     
     
     # we only keep georef data for which we have an equivalent year in nominal
@@ -61,7 +61,7 @@ strata_with_catches_without_effort = function(main.dir, connectionDB,uploadgoogl
       
       # save.image(paste0(name,".Rdata"))
       concerned_trfmos <- unique(catch_no_effort$source_authority)
-      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
+      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
       # 
       # copy_project_files(original_repo_path = here::here("Analysis_markdown/"), new_repo_path = getwd())
       concerned_trfmos <- c(concerned_trfmos, "all")

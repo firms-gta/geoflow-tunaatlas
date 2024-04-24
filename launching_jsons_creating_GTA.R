@@ -105,7 +105,7 @@ raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_ge
 running_time_of_workflow(raw_data_georef_effort)
 
 ## Summarising the invalid data for all the datasets pre-harmonized
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
 config <- initWorkflow(here::here("All_raw_data_georef.json"), handleMetadata = FALSE)
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
@@ -132,14 +132,14 @@ create_materialized_view <- ""
 
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Summarising_step.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
 ## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_actions/convert_to_netcdf.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/convert_to_netcdf.R")
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 
@@ -164,11 +164,11 @@ setwd(wd)
 # for several stratas used to inspect the data (more details in the report)
 
 # This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
 
 upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
                                                                          connectionDB = con)
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/strata_with_catches_without_effort.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_with_catches_without_effort.R")
 CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
                                            connectionDB = con)
 

@@ -30,7 +30,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   }
   
   # Define the base URL for scripts
-  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/"
+  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/"
   
   # Source scripts from URLs
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
@@ -101,7 +101,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   curation_absurd_converted_data_list <-
     curation_absurd_converted_data(georef_dataset = georef_dataset,
-                                   max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/data/max_conversion_factor.csv")
+                                   max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/max_conversion_factor.csv")
   
   georef_dataset <- curation_absurd_converted_data_list$georef_dataset
   
