@@ -1,21 +1,30 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_1deg_1m_ccsbt_level0__surface, title = Harmonize data structure of CCSBT Surface catch datasets, abstract = Harmonize the structure of CCSBT catch-and-effort datasets: 'Surface' (pid of output file = southern_hemisphere_oceans_catch_1deg_1m_tunaatlasccsbt_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/TokY4i, value = "https://goo.gl/TokY4i";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-
-#' @details Input csv file must be structured like this: \url{https://goo.gl/TokY4i}
+#' Harmonize CCSBT Surface Catch Datasets
 #'
+#' This function harmonizes the CCSBT Surface catch datasets,
+#' preparing them for integration into the Tuna Atlas database, according to specified format requirements.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to ensure compliance with the standardized
+#'          format, including renaming, reordering, and recalculating specific fields as necessary.
+#'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
+#'
+#' @import dplyr
+#' @import readxl
+#' @importFrom stringr str_replace
+#' @seealso \code{\link{harmo_time_2}} 
+#'          \code{\link{harmo_spatial_5}} 
+#'          \code{\link{format_time_db_format}} 
+#' @export
+#' @keywords data harmonization, fisheries, CCSBT, tuna
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' 
-#' @keywords Commission for the Conservation of Southern Bluefin Tuna CCSBT tuna RFMO Sardara Global database on tuna fishieries
-#'
-#' @seealso \code{\link{convertDSD_ccsbt_ce_Longline}} to convert CCSBT task 2 Longline data structure, \code{\link{convertDSD_ccsbt_nc_annual_catches_by_gear}} to convert CCSBT nominal catch data structure
-
-  # Input data sample (after importing as data.frame in R):
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+# Input data sample (after importing as data.frame in R):
   # YEAR MONTH COUNTRY_CODE GEAR_CODE CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOURS_SEARCHED WEIGHT_(Kg)_OF_SBT_RETAINED
   # 1975    12           AU        PS                      4      -37       150                       17                       59800
   # 1976     8           AU        BB                      4      -36       150                        8                           0
@@ -52,7 +61,9 @@ if(!require(readxl)){
 #entity --> the entity you are managing
 #get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  CEData_Surface.xlsx, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  ccsbt_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
@@ -112,16 +123,9 @@ catches <-RFMO_CE[,colToKeep_captures]
 catches[,c("AreaName","FishingFleet")]<-as.data.frame(apply(catches[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 
 # remove 0 and NA values 
-#catches <- catches  %>% 
-#  filter( ! Catch %in% 0 ) %>%
-#  filter( ! is.na(Catch)) 
 catches <- catches[!is.na(catches$Catch),]
 catches <- catches[catches$Catch != 0,]
 
-#catches <- catches %>% 
-#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
-#  summarise(Catch = sum(Catch))
-#catches<-as.data.frame(catches)
 
 catches <- aggregate(catches$Catch, FUN = sum,
 	by = list(

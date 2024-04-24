@@ -9,6 +9,18 @@ output: html_document
 
 Here is represented the differences in percent for each year.
 
+```{r time-dimension-groupping, message=FALSE, warning=FALSE, include=FALSE}
+
+for (i in parameter_time_dimension){
+  temporaire <- fonction_groupement(i,init, final)
+  assign(paste0("Groupped", i), temporaire)
+  
+  Groupped_time_dimension <- rbind(Groupped_all, temporaire)
+}
+
+```
+
+
 ```{r timedimdiff, eval = !unique_analyse}
 
 timediffplot <- lapply(parameter_time_dimension, 

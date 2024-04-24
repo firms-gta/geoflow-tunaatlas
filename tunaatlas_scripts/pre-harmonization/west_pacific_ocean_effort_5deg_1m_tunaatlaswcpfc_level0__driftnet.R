@@ -1,11 +1,28 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = west_pacific_ocean_catch_5deg_1m_tunaatlasWCPFC_level0__driftnet, title = Harmonize data structure of WCPFC Drifnet effort dataset, abstract = Harmonize the structure of WCPFC catch-and-effort dataset: 'Driftnet' (pid of output file = west_pacific_ocean_effort_5deg_1m_tunaatlasWCPFC_level0__driftnet). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. If it is an Excel file, it must be converted to CSV before using this function. Input file must be structured as follow: https://goo.gl/R5EbrB, value = "https://goo.gl/R5EbrB";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
+#' Harmonize WCPFC Driftnet Effort Datasets
+#'
+#' This function harmonizes the WCPFC Driftnet effort datasets,
+#' preparing them for integration into the Tuna Atlas database according to specified format requirements.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to ensure compliance with the standardized
+#'          format, including renaming, reordering, and recalculating specific fields as necessary.
+#'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import readr
+#' @importFrom stringr str_replace
+#' @seealso \code{\link{WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD}} for converting WCPFC Driftnet data structure,
+#' @export
+#' @keywords data harmonization, fisheries, WCPFC, driftnet, tuna
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' This script works with any dataset that has the first 5 columns named and ordered as follow: {YY|MM|LAT5|LON5|DAYS} followed by a list of columns specifing the species codes with "_N" for catches expressed in number and "_T" for catches expressed in tons
 
 
@@ -31,14 +48,6 @@ function(action, entity, config){
     require(dplyr)
   }
 
-
-
-# wd<-getwd()
-# download.file(path_to_raw_dataset,destfile=paste(wd,"/dbf_file.DBF",sep=""), method='auto', quiet = FALSE, mode = "w",cacheOK = TRUE,extra = getOption("download.file.extra"))
-# path_to_raw_dataset=paste(wd,"/dbf_file.DBF",sep="")
-
-
-
 # Input data sample:
 # YY MM LAT5 LON5 DAYS ALB_N  ALB_C
 # 1983 11  30S 170W    0     0  0.000
@@ -62,9 +71,10 @@ function(action, entity, config){
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow
 #entity --> the entity you are managing
-#get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  WCPFC_G_PUBLIC_BY_YR_MON.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  wcpfc_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
@@ -88,7 +98,7 @@ DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
 DF$variable <- as.character(DF$variable)
 colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
 DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
-DF$Species <- toupper(DF$Species) #@eblondel added
+DF$Species <- toupper(DF$Species) 
 DF$Species <- sub("_C", "", DF$Species)
 DF$Species <- sub("_N", "", DF$Species)
 DF$School <- "OTH"
@@ -110,7 +120,6 @@ efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "no"
 # School
 efforts_pivot_WCPFC$School<-"ALL"
 
-# Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
 efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
 

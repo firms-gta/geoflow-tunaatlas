@@ -1,19 +1,27 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_5deg_1m_ll_iattc_level0, title = Harmonize data structure of IATTC LL (longline) catch datasets, abstract = Harmonize the structure of IATTC catch-and-effort datasets: 'Shark' and 'Tuna_Billfish' (pid of output file = pacific_ocean_catch_5deg_1m_ll_tunaatlasIATTC_level0__shark or pacific_ocean_catch_5deg_1m_ll_tunaatlasIATTC_level0__tuna_billfish). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the catch dataset. Input file must be structured as follow: https://goo.gl/ObIRfj, value = "https://goo.gl/ObIRfj";
-# wps.in: id = path_to_effort_dataset, type = String, title = Path to the effort dataset. Input file must be structured as follow: https://goo.gl/U0zyWa, value = "https://goo.gl/U0zyWa";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-
+#' Harmonize IATTC PSSetType Effort Datasets
+#'
+#' This function harmonizes the IATTC PSSetType effort datasets,
+#' preparing them for integration into the Tuna Atlas database, according to specified format requirements.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to ensure compliance with the standardized
+#'          format, including renaming, reordering, and recalculating specific fields as necessary.
+#'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
+#'
+#' @import dplyr
+#' @import readr
+#' @importFrom stringr str_replace
+#' @seealso \code{\link{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD}} 
+#' @export
+#' @keywords data harmonization, fisheries, IATTC, tuna
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' 
-#' @keywords Inter-American-Tropical-Tuna-Commission IATTC tuna RFMO Sardara Global database on tuna fishieries
-#'
-#' @seealso \code{\link{convertDSD_iattc_nc}} to convert IATTC nominal catch data structure, code{\link{convertDSD_iattc_ce_LLTunaBillfish_LLShark}} to convert IATTC task 2 LLTunaBillfish and LLShark data structure, \code{\link{convertDSD_iattc_ce_LPTunaFlag}} to convert IATTC task 2 LPTunaFlag data structure, \code{\link{convertDSD_iattc_ce_LLOrigFormat}} to convert IATTC task 2 Longline original format data structure, \code{\link{convertDSD_iattc_ce_PSSharkSetType}} to convert IATTC task 2 'PublicPSSharkSetType' data structure, \code{\link{convertDSD_iattc_ce_PSSharkFlag}} to convert IATTC task 2 'PublicPSSharkFlag' data structure, \code{\link{convertDSD_iattc_ce_PSSharkFlag}} to convert IATTC task 2 'PublicPSBillfishSetType' and 'PublicPSSharkSetType' and 'PublicPSTunaSetType' data structure, \code{\link{convertDSD_iattc_ce_PSFlag}} to convert IATTC task 2 'PublicPSBillfishFlag' and 'PublicPSSharkFlag' and 'PublicPSTunaFlag' data structure
-#'
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
 # Catch input data sample:
 # Record Spp DTypeID Number Weight
@@ -59,8 +67,14 @@ function(action, entity, config){
   #entity --> the entity you are managing
   #get data from geoflow current job dir
   filename_catch <- entity$data$source[[1]] #catch data
+# Historical name for the dataset at source  PublicCatchOrigFormatTunaBillfish.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicCatchOrigFormatShark.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename_effort <- entity$data$source[[2]] #effort data
+# Historical name for the dataset at source  PublicEffortOrigFormatTunaBillfish.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicEffortOrigFormatShark.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename_str <- entity$data$source[[3]] #structure
+# Historical name for the dataset at source  iattc_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iattc_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   path_to_raw_dataset_catch <- entity$getJobDataResource(config, filename_catch)
   path_to_raw_dataset_effort <- entity$getJobDataResource(config, filename_effort)
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
@@ -89,23 +103,12 @@ function(action, entity, config){
   # DType code 3 means that the data was submitted as weight only
   
   #Initialisation
-  # efforts$CatchUnits<-'NA'
-  
-  
-  # Merge catches and efforts to have the strata in the catch file
-  # catches<-left_join(catches,efforts,by=c("Record"))
-  # efforts <- efforts[c("Spp","value","EffortUnits","Year","Month","FlagAbv","Lat","Lon")]
-  # 
-  # colnames(catches)<-c("variable","value","CatchUnits","Year","Month","Flag","Lat","Lon")
   
   efforts$SquareSize<-5
   efforts$CodeSquareSize<-6
   efforts$Gear<-"LL"
   efforts$SetType<-"ALL"
   efforts <- efforts %>% select(-Record)
-  # efforts$variable[which(efforts[,"variable"]=="BuM")]<-"BUM"
-  
-  # colnames(efforts)[colnames(efforts)=="Flag"] <- "FishingFleet"
   
   # Reach the catches harmonized DSD using a function in IATTC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName", "School","EffortUnits","Effort")

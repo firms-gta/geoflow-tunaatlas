@@ -14,4 +14,8 @@ create_grid_views <- function(config, software, software_config){
   sql <- paste(readLines("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_sql/create_view_area_labels_viewer.sql"), collapse="\n")
   return(sql)
   
+  
+  
+  
+  
 }

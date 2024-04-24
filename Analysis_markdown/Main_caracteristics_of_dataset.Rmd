@@ -1,0 +1,41 @@
+---
+title: "Main_caracteristics_of_dataset"
+author: "BastienG"
+date: "2023-11-03"
+output: html_document
+---
+
+`r if(!unique_analyse){cat_title("# Main characteristics of the two datasets", child_headerinside = child_header)}`
+
+
+```{r timecoverage, echo=FALSE, results='asis', eval = (length(parameter_time_dimension) != 0)}
+
+res <- knitr::knit_child("Timecoverage.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```
+
+\clearpage
+
+```{r eval= print_map, results='asis', eval = (length(parameter_geographical_dimension) != 0)}
+
+res <- knitr::knit_child("Spatialcoverage.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```
+
+
+\clearpage
+
+
+```{r otherdim, results='asis', eval = length(Other_dimensions) != 0}
+
+res <- knitr::knit_child("Otherdimensions.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```
+
+\clearpage

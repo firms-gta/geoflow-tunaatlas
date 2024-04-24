@@ -1,17 +1,27 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = nominal_catch_iattc_level0, title = Harmonize data structure of IATTC nominal catch, abstract = Harmonize the structure of IATTC nominal catch dataset (pid of output file = pacific_ocean_nominal_catch_tunaatlasiattc_level0). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/4FexgR, value = "https://goo.gl/4FexgR";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv. , value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' 
-#' @keywords Inter-American-Tropical-Tuna-Commission IATTC tuna RFMO Sardara Global database on tuna fishieries
+#' Harmonize IATTC Nominal Catch Datasets
 #'
-#' @seealso \code{\link{convertDSD_iattc_nc}} to convert IATTC nominal catch data structure, code{\link{convertDSD_iattc_ce_LLTunaBillfish_LLShark}} to convert IATTC task 2 LLTunaBillfish and LLShark data structure, \code{\link{convertDSD_iattc_ce_LPTunaFlag}} to convert IATTC task 2 LPTunaFlag data structure, \code{\link{convertDSD_iattc_ce_LLOrigFormat}} to convert IATTC task 2 Longline original format data structure, \code{\link{convertDSD_iattc_ce_PSSharkSetType}} to convert IATTC task 2 'PublicPSSharkSetType' data structure, \code{\link{convertDSD_iattc_ce_PSSharkFlag}} to convert IATTC task 2 'PublicPSSharkFlag' data structure, \code{\link{convertDSD_iattc_ce_PSSharkFlag}} to convert IATTC task 2 'PublicPSBillfishSetType' and 'PublicPSSharkSetType' and 'PublicPSTunaSetType' data structure, \code{\link{convertDSD_iattc_ce_PSFlag}} to convert IATTC task 2 'PublicPSBillfishFlag' and 'PublicPSSharkFlag' and 'PublicPSTunaFlag' data structure
+#' This function harmonizes the IATTC nominal catch datasets,
+#' preparing them for integration into the Tuna Atlas database, according to specified format requirements.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to ensure compliance with the standardized
+#'          format, including renaming, reordering, and recalculating specific fields as necessary.
+#'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
+#'
+#' @import dplyr
+#' @import readr
+#' @importFrom stringr str_replace
+#' @seealso \code{\link{format_time_db_format}} for converting time format,
+#' @export
+#' @keywords data harmonization, fisheries, IATTC, tuna
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
 
   # Input data sample:
@@ -64,7 +74,7 @@ colToKeep_NC<-c("AnoYear","BanderaFlag","ArteGear","EspeciesSpecies","t")
 NC_harm_IATTC<-NC[,colToKeep_NC]
 colnames(NC_harm_IATTC)<-c("Year", "Flag","Gear","Species","Catch")
 
-NC_harm_IATTC$AreaName<-"IATTC"
+NC_harm_IATTC$AreaName<-"EPO"
 NC_harm_IATTC$AreaCWPgrid<-NA
 NC_harm_IATTC$School<-"ALL"
 NC_harm_IATTC$CatchType<-"ALL"
@@ -74,10 +84,11 @@ NC_harm_IATTC$Ocean<-"PAC_E"
 
 NC_harm_IATTC$MonthStart<-1
 NC_harm_IATTC$Period<-12
+
 #Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
+
 NC_harm_IATTC<-format_time_db_format(NC_harm_IATTC)
 
-#NC <- NC_harm_IATTC  %>%  filter( ! Catch %in% 0 )
 NC <- NC_harm_IATTC[NC_harm_IATTC$Catch != 0,]
 
 rm(NC_harm_IATTC)
@@ -87,16 +98,9 @@ colnames(NC)[colnames(NC)=="Flag"] <- "FishingFleet"
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 NC <-NC[,colToKeep_captures]
 # remove 0 and NA values 
-#NC <- NC  %>% 
-#  filter( ! Catch %in% 0 ) %>%
-#  filter( ! is.na(Catch)) 
 NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
-#NC <- NC %>% 
-#  group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,Species,CatchType,CatchUnits) %>% 
-#  summarise(Catch = sum(Catch))
-#NC<-as.data.frame(NC)
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(

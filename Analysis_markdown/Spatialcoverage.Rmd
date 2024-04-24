@@ -2,16 +2,35 @@
 title: "Spatialcoverage"
 author: "BastienG"
 date: "2023-09-12"
-output: html_document
+output: pdf_document
 ---
 
 \clearpage
 
 `r cat_title("## Spatial coverage ", child_headerinside = child_header)`
 
+```{r fonction-empreinte-spatial, eval=print_map}
 
+map_unit <- lapply(units, FUN = fonction_empreinte_spatiale,  initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2, shapefile.fix = shapefile.fix, plotting_type = plotting_type, continent = continent)
+
+
+titles <- paste0("Distribution in value for the unit : ",units)
+
+
+```
+
+```{r numbergridtype, results='asis', eval=print_map}
+
+if(exists("GrouppedGRIDTYPE")){
+number_of_GRIDTYPE <- length(unique(GrouppedGRIDTYPE$Precision))
+GRIDTYPE <- paste(as.list(unique(GrouppedGRIDTYPE$Precision)), collapse = " ; ")
+}
+
+```
 
 ```{r knitchildmapprintingdefinitionfunction, eval = print_map}
+
+
 knit_child_map_printing <- knitr::knit_child(text =c(
     '',
   '```{r results="asis"}', 

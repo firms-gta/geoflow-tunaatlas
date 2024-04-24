@@ -1,19 +1,64 @@
+#' Format pre-harmonized data to cwp format
+#'
+#' This function preprocesses catch data for harmonization, including renaming columns, converting data types,
+#' and filtering records. It then exports the processed data along with associated code lists as CSV files.
+#' Additionally, it updates the entity with temporal coverage information based on the dataset's date range.
+#'
+#' @param action An action placeholder, not directly used but reserved for future extensions or logging.
+#' @param entity An object encapsulating dataset metadata and methods for managing data resources and metadata.
+#' @param config A configuration object providing settings and utilities, such as a logger for information logging.
+#'
+#' @details
+#' The function performs several steps to prepare the catch data for further processing or integration:
+#' - Reads the dataset from a specified path.
+#' - Optionally renames the 'fishingfleet' column to 'fishing_fleet' if it exists.
+#' - Converts time fields to character format, then to Date, and numerically transforms the 'measurement_value'.
+#' - Filters out records with a 'measurement_value' of zero.
+#' - Selects specific columns for the final dataset.
+#' - Calculates and sets the temporal extent of the dataset based on the time fields.
+#' - Exports the harmonized dataset and code lists to CSV files, updating the entity with these resources.
+#'
+#' It relies on the 'dplyr' package for data manipulation and 'readr' for reading CSV files. The function assumes
+#' that the 'entity' object provides methods for accessing data sources and setting metadata properties.
+#'
+#' @return Does not return a value but writes out CSV files and updates the 'entity' object.
+#'
+#' @examples
+#' \dontrun{
+#'   pre_harmonize_catch_data(action, entity, config)
+#'   # Ensure 'action', 'entity', and 'config' are properly defined before running.
+#' }
+#'
+#' @importFrom dplyr filter mutate rename select
+#' @importFrom readr read_csv
+#' @export
+
+
 function(action, entity, config){
   
   require(dplyr)
-  
   catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
+# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iotc_catch_all_1m_firms_level0.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 
   filename1 <- entity$data$source[[1]]
+# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iotc_catch_all_1m_firms_level0.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename2 <- entity$data$source[[2]]
+# Historical name for the dataset at source  iccat_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iotc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   path_to_raw_dataset <- entity$getJobDataResource(config, entity$data$source[[1]])
+# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iotc_catch_all_1m_firms_level0.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()
   options(encoding = "UTF-8")
   #----------------------------------------------------------------------------------------------------------------------------
   
-  ##Catches
+  ## Catches
+  if("fishingfleet" %in%colnames(catches)){
   catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
+  }
   
   catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier), measurement_value = as.numeric(catches$measurement_value))
   
@@ -38,7 +83,6 @@ function(action, entity, config){
   dataset_temporal_extent <- paste(min(catches$time_start),max(catches$time_end),sep = "/")
   entity$setTemporalExtent(dataset_temporal_extent)
   
-  #@geoflow -> export as csv
   output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
   write.csv(catches, output_name_dataset, row.names = FALSE)
   

@@ -604,7 +604,9 @@ geom_line( aes(y=`Sum in millions of hooks`,group = 1), size=0.5)+theme(axis.tex
 
 
 ```{r echo=FALSE, results='asis', eval=(parameter_fact == "catch")}
+
 qflextable2(reduced, captionn ="Evolution of Tons and Number of fish and lines along the steps", pgwidth = 6)
+
 ```
 
 ```{r echo=FALSE, results='asis', eval=(parameter_fact == "effort")}

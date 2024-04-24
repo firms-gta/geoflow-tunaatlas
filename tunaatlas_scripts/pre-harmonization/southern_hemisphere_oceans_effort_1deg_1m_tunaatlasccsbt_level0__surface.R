@@ -1,10 +1,38 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface, title = Harmonize data structure of CCSBT Surface effort datasets, abstract = Harmonize the structure of CCSBT catch-and-effort datasets: 'Surface' (pid of output file = southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/TokY4i, value = "https://goo.gl/TokY4i";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
+#' Harmonize CCSBT Surface Effort Datasets
+#'
+#' Harmonizes the structure of CCSBT catch-and-effort datasets specifically for 'Surface' effort data.
+#' This involves reading the raw dataset, performing various data transformations including renaming,
+#' mutating, and selecting columns, and calculating new fields. The output is a harmonized dataset suitable
+#' for integration into the Tuna Atlas database.
+#'
+#' @param action Action parameter, currently unused but reserved for future extension.
+#' @param entity An entity object that contains dataset metadata and methods for data resource management.
+#' @param config A configuration object that includes settings and utilities, such as logging.
+#'
+#' @details
+#' The function performs the following key steps:
+#' - Reads the raw dataset and metadata file from specified paths.
+#' - Applies renaming and transformation logic to align with the database schema.
+#' - Calculates conversion factors and standardizes time format.
+#' - Generates harmonized dataset and metadata files, which are then saved to CSV.
+#'
+#' The harmonization process is tailored to CCSBT 'Surface' datasets and assumes specific column names
+#' and data structure. It enriches the entity with temporal coverage information based on the dataset's
+#' date range and exports the harmonized data, metadata, and code lists as CSV files.
+#'
+#' @return Void. The function does not return a value but writes output files and updates the entity object.
+#'
+#' @examples
+#' \dontrun{
+#'   harmonize_ccsbt_surface_effort(action, entity, config)
+#' }
+#'
+#' @importFrom dplyr filter mutate group_by summarise
+#' @importFrom readxl read_excel
+#' @importFrom lubridate as_date ceiling_date
+#' @export
+#' 
+#' 
 
 function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_5.R")
@@ -45,14 +73,14 @@ function(action, entity, config){
   #entity --> the entity you are managing
   #get data from geoflow current job dir
   filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  CEData_Surface.xlsx, if multiple, this means this function is used for several dataset, keep the same order to match data
   filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  ccsbt_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()
   options(encoding = "UTF-8")
   
-#library(readxl) # devtools::install_github("hadley/readxl") 
-#RFMO_CE<-read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
 
   RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
   
@@ -66,6 +94,7 @@ function(action, entity, config){
   write.csv(summary(as.data.frame(RFMO_CE)), "test1", row.names = FALSE)
   
   #Remove lines that are read in the Excel but that are not real
+  
   RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
   RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED<-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
   RFMO_CE$NUMBER_OF_HOURS_SEARCHED<-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
@@ -76,7 +105,9 @@ function(action, entity, config){
   
   #Gear
   RFMO_CE$Gear<-RFMO_CE$GEAR_CODE
+  
   # replace PS by Purse Seine and BB by Pole and Line
+  
   RFMO_CE$Gear[RFMO_CE$Gear == "PS"] <- "Purse Seine"
   RFMO_CE$Gear[RFMO_CE$Gear == "BB"] <- "Pole and Line"
   
@@ -107,10 +138,12 @@ efforts <-efforts[colToKeep_efforts]
 
 
 #remove whitespaces on columns that should not have withespace
+
 efforts[,c("AreaName","FishingFleet")]<-as.data.frame(apply(efforts[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
 write.csv(summary(as.data.frame(efforts)), "test3", row.names = FALSE)
 
 # remove 0 and NA values 
+
 efforts <- efforts  %>% 
   filter( ! Effort %in% 0 ) %>%
   filter( ! is.na(Effort)) 

@@ -1,5 +1,5 @@
 convert_units = function (con, df_input, df_conversion_factor, codelist_geoidentifiers_df_input = NULL, 
-          codelist_geoidentifiers_conversion_factors = NULL) 
+                          codelist_geoidentifiers_conversion_factors = NULL) 
 {
   cat(paste0("\n BEGIN tunaatlas::convert_units() => converting units and measures"))
   columns_df_input = colnames(df_input)
@@ -12,8 +12,31 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
                                            "geographic_identifier")] <- "conv_factor_df_geo_id"
     if (codelist_geoidentifiers_df_input == codelist_geoidentifiers_conversion_factors) {
       df_input$conv_factor_df_geo_id <- df_input$geographic_identifier
-    }
-    else {
+    } else if (codelist_geoidentifiers_conversion_factors =='areas_conversion_factors_numtoweight_ird'){
+      classify_cwp_code <- function(cwp_code) {
+        # Parse the CWP code to extract relevant parts
+        # This is a placeholder - you'll need to replace this with actual logic
+        # For example, if the first character is the size code, the second is the quadrant, etc.
+        size_code <- substr(cwp_code, 1, 1)
+        quadrant_code <- substr(cwp_code, 2, 2)
+        latitude <- as.numeric(substr(cwp_code, 3, 5))  # Assuming latitude is coded in characters 3 to 5
+        
+        # Determine classification based on quadrant and latitude
+        # This is a simplification. The actual logic may depend on how the latitude is encoded in the CWP code.
+        if ((quadrant_code %in% c("1", "4") && latitude >= 10) ||
+            (quadrant_code %in% c("2", "3") && latitude <= -10)) {
+          return(1)  # North tropical
+        } else if (quadrant_code %in% c("2", "3") && latitude <= 10) {
+          return(2)  # South tropical
+        } else {
+          return(3)  # Center/rest Equatorial
+        }
+      }
+      
+      df_input <- df_input %>%
+        dplyr::mutate(conv_factor_df_geo_id = sapply(geographic_identifier, classify_cwp_code))
+      
+    } else {
       cat(paste0("\n List the different geographic identifiers in the gridded catch file \n"))
       dataset_distinct_geographic_identifier <- unique(df_input$geographic_identifier)
       dataset_distinct_geographic_identifier <- paste(unique(dataset_distinct_geographic_identifier), 
@@ -31,6 +54,8 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
                      codelist_geoidentifiers_df_input, "' \n               AND u1.codesource_area IN ('", 
                      dataset_distinct_geographic_identifier, "') \n               AND ST_Contains(u2.geom, u1.geom)", 
                      sep = "")
+      
+      
       correspondance_geo_identifiers_input_df_conv_fact_df <- dbGetQuery(con, 
                                                                          query)
       fileConn <- file("/tmp/query.sql")

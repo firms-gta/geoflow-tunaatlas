@@ -1,14 +1,30 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_1deg_1m_ps_iattc_level0__byFlag, title = Harmonize data structure of IATTC PS ByFlag catch datasets, abstract = Harmonize the structure of IATTC catch-and-effort datasets: 'PublicPSBillfishFlag' and 'PublicPSTunaFlag' and 'PublicPSSharkFlag' (pid of output file = pacific_ocean_catch_1deg_1m_ps_tunaatlasIATTC_level0__billfish_byFlag or pacific_ocean_catch_1deg_1m_ps_tunaatlasIATTC_level0__shark_byFlag or pacific_ocean_catch_1deg_1m_ps_tunaatlasIATTC_level0__tuna_byFlag). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/Q1w7Ur, value = "https://goo.gl/Q1w7Ur";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-
-
-# '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
+#' Harmonize IATTC PS ByFlag Catch Datasets
+#'
+#' Harmonizes the structure of IATTC PS (Purse Seine) catch datasets by flag. This function is designed
+#' to adjust catch data to fit standardized formats required for integration into the Tuna Atlas database.
+#' The process involves reformatting the data and possibly integrating metadata and code lists if they
+#' will be loaded into the Tuna Atlas database.
+#' This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
+#'
+#' @param action Contextual action data typically provided by the geoflow framework.
+#' @param entity Contextual entity data describing the dataset within the geoflow framework.
+#' @param config Configuration settings provided by the geoflow framework.
+#'
+#' @details The function reads raw data, processes it according to specified stratifications such as
+#'          'PublicPSBillfishFlag', 'PublicPSTunaFlag', and 'PublicPSSharkFlag', and then outputs a
+#'          harmonized dataset. It can conditionally include metadata and code lists based on whether the
+#'          data is intended for database loading.
+#'
+#' @return Does not return anything; it outputs files directly to the specified location within the geoflow system.
+#'
+#' @importFrom dplyr filter mutate
+#' @importFrom readr read_csv write_csv
+#' @seealso \code{\link{convertDSD_iattc_ce}} for other conversions related to IATTC data,
+#'          \code{\link{format_time_db_format}} to standardize time formatting for database integration.
+#' @export
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+#' @keywords IATTC, tuna, fisheries, data harmonization, catch data
 function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
 #packages
@@ -18,9 +34,11 @@ function(action, entity, config){
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow
 #entity --> the entity you are managing
-#get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  PublicPSTunaFlag.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicPSBillfishFlag.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  iattc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()

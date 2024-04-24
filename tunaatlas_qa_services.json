@@ -27,7 +27,23 @@
       "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
     }
   },
-  "software": [
+  "software": [    
+    {
+  		"id": "my-zenodo",
+		  "type": "output",
+		  "software_type": "zenodo",
+		  "parameters": {
+    		"url": "https://sandbox.zenodo.org/api",
+    		"token": "{{ ZENODO_SANDBOX_TOKEN }}",
+    		"logger": "INFO"
+		  },
+		  "properties": {
+		    "clean": {
+		      "run": false
+		    }
+		  }
+		},
+
 {
 		"id": "tunaatlas-db-write",
 		"type": "output",
@@ -128,6 +144,20 @@
 	    "createWorkspace": true,
 	    "createStore": true
 	  }
-	}
+	},
+  	{
+      "id": "zen4R-deposit-record",
+      "run": false,
+      "options": {
+        "update_files": true,
+        "depositWithFiles": true,
+        "communities": "",
+        "deleteOldFiles": false,
+        "update_metadata": true,
+        "strategy": "newversion",
+        "publish":false
+      }
+  	}
+	
  ]
 }

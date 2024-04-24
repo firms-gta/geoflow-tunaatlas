@@ -105,11 +105,12 @@ function(action, entity, config){
 	# done base on mapping between source_authority (tRFMO) and species 
 	url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
 	species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo)
+	
+	removed <- nominal_catch %>% dplyr::anti_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species",
+	                                                                                           "source_authority" = "source_authority"))
 	nominal_catch <- nominal_catch %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species",
   "source_authority" = "source_authority"))
 	
-	removed <- nominal_catch %>% dplyr::anti_join(species_to_be_kept_by_rfmo_in_level0, by = c("species" = "species",
-  "source_authority" = "source_authority"))
   
 	if(recap_each_step){
 	  function_recap_each_step(

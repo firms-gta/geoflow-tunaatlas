@@ -1,19 +1,30 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = west_pacific_ocean_effort_5deg_1m_ll_tunaatlaswcpfc_level0, title = Harmonize data structure of WCPFC Longline effort datasets, abstract = Harmonize the structure of WCPFC catch-and-effort datasets: 'longline_60' 'longline_70' 'longline_80' 'longline_90' 'longline_00' (pid of output file = west_pacific_ocean_effort_5deg_1m_ll_tunaatlasWCPFC_level0__1950to1970 or west_pacific_ocean_effort_5deg_1m_ll_tunaatlasWCPFC_level0__1970to1980 or west_pacific_ocean_effort_5deg_1m_ll_tunaatlasWCPFC_level0__1980to1990 or west_pacific_ocean_effort_5deg_1m_ll_tunaatlasWCPFC_level0__1990to2000 or west_pacific_ocean_effort_5deg_1m_ll_tunaatlasWCPFC_level0__2000). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/pLHB56, value = "https://goo.gl/pLHB56";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
-#' This script works with any dataset that has the first 5 columns named and ordered as follow: {YY|MM|LAT5|LON5|HHOOKS} followed by a list of columns specifing the species codes with "_N" for catches expressed in number and "_T" for catches expressed in tons
-#' 
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' 
-#' @keywords Western and Central Pacific Fisheries Commission WCPFC tuna RFMO Sardara Global database on tuna fishieries
+#' Harmonize WCPFC Longline Effort Datasets
 #'
-#' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}} to convert WCPFC task 2 Drifnet data structure, \code{\link{convertDSD_wcpfc_ce_Longline}} to convert WCPFC task 2 Longline data structure, \code{\link{convertDSD_wcpfc_ce_Pole_and_line}} to convert WCPFC task 2 Pole-and-line data structure, \code{\link{convertDSD_wcpfc_ce_PurseSeine}} to convert WCPFC task 2 Purse seine data structure, \code{\link{convertDSD_wcpfc_nc}} to convert WCPFC task 1 data structure  
-
+#' This function harmonizes WCPFC Longline effort datasets, preparing them
+#' for integration into the Tuna Atlas database according to specified format requirements.
+#'
+#' @param action The action context from geoflow, used for controlling workflow processes.
+#' @param entity The entity context from geoflow, which manages dataset-specific details.
+#' @param config The configuration context from geoflow, used for managing global settings.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function modifies the dataset to ensure compliance with the standardized
+#'          format, including renaming, reordering, and recalculating specific fields as necessary.
+#'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
+#'
+#' @import dplyr
+#' @import tidyr
+#' @import readr
+#' @importFrom stringr str_replace
+#' @seealso \code{\link{harmo_time_2}} for converting time data structure,
+#'          \code{\link{harmo_spatial_3}} for converting lat lon to cwp grid format,
+#'          \code{\link{WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD}} for Pole-and-line data structure,
+#' @export
+#' @keywords data harmonization, fisheries, WCPFC, longline, tuna
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
 
 # wd<-getwd()
@@ -74,7 +85,6 @@ function(action, entity, config){
   #@geoflow --> with this script 2 objects are pre-loaded
   #config --> the global config of the workflow
   #entity --> the entity you are managing
-  #get data from geoflow current job dir
   filename1 <- entity$data$source[[1]] #data
   filename2 <- entity$data$source[[2]] #structure
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
@@ -86,16 +96,9 @@ function(action, entity, config){
   
   DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
   
-  #2020-11-13 @eblondel
-  #Changes
-  #	- Flag column added add UNK where missing
-  #	- Change id upper index for melting
-  #---------------------------------------
-  DF$cwp_grid=NULL # remove column cwp_grid
+  DF$cwp_grid=NULL 
   colnames(DF)<-toupper(colnames(DF))
   if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
-  # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
-  # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
   DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
   
   DF<- DF %>% 
@@ -119,19 +122,18 @@ function(action, entity, config){
   efforts_pivot_WCPFC$Gear<-"L"
   
   # School
-  efforts_pivot_WCPFC$School<-"ALL"
-# Reach the efforts pivot DSD using a function in WCPFC_functions.R
+efforts_pivot_WCPFC$School<-"ALL"
 efforts_pivot_WCPFC$Gear<-"L"
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 
 efforts_pivot_WCPFC$RFMO <- "WCPFC"
 efforts_pivot_WCPFC$Ocean <- "PAC_W"
-efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID #@eblondel added
+efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID 
 efforts_pivot_WCPFC <- harmo_time_2(efforts_pivot_WCPFC, 
                                                 "YY", "MM")
 efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, 
-                                                   "LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+                                                   "LAT_SHORT", "LON_SHORT", 5, 6) 
 efforts_pivot_WCPFC$CatchType <- "ALL"
 efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
 efforts <- efforts_pivot_WCPFC[colToKeep_efforts]

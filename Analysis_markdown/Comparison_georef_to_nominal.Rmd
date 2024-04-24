@@ -47,7 +47,7 @@ child_env_comp$parameter_fact <- "catch"
 child_env_comp$time_dimension <- c("year")
 
 
-fig.pathchild <- paste0(fig.path, "Comparison/nominal_georef/figures/")
+fig.pathchild <- paste0(fig.path, "/Comparison/nominal_georef/figures/")
 dir.create(fig.pathchild, recursive = TRUE)
 
 child_env_comp$fig.path = fig.pathchild

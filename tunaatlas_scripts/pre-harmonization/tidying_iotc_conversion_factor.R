@@ -1,3 +1,40 @@
+#' Tidy and Convert IOTC Data with Conversion Factors
+#'
+#' This function takes initial IOTC (Indian Ocean Tuna Commission) data, reads it into a dataframe, 
+#' and performs several tidying and conversion operations. Specifically, it calculates conversion factors
+#' from average weights, adjusts unit measurements, assigns geographic identifiers, and defines start and end
+#' times for the data. The final dataset is then saved as a harmonized CSV file. Additionally, the entity is 
+#' enriched with temporal coverage information.
+#'
+#' @param action An action placeholder, not directly used in the function but may signify the action context in which the function is called.
+#' @param entity An object containing methods and properties for dataset metadata, including methods to access job data resources and to set temporal extent.
+#' @param config A configuration object, potentially containing settings and utilities, such as a logger or access credentials.
+#'
+#' @details 
+#' The function assumes `entity` and `config` to be well-defined objects with specific properties and methods:
+#' - `entity$getJobDataResource` to obtain the path to dataset sources.
+#' - `entity$setTemporalExtent` to set the dataset's temporal coverage based on provided data.
+#' - `entity$addResource` to update the entity with references to generated resources.
+#' The function uses `readr` for reading CSV data, `dplyr` for data manipulation, and `lubridate` for date operations.
+#' Data transformations include unit conversion from individual counts to tonnage based on average weights (`AVG_WEIGHT`),
+#' reassignment of column names to more generic terms, and calculation of start and end dates for each record.
+#'
+#' @return The function does not return a value but writes the harmonized dataset to a CSV file and updates the `entity` object
+#'         with new resources and temporal extent information.
+#'
+#' @examples
+#' \dontrun{
+#'   tidying_iotc_conversion_factor(action, entity, config)
+#'   action, entity and config are object created with geoflow package
+#'   # Where `action` is your action context, `entity` is your entity object with data source and metadata handling methods,
+#'   # and `config` is your configuration object with necessary settings.
+#' }
+#'
+#' @importFrom readr read_csv
+#' @importFrom dplyr mutate select filter rename
+#' @importFrom lubridate as_date ceiling_date
+#' @export
+
 tidying_iotc_conversion_factor <- function(action, entity, config){
   
 

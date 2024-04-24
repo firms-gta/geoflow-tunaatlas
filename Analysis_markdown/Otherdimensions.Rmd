@@ -12,15 +12,16 @@ We check the distribution of the value of each dimension and each unit.
 
 
 
+
 ```{r pie-charts-multiple-list}
 
-if(!unique_analyse){figures <- lapply(list_pie_chart,FUN = pie_chart_2_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{figures <- lapply(list_pie_chart,FUN = pie_chart_2_default, first= init, topn = 7, title_yes_no = FALSE , titre_1 = titre_1)}
+if(!unique_analyse){figures <- lapply(Other_dimensions,FUN = pie_chart_2_default, first= init, second = final, topn = 7, titre_1 = titre_1, titre_2 = titre_2)}else{figures <- lapply(Other_dimensions,FUN = pie_chart_2_default, first= init, topn = 7, title_yes_no = FALSE , titre_1 = titre_1)}
 
 ```
 
 ```{r pie-charts-names}
 
-dimension_title_subfigures <- paste0("Distribution in value for the dimension : ", list_pie_chart)
+dimension_title_subfigures <- gsub("_", ".", paste0("Distribution in value for the dimension : ", Other_dimensions))
 
 ```
 
@@ -68,6 +69,12 @@ pie_chart_knit <- mapply(FUN = knitting_plots_subfigures,
 cat(unlist(pie_chart_knit),  sep = "\n")
 
 ```
+
+```{r}
+knitr::knit_exit(fully = FALSE)
+```
+
+
 
 ```{r bar-charts-multiple-list}
 

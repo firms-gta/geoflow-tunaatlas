@@ -1,12 +1,32 @@
-######################################################################
-##### 52North WPS annotations ##########
-######################################################################
-# wps.des: id = catch_1deg_1m_ps_iattc_level0__shark_bySchool, title = Harmonize data structure of IATTC PS Shark BySchool catch datasets, abstract = Harmonize the structure of IATTC catch-and-effort datasets: 'PublicPSSharkSetType' (pid of output file = pacific_ocean_catch_1deg_1m_ps_tunaatlasIATTC_level0__shark_bySchool). The only mandatory field is the first one. The metadata must be filled-in only if the dataset will be loaded in the Tuna atlas database. ;
-# wps.in: id = path_to_raw_dataset, type = String, title = Path to the input dataset to harmonize. Input file must be structured as follow: https://goo.gl/xaeTwG, value = "https://goo.gl/xaeTwG";
-# wps.in: id = path_to_metadata_file, type = String, title = NULL or path to the csv of metadata. The template file can be found here: https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/sardara_world/transform_trfmos_data_structure/metadata_source_datasets_to_database/metadata_source_datasets_to_database_template.csv . If NULL, no metadata will be outputted., value = "NULL";
-# wps.out: id = zip_namefile, type = text/zip, title = Dataset with structure harmonized + File of metadata (for integration within the Tuna Atlas database) + File of code lists (for integration within the Tuna Atlas database) ; 
-
+#' Harmonize IATTC PS Shark BySchool Catch Datasets
+#'
+#' This function processes and harmonizes the Inter-American Tropical Tuna Commission (IATTC)
+#' PS (Purse Seine) shark catch datasets by school type. It prepares the data for integration into the
+#' Tuna Atlas database, aligning with the requirements for data standardization and optionally
+#' including metadata if the dataset is intended for database loading.
+#'
+#' @param action Contextual action data provided by the geoflow framework, used for controlling workflow processes.
+#' @param entity Contextual entity data describing the dataset within the geoflow framework.
+#' @param config Configuration settings provided by the geoflow framework.
+#'
+#' @return None; the function outputs files directly, including harmonized datasets,
+#'         optional metadata, and code lists for integration within the Tuna Atlas database.
+#'
+#' @details This function restructures the dataset to include only essential fields, performs any necessary calculations
+#'          for catch units, and standardizes the format for date fields and geographical identifiers.
+#'          Metadata integration is contingent on the final use of the dataset within the Tuna Atlas database.
+#'
+#' @importFrom readr read_csv write_csv
+#' @importFrom dplyr filter mutate
+#' @importFrom tidyr gather
+#' @seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType_Shark}} for specific data processing of shark catches by school,
+#'          \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} for general data structuring operations.
+#' @export
+#' @keywords IATTC, tuna, fisheries, data harmonization, shark catch, school
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 # '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
+
 function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType_Shark.R")
 #packages
@@ -16,9 +36,10 @@ function(action, entity, config){
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow
 #entity --> the entity you are managing
-#get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
+# Historical name for the dataset at source  PublicPSSharkSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 filename2 <- entity$data$source[[2]] #structure
+# Historical name for the dataset at source  iattc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
