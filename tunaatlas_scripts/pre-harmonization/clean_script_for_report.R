@@ -35,7 +35,7 @@ clean_script <- function(script_path) {
   # Reverse the array to handle the closing brace
   lines_reversed <- rev(lines)
   # Remove the first occurrence of the closing brace
-  lines_reversed[which(str_detect(lines_reversed, "\\}$"))[1]] <- str_remove(lines_reversed[which(str_detect(lines_reversed, "\\}$"))[1]], "\\}$")
+  lines_reversed[which(str_detect(lines_reversed, "\\}$"))[1]] <- str_remove(lines_reversed[which(str_detect(lines_reversed, "\\}"))[1]], "\\}")
   # Restore the original order of lines
   lines <- rev(lines_reversed)
   
