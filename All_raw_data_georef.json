@@ -73,6 +73,14 @@
         "add_sql_comments": false,
         "upload_to_googledrive": true
       }
+    }, 
+    
+    {
+      "id": "create_report_global_action",
+      "script": "./tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "run": true,
+      "options": {
+      }
     }
     
   ]

@@ -14,13 +14,9 @@
 #' Tidying_and_mapping_data(action, entity, config)
 
 Tidying_and_mapping_data = function(action, entity, config) {
-
   # Set options and configurations
   harmonized <- entity$resources$harmonized
   output_name_dataset_mapped <- gsub("harmonized", "mapped", harmonized)
-  if (grepl("nominal", harmonized)){
-    return()
-  }
   
   opts <- action$options
   con <- config$software$output$dbi
@@ -43,8 +39,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
-  
-  
   
   # Additional scripts for reporting and functions
   reporting_functions <- c(
@@ -78,14 +72,35 @@ Tidying_and_mapping_data = function(action, entity, config) {
       df_to_load)
   }
   
+  georef_dataset <- df_to_load
+  georef_dataset$measurement_unit <- as.character(georef_dataset$measurement_unit)
+  if(!is.na(any(georef_dataset$measurement_unit) == "TRUE")) if(any(georef_dataset$measurement_unit) == "TRUE") georef_dataset[(georef_dataset$measurement_unit) == "TRUE",]$measurement_unit <- "t"
+  
+  #--------Negative or null values ------------------------------------------------------------------------------------------------------------------------------------
+  # Negative or null values 
+  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  negative_values <- georef_dataset %>% dplyr::filter(measurement_value <= 0)
+  georef_dataset <- georef_dataset %>% dplyr::filter(measurement_value > 0)
+  if(nrow(negative_values)!=0){
+    if(recap_each_step){
+      function_recap_each_step("negative_values",georef_dataset,paste0("In this step,handle negative values in the measurement_values of the data"))
+      
+      saveRDS(negative_values,"data/negative_values.rds")
+      
+    }
+  }
+  
+
+  
+  if (!grepl("nominal", harmonized)){
+  
   # Curation absurd converted data ------------------------------------------
   stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
   stepnumber = stepnumber+1
   
-  
-  
   curation_absurd_converted_data_list <-
-    curation_absurd_converted_data(georef_dataset = df_to_load,
+    curation_absurd_converted_data(georef_dataset = georef_dataset,
                                    max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/data/max_conversion_factor.csv")
   
   georef_dataset <- curation_absurd_converted_data_list$georef_dataset
@@ -109,8 +124,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
     
   }
   
-  
-  
   #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
   stepLogger(level = 0, step = stepnumber, msg = "Standardizing unit of measures")
   stepnumber = stepnumber+1
@@ -126,22 +139,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
         TRUE ~ measurement_unit
       )
     )
-  
-  #--------Negative or null values ------------------------------------------------------------------------------------------------------------------------------------
-  # Negative or null values 
-  #-----------------------------------------------------------------------------------------------------------------------------------------------------------
-  
-  negative_values <- georef_dataset %>% dplyr::filter(measurement_value <= 0)
-  georef_dataset <- georef_dataset %>% dplyr::filter(measurement_value > 0)
-  if(nrow(negative_values)!=0){
-    if(recap_each_step){
-      function_recap_each_step("negative_values",georef_dataset,paste0("In this step,handle negative values in the measurement_values of the data"))
-      
-      saveRDS(negative_values,"data/negative_values.rds")
-      
-    }
-  }
-  
   
   # -----------spatial_curation_data_mislocated------------------------------------------------------
   
@@ -170,11 +167,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
         "spatial_curation_data_mislocated"
       )
       saveRDS(areas_in_land,"data/areas_in_land.rds")
-      # names_list_irregular_areas <-
-      #   c("areas_in_land") #file we want to save
-      # 
-      # try(lapply(names_list_irregular_areas, function_write_RDS))
-      
     }
     gc()
     
@@ -200,8 +192,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
     
     
   }
-  
-  
   
   
   if(!is.null(NULL)){
@@ -234,6 +224,25 @@ Tidying_and_mapping_data = function(action, entity, config) {
     }
     
   }
+  
+
+  
+  
+  files_to_check <- c("data/not_conform_conversion_factors.rds",
+                      "data/removed_irregular_areas.rds",
+                      "data/areas_in_land.rds",
+                      "data/outside_juridiction.rds",
+                      "data/not_mapped_total.rds")
+  
+  if(any(file.exists(files_to_check))) {
+    parameter_directory <- getwd()
+    base::options(knitr.duplicate.label = "allow")
+  }
+  
+  
+  }
+  
+  
   #----------Map code lists -------------------------------------------------------------------------------------------------------------------------------------------------
   #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
   #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -244,7 +253,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
     stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
     stepnumber = stepnumber+1
     config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
-    
     # mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
     # mapping_dataset <-read.csv(mapping_csv_mapping_datasets_url,stringsAsFactors = F,colClasses = "character")
     config$logger.info("Mapping code lists of georeferenced datasets...")
@@ -252,10 +260,10 @@ Tidying_and_mapping_data = function(action, entity, config) {
     mapping_codelist <-map_codelists_no_DB(opts$fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", 
                                            dataset_to_map = georef_dataset, 
                                            mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) 
-
-
+    
+    
     georef_dataset <- mapping_codelist$dataset_mapped
-
+    
     
     if(fact == "catch"){
       georef_dataset <- georef_dataset %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet),
@@ -276,18 +284,8 @@ Tidying_and_mapping_data = function(action, entity, config) {
       stats_total <- mapping_codelist$stats_total
       not_mapped_total <- mapping_codelist$not_mapped_total
       
-      # names_list <-
-      #   c("recap_mapping", "stats_total", "not_mapped_total") #file we want to save
-      
       saveRDS(not_mapped_total,"data/not_mapped_total.rds")
       saveRDS(recap_mapping,"data/recap_mapping.rds")
-      
-      
-      # try(lapply(names_list, function_write_RDS))
-      
-      # if(nrow(not_mapped_total)!=0){
-      #   rmarkdown::render(, not_mapped_total)
-      # }
       
       config$logger.info("Saving recap of mapping ok")
       
@@ -308,37 +306,12 @@ Tidying_and_mapping_data = function(action, entity, config) {
       )
       
       df_mapping_final_this_dimension <- recap_mapping %>%
-        # dplyr::filter(species %in% unique(georef_dataset$species)) %>%
-        # dplyr::filter(fishing_fleet %in% unique(georef_dataset$fishing_fleet)) %>%
-        # dplyr::filter(gear_type %in% unique(georef_dataset$gear_type)) %>%
         dplyr::filter(source_authority %in% unique(georef_dataset$source_authority))
-      # rmarkdown::render("~/Documents/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Mapping_recap.Rmd",
-      #                   envir = environment(),
-      #                   output_dir = getwd())
       gc()
       
     }
     
   }
-  
-  
-  files_to_check <- c("data/not_conform_conversion_factors.rds",
-                      "data/removed_irregular_areas.rds",
-                      "data/areas_in_land.rds",
-                      "data/outside_juridiction.rds",
-                      "data/not_mapped_total.rds")
-  
-  if(any(file.exists(files_to_check))) {
-    parameter_directory <- getwd()
-    base::options(knitr.duplicate.label = "allow")
-    #                   envir = environment(),
-    #                   output_dir = getwd())
-  }
-  
-  
-  
-  
-  
   
   #Filter on species under mandate for FIRMS level 0
   #-------------------------------------------------------------------------------------------------
@@ -381,7 +354,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     }
   }
   
-  
+
   
   #we do an aggregation by dimensions
   dataset <-

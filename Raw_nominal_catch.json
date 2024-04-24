@@ -56,7 +56,7 @@
   "actions": [
     {
       "id": "Tidying_and_mapping_data",
-      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "script": "./tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
       "run": true,
       "options": {
         "recap_each_step": true
@@ -72,6 +72,14 @@
         "create_materialized_view": false,
         "add_sql_comments": false,
         "upload_to_googledrive": true
+      }
+    }, 
+    
+    {
+      "id": "create_report_global_action",
+      "script": "./tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "run": true,
+      "options": {
       }
     }
     
