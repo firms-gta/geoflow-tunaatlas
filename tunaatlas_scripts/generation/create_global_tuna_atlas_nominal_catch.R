@@ -53,6 +53,12 @@ function(action, entity, config){
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
   config$logger.info("Retrieving RFMOs nominal catch OK")
   
+  if(recap_each_step){
+    function_recap_each_step(
+      "rawdata",
+      nominal_catch, "rawdata","retrieve_nominal_catch",NULL)
+  }
+  
   #### 2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
   
   if (!is.null(SBF_data_rfmo_to_keep)){
