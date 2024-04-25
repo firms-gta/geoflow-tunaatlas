@@ -46,6 +46,13 @@
 				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/deploy_database_model.R",
 				"fun": "deploy_database_model"
 			}
+		},
+		"properties" : {
+			"user_readonly": "{{DB_USER_READONLY}}",
+			"onend_r": {
+				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/create_grid_views.R",
+				"fun": "deploy_database_model"
+			}
 		}
 	},
 	{
