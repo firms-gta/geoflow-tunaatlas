@@ -21,7 +21,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
   opts <- action$options
   con <- config$software$output$dbi
   options(encoding = "UTF-8")
-  opts$fact <- ifelse(grepl("effort", harmonized), "effort", "catch")
   recap_each_step <- TRUE
   
   # Define step logger function
@@ -64,6 +63,10 @@ Tidying_and_mapping_data = function(action, entity, config) {
   if("species" %notin% colnames(df_to_load)){
     fact = "effort"
     opts$fact <- "effort"
+  } else {
+    fact = "catch"
+    opts$fact <- "catch"
+    
   }
   
   if(recap_each_step){
@@ -319,10 +322,8 @@ Tidying_and_mapping_data = function(action, entity, config) {
   stepnumber = stepnumber+1
   
   # Temporary patch for ASFIS RMJ --> RMM
-  if("species" %in% colnames(georef_dataset)){
+  if(fact == "catch"){
     georef_dataset <- georef_dataset %>% dplyr::mutate(species = case_when(species == "RMJ" ~ "RMM", TRUE ~ species))
-    opts$fact <- "effort"
-    fact <- "effort"
     
     # Filtering on species under mandate --------------------------------------
     # done base on mapping between source_authority (tRFMO) and species
