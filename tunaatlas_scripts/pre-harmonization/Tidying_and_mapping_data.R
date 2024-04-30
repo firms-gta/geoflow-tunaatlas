@@ -275,7 +275,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       
     }
     
-    config$logger.info("Mapping code lists of georeferenced datasets OK")
+    config$logger.info("Mapping code lists of datasets OK")
     
     
     if(recap_each_step){
@@ -355,6 +355,14 @@ Tidying_and_mapping_data = function(action, entity, config) {
   }
   
 
+# Adding measurement column for CWP standards ----------------------------
+
+  georef_dataset$measurement <- as.character(opts$fact)
+
+# Final tidying -----------------------------------------------------------
+
+
+  
   
   #we do an aggregation by dimensions
   dataset <-
