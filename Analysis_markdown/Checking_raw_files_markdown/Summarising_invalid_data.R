@@ -276,13 +276,40 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   sapply(all_files, function(file) {
     destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
     file.copy(file, destination_file)
-    # path_to_dataset_new <- file.path(file)
-    # drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
+    path_to_dataset_new <- file.path(file)
+    drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
     
   })
   # 
-  # path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
-  # drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
+  path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
+  drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
+  
+  
+  read_last_csv <- function(path) {
+    csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
+    if (length(csv_files) == 0) return(NULL)
+    last_csv <- csv_files[order(file.info(csv_files)$mtime, decreasing = TRUE)[1]]
+    read_csv(last_csv)
+  }
+  
+  # Liste des tRFMOs, n'inclut pas iattc car pas de binding
+  tRFMOs <- c("ccsbt", "wcpfc")
+  list_csv <- c()
+  
+  combined_data_list <- lapply(tRFMOs, function(trfmo) {
+    trfmo_paths <- list.dirs(file.path(path, "entities"), recursive = FALSE)
+    trfmo_paths <- trfmo_paths[grep(trfmo, trfmo_paths)]
+    
+    trfmo_data <- lapply(file.path(trfmo_paths, "data"), read_last_csv)
+    trfmo_data <- do.call(rbind, trfmo_data)
+    
+    # Enregistrement du fichier combiné
+    name <- paste0(path, "/", trfmo, "_combined_data.csv")
+    write_csv(trfmo_data, name)
+    
+    return(name)
+  })
+  lapply(combined_data_list, drive_upload, as_id(folder_datasets_id), overwrite = TRUE)
   
   
   setwd(ancient_wd)
