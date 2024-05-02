@@ -116,6 +116,9 @@ time_Summarising_invalid_data <- system.time({
 time_Summarising_invalid_data_georef <- system.time({
   Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
 })
+
+Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_nominal_catch', connectionDB = con)
+
 # Around 50 seconds
 ## These two lines of codes creates a recap for each entity of the irregularities of the data for the datasets. 
 # They also creates a report summarising the irregular data for each entity so it is easier to target them
@@ -124,7 +127,7 @@ time_Summarising_invalid_data_georef <- system.time({
 # Create 5 datasets catch and effort. These entities are the final one published on zenodo. 
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_tunaatlas_qa_global_datasets_catch_path")
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets")
 ### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)

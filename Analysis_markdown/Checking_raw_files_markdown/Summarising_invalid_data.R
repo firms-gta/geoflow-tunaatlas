@@ -284,13 +284,12 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
   drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
   
-  
-  read_last_csv <- function(path) {
-    csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
-    if (length(csv_files) == 0) return(NULL)
-    last_csv <- csv_files[order(file.info(csv_files)$mtime, decreasing = TRUE)[1]]
-    read_csv(last_csv)
-  }
+    read_last_csv <- function(path) {
+      csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
+      if (length(csv_files) == 0) return(NULL)
+      last_csv <- csv_files[order(file.info(csv_files)$mtime, decreasing = TRUE)[1]]
+      read_csv(last_csv)
+    }
   
   # Liste des tRFMOs, n'inclut pas iattc car pas de binding
   tRFMOs <- c("ccsbt", "wcpfc")
@@ -298,6 +297,8 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   combined_data_list <- lapply(tRFMOs, function(trfmo) {
     trfmo_paths <- list.dirs(file.path(path, "entities"), recursive = FALSE)
+    trfmo_paths <- trfmo_paths[!grepl("nominal", trfmo_paths)]
+    if(length(trfmo_paths) != 0){
     trfmo_paths <- trfmo_paths[grep(trfmo, trfmo_paths)]
     
     trfmo_data <- lapply(file.path(trfmo_paths, "data"), read_last_csv)
@@ -308,9 +309,22 @@ Summarising_invalid_data = function(main_dir, connectionDB){
     write_csv(trfmo_data, name)
     
     return(name)
+    } else {return(NULL)}
   })
-  lapply(combined_data_list, drive_upload, as_id(folder_datasets_id), overwrite = TRUE)
+  
+  drive_upload_safe <- function(data_path) {
+    tryCatch({
+      drive_upload(data_path, as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
+    }, error = function(e) {
+      message(sprintf("Failed to upload %s: %s", data_path, e$message))
+      return(NULL)  # Returning NULL or any other indication of failure
+    })
+  }
+  
+  # Apply the safe upload function to each path in your list
+  result_list <- lapply(combined_data_list, drive_upload_safe)
   
   
   setwd(ancient_wd)
+
 }
