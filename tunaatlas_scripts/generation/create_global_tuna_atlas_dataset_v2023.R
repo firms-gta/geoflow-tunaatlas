@@ -128,7 +128,6 @@ function(action, entity, config) {
   
   
   #for level 1 - FIRMS (candidate)
-  source(file.path(url_scripts_create_own_tuna_atlas, "spatial_curation_data_mislocated.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "double_unit_data_handling.R")) # new function for double unit
   source(file.path(url_scripts_create_own_tuna_atlas, "do_unit_conversion.R"))
   
@@ -518,26 +517,26 @@ function(action, entity, config) {
     if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
       mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
       
-      #   georef_dataset <-
-      # 	double_unit_data_handling(
-      # 	  con = con,
-      # 	  entity = entity,
-      # 	  config = config,
-      # 	  fact = fact,
-      # 	  unit_conversion_csv_conversion_factor_url =
-      # 		opts$unit_conversion_csv_conversion_factor_url,
-      # 	  unit_conversion_codelist_geoidentifiers_conversion_factors =
-      # 		opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-      # 	  mapping_map_code_lists = opts$mapping_map_code_lists,
-      # 	  georef_dataset = georef_dataset
-      # 	)
-      #   function_recap_each_step(
-      # 	"Removing NOMT and converting MTNO in MT",
-      # 	georef_dataset,
-      # 	"In this step, we target the data provided in Tons and Number of fish. The data initially in MTNO will be converted in MT and the data in NTMO will be removed.",
-      # 	"",
-      # 	list("")
-      #   )
+        georef_dataset <-
+      	double_unit_data_handling(
+      	  con = con,
+      	  entity = entity,
+      	  config = config,
+      	  fact = fact,
+      	  unit_conversion_csv_conversion_factor_url =
+      		opts$unit_conversion_csv_conversion_factor_url,
+      	  unit_conversion_codelist_geoidentifiers_conversion_factors =
+      		opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+      	  mapping_map_code_lists = opts$mapping_map_code_lists,
+      	  georef_dataset = georef_dataset
+      	)
+        function_recap_each_step(
+      	"Removing NOMT and converting MTNO in MT",
+      	georef_dataset,
+      	"In this step, we target the data provided in Tons and Number of fish. The data initially in MTNO will be converted in MT and the data in NTMO will be removed.",
+      	"",
+      	list("")
+        )
       
       new_version_iotc_raising_available <- TRUE
       if (file.exists("data/IOTC_conv_fact_mapped.csv")) {
