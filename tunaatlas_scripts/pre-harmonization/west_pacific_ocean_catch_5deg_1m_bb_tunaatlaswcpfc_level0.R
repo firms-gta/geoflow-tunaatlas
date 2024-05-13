@@ -140,7 +140,7 @@ catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKee
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
 catches$source_authority<-"WCPFC"
-
+catches$measurement_type <- "RC" # Retained catches
 #----------------------------------------------------------------------------------------------------------------------------
 catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)

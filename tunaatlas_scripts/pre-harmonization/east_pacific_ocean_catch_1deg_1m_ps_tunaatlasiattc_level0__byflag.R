@@ -57,6 +57,7 @@ catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKee
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
 catches$source_authority<-"IATTC"
+catches$measurement_type <- "RC" # Retained catches
  
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
