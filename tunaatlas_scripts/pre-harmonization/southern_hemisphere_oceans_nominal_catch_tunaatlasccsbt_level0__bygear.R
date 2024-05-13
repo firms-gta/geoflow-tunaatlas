@@ -99,7 +99,7 @@ function(action, entity, config){
   CCSBT_NC$species<-"SBF"
   
   #CatchType
-  CCSBT_NC$measurement_type<-"ALL"
+  CCSBT_NC$measurement_type<-"NC"
   
   #Geographic identifier
   CCSBT_NC <- CCSBT_NC  %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "Indian"~"IOTC", 
