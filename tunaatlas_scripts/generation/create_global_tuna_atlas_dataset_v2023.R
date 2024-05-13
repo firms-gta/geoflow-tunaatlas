@@ -3,6 +3,7 @@ function(action, entity, config) {
   opts <- action$options
   con <- config$software$output$dbi
   options(encoding = "UTF-8")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
   write_options_to_csv(opts)
   use_ancient_dir_as_cache <- if(!is.null(opts$cache)) opts$cache else FALSE
   if(use_ancient_dir_as_cache){#(!is.null(opts$cache)) && opts$cache){
@@ -141,7 +142,7 @@ function(action, entity, config) {
   }
   
   #for reporting
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
+ 
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copyrmd.R")
   # Saving options in a csv file and creating a new variable for each options
