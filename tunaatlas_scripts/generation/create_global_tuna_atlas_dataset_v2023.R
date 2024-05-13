@@ -392,7 +392,7 @@ function(action, entity, config) {
   
   #--------Overlapping zones---------------------------------------------------------------------------------------------------------------------
   # This function handles the processing of overlapping zones.
-  handle_overlap <- function(zone_key, rfmo_main, default_strata) {
+  handle_overlap <- function(zone_key, rfmo_main, default_strata, recap_step = TRUE) {
     # Construct the names of options based on the zone key
     opts_key <- paste0("overlapping_zone_", zone_key, "_data_to_keep")
     strata_key <- paste0("strata_overlap_", zone_key)
@@ -421,7 +421,7 @@ function(action, entity, config) {
     # Determine which RFMO data not to keep
     rfmo_not_to_keep <- ifelse(opts[[opts_key]] == rfmo_main[[1]], names(rfmo_main)[[1]], rfmo_main[[1]])
     # Call the overlapping function to process the dataset
-    georef_dataset <<- function_overlapped(
+    georef_dataset <- function_overlapped(
       dataset = georef_dataset,
       con = con,
       rfmo_to_keep = opts[[opts_key]],
@@ -431,7 +431,7 @@ function(action, entity, config) {
     )
     
     # If required, recap the steps undertaken
-    if(recap_each_step){
+    if(recap_step){
       function_recap_each_step(
         paste0("overlap_", zone_key),
         georef_dataset,
@@ -452,7 +452,6 @@ function(action, entity, config) {
   
   
   # Configuration for each overlapping zone checking the one having an impact later and be able to easily remove unusefull steps by commenting
-  
   zones_config <- list(
     iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "species", "year")),
     # wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")), # not usefull anymore as handled in pre harmo
@@ -467,16 +466,13 @@ function(action, entity, config) {
     
     # It's a good practice to use tryCatch to understand if errors in handle_overlap are stopping the loop
     tryCatch({
-      handle_overlap(zone_key, zones_config[[zone_key]]$main, zones_config[[zone_key]]$default_strata)
+      handle_overlap(zone_key, zones_config[[zone_key]]$main, zones_config[[zone_key]]$default_strata, recap_step = recap_each_step)
     }, error = function(e) {
       message(paste0("Error encountered: ", e))  # Print errors to the console
     })
     
     config$logger.info(paste0("Finished processing zone: ", zone_key))  # Log after processing
   }
-  
-  
-  
   
   #===========================================================================================================================================================
   #===========================================================================================================================================================
@@ -739,10 +735,10 @@ function(action, entity, config) {
         config$logger.info(
           "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
         )
-        if(file.exists("data/nominal_catch.csv")){
+        if(file.exists("data/global_nominal_catch_firms_level0.csv")){
           nominal_catch <-
-            readr::read_csv("data/nominal_catch.csv",
-                            guess_max = 0) 
+            readr::read_csv("data/global_nominal_catch_firms_level0.csv",
+                            guess_max = 0)
           class(nominal_catch$measurement_value) <- "numeric"
           mapping_dataset <-
             read.csv(
