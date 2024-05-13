@@ -77,7 +77,7 @@ efforts<-IOTC_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_IOTC,colToKeep_e
 
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"IOTC"
-
+efforts$measurement<-"effort"
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support

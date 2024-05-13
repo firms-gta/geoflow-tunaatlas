@@ -172,7 +172,7 @@ function(action, entity, config){
   
   colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
   efforts$source_authority<-"WCPFC"
-  
+  efforts$measurement <- "effort" 
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
   efforts$time_start <- as.Date(efforts$time_start)
