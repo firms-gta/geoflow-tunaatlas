@@ -1,20 +1,6 @@
 Summarising_step = function(main_dir, connectionDB, config){
   ancient_wd <- getwd()
   
-  required_packages <- c("webshot",
-                         "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
-                         "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
-                         "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-                         "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
-  )
-  
-  for (package in required_packages) {
-    if (!requireNamespace(package, quietly = TRUE)) {
-      install.packages(package, dependencies = TRUE)
-    }
-    library(package, character.only = TRUE)
-  }
-  
   species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% dplyr::select(Code = code, Gear = label)
   
