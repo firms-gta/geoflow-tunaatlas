@@ -421,7 +421,7 @@ function(action, entity, config) {
     # Determine which RFMO data not to keep
     rfmo_not_to_keep <- ifelse(opts[[opts_key]] == rfmo_main[[1]], names(rfmo_main)[[1]], rfmo_main[[1]])
     # Call the overlapping function to process the dataset
-    georef_dataset <- function_overlapped(
+    georef_dataset <<- function_overlapped(
       dataset = georef_dataset,
       con = con,
       rfmo_to_keep = opts[[opts_key]],
