@@ -12,12 +12,13 @@ required_packages <- c(
   "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
   "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
   "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
-  "flextable", "readtext", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
+  "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
   "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
   "gdata", "R3port", "reshape2", "tools", "plogr", "plotrix", "rpostgis", "RPostgres", "RSQLite"
 )
 
+# Function to check, install (if necessary), and load a package
 # Function to check, install (if necessary), and load a package
 install_and_load <- function(package) {
   if (!require(package, character.only = TRUE)) {
@@ -70,7 +71,7 @@ running_time_of_workflow <- function(folder){
   
   return(time_difference)
 }
-
+stop("Stop")
 # First step is creation of the database model and loading of the codelist (around 5 minutes)
 db_model <- executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) 
 db_model <- executeAndRename(db_model, "_db_model")
@@ -91,7 +92,7 @@ raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch")
 running_time_of_workflow(raw_nominal_catch)
 
 
-## Georeferenced catch: These datasets contains catch AND EFFORT for some data as effort are used to raise catch data for level 0 to 2
+## Georeferenced catch: These datasets contains catch AND EFFORT FOR SOME DATA as effort are used to raise catch data for level 0 to 2
 # Around 1.2 hours
 raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef")
@@ -139,6 +140,13 @@ source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Ana
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
+
+#removed of Sumamrising step required_packages <- c("webshot","here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+#                        "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
+#                        "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
+#                        "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
+# )
+
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
 ## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
