@@ -172,7 +172,7 @@ function(action, entity, config) {
   #by default, at this step we will skip specific processings applied to IATTC data. These processings are eventually done later in the script (if options are activated)
   rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
   rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
-  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_mode"
+  rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_fleet"
   
   if(opts$fact == "CPUE"){
     variable <- NULL
