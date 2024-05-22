@@ -113,7 +113,9 @@ list2env(parameters_child, env = child_env_base)
 
 ```{r folder-with-rds, message=FALSE, warning=FALSE, include=FALSE}
 
-sub_list_dir_2 <- paste0("Markdown/",list.dirs(path =paste0(getwd(),"/Markdown"), full.names = FALSE, recursive = FALSE))
+
+sublist <- list.dirs(path =paste0(getwd(),"/Markdown"), full.names = FALSE, recursive = FALSE)
+sub_list_dir_2 <- file.path("Markdown/",sublist)
 details = file.info(paste0(sub_list_dir_2,"/Markdown"))
 details = file.info(sub_list_dir_2)
 details = details[with(details, order(as.POSIXct(mtime))), ]
@@ -228,104 +230,114 @@ The following table recap all the treatment done on the data provided by tRFMOs.
 
 ```{r include=FALSE, eval=(parameter_fact == "catch")}
 
-if(dir.exists("Markdown")){
-
-    nominal_dataset <- readr::read_csv(paste0("data/global_nominal_catch_firms_level0.csv"))
-
-nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
+# Check if "Markdown" directory exists
+if (dir.exists("Markdown")) {
+  nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0.csv")
+  nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
 }
 
-if(exists("nominal_dataset")){nominal <- sum(nominal_dataset$measurement_value)} else {nominal <- 1}
-df <- data.frame(matrix(ncol =13, nrow = 1))
-      colnames(df) <- c(paste0(tail(str_split(paste0(sub_list_dir_2),"/")[[1]],n=1)),
-                        "Explenation", "Fonctions", 
-                        "Options", "Tons", "Number of fish", "Lines","Difference (in % of tons)","Difference in tons","Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", "Percentage of nominal"
-      )
-          main <- filtering_function(readRDS(paste0(sub_list_dir_2[1],"/rds.rds")), parameter_filtering = parameter_filtering)
-          tons_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("MTNO", "MT","t", "Tons")))$measurement_value)
-          nofish_init <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no", "Number of fish")))$measurement_value)
-          lines_init <- nrow(main)
-      for (i in sub_list_dir_2){
-        Explenation <- readtext(paste0(i,"/explication.txt"))[2]
-        Fonctions <- pull(readtext(paste0(i,"/fonctions.txt"))[2])
-        if (file.exists(paste0(i,"/options_written.txt"))){
-          Options <- pull(readtext(paste0(i,"/options_written.txt"))[2])} else {Options <- "Aucune"}
-        if(isNullList(parameter_filtering)){
-          sums <- read_csv(paste0(i,"/sums.csv"))
-        sum_t <- sums$somme_t
-        sum_no <- sums$somme_no
-        nrow <- sums$lines
-        } else {
-          main <- filtering_function(readRDS(paste0(i,"/rds.rds")), parameter_filtering = parameter_filtering)
-          sum_t <- sum((main %>% dplyr::filter(measurement_unit%in%c("MTNO", "MT","t", "Tons")))$measurement_value)
-          sum_no <- sum((main %>% dplyr::filter(measurement_unit%in%c("NOMT", "NO","no", "Number of fish")))$measurement_value)
-         nrow <- nrow(main)
+# Calculate nominal value
+if (exists("nominal_dataset")) {
+  nominal <- sum(nominal_dataset$measurement_value)
+} else {
+  nominal <- 1
+}
 
-        }
+# Initialize data frame
+df <- data.frame(matrix(ncol = 13, nrow = 1))
+colnames(df) <- c(
+  paste0(tail(str_split(paste0(sub_list_dir_2), "/")[[1]], n = 1)),
+  "Explanation", "Functions",
+  "Options", "Tons", "Number of fish", "Lines", "Difference (in % of tons)", "Difference in tons", "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", "Percentage of nominal"
+)
 
-        step <- tail(str_split(paste0(i),"/")[[1]],n=1)
-        Difference_percent <- -100*((tons_init - sum_t)/tons_init)
-        Difference_tons <- -(tons_init - sum_t)
-        Difference_no <- -(nofish_init - sum_no)
-        Difference_percent_lines <- -100*((lines_init - nrow)/lines_init)
-        Difference_percent_no <- -100*((nofish_init - sum_no)/nofish_init)
-        percentage_of_nominal <- round((sum_t*100)/nominal, 1)
-        sums <- as.data.frame(data.frame(sum_t, sum_no, nrow))
-        data_i <- cbind(step,
-                        Explenation, Fonctions, 
-                        Options,
-                        sums, Difference_percent,Difference_tons,Difference_percent_no,Difference_no, Difference_percent_lines, percentage_of_nominal)
-        names(data_i) <- colnames(df)
-        df <- rbind(df, data_i)
-        tons_init <- sum_t
-        nofish_init <- sum_no
-        lines_init <- nrow
-        
-      }
-      df2 = df[-1,]
-      df2[df2 == -Inf] <- 0
-      colnames(df2)[1] <- "Step"
+# Process initial dataset
+main <- filtering_function(readRDS(paste0(sub_list_dir_2[1], "/rds.rds")), parameter_filtering = parameter_filtering)
+tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
+nofish_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
+lines_init <- nrow(main)
 
+# Process each directory
+for (i in sub_list_dir_2) {
+  Explanation <- readLines(paste0(i, "/explication.txt"))[2]
+  Functions <- readLines(paste0(i, "/fonctions.txt"))[2]
+  if (file.exists(paste0(i, "/options_written.txt"))) {
+    Options <- readLines(paste0(i, "/options_written.txt"))[2]
+  } else {
+    Options <- "Aucune"
+  }
+  if (isNullList(parameter_filtering)) {
+    sums <- read_csv(paste0(i, "/sums.csv"))
+    sum_t <- sums$somme_t
+    sum_no <- sums$somme_no
+    nrow <- sums$lines
+  } else {
+    main <- filtering_function(readRDS(paste0(i, "/rds.rds")), parameter_filtering = parameter_filtering)
+    sum_t <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
+    sum_no <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
+    nrow <- nrow(main)
+  }
 
+  step <- tail(str_split(paste0(i), "/")[[1]], n = 1)
+  Difference_percent <- -100 * ((tons_init - sum_t) / tons_init)
+  Difference_tons <- -(tons_init - sum_t)
+  Difference_no <- -(nofish_init - sum_no)
+  Difference_percent_lines <- -100 * ((lines_init - nrow) / lines_init)
+  Difference_percent_no <- -100 * ((nofish_init - sum_no) / nofish_init)
+  percentage_of_nominal <- round((sum_t * 100) / nominal, 1)
+  sums <- data.frame(sum_t, sum_no, nrow)
+  data_i <- cbind(step,
+                  Explanation, Functions,
+                  Options,
+                  sums, Difference_percent, Difference_tons, Difference_percent_no, Difference_no, Difference_percent_lines, percentage_of_nominal)
+  names(data_i) <- colnames(df)
+  df <- rbind(df, data_i)
+  tons_init <- sum_t
+  nofish_init <- sum_no
+  lines_init <- nrow
+}
 
-     
+# Finalize data frame
+df2 <- df[-1, ]
+df2[df2 == -Inf] <- 0
+colnames(df2)[1] <- "Step"
 
-      reduced <- df2 %>% dplyr::mutate(`Millions of tons` = `Tons` / 1000000, `Millions of fish` = `Number of fish` / 1000000)%>% dplyr::select(Step, `Millions of tons`, `Millions of fish`,# `Lines`,
-                                                                "Difference (in % of tons)","Difference (in % of fish)", "Percentage of nominal")%>% dplyr::mutate(`Step number` = as.numeric(row_number()))
-      reduced$Step <- factor(reduced$Step, levels = (reduced %>% dplyr::arrange(`Step number`))$Step)
-      
+reduced <- df2 %>%
+  dplyr::mutate(`Millions of tons` = `Tons` / 1000000, `Millions of fish` = `Number of fish` / 1000000) %>%
+  dplyr::select(Step, `Millions of tons`, `Millions of fish`,
+                "Difference (in % of tons)", "Difference (in % of fish)", "Percentage of nominal") %>%
+  dplyr::mutate(`Step number` = as.numeric(row_number()))
+
+reduced$Step <- factor(reduced$Step, levels = (reduced %>% dplyr::arrange(`Step number`))$Step)
 
 coeff <- 3
 temperatureColor <- "#69b3a2"
-      
 priceColor <- rgb(0.2, 0.6, 0.9, 1)
 
-second_graf <- ggplot(reduced,aes(x = Step,group = 1))+ 
-        geom_line( aes(y=`Millions of tons` ,group = 1), size=0.5, color=priceColor)+geom_point( aes(y=`Millions of tons` ,group = 1)) +
-        geom_line( aes(y=`Millions of fish`/ coeff,group = 1), size=0.5, color=temperatureColor)+geom_point( aes(y=`Millions of fish`/ coeff))  +
-        scale_y_continuous(
-          
-          # Features of the first axis
-          name = "Tons",
-          
-          # Add a second axis and specify its features
-          sec.axis = sec_axis(~.*coeff, name="Number of fish")
-        ) + 
-        
-        
-        
-        theme(
-          axis.title.y = element_text(color = priceColor, size=8),
-          axis.title.y.right = element_text(color = temperatureColor, size=8)
-        ) +
-        
-        ggtitle("Evolution of the repartition of captures depending on units and Steps")+
-        theme(axis.text.x = element_text(angle = 90))
+second_graf <- ggplot(reduced, aes(x = Step, group = 1)) +
+  geom_line(aes(y = `Millions of tons`, group = 1), size = 0.5, color = priceColor) +
+  geom_point(aes(y = `Millions of tons`, group = 1)) +
+  geom_line(aes(y = `Millions of fish` / coeff, group = 1), size = 0.5, color = temperatureColor) +
+  geom_point(aes(y = `Millions of fish` / coeff)) +
+  scale_y_continuous(
+    name = "Tons",
+    sec.axis = sec_axis(~ . * coeff, name = "Number of fish")
+  ) +
+  theme(
+    axis.title.y = element_text(color = priceColor, size = 8),
+    axis.title.y.right = element_text(color = temperatureColor, size = 8)
+  ) +
+  ggtitle("Evolution of the repartition of captures depending on units and Steps") +
+  theme(axis.text.x = element_text(angle = 90))
 
-no_fish_plot <- ggplot(reduced,aes(x = Step,group = 1)) +geom_line( aes(y=`Millions of fish`,group = 1), size=0.5)+theme(axis.text.x = element_text(angle = 90))
-      
-tons_plot <- ggplot(reduced,aes(x = Step,group = 1)) +
-geom_line( aes(y=`Millions of tons`,group = 1), size=0.5)+theme(axis.text.x = element_text(angle = 90))
+no_fish_plot <- ggplot(reduced, aes(x = Step, group = 1)) +
+  geom_line(aes(y = `Millions of fish`, group = 1), size = 0.5) +
+  theme(axis.text.x = element_text(angle = 90))
+
+tons_plot <- ggplot(reduced, aes(x = Step, group = 1)) +
+  geom_line(aes(y = `Millions of tons`, group = 1), size = 0.5) +
+  theme(axis.text.x = element_text(angle = 90))
+
 
 ```
 
