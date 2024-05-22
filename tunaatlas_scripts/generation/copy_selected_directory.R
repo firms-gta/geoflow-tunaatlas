@@ -49,7 +49,7 @@ copy_selected_directory <- function(ancient_dir, entity_name, new_dir) {
     answer <- as.integer(readline(prompt = paste0(lines, "\n Enter the number of the directory to copy (e.g., 1, 2, 3):\n Enter 0 if you do not want to use cache and begin from scratch ")))
     elapsed_time <- proc.time() - start_time
     
-    if (!is.na(answer) && answer %in c(0, seq_along(matching_dirs_same_opts))) {
+    if (!is.na(answer) && answer %in% c(0, seq_along(matching_dirs_same_opts))) {
       break
     } else if (elapsed_time[3] >= 30) { # Check if 30 seconds have passed
       cat("Timeout reached. Proceeding as if 1 was entered.\n")
