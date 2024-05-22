@@ -486,28 +486,17 @@ child_env$unique_analyse <- FALSE
 
 child_env$debug <- TRUE
 
-new_path <- file.path(fig.path, "/Comparison/",gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1]))
+new_path <- file.path(fig.path, "/Comparison/",paste0(gsub("Markdown/","",sub_list_dir[counting]),"_", gsub("Markdown/","",sub_list_dir[counting+1])))
 
 dir.create(new_path, recursive = TRUE)
 
 child_env$fig.path = new_path
 
 if( identical(readRDS(child_env$parameter_init),readRDS(child_env$parameter_final) )){NA}else{
-      # knitr::knit_child(text =c('```{r child="comparison.Rmd"}',
-      #                       '',
-      #                       '',
-      #                       '',
-      #                       '```'), envir = child_env, quiet= TRUE)
       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
         rm(child_env)
         return(res)
         gc()
-
-
-
-    
-
-    
 }
 }
 

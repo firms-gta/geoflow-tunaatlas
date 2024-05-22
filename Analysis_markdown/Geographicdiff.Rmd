@@ -37,7 +37,13 @@ breaks$`Impact on the data` <- factor(breaks$`Impact on the data`, levels = c("A
 
  image <- tm_shape(breaks)+tm_fill("Impact on the data", palette="-PiYG",  id="name")+ tm_facets(by = c("measurement_unit", "GRIDTYPE"), free.scales = FALSE,free.coords = TRUE)+    tm_layout(legend.outside = TRUE)
 
-if(plotting_type == "plot"){image <- image  +tm_shape(continent)+tm_borders()}
+if(plotting_type == "plot"){
+  image <- image  +tm_shape(continent)+tm_borders()
+  image_to_save <- image
+} else {
+    image_to_save <-  image + tm_shape(continent)+tm_borders()
+  }
+ 
 
  
 
@@ -49,7 +55,7 @@ if(plotting_type == "plot"){image <- image  +tm_shape(continent)+tm_borders()}
 ```{r spatialdifferencessaving, out.width="100%"}
 
 
-save_image(title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset"),plott = image, folder = "Spatialdiffmap", find_and_print = outputonly)
+save_image(title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset"),plott = image_to_save, folder = "Spatialdiffmap", find_and_print = outputonly)
 
 
 ```
