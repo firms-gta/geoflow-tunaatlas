@@ -77,7 +77,7 @@ columns_to_color <- names(issued_dataframes)[-c(1,2)]
 
 ```{r echo=FALSE, results='asis'}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R")
 issued_dataframes <- qflextable2(issued_dataframes , captionn = "Recap of the issues with each dataframe", grouped_data = c( "tRFMO"))
 for (i in columns_to_color){
   issued_dataframes$body$styles$text$color$data[,i] <- ifelse(is.na(issued_dataframes$body$dataset[,i]), "blue", ifelse(issued_dataframes$body$dataset[,i], "red", "green"))

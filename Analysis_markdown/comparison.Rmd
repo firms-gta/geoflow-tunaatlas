@@ -79,14 +79,14 @@ cat(res)
 
 ```{r sourcingfunctionsmarkdown,include = FALSE}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
 
 ```
 
 
 ```{r parameter-settings,include = FALSE}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Parameters_settings.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Parameters_settings.R", local = TRUE)
 
 ```
 
@@ -94,14 +94,14 @@ source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpem
 
 ```{r fileformatting, results='asis',include = FALSE}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/file_formatting.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/file_formatting.R", local = TRUE)
 
 ```
 
 
 ```{r Groupping-datarmd, results='asis',include = FALSE}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/Developpement/Analysis_markdown/functions/Groupping_differences.R", local = TRUE)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Groupping_differences.R", local = TRUE)
 
 ```
 
