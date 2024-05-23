@@ -196,7 +196,7 @@ save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside 
     tmap_save(tm = plott, filename = filenametmap)
     tmap_mode(current)
   } else {
-ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder))
+ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder), create.dir = TRUE)
   }
   } else { print("Cannot save the image the folder does not exist")}
   # plott
