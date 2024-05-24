@@ -115,7 +115,6 @@ NC <-NC[c("FishingFleet","Gear","time_start","time_end","AreaName","School","Spe
 NC <- NC[!is.na(NC$Catch),]
 NC <- NC[NC$Catch != 0,]
 
-#NC <- NC %>% 
 NC <- aggregate(NC$Catch,
 		FUN = sum,
 		by = list(
