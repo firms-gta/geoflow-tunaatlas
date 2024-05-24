@@ -42,7 +42,7 @@ clean_script <- function(script_path) {
   # Remove spaces in front of the hash symbol for comments
   lines <- gsub("^\\s*#", "#", lines)
   # Remove lines containing specific keywords
-  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current")]
+  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current|code_lists")]
   
   # Replace 'output_name_dataset' assignments with a specific fixed string
   lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
@@ -85,12 +85,13 @@ clean_script <- function(script_path) {
   )
   
   extra_lines <- c(
-    "# Load pre-harmonization scripts and apply mappings",
+    "#' @ Load pre-harmonization scripts and apply mappings",
+    
     "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
     "source('local_map_codelists_no_DB.R')",
     line_fact,
     "mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = 'https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv', dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c('IATTC', 'CCSBT', 'WCPFC'))",
-    "# Handle unmapped values and save the results",
+    "#' @ Handle unmapped values and save the results",
     "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), species = ifelse(species == 'UNK', 'MZZ', species), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
     "fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')",
     "fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')",

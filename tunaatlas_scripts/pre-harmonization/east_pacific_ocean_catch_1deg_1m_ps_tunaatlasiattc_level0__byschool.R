@@ -34,10 +34,9 @@ function(action, entity, config){
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 filename1 <- entity$data$source[[1]] #data
-# Historical name for the dataset at source  PublicPSTunaSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  PublicPSBillfishSetType.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  PublicPSTunaSetType.csv or PublicPSBillfishSetType.csv
 filename2 <- entity$data$source[[2]] #structure
-# Historical name for the dataset at source  iattc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iattc_catch_code_lists.csv
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()

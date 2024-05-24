@@ -67,14 +67,12 @@ if(!require(tidyr)){
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 #get data from geoflow current job dir
-filename_catch <- entity$data$source[[1]] #catch data
-# Historical name for the dataset at source  PublicCatchOrigFormatTunaBillfish.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  PublicCatchOrigFormatShark.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-filename_effort <- entity$data$source[[2]] #effort data
-# Historical name for the dataset at source  PublicEffortOrigFormatTunaBillfish.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  PublicEffortOrigFormatShark.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-filename_str <- entity$data$source[[3]] #structure
-# Historical name for the dataset at source  iattc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+filename_catch <- entity$data$source[[1]] # catch data
+# Historical name for the dataset at source  PublicCatchOrigFormatTunaBillfish.csv or PublicCatchOrigFormatShark.csv
+filename_effort <- entity$data$source[[2]] # effort data
+# Historical name for the dataset at source  PublicEffortOrigFormatTunaBillfish.csv or PublicEffortOrigFormatShark.csv (keep the same order as for catch)
+filename_str <- entity$data$source[[3]] # structure
+# Historical name for the dataset at source  iattc_catch_code_lists.csv
 path_to_raw_dataset_catch <- entity$getJobDataResource(config, filename_catch)
 path_to_raw_dataset_effort <- entity$getJobDataResource(config, filename_effort)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))

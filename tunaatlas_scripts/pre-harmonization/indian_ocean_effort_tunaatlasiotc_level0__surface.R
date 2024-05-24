@@ -76,9 +76,9 @@ require(readr)
   #entity --> the entity you are managing
   #get data from geoflow current job dir
   filename1 <- entity$data$source[[1]] #data
-# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Surface_1950-2021.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Surface_1950-2021.csv
   filename2 <- entity$data$source[[2]] #structure
-# Historical name for the dataset at source  iotc_effort_code_lists_2023.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iotc_effort_code_lists_2023.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()

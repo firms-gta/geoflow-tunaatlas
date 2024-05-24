@@ -38,18 +38,14 @@ function(action, entity, config){
   
   require(dplyr)
   catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
-# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  iotc_catch_all_1m_firms_level0.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
 
   filename1 <- entity$data$source[[1]]
-# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  iotc_catch_all_1m_firms_level0.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
   filename2 <- entity$data$source[[2]]
-# Historical name for the dataset at source  iccat_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  iotc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iccat_catch_code_lists.csv or iotc_catch_code_lists.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, entity$data$source[[1]])
-# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
-# Historical name for the dataset at source  iotc_catch_all_1m_firms_level0.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()
   options(encoding = "UTF-8")

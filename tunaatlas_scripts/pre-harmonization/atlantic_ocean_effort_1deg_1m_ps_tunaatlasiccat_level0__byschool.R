@@ -39,9 +39,9 @@ if(!require(dplyr)){
 #config --> the global config of the workflow
 #entity --> the entity you are managing
 filename1 <- entity$data$source[[1]] #data
-# Historical name for the dataset at source  t2ce_bySchool.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  t2ce_bySchool.csv
 filename2 <- entity$data$source[[2]] #structure
-# Historical name for the dataset at source  iccat_effort_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  iccat_effort_code_lists.csv
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()

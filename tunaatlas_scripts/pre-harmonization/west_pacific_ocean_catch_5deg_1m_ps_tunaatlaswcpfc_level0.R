@@ -51,9 +51,6 @@ function(action, entity, config){
   
 #packages
 
-  
-    
-
 if(!require(reshape)){
   install.packages("reshape")
   require(reshape)
@@ -77,9 +74,9 @@ if(!require(dplyr)){
 #entity --> the entity you are managing
 #get data from geoflow current job dir
 filename1 <- entity$data$source[[1]] #data
-# Historical name for the dataset at source  WCPFC_S_PUBLIC_BY_YR_MON.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  WCPFC_S_PUBLIC_BY_YR_MON.csv
 filename2 <- entity$data$source[[2]] #structure
-# Historical name for the dataset at source  wcpfc_catch_code_lists.csv, if multiple, this means this function is used for several dataset, keep the same order to match data
+# Historical name for the dataset at source  wcpfc_catch_code_lists.csv
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
@@ -89,9 +86,7 @@ options(encoding = "UTF-8")
   
 ##Catches
 
-### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-#catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_Purse_Seine_2016 (path_to_raw_dataset)
-#2020-11-13 @eblondel for Tuna atlas update
+### Reach the catches pivot DSD
 #Changes
 #	- change from dbf to csv
 #	- remove cwp_grid code
@@ -101,8 +96,6 @@ DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
 DF$CWP_GRID <- NULL
 
-# DF <- melt(DF, id = c(colnames(DF[1:10])))  #@juldebar error with melt function from reshape package
-# DF <- melt(as.data.table(DF), id=c(colnames(DF[1:10])))
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
 
 DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
@@ -124,7 +117,6 @@ catches_pivot_WCPFC <- DF; rm(DF)
 catches_pivot_WCPFC$Gear<-"S"
 
 # Catchunits
-# Check data that exist both in number and weight
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
