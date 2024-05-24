@@ -18,9 +18,14 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
   ancient_wd <- getwd()
   setwd(main.dir)
   path <- getwd()
+  species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
+  cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
+  
+  shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
+    dplyr::rename(GRIDTYPE = gridtype)
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/compare_georef_nominal.R")
-  if (file.exists(file.path("entities/global_nominal_catch_firms/data/global_nominal_catch_firms_harmonized.csv"))) {
-    nominal <- as.data.frame(read_csv(file.path("entities/global_nominal_catch_firms/data/global_nominal_catch_firms_harmonized.csv")) %>%
+  if (file.exists(file.path("entities/global_catch_firms_level0/data/global_nominal_catch_firms_level0.csv"))) {
+    nominal <- as.data.frame(read_csv(file.path("entities/global_catch_firms_level0/data/global_nominal_catch_firms_level0.csv")) %>%
                                mutate(measurement_unit = "Tons")) %>%
       dplyr::mutate(gear_type = as.numeric(gear_type)) %>%
       dplyr::mutate(gear_type = as.character(gear_type))
@@ -76,12 +81,13 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
       message("An error occurred: ", conditionMessage(e))
     })
     
-    georef_no_nominal_all <- anti_join(georef_mapped, nominal, by = c("species", "year", "source_authority")) %>%
-      filter(measurement_value > 0)
-    georef_no_nominal_all <- georef_no_nominal_all %>%
-      dplyr::mutate(year = as.character(year)) %>%
-      ungroup() %>%
-      dplyr::select(-geographic_identifier)
+    #to uncomment and debug to get the georef upgradded
+    # georef_no_nominal_all <- anti_join(georef_mapped, nominal, by = c("species", "year", "source_authority")) %>%
+    #   filter(measurement_value > 0)
+    # georef_no_nominal_all <- georef_no_nominal_all %>%
+    #   dplyr::mutate(year = as.character(year)) %>%
+    #   ungroup() %>%
+    #   dplyr::select(-geographic_identifier)
     
     # Define directories
     source_directory <- file.path(getwd(), "georef_not_nominal_markdown")
@@ -110,8 +116,8 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
       }
     }
     
-    upgradded_nominal <- rbind(nominal, georef_no_nominal_all)
+    # upgradded_nominal <- rbind(nominal, georef_no_nominal_all)
     setwd(ancient_wd)
-    return(upgradded_nominal)
+    # return(upgradded_nominal)
   }
 }
