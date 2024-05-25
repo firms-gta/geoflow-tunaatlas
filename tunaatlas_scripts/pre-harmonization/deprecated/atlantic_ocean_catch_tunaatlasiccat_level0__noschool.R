@@ -73,7 +73,7 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 
 keep_fleet_instead_of_flag=FALSE  
   
-##Catches
+## Catches
 
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 

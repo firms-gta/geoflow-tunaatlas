@@ -87,7 +87,7 @@ options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
 
 
-##Catches
+## Catches
 DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
 
 #2020-11-13 @eblondel

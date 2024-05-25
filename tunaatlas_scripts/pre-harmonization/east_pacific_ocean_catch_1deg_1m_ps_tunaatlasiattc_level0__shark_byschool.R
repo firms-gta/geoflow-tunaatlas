@@ -46,7 +46,7 @@ opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
 
-##Catches
+## Catches
 
 catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType_Shark(path_to_raw_dataset,"SetType","PS")
 catches_pivot_IATTC$NumSets<-NULL

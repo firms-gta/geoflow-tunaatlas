@@ -80,7 +80,7 @@ function(action, entity, config){
   options(encoding = "UTF-8")
   #----------------------------------------------------------------------------------------------------------------------------
   
-  ##Catches
+  ## Catches
   catches<-read.csv(path_to_raw_dataset_catch, stringsAsFactors = F)
   efforts<-read.csv(path_to_raw_dataset_effort, stringsAsFactors = F)
   # catches <- melt(catches, id.vars=c("Record","Spp","DTypeID"))  #@juldebar error with melt function from reshape package

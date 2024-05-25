@@ -80,7 +80,7 @@ opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
 
-##Catches
+## Catches
 catches<-read.csv(path_to_raw_dataset_catch, stringsAsFactors = F)
 efforts<-read.csv(path_to_raw_dataset_effort, stringsAsFactors = F)
 catches <- catches %>% tidyr::gather(variable, value, -c("Record","Spp","DTypeID"))

@@ -72,7 +72,7 @@ options(encoding = "UTF-8")
 # Belize   PS 2009-09-01 2009-10-01  5202006     LS   FISH.HOUR  12.10
 
 
-##Catches
+## Catches
 
 RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
 names(RFMO_CE)[names(RFMO_CE) == 'Flag'] <- 'FishingFleet'

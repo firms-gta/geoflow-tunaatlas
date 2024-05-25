@@ -22,7 +22,7 @@
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 
-##Catches
+## Catches
 # Input data sample (after importing as data.frame in R):
 # A tibble: 6 × 6
 # Calendar_Year Flag_Code Flag         Ocean    Gear      Catch_mt

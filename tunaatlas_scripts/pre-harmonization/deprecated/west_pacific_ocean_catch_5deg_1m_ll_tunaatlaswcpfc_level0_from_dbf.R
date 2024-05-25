@@ -65,7 +65,7 @@ opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
 
-##Catches
+## Catches
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_WCPFC_CE_allButPurseSeine.R")
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
 catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
