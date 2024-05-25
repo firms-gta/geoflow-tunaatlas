@@ -4,7 +4,6 @@
 .Ruserdata
 jobs
 *.env
-data/
 IOTC_new_data_scripts.R
 IOTC_new_data_scripts_2.R
 Making_markdown_test.R
