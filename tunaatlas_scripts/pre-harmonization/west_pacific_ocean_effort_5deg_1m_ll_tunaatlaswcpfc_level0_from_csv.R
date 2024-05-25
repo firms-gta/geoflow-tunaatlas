@@ -163,8 +163,6 @@ function(action, entity, config){
                          time_end = efforts$time_end,
                          AreaName = efforts$AreaName,
                          School = efforts$School,
-                         # Species = efforts$Species,
-                         # CatchType = efforts$CatchType,
                          EffortUnits = efforts$EffortUnits
                        ),
                        FUN = sum)

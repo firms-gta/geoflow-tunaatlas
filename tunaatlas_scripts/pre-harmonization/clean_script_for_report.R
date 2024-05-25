@@ -39,13 +39,13 @@ clean_script <- function(script_path) {
   # Restore the original order of lines
   lines <- rev(lines_reversed)
   
+  # Replace 'output_name_dataset' assignments with a specific fixed string
+  lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
+  
   # Remove spaces in front of the hash symbol for comments
   lines <- gsub("^\\s*#", "#", lines)
   # Remove lines containing specific keywords
   lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current|code_lists")]
-  
-  # Replace 'output_name_dataset' assignments with a specific fixed string
-  lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
   
   # Update write.csv lines and add a line for georef_dataset assignment
   for (i in seq_along(lines)) {
@@ -58,8 +58,12 @@ clean_script <- function(script_path) {
   
   
   if(grepl("effort",  script_path)){
+    line_mapping = 'mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))'
     line_fact <- 'fact <- "effort"' 
-  } else { line_fact <- 'fact <- "catch"'}
+  } else { 
+    line_fact <- 'fact <- "catch"'
+    line_mapping = 'mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))'
+    }
   
   lines_add <- ''
   
@@ -90,7 +94,7 @@ clean_script <- function(script_path) {
     "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
     "source('local_map_codelists_no_DB.R')",
     line_fact,
-    "mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = 'https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv', dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c('IATTC', 'CCSBT', 'WCPFC'))",
+    line_mapping,
     "#' @ Handle unmapped values and save the results",
     "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
     "fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')",
