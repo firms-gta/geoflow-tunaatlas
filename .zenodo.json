@@ -42,7 +42,9 @@
     "keywords": ["Tuna fisheries", "FAIR services","R package", "reproducible research"],
 
     "communities": [
-        {"identifier": "fisheries"}
+        {"identifier": "fisheries"},
+        {"identifier": "marbec"}
+        
     ],
 
     "grants": [{"id":"101094227"}]
