@@ -43,9 +43,9 @@ clean_script <- function(script_path) {
   lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
   
   # Remove spaces in front of the hash symbol for comments
-  lines <- gsub("^\\s*#", "#", lines)
+  # lines <- gsub("^\\s*#", "#", lines)
   # Remove lines containing specific keywords
-  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current|code_lists")]
+  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current|code_lists|\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-\\-")]
   
   # Update write.csv lines and add a line for georef_dataset assignment
   for (i in seq_along(lines)) {
