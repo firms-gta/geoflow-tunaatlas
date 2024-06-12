@@ -1,6 +1,10 @@
 {
     "creators": [
         {
+            "orcid": "0009-0007-6967-0300",
+            "name": "FIRMS GTA Technical Working Group"
+        },
+        {
             "orcid": "0000-0002-9946-1338",
             "affiliation": "IRD",
             "name": "Grasset, Bastien"
