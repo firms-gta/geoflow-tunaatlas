@@ -98,12 +98,25 @@ raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef")
 running_time_of_workflow(raw_data_georef)
 
-
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 # Around 30 minutes
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
 running_time_of_workflow(raw_data_georef_effort)
+
+source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
+safe_rewrite_functions_as_rmd <- function(source_path) {
+  tryCatch({
+    rewrite_functions_as_rmd(source_path)
+  }, error = function(e) {
+    message(sprintf("Error processing %s: %s", source_path, e$message))
+  })
+}
+
+# Appels aux fonctions avec gestion des erreurs
+safe_rewrite_functions_as_rmd(raw_nominal_catch)
+safe_rewrite_functions_as_rmd(raw_data_georef)
+safe_rewrite_functions_as_rmd(raw_data_georef_effort)
 
 ## Summarising the invalid data for all the datasets pre-harmonized
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
@@ -134,6 +147,8 @@ tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
 create_materialized_view <- ""
 
+# uncomment the follwoing lines to go the shared path for analysis
+# tunaatlas_qa_global_datasets_catch_path <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data"
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
@@ -177,7 +192,7 @@ setwd(wd)
 # This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
 
-upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching(tunaatlas_qa_global_datasets_catch_path,
+upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data",
                                                                          connectionDB = con)
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_with_catches_without_effort.R")
 CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
