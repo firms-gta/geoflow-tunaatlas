@@ -56,7 +56,7 @@ compare_georef_nominal <- function(georef, nominal, connectionDB) {
     mutate(measurement_value = sum(measurement_value))
   
   # Define strata
-  list_strata <- list(c("species", "year", "source_authority"), c("species", "year", "source_authority", "gear_type"))
+  list_strata <- list(c("species","source_authority"),c("species", "year", "source_authority"), c("species", "year", "source_authority", "gear_type"),  c("species", "year", "source_authority", "gear_type", "fishing_fleet"))
   
   # Initialize result list
   results <- list()

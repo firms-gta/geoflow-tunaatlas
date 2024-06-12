@@ -73,6 +73,8 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
                               envir = child_env_global,
                               output_file = "strata_in_georef_but_no_nominal.html",
                               output_dir = file.path("georef_not_nominal_markdown", i, name))
+            if(nrow(georef_no_nominal_groupped)!=0){saveRDS(georef_no_nominal_groupped, file.path("georef_no_nominal_groupped", i, name, "_data.rds"))}
+            if(nrow(georef_no_nominal_groupped)!=0){saveRDS(georef_sup_to_nom, file.path("georef_sup_to_nom", i, name, "_data.rds"))}
           }
         }
       }
