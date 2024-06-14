@@ -76,7 +76,6 @@
   ],
   "actions": [
   
-	
 	{
 		"id": "load_dataset",
 		"script": "./tunaatlas_actions/load_dataset.R",
@@ -90,19 +89,36 @@
 	},
 	{
 		"id": "enrich_metadata",
-		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
+		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
 		"run": true
 	},
 	{
 		"id": "enrich_for_db_services",
-		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
+		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
 		"run": true
 	},
 	{
 		"id": "load_metadata",
-		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
+		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
 		"run": true
-	}
+	},
+    {
+      "id": "geometa-create-iso-19115",
+      "run": true,
+      "options": {
+        "doi": true,
+        "logo": true
+      }
+    },
+    {
+      "id": "geometa-create-iso-19110",
+      "run": true,
+      "options": {
+        "exclude_attributes": ["time_start", "time_end"],
+        "exclude_values_for_attributes": ["geographic_identifier", "measurement"],
+        "extra_attributes": ["geom", "aggregation_method"]
+      }
+    }
 	
 
  ]
