@@ -163,6 +163,18 @@
       ],
       "Hash": "45f0398006e83a5b10b72a90663d8d8c"
     },
+    "RCurl": {
+      "Package": "RCurl",
+      "Version": "1.98-1.14",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "bitops",
+        "methods"
+      ],
+      "Hash": "47f648d288079d0c696804ad4e55197e"
+    },
     "RPostgreSQL": {
       "Package": "RPostgreSQL",
       "Version": "0.7-6",
@@ -275,6 +287,16 @@
       ],
       "Hash": "4f57884290cc75ab22f4af9e9d4ca862"
     },
+    "antiword": {
+      "Package": "antiword",
+      "Version": "1.3.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "sys"
+      ],
+      "Hash": "539cc509762f4aa6815a29db264c47d3"
+    },
     "askpass": {
       "Package": "askpass",
       "Version": "1.2.0",
@@ -338,6 +360,13 @@
         "utils"
       ],
       "Hash": "9fe98599ca456d6552421db0d6772d8f"
+    },
+    "bitops": {
+      "Package": "bitops",
+      "Version": "1.0-7",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b7d8d8ee39869c18d8846a184dd8a1af"
     },
     "blob": {
       "Package": "blob",
@@ -2128,6 +2157,19 @@
       "Repository": "CRAN",
       "Hash": "004b5219ae6d8ff53a3dcd2c89e56139"
     },
+    "ndjson": {
+      "Package": "ndjson",
+      "Version": "0.9.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "data.table",
+        "tibble"
+      ],
+      "Hash": "9d50f0353c90f841dbaf81c1e6c39098"
+    },
     "nlme": {
       "Package": "nlme",
       "Version": "3.1-164",
@@ -2268,6 +2310,17 @@
         "parallel"
       ],
       "Hash": "3b5b99f4d3f067bb9c1d59317d071370"
+    },
+    "pdftools": {
+      "Package": "pdftools",
+      "Version": "3.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Rcpp",
+        "qpdf"
+      ],
+      "Hash": "9f04cfdc668ad1149d865a2996ac2045"
     },
     "pillar": {
       "Package": "pillar",
@@ -2528,6 +2581,18 @@
       ],
       "Hash": "1cba04a4e9414bdefc9dcaa99649a8dc"
     },
+    "qpdf": {
+      "Package": "qpdf",
+      "Version": "1.3.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Rcpp",
+        "askpass",
+        "curl"
+      ],
+      "Hash": "479ebe6dca0a57c63d306e1b6a4bf30c"
+    },
     "quantreg": {
       "Package": "quantreg",
       "Version": "5.97",
@@ -2610,6 +2675,24 @@
       ],
       "Hash": "8f25ebe2ec38b1f2aef3b0d2ef76f6c4"
     },
+    "readODS": {
+      "Package": "readODS",
+      "Version": "2.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "cellranger",
+        "cpp11",
+        "readr",
+        "stringi",
+        "tibble",
+        "tools",
+        "vctrs",
+        "zip"
+      ],
+      "Hash": "79c0f23a27909659c1a2d62048c15096"
+    },
     "readr": {
       "Package": "readr",
       "Version": "2.1.5",
@@ -2632,6 +2715,30 @@
         "vroom"
       ],
       "Hash": "9de96463d2117f6ac49980577939dfb3"
+    },
+    "readtext": {
+      "Package": "readtext",
+      "Version": "0.91",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "antiword",
+        "data.table",
+        "digest",
+        "httr",
+        "jsonlite",
+        "pdftools",
+        "pillar",
+        "readODS",
+        "readxl",
+        "streamR",
+        "stringi",
+        "striprtf",
+        "utils",
+        "xml2"
+      ],
+      "Hash": "e21086b13d7d8873e2c2df77925963f6"
     },
     "readxl": {
       "Package": "readxl",
@@ -2750,6 +2857,16 @@
         "stringr"
       ],
       "Hash": "bb5996d0bd962d214a11140d77589917"
+    },
+    "rjson": {
+      "Package": "rjson",
+      "Version": "0.2.21",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "f9da75e6444e95a1baf8ca24909d63b9"
     },
     "rlang": {
       "Package": "rlang",
@@ -3104,6 +3221,19 @@
       ],
       "Hash": "8b4284bf9fddfb481d516877a2045023"
     },
+    "streamR": {
+      "Package": "streamR",
+      "Version": "0.4.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "RCurl",
+        "ndjson",
+        "rjson"
+      ],
+      "Hash": "5956a234de8d4d49744dc51e8b39534c"
+    },
     "stringi": {
       "Package": "stringi",
       "Version": "1.8.3",
@@ -3133,6 +3263,20 @@
         "vctrs"
       ],
       "Hash": "960e2ae9e09656611e0b8214ad543207"
+    },
+    "striprtf": {
+      "Package": "striprtf",
+      "Version": "0.6.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "magrittr",
+        "stringr",
+        "utils"
+      ],
+      "Hash": "f32c1fb0c19e249bf53430a972c6d9a2"
     },
     "studycatchesird": {
       "Package": "studycatchesird",
