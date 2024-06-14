@@ -1,3 +1,4 @@
+# Chargement des bibliothèques nécessaires
 library(fs)
 library(dplyr)
 library(readxl)
@@ -48,8 +49,9 @@ truncate_files <- function(root_dir) {
   message("All files have been truncated.")
 }
 
-# Fonction pour réécrire les Rmd avec de nouvelles configurations et générer des HTML
+# Fonction principale pour réécrire les fichiers RMarkdown et générer les fichiers HTML
 rewrite_functions_as_rmd <- function(source_path) {
+  # Chemin du dossier de destination
   destination_path <- "~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization"
   
   # Fonction pour déplacer les fichiers vers le dossier correspondant
@@ -70,6 +72,7 @@ rewrite_functions_as_rmd <- function(source_path) {
   invalid_files <- dir_ls(path = source_path, recurse = TRUE, glob = "*invalid_data.csv")
   purrr::walk(invalid_files, move_files)
   
+  # Fonction pour mettre à jour les chemins dans les fichiers Rmd et ajouter le titre
   update_rmd_paths <- function(rmd_file) {
     lines <- readLines(rmd_file)
     title_line <- lines[grep("armon", lines)][1]
@@ -119,6 +122,12 @@ rewrite_functions_as_rmd <- function(source_path) {
       }
     }
     
+    # Ajouter un espace après chaque # suivi directement d'une lettre
+    lines <- gsub("(^#)(\\S)", "\\1 \\2", lines)
+    
+    # Supprimer les lignes contenant uniquement des tirets
+    lines <- lines[!grepl("^[-]+$", lines)]
+    
     new_data_path <- file.path(rmd_destination_path, "data")
     if (!dir_exists(new_data_path)) {
       dir_create(new_data_path)
@@ -141,9 +150,6 @@ rewrite_functions_as_rmd <- function(source_path) {
     }
     
     purrr::walk(data_files, copy_files)
-    
-    # Supprimer toutes les lignes où il n'y a que des '-'
-    lines <- lines[!grepl("^[-]+$", lines)]
     
     writeLines(c(yaml_header, "", lines), new_rmd_path)
     message(paste("Updated and moved Rmd:", path_file(rmd_file)))
@@ -169,24 +175,33 @@ safe_rewrite_functions_as_rmd <- function(source_path) {
   tryCatch({
     rewrite_functions_as_rmd(source_path)
   }, error = function(e) {
-    message(sprintf("Error processing %s: %s", source_path, e$message))
+    message(sprintf("An error occurred while processing '%s': %s", source_path, e$message))
   })
 }
 
-# Appels aux fonctions avec gestion des erreurs
-safe_rewrite_functions_as_rmd(raw_nominal_catch)
-safe_rewrite_functions_as_rmd(raw_data_georef)
-safe_rewrite_functions_as_rmd(raw_data_georef_effort)
 
 # Fonction pour supprimer les fichiers spécifiques
 remove_specific_files <- function(root_dir) {
   files_to_remove <- c("CWP_dataset.csv", "Dataset_harmonized.csv", "not_mapped_total.csv", "recap_mapping.csv", "local_map_codelists_no_DB.R")
-  files_found <- dir_ls(path = root_dir, recurse = TRUE) %>%
-    keep(~ path_file(.x) %in% files_to_remove)
   
-  file_delete(files_found)
-  message("Specific files have been removed.")
+  # Rechercher les fichiers spécifiés dans le répertoire racine et ses sous-dossiers
+  all_files <- dir_ls(path = root_dir, recurse = TRUE, type = "file")
+  
+  # Filtrer les fichiers à supprimer
+  files_found <- all_files[path_file(all_files) %in% files_to_remove]
+  
+  # Vérification des fichiers trouvés avant suppression
+  if (length(files_found) > 0) {
+    file_delete(files_found)
+    message("Specific files have been removed.")
+  } else {
+    message("No specific files found to remove.")
+  }
 }
 
 # Appel à la fonction pour supprimer les fichiers spécifiques
-remove_specific_files("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization")
+remove_specific_files(here::here("tunaatlas_scripts/pre-harmonization"))
+
+
+# Troncature des fichiers CSV et XLSX après la génération des fichiers HTML
+truncate_files("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization")

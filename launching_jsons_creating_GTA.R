@@ -181,6 +181,9 @@ for (entitynumber in 1:length(config$metadata$content$entities)){
 } #could also be in global action but keep in mind it is very long
 setwd(wd)
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/process_entities_for_DOI.R")
+process_entities_for_DOI(tunaatlas_qa_global_datasets_catch_path, "~/firms-gta/geoflow-tunaatlas/jobs/processed_entities_for_DOI")
+
 # Pakcages for markdown
 
 # These step is to be done once nominal and georeferenced data are created. It extract irregular data that is :
