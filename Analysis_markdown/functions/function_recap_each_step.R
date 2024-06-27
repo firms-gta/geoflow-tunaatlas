@@ -45,7 +45,7 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   fwrite(data.frame(sum_t, sum_no, lines), file.path(step_dir, "sums.csv"))
   
   # Handle options
-  if (!is.null(option_list)) {
+  if (!is.null(option_list) && length(option_list) != 0) {
     options_substi <- as.list(substitute(option_list))[-1]
     options_written <- ""
     for (i in 1:length(options_substi)) {
