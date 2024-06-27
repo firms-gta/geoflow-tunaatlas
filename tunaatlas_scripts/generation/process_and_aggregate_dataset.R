@@ -88,10 +88,17 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
     entity$addResource("codelists", output_name_codelists)
   }
   
+  #write to service dbi
+  dataset_enriched$geographic_identifier = as.character(dataset_enriched$geographic_identifier)
+  entity$data$features = dataset_enriched
+  if(entity$data$upload) writeWorkflowJobDataResource(entity=entity,config=config,type="dbtable",useFeatures=TRUE,useUploadSource=TRUE, createIndexes=TRUE)
+  
+  entity$addResource("fact", opts$fact)
+  entity$addResource("geom_table", opts$geom_table)
+  
   # Add resources to the entity
   entity$addResource("harmonized", output_name_dataset)
   entity$addResource("public", output_name_dataset_public)
-  entity$addResource("geom_table", opts$geom_table)
   
   # Log completion
   config$logger.info("-----------------------------------------------------------------------------------------------------")
@@ -101,4 +108,5 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   # Clean up
   rm(georef_dataset)
   gc()
+  # return(list(entity, georef_dataset, entity, config, opts))
 }
