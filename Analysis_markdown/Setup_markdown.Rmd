@@ -1,32 +1,22 @@
 ---
 title: "Setup_markdown"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 author: "BastienG"
-date: "2023-09-13"
 output: html_document
 ---
-
-```{r include=FALSE}
-
-knitr::opts_chunk$set(
-	echo = FALSE,
-	error = 0,
-	fig.align = "center",
-	message = FALSE,
-	warning = FALSE,
-	tab.cap.pre = "Table ",
-	tab.cap.sep = ": ", results = 'asis'
-)
-base::options(knitr.duplicate.label = "allow")
-
-```
 
 
 ```{r options, include=FALSE}
 
 base::options(scipen=9999)
-plotting_type <- "plot" 
-if (knitr::is_html_output()){plotting_type <- "view" }
+
+if(!exists("plotting_type") | !knitr::is_html_output()){
+  plotting_type  <- "plot"  
+} else{
+plotting_type <- plotting_type}
 tmap_mode(plotting_type)
+
+knitr::opts_chunk$set(echo = FALSE)
 
 ```
 

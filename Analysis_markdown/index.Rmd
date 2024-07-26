@@ -1,0 +1,67 @@
+---
+title: "Summary of the treatment for a specific entity of the global tuna atlas"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author:
+  - name: Bastien Grasset
+    email: bastien.grasset@ird.fr
+    affiliation:
+      - IRD
+      - MARBEC
+  - name: Emmanuel Blondel
+    affiliation: FAO
+  - name: Julien Barde
+    affiliation:
+      - IRD
+      - MARBEC
+address:
+  - code: IRD
+    address: Institut de Recherche pour le Développement (IRD), av. Jean Monnet, CS 30171, 34203 Sète cédex, France
+  - code: MARBEC
+    address: MARBEC, University of Montpellier, CNRS, Ifremer, IRD, Sète, France
+csl: dmk-format.csl
+link-citations: TRUE
+output:
+  bookdown::html_document2:
+    toc: TRUE
+    keep_md: true
+  bookdown::gitbook:
+    config:
+      toc:
+        collapse: subsection
+        scroll_highlight: true
+        before: null
+        after: null
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter", "makecell"]
+    toc: TRUE
+    keep_tex: TRUE
+    template: template.tex
+    number_sections: TRUE
+    citation_package: default
+    keep_md: TRUE
+  bookdown::word_document2:
+    toc: TRUE
+lang: en
+abstract: "This document is aimed to recap the impact on the data of the different treatment of the Global Tuna Atlas. \nFirst we present the data created by the GlobalTuna Atlas, as well as the comparison between this data and the rawdata provided by the RFMO’s before the global Tuna Atlas treatment. \nIn a second time we will present the process of the GlobalTuna Atlas in order to reference exactly the choices made."
+geometry: "margin=25mm"
+papersize: a4
+endfloat: FALSE
+numberlines: FALSE
+authblk: FALSE
+footnotehyper: FALSE
+urlcolor: blue
+linkcolor: blue
+citecolor: blue
+graphics: TRUE
+tables: TRUE
+fancyhdr:
+  first:
+    headleft: "Global Tuna Atlas outputs and process"
+    headright: "2023"
+    headrulewidth: 0pt
+  subsequent:
+    headleft: "Global Tuna Atlas outputs and process"
+    headright: "2023"
+    headrulewidth: 1pt
+    footrulewidth: 0pt
+---

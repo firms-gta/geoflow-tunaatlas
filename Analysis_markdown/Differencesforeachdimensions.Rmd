@@ -1,0 +1,32 @@
+---
+title: "Differencesforeachdimensions"
+author: "BastienG"
+date: "2023-09-12"
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: FALSE
+    keep_tex: TRUE
+    template: template.tex
+    number_sections: TRUE
+    citation_package: default
+  bookdown::html_document2:
+  bookdown::word_document2: 
+    toc: TRUE
+---
+
+This section details the differences that are observed between the dataframe ***`r parameter_titre_dataset_1`*** and ***`r parameter_titre_dataset_2`***.
+
+```{r topn, include=FALSE}
+if(exists("compare_dimension_differences_list$topn")){topn <- compare_dimension_differences_list$topn} else{topn <- 6}
+```
+
+We will look for each dimension the `r topn` most important differences without presenting the stratas completely appearing or disappearing.
+
+```{r printing-table-diff-dimensions, paged.print=TRUE, results='asis'}
+if(nrow(compare_dimension_differences_list$Groupped_all_not_disap_or_app_to_dysplay) != 0) {
+  qflextable2(compare_dimension_differences_list$Groupped_all_not_disap_or_app_to_dysplay, captionn = "Difference between stratas of the two datasets", grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", columns_to_color = c("Difference (in %)"))
+} else {
+  cat("There are no differences between stratas aside the appearing and disappearing ones")
+}
+```

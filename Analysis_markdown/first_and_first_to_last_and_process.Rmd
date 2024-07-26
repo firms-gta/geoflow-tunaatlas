@@ -1,0 +1,92 @@
+```{r setuprmd, include = FALSE, echo=FALSE}
+
+res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
+
+```
+
+# Summary of the final provided data : `r gsub("_", "", entity$identifiers[["id"]])`
+
+```{r analysislast, message=TRUE, warning=TRUE, include=FALSE}
+
+child_env_last <- list2env(as.list(child_env_last_result), parent = new.env())
+
+res_last <- knitr::knit_child("comparison.Rmd", quiet = TRUE,envir = child_env_last)
+
+
+# rm(child_env_last_result, envir = environment())
+rm(child_env_last, envir = environment())
+gc()
+
+```
+
+```{r catanalyslast, echo=FALSE, results='asis'}
+
+cat(res_last, sep =  "\\clearpage")
+
+```
+
+
+```{r cleaninganalysislast, include=FALSE}
+
+rm(res_last, envir = environment())
+gc()
+
+```
+
+\clearpage
+
+# Summary of the treatment done on the data (comparison between the Initial data and the data resulting from treatments)
+
+
+```{r complastfirst, include=FALSE, results='asis'}
+
+
+child_env_first_to_last <- list2env(as.list(child_env_first_to_last_result), parent = new.env())
+
+res_comparison_first_to_last <- knitr::knit_child("comparison.Rmd", quiet = TRUE, envir = child_env_first_to_last)
+
+rm(child_env_first_to_last)
+# rm(child_env_first_to_last_result)
+gc()
+
+```
+
+
+```{r complastfirstcat, echo=FALSE, results='asis'}
+
+cat(res_comparison_first_to_last, sep =  "\\clearpage")
+
+```
+
+
+```{r include=FALSE}
+
+rm(res_comparison_first_to_last)
+gc()
+
+```
+
+\clearpage
+
+
+# Analyse of the processing of the data
+
+The following table recap all the treatment done on the data provided by tRFMOs.
+
+```{r results='asis'}
+
+qflextable2(process_fisheries_data_list$reduced, captionn =process_fisheries_data_list$fig.capp, columns_to_color = process_fisheries_data_list$columns_to_color,  pgwidth = 6, save_folder = "Summary", fig.pathinside = fig.path)
+
+```
+
+```{r message=FALSE, warning=FALSE}
+
+save_image(title= process_fisheries_data_list$fig.capp, plott = process_fisheries_data_list$cowplot, folder = "Summary", fig.pathinside = fig.path)
+```
+
+
+```{r evolamountduringprocess,  echo=FALSE, results='asis', fig.cap = process_fisheries_data_list$fig.capp, out.width='100%'}
+
+process_fisheries_data_list$cowplot
+
+```

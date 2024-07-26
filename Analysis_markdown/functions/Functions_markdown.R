@@ -1,4 +1,16 @@
 `%notin%` <- Negate(`%in%`)
+
+# Function to read data based on file type
+read_data <- function(file_path) {
+  if (grepl("\\.rds$", file_path)) {
+    readRDS(file_path)
+  } else if (grepl("\\.csv$", file_path)) {
+    fread(file_path)
+  } else {
+    stop("File type not supported")
+  }
+}
+
 last_path = function(x) {
   x <- gsub("/rds.rds", "", x)
   substr(x, max(gregexpr("/", x)[[1]]) + 1, nchar(x))
@@ -6,16 +18,20 @@ last_path = function(x) {
 last_path_reduced = function(x) {
   gsub("georef_dataset", "", last_path(x))
 }
-is_null_or_not_exist = function(x) {
+is_null_or_not_exist <- function(x) {
   var_name <- deparse(substitute(x))
   if (!exists(var_name, envir = parent.frame()) || 
-      is.null(eval(parse(text = var_name), envir = parent.frame()))) {
+      is.null(get(var_name, envir = parent.frame()))) {
     return(TRUE)
   } else {
     return(FALSE)
   }
 }
+
 cat_title = function(x, child_headerinside ="") {
+  if(is.null(child_headerinside)){
+    child_headerinside <- ""
+  }
   if(child_headerinside == "-#"){
     x <- sub("#", "", x)
     child_headerinside = ""
@@ -69,9 +85,10 @@ is_ggplot <- function(obj) {
 }
 
 
-qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = fig.path, grouped_data = NULL, interactive_plot = FALSE, find_and_print = ifelse(exists("outputonly"), outputonly, FALSE)) {
-  
+qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE, find_and_print = FALSE) {
+  captionn <- eval(captionn)
   if(find_and_print){
+    
     filepath <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".png"))
     knitr::knit_child(text = paste0(
       '\n```{r evolvaluedim, fig.cap="', captionn, '", fig.align="center", out.width="100%"}',
@@ -87,7 +104,7 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
     }
     if (!is.null(save_folder)) {
       if (!dir.exists(file.path(fig.pathinside, save_folder))) {
-        dir.create(file.path(fig.pathinside, save_folder))
+        dir.create(file.path(fig.pathinside, save_folder), recursive = TRUE)
       }
       save_path_data <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".csv" ))  # Adjust the file name as needed
       fwrite(x, file = save_path_data)
@@ -138,6 +155,7 @@ if (!is.null(captionn)) {
   ft_out
   }
 }
+
 fonction_groupement = function(these_col, init, final){
   
   # Compute sum of values for each combination of the columns in "these_col" and "measurement_unit" in the "init" dataframe
@@ -185,8 +203,9 @@ fonction_groupement = function(these_col, init, final){
 }
 save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
   current <- tmap_mode()
-  if(!is.null(folder) && !dir.exists(folder)){
-    dir.create(file.path(fig.pathinside, folder))
+  title <- eval(title)
+  if(!is.null(folder)){
+    dir.create(file.path(fig.pathinside, folder), recursive = TRUE)
   
     if(all(class(plott) == "flextable")){
     save_as_image(plott,path = file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png"))))
@@ -199,20 +218,22 @@ save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside 
 ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder), create.dir = TRUE)
   }
   } else { print("Cannot save the image the folder does not exist")}
-  # plott
+  # return(plott)
 
 }
 
 # Function to create spatial plots from init final variable
 fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
 shapefile.fix, plotting_type = "plot", continent) {
-  continent <- sf::st_as_sf(continent)
 
   selection <- function(x) {
+    
+    # x <- dtplyr::lazy_dt(x)
     x %>% 
       dplyr::ungroup() %>% 
       dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit) %>%
-      dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
+      dplyr::mutate(geographic_identifier = as.character(geographic_identifier)) %>% 
+      as.data.frame()
   }
   
   Initial_dataframe <- selection(initial_dataset)

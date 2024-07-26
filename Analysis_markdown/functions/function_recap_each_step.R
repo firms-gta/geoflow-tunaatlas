@@ -69,8 +69,8 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   write(options_written, file.path(step_dir, "options_written.txt"))
   
   if(!is.null(entity)){
-    if(entity$provenance$statement != "Metadata automatically created during the workflow and based on options displayed"){
-      entity$provenance$setStatement("Metadata automatically created during the workflow and based on options displayed")
+    if(entity$provenance$statement != "The following processes are applied to the dataset:"){
+      entity$provenance$setStatement("The following processes are applied to the dataset:")
       entity$provenance$processes <- NULL
     }
     rationale <- geoflow_process$new()

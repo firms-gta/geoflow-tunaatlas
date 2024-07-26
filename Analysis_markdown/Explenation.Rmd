@@ -7,40 +7,39 @@ output: html_document
 
 ```{r explanationongainandloss, results='asis', eval=(!parameter_short && !unique_analyse)}
 
-if(!parameter_short && !unique_analyse) {
   cat(
-    "*Attention ! In the following document:*",
-    "- ***All the differences inferior to 0 corresponds to gain in captures.***", 
-    "- ***The initial dataset, referred as, dataset 1 is", titre_1, "***",
-    "- ***The final dataset, referred as, dataset 2 is", titre_2, "***", 
+    "*Attention ! In the following document:* \n",
+    "- ***All the differences inferior to 0 corresponds to gain in captures.*** \n", 
+    "- ***The initial dataset, referred as, dataset 1 is", parameter_titre_dataset_1, "*** \n",
+    "- ***The final dataset, referred as, dataset 2 is", parameter_titre_dataset_2, "***", 
     sep = "\n"
   )
-}
 
 ```
 
 ```{r results='asis'}
 
-if(!parameter_mapped && !unique_analyse){
-  
-  cat("In this comparison, the differences due to the mapping, that is to say, the renaming of codes to harmonize data, will not be presented. The recap of the mapping is presented in the annex.", sep = "\n")
-  
-}
+# if(!parameter_mapped && !unique_analyse){
+#   
+#   cat("In this comparison, the differences due to the mapping, that is to say, the renaming of codes to harmonize data, will not be presented. The recap of the mapping is presented in the annex.", sep = "\n")
+#   
+# }
 
 
 ```
 
-```{r checkifnodiff,  eval=!unique_analyse , results='asis'}
 
-if (identical(init, final)) {
-  
-  cat("There are no differences between the two datasets; this step is not changing the data in any way")
-  
-  knitr::knit_exit(fully = FALSE)
-  
-}
+<!-- ```{r checkifnodiff,  eval=!unique_analyse , results='asis'} -->
 
-```
+<!-- if (identical(init, final)) { -->
+
+<!--   cat("There are no differences between the two datasets; this step is not changing the data in any way") -->
+
+<!--   knitr::knit_exit(fully = FALSE) -->
+
+<!-- } -->
+
+<!-- ``` -->
 
 
 ```{r filterprinting, echo=FALSE, results='asis'}
