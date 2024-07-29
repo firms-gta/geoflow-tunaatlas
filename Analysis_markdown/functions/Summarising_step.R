@@ -66,18 +66,18 @@ Summarising_step <- function(main_dir, connectionDB, config) {
   
   i <- 1
   file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
-  source(file.path(file_path_url,"copy_project_files.R", local = TRUE))
+  source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
   source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
-  source(file.path(file_path_url,"Functions_markdown.R", local = TRUE))
-  source(file.path(file_path_url,"Groupping_differences.R", local = TRUE))
-  source(file.path(file_path_url,"compare_strata_differences.R", local = TRUE))
-  source(file.path(file_path_url,"compare_dimension_differences.R", local = TRUE))
-  source(file.path(file_path_url,"compare_temporal_differences.R", local = TRUE))
-  source(file.path(file_path_url,"geographic_diff.R", local = TRUE))
-  source(file.path(file_path_url,"time_coverage_analysis.R", local = TRUE))
-  source(file.path(file_path_url,"spatial_coverage_analysis.R", local = TRUE))
-  source(file.path(file_path_url,"other_dimension_analysis.R", local = TRUE))
-  source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R", local = TRUE))
+  source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
+  source(file.path(file_path_url,"Groupping_differences.R"), local = TRUE)
+  source(file.path(file_path_url,"compare_strata_differences.R"), local = TRUE)
+  source(file.path(file_path_url,"compare_dimension_differences.R"), local = TRUE)
+  source(file.path(file_path_url,"compare_temporal_differences.R"), local = TRUE)
+  source(file.path(file_path_url,"geographic_diff.R"), local = TRUE)
+  source(file.path(file_path_url,"time_coverage_analysis.R"), local = TRUE)
+  source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
+  source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
+  source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
   flog.info("Sourced all required functions")
   
   for (entity_dir in entity_dirs) {
@@ -204,7 +204,7 @@ Summarising_step <- function(main_dir, connectionDB, config) {
       
       sub_list_dir_3 <- gsub("/rds.rds", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
-      source(file.path(file_path_url,"process_fisheries_data.R", local = TRUE))
+      source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
       process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
       flog.info("Processed process_fisheries_data_list")
       

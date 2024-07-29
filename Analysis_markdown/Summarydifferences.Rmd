@@ -6,7 +6,7 @@ output: html_document
 ---
 
 
-```{r summaryofdifferences}
+```{r summaryofdifferences, message=FALSE, warning=FALSE, include=FALSE}
 
 summary_of_differences <- compute_summary_of_differences(init, final, titre_1, titre_2)
 
