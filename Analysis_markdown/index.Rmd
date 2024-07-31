@@ -41,7 +41,6 @@ output:
     keep_md: TRUE
   bookdown::word_document2:
     toc: TRUE
-lang: en
 abstract: "This document is aimed to recap the impact on the data of the different treatment of the Global Tuna Atlas. \nFirst we present the data created by the GlobalTuna Atlas, as well as the comparison between this data and the rawdata provided by the RFMO’s before the global Tuna Atlas treatment. \nIn a second time we will present the process of the GlobalTuna Atlas in order to reference exactly the choices made."
 geometry: "margin=25mm"
 papersize: a4
