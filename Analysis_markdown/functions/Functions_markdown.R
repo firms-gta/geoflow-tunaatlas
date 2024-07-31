@@ -162,7 +162,8 @@ fonction_groupement = function(these_col, init, final){
   groupement_1 <- init %>%
     dplyr::ungroup() %>%
     dplyr::group_by(!!!rlang::syms(these_col), measurement_unit) %>%
-    dplyr::summarise(value_sum_1 = round(((sum(measurement_value, na.rm=TRUE))))) %>%
+    dplyr::summarise(value_sum_1 = round(sum(measurement_value, na.rm=TRUE),digits = 3)) %>%
+    # dplyr::summarise(value_sum_1 = round(((sum(measurement_value, na.rm=TRUE))))) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(value_sum_1 = dplyr::coalesce(value_sum_1, 0)) %>%
     dplyr::mutate(measurement_unit = as.character(measurement_unit)) %>%
@@ -172,7 +173,8 @@ fonction_groupement = function(these_col, init, final){
   groupement_2 <- final %>%
     dplyr::ungroup() %>%
     dplyr::group_by(!!!rlang::syms(these_col), measurement_unit) %>%
-    dplyr::summarise(value_sum_2 = round(((sum(measurement_value, na.rm=TRUE))))) %>%
+    # dplyr::summarise(value_sum_2 = round(((sum(measurement_value, na.rm=TRUE))))) %>%
+    dplyr::summarise(value_sum_2 = round(sum(measurement_value, na.rm=TRUE),digits = 3)) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
     dplyr::mutate(measurement_unit = as.character(measurement_unit)) %>%

@@ -81,6 +81,8 @@ Summarising_step <- function(main_dir, connectionDB, config) {
   flog.info("Sourced all required functions")
   
   for (entity_dir in entity_dirs) {
+    copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = entity_dir)
+    
     flog.info("Processing entity directory: %s", entity_dir)
     
     entity <- config$metadata$content$entities[[i]]
@@ -284,8 +286,9 @@ Summarising_step <- function(main_dir, connectionDB, config) {
       render_env$plotting_type <- "view"
       render_env$fig.path <- new_path
       # saveRDS(render_env, file = "render_env.rds")
-      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::html_document2")
+      # bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::html_document2")
       bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook")
+      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::pdf_document2")
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)
       rm(render_env)
