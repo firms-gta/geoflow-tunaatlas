@@ -81,20 +81,21 @@ Summarising_step <- function(main_dir, connectionDB, config) {
   flog.info("Sourced all required functions")
   
   for (entity_dir in entity_dirs) {
-    copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = entity_dir)
     
     flog.info("Processing entity directory: %s", entity_dir)
     
     entity <- config$metadata$content$entities[[i]]
+    i <- i + 1
     action <- entity$data$actions[[1]]
     opts <- action$options
     
     if (opts$fact == "effort") {
       flog.warn("Effort dataset not displayed for now")
     } else {
-      i <- i + 1
       entity_name <- basename(entity_dir)
       setwd(entity_dir)
+      copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
+      
       
       sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "rds.rds", full.names = TRUE)
       details <- file.info(sub_list_dir_2)
@@ -286,8 +287,9 @@ Summarising_step <- function(main_dir, connectionDB, config) {
       render_env$plotting_type <- "view"
       render_env$fig.path <- new_path
       # saveRDS(render_env, file = "render_env.rds")
-      # bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::html_document2")
+      set_flextable_defaults(fonts_ignore=TRUE)
       bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook")
+      gc()
       bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::pdf_document2")
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)

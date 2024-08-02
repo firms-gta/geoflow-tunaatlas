@@ -21,9 +21,6 @@ address:
 csl: dmk-format.csl
 link-citations: TRUE
 output:
-  bookdown::html_document2:
-    toc: TRUE
-    keep_md: true
   bookdown::gitbook:
     config:
       toc:
@@ -32,17 +29,18 @@ output:
         before: null
         after: null
   bookdown::pdf_document2:
+    latex_engine: lualatex 
     extra_dependencies: ["adjustbox", "subfig", "flafter", "makecell"]
     toc: TRUE
     keep_tex: TRUE
     template: template.tex
+    #md_extensions: "-autolink_bare_uris"
     number_sections: TRUE
-    citation_package: default
+    citation_package: default # Can also be "natbib"
+    always_allow_html: TRUE
     keep_md: TRUE
-  bookdown::word_document2:
-    toc: TRUE
 abstract: "This document is aimed to recap the impact on the data of the different treatment of the Global Tuna Atlas. \nFirst we present the data created by the GlobalTuna Atlas, as well as the comparison between this data and the rawdata provided by the RFMO’s before the global Tuna Atlas treatment. \nIn a second time we will present the process of the GlobalTuna Atlas in order to reference exactly the choices made."
-geometry: "margin=25mm"
+geometry: "margin=20mm"
 papersize: a4
 endfloat: FALSE
 numberlines: FALSE

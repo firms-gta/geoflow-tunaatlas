@@ -43,10 +43,10 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     lines_init <- nrow(main)
     
     for (i in sub_list_dir_2) {
-      Explanation <- readLines(paste0(i, "/explanation.txt"))[2]
-      Functions <- readLines(paste0(i, "/functions.txt"))[2]
+      Explanation <- readLines(paste0(i, "/explanation.txt"))[1]
+      Functions <- readLines(paste0(i, "/functions.txt"))[1]
       if (file.exists(paste0(i, "/options_written.txt"))) {
-        Options <- readLines(paste0(i, "/options_written.txt"))[2]
+        Options <- readLines(paste0(i, "/options_written.txt"))[1]
       } else {
         Options <- "Aucune"
       }
@@ -141,10 +141,10 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     
     for (i in sub_list_dir_2) {
       sums <- read.csv(paste0(i, "/sums.csv"))
-      Explanation <- readtext(paste0(i, "/explanation.txt"))[2]
-      Functions <- pull(readtext(paste0(i, "/functions.txt"))[2])
+      Explanation <- readtext(paste0(i, "/explanation.txt"))[1]
+      Functions <- pull(readtext(paste0(i, "/functions.txt"))[1])
       if (file.exists(paste0(i, "/options_written.txt"))) {
-        Options <- pull(readtext(paste0(i, "/options_written.txt"))[2])
+        Options <- pull(readtext(paste0(i, "/options_written.txt"))[1])
       } else {
         Options <- "Aucune"
       }
