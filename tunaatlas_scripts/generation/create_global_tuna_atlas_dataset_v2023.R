@@ -524,7 +524,10 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     )
     
     # unit conversion already given factors -----------------------------------
-    
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/do_unit_conversion.R")
+    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/perform_unit_conversion.R")
+    mapping_map_code_lists <- TRUE
+    opts$mapping_map_code_lists <- TRUE
     if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
       mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
       
@@ -549,142 +552,35 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       	list(opts$mapping_csv_mapping_datasets_url)
         )
       
-      new_version_iotc_raising_available <- TRUE
-      if (file.exists("data/IOTC_conv_fact_mapped.csv")) {
-        
-        iotc_conv_fact_mapped <- read_csv("data/IOTC_conv_fact_mapped.csv",
-                                          col_types = cols(
-                                            geographic_identifier = col_character(),
-                                            time_start = col_character(),
-                                            time_end = col_character()
-                                          ))
-        
-        
-        iotc_data <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
-        
-        iotc_data_converted <- do_unit_conversion(
+        georef_dataset <- perform_unit_conversion(
+          conversion_factor_csv = "data/IOTC_conv_fact_mapped.csv",
+          unit_conversion_codelist_geoidentifiers_conversion_factors = "cwp_grid",
+          georef_dataset = georef_dataset,
           entity = entity,
           config = config,
-          fact = opts$fact,
-          unit_conversion_csv_conversion_factor_url =
-            iotc_conv_fact_mapped,
-          unit_conversion_codelist_geoidentifiers_conversion_factors =
-            "cwp_grid",
-          mapping_map_code_lists =
-            opts$mapping_map_code_lists,
-          georef_dataset = iotc_data,
-          removing_numberfish_final = FALSE
-        ) # do not remove number of fish as they will be converted later with other conversion factor data
-        
-        georef_dataset <- rbind(georef_dataset %>% filter(source_authority != "IOTC"), iotc_data_converted)
-        
-        function_recap_each_step(
-          "Harmonising units on IOTC data",
-          georef_dataset,
-          "The data provided in Number of fish provided by IOTC is converted in tons.
-					 As a new conversion factor dataset has been provided by IOTC we use the following dataset data/IOTC_conv_fact_mapped.csv which can be found in the associated metadata",
-          "do_unit_conversion",
-          list("")
+          opts = opts,
+          step_description = "Harmonising units on IOTC data"
         )
         
+        georef_dataset <- perform_unit_conversion(
+          conversion_factor_csv = "data/fact_conv_IRD.csv",
+          unit_conversion_codelist_geoidentifiers_conversion_factors = opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+          georef_dataset = georef_dataset,
+          entity = entity,
+          config = config,
+          opts = opts,
+          step_description = "Harmonising units on IRD data"
+        )
         
-      }
-      
-      # unit conversion with factors from IRD dataset -----------------------------------
-      
-      
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      config$logger.info(
-        sprintf(
-          "LEVEL 1 => STEP 2/5  for file [%s] is executed: Convert units by using A. Fonteneau file. Option is: [%s] ",
-          entity$data$source[[1]],
-          opts$unit_conversion_convert
-        )
-      )
-      config$logger.info(
-        "-----------------------------------------------------------------------------------------------------"
-      )
-      mapping_map_code_lists <- TRUE
-      if (!is.null(opts$mapping_map_code_lists))
-        mapping_map_code_lists = opts$mapping_map_code_lists
-      if (is.null(opts$unit_conversion_csv_conversion_factor_url))
-        stop(
-          "Conversion of unit requires parameter 'unit_conversion_csv_conversion_factor_url'"
-        )
-      if (is.null(opts$unit_conversion_codelist_geoidentifiers_conversion_factors))
-        stop(
-          "Conversion of unit requires parameter 'unit_conversion_codelist_geoidentifiers_conversion_factors'"
-        )
-      
-      ntons_before_this_step <-
-        round(georef_dataset %>% filter(measurement_unit == "t")  %>% dplyr::select(measurement_value)  %>% sum())
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Gridded catch dataset before unit conversion has [%s] lines and total catch is [%s] Tons",
-          nrow(georef_dataset),
-          ntons_before_this_step
-        )
-      )
-      
-      config$logger.info("STEP 2/5: BEGIN do_unit_conversion() function to convert units of georef_dataset")
-      
-      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/do_unit_conversion.R")
-      
-      georef_dataset <- do_unit_conversion(
-        entity = entity,
-        config = config,
-        fact = opts$fact,
-        unit_conversion_csv_conversion_factor_url =
-          opts$unit_conversion_csv_conversion_factor_url,
-        unit_conversion_codelist_geoidentifiers_conversion_factors =
-          opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-        mapping_map_code_lists = mapping_map_code_lists,
-        georef_dataset = georef_dataset
-      )
-      config$logger.info("STEP 2/5: END do_unit_conversion() function")
-      
-      ntons_after_conversion <-
-        round(georef_dataset %>% dplyr::select(measurement_value)  %>% sum())
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Gridded catch dataset after unit conversion has [%s] lines and total catch is [%s] Tons",
-          nrow(georef_dataset),
-          ntons_after_conversion
-        )
-      )
-      # config$logger.info(sprintf("STEP 2/5 : [%s] lines have been removed", nrow(georef_dataset)-nrow_before))
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Unit conversion generated [%s] additionnal tons",
-          ntons_after_conversion - ntons_before_this_step
-        )
-      )
-      config$logger.info(
-        sprintf(
-          "STEP 2/5 : Total number for 'NO' unit is now [%s] individuals",
-          georef_dataset %>% filter(measurement_unit == "no")  %>% select(measurement_value)  %>% sum()
-        )
-      )
-      config$logger.info("END STEP 2/5")
-      function_recap_each_step(
-        "Harmonising units from IRD conversion factors",
-        georef_dataset,
-        paste0("The data declared in Number of fish is converted in tons using the A. Fonteneau file which can be found in the metadata file or under this link : ",
-               options_unit_conversion_csv_conversion_factor_url),
-        fonctions =
-          "do_unit_conversion, unit_conversion_csv_conversion_factor_url, extract_dataset,
-								map_codelist, convert_units",
-          list(
-          options_unit_conversion_csv_conversion_factor_url ,
-          options_unit_conversion_codelist_geoidentifiers_conversion_factors ,
-          options_unit_conversion_convert
-        )
-      )
-      
-      
-      
+        georef_dataset <- perform_unit_conversion(
+          conversion_factor_csv = "data/fact_conv_IRD_complete.csv",
+          unit_conversion_codelist_geoidentifiers_conversion_factors = opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+          georef_dataset = georef_dataset,
+          entity = entity,
+          config = config,
+          opts = opts,
+          step_description = "Harmonising units on IRD completed data"
+        )      
       
     } else{
       config$logger.info(
