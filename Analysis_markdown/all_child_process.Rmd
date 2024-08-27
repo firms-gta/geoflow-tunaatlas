@@ -1,0 +1,41 @@
+# Detail of all the steps of treatment of the data
+
+For each treatment on the data, we provide a summary of what has been added, removed or transformed. This allows to see where major changes occurs for specific data needs.
+
+
+```{r processallandHIDe, echo=FALSE, results='hide'}
+
+# the comprehensive_cwp_dataframe_analysis function is ran inside the rmd because for a reason I cannot understand, runnning it outside and then passing the result end up in the crashing of pandoc
+# Function to process each list item and knit the child document
+process_list_item <- function(list_item, template) {
+  child_env_result <- list2env(list_item, new.env())
+  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_result)
+  
+  res <- knitr::knit_child(template, envir = child_env_result, quiet = TRUE)
+  rm(child_env_result)
+  gc()
+  return(res)
+}
+
+# Iterate over all items in all_list and process each one
+results <- lapply(all_list, process_list_item, template = "comparison.Rmd")
+
+# Perform garbage collection
+gc()
+
+```
+
+
+```{r unlistallcomp,echo=FALSE, results='asis'}
+
+cat(unlist(results), sep =  "\\clearpage")
+
+```
+
+```{r include=FALSE}
+
+rm(results)
+gc()
+
+```

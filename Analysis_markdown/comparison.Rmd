@@ -1,72 +1,14 @@
 ---
-title: "`r ifelse(exists('title'), title, 'Comparison of two datasets')`"
+title: "`r ifelse(exists('title_markdown'), title_markdown, 'Comparison of two datasets')`"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-author:
-  - name: Bastien Grasset
-    email: bastien.grasset@ird.fr
-    affiliation:
-      - IRD
-      - MARBEC
-  - name: Julien Barde
-    affiliation:
-      - IRD
-      - MARBEC
-address:
-  - code: IRD
-    address: Institut de Recherche pour le Développement (IRD), av. Jean Monnet, CS 30171, 34203 Sète cédex, France
-  - code: MARBEC
-    address: MARBEC, University of Montpellier, CNRS, Ifremer, IRD, Sète, France
-# bibliography: ["IOTC-2022-WPDCS18.bib"] # Replace with one or more of your own bibtex files. Better BibTeX for Zotero is your friend
-csl: dmk-format.csl # Use any CSL style. See https://www.zotero.org/styles for a good list. Ignored if citation_package: natbib
-link-citations: TRUE
-output:
-  bookdown::pdf_document2:
-    extra_dependencies: ["adjustbox", "subfig", "flafter"]
-    toc: TRUE
-    keep_tex: TRUE
-    template: template.tex
-    #md_extensions: "-autolink_bare_uris"
-    number_sections: TRUE
-    citation_package: default # Can also be "natbib"
-  bookdown::html_document2:
-  bookdown::word_document2: 
-    # Produces largely readable output, though some cross-referencing may fail. Useful for collaboration.
-    toc: TRUE
-lang: en # Main document language in BCP47 format
-geometry: "margin=25mm"
-papersize: a4
-#linestretch: 2 # for double spacing
-endfloat: FALSE # Set to TRUE to turn on latex endfloat package to place figures and tables at end of document
-# endfloatoption: # See endfloat documentation for more possibilities
-#   - tablesfirst # Default
-#   - nomarkers # Default
-numberlines: FALSE
-authblk: FALSE # FALSE = author affiliations in footnotes; TRUE = author affiliations in a block below author names
-footnotehyper: FALSE # TRUE will give you enhanced table footnote capabilities. Set to FALSE to be able to use French blocks. Needed due to what appears to be a latex bug.
-urlcolor: blue
-linkcolor: blue
-citecolor: blue
-graphics: TRUE # Needed to be able to include images
-tables: TRUE # Needed to be able to include tables
-fancyhdr:
-  first:
-    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
-    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
-    headrulewidth: 0pt
-    #footleft: A left foot
-    footrulewidth: 0pt
-  subsequent:
-    headleft: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
-    headright: "`r ifelse(exists('headleft_title'), headleft_title, 'Comparison')`"
-    headrulewidth: 1pt
-    footrulewidth: 0pt
+author: "BastienG"
+output: html_document
 ---
 
-
-```{r setuprmd,include = FALSE}
+```{r setuprmd,include = FALSE, echo=FALSE}
 
 res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
-
+# envir = parent.frame() ne marche pas bien car il faut appeler dans le nouveau markdown (child) envir$obj
 ```
 
 ```{r eval=exists("Add_lines") && file.exists(Add_lines), results='asis'}
@@ -76,35 +18,7 @@ cat(res)
 
 ```
 
-
-```{r sourcingfunctionsmarkdown,include = FALSE}
-
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
-
-```
-
-
-```{r parameter-settings,include = FALSE}
-
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Parameters_settings.R", local = TRUE)
-
-```
-
 `r if(step_title_t_f){cat_title(step_title, child_headerinside = child_header)}`
-
-```{r fileformatting, results='asis',include = FALSE}
-
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/file_formatting.R", local = TRUE)
-
-```
-
-
-```{r Groupping-datarmd, results='asis',include = FALSE}
-
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Groupping_differences.R", local = TRUE)
-
-```
-
 
 ```{r explenation, results='asis'}
 
@@ -114,16 +28,18 @@ cat(res)
 
 ```
 
-`r if(!unique_analyse && parameter_short == FALSE ){cat_title("# Main differences \n ", child_headerinside = child_header)}`
+```{r include=FALSE}
 
-
-```{r SummarydifferencesRmd, eval=!unique_analyse, results='asis'}
-
-res <- knitr::knit_child("Summarydifferences.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
+if(!unique_analyse && parameter_short == FALSE && coverage){
+  main_title <- TRUE
+} else {
+  main_title <- FALSE
+  child_header <- sub("#", "", child_header)
+}
 
 ```
+
+`r if(main_title){cat_title("# Main differences", child_headerinside = child_header)}`
 
 ```{r Compnumberstratas, eval=!unique_analyse, echo=FALSE, results='asis'}
 
@@ -144,44 +60,55 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 
 ```
 
-```{r Main-differences, results='asis', eval=!unique_analyse}
 
-res <- knitr::knit_child("Main_differences.Rmd", quiet = TRUE, envir = environment())
+`r if(!unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))){cat_title("## Differences in temporal data", child_headerinside = child_header)}`
+
+
+```{r timediffchild, results='asis', eval = !unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))}
+
+res <- knitr::knit_child("Differenceintimedata.Rmd", quiet = TRUE, envir = environment())
 
 cat(res, sep =  "\\clearpage")
 
 ```
 
+\clearpage
 
-```{r Main-caracteristics-of-dataset, results='asis', eval = coverage}
+`r if(!unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))){cat_title("## Differences in geographical data", child_headerinside = child_header)}`
+
+
+```{r Geodiff, results='asis', eval = !unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))}
+
+res <- knitr::knit_child("Geographicdiff.Rmd", quiet = TRUE, envir = environment())
+cat(res, sep =  "\\clearpage")
+
+```
+
+\clearpage
+
+`r if(!unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))){cat_title("## The differences for each other dimension", child_headerinside = child_header)}`
+
+
+```{r Diff-for-other-dimensions, results='asis', eval = !unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))}
+
+res <- knitr::knit_child("Differencesforeachdimensions.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```
+
+```{r eval = !coverage}
+
+knitr::knit_exit(fully = FALSE)
+
+```
+
+
+
+```{r Maincharactofdataset, results='asis', eval = coverage}
 
 res <- knitr::knit_child("Main_caracteristics_of_dataset.Rmd", quiet = TRUE, envir = environment())
 
 cat(res, sep =  "\\clearpage")
 
 ```
-
-\clearpage
-
-
-```{r recapwithout-mappingg, Diff-for-other-dimensions,eval = (!unique_analyse & !parameter_mapped), results='asis'}
-
-res <- knitr::knit_child("Recap_without_mapping.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-
-\clearpage
-
-```{r annexe, eval = FALSE, results='asis'}
-
-res <- knitr::knit_child("Annexe.Rmd", quiet = TRUE, envir = environment())
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-\clearpage
-

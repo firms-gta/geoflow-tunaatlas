@@ -1,20 +1,20 @@
 recap_all_markdown <- function(action, entity, config, options){
-  if(!file.exists("Markdown")){
-    return(NULL)
-  } else {
-    required_packages <- c("webshot",
-      "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
-      "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
-      "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
-      "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
-    )
-    
-    for (package in required_packages) {
-      if (!requireNamespace(package, quietly = TRUE)) {
-        install.packages(package, dependencies = TRUE)
-      }
-      library(package, character.only = TRUE)
-    }
+  # if(!file.exists("Markdown")){
+  #   return(NULL)
+  # } else {
+    # required_packages <- c("webshot",
+    #   "here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+    #   "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
+    #   "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
+    #   "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
+    # )
+    # 
+    # for (package in required_packages) {
+    #   if (!requireNamespace(package, quietly = TRUE)) {
+    #     install.packages(package, dependencies = TRUE)
+    #   }
+    #   library(package, character.only = TRUE)
+    # }
     
     opts <- action$options
     debugging <- if(!is.null(opts$debugging)) opts$debugging else FALSE

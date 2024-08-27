@@ -2,16 +2,7 @@
 
 library(readr)
 
-# Function to read data based on file type
-read_data <- function(file_path) {
-  if (grepl("\\.rds$", file_path)) {
-    readRDS(file_path)
-  } else if (grepl("\\.csv$", file_path)) {
-    fread(file_path)
-  } else {
-    stop("File type not supported")
-  }
-}
+
 
 # Process 'parameter_init'
 if (is.character(parameter_init)) {
