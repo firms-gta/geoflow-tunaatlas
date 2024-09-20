@@ -5,29 +5,29 @@
 #' (IOTC, ICCAT, WCPFC, IATTC, CCSBT) stored within the Tuna atlas database. Users can customize the computation
 #' of the tuna atlas using a set of parameters.
 #'
-#' @param action An action object containing options for dataset processing.
+#' @param action An action object containing options for dataset processing from geoflow.
 #' @param entity A geoflow entity object with dataset identifiers and metadata.
 #' @param config A geoflow configuration object with software settings.
 #' @return The status of the dataset creation process.
 #' @examples
 #' \dontrun{
 #' # Example usage:
-#' action <- list(options = list(fact = "catch", dataset_level = 1))
-#' entity <- list(identifiers = list(id = "example_id"))
-#' config <- list(software = list(output = list(dbi = "some_dbi_connection")),
-#'                logger = list(info = function(msg) cat(msg, "\n")))
+#' action <- entity$data$actions[[1]]
+#' entity <- config$metadata$content$entities[[1]]
+#' config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 #' create_own_tuna_atlas_catch_effort(action, entity, config)
 #' }
 #' @export
 #' 
 create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
-  # Initialisation ----------------------------------------------------------
-  
-  
+ 
+   # Initialisation ----------------------------------------------------------
   opts <- action$options
   con <- config$software$output$dbi
   options(encoding = "UTF-8")
+  
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
+  
   write_options_to_csv(opts)
   # List of required packages
   packages <- c("dplyr", "sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
