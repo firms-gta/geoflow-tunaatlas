@@ -9,8 +9,9 @@ enrich_db_for_services <- function(action,entity, config){
   geom_table <- "area.area_labels"
   if(!is.null(entity$resources$geom_table)) geom_table <- entity$resources$geom_table
   
-  df_codelists <- read.csv(entity$resources$codelists)
-  dimensions <- c(df_codelists$dimension [df_codelists$dimension != "area"], "time_start", "time_end", "year", "quarter", "month", "aggregation_method")
+  #set information required for (meta)data services	
+  dimensions <- colnames(entity$data$features)
+  dimensions <- c(dimensions[!dimensions %in% c("geographic_identifier", "measurement_value")],"aggregation_method")
   
   #scripts
   source(geoflow::get_config_resource_path(config, "./tunaatlas_actions/create_plsql_data_getter.R"))
@@ -18,7 +19,7 @@ enrich_db_for_services <- function(action,entity, config){
   
   #entity management
   pid <- entity$identifiers[["id"]]
-  fact <- unlist(strsplit(entity$data$uploadSource[[1]], "\\."))[2]
+  fact <- entity$resources$fact
   entity$data$run <- FALSE #deactivate local action (harmonization/generation)
   entity$data$sourceType <- "csv"
   entity$data$uploadType <- "dbquery" #set dbquery as upload type for enabling geoserver sql view data services
@@ -55,12 +56,4 @@ enrich_db_for_services <- function(action,entity, config){
     entity$data$setParameter(dimension, dimension, regexpValue, defaultValue)
   }
   
-  config$logger.info("Upload SQL main query (based on PL/SQL function to query data) to Google Drive")
-  # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
-  folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
-  mainSource <- sprintf("select * from get_fact_dataset_%s('%s', '%s', %s, '%s')", fact, schema, pid, paste0("'", default_values,"'", collapse=","),geom_table)
-  file_sql_query <- paste0(entity$identifiers[["id"]], "_query.sql")
-  writeLines(mainSource, file.path("data", file_sql_query))
-  #entity$data$source <- c(file_sql_query, entity$data$source)
-  drive_upload(file.path("data", file_sql_query), as_id(folder_views_id), overwrite = TRUE)
 }

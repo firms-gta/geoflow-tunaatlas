@@ -60,7 +60,7 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   assign("explanation_total", paste0(explanation_total, explanation), envir = .GlobalEnv)
   
   # Save RDS and text files
-  saveRDS(rds_data, file.path(step_dir, "rds.rds"))
+  qs::qsave(rds_data, file.path(step_dir, "data.qs"))
   write(explanation, file.path(step_dir, "explanation.txt"))
   write(explanation_total, file.path(step_dir, "explanation_total.txt"))
   write(functions, file.path(step_dir, "functions.txt"))

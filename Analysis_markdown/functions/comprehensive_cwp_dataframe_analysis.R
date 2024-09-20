@@ -1,4 +1,3 @@
-#' Comprehensive Analysis Function
 #'
 #' This function performs a comprehensive analysis of initial and final datasets, including summary of differences, grouping differences, dimension comparisons, temporal and spatial analyses.
 #'
@@ -56,9 +55,11 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   # Process 'parameter_init'
   # #cat("Processing initial dataset...\n")
   if (is.character(parameter_init)) {
-    init <- read_data(parameter_init) #%>% head(10000)
+    init <- read_data(parameter_init) %>% 
+      dplyr::filter(!is.na(measurement_value))#%>% head(10000)
   } else if (is.data.frame(parameter_init)) {
-    init <- parameter_init
+    init <- parameter_init%>% 
+      dplyr::filter(!is.na(measurement_value))
   } else {
     stop("Invalid 'parameter_init'")
   }
@@ -70,12 +71,19 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   } else {
     #cat("Processing final dataset...\n")
     if (is.character(parameter_final)) {
-      final <- read_data(parameter_final)
+      final <- read_data(parameter_final)%>% 
+        dplyr::filter(!is.na(measurement_value))
     } else if (is.data.frame(parameter_final)) {
-      final <- parameter_final
+      final <- parameter_final%>% 
+        dplyr::filter(!is.na(measurement_value))
     } else {
       stop("Invalid 'parameter_final'")
     }
+  }
+  
+  if(!print_map | parameter_geographical_dimension_groupping %notin% colnames(init)){
+    init <- init %>% dplyr::mutate(GRIDTYPE = "GRIDTYPE")
+    final <- final %>% dplyr::mutate(GRIDTYPE = "GRIDTYPE")
   }
   
   if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse) {
@@ -118,7 +126,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   
   #cat("Applying filtering function...\n")
   formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
-  init <- filtering_function(dataframe_to_filter = init)
+  init <- filtering_function(init)
   
   if (unique_analyse) {
     final <- init[0,]
@@ -149,26 +157,26 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     summary_of_differences <- compute_summary_of_differences(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2)
     compare_strata_differences_list <- compare_strata_differences(init, final, Groupped_all, parameter_titre_dataset_1, parameter_titre_dataset_2, parameter_columns_to_keep, unique_analyse)
     compare_strata_differences_list$title <- paste0("Disappearing or appearing strata between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
- 
-  
-  #cat("Comparing dimension differences...\n")
-  compare_dimension_differences_list <- compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = 6)
-  
-  if (length(parameter_time_dimension) != 0) {
-    #cat("Comparing temporal differences...\n")
-    plot_titles_list <- compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
-  }
-  
-  if (length(parameter_geographical_dimension) != 0) {
-    #cat("Analyzing geographic differences...\n")
-    Geographicdiff <- geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1, 
-                                      parameter_titre_dataset_2, outputonly)
-    if(removemap){
-      Geographicdiff$plott <- NULL
-      gc()
+    
+    
+    #cat("Comparing dimension differences...\n")
+    compare_dimension_differences_list <- compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = 6)
+    compare_dimension_differences_list$title <-paste0("Difference between the non appearing/disappearing stratas between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
+    if (length(parameter_time_dimension) != 0) {
+      #cat("Comparing temporal differences...\n")
+      plot_titles_list <- compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
     }
-  }
-  
+    
+    if (length(parameter_geographical_dimension) != 0) {
+      #cat("Analyzing geographic differences...\n")
+      Geographicdiff <- geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1, 
+                                        parameter_titre_dataset_2, outputonly)
+      if(removemap){
+        Geographicdiff$plott <- NULL
+        gc()
+      }
+    }
+    
   } else {
     summary_of_differences <- NULL
     compare_strata_differences_list <- NULL
@@ -177,40 +185,45 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     compare_dimension_differences_list <- NULL
     GrouppedGRIDTYPE <- NULL
   }
-
+  
   if (length(parameter_time_dimension) != 0 && coverage) {
     #cat("Performing time coverage analysis...\n")
     time_coverage_analysis_list <- time_coverage_analysis(time_dimension_list_groupped, parameter_time_dimension, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
-    } else {
-      time_coverage_analysis_list <- NULL
+  } else {
+    time_coverage_analysis_list <- NULL
   }
   
   if(coverage){
-  #cat("Analyzing other dimensions...\n")
-  other_dimension_analysis_list <- other_dimension_analysis(Other_dimensions, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
+    #cat("Analyzing other dimensions...\n")
+    other_dimension_analysis_list <- other_dimension_analysis(Other_dimensions, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
   } else {
     other_dimension_analysis_list <- NULL
   }
   if (print_map && coverage) {
     #cat("Performing spatial coverage analysis...\n")
-      
+    
     spatial_coverage_analysis_list <- spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, GrouppedGRIDTYPE, savingimages = FALSE)
   } else {
     spatial_coverage_analysis_list <- NULL
-    }
-    #cat("Analysis complete.\n")
-    
-    return(list(
-      summary_of_differences = summary_of_differences,
-      compare_strata_differences_list = compare_strata_differences_list,
-      groupping_differences_list = groupping_differences_list,
-      compare_dimension_differences_list = compare_dimension_differences_list,
-      plot_titles_list = plot_titles_list,
-      Geographicdiff = Geographicdiff,
-      time_coverage_analysis_list = time_coverage_analysis_list,
-      spatial_coverage_analysis_list = spatial_coverage_analysis_list,
-      other_dimension_analysis_list = other_dimension_analysis_list,
-      Other_dimensions = Other_dimensions, 
-      coverage = coverage
-    ))
+  }
+  #cat("Analysis complete.\n")
+  
+  return(list(
+    summary_of_differences = summary_of_differences,
+    compare_strata_differences_list = compare_strata_differences_list,
+    groupping_differences_list = groupping_differences_list,
+    compare_dimension_differences_list = compare_dimension_differences_list,
+    plot_titles_list = plot_titles_list,
+    Geographicdiff = Geographicdiff,
+    time_coverage_analysis_list = time_coverage_analysis_list,
+    spatial_coverage_analysis_list = spatial_coverage_analysis_list,
+    other_dimension_analysis_list = other_dimension_analysis_list,
+    Other_dimensions = Other_dimensions, 
+    coverage = coverage, unique_analyse = unique_analyse, 
+    parameter_titre_dataset_1 = parameter_titre_dataset_1, 
+    parameter_titre_dataset_2 = parameter_titre_dataset_2, 
+    parameter_filtering = parameter_filtering, 
+    parameter_resolution_filter = parameter_resolution_filter, 
+    fig.path = fig.path
+  ))
 }

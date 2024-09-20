@@ -6,8 +6,9 @@ read_data <- function(file_path) {
     readRDS(file_path)
   } else if (grepl("\\.csv$", file_path)) {
     fread(file_path)
-  } else {
-    stop("File type not supported")
+  } else if (grepl("\\.qs$", file_path)) {
+    qs::qread(file_path)
+  } else {    stop("File type not supported")
   }
 }
 
@@ -371,9 +372,10 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
 
 ## ----function-bar-plot-pie-plot---------------
 
-pie_chart_2_default = function (dimension, first, second = NULL, topn = 10, titre_1 = "first", 
+pie_chart_2_default = function (dimension, first, second = NULL, topn = 5, titre_1 = "first", 
   titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
 {
+  topn = 5
   first[is.na(first)] <- "NA"
   if (deparse(substitute(dimension)) == "X[[i]]") {
     r <- dimension
@@ -580,6 +582,100 @@ pie_chart_2_default = function (dimension, first, second = NULL, topn = 10, titr
   }
 }
 
+pie_chart_2_default_plotrix <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first", 
+                                         titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
+{
+  topn = 5
+  first[is.na(first)] <- "NA"
+  if (deparse(substitute(dimension)) == "X[[i]]") {
+    r <- dimension
+  } else {
+    r <- deparse(substitute(dimension))
+  }
+  dimension <- gsub("\"", "", r)
+  
+  if (dimension == "source_authority") {
+    topn = 6
+  }
+  
+  name1 <- titre_1
+  name2 <- titre_2
+  if(is.null(second)) {
+    name1 <- ""
+  }
+  
+  # Summarize the data for the first dataset
+  provisoire_i <- first %>%
+    dplyr::group_by(dplyr::across(c(dimension, "measurement_unit"))) %>%
+    dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
+    dplyr::group_by(measurement_unit) %>%
+    dplyr::arrange(desc(measurement_value)) %>%
+    dplyr::mutate(id = row_number()) %>%
+    dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension), "Others"))) %>%
+    dplyr::group_by(class, measurement_unit) %>%
+    dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(pourcentage = prop.table(measurement_value) * 100) %>%
+    dplyr::mutate(labels = paste0(round(pourcentage), " %")) %>%
+    dplyr::arrange(desc(class)) %>%
+    dplyr::distinct() %>%
+    dplyr::filter(!is.na(class))
+  
+  # Prepare for second dataset if available
+  if (!is.null(second)) {
+    provisoire_t <- second %>%
+      dplyr::group_by(across(c(dimension, "measurement_unit"))) %>%
+      dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
+      dplyr::group_by(measurement_unit) %>%
+      dplyr::arrange(desc(measurement_value)) %>%
+      dplyr::mutate(id = row_number()) %>%
+      dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension), "Others"))) %>%
+      dplyr::group_by(class, measurement_unit) %>%
+      dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(pourcentage = prop.table(measurement_value) * 100) %>%
+      dplyr::mutate(labels = paste0(round(pourcentage), " %")) %>%
+      dplyr::arrange(desc(class)) %>%
+      dplyr::distinct() %>%
+      dplyr::filter(!is.na(class))
+  }
+  
+  # Set up colors
+  number <- length(unique(provisoire_i$class))
+  pal <- brewer.pal(number, "Paired")
+  pal <- setNames(pal, unique(provisoire_i$class))
+  
+  # Create a pie chart for the first dataset using plotrix
+  pie_labels <- provisoire_i$labels
+  pie_values <- provisoire_i$pourcentage
+  pie_classes <- provisoire_i$class
+  
+  plotrix::pie3D(pie_values, labels = pie_labels, explode = 0.1,
+                 main = paste("Distribution in measurement_value for the dimension:", dimension),
+                 col = pal, labelcex = 0.7, radius = 0.8)
+  
+  # Plot for the second dataset if provided
+  if (!is.null(second)) {
+    pie_labels_t <- provisoire_t$labels
+    pie_values_t <- provisoire_t$pourcentage
+    pie_classes_t <- provisoire_t$class
+    
+    plotrix::pie3D(pie_values_t, labels = pie_labels_t, explode = 0.1,
+                   main = paste("Distribution in measurement_value for the dimension:", dimension, " (", titre_2, ")"),
+                   col = pal, labelcex = 0.7, radius = 0.8)
+  }
+  
+  # If title_yes_no is TRUE, add a title using cowplot
+  if (title_yes_no) {
+    title <- paste0("Distribution in measurement_value for the dimension: ", r)
+    if (!is.null(second)) {
+      title <- paste0(title, "\nComparing ", titre_1, " and ", titre_2)
+    }
+    title
+  }
+}
+
+
 bar_plot_default <- function(first, 
                              second = NULL, 
                              dimension, 
@@ -680,18 +776,30 @@ bar_plot_default <- function(first,
 #' print(summary)
 #' }
 #' @export
-compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
-
+compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", meanorsum = "sum") {
+  
+  if(meanorsum == "sum"){
     # Group and summarize initial dataset
-  init_group <- init %>%
-    dplyr::group_by(measurement_unit) %>%
-    dplyr::summarise(titre_test1 = sum(measurement_value)) 
-  
-  # Group and summarize final dataset
-  final_group <- final %>%
-    dplyr::group_by(measurement_unit) %>%
-    dplyr::summarise(titre_test2 = sum(measurement_value))
-  
+    init_group <- init %>%
+      dplyr::group_by(measurement_unit) %>%
+      dplyr::summarise(titre_test1 = sum(measurement_value)) 
+    
+    # Group and summarize final dataset
+    final_group <- final %>%
+      dplyr::group_by(measurement_unit) %>%
+      dplyr::summarise(titre_test2 = sum(measurement_value))
+  } else{
+    
+    # Group and summarize initial dataset
+    init_group <- init %>%
+      dplyr::group_by(measurement_unit) %>%
+      dplyr::summarise(titre_test1 = mean(measurement_value)) 
+    
+    # Group and summarize final dataset
+    final_group <- final %>%
+      dplyr::group_by(measurement_unit) %>%
+      dplyr::summarise(titre_test2 = mean(measurement_value))
+  }
   # Compute summary of differences
   summary <- dplyr::full_join(init_group, final_group) %>%
     dplyr::mutate(across(where(is.numeric), ~replace(., is.na(.), 0))) %>%
@@ -710,5 +818,4 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
   
   return(summary)
 }
-
 

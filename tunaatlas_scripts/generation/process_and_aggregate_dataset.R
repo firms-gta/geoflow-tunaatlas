@@ -18,6 +18,7 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   dataset <- georef_dataset %>%
     dplyr::group_by(.dots = setdiff(colnames(georef_dataset), "measurement_value")) %>%
     dplyr::summarise(measurement_value = sum(measurement_value)) %>%
+    # head(1000) %>%
     dplyr::ungroup()
   
   dataset <- as.data.frame(dataset)
@@ -70,7 +71,7 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   
   # Create enriched public dataset
   output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
-  dataset_enriched <- dataset_list$dataset
+  dataset_enriched <- dataset_list$dataset #%>% head(1000)
   dataset_enriched$year <- as.integer(format(dataset_enriched$time_end, "%Y"))
   dataset_enriched$month <- as.integer(format(dataset_enriched$time_end, "%m"))
   dataset_enriched$quarter <- as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
@@ -91,7 +92,7 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   #write to service dbi
   dataset_enriched$geographic_identifier = as.character(dataset_enriched$geographic_identifier)
   entity$data$features = dataset_enriched
-  if(entity$data$upload) writeWorkflowJobDataResource(entity=entity,config=config,type="dbtable",useFeatures=TRUE,useUploadSource=TRUE, createIndexes=TRUE)
+  # if(entity$data$upload) writeWorkflowJobDataResource(entity=entity,config=config,type="dbtable",useFeatures=TRUE,useUploadSource=TRUE, createIndexes=TRUE)
   
   entity$addResource("fact", opts$fact)
   entity$addResource("geom_table", opts$geom_table)
@@ -108,5 +109,4 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   # Clean up
   rm(georef_dataset)
   gc()
-  # return(list(entity, georef_dataset, entity, config, opts))
 }

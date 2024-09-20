@@ -120,7 +120,6 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     if(nchar(dimensions[1]) != 0 & !dimensions[1] %in% c('all','no') ){aggBy <- c(aggBy,dimensions)
     } else if (tolower(dimensions)=='all' ){dimensions <- names(res_dimensions_and_variables)[-which( names(res_dimensions_and_variables) %in% c('measurement_value','geom_wkt','time_start','time_end', "source_authority", "measurement_type"))];aggBy <- c(aggBy,dimensions)
     } else if(tolower(dimensions)=='no' | nchar(dimensions[1]) == 0 ){dimensions = ''}
-    
     # res_dimensions_and_variables <- aggregate(res_dimensions_and_variables['measurement_value'],setdiff(res_dimensions_and_variables[aggBy],"unit"),FUN=aggFun)
     res_dimensions_and_variables <- aggregate(res_dimensions_and_variables['measurement_value'],res_dimensions_and_variables[aggBy],FUN='sum')
     
@@ -446,10 +445,70 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   dataset_metadata<-dbGetQuery(con,paste0("SELECT * FROM metadata.metadata where identifier='",dataset_pid, "'"))
   query_netCDF<-getSQLSardaraQueries(con,dataset_metadata)$query_NetCDF
   dataset<-dbGetQuery(con,query_netCDF)
+  
+  # head(dataset)
+  # source_authority fishing_fleet gear_type species fishing_mode time_start
+  # 1            ICCAT           SEN     09.32     SPZ          UNK 2015-09-01
+  # 2            ICCAT         EUFRA      01.1     SPZ           LS 2020-07-01
+  # 3            ICCAT         EUFRA      01.1     SPZ           LS 2020-08-01
+  # 4            ICCAT         EUFRA      01.1     SPZ           LS 2020-09-01
+  # 5            ICCAT         EUFRA      01.1     SPZ           LS 2021-06-01
+  # 6            ICCAT         EUFRA      01.1     SPZ           LS 2021-07-01
+  # time_end measurement_type measurement_unit                       geom_wkt
+  # 1 2015-09-30              UNK                t POLYGON((0 0,0 5,5 5,5 0,0 0))
+  # 2 2020-07-31              UNK                t POLYGON((0 0,0 5,5 5,5 0,0 0))
+  # 3 2020-08-31              UNK                t POLYGON((0 0,0 5,5 5,5 0,0 0))
+  # 4 2020-09-30              UNK                t POLYGON((0 0,0 5,5 5,5 0,0 0))
+  # 5 2021-06-30              UNK                t POLYGON((0 0,0 5,5 5,5 0,0 0))
+  # 6 2021-07-31              UNK                t POLYGON((0 0,0 5,5 5,5 0,0 0))
+  # measurement_value
+  # 1              0.64
+  # 2              0.10
+  # 3              0.48
+  # 4              0.17
+  # 5              0.01
+  # 6              0.03
+  # > summary(dataset)
+  # source_authority   fishing_fleet       gear_type           species         
+  # Length:3397852     Length:3397852     Length:3397852     Length:3397852    
+  # Class :character   Class :character   Class :character   Class :character  
+  # Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+  # 
+  # 
+  # 
+  # fishing_mode         time_start                     
+  # Length:3397852     Min.   :1950-04-01 00:00:00.000  
+  # Class :character   1st Qu.:1985-05-01 00:00:00.000  
+  # Mode  :character   Median :2001-11-01 00:00:00.000  
+  # Mean   :1998-02-10 13:48:00.664  
+  # 3rd Qu.:2012-08-01 00:00:00.000  
+  # Max.   :2021-12-01 00:00:00.000  
+  # time_end                       measurement_type   measurement_unit  
+  # Min.   :1950-04-30 00:00:00.000   Length:3397852     Length:3397852    
+  # 1st Qu.:1985-05-31 00:00:00.000   Class :character   Class :character  
+  # Median :2001-11-30 00:00:00.000   Mode  :character   Mode  :character  
+  # Mean   :1998-03-12 00:25:29.203                                        
+  # 3rd Qu.:2012-08-31 00:00:00.000                                        
+  # Max.   :2021-12-31 00:00:00.000                                        
+  # geom_wkt         measurement_value  
+  # Length:3397852     Min.   :      0.0  
+  # Class :character   1st Qu.:      0.7  
+  # Mode  :character   Median :      4.0  
+  # Mean   :    118.7  
+  # 3rd Qu.:     27.1  
+  # Max.   :1076771.0  
+  
   ## 2) Extract metadata in the appropriate structure
   # unit
   paste("Data are expressed in one of these units: ",paste(unique(dataset$measurement_unit),collapse = ",",sep=""))
   # variable
+  if(length(unique(dataset$measurement_unit)) == 1){
+    dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
+  } else {
+    dataset <- dataset %>% dplyr::filter(measurement_unit == "t")
+    print(config$logger.info("Multiple units shouldn't be handled by netcdf only tons are kept"))
+  }
+  
   dataset_metadata$variable<-sub('.*\\.', '',dataset_metadata$database_table_name )
   # sp_resolution and sp_resolution_unit
   if (grepl("nominal_catch",dataset_metadata$identifier)){
@@ -458,11 +517,14 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     compression = 9
   } else {
     compression = 9
-    query_resolution <- paste0("select distinct(cwp_grid.gridtype) from fact_tables.catch as tab
-LEFT OUTER JOIN
-    area.area USING (id_area)
-LEFT JOIN
-    area.cwp_grid ON cwp_grid.cwp_code = area.codesource_area where tab.id_metadata=",dataset_metadata$id_metadata)
+    query_resolution <- paste0("SELECT DISTINCT cwp_grid.gridtype
+                 FROM (
+                     SELECT DISTINCT id_area
+                     FROM fact_tables.catch
+                     WHERE id_metadata = ", dataset_metadata$id_metadata, "
+                 ) AS tab
+                 LEFT OUTER JOIN area.area USING (id_area)
+                 LEFT JOIN area.cwp_grid ON cwp_grid.cwp_code = area.codesource_area;")
     resolution<-dbGetQuery(con,query_resolution)
     
     if(length(resolution$gridtype) == 1){
@@ -488,10 +550,6 @@ LEFT JOIN
     
   }
   
-  # if(length(unique(dataset$measurement_unit)) == 1){
-  #   dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
-  # } else {print(config$logger.info("Multiple units shouldn't be handled by netcdf please convert data"))
-  # }
   # dataset_groupped <- dataset %>% dplyr::group_by(species)# %>% dplyr::slice_head(n = 1000) %>% dplyr::filter(species%in% c("YFT", "ALB", "SKJ", "SBF", "BET"))
   #########!!!! 1.2 execution de la fonction pour transformer les données en Netcdf
   

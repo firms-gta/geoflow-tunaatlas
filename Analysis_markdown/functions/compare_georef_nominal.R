@@ -54,6 +54,9 @@ compare_georef_nominal <- function(georef, nominal, connectionDB) {
     filter(year %in% nominal_year) %>%
     dplyr::group_by(across(setdiff(everything(), "measurement_value"))) %>%
     mutate(measurement_value = sum(measurement_value))
+  georef_year <- unique(georef_year$year)
+  nominal <- nominal %>%
+    filter(year %in% georef_year) 
   
   # Define strata
   list_strata <- list(c("species","source_authority"),c("species", "year", "source_authority"), c("species", "year", "source_authority", "gear_type"),  c("species", "year", "source_authority", "gear_type", "fishing_fleet"))
@@ -101,7 +104,6 @@ compare_georef_nominal <- function(georef, nominal, connectionDB) {
       species_group_dataframe = species_group,
       cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2
     )
-    
     # Store results
     results[[name]] <- list(
       georef_sup_to_nom_all = georef_sup_to_nom_all,

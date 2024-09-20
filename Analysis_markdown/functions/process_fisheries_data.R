@@ -37,7 +37,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       "Options", "Tons", "Number of fish", "Lines", "Difference (in % of tons)", "Difference in tons", "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", "Percentage of nominal"
     )
     
-    main <- filtering_function(readRDS(paste0(sub_list_dir_2[1], "/rds.rds")), parameter_filtering = parameter_filtering)
+    main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
     tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
     nofish_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
     lines_init <- nrow(main)
@@ -56,7 +56,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
         sum_no <- sums$sum_no
         nrow <- sums$lines
       } else {
-        main <- filtering_function(readRDS(paste0(i, "/rds.rds")), parameter_filtering = parameter_filtering)
+        main <- filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
         sum_t <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
         sum_no <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
         nrow <- nrow(main)
@@ -134,7 +134,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
                       "Options", "Sum in hooks", "Sum in fishing days", "Lines", "Difference (in % of hooks)", "Difference in hooks", "Difference (in % of fishing days)", "Difference in fishing days",  "Difference (in % of lines)", "Percentage of nominal"
     )
     
-    main <- filtering_function(readRDS(paste0(sub_list_dir_2[1], "/rds.rds")), parameter_filtering = parameter_filtering)
+    main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
     hooks_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("HOOKS", "HOOKS")))$measurement_value)
     fishing_days_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("FDAYS", "FDAYS")))$measurement_value)
     lines_init <- nrow(main)
@@ -148,7 +148,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       } else {
         Options <- "Aucune"
       }
-      main <- filtering_function(readRDS(paste0(i, "/rds.rds")), parameter_filtering = parameter_filtering)
+      main <- filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
       sum_hooks <- sum((main %>% dplyr::filter(measurement_unit %in% c("HOOKS", "HOOKS")))$measurement_value)
       sum_fdays <- sum((main %>% dplyr::filter(measurement_unit %in% c("FDAYS", "FDAYS")))$measurement_value)
       nrow <- nrow(main)
