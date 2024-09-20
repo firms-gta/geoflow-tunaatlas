@@ -15,10 +15,9 @@ required_packages <- c(
   "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
   "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools", "plogr", "plotrix", "rpostgis", "RPostgres", "RSQLite"
+  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger"
 )
 
-# Function to check, install (if necessary), and load a package
 # Function to check, install (if necessary), and load a package
 install_and_load <- function(package) {
   if (!require(package, character.only = TRUE)) {
@@ -86,7 +85,7 @@ running_time_of_workflow(mappings)
 # substep depending on the type of the data:
 
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
-# Atound 2.7 minutes
+# Around 2.7 minutes
 raw_nominal_catch <- executeWorkflow(here::here("Raw_nominal_catch.json"))
 raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch")
 running_time_of_workflow(raw_nominal_catch)
@@ -141,7 +140,7 @@ Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_
 # Create 5 datasets catch and effort. These entities are the final one published on zenodo. 
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets")
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
 ### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
@@ -152,10 +151,10 @@ create_materialized_view <- ""
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
+source(here::here("Analysis_markdown/functions/Summarising_step.R"))
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
-
 #removed of Sumamrising step required_packages <- c("webshot","here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
 #                        "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
 #                        "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
@@ -164,21 +163,35 @@ con <- config$software$output$dbi
 
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
 
+
+
+# 
+# `2024-08-28_11:12:03nominal_inferior_to_georeferenced`$GRIDTYPE <- "GRIDTYPE"
+# a <- comprehensive_cwp_dataframe_analysis(parameter_init = `2024-08-28_11:12:03nominal_inferior_to_georeferenced`,
+# unique_analyse = TRUE, print_map = FALSE, removemap = TRUE)
+# source("~/firms-gta/geoflow-tunaatlas/comparing_conversion_factors.R")
+source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/compare_georef_nominal.R")
+results <- compare_georef_nominal(georeferenced, global_nominal_catch_firms_level0, connectionDB = con)
+saveRDS(results, "data/resultsonallthegeorefsuptonom.rds")
 ## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/convert_to_netcdf.R")
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
-config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-
 wd <- getwd()
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+# tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
+
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+unlink(config$job, recursive = TRUE)
+
 
 for (entitynumber in 1:length(config$metadata$content$entities)){
   entity <- config$metadata$content$entities[[entitynumber]]
   dataset_pid <- entity$identifiers[["id"]]
   setwd(file.path(tunaatlas_qa_global_datasets_catch_path,"entities", dataset_pid))
   action <- entity$data$actions[[1]]
-  convert_to_netcdf(action, config, entity, uploadgoogledrive = TRUE)
+  convert_to_netcdf(action, config, entity, uploadgoogledrive = FALSE)
 } #could also be in global action but keep in mind it is very long
+
 setwd(wd)
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/process_entities_for_DOI.R")

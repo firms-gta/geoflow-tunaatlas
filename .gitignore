@@ -23,3 +23,9 @@ Temporal
 Analysis_markdown/figure
 core
 rdatafornetcdf.RData
+*.rds
+Analysis_markdown/Examplegitbookpdf
+georef_not_nominal_markdown/
+iattc_analysis
+Analysis_markdown/*.pdf
+Analysis_markdown/Figures/
