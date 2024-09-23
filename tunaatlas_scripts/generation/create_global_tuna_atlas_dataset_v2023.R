@@ -432,7 +432,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         georef_dataset <- download_zenodo_csv(opts$doigeoref, opts$keygeoref) 
         
       } else if(file.exists("~/firms-gta/geoflow-tunaatlas/data/firms_level0_dataset.qs")){
-        nominal_catch <-
+        georef_dataset <-
           qs::qread("~/firms-gta/geoflow-tunaatlas/data/firms_level0_dataset.qs")
         
       function_recap_each_step(
