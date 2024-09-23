@@ -41,20 +41,10 @@ perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codel
                                      geographic_identifier = col_character(),
                                      time_start = col_character(),
                                      time_end = col_character()
-<<<<<<< HEAD
-                                   )) 
-    # if(unit_conversion_codelist_geoidentifiers_conversion_factors %in% colnames(conversion_factors)){
-    # conversion_factors <- conversion_factors %>% 
-    #   dplyr::mutate(!!sym(unit_conversion_codelist_geoidentifiers_conversion_factors) := as.character(!!sym(unit_conversion_codelist_geoidentifiers_conversion_factors)))   
-    # }
-    # Perform unit conversion
-    converted_data <- do_unit_conversion(
-=======
-                                   )) %>% 
-      dplyr::mutate(source_authority = ifelse(source_authority == "IOTC" && species == "SBF", "CCSBT", "IOTC"))
+                                   ))
+
     # Perform unit conversion
     georef_dataset <- do_unit_conversion(
->>>>>>> af48f96 (Major Tyding of level 2 creation script)
       entity = entity,
       config = config,
       fact = opts$fact,
@@ -65,11 +55,6 @@ perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codel
       removing_numberfish_final = FALSE
     )
     
-<<<<<<< HEAD
-    # Combine converted data with the rest of the dataset
-    georef_dataset <- rbind(georef_dataset %>% filter(source_authority != source_authority), converted_data)
-=======
->>>>>>> af48f96 (Major Tyding of level 2 creation script)
     # Log the step
     function_recap_each_step(
       step_description,

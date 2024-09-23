@@ -17,31 +17,6 @@ output: html_document
 
 ```
 
-```{r results='asis'}
-
-# if(!parameter_mapped && !unique_analyse){
-#   
-#   cat("In this comparison, the differences due to the mapping, that is to say, the renaming of codes to harmonize data, will not be presented. The recap of the mapping is presented in the annex.", sep = "\n")
-#   
-# }
-
-
-```
-
-
-<!-- ```{r checkifnodiff,  eval=!unique_analyse , results='asis'} -->
-
-<!-- if (identical(init, final)) { -->
-
-<!--   cat("There are no differences between the two datasets; this step is not changing the data in any way") -->
-
-<!--   knitr::knit_exit(fully = FALSE) -->
-
-<!-- } -->
-
-<!-- ``` -->
-
-
 ```{r filterprinting, echo=FALSE, results='asis'}
 
 if (!isNullList(parameter_filtering)){
