@@ -63,9 +63,8 @@ Summarising_step <- function(main_dir, connectionDB, config) {
   source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
   source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
   source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
-  source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/Functions_markdown.R", local = TRUE)
-  source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/compare_temporal_differences_dygraphs.R", local = TRUE)
-  source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/other_dimension_analysis_dygraphs.R", local = TRUE)
+  source(file.path(file_path_url,"compare_temporal_differences_dygraphs.R"), local = TRUE)
+  source(file.path(file_path_url,"other_dimension_analysis_dygraphs.R"), local = TRUE)
   source(file.path(file_path_url,"Groupping_differences.R"), local = TRUE)
   source(file.path(file_path_url,"compare_strata_differences.R"), local = TRUE)
   source(file.path(file_path_url,"compare_dimension_differences.R"), local = TRUE)
@@ -75,7 +74,8 @@ Summarising_step <- function(main_dir, connectionDB, config) {
   source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
-  source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/comprehensive_cwp_dataframe_analysis.R", local = TRUE)
+  source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
+  
   flog.info("Sourced all required functions")
   for (entity_dir in entity_dirs) {
   
@@ -109,26 +109,38 @@ Summarising_step <- function(main_dir, connectionDB, config) {
             data <- data %>%
               dplyr::mutate(geographic_identifier = as.character(geographic_identifier),
                             gear_type = as.character(gear_type))
-            data <- tidying_GTA_data_for_comparison(dataframe = data,
-                                                    shape = shape_without_geom,
-                                                    species_group_dataframe = species_group,
-                                                    cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
-            if ("gridtype" %in% colnames(data)) {
-              data <- data %>%
-                dplyr::rename(GRIDTYPE = gridtype)
+
+            if("GRIDTYPE"%in%colnames(data)){
+              data <- data%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
             }
+            if("geographic_identifier"%in%colnames(data) & !is.null(shape_without_geom)){
+              data <- data%>%  dplyr::left_join(shape_without_geom %>% 
+                                                  dplyr::select(GRIDTYPE, cwp_code), by = c("geographic_identifier"="cwp_code")) 
+              if(!is.null(species_group) && ("species" %in% colnames(data))){
+                data <- data %>% dplyr::left_join(species_group%>% dplyr::distinct(), by = c("species"))
+              }
+              
+              if("gear_type" %in%colnames(data) & !is.null(cl_cwp_gear_level2) ){
+                data <- data %>% dplyr::left_join(cl_cwp_gear_level2, by = c("gear_type" = "Code"))
+              }
+              
+              data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons", 
+                                                                                         measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit)) 
 
             qs::qsave(data, file = file)
             flog.info("Processed and saved data for file: %s", file)
           }
         }
+        } else {
+          flog.info("Retrieving processed data")
+          
       }
-      
+      }
       parameter_resolution_filter <- opts$resolution_filter
       parameter_filtering <- list(species =NULL, gear_type = NULL)
         # 
         # species_list <- c("YFT", "BET", "SKJ", "ALB", "SBF", "BFT", "PBF", "SWO")
-      source_authoritylist <- list("CCSBT", "IATTC", "ICCAT", "IOTC", "WCPFC", "all")
+      source_authoritylist <- c("all","IOTC", "CCSBT", "IATTC", "ICCAT" , "WCPFC")
       
       for (s in 1:length(source_authoritylist)){
         if(source_authoritylist[s] == "all"){
@@ -215,8 +227,6 @@ Summarising_step <- function(main_dir, connectionDB, config) {
 
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
-      source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
-      source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisheries_data.R", local = TRUE)
       process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
       flog.info("Processed process_fisheries_data_list")
 
@@ -318,7 +328,7 @@ Summarising_step <- function(main_dir, connectionDB, config) {
       qs::qsave(render_env, file = paste0(source_authoritylist[s],"renderenv.qs"))
         }
       set_flextable_defaults(fonts_ignore=TRUE)
-      # bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook")
+      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook")
       gc()
       bookdown::render_book("index.Rmd", envir = render_env, 
                             output_format = "bookdown::pdf_document2", 
@@ -336,7 +346,7 @@ Summarising_step <- function(main_dir, connectionDB, config) {
     sprintf("entity: %s is done", entity_dir)
 
     }
-  }
+    }
   try(setwd("~/firms-gta/geoflow-tunaatlas"))
   flog.info("Finished Summarising_step function")
   # return(render_env)

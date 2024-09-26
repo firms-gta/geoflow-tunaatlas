@@ -23,7 +23,7 @@ species_group_dataframe = NULL, cl_cwp_gear_level2_dataframe = NULL ){
   dataframe <- dataframe%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons", 
   measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit)) 
   
-  dataframe <- dataframe %>% dplyr::mutate(measurement_value = sum(measurement_value))
+  # dataframe <- dataframe %>% dplyr::mutate(measurement_value = sum(measurement_value))
   
   return(dataframe = dataframe)
 }

@@ -59,7 +59,7 @@ compare_georef_nominal <- function(georef, nominal, connectionDB) {
     filter(year %in% georef_year) 
   
   # Define strata
-  list_strata <- list(c("species","source_authority"),c("species", "year", "source_authority"), c("species", "year", "source_authority", "gear_type"),  c("species", "year", "source_authority", "gear_type", "fishing_fleet"))
+  list_strata <- list(c("species", "year", "source_authority"), c("species", "year", "source_authority", "gear_type"),  c("species", "year", "source_authority", "gear_type", "fishing_fleet"))
   
   # Initialize result list
   results <- list()
