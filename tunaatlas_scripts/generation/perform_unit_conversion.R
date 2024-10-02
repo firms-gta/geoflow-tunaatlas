@@ -59,7 +59,7 @@ perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codel
     function_recap_each_step(
       step_description,
       georef_dataset,
-      paste0(sprintf("The number of fish are converted to tons if there is a conversion factors in the dataset %s.",
+      paste0(sprintf("The number of fish is converted into tons using the following dataset:  %s. ",
                      conversion_factor_csv), addeddescription),
       "do_unit_conversion",
       list(conversion_factor_csv)

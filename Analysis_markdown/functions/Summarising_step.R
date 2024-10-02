@@ -6,14 +6,35 @@
 #' @param main_dir Character. The main directory containing the entities.
 #' @param connectionDB Object. The database connection.
 #' @param config List. Configuration list containing metadata and options for processing.
+#' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
 #' @return NULL. The function has side effects, such as writing files and rendering reports.
+#' @param size Character string. La taille peut prendre les valeurs suivantes :
+#'   \itemize{
+#'     \item `"long"` (par défaut) : Long with coverage.
+#'     \item `"middle"` : Long without coverage
+#'     \item `"short"` : Only first characteristics, first differences and main table of steps
+#'   }
+#'
 #' @examples
 #' Summarising_step(main_dir = "path/to/main/dir", connectionDB = db_connection, config = config_list)
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
 #' @export
-Summarising_step <- function(main_dir, connectionDB, config) {
+Summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC", "CCSBT", "IATTC", "ICCAT" , "WCPFC"), sizepdf = "long",
+                             savestep = FALSE) {
+  
+  if(sizepdf == "long"){
+    coverage = TRUE
+  } else if(sizepdf %in% c("middle", "short")){
+    coverage = FALSE
+  } else {
+    stop('Please provide a correct sizepdf')
+  }
+  
+  flog.info(paste0("Size pdf is:", sizepdf))
+  
+  
   ancient_wd <- getwd()
   flog.info("Starting Summarising_step function")
 
@@ -77,6 +98,7 @@ Summarising_step <- function(main_dir, connectionDB, config) {
   source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
   
   flog.info("Sourced all required functions")
+  
   for (entity_dir in entity_dirs) {
   
     flog.info("Processing entity directory: %s", entity_dir)
@@ -132,15 +154,15 @@ Summarising_step <- function(main_dir, connectionDB, config) {
           }
         }
         } else {
-          flog.info("Retrieving processed data")
+          flog.info("Retrieving processed data: %s", file)
           
       }
       }
       parameter_resolution_filter <- opts$resolution_filter
       parameter_filtering <- list(species =NULL, gear_type = NULL)
-        # 
-        # species_list <- c("YFT", "BET", "SKJ", "ALB", "SBF", "BFT", "PBF", "SWO")
-      source_authoritylist <- c("all","IOTC", "CCSBT", "IATTC", "ICCAT" , "WCPFC")
+
+      # species_list <- c("YFT", "BET", "SKJ", "ALB", "SBF", "BFT", "PBF", "SWO")
+      
       
       for (s in 1:length(source_authoritylist)){
         if(source_authoritylist[s] == "all"){
@@ -149,8 +171,8 @@ Summarising_step <- function(main_dir, connectionDB, config) {
       parameter_filtering <- list(source_authority =source_authoritylist[s])
         }
         
-        if(file.exists(paste0(source_authoritylist[s],"renderenv.qs"))){
-          render_env <- qs::qread(paste0(source_authoritylist[s],"renderenv.qs"))
+        if(file.exists(paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))){
+          render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
         } else {
         
       parameters_child_global <- list(
@@ -233,6 +255,7 @@ Summarising_step <- function(main_dir, connectionDB, config) {
       render_env$process_fisheries_data_list <- process_fisheries_data_list
 
       flog.info("Adding to render_env")
+      
 
       function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent) {
         
@@ -248,7 +271,7 @@ Summarising_step <- function(main_dir, connectionDB, config) {
         dir.create(new_path, recursive = TRUE)
         
         # Logging the start of comparison
-        flog.info(paste("Starting comparison between:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+        flog.info(paste("Starting comparison between:", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2, " with coverage being: ", coverage))
         
         # Check if the datasets are different
         formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
@@ -307,33 +330,44 @@ Summarising_step <- function(main_dir, connectionDB, config) {
         }
       }
       
+      if(sizepdf %in% c("long", "middle")){
 
       final_step <- length(sub_list_dir_3) - 1
       all_list <- lapply(1:final_step, function_multiple_comparison, parameter_short = FALSE, sub_list_dir = sub_list_dir_3,
                          shapefile.fix = shapefile.fix,
                          continent = continent,
-                         parameters_child_global = parameters_child_global, fig.path = render_env$fig.path, coverage = TRUE)
+                         parameters_child_global = parameters_child_global, fig.path = render_env$fig.path, coverage = coverage)
       flog.info("all_list processed")
 
       all_list <- all_list[!is.na(all_list)]
 
       render_env$all_list <- all_list
+      } else{
+      render_env$all_list <- NULL
+          
+      }
       render_env$child_env_first_to_last_result <- child_env_first_to_last_result
       render_env$child_env_last_result <- child_env_last_result
       gc()
 
-      base::options(knitr.duplicate.label = "allow")
       render_env$plotting_type <- "plot"
       render_env$fig.path <- new_path
-      qs::qsave(render_env, file = paste0(source_authoritylist[s],"renderenv.qs"))
+      if(savestep){
+      qs::qsave(render_env, file = paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))
+      }
         }
+        
       set_flextable_defaults(fonts_ignore=TRUE)
-      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook")
+      base::options(knitr.duplicate.label = "allow")
+      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook",  
+                            output_dir =paste0(sizepdf, paste0(source_authoritylist[s],"recap")))
+      
       gc()
+
       bookdown::render_book("index.Rmd", envir = render_env, 
                             output_format = "bookdown::pdf_document2", 
-                            output_dir =paste0(source_authoritylist[s],
-"recap"))
+                            output_dir =paste0(sizepdf, paste0(source_authoritylist[s],"recappdf")))
+      
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)
       rm(render_env)

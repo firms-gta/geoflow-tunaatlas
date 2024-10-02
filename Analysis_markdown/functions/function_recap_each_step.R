@@ -29,6 +29,11 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   # Set the directory name
   step_dir <- file.path("Markdown", step_name)
   
+  rds_data <- rds_data %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(across(-measurement_value)) %>% 
+    dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
+  
   # Ensure measurement_value is numeric
   rds_data$measurement_value <- as.numeric(rds_data$measurement_value)
   

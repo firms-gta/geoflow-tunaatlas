@@ -11,12 +11,12 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
     stop("one of the dataframes as input does not have the dimensions set in the dimensions to consider for the raising")
   }
   colnames_input_dataset <- colnames(df_input_incomplete)
-  sum_df_total <- df_input_total %>% group_by(measurement_unit) %>% summarise(sum_df_total = sum(measurement_value))
+  sum_df_total <- df_input_total %>% group_by(measurement_unit) %>% dplyr::summarise(sum_df_total = sum(measurement_value))
   sum_df_incomplete_before_raising <- df_input_incomplete %>% 
-    group_by(measurement_unit) %>% summarise(sum_df_incomplete_before_raising = sum(measurement_value))
+    group_by(measurement_unit) %>% dplyr::summarise(sum_df_incomplete_before_raising = sum(measurement_value))
   sum_df_total_do_not_exist_in_df_incomplete <- left_join(df_input_total, 
-                                                          df_rf) %>% filter(!is.na(sum_value_df_input_incomplete)) %>% 
-    group_by(measurement_unit) %>% summarise(sum_df_total_do_not_exist_in_df_incomplete = sum(measurement_value))
+                                                          df_rf) %>% dplyr::filter(!is.na(sum_value_df_input_incomplete)) %>% 
+    dplyr::group_by(measurement_unit) %>% dplyr::summarise(sum_df_total_do_not_exist_in_df_incomplete = sum(measurement_value))
   index.na.rf <- which(is.na(df_rf$rf))
   if (length(index.na.rf) > 0) {
     df_rf <- df_rf[-index.na.rf, ]
@@ -25,21 +25,25 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
   df_input_incomplete <- left_join(df_input_incomplete, df_rf, 
                                    by = x_raising_dimensions)
   sum_df_incomplete_do_not_exist_in_df_total <- df_input_incomplete %>% 
-    filter(is.na(sum_value_df_input_total)) %>% group_by(measurement_unit) %>% 
-    summarise(sum_df_incomplete_do_not_exist_in_df_total = sum(measurement_value))
-  df_input_incomplete$value_raised <- df_input_incomplete[, 
-                                                          "measurement_value"]
+    dplyr::filter(is.na(sum_value_df_input_total)) %>% dplyr::group_by(measurement_unit) %>% 
+    dplyr::summarise(sum_df_incomplete_do_not_exist_in_df_total = sum(measurement_value))
+  
+  df_input_incomplete$value_raised <- df_input_incomplete$measurement_value
+  
   if (decrease_when_rf_inferior_to_one == TRUE) {
-    index.rfNotNa <- which(!is.na(df_input_incomplete[, 
-                                                      "rf"]))
-    df_input_incomplete$value_raised[index.rfNotNa] <- df_input_incomplete[index.rfNotNa, 
-                                                                           "measurement_value"] * df_input_incomplete[index.rfNotNa, "rf"]
+
+    df_input_incomplete <- df_input_incomplete %>%
+      dplyr::mutate(value_raised = ifelse(!is.na(rf),
+                                   measurement_value * rf, 
+                                   value_raised))
   }   else {
-    index.rfNotNa <- which(!is.na(df_input_incomplete[, 
-                                                      "rf"]) & df_input_incomplete[, "rf"] >= 1)
-    df_input_incomplete$value_raised[index.rfNotNa] <- df_input_incomplete[index.rfNotNa, 
-                                                                           "measurement_value"] * df_input_incomplete[index.rfNotNa, "rf"]
+    
+    df_input_incomplete <- df_input_incomplete %>%
+      dplyr::mutate(value_raised = ifelse(!is.na(rf) & rf >= 1,
+                                   measurement_value * rf, 
+                                   value_raised))
   }
+  
   if (!is.null(threshold_rf)) {
     index.threshold <- which(df_input_incomplete$rf > threshold_rf)
     df_input_incomplete <- df_input_incomplete[-index.threshold, 
@@ -52,7 +56,7 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
   dataset_to_return <- dataset_to_return[colnames_input_dataset]
   dataset_to_return$year <- NULL
   sum_df_incomplete_after_raising <- dataset_to_return %>% 
-    group_by(measurement_unit) %>% summarise(sum_df_incomplete_after_raising = sum(measurement_value))
+    group_by(measurement_unit) %>% dplyr::summarise(sum_df_incomplete_after_raising = sum(measurement_value))
   stats <- sum_df_total %>% full_join(sum_df_incomplete_before_raising) %>% 
     full_join(sum_df_incomplete_after_raising) %>% full_join(sum_df_incomplete_do_not_exist_in_df_total) %>% 
     full_join(sum_df_total_do_not_exist_in_df_incomplete)
