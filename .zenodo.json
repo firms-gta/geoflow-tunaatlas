@@ -1,4 +1,9 @@
 {
+    "title": "Global Tuna Atlas : data generation worklow",
+    "description": "This R worklfow is used to generate the Global Tuna Atlas datasets. The code has been developped and can be directly executed in the virtual environments of the RStudio server hosted in the same <a href=\"https://blue-cloud.d4science.org/group/globalfisheriesatlas\">Virtual Lab<\/a> provided by <a href=\"https://blue-cloud.d4science.org\">Blue-Cloud 2026<\/a> project which implements best practices for Open Science and FAIR data management.",
+    "license": "CC-BY-4.0",
+    "upload_type": "software",
+    "access_right": "open",
     "creators": [
         {
             "orcid": "0009-0007-6967-0300",
@@ -14,38 +19,62 @@
             "affiliation": "IRD",
             "name": "Barde, Julien"
         },
-              {
+        {
             "orcid": "0000-0001-7429-7204",
             "affiliation": "IRD",
             "name": "Taconet, Paul"
-        }
-    ],
-
-    "title": "Global Tuna Atlas : data generation worklow",
-    "upload_type": "software",
-    "access_right": "open",
-    "related_identifiers": [
-        {
-            "scheme": "doi",
-            "identifier": "10.5281/zenodo.5745958",
-            "relation": "isSourceOf",
-            "resource_type": "dataset"
         },
-              {
-            "scheme": "doi",
-            "identifier": "10.5281/zenodo.11460074",
-            "relation": "isSourceOf",
-            "resource_type": "dataset"
-        }
+        {
+            "name": "Blondel, Emmanuel",
+            "affiliation": "FAO",
+            "orcid": "0000-0002-5870-5762"
+            }
     ],
-
-    "keywords": ["Tuna fisheries", "FAIR services","R package", "reproducible research"],
-
+    "keywords": [
+      "Tuna fisheries",
+      "FAIR services",
+      "web mapping",
+      "Shiny app",
+      "Darwin Core",
+      "GBIF",
+      "reproducible research",
+      "Open Science",
+      "R"
+    ],
+    "related_identifiers": [
+      {
+      "scheme": "doi",
+      "identifier": "https://doi.org/10.5281/zenodo.5745958",
+      "relation": "isSourceOf",
+      "resource_type": "dataset"
+      },
+      {
+      "scheme": "doi",
+      "identifier": "https://dx.doi.org/10.5281/zenodo.5747174",
+      "relation": "isSourceOf",
+      "resource_type": "dataset"
+      },
+      {
+      "scheme": "doi",
+      "identifier": "https://dx.doi.org/10.5281/zenodo.5745986",
+      "relation": "isSourceOf",
+      "resource_type": "dataset"
+      },
+      {
+      "scheme": "doi",
+      "identifier": "https://dx.doi.org/10.5281/zenodo.5746041",
+      "relation": "isSupplementTo",
+      "resource_type": "dataset"
+      }
+    ],
     "communities": [
         {"identifier": "fisheries"},
-        {"identifier": "marbec"}
+        {"identifier": "bluecloud"},
+        {"identifier": "umr-marbec"}
         
     ],
-
-    "grants": [{"id":"101094227"}]
+  "grants": [
+    {"id":"101094227"},
+    {"id":"862409"}
+    ]
 }
