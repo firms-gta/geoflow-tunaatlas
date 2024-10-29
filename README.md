@@ -4,6 +4,10 @@ output:
   pdf_document: default
 ---
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11563961.svg)](https://doi.org/10.5281/zenodo.11563961)
+
+
+
 # Geoflow-tuna repository
 
 This repository contains all material needed to update the Tuna atlas workflow by using geoflow package
