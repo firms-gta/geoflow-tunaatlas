@@ -157,6 +157,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     
     compare_dimension_differences_list <- compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = 6)
     compare_dimension_differences_list$title <-paste0("Difference between the non appearing/disappearing stratas between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
+    
     if (length(parameter_time_dimension) != 0) {
       plot_titles_list <- compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
     }
@@ -197,7 +198,43 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     spatial_coverage_analysis_list <- NULL
   }
   
-  return(list(
+  combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init", final, parameter_titre_dataset_2 = "Final") {
+    setDT(init)  
+    summary_number_row_init <- init[, .(Number_different_stratas = .N), by = measurement_unit]
+    summary_number_row_init[, data_source := parameter_titre_dataset_1]  
+    
+    
+    setDT(final)  
+    summary_number_row_final <- final[, .(Number_different_stratas = .N), by = measurement_unit]
+    summary_number_row_final[, data_source := parameter_titre_dataset_2] 
+    combined_summary <- rbind(summary_number_row_init, summary_number_row_final)
+    combined_summary[, Percent := Number_different_stratas / sum(Number_different_stratas) * 100, by = data_source]
+    
+    
+    
+    total_rows <- combined_summary[, .(Total_rows = sum(Number_different_stratas)), by = data_source]
+    combined_summary <- merge(combined_summary, total_rows, by = "data_source")
+    
+    combined_summary_histogram <- ggplot(combined_summary, aes(x = factor(paste0(data_source, "\n(Number of different stratas=", Total_rows, ")")), y = Percent, fill = measurement_unit)) +
+      geom_bar(stat = "identity", position = "fill") +  # Stacked bars with 100% scale
+      scale_fill_manual(values = c("Tons" = "#4C72B0", "Number of fish" = "#55A868")) +  # Custom blue-green colors
+      scale_y_continuous(labels = scales::percent_format()) + geom_text(aes(label = paste0(round(Percent, 1), "%")), 
+                                                                        position = position_fill(vjust = 0.5), color = "black") +# y-axis as percentages
+      labs(title = "Distribution of number strata for each measurement_unit by dataset",
+           x = "Dataset",
+           y = "Percentage",
+           fill = "Measurement unit") +
+      theme_minimal()
+    return(combined_summary_histogram)
+  }
+  
+  combined_summary_histogram <- combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2)
+  
+  rm(init)
+  rm(final)
+  gc()
+  
+  return(list(combined_summary_histogram = combined_summary_histogram, 
     summary_of_differences = summary_of_differences,
     compare_strata_differences_list = compare_strata_differences_list,
     groupping_differences_list = groupping_differences_list,

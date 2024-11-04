@@ -137,8 +137,7 @@ recap_all_markdown <- function(action, entity, config, options){
     # cl_cwp_gear_level2 <- read_csv(file.path("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv")) %>% select(Code = code, Gear = label)
     cl_cwp_gear_level2 <- st_read(con, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
     
-    # source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
-    source("~/Documents/geoflow-tunaatlas/Analysis_markdown/functions/tidying_GTA_data_for_comparison.R")
+    source(file.path(url_analysis_markdown,"functions", "tidying_GTA_data_for_comparison.R"))
     
     sub_list_dir_2 <- list.files("Markdown", recursive = TRUE,pattern = ".rds", full.names = TRUE)
     details = file.info(sub_list_dir_2)

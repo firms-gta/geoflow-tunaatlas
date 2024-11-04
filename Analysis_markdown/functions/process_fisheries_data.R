@@ -30,11 +30,13 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       nominal <- 1
     }
     
-    df <- data.frame(matrix(ncol = 13, nrow = 1))
+    df <- data.frame(matrix(ncol = 14, nrow = 1))  # Ajout d'une colonne pour "Conversion factors"
     colnames(df) <- c(
       paste0(tail(str_split(paste0(sub_list_dir_2), "/")[[1]], n = 1)),
       "Explanation", "Functions",
-      "Options", "Tons", "Number of fish", "Lines", "Difference (in % of tons)", "Difference in tons", "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", "Percentage of nominal"
+      "Options", "Tons", "Number of fish", "Lines", "Difference (in % of tons)", "Difference in tons", 
+      "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)", 
+      "Percentage of nominal", "Conversion factors (kg)"  # Nouvelle colonne
     )
     
     main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
@@ -48,7 +50,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       if (file.exists(paste0(i, "/options_written.txt"))) {
         Options <- readLines(paste0(i, "/options_written.txt"))[1]
       } else {
-        Options <- "Aucune"
+        Options <- "None"
       }
       if (isNullList(parameter_filtering)) {
         sums <- read_csv(paste0(i, "/sums.csv"))
@@ -62,6 +64,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
         nrow <- nrow(main)
       }
       
+      # Calcul des différences
       step <- tail(str_split(paste0(i), "/")[[1]], n = 1)
       Difference_percent <- -100 * ((tons_init - sum_t) / tons_init)
       Difference_tons <- -(tons_init - sum_t)
@@ -69,11 +72,17 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       Difference_percent_lines <- -100 * ((lines_init - nrow) / lines_init)
       Difference_percent_no <- -100 * ((nofish_init - sum_no) / nofish_init)
       percentage_of_nominal <- round((sum_t * 100) / nominal, 1)
+      
+      # Calcul du facteur de conversion (kg)
+      Conversion_factors_kg <- ifelse(Difference_no != 0 && Difference_tons != 0, (abs(Difference_tons) /abs(Difference_no) ) * 1000, NA)
+      
       sums <- data.frame(sum_t, sum_no, nrow)
       data_i <- cbind(step,
                       Explanation, Functions,
                       Options,
-                      sums, Difference_percent, Difference_tons, Difference_percent_no, Difference_no, Difference_percent_lines, percentage_of_nominal)
+                      sums, Difference_percent, Difference_tons, Difference_percent_no, 
+                      Difference_no, Difference_percent_lines, percentage_of_nominal, 
+                      Conversion_factors_kg)  # Ajout de la colonne conversion factors
       names(data_i) <- colnames(df)
       df <- rbind(df, data_i)
       tons_init <- sum_t
@@ -88,11 +97,12 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     reduced <- df2 %>%
       dplyr::mutate(`Millions of tons` = `Tons` / 1000000, `Millions of fish` = `Number of fish` / 1000000) %>%
       dplyr::select(Step, `Millions of tons`, `Millions of fish`,
-                    "Difference (in % of tons)", "Difference (in % of fish)", "Percentage of nominal") %>%
+                    "Difference (in % of tons)", "Difference (in % of fish)", "Percentage of nominal", "Conversion factors (kg)") %>%
       dplyr::mutate(`Step number` = as.numeric(row_number()))
     
     reduced$Step <- factor(reduced$Step, levels = (reduced %>% dplyr::arrange(`Step number`))$Step)
     
+    # Générer les graphiques
     coeff <- 3
     temperatureColor <- "#69b3a2"
     priceColor <- rgb(0.2, 0.6, 0.9, 1)
@@ -125,106 +135,13 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     columns_to_color = c("Difference (in % of tons)","Difference (in % of fish)")
     fig.capp = 'Evolution of captures in tons and number of fish during the process'
     
-  } else if (parameter_fact == "effort") {
-    
-    nominal <- 1
-    df <- data.frame(matrix(ncol = 13, nrow = 1))
-    colnames(df) <- c(paste0(tail(str_split(paste0(sub_list_dir_2), "/")[[1]], n = 1)),
-                      "Explanation", "Functions",
-                      "Options", "Sum in hooks", "Sum in fishing days", "Lines", "Difference (in % of hooks)", "Difference in hooks", "Difference (in % of fishing days)", "Difference in fishing days",  "Difference (in % of lines)", "Percentage of nominal"
-    )
-    
-    main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
-    hooks_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("HOOKS", "HOOKS")))$measurement_value)
-    fishing_days_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("FDAYS", "FDAYS")))$measurement_value)
-    lines_init <- nrow(main)
-    
-    for (i in sub_list_dir_2) {
-      sums <- read.csv(paste0(i, "/sums.csv"))
-      Explanation <- readtext(paste0(i, "/explanation.txt"))[1]
-      Functions <- pull(readtext(paste0(i, "/functions.txt"))[1])
-      if (file.exists(paste0(i, "/options_written.txt"))) {
-        Options <- pull(readtext(paste0(i, "/options_written.txt"))[1])
-      } else {
-        Options <- "Aucune"
-      }
-      main <- filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
-      sum_hooks <- sum((main %>% dplyr::filter(measurement_unit %in% c("HOOKS", "HOOKS")))$measurement_value)
-      sum_fdays <- sum((main %>% dplyr::filter(measurement_unit %in% c("FDAYS", "FDAYS")))$measurement_value)
-      nrow <- nrow(main)
-      
-      step <- tail(str_split(paste0(i), "/")[[1]], n = 1)
-      Difference_percent <- -100 * ((hooks_init - sum_hooks) / hooks_init)
-      Difference_hooks <- -(hooks_init - sum_fdays)
-      Difference_fdays <- -(fishing_days_init - sum_hooks)
-      Difference_percent_lines <- -100 * ((lines_init - nrow) / lines_init)
-      Difference_percent_fdays <- -100 * ((fishing_days_init - sum_fdays) / fishing_days_init)
-      percentage_of_nominal <- (sum_hooks * 100) / nominal
-      sums <- as.data.frame(data.frame(sum_hooks, sum_fdays, nrow))
-      data_i <- cbind(step,
-                      Explanation, Functions,
-                      Options,
-                      sums, Difference_percent, Difference_hooks, Difference_percent_fdays, Difference_fdays, Difference_percent_lines, percentage_of_nominal)
-      names(data_i) <- colnames(df)
-      df <- rbind(df, data_i)
-      hooks_init <- sum_hooks
-      fishing_days_init <- sum_fdays
-      lines_init <- nrow
-    }
-    
-    df2 <- df[-1, ]
-    df2[df2 == -Inf] <- 0
-    colnames(df2)[1] <- "Step"
-    
-    reduced <- df2 %>% mutate(`Sum in millions of hooks` = `Sum in hooks` / 1000000, `Sum in millions of days` = `Sum in fishing days` / 1000000) %>% 
-      dplyr::select(Step, `Sum in millions of hooks`, `Sum in millions of days`,
-                    "Difference (in % of hooks)","Difference (in % of fishing days)") %>% 
-      dplyr::mutate(`Step number` = as.numeric(row_number()))
-    
-    reduced$Step <- factor(reduced$Step, levels = (reduced %>% arrange(`Step number`))$Step)
-    
-    coeff <- 3
-    temperatureColor <- "#69b3a2"
-    priceColor <- rgb(0.2, 0.6, 0.9, 1)
-    
-    second_graf <- ggplot(reduced, aes(x = Step, group = 1)) + 
-      geom_line(aes(y = `Sum in millions of hooks`, group = 1), size = 0.5, color = priceColor) + geom_point(aes(y = `Sum in millions of hooks`, group = 1)) +
-      geom_line(aes(y = `Sum in millions of days` / coeff, group = 1), size = 0.5, color = temperatureColor) + geom_point(aes(y = `Sum in millions of days` / coeff))  +
-      scale_y_continuous(
-        name = "hooks",
-        sec.axis = sec_axis(~ . * coeff, name = "fishing days")
-      ) + 
-      theme(
-        axis.title.y = element_text(color = priceColor, size = 8),
-        axis.title.y.right = element_text(color = temperatureColor, size = 8)
-      ) +
-      ggtitle("Evolution of the repartition of captures depending on units and Steps") +
-      theme(axis.text.x = element_text(angle = 90))
-    
-    fishing_days_plot <- ggplot(reduced, aes(x = Step, group = 1)) + geom_line(aes(y = `Sum in millions of days`, group = 1), size = 0.5) + theme(axis.text.x = element_text(angle = 90))
-    
-    hooks_plot <- ggplot(reduced, aes(x = Step, group = 1)) + geom_line(aes(y = `Sum in millions of hooks`, group = 1), size = 0.5) + theme(axis.text.x = element_text(angle = 90))
-    
-    cowplot <- cowplot::plot_grid(hooks_plot, fishing_days_plot)
-    
-    columns_to_color = c("")
-    fig.cap = 'Evolution of captures in fishing days and hooks during the process'
-    
   }
-  
-  colnames(df2)[1] <-  "Treatment"
-  
-  
-  df2 <- df2%>% dplyr::select(c("Treatment", "Explanation", "Functions"))%>% 
-    rowwise()%>% mutate_all(function(.)toString(.)) %>% mutate_all(function(x)gsub("_", "-", x)) %>% 
-    dplyr::mutate_if(is.character,~str_replace_all( ., "_", "-" )) %>%  dplyr::mutate_if(is.character,~str_replace_all( ., "\n", " " )) %>% 
-    dplyr::mutate_if(is.character,~str_replace_all( ., "  ", " " ))%>%mutate_if(is.character, toString)
   
   return(list(reduced = reduced, cowplot = cowplot, second_graf = second_graf, df2 = df2,  
               columns_to_color = columns_to_color, fig.capp = fig.capp))
-  
 }
 
+a <- process_fisheries_data(sub_list_dir_3, "catch", opts$parameter_filtering)
 
 
 

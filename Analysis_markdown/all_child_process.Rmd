@@ -1,12 +1,16 @@
-# Detail of all the steps of treatment of the data
+```{r results='asis'}
 
-For each treatment on the data, we provide a summary of what has been added, removed or transformed. This allows to see where major changes occurs for specific data needs.
-
+if (!is.null(all_list)) {
+  cat("# Detail of all the steps of treatment of the data\n\n",
+      "For each treatment on the data, we provide a summary of what has been added, removed or transformed. ",
+      "This allows to see where major changes occur for specific data needs.\n\n")
+  
+}
+```
 
 
 ```{r processallandHIDe, echo=FALSE, results='hide'}
 
-# the comprehensive_cwp_dataframe_analysis function is ran inside the rmd because for a reason I cannot understand, runnning it outside and then passing the result end up in the crashing of pandoc
 # Function to process each list item and knit the child document
 process_list_item <- function(list_item, template) {
   child_env_result <- list2env(list_item, new.env())
@@ -21,7 +25,7 @@ process_list_item <- function(list_item, template) {
 
 # Iterate over all items in all_list and process each one
 
-if(is.null(all_list)){
+if(!is.null(all_list)){
 results <- lapply(all_list, process_list_item, template = "comparison.Rmd")
 
 # Perform garbage collection
@@ -31,13 +35,13 @@ gc()
 
 
 ```{r unlistallcomp,echo=FALSE, results='asis'}
-if(is.null(all_list)){
+if(!is.null(all_list)){
 cat(unlist(results), sep =  "\\clearpage")
 }
 ```
 
 ```{r include=FALSE}
-if(is.null(all_list)){
+if(!is.null(all_list)){
 rm(results)
 gc()
 }

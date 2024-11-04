@@ -22,7 +22,7 @@
 #' @import futile.logger
 #' @export
 Summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC", "CCSBT", "IATTC", "ICCAT" , "WCPFC"), sizepdf = "long",
-                             savestep = FALSE) {
+                             savestep = FALSE, nameoutput = NULL, usesave = FALSE) {
   
   if(sizepdf == "long"){
     coverage = TRUE
@@ -74,7 +74,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   flog.info("Processed shapefile.fix data")
 
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
-
+  # entity_dirs <- entity_dirs[2]
   child_env <- new.env(parent = new.env())
   gc()
   flog.info("Initialized child environment")
@@ -159,21 +159,25 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       }
       }
       parameter_resolution_filter <- opts$resolution_filter
-      parameter_filtering <- list(species =NULL, gear_type = NULL)
+      parameter_filtering <- opts$parameter_filtering
 
-      # species_list <- c("YFT", "BET", "SKJ", "ALB", "SBF", "BFT", "PBF", "SWO")
-      
-      
       for (s in 1:length(source_authoritylist)){
         if(source_authoritylist[s] == "all"){
-          parameter_filtering = list(species = NULL, gear_type = NULL)
+          parameter_filtering = opts$parameter_filtering
         } else {
-      parameter_filtering <- list(source_authority =source_authoritylist[s])
+      parameter_filtering$source_authority <- source_authoritylist[s]
         }
-        
+        if(usesave){
         if(file.exists(paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))){
+          
           render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
-        } else {
+          
+        } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs")))){
+          
+          render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
+          assign("all_list", NULL, envir = render_env)
+        }
+        }else {
         
       parameters_child_global <- list(
         fig.path = paste0("tableau_recap_global_action/figures/"),
@@ -231,7 +235,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         coverage = TRUE,
         parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
         parameter_filtering = parameters_child_global$parameter_filtering,
-        parameter_titre_dataset_1 = "Initial_data",
+        parameter_titre_dataset_1 = "FirmsLevel0",
         parameter_titre_dataset_2 = entity$identifiers[["id"]],
         unique_analyse = FALSE
       )
@@ -337,37 +341,50 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                          shapefile.fix = shapefile.fix,
                          continent = continent,
                          parameters_child_global = parameters_child_global, fig.path = render_env$fig.path, coverage = coverage)
+      
       flog.info("all_list processed")
 
       all_list <- all_list[!is.na(all_list)]
 
       render_env$all_list <- all_list
+      
       } else{
-      render_env$all_list <- NULL
+        
+        rm(all_list, envir = render_env)
+        assign("all_list", NULL, envir = render_env)
           
       }
+      
       render_env$child_env_first_to_last_result <- child_env_first_to_last_result
       render_env$child_env_last_result <- child_env_last_result
       gc()
 
       render_env$plotting_type <- "plot"
       render_env$fig.path <- new_path
+      
       if(savestep){
-      qs::qsave(render_env, file = paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))
+        qs::qsave(render_env, file = paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))
       }
+        }
+        
+        if(is.null(nameoutput)){
+          nameoutput <- paste0(sizepdf, paste0(source_authoritylist[s],"recappdf"))
         }
         
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
-      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook",  
-                            output_dir =paste0(sizepdf, paste0(source_authoritylist[s],"recap")))
+      if(sizepdf != "short"){
+      flog.info("gitbook")
+      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook",
+                            output_dir =nameoutput)
       
       gc()
-
-      bookdown::render_book("index.Rmd", envir = render_env, 
-                            output_format = "bookdown::pdf_document2", 
-                            output_dir =paste0(sizepdf, paste0(source_authoritylist[s],"recappdf")))
-      
+      }
+      flog.info("pdfdocument")
+      bookdown::render_book("index.Rmd", envir = render_env,
+                            output_format = "bookdown::pdf_document2",
+                            output_dir = nameoutput)
+      nameoutput <- NULL
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)
       rm(render_env)
@@ -381,7 +398,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     }
     }
-  try(setwd("~/firms-gta/geoflow-tunaatlas"))
+  try(setwd(ancient_wd))
   flog.info("Finished Summarising_step function")
   # return(render_env)
 }

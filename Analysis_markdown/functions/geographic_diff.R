@@ -45,10 +45,10 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
     tmap::tm_layout(legend.outside = TRUE)
 
   if (plotting_type == "plot") {
-    image <- image + tmap::tm_shape(continent) + tmap::tm_borders()
+    image <- tmap::tm_shape(continent) + tmap::tm_borders() +image 
     image_to_save <- image
   } else {
-    image_to_save <- image + tmap::tm_shape(continent) + tmap::tm_borders()
+    image_to_save <- tmap::tm_shape(continent) + tmap::tm_borders() + image
   }
   title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset")
   

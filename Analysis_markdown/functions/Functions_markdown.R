@@ -1,7 +1,18 @@
+#' Negate `%in%` Operator
+#'
+#' @description This operator checks if elements are not present in a given vector.
+#' @param x A vector of elements to check.
+#' @param table A vector to check against.
+#' @return Logical vector indicating if each element of `x` is not in `table`.
 `%notin%` <- Negate(`%in%`)
 
-# Function to read data based on file type
-read_data <- function(file_path) {
+#' Read Data from Various File Types
+#'
+#' @description This function reads data based on the provided file path and file type.
+#' @param file_path A character string indicating the path of the file to read.
+#' @return Data read from the specified file, either as a data frame or data table.
+#' @export
+read_data <- function(file_path){
   if (grepl("\\.rds$", file_path)) {
     readRDS(file_path)
   } else if (grepl("\\.csv$", file_path)) {
@@ -12,13 +23,33 @@ read_data <- function(file_path) {
   }
 }
 
-last_path = function(x) {
+#' Extract Last Part of a File Path
+#'
+#' @description This function returns the last part of a file path after removing a specific suffix.
+#' @param x A character string representing the file path.
+#' @return A character string representing the last part of the file path.
+#' @export
+last_path <- function(x){
   x <- gsub("/rds.rds", "", x)
   substr(x, max(gregexpr("/", x)[[1]]) + 1, nchar(x))
 }
-last_path_reduced = function(x) {
+
+#' Reduce Last Path for Georeferenced Datasets
+#'
+#' @description This function modifies the last path by removing specific substrings for clarity.
+#' @param x A character string representing the file path.
+#' @return A character string representing the modified last path.
+#' @export
+last_path_reduced <- function(x) {
   gsub("georef_dataset", "", last_path(x))
 }
+
+#' Check if Variable is NULL or Does Not Exist
+#'
+#' @description This function checks if a variable is either NULL or does not exist in the environment.
+#' @param x The variable to check.
+#' @return Logical value indicating whether the variable is NULL or does not exist.
+#' @export
 is_null_or_not_exist <- function(x) {
   var_name <- deparse(substitute(x))
   if (!exists(var_name, envir = parent.frame()) || 
@@ -29,7 +60,14 @@ is_null_or_not_exist <- function(x) {
   }
 }
 
-cat_title = function(x, child_headerinside ="") {
+#' Create a Title with Optional Child Header
+#'
+#' @description This function formats a title with optional child headers for output.
+#' @param x A character string representing the title.
+#' @param child_headerinside An optional character string for the child header.
+#' @return A formatted character string.
+#' @export
+cat_title <- function(x, child_headerinside = "") {
   if(is.null(child_headerinside)){
     child_headerinside <- ""
   }
@@ -41,8 +79,23 @@ cat_title = function(x, child_headerinside ="") {
   output = paste0(child_headerinside, x, " \n")
   return(output)
 }
-isNullList = function(x) all(!lengths(x))
-filtering_function= function(dataframe_to_filter, parameter_filtering){
+
+#' Check if All Elements in a List are NULL or Empty
+#'
+#' @description This function checks if all elements in a list are of zero length.
+#' @param x A list to check.
+#' @return Logical value indicating whether all elements are NULL or empty.
+#' @export
+isNullList <- function(x) { all(!lengths(x))}
+
+#' Filter Data Frame Based on Provided Parameters
+#'
+#' @description This function filters a data frame based on specified filtering parameters.
+#' @param dataframe_to_filter A data frame to be filtered.
+#' @param parameter_filtering A list of parameters to use for filtering.
+#' @return A filtered data frame.
+#' @export
+filtering_function <- function(dataframe_to_filter, parameter_filtering) {
   
   matchingList <- parameter_filtering %>% purrr::keep( ~ !is.null(.) )
   if(length(matchingList)!= 0){  
@@ -62,6 +115,15 @@ filtering_function= function(dataframe_to_filter, parameter_filtering){
     dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
   return(dataframe_to_filter)
 }
+
+#' Tidying Data by Keeping Specific Columns
+#'
+#' @description This function tidies a data frame by selecting specified columns and converting time columns to character.
+#' @param dataframe A data frame to tidy.
+#' @param parameter_colnames_to_keep_dataframe A character vector of column names to keep.
+#' @param time_dimension A character vector of time dimension column names.
+#' @return A tidied data frame.
+#' @export
 tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe, time_dimension){
   dataframe <- dataframe %>% ungroup()
   dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
@@ -69,7 +131,18 @@ tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe, time_d
   return(dataframe)
   
 }
-function_geographic_identifier_renaming_and_not_standards_unit= function(dataframe_to_filter, geo_dim , parameter_fact, parameter_UNK_for_not_standards_unit = TRUE, geo_dim_group){
+
+#' Rename Geographic Identifiers and Handle Standard Units
+#'
+#' @description This function renames geographic identifiers in a data frame and manages non-standard units.
+#' @param dataframe_to_filter A data frame to filter and rename columns.
+#' @param geo_dim The geographic dimension to rename.
+#' @param parameter_fact A parameter indicating the measurement context.
+#' @param parameter_UNK_for_not_standards_unit Logical indicating if non-standard units should be labeled as 'UNK'.
+#' @param geo_dim_group The grouping geographic dimension to rename.
+#' @return A modified data frame with renamed columns.
+#' @export
+function_geographic_identifier_renaming_and_not_standards_unit <- function(dataframe_to_filter, geo_dim , parameter_fact, parameter_UNK_for_not_standards_unit = TRUE, geo_dim_group){
   if(  parameter_UNK_for_not_standards_unit & parameter_fact == "effort"){
     dataframe_to_filter <- dataframe_to_filter %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit%in%c("HOOKS","FDAYS"), measurement_unit, "UNK" ))}
   
@@ -81,22 +154,34 @@ function_geographic_identifier_renaming_and_not_standards_unit= function(datafra
   }
   dataframe_to_filter
 }
+
+#' Check if an Object is a ggplot
+#'
+#' @description This function checks if an object is a ggplot object.
+#' @param obj The object to check.
+#' @return Logical value indicating whether the object is a ggplot.
+#' @export
 is_ggplot <- function(obj) {
   inherits(obj, "gg") || inherits(obj, "ggplot")
 }
 
-
+#' Create and Save a Flextable
+#'
+#' @description This function creates a flextable from a data frame, optionally saving it as an image.
+#' @param x A data frame or flextable to create the table from.
+#' @param captionn An optional character string for the table caption.
+#' @param autonumm An optional automatic numbering parameter.
+#' @param pgwidth A numeric value for the width of the table.
+#' @param columns_to_color Optional columns to apply color coding.
+#' @param save_folder Optional folder to save the flextable.
+#' @param fig.pathinside A character string for the path to save figures.
+#' @param grouped_data Optional grouped data for formatting.
+#' @param interactive_plot Logical indicating if the output should be interactive.
+#' @return A flextable object or a DT datatable if interactive_plot is TRUE.
+#' @export
 qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE, find_and_print = FALSE) {
   captionn <- eval(captionn)
-  if(find_and_print){
-    
-    filepath <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".png"))
-    knitr::knit_child(text = paste0(
-      '\n```{r evolvaluedim, fig.cap="', captionn, '", fig.align="center", out.width="100%"}',
-      '\nknitr::include_graphics("', filepath, '")',
-      '\n```\n'
-    ), envir = environment(), quiet = TRUE)
-  } else {
+  
   if (all(class(x) == "flextable")) {
     flextabley <- x
   } else {
@@ -154,57 +239,95 @@ if (!is.null(captionn)) {
     return(DT::datatable(y))
   }
   ft_out
-  }
+  
 }
 
-fonction_groupement = function(these_col, init, final){
+#' Group and Summarize Data
+#'
+#' This function takes two data.tables and groups them by specified columns, 
+#' summing the measurement values for each group, and then compares the results 
+#' from both data.tables. It computes the loss or gain in measurement values 
+#' and provides additional metrics related to the comparison.
+#'
+#' @param these_col A character vector of column names to group by.
+#' @param init A data.table containing the initial measurement data.
+#' @param final A data.table containing the final measurement data.
+#'
+#' @return A data.table containing the results of the comparison between the 
+#'         two input data.tables, including summed values, losses or gains, 
+#'         and percentage differences.
+#' @export
+fonction_groupement <- function(these_col, init, final) {
   
-  # Compute sum of values for each combination of the columns in "these_col" and "measurement_unit" in the "init" dataframe
-  groupement_1 <- init %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(!!!rlang::syms(these_col), measurement_unit) %>%
-    dplyr::summarise(value_sum_1 = round(sum(measurement_value, na.rm=TRUE),digits = 3)) %>%
-    # dplyr::summarise(value_sum_1 = round(((sum(measurement_value, na.rm=TRUE))))) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(value_sum_1 = dplyr::coalesce(value_sum_1, 0)) %>%
-    dplyr::mutate(measurement_unit = as.character(measurement_unit)) %>%
-    dplyr::mutate(number_lines1 = n())
+  # Ensure input data are data.tables
+  init <- as.data.table(init)
+  final <- as.data.table(final)
   
-  # Compute sum of values for each combination of the columns in "these_col" and "measurement_unit" in the "final" dataframe
-  groupement_2 <- final %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(!!!rlang::syms(these_col), measurement_unit) %>%
-    # dplyr::summarise(value_sum_2 = round(((sum(measurement_value, na.rm=TRUE))))) %>%
-    dplyr::summarise(value_sum_2 = round(sum(measurement_value, na.rm=TRUE),digits = 3)) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    dplyr::mutate(measurement_unit = as.character(measurement_unit)) %>%
-    dplyr::mutate(number_lines2 = n())
+  # Compute sum of values for each combination of the columns in "these_col" 
+  # and "measurement_unit" in the "init" data.table
+  groupement_1 <- init[, .(value_sum_1 = round(sum(measurement_value, na.rm = TRUE), digits = 3),
+                           number_lines1 = .N), 
+                       by = c(these_col, "measurement_unit")]
   
-  # Join the two dataframes based on the columns in "these_col" and "measurement_unit"
-  fulljoin <- dplyr::full_join(groupement_1, groupement_2) %>%
-    dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    dplyr::mutate(value_sum_1 = dplyr::coalesce(value_sum_1, 0)) %>%
-    dplyr::mutate(loss = value_sum_1 - value_sum_2) %>%
-    # Compute whether the difference in value is a gain or loss
-    dplyr::mutate(`Loss / Gain` = dplyr::case_when(abs(loss) <= 1 ~ "Egal", loss > 1 ~"Loss",  loss < 1 ~"Gain")) %>%
-    dplyr::mutate(Loss_pourcent = - (100*((value_sum_1 - value_sum_2)/value_sum_1))) %>%
-    dplyr::mutate(Dimension = colnames(groupement_1[1])) %>%
-    dplyr::rename("Precision" = 1) %>%
-    dplyr::mutate(Precision = as.character(Precision)) %>%
-    dplyr::mutate(value_sum_2 = dplyr::coalesce(value_sum_2, 0)) %>%
-    # Set Loss_pourcent to 100 if it is NA or -Inf or 0 
-    dplyr::mutate(Loss_pourcent = base::ifelse(is.na(Loss_pourcent)|Loss_pourcent==-Inf, 100, Loss_pourcent)) %>%
-    dplyr::ungroup() %>%
-    # Compute the difference in the number of lines between the two dataframes
-    dplyr::mutate(loss_nb_ligne = - (number_lines1 - number_lines2)) %>%
-    dplyr::mutate(`Difference in value`= - (value_sum_1 - value_sum_2)) %>% #final - init
-    dplyr::rename(`Difference (in %)` = Loss_pourcent,`Difference in number of lines` = loss_nb_ligne)%>%
-    dplyr::mutate_if(is.numeric, list(~replace_na(., 0)))
+  groupement_1[, measurement_unit := as.character(measurement_unit)]
+  groupement_1[is.na(value_sum_1), value_sum_1 := 0]
+  
+  # Compute sum of values for each combination of the columns in "these_col" 
+  # and "measurement_unit" in the "final" data.table
+  groupement_2 <- final[, .(value_sum_2 = round(sum(measurement_value, na.rm = TRUE), digits = 3),
+                            number_lines2 = .N), 
+                        by = c(these_col, "measurement_unit")]
+  
+  groupement_2[, measurement_unit := as.character(measurement_unit)]
+  groupement_2[is.na(value_sum_2), value_sum_2 := 0]
+  
+  # Join the two data.tables based on the columns in "these_col" and "measurement_unit"
+  fulljoin <- merge(groupement_1, groupement_2, 
+                    by = c(these_col, "measurement_unit"), 
+                    all = TRUE, 
+                    suffixes = c("_1", "_2"))
+  
+  fulljoin[is.na(value_sum_1), value_sum_1 := 0]
+  fulljoin[is.na(value_sum_2), value_sum_2 := 0]
+  
+  # Calculate losses and gains
+  fulljoin[, loss := value_sum_1 - value_sum_2]
+  fulljoin[, `Loss / Gain` := fifelse(abs(loss) <= 1, "Egal", 
+                                      fifelse(loss > 1, "Loss", "Gain"))]
+  fulljoin[, Loss_pourcent := -100 * (loss / value_sum_1)]
+  
+  # Handle NA values in Loss_pourcent
+  fulljoin[is.na(Loss_pourcent) | Loss_pourcent == -Inf, Loss_pourcent := 100]
+  
+  # Add additional columns
+  fulljoin[, Dimension := names(groupement_1)[1]]
+  setnames(fulljoin, "measurement_unit", "Precision")
+  fulljoin[, Precision := as.character(Precision)]
+  
+  # Calculate differences
+  fulljoin[, loss_nb_ligne := - (number_lines1 - number_lines2)]
+  fulljoin[, `Difference in value` := - (value_sum_1 - value_sum_2)]
+  setnames(fulljoin, "Loss_pourcent", "Difference (in %)")
+  setnames(fulljoin, "loss_nb_ligne", "Difference in number of lines")
+  
+  # Replace NA with 0 for numeric columns
+  fulljoin[, lapply(.SD, function(x) replace(x, is.na(x), 0)), .SDcols = where(is.numeric)]
   
   return(fulljoin)
 }
-save_image = function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
+
+
+#' Save Plot as Image
+#'
+#' @description This function saves the current plot as an image in a specified folder.
+#' @param title A character string representing the title of the plot.
+#' @param plott The plot object to save.
+#' @param folder The folder where the image will be saved.
+#' @param fig.pathinside The path for saving the figure.
+#' @param find_and_print Logical indicating if results should be printed.
+#' @return None
+#' @export
+save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
   current <- tmap_mode()
   title <- eval(title)
   if(!is.null(folder)){
@@ -225,63 +348,84 @@ ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path =
 
 }
 
-# Function to create spatial plots from init final variable
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
-shapefile.fix, plotting_type = "plot", continent) {
-
-  selection <- function(x) {
-    
-    # x <- dtplyr::lazy_dt(x)
-    x %>% 
-      dplyr::ungroup() %>% 
-      dplyr::select(geographic_identifier, measurement_value, GRIDTYPE, measurement_unit) %>%
-      dplyr::mutate(geographic_identifier = as.character(geographic_identifier)) %>% 
-      as.data.frame()
+#' Spatial Footprint Function
+#'
+#' This function generates a spatial representation of measurement values from two datasets, 
+#' allowing for comparison between initial and final datasets using a provided shapefile.
+#'
+#' @param variable_affichee A character string indicating the measurement unit to be displayed.
+#' @param initial_dataset A data.table containing the initial measurement data (default: init).
+#' @param final_dataset A data.table containing the final measurement data (default: final).
+#' @param titre_1 A character string for the title of the first dataset (default: "Dataset 1").
+#' @param titre_2 A character string for the title of the second dataset (default: "Dataset 2").
+#' @param shapefile.fix A spatial object (sf) for the polygons that defines the geographical areas.
+#' @param plotting_type A character string indicating the type of plot ("plot" or "view").
+#' @param continent An optional spatial object for adding continent borders to the plot.
+#'
+#' @return A plot object representing the spatial footprint of the measurement values.
+#' @export
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, 
+                                        titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
+                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL) {
+  
+  if(is.null(shapefile.fix)){
+    stop("Please provide a shape for the polygons")
   }
   
-  Initial_dataframe <- selection(initial_dataset)
-  Final_dataframe <- selection(final_dataset)
+  selection <- function(x) {
+    x[, .(geographic_identifier = as.character(geographic_identifier), 
+          measurement_value, 
+          GRIDTYPE, 
+          measurement_unit)]
+  }
   
-  geo_data <- gdata::combine(Initial_dataframe, Final_dataframe)
-  rm(Initial_dataframe, Final_dataframe)
-  gc()
+  Initial_dataframe <- selection(as.data.table(initial_dataset))
+  Final_dataframe <- selection(as.data.table(final_dataset))
   
-  geo_data <- geo_data %>% 
-    dplyr::mutate(source = dplyr::case_when(
-      source == "Initial_dataframe" ~ eval(parse(text = "titre_1")),
-      source == "Final_dataframe" ~ eval(parse(text = "titre_2")),
-      TRUE ~ "Error"
-    ))
+  geo_data <- rbind(Initial_dataframe, Final_dataframe, use.names = TRUE, fill = TRUE)
   
-  inner_join <- st_as_sf(geo_data %>% 
-                           dplyr::group_by(geographic_identifier, measurement_unit, source, GRIDTYPE) %>%
-                           dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
-                           dplyr::filter(measurement_value != 0) %>%
-                           dplyr::inner_join(shapefile.fix %>% dplyr::select(-GRIDTYPE), by = c("geographic_identifier" = "cwp_code"))
-  )
-  if (nrow(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
+  geo_data[, source := fifelse(source == "Initial_dataframe", titre_1,
+                               fifelse(source == "Final_dataframe", titre_2, "Error"))]
+  
+  inner_join <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)), 
+                         by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
+                           measurement_value != 0]
+  
+  inner_join <- st_as_sf(inner_join)[st_join(inner_join, shapefile.fix %>% select(-GRIDTYPE), 
+                                             join = st_equals)]
+  
+  if (nrow(inner_join[measurement_unit == variable_affichee]) != 0) {
     if (plotting_type == "view") {
-      image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
+      image <- tm_shape(inner_join[measurement_unit == variable_affichee]) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
         tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
     } else {
-      image <- tm_shape(inner_join %>% dplyr::filter(measurement_unit == variable_affichee)) +
+      image <- tm_shape(inner_join[measurement_unit == variable_affichee]) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) + tm_shape(continent) + tm_borders()
+        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) +
+        tm_shape(continent) + tm_borders()
     }
     
     return(image)
   }
 }
 
+#' Save Plots with Subfigures in a Knitr Environment
+#'
+#' @description This function saves plots and creates subfigures for rendering in RMarkdown.
+#' @param plot The plot object to save.
+#' @param title A character string for the plot title.
+#' @param folder The folder where the plot will be saved.
+#' @param fig.pathinside The path for saving the figure.
+#' @return None
+#' @export
 knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fig.pathinside = fig.path) {
   # Check if the function is being run in a knitr environment
   in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
   
   # Save the ggplot object in the current environment with a unique name
   if(is_ggplot(plot)) {
-    save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
-    
+    save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside) 
     if(in_knitr) {
       # This will run if inside a knitr/RMarkdown environment
       
@@ -328,6 +472,14 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       }
 }
 
+#' Render Subfigures from a List of Plots
+#'
+#' @description This function creates a grid of subfigures from a list of plots and titles.
+#' @param plots_list A list of plot objects.
+#' @param titles_list A list of character strings for plot titles.
+#' @param general_title A character string for the general title of the plots.
+#' @return None
+#' @export
 render_subfigures <- function(plots_list, titles_list, general_title) {
   # Check if the function is being run in a knitr environment
   in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
@@ -371,8 +523,20 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
 
 
 ## ----function-bar-plot-pie-plot---------------
-
-pie_chart_2_default = function (dimension, first, second = NULL, topn = 5, titre_1 = "first", 
+#' Create Pie Charts from Data
+#'
+#' @description This function creates pie charts from measurement data for one or two datasets.
+#' @param dimension A character string indicating the dimension for grouping.
+#' @param first A data frame representing the first dataset.
+#' @param second An optional second data frame.
+#' @param topn An integer for the number of top categories to display.
+#' @param titre_1 A character string for the title of the first dataset.
+#' @param titre_2 A character string for the title of the second dataset.
+#' @param title_yes_no Logical indicating if a title should be displayed.
+#' @param dataframe Logical indicating if a data frame should be returned.
+#' @return A pie chart or a list containing the pie chart and data frame, if specified.
+#' @export
+pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first", 
   titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
 {
   topn = 5
@@ -582,6 +746,19 @@ pie_chart_2_default = function (dimension, first, second = NULL, topn = 5, titre
   }
 }
 
+#' Create 3D Pie Charts from Data Using plotrix
+#'
+#' @description This function creates 3D pie charts from measurement data for one or two datasets using plotrix.
+#' @param dimension A character string indicating the dimension for grouping.
+#' @param first A data frame representing the first dataset.
+#' @param second An optional second data frame.
+#' @param topn An integer for the number of top categories to display.
+#' @param titre_1 A character string for the title of the first dataset.
+#' @param titre_2 A character string for the title of the second dataset.
+#' @param title_yes_no Logical indicating if a title should be displayed.
+#' @param dataframe Logical indicating if a data frame should be returned.
+#' @return None
+#' @export
 pie_chart_2_default_plotrix <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first", 
                                          titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE) 
 {
@@ -675,7 +852,19 @@ pie_chart_2_default_plotrix <- function (dimension, first, second = NULL, topn =
   }
 }
 
-
+#' Create Bar Plots from Measurement Data
+#'
+#' @description This function creates bar plots comparing measurement data for one or two datasets.
+#' @param first A data frame representing the first dataset.
+#' @param second An optional second data frame.
+#' @param dimension A character string indicating the dimension for grouping.
+#' @param topn An integer for the number of top categories to display.
+#' @param titre_1 A character string for the title of the first dataset.
+#' @param titre_2 A character string for the title of the second dataset.
+#' @param fill_colors Optional vector of fill colors for the bars.
+#' @param outline_colors Optional vector of outline colors for the bars.
+#' @return A bar plot object.
+#' @export
 bar_plot_default <- function(first, 
                              second = NULL, 
                              dimension, 
@@ -757,65 +946,50 @@ bar_plot_default <- function(first,
 }
 
 
-#' Compute Summary of Differences Between Two Datasets
+#' Compute Summary of Differences
 #'
-#' This function computes the differences between two datasets based on their measurement units.
-#' It returns a summary dataframe that shows the differences in values and percentages for each unit.
+#' This function computes the summary of differences in measurement values 
+#' between two datasets by grouping them by measurement unit and calculating 
+#' the sum of values. It also computes the percentage difference.
 #'
-#' @param init A dataframe representing the initial dataset.
-#' @param final A dataframe representing the final dataset.
-#' @param titre_1 A string representing the name for the title of the initial dataset in the summary.
-#' @param titre_2 A string representing the name for the title of the final dataset in the summary.
-#' 
-#' @return A dataframe summarizing the differences between the two datasets.
-#' @examples
-#' \dontrun{
-#' init_dataset <- data.frame(measurement_unit = c("unit1", "unit2"), measurement_value = c(10, 20))
-#' final_dataset <- data.frame(measurement_unit = c("unit1", "unit2"), measurement_value = c(15, 25))
-#' summary <- compute_summary_of_differences(init_dataset, final_dataset, "Initial Data", "Final Data")
-#' print(summary)
-#' }
+#' @param init A data.table containing the initial measurement data.
+#' @param final A data.table containing the final measurement data.
+#' @param titre_1 A character string for the title of the first dataset (default: "Dataset 1").
+#' @param titre_2 A character string for the title of the second dataset (default: "Dataset 2").
+#'
+#' @return A data.table summarizing the differences between the two datasets, 
+#'         including total measurements and percentage differences.
 #' @export
-compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", meanorsum = "sum") {
+compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
   
-  if(meanorsum == "sum"){
-    # Group and summarize initial dataset
-    init_group <- init %>%
-      dplyr::group_by(measurement_unit) %>%
-      dplyr::summarise(titre_test1 = sum(measurement_value)) 
-    
-    # Group and summarize final dataset
-    final_group <- final %>%
-      dplyr::group_by(measurement_unit) %>%
-      dplyr::summarise(titre_test2 = sum(measurement_value))
-  } else{
-    
-    # Group and summarize initial dataset
-    init_group <- init %>%
-      dplyr::group_by(measurement_unit) %>%
-      dplyr::summarise(titre_test1 = mean(measurement_value)) 
-    
-    # Group and summarize final dataset
-    final_group <- final %>%
-      dplyr::group_by(measurement_unit) %>%
-      dplyr::summarise(titre_test2 = mean(measurement_value))
-  }
+  # Ensure input data are data.tables
+  init <- as.data.table(init)
+  final <- as.data.table(final)
+  
+  # Group and summarize initial dataset
+  init_group <- init[, .(titre_test1 = sum(measurement_value, na.rm = TRUE)), by = measurement_unit]
+  
+  # Group and summarize final dataset
+  final_group <- final[, .(titre_test2 = sum(measurement_value, na.rm = TRUE)), by = measurement_unit]
+  
   # Compute summary of differences
-  summary <- dplyr::full_join(init_group, final_group) %>%
-    dplyr::mutate(across(where(is.numeric), ~replace(., is.na(.), 0))) %>%
-    dplyr::arrange(measurement_unit) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(
-      measurement_unit = paste0(measurement_unit),
-      Difference = -titre_test1 + titre_test2,
-      `Difference (in %)` = 100 * (Difference / titre_test1)
-    ) %>%
-    dplyr::rename_with(~ case_when(
-      .x == "titre_test1" ~ titre_1,
-      .x == "titre_test2" ~ titre_2,
-      TRUE ~ .x
-    ))
+  summary <- merge(init_group, final_group, by = "measurement_unit", all = TRUE)
+  
+  # Replace NA with 0 in numeric columns and calculate differences
+  summary[is.na(titre_test1), titre_test1 := 0]
+  summary[is.na(titre_test2), titre_test2 := 0]
+  
+  summary[, Difference := -titre_test1 + titre_test2]
+  summary[, `Difference (in %)` := 100 * (Difference / titre_test1)]
+  
+  # Rename columns for clarity
+  setnames(summary, "titre_test1", titre_1)
+  setnames(summary, "titre_test2", titre_2)
+  
+  # Arrange the summary by measurement_unit
+  setorder(summary, measurement_unit)
   
   return(summary)
 }
+
 

@@ -1,0 +1,167 @@
+---
+title: '`r ifelse(exists("title"), title, "Comparison of two datasets")`'
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+author:
+  - name: Bastien Grasset
+    email: bastien.grasset@ird.fr
+    affiliation:
+      - IRD
+      - MARBEC
+  - name: Julien Barde
+    affiliation:
+      - IRD
+      - MARBEC
+address:
+  - code: IRD
+    address: Institut de Recherche pour le Développement (IRD), av. Jean Monnet, CS 30171, 34203 Sète cédex, France
+  - code: MARBEC
+    address: MARBEC, University of Montpellier, CNRS, Ifremer, IRD, Sète, France
+csl: dmk-format.csl
+link-citations: TRUE
+output:
+  bookdown::pdf_document2:
+    extra_dependencies: ["adjustbox", "subfig", "flafter"]
+    toc: TRUE
+    keep_tex: TRUE
+    template: template.tex
+    number_sections: TRUE
+    citation_package: default
+  bookdown::html_document2:
+  bookdown::word_document2:
+    toc: TRUE
+lang: en
+geometry: "margin=25mm"
+papersize: a4
+endfloat: FALSE
+numberlines: FALSE
+authblk: FALSE
+footnotehyper: FALSE
+urlcolor: blue
+linkcolor: blue
+citecolor: blue
+graphics: TRUE
+tables: TRUE
+fancyhdr:
+  first:
+    headleft: '`r ifelse(exists("headleft_title"), headleft_title, "Comparison")`'
+    headright: '`r ifelse(exists("headleft_title"), headleft_title, "Comparison")`'
+    headrulewidth: 0pt
+  subsequent:
+    headleft: '`r ifelse(exists("headleft_title"), headleft_title, "Comparison")`'
+    headright: '`r ifelse(exists("headleft_title"), headleft_title, "Comparison")`'
+    headrulewidth: 1pt
+    footrulewidth: 0pt
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(rmarkdown)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(officer)
+library(flextable)
+# Chargez d'autres packages nécessaires ici
+
+# Fonction pour vérifier et inclure des fichiers enfants
+include_child <- function(file) {
+  if (file.exists(file)) {
+    return(knitr::knit_child(file, quiet = TRUE, envir = environment()))
+  } else {
+    return(NULL)
+  }
+}
+```
+
+### Paramètres
+
+Définissez les paramètres nécessaires.
+
+```{r parameter-settings, include=FALSE}
+# Contenu de Parameters_settings.R
+# Définissez vos paramètres ici
+# Exemple : parameter_short <- FALSE
+```
+
+### Setup_markdown
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  error = 0,
+  fig.align = "center",
+  message = FALSE,
+  warning = FALSE,
+  tab.cap.pre = "Table ",
+  tab.cap.sep = ": ", results = 'asis'
+)
+base::options(knitr.duplicate.label = "allow")
+
+base::options(scipen=9999)
+plotting_type <- "plot"
+if (knitr::is_html_output()){plotting_type <- "view"}
+tmap_mode(plotting_type)
+
+set_flextable_defaults(
+  font.size = 10,
+  font.color = "black",
+  digits = 2,
+  theme_fun = "theme_box"
+)
+
+autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE)
+```
+
+### Explenation
+
+```{r explenation, results='asis'}
+include_child("Explenation.Rmd")
+```
+
+### Summary of Differences
+
+```{r Summarydifferences, results='asis'}
+include_child("Summarydifferences.Rmd")
+```
+
+### Comparison of Number of Stratas
+
+```{r Compnumberstratas, results='asis'}
+include_child("Compnumberstratas.Rmd")
+```
+
+### Main Differences
+
+```{r Main-differences, results='asis'}
+include_child("Main_differences.Rmd")
+```
+
+### Main Characteristics of the Dataset
+
+```{r Main-caracteristics-of-dataset, results='asis'}
+include_child("Main_caracteristics_of_dataset.Rmd")
+```
+
+### Recap without Mapping
+
+```{r Recap-without-mapping, results='asis'}
+include_child("Recap_without_mapping.Rmd")
+```
+
+### Annexe
+
+```{r Annexe, results='asis'}
+include_child("Annexe.Rmd")
+```
+
+### Vérification et inclusion des fichiers générés
+
+```{r include=FALSE}
+# Exemple de vérification de fichiers .rds
+if (file.exists("path/to/yourfile.rds")) {
+  data <- readRDS("path/to/yourfile.rds")
+  # Affichez ou traitez les données ici
+}
+```
+
+\clearpage

@@ -1,0 +1,261 @@
+---
+title: "`r ifelse(exists('title_markdown'), title_markdown, 'Comparison of two CWP format datasets')`"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author:
+  - name: Bastien Grasset
+    email: bastien.grasset@ird.fr
+    affiliation:
+      - IRD
+      - MARBEC
+  - name: Emmanuel Blondel
+    affiliation: FAO
+  - name: Julien Barde
+    affiliation:
+      - IRD
+      - MARBEC
+address:
+  - code: IRD
+    address: Institut de Recherche pour le Développement (IRD), av. Jean Monnet, CS 30171, 34203 Sète cédex, France
+  - code: MARBEC
+    address: MARBEC, University of Montpellier, CNRS, Ifremer, IRD, Sète, France
+csl: dmk-format.csl
+link-citations: TRUE
+output:
+  bookdown::gitbook:
+    config:
+      toc:
+        collapse: subsection
+        scroll_highlight: true
+        before: null
+        after: null
+  bookdown::pdf_document2:
+    latex_engine: lualatex 
+    extra_dependencies: ["adjustbox", "subfig", "flafter", "makecell"]
+    toc: TRUE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+    always_allow_html: TRUE
+    keep_md: TRUE
+abstract: "This document provides an overview of the impact of various processing steps on a specific dataset from the Global Tuna Atlas. We begin by presenting the final dataset along with its key characteristics, followed by a global comparison with the FIRMS level 0 dataset. Next, we outline each step involved in creating the final dataset, detailing the decisions made and their effects on specific data points.\n If you would like to explore the impact of individual processing steps with more specific filters, feel free to contact us or rerun the process and automated reporting using the project available on GitHub at firms-gta/geoflow-tunaatlas."
+geometry: "margin=20mm"
+papersize: a4
+endfloat: FALSE
+numberlines: FALSE
+authblk: FALSE
+footnotehyper: FALSE
+urlcolor: blue
+linkcolor: blue
+citecolor: blue
+graphics: TRUE
+tables: TRUE
+fancyhdr:
+  first:
+    headleft: "Global Tuna Atlas outputs and process"
+    headright: "2023"
+    headrulewidth: 0pt
+  subsequent:
+    headleft: "Global Tuna Atlas outputs and process"
+    headright: "2023"
+    headrulewidth: 1pt
+    footrulewidth: 0pt
+---
+
+
+```{r setuprmd,include = FALSE, echo=FALSE}
+
+res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
+# envir = parent.frame() ne marche pas bien car il faut appeler dans le nouveau markdown (child) envir$obj
+```
+
+```{r}
+
+if(!exists("parameter_short")){parameter_short = FALSE}
+if(!exists("child_header")){child_header = ""}
+
+```
+
+
+```{r eval=exists("Add_lines") && file.exists(Add_lines), results='asis'}
+
+res <- knitr::knit_child(Add_lines, quiet = TRUE, envir = environment())
+cat(res)
+
+```
+
+`r if(exists("step_title_t_f") && step_title_t_f){cat_title(step_title, child_headerinside = child_header)}`
+
+```{r explanationongainandloss, results='asis', eval=(!parameter_short && !unique_analyse)}
+
+  cat(
+    "*In the following document:* \n",
+    "- ***All the differences inferior to 0 corresponds to gain in captures.*** \n", 
+    "- ***The initial dataset, sometimes referred as, dataset 1 is: ", parameter_titre_dataset_1, "*** \n",
+    "- ***The final dataset, sometimes referred as, dataset 2 is: ", parameter_titre_dataset_2, "***", 
+    sep = "\n"
+  )
+
+```
+
+```{r filterprinting, echo=FALSE, results='asis'}
+
+if (!isNullList(parameter_filtering)){
+  cat (paste0("The filter used on this data are:  \n "))
+  for (i in 1:length(parameter_filtering)){
+    if (parameter_filtering[i] %in% parameter_filtering & !is.null(parameter_filtering[[i]])){
+      cat(paste0("***- On ", names((parameter_filtering)[i]), " : ", paste((parameter_filtering)[[i]], collapse = " ; "),"*** \n"))
+    } else {""}
+  }
+}
+
+if (!is.null(parameter_resolution_filter)) {
+
+  cat (paste0("The geographical filter used on this data is:  \n "))
+
+  cat(parameter_resolution_filter)
+    
+  }
+
+
+```
+
+```{r include=FALSE}
+
+if(!unique_analyse && parameter_short == FALSE && coverage){
+  main_title <- TRUE
+} else {
+  main_title <- FALSE
+  child_header <- sub("#", "", child_header)
+}
+
+```
+
+`r if(main_title){cat_title("# Main differences", child_headerinside = child_header)}`
+
+```{r summarydiffplotting, eval=!unique_analyse,echo=FALSE, results='asis', out.width="100%"}
+
+qflextable2(summary_of_differences, captionn = "Summary of the difference between the two datasets", columns_to_color = c("Difference"), save_folder = "Summary", interactive_plot = FALSE)
+
+```
+
+```{r include=FALSE, eval=!unique_analyse}
+
+title <- gsub("_", "\\_", combined_summary_histogram$labels$title, fixed = TRUE)
+
+combined_summary_histogram$labels$title <- ""
+
+```
+
+
+```{r, echo=FALSE, out.width="100%", warning=FALSE, message=FALSE, fig.cap=title, eval=!unique_analyse}
+
+combined_summary_histogram
+
+```
+
+```{r diffstratas,echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE, results='asis', eval=!unique_analyse}
+
+if (nrow(compare_strata_differences_list$strates_perdues_first_10) != 0) {
+  cat("The strata differences (completely lost or appearing) between the first one and the second one (representing ", round(compare_strata_differences_list$pourcentage_strates_perdues), " % of the total number of strata) are :")
+} else {
+  cat("No stratum is gained nor lost")
+}
+```
+
+```{r disapandapflextable, eval = (nrow(compare_strata_differences_list$strates_perdues_first_10) != 0) & !unique_analyse, results="asis"}
+
+qflextable2(compare_strata_differences_list$disapandap, captionn = compare_strata_differences_list$title, columns_to_color = c("Difference in millions"), grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE, find_and_print = FALSE)
+
+```
+
+```{r compnumberstratascolumns, results='asis', out.width="100%", eval=!unique_analyse}
+
+qflextable2(compare_strata_differences_list$number_init_column_final_column, captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
+
+```
+
+```{r parametershort,  eval=parameter_short && !unique_analyse, results='asis'}
+
+exit <- "This document only presents the summary of the differences between the two datasets. If you need a more detailed summary please provide FALSE as argument for the 'short' parameter"
+
+if(child){exit <- ""}
+
+if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
+
+
+```
+
+
+`r if(!unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list)) && !=unique_analyse){cat_title("## Differences in temporal data", child_headerinside = child_header)}`
+
+```{r include = FALSE,eval = !unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))}
+
+timediffplot_knit_list <- mapply(FUN = knitting_plots_subfigures, plot = plot_titles_list$plots, title = plot_titles_list$titles, MoreArgs = list(folder = "Temporal", fig.pathinside = fig.path))
+
+```
+
+
+```{r timedimdiffmultipleplotsprinting, results='asis',eval = !unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))}
+
+cat(unlist(timediffplot_knit_list), sep = "\n")
+
+```
+
+\clearpage
+
+`r if(!unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))){cat_title("## Differences in geographical data", child_headerinside = child_header)}`
+
+```{r tmapsaving, message=FALSE, warning=FALSE, eval = !unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))}
+
+save_image(title = Geographicdiff$title, plott = Geographicdiff$plott, folder = "Spatialdiffmap", find_and_print = outputonly, fig.pathinside = fig.path)
+
+```
+
+
+```{r spatialdifferencesplotting, out.width="100%", eval = !unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))}
+
+Geographicdiff$plott
+
+```
+
+\clearpage
+
+`r if(!unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))){cat_title("## The differences for each other dimension", child_headerinside = child_header)}`
+
+```{r topn, include=FALSE, eval = !unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))}
+if(exists("compare_dimension_differences_list$topn")){topn <- compare_dimension_differences_list$topn} else{topn <- 6}
+```
+
+
+```{r topnsentence, eval = !unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))}
+
+cat(paste0("We present for each dimension the ", topn, " most important differences without presenting the stratas completely appearing or disappearing."))
+
+```
+
+
+
+```{r printing-table-diff-dimensions, paged.print=TRUE, results='asis', eval = !unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))}
+if(nrow(compare_dimension_differences_list$Groupped_all_not_disap_or_app_to_dysplay) != 0) {
+  qflextable2(compare_dimension_differences_list$Groupped_all_not_disap_or_app_to_dysplay, captionn = compare_dimension_differences_list$title, grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", columns_to_color = c("Difference (in %)"))
+} else {
+  cat("There are no differences between stratas aside the appearing and disappearing ones")
+}
+```
+
+
+```{r eval = !coverage}
+
+knitr::knit_exit(fully = FALSE)
+
+```
+
+```{r Maincharactofdataset, results='asis', eval = coverage}
+
+res <- knitr::knit_child("Main_caracteristics_of_dataset.Rmd", quiet = TRUE, envir = environment())
+
+cat(res, sep =  "\\clearpage")
+
+```

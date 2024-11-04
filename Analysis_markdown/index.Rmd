@@ -7,8 +7,6 @@ author:
     affiliation:
       - IRD
       - MARBEC
-  - name: Emmanuel Blondel
-    affiliation: FAO
   - name: Julien Barde
     affiliation:
       - IRD
@@ -39,7 +37,7 @@ output:
     citation_package: default # Can also be "natbib"
     always_allow_html: TRUE
     keep_md: TRUE
-abstract: "This document is aimed to recap the impact on the data of the different treatment of the Global Tuna Atlas. \nFirst we present the data created by the GlobalTuna Atlas, as well as the comparison between this data and the rawdata provided by the RFMO’s before the global Tuna Atlas treatment. \nIn a second time we will present the process of the GlobalTuna Atlas in order to reference exactly the choices made."
+abstract: "This document provides an overview of the impact of various processing steps on a specific dataset from the Global Tuna Atlas. We begin by presenting the final dataset along with its key characteristics, followed by a global comparison with the FIRMS level 0 dataset. Next, we outline each step involved in creating the final dataset, detailing the decisions made and their effects on specific data points.\n If you would like to explore the impact of individual processing steps with more specific filters, feel free to contact us or rerun the process and automated reporting using the project available on GitHub at firms-gta/geoflow-tunaatlas."
 geometry: "margin=20mm"
 papersize: a4
 endfloat: FALSE

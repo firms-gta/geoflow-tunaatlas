@@ -1,4 +1,3 @@
-
 # Load 'renv' for project-specific environments
 # if (!require("renv")) install.packages("renv")
 library(renv)
@@ -15,7 +14,7 @@ required_packages <- c(
   "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
   "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger"
+  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
 )
 
 # Function to check, install (if necessary), and load a package
@@ -30,17 +29,6 @@ install_and_load <- function(package) {
 sapply(required_packages, install_and_load)
 
 require(geoflow)
-
-
-executeAndRename <- function(executed_file, suffix) {
-  
-  # Derive folder and file names
-  folder_file <- file.path("jobs", basename(executed_file))
-  
-  # Rename the file with the given suffix
-  file.rename(folder_file, paste0("jobs/", basename(executed_file), suffix))
-  return(paste0("jobs/", basename(executed_file), suffix))
-}
 
 # Note: This script assumes that the internet connection is available and
 # the CRAN/GitHub repositories are accessible for package installation.
@@ -58,7 +46,7 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
 # } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
-# load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
+# load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")
 
 running_time_of_workflow <- function(folder){
   # Get the last modified times of the files
@@ -70,6 +58,14 @@ running_time_of_workflow <- function(folder){
   
   return(time_difference)
 }
+
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+
+entity <- config$metadata$content$entities[[1]]
+action <- entity$data$actions[[1]]
+
 stop("Stop")
 # First step is creation of the database model and loading of the codelist (around 5 minutes)
 db_model <- executeWorkflow(here("tunaatlas_qa_dbmodel+codelists.json")) 
@@ -139,20 +135,145 @@ Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_
 
 # Create 5 datasets catch and effort. These entities are the final one published on zenodo. 
 
+executeWorkflow("manu_geoflow_gta_config_model.json")
+
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
 ### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
 create_materialized_view <- ""
+compare_nominal_georef_corrected <- function(nominal, georef_mapped, list_strata = list(c("species", "year", "source_authority", "gear_type", "fishing_fleet"))) {
+  # Convertir les data.frames en data.tables
+  setDT(nominal)
+  setDT(georef_mapped)
+  
+  # Créer la colonne "year" à partir de time_start
+  georef_mapped[, year := as.character(year(ymd(time_start)))]
+  nominal[, year := as.character(year(ymd(time_start)))]
+  
+  # Conserver uniquement les données en tonnes
+  georef_mapped_tons <- georef_mapped[measurement_unit == "t"]
+  
+  # Initialise une liste pour stocker les résultats (un résultat pour chaque liste de dimensions à conserver pour faire la comparaison)
+  results <- list()
+  
+  for (strata in list_strata) {
+    # Nom pour la catégorie actuelle de strata
+    name <- paste0(toString(strata))
+    
+    # Agréger les données pour le nominal et georef sur les colonnes spécifiées dans 'strata' (ex groupper les données par années, espèces, engins, pavillon)
+    nominal_grouped <- nominal[, .(measurement_value_nominal = sum(measurement_value, na.rm = TRUE)), by = strata]
+    georef_mapped_grouped <- georef_mapped[, .(measurement_value_georef = sum(measurement_value, na.rm = TRUE)), by = strata]
+    georef_mapped_tons_grouped <- georef_mapped_tons[, .(measurement_value_georef_tons = sum(measurement_value, na.rm = TRUE)), by = strata]
+    
+    # # Retirer les valeurs des colonnes pour comparer uniquement les strates (si on veut garder que elles)
+    nominal_grouped_without_value <- nominal_grouped[, .SD, .SDcols = strata]
+    georef_grouped_without_value <- georef_mapped_grouped[, .SD, .SDcols = strata]
+    georef_tons_grouped_without_value <- georef_mapped_tons_grouped[, .SD, .SDcols = strata]
+    
+    
+    # # Assurer que les colonnes sont dans le même ordre pour la comparaison
+    setcolorder(georef_grouped_without_value, names(nominal_grouped_without_value))
+    setcolorder(georef_tons_grouped_without_value, names(nominal_grouped_without_value))
+    
+    # Trouver les strates présentes dans georef_mapped mais absentes de nominal
+    georef_no_nominal <- fsetdiff(georef_grouped_without_value, nominal_grouped_without_value, all = FALSE)
+    georef_no_nominal_with_value <- merge(georef_mapped_tons_grouped, georef_no_nominal, by = strata, all = FALSE)
+    sum_georef_no_nominal_tons <- sum(georef_no_nominal_with_value$measurement_value_georef_tons ,na.rm = TRUE)
+    
+    
+    # Comparer uniquement les données en tonnes
+    georef_tons_no_nominal <- fsetdiff(georef_tons_grouped_without_value, nominal_grouped_without_value, all = FALSE)
+    
+    # Comparer les valeurs des strates communes entre nominal et georef_mapped pour les données en tonnes
+    georef_sup_nominal <- merge(nominal_grouped, georef_mapped_tons_grouped, by = strata, all = FALSE)
+    
+    # Vérifier si les colonnes existent après le merge
+    if ("measurement_value_georef_tons" %in% names(georef_sup_nominal) && 
+        "measurement_value_nominal" %in% names(georef_sup_nominal)) {
+      georef_sup_nominal[, Difference := measurement_value_georef_tons - measurement_value_nominal]
+      georef_sup_nominal <- georef_sup_nominal[round(Difference, 3) > 1] # Supérieur strictement à 1, on s'affranchit des petits kouaks
+    } else {
+      georef_sup_nominal <- data.table()  # Retourne une table vide s'il n'y a pas de données
+    }
+    
+    if ("fishing_fleet" %in% colnames(georef_sup_nominal)){
+      tons_nei_georef <- georef_no_nominal_with_value[
+        fishing_fleet == "NEI" ,
+        sum(measurement_value_georef_tons)] + georef_sup_nominal[
+          fishing_fleet == "NEI" ,
+          sum(measurement_value_georef_tons) 
+        ]} else {
+          tons_nei_georef <- 0
+        }
+    
+    tons_aggregated_georef <- georef_no_nominal_with_value[
+      species %in% c("TUN", "TUS" ,"BIL"),
+      sum(measurement_value_georef_tons)
+    ] + georef_sup_nominal[
+      species %in% c("TUN", "TUS" ,"BIL"),
+      sum(measurement_value_georef_tons)
+    ]
+    
+    if ("fishing_fleet" %in% colnames(nominal_grouped)){
+      tons_nei_nominal <- nominal_grouped[
+        fishing_fleet == "NEI",
+        sum(measurement_value_nominal)
+      ]} else {tons_nei_nominal <- 0}
+    
+    
+    sum_georef_sup_nom <- sum(georef_sup_nominal$Difference, na.rm = TRUE)
+    
+    suffisant <- ifelse(sum_georef_no_nominal_tons + sum_georef_sup_nom -(tons_aggregated_georef + tons_nei_georef) > 0, FALSE, TRUE)
+    # Stocker les résultats
+    results[[name]] <- list(
+      georef_no_nominal = georef_no_nominal,           # Strates dans georef mais absentes dans nominal
+      georef_no_nominal_with_value = georef_no_nominal_with_value %>% dplyr::rename(measurement_value = measurement_value_georef_tons),           # Strates dans georef mais absentes dans nominal avec la valeur totale
+      georef_tons_no_nominal = georef_tons_no_nominal, # Strates en tonnes absentes dans nominal
+      georef_sup_nominal = georef_sup_nominal,          # Strates où georef est supérieur à nominal
+      tons_nei_nominal = tons_nei_nominal,          # Strates nei qui pourraient expliquer les différences
+      tons_nei_georef = tons_nei_georef,          # Strates nei qui pourraient expliquer les différences
+      sum_georef_no_nominal = sum_georef_no_nominal_tons, 
+      suffisant = suffisant, 
+      tons_aggregated_georef = tons_aggregated_georef,
+      sum_georef_sup_nom = sum_georef_sup_nom
+    )
+  }
+  
+  return(results)
+}
+source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisheries_data_by_species.R")
+
+# IRD_data <- readr::read_csv("data/IOTC_conv_fact_mapped.csv")
+# specieslist <- unique(IRD_data$species)
+specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF")
+
+entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
+# entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20241007133651_global_datasets_level1_2/entities/global_catch_ird_level2_without_IRD"
+for (entity_dir in entity_dirs) {
+  entity_name <- basename(entity_dir)
+  setwd(here::here(entity_dir))
+  sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
+  details <- file.info(sub_list_dir_2)
+  details <- details[with(details, order(as.POSIXct(mtime))), ]
+  sub_list_dir_2 <- rownames(details)
+  flog.info("Processed sub_list_dir_2")
+  sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+  a <- process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
+  combined_df <- create_combined_dataframe(a)
+  qflextable(combined_df)
+  # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
+  qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
+}
 
 # uncomment the follwoing lines to go the shared path for analysis
 # tunaatlas_qa_global_datasets_catch_path <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data"
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
-source(here::here("Analysis_markdown/functions/Summarising_step.R"))
-config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("creating_dataset.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 #removed of Sumamrising step required_packages <- c("webshot","here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
@@ -160,12 +281,32 @@ con <- config$software$output$dbi
 #                        "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
 #                        "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
 # )
-
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config)
-
-
-
+source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/Summarising_step.R")
+setwd("~/firms-gta/geoflow-tunaatlas")
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = TRUE, usesave = FALSE)
+config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
+# Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
 # 
+# georef_dataset <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20241002142921_global_datasets_level1_2/entities/global_catch_ird_level2/Markdown/Level2_RF1/ancient.qs")
+# species <- unique(georef_dataset$species)
+# rm(georef_dataset)
+# 
+# config$metadata$content$entities[[1]] <- config$metadata$content$entities[[2]]
+# # Remove the 2nd and 3rd elements from the list
+# config$metadata$content$entities <- config$metadata$content$entities[-c(2, 3)]
+# 
+# 
+# for (i in unique(species)){
+#   
+#   config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = i)
+#   
+# Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short",
+#                  source_authoritylist = c("all"),savestep = FALSE, nameoutput = paste0(i, "pdf"), usesave = FALSE )
+# 
+# }
+
+
 # `2024-08-28_11:12:03nominal_inferior_to_georeferenced`$GRIDTYPE <- "GRIDTYPE"
 # a <- comprehensive_cwp_dataframe_analysis(parameter_init = `2024-08-28_11:12:03nominal_inferior_to_georeferenced`,
 # unique_analyse = TRUE, print_map = FALSE, removemap = TRUE)

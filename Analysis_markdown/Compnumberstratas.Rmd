@@ -11,6 +11,20 @@ qflextable2(summary_of_differences, captionn = "Summary of the difference betwee
 
 ```
 
+```{r include=FALSE}
+
+title <- gsub("_", "\\_", combined_summary_histogram$labels$title, fixed = TRUE)
+
+combined_summary_histogram$labels$title <- ""
+
+```
+
+
+```{r, echo=FALSE, out.width="100%", warning=FALSE, message=FALSE, fig.cap=title}
+
+combined_summary_histogram
+
+```
 
 ```{r diffstratas,echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE, results='asis'}
 
