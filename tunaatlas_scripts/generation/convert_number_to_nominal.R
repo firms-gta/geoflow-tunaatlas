@@ -26,9 +26,11 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
                                       strata = c("source_authority", "species", "gear_type", "fishing_fleet", "year"),
                                       raise_only_unmatched = TRUE) {
   
+  columns <- colnames(georef_dataset)
+  
   global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>%
     dplyr::mutate(year = lubridate::year(time_start)) %>% 
-    ungroup()
+    ungroup() %>% dplyr::group_by(across(strata)) %>% dplyr::summarise(measurement_value = sum(measurement_value))
   
   flog.info("Starting conversion of fish capture numbers to tons.")
   
@@ -117,15 +119,15 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
     dplyr::filter(!is.na(new_measurement)) %>%
     dplyr::rename(measurement_value = new_measurement) %>%
     dplyr::ungroup() %>%
-    dplyr::select(time_start, gear_type, time_end, geographic_identifier, species, source_authority, fishing_fleet,  measurement_value, fishing_mode) %>%
+    dplyr::select(all_of(columns)) %>%
     dplyr::mutate(measurement_unit = "t")
   
   # Handle hopeless cases (entries without conversion)
   not_converted_number <- georef_and_nominal_augmentation %>%
     dplyr::filter(is.na(new_measurement)) %>%
     dplyr::ungroup() %>%
-    dplyr::select(time_start, time_end, gear_type, species, source_authority, fishing_fleet, 
-                  geographic_identifier ,measurement_value = measurement_value.x, fishing_mode) %>%
+    dplyr::rename(measurement_value = measurement_value.x) %>% 
+    dplyr::select(all_of(columns)) %>%
     dplyr::mutate(measurement_unit = "no")
   # Combine all datasets
   georef_dataset <- rbind(

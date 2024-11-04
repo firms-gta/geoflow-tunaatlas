@@ -15,21 +15,17 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
     } else if (codelist_geoidentifiers_conversion_factors =='areas_conversion_factors_numtoweight_ird'){
       classify_cwp_code <- function(cwp_code) {
         # Parse the CWP code to extract relevant parts
-        # This is a placeholder - you'll need to replace this with actual logic
-        # For example, if the first character is the size code, the second is the quadrant, etc.
         size_code <- substr(cwp_code, 1, 1)
         quadrant_code <- substr(cwp_code, 2, 2)
-        latitude <- as.numeric(substr(cwp_code, 3, 5))  # Assuming latitude is coded in characters 3 to 5
+        latitude <- as.numeric(substr(cwp_code, 3, 5))  
         
-        # Determine classification based on quadrant and latitude
-        # This is a simplification. The actual logic may depend on how the latitude is encoded in the CWP code.
         if ((quadrant_code %in% c("1", "4") && latitude >= 10) ||
             (quadrant_code %in% c("2", "3") && latitude <= -10)) {
-          return(1)  # North tropical
+          return(1) 
         } else if (quadrant_code %in% c("2", "3") && latitude <= 10) {
-          return(2)  # South tropical
+          return(2) 
         } else {
-          return(3)  # Center/rest Equatorial
+          return(3)  
         }
       }
       

@@ -1,5 +1,5 @@
 function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions,
-                              decrease_when_rf_inferior_to_one = FALSE){
+                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE){
   
   dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
   
@@ -31,6 +31,33 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
                                                          decrease_when_rf_inferior_to_one = decrease_when_rf_inferior_to_one,
                                                          threshold_rf = NULL)
   
-  return(list(data_raised = data_raised$df, df_rf = df_rf))
+  if(remove_corresponding_number){
+  data_raised <- data_raised$df %>%
+    dplyr::ungroup() %>%
+    dplyr::group_by(across(-measurement_value)) %>% 
+    dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
+  
+  raising_factor_with_raising <- df_rf %>% dplyr::filter(round(rf,6) > 1)
+  
+  corresponding_number_to_raised_data <- data_raised %>% 
+    dplyr::filter(measurement_unit == "no") %>% 
+    dplyr::mutate(year = lubridate::year(time_start))%>% 
+    dplyr::select(x_raising_dimensions) %>% dplyr::distinct() %>% 
+    dplyr::inner_join(raising_factor_with_raising %>% 
+                        dplyr::select(x_raising_dimensions)%>% dplyr::distinct(),
+                      by = x_raising_dimensions) %>% 
+    dplyr::mutate(measurement_unit = "no") %>%
+    dplyr::distinct()
+  
+  # inner_join_removed <- data_raised%>% 
+  #   dplyr::mutate(year = lubridate::year(time_start)) %>% dplyr::inner_join(corresponding_number_to_raised_data,by = c("source_authority", "species", "gear_type", "fishing_fleet", "measurement_unit", "year"))
+  
+  data_raised <- data_raised %>% 
+    dplyr::mutate(year = lubridate::year(time_start)) %>% 
+    anti_join(corresponding_number_to_raised_data, by = c(x_raising_dimensions,"measurement_unit")) %>% 
+    dplyr::select(-year)
+  }
+  
+  return(list(data_raised = data_raised, df_rf = df_rf))
   
 }
