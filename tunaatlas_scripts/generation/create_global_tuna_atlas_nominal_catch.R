@@ -16,8 +16,15 @@
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
 
 function(action, entity, config){
+  
   opts <- action$options
-
+  # #############
+  #action options
+  recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else FALSE #default FALSE
+  SBF_data_rfmo_to_keep = if(!is.null(opts$SBF_data_rfmo_to_keep)) opts$SBF_data_rfmo_to_keep else "CCSBT"
+  from_repo = if(!is.null(opts$from_repo)) opts$from_repo else FALSE
+  
+  
   #packages
   if(!require(dplyr)){
     install.packages("dplyr")
@@ -28,10 +35,11 @@ function(action, entity, config){
     require(readr)
   }
   
-  # #############
-  #action options
-  recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else FALSE #default FALSE
-  SBF_data_rfmo_to_keep = if(!is.null(opts$SBF_data_rfmo_to_keep)) opts$SBF_data_rfmo_to_keep else "CCSBT"
+  if(from_repo){
+    nominal_catch <-
+      readr::read_csv("~/firms-gta/geoflow-tunaatlas/data/global_nominal_catch_firms_level0_harmonized.csv",
+                      guess_max = 0) %>% dplyr::mutate(measurement_value = as.numeric(measurement_value))
+  } else {
   
   # connect to Tuna atlas database
   con <- config$software$output$dbi
@@ -83,9 +91,9 @@ function(action, entity, config){
     }
     
   }
-  
+  }
   #final step
-  dataset<-nominal_catch %>% group_by_(.dots = setdiff(colnames(nominal_catch),"masurement_value")) %>% dplyr::summarise(measurement_value=sum(measurement_value))
+  dataset<-nominal_catch %>% dplyr::group_by_(.dots = setdiff(colnames(nominal_catch),"measurement_value")) %>% dplyr::summarise(measurement_value=sum(measurement_value))
   dataset<-data.frame(dataset)
   if(!is.na(any(dataset$measurement_unit) == "TRUE")) if(any(dataset$measurement_unit) == "TRUE") dataset[(dataset$measurement_unit) == "TRUE",]$measurement_unit <- "t"  #patch because of https://github.com/firms-gta/geoflow-tunaatlas/issues/41
   

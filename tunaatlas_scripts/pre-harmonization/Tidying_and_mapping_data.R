@@ -132,16 +132,20 @@ Tidying_and_mapping_data = function(action, entity, config) {
   stepnumber = stepnumber+1
   #-------------------------------------------------------------------------------------------------------------------------------------
   
-  unit_weight_to_remap = c("MT", "MTNO")
-  unit_number_to_remap = c("NO", "NOMT")
-  georef_dataset <- georef_dataset %>%
-    dplyr::mutate(
-      measurement_unit = case_when(
-        measurement_unit %in% unit_weight_to_remap ~ "t",
-        measurement_unit %in% unit_number_to_remap ~ "no",
-        TRUE ~ measurement_unit
-      )
-    )
+  georef_dataset$measurement_unit[which(georef_dataset$measurement_unit == "MTNO")]<-"t"
+  georef_dataset<-georef_dataset[!(georef_dataset$measurement_unit=="NOMT"),]
+  
+  # 
+  # unit_weight_to_remap = c("MT", "MTNO")
+  # unit_number_to_remap = c("NO", "NOMT")
+  # georef_dataset <- georef_dataset %>%
+  #   dplyr::mutate(
+  #     measurement_unit = case_when(
+  #       measurement_unit %in% unit_weight_to_remap ~ "t",
+  #       measurement_unit %in% unit_number_to_remap ~ "no",
+  #       TRUE ~ measurement_unit
+  #     )
+  #   )
   
   # -----------spatial_curation_data_mislocated------------------------------------------------------
   

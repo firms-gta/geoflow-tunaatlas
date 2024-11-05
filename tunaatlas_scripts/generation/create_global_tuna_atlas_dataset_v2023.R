@@ -24,14 +24,13 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     
   # Initialisation ----------------------------------------------------------
 
-  
   opts <- action$options
   con <- config$software$output$dbi
   options(encoding = "UTF-8")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
   write_options_to_csv(opts)
   # List of required packages
-  packages <- c("dplyr", "sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
+  packages <- c("dplyr","zen4R" ,"sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
   
   # Function to check and install missing packages
   install_and_load <- function(package) {
@@ -40,7 +39,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       require(package, character.only = TRUE)
     }
   }
-  
   # Apply the function to each package
   sapply(packages, install_and_load)
     
@@ -74,6 +72,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
     source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "convert_number_to_nominal.R")) #modified for geoflow
+    source(here::here("tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "function_raise_data.R")) #modified for geoflow
     
     
@@ -99,8 +98,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     opts$keylevel0 =  if(!is.null(opts$keylevel0)) opts$keylevel0 else "global_catch_firms_level0_harmonized.csv"
     opts$forceuseofdoi =  if(!is.null(opts$forceuseofdoi)) opts$forceuseofdoi else FALSE
     opts$doinominal = if(!is.null(opts$doinominal)) opts$doinominal else "10.5281/zenodo.11410529"
-    opts$keygeographic =  if(!is.null(opts$keygeographic)) opts$keygeographic else "test"
-    opts$doigeographic =  if(!is.null(opts$doigeographic)) opts$doigeographic else "geographic_identifier_to_nominal.csv"
+    opts$keynominal =  if(!is.null(opts$keynominal)) opts$keynominal else "global_nominal_catch_firms_level0_harmonized.csv"
     opts$include_IOTC = if(!is.null(opts$include_IOTC)) opts$include_IOTC else TRUE
     opts$include_IATTC = if(!is.null(opts$include_IATTC)) opts$include_IATTC else TRUE
     opts$include_WCPFC = if(!is.null(opts$include_WCPFC)) opts$include_WCPFC else TRUE
@@ -437,10 +435,12 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     } else {
       ## RETRIEVING DATA FROM DOI ---------------------------------------------------
       # Load georeferenced dataset
-      if (file.exists(here::here(file.path("data", keylevel0))) && !opts$forceuseofdoi) {
-        georef_dataset <- readr::read_csv(here::here(file.path("data", keylevel0)), guess_max = 0)
-      } else if (opts$forceuseofdoi && !is.null(opts$doilevel0)) {
-        georef_dataset <- download_zenodo_csv(opts$doilevel0, opts$keylevel0)
+      if (file.exists(here::here(file.path("data", opts$keylevel0))) && !opts$forceuseofdoi) {
+        georef_dataset <- readr::read_csv(here::here(file.path("data", opts$keylevel0)), guess_max = 0)
+        class(georef_dataset$measurement_value) <- "numeric" 
+      } else if (!is.null(opts$doilevel0)) {
+        zen4R::download_zenodo(doi = opts$doilevel0, files = opts$keylevel0, path = "data")
+        georef_dataset <- readr::read_csv(here::here(file.path("data", opts$keylevel0)), guess_max = 0)
         class(georef_dataset$measurement_value) <- "numeric"
       } else {
         stop("Please provide a georeferenced catch dataset")
@@ -448,15 +448,16 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         # Filtering on complete year ----------------------------------------------
         if(DATASET_LEVEL == 2){
           
-          if (file.exists(here::here("data/geographic_identifier_to_nominal.csv")) && !opts$forceuseofdoi) {
+          if (file.exists(here::here("data/geographic_identifier_to_nominal.csv"))) {
             geographic_identifier_to_nominal <- readr::read_csv(here::here("data/geographic_identifier_to_nominal.csv"))
-          } else if (opts$forceuseofdoi && !is.null(opts$doigeographic)) {
-            geographic_identifier_to_nominal <- download_zenodo_csv(opts$doigeographic, opts$keygeographic)
+            class(geographic_identifier_to_nominal$code) <- "character"
+            
           } else {
             stop("Please provide a geographic identifier to nominal dataset")
           }
           
           georef_dataset <- georef_dataset %>% 
+            dplyr::select(-c(measurement, measurement_status, measurement_type))%>% 
             # dplyr::mutate(fishing_fleet = ifelse(source_authority == "CCSBT", "NEI",fishing_fleet))%>%
             dplyr::mutate(year =lubridate::year(time_start)) %>%
             dplyr::filter((source_authority == "WCPFC" & year >= 1952) |
@@ -465,8 +466,37 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                             (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
             dplyr::select(-year) %>% dplyr::inner_join(geographic_identifier_to_nominal, by = c("geographic_identifier" = "code", "source_authority"))
           
+          species_list_wcpfc <- c("ALB", "BET", "MAK", "MLS", "SWO", "YFT", "BLM", "BUM", "POR", "OCS", "FAL", "SPN", "THR")
+          
+          wcpfc_problematic <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC" & gear_type == "09.31" &
+                                                                  substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_wcpfc) %>% 
+            dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
+            dplyr::mutate(n = n_distinct(measurement_unit))
+          
+          wcpfc_ok <- wcpfc_problematic %>% 
+          dplyr::filter(n ==1 | measurement_unit == "t") %>% dplyr::select(-n)
+          
+          species_list_iattc <- c("BSH", "FAL", "OCS", "MAK", "THR", "RSK", "SMA", "SKH", "SPN", "BET", "MLS", "SWO", "BUM", 
+                            "BLM", "YFT", "SFA", "ALB", "BIL", "SSP", "SKJ", "TUN", "PBF")
+          
+          
+          iattc_problematic <- georef_dataset %>% dplyr::filter(source_authority == "IATTC" & gear_type == "09.32" & 
+          substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_iattc)%>% 
+            dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
+            dplyr::mutate(n = n_distinct(measurement_unit))
+          
+          iattc_ok <- iattc_problematic %>% 
+            dplyr::filter(n ==1 | measurement_unit == "t") %>% dplyr::select(-n)
+          
+          georef_dataset_filtered <- georef_dataset %>% dplyr::filter(!(source_authority == "WCPFC" & gear_type == "09.31" &
+                                                                 substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_wcpfc)) %>% 
+            dplyr::filter(!(source_authority == "IATTC" & gear_type == "09.32" & substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_iattc))
+          
+          georef_dataset <- rbind(georef_dataset_filtered, wcpfc_ok, iattc_ok)
+          
           Description <- paste0("As dataset is to be raised on the basis of nominal catch that are displayed with a time resolution of year, the data is filtered to keep, for each source_authority,", 
-          " only the years where catch data are provided from January to December")
+          " only the years where catch data are provided from January to December. As well for the data displayed in number for WCPFC in 09.31 and IATTC in 09.32 ", 
+          " for dataset in 5 degrees. We remove this data as it will be used to raise the data, this represent around 40% of the data in number.")
           
           
         } else {
@@ -492,9 +522,14 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       nominal_catch <-
         readr::read_csv(here::here(file.path("data", opts$keynominal)),
                         guess_max = 0)
+      class(nominal_catch$measurement_value) <- "numeric"
+      
       #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
-    } else if(opts$forceuseofdoi && !is.null(opts$doinominal)){
-      nominal_catch <- download_zenodo_csv(opts$doinominal, opts$keynominal) 
+    } else if(!is.null(opts$doinominal)){
+      zen4R::download_zenodo(doi = opts$doinominal, files = opts$keynominal, path = "data")
+      nominal_catch <-
+        readr::read_csv(here::here(file.path("data", opts$keynominal)),
+                        guess_max = 0)
       class(nominal_catch$measurement_value) <- "numeric"
       
     } else {
@@ -532,7 +567,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                       (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
       dplyr::select(-year) %>% dplyr::rename(geographic_identifier_nom = geographic_identifier)
     
-    nominal_catch <- nominal_catch %>%
+    nominal_catch <- nominal_catch %>% 
+      dplyr::select(-c(measurement, measurement_status, measurement_type))%>%
       dplyr::ungroup() %>%
       dplyr::group_by(across(-measurement_value)) %>% 
       dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
@@ -1077,7 +1113,7 @@ function_recap_each_step(
           }
           
         }
-      
+    }
       
       if (opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate", "remove")) {
         config$logger.info(
@@ -1147,7 +1183,6 @@ function_recap_each_step(
         
       }
       gc()
-    }
           
           }
 

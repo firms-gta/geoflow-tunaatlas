@@ -95,6 +95,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
+  source(here::here("Analysis_markdown/functions/comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
   
   flog.info("Sourced all required functions")

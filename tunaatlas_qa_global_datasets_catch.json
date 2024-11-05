@@ -16,8 +16,8 @@
   "metadata": {
     "entities" : [
       {
-      "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1JhS1ADsnqTpWOEEvljk-c9EdzBurkc8A8__JOHJmkOk/edit?gid=1555058995#gid=1555058995"
+      "handler": "csv",
+      "source": "geoflow_entities_tuna_global_datasets_IRD_level1_2022 - IRD_level2.csv"
       }
     ],
     "contacts" : [
@@ -39,15 +39,7 @@
         "host": "{{DB_HOST}}",
         "port": "{{DB_PORT}}",
         "dbname": "{{DB_NAME}}"
-      },
-      		"properties" : {
-			"user": "{{DB_USER}}",
-			"onend_r": {
-				"script": "./tunaatlas_scripts/create_materialized_view_for_shiny_apps.R",
-				"fun": "create_materialized_view_for_shiny_apps"
-			}
-		}
-
+      }
     },
     {
       "id": "my-database-write",
@@ -90,17 +82,17 @@
 	{
 		"id": "enrich_metadata",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
-		"run": true
+		"run": false
 	},
 	{
 		"id": "enrich_for_db_services",
 		"script": "./tunaatlas_actions/enrich_db_for_services.R",
-		"run": true
+		"run": false
 	},
 	{
 		"id": "load_metadata",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
-		"run": true
+		"run": false
 	},
     {
       "id": "geometa-create-iso-19115",
