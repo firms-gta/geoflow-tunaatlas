@@ -382,27 +382,30 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   Initial_dataframe <- selection(as.data.table(initial_dataset))
   Final_dataframe <- selection(as.data.table(final_dataset))
   
-  geo_data <- rbind(Initial_dataframe, Final_dataframe, use.names = TRUE, fill = TRUE)
+  Initial_dataframe[, source := "Initial_dataframe"]
+  Final_dataframe[, source := "Final_dataframe"]
   
+  geo_data <- rbind(Initial_dataframe, Final_dataframe, use.names = TRUE, fill = TRUE)
   geo_data[, source := fifelse(source == "Initial_dataframe", titre_1,
                                fifelse(source == "Final_dataframe", titre_2, "Error"))]
   
-  inner_join <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)), 
+  inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)), 
                          by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
                            measurement_value != 0]
   
-  inner_join <- st_as_sf(inner_join)[st_join(inner_join, shapefile.fix %>% select(-GRIDTYPE), 
-                                             join = st_equals)]
+  inner_join_data <- st_as_sf(inner_join(inner_join_data, 
+                                shapefile.fix %>% select(code, geom), 
+                                by = c("geographic_identifier" = "code")))
   
-  if (nrow(inner_join[measurement_unit == variable_affichee]) != 0) {
+  if (nrow(inner_join_data[measurement_unit == variable_affichee]) != 0) {
     if (plotting_type == "view") {
-      image <- tm_shape(inner_join[measurement_unit == variable_affichee]) +
+      image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
         tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
     } else {
-      image <- tm_shape(inner_join[measurement_unit == variable_affichee]) +
+      image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) +
+        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)+
         tm_shape(continent) + tm_borders()
     }
     
