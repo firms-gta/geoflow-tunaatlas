@@ -301,7 +301,7 @@ fonction_groupement <- function(these_col, init, final) {
   
   # Add additional columns
   fulljoin[, Dimension := names(groupement_1)[1]]
-  setnames(fulljoin, "measurement_unit", "Precision")
+  setnames(fulljoin, names(groupement_1)[1], "Precision")
   fulljoin[, Precision := as.character(Precision)]
   
   # Calculate differences
