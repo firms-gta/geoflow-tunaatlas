@@ -21,11 +21,11 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
                             parameter_geographical_dimension_groupping, continent, plotting_type, 
                             titre_1, titre_2, outputonly) {
   
-  geographic_dimension <- fonction_groupement(list(parameter_geographical_dimension, parameter_geographical_dimension_groupping), 
+  geographic_dimension <- fonction_groupement(c(parameter_geographical_dimension, parameter_geographical_dimension_groupping), 
                                               init = init , final = final) %>% 
     dplyr::filter(value_sum_1 != 0 | value_sum_2 != 0)
   
-  breaks <- dplyr::inner_join(shapefile_fix %>% dplyr::select(-GRIDTYPE), geographic_dimension, by = c("cwp_code"="Precision")) %>%
+  breaks <- dplyr::inner_join(shapefile_fix %>% dplyr::select(cwp_code, geom), geographic_dimension, by = c("cwp_code"="Precision")) %>%
     dplyr::mutate(`Impact on the data` = dplyr::case_when(`Difference (in %)` == Inf ~ "Appearing data",
                                                           Inf > `Difference (in %)`  & `Difference (in %)` >= 100 ~ "Gain (more than double)",
                                                           100 > `Difference (in %)`  & `Difference (in %)` > 0 ~ "Gain",
@@ -41,16 +41,16 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
   
   image <- tmap::tm_shape(breaks) +
     tmap::tm_fill("Impact on the data", palette = "-PiYG", id = "name") +
-    tmap::tm_facets(by = c("measurement_unit", "GRIDTYPE"), free.scales = FALSE, free.coords = TRUE) +
+    tmap::tm_facets(by = c("measurement_unit", parameter_geographical_dimension_groupping), free.scales = FALSE, free.coords = FALSE) + # do not put free coords to true it creates bug
     tmap::tm_layout(legend.outside = TRUE)
 
-  if (plotting_type == "plot") {
-    image <- tmap::tm_shape(continent) + tmap::tm_borders() +image 
-    image_to_save <- image
-  } else {
-    image_to_save <- tmap::tm_shape(continent) + tmap::tm_borders() + image
-  }
+  # if (plotting_type == "plot") {
+    image <- image+tmap::tm_shape(continent) + tmap::tm_borders() 
+    # image_to_save <- image
+  # } else {
+  #   # image_to_save <- tmap::tm_shape(continent) + tmap::tm_borders() + image
+  # }
   title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset")
-  
+  breaks$geom <- NULL
   return(list(title = title, plott = image, tableforimage = breaks))
 }

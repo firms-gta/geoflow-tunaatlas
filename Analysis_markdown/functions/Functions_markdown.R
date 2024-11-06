@@ -397,7 +397,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                 shapefile.fix %>% select(code, geom), 
                                 by = c("geographic_identifier" = "code")))
   
-  if (nrow(inner_join_data[measurement_unit == variable_affichee]) != 0) {
+  if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
     if (plotting_type == "view") {
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
@@ -456,16 +456,27 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       # Adjust title for use in fig.cap
       assign("title_adj", gsub("_", "-", title), envir = environment())
       assign("plot_obj", plot, envir = environment())
-      
-      # Create the R chunk as a string referencing the ggplot object by its name
+      # the following code allows to print title even if the tmap object is in view mode, issue is know https://github.com/r-spatial/mapview/issues/146 but not fixed so here is a patch
       knitr::knit_child(text = c(
-        '```{r evolvaluedimdiff, fig.cap=`title_adj`, fig.align = "center", out.width = "100%", results= "asis"}',
+        '```{r nametitleplotting, echo=FALSE, fig.cap=`title_adj`, fig.height=0.1, fig.width=0.1}',
+        '',
+        '',
+        'par(mar = c(0, 0, 0, 0))',
+        'plot.new()',
+        '',
+        '',
+        '```',
+        '',
+        '',
+        '```{r knittingplotsubfigures, fig.align = "center", out.width = "100%", results= "asis"}',
         '',
         '',
         'plot_obj',
         '',
+        '',
         '```'
       ), envir = environment(), quiet = TRUE)
+      
     } else {
       # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
       plot

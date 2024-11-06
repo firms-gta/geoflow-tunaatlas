@@ -192,12 +192,10 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     other_dimension_analysis_list <- NULL
   }
   if (print_map && coverage) {
-    
     spatial_coverage_analysis_list <- spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, GrouppedGRIDTYPE, savingimages = FALSE)
   } else {
     spatial_coverage_analysis_list <- NULL
   }
-  
   combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init", final, parameter_titre_dataset_2 = "Final") {
     setDT(init)  
     summary_number_row_init <- init[, .(Number_different_stratas = .N), by = measurement_unit]

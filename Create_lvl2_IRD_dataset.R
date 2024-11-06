@@ -23,10 +23,10 @@ required_packages <- c(
 
 # Install and load packages
 install_and_load <- function(package) {
-  if (!require(package, character.only = TRUE)) {
-    install.packages(package)
+  # if (!require(package, character.only = TRUE)) {
+  #   install.packages(package)
     library(package, character.only = TRUE)
-  }
+  # }
 }
 sapply(required_packages, install_and_load)
 require(geoflow)
@@ -44,10 +44,15 @@ tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas
 
 # Summarizing Step
 # ----------------
-
+if(file.exists(here::here("geoserver_sdi_lab.env"))){
+  default_file <- "geoserver_sdi_lab.env"
+} # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
+load_dot_env(file = here::here(default_file)) # to be replaced by the one used
+config <- initWorkflow(here::here("creating_dataset.json"))
+con <- config$software$output$dbi
 # Load function and run summarizing step
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
-# Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config = config, sizepdf = "middle", savestep = TRUE, usesave = FALSE)
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config = config, sizepdf = "middle", savestep = TRUE, usesave = FALSE)
 
 
 # NetCDF Creation

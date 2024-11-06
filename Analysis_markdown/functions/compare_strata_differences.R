@@ -18,7 +18,7 @@
 #' }
 #' @export
 compare_strata_differences <- function(init, final, Groupped_all, titre_1 = "Dataset1", titre_2 = "Dataset2", parameter_columns_to_keep, unique_analyse = FALSE) {
-
+  Groupped_all <- as.data.frame(Groupped_all)
   Groupped_all$Dimension <- as.character(Groupped_all$Dimension)
   Groupped_all$Precision <- as.character(Groupped_all$Precision)
   
@@ -44,7 +44,7 @@ compare_strata_differences <- function(init, final, Groupped_all, titre_1 = "Dat
       dplyr::group_by(`Loss / Gain`, Dimension, measurement_unit) %>% 
       dplyr::select(Dimension, everything())
   }
-  
+  strates_perdues_first_10 <- as.data.frame(strates_perdues_first_10)
   strates_perdues_first_10[strates_perdues_first_10 == ""] <- "NA"
   strates_perdues_first_10[is.na(strates_perdues_first_10)] <- "NA"
   

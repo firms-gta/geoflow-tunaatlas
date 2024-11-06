@@ -468,7 +468,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           
           species_list_wcpfc <- c("ALB", "BET", "MAK", "MLS", "SWO", "YFT", "BLM", "BUM", "POR", "OCS", "FAL", "SPN", "THR")
           
-          wcpfc_problematic <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC" & gear_type == "09.31" &
+          wcpfc_problematic <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC" & gear_type == "09.32" &
                                                                   substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_wcpfc) %>% 
             dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
             dplyr::mutate(n = n_distinct(measurement_unit))
@@ -492,7 +492,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                                                                  substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_wcpfc)) %>% 
             dplyr::filter(!(source_authority == "IATTC" & gear_type == "09.32" & substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_iattc))
           
-          georef_dataset <- rbind(georef_dataset_filtered, wcpfc_ok, iattc_ok)
+          georef_dataset <- rbind(georef_dataset_filtered, wcpfc_ok, iattc_ok) %>% 
+            dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type = "09.32", "09.31", gear_type))
           
           Description <- paste0("As dataset is to be raised on the basis of nominal catch that are displayed with a time resolution of year, the data is filtered to keep, for each source_authority,", 
           " only the years where catch data are provided from January to December. As well for the data displayed in number for WCPFC in 09.31 and IATTC in 09.32 ", 

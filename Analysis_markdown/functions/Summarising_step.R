@@ -21,7 +21,7 @@
 #' @import sf
 #' @import futile.logger
 #' @export
-Summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC", "CCSBT", "IATTC", "ICCAT" , "WCPFC"), sizepdf = "long",
+Summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
                              savestep = FALSE, nameoutput = NULL, usesave = FALSE) {
   
   if(sizepdf == "long"){
@@ -95,7 +95,6 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
-  source(here::here("Analysis_markdown/functions/comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
   
   flog.info("Sourced all required functions")
@@ -161,7 +160,6 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       }
       parameter_resolution_filter <- opts$resolution_filter
       parameter_filtering <- opts$parameter_filtering
-
       for (s in 1:length(source_authoritylist)){
         if(source_authoritylist[s] == "all"){
           parameter_filtering = opts$parameter_filtering
@@ -190,7 +188,6 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       render_env <- list2env(as.list(child_env), parent = child_env)
       list2env(parameters_child_global, render_env)
-
       child_env_last_result <- comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[length(sub_list_dir_2)],
         parameter_final = NULL,
@@ -293,7 +290,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             parameter_final = parameter_final,
             fig.path = new_path,
             parameter_fact = "catch",
-            plotting_type = "plot",
+            plotting_type = "view",
             parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
                                            "fishing_mode", "geographic_identifier",
                                            "measurement_unit", "measurement_value", "GRIDTYPE",
@@ -360,7 +357,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       render_env$child_env_last_result <- child_env_last_result
       gc()
 
-      render_env$plotting_type <- "plot"
+      render_env$plotting_type <- "view"
       render_env$fig.path <- new_path
       
       if(savestep){

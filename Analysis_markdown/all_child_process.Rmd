@@ -35,14 +35,18 @@ gc()
 
 
 ```{r unlistallcomp,echo=FALSE, results='asis'}
+
 if(!is.null(all_list)){
 cat(unlist(results), sep =  "\\clearpage")
 }
+
 ```
 
 ```{r include=FALSE}
+
 if(!is.null(all_list)){
 rm(results)
 gc()
 }
+
 ```
