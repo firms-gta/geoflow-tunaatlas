@@ -49,7 +49,9 @@ process_fisheries_data_by_species <- function(sub_list_dir_2, parameter_fact, sp
   
   # Charger les datasets une seule fois
   nominal_dataset <- if (dir.exists("Markdown")) {
-    readr::read_csv("data/global_nominal_catch_firms_level0.csv")
+    if(file.exists("data/global_nominal_catch_firms_level0.csv")){
+    readr::read_csv("data/global_nominal_catch_firms_level0.csv")} else if(file.exists("data/global_nominal_catch_firms_level0.csv")){
+      readr::read_csv("data/global_nominal_catch_firms_level0.csv")}
   } else {
     NULL
   }

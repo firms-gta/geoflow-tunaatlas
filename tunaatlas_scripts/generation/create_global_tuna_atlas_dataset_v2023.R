@@ -445,6 +445,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       } else {
         stop("Please provide a georeferenced catch dataset")
       }
+    }
         # Filtering on complete year ----------------------------------------------
         if(DATASET_LEVEL == 2){
           
@@ -457,47 +458,51 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           }
           
           georef_dataset <- georef_dataset %>% 
-            dplyr::select(-c(measurement, measurement_status, measurement_type))%>% 
+            dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>% 
             # dplyr::mutate(fishing_fleet = ifelse(source_authority == "CCSBT", "NEI",fishing_fleet))%>%
             dplyr::mutate(year =lubridate::year(time_start)) %>%
             dplyr::filter((source_authority == "WCPFC" & year >= 1952) |
                             (source_authority == "IOTC" & year >= 1953) |
                             (source_authority == "ICCAT" & year >= 1957) |
                             (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
-            dplyr::select(-year) %>% dplyr::inner_join(geographic_identifier_to_nominal, by = c("geographic_identifier" = "code", "source_authority"))
+            dplyr::select(-year) %>% dplyr::left_join(geographic_identifier_to_nominal, by = c("geographic_identifier" = "code", "source_authority"))
           
-          species_list_wcpfc <- c("ALB", "BET", "MAK", "MLS", "SWO", "YFT", "BLM", "BUM", "POR", "OCS", "FAL", "SPN", "THR")
+          # # Fonction de filtrage pour une source d'autorité
+          # filter_problematic_units <- function(dataset, authority, species_list) {
+          #   dataset %>%
+          #     dplyr::filter(
+          #       source_authority == authority, 
+          #       gear_type %in%c("09.32", "09.31"),
+          #       substr(geographic_identifier, 1, 1) == "6", 
+          #       species %in% species_list
+          #     ) %>%
+          #     dplyr::group_by(across(setdiff(colnames(dataset), c("measurement_value", "measurement_unit")))) %>%
+          #     dplyr::mutate(n = n_distinct(measurement_unit)) %>%
+          #     dplyr::filter((n == 2 & measurement_unit == "no")) %>%
+          #     dplyr::select(-n)
+          # }
           
-          wcpfc_problematic <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC" & gear_type == "09.32" &
-                                                                  substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_wcpfc) %>% 
-            dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
-            dplyr::mutate(n = n_distinct(measurement_unit))
+          # # Listes d'espèces
+          # species_list_wcpfc <- c("ALB", "BET", "MAK", "MLS", "SWO", "YFT", "BLM", "BUM", "POR", "OCS", "FAL", "SPN", "THR")
+          # species_list_iattc <- c("BSH", "FAL", "OCS", "MAK", "THR", "RSK", "SMA", "SKH", "SPN", "BET", "MLS", "SWO", "BUM", 
+          #                         "BLM", "YFT", "SFA", "ALB", "BIL", "SSP", "SKJ", "TUN", "PBF")
           
-          wcpfc_ok <- wcpfc_problematic %>% 
-          dplyr::filter(n ==1 | measurement_unit == "t") %>% dplyr::select(-n)
+          # # Appliquer la fonction de filtrage pour chaque tRFMOs
+          # wcpfc_notok <- filter_problematic_units(georef_dataset, "WCPFC", species_list_wcpfc)
+          # iattc_notok <- filter_problematic_units(georef_dataset, "IATTC", species_list_iattc)
           
-          species_list_iattc <- c("BSH", "FAL", "OCS", "MAK", "THR", "RSK", "SMA", "SKH", "SPN", "BET", "MLS", "SWO", "BUM", 
-                            "BLM", "YFT", "SFA", "ALB", "BIL", "SSP", "SKJ", "TUN", "PBF")
+          # # Jeu de données final en supprimant les enregistrements problématiques
+          # georef_dataset_filtered <- georef_dataset %>%
+          #   dplyr::anti_join(wcpfc_notok, by = setdiff(colnames(georef_dataset), c("measurement_value"))) %>%
+          #   dplyr::anti_join(iattc_notok, by = setdiff(colnames(georef_dataset), c("measurement_value")))
           
           
-          iattc_problematic <- georef_dataset %>% dplyr::filter(source_authority == "IATTC" & gear_type == "09.32" & 
-          substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_iattc)%>% 
-            dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
-            dplyr::mutate(n = n_distinct(measurement_unit))
-          
-          iattc_ok <- iattc_problematic %>% 
-            dplyr::filter(n ==1 | measurement_unit == "t") %>% dplyr::select(-n)
-          
-          georef_dataset_filtered <- georef_dataset %>% dplyr::filter(!(source_authority == "WCPFC" & gear_type == "09.31" &
-                                                                 substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_wcpfc)) %>% 
-            dplyr::filter(!(source_authority == "IATTC" & gear_type == "09.32" & substr(geographic_identifier, 1, 1) == "6" & species %in% species_list_iattc))
-          
-          georef_dataset <- rbind(georef_dataset_filtered, wcpfc_ok, iattc_ok) %>% 
-            dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type = "09.32", "09.31", gear_type))
+          georef_dataset <- georef_dataset %>% 
+            dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type == "09.32", "09.31", gear_type))
           
           Description <- paste0("As dataset is to be raised on the basis of nominal catch that are displayed with a time resolution of year, the data is filtered to keep, for each source_authority,", 
-          " only the years where catch data are provided from January to December. As well for the data displayed in number for WCPFC in 09.31 and IATTC in 09.32 ", 
-          " for dataset in 5 degrees. We remove this data as it will be used to raise the data, this represent around 40% of the data in number.")
+          " only the years where catch data are provided from January to December. As well we remove stratas data displayed in number for WCPFC in 09.31 and IATTC in 09.32 for dataset in 5 degrees", 
+          "which corresponds to duplicated data to the equivalent stratas in tons.")
           
           
         } else {
@@ -513,7 +518,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         "download_zenodo_csv"  ,
         list(opts$doi, opts$key), entity
       ) 
-    }
     
     config$logger.info(
       "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
@@ -569,7 +573,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       dplyr::select(-year) %>% dplyr::rename(geographic_identifier_nom = geographic_identifier)
     
     nominal_catch <- nominal_catch %>% 
-      dplyr::select(-c(measurement, measurement_status, measurement_type))%>%
+      dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>%
       dplyr::ungroup() %>%
       dplyr::group_by(across(-measurement_value)) %>% 
       dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')

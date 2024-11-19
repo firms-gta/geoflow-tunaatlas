@@ -1,5 +1,5 @@
 ---
-title: "Summary of the treatment for a specific entity of the global tuna atlas"
+title: "Summary of the treatment for a specific dataset of the Global Tuna Atlas"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 author:
   - name: Bastien Grasset
@@ -37,7 +37,7 @@ output:
     citation_package: default # Can also be "natbib"
     always_allow_html: TRUE
     keep_md: TRUE
-abstract: "This document provides an overview of the impact of various processing steps on a specific dataset from the Global Tuna Atlas. We begin by presenting the final dataset along with its key characteristics, followed by a global comparison with the FIRMS level 0 dataset. Next, we outline each step involved in creating the final dataset, detailing the decisions made and their effects on specific data points.\n If you would like to explore the impact of individual processing steps with more specific filters, feel free to contact us or rerun the process and automated reporting using the project available on GitHub at firms-gta/geoflow-tunaatlas."
+abstract: "This document provides an overview of the impact of various processing steps on a specific dataset from the Global Tuna Atlas. We begin by presenting the final dataset along with its key characteristics, followed by a global comparison with the initial dataset before any treatment. Next, we outline each step involved in creating the final dataset, detailing the decisions made and their effects on specific data points.\n If you would like to explore the impact of individual processing steps with more specific filters, feel free to contact us or rerun the process and automated reporting using the project available with this DOI on GitHub at firms-gta/geoflow-tunaatlas and ."
 geometry: "margin=20mm"
 papersize: a4
 endfloat: FALSE

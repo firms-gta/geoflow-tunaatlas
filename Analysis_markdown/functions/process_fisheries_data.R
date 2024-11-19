@@ -22,11 +22,12 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     if (dir.exists("Markdown")) {
       if(file.exists("data/global_nominal_catch_firms_level0_harmonized.csv")){
         nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0_harmonized.csv")
+        nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
         
       } else if (file.exists("data/global_nominal_catch_firms_level0.csv")){
       nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0.csv")
-    }
       nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
+      }
     }
     
     if (exists("nominal_dataset")) {

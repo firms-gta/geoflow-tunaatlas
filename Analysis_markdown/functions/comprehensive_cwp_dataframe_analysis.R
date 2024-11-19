@@ -162,13 +162,15 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
       plot_titles_list <- compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
     }
     
-    if (length(parameter_geographical_dimension) != 0) {
+    if (length(parameter_geographical_dimension) != 0 && print_map) {
       Geographicdiff <- geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1, 
                                         parameter_titre_dataset_2, outputonly)
-      if(removemap){
+      if(removemap| print_map){
         Geographicdiff$plott <- NULL
         gc()
       }
+    } else {
+      Geographicdiff <- NULL
     }
     
   } else {
