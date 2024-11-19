@@ -42,9 +42,24 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     janitor::clean_names() %>%
     dplyr::select(species_group = taxa_order, species = code)
   flog.info("Loaded species_group data")
+  
+  if(!file.exists("data/cl_fishing_mode.csv")){
+    url <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/31756d4c0baf44c6d7d851e93c14c1e6917f7276/global/firms/gta/cl_fishing_mode.csv"
+    destination <- "data/cl_fishing_mode.csv"
+    
+    utils::download.file(url, destination, method = "curl")
+  }
+  
+  cl_fishing_mode <- readr::read_csv("data/cl_fishing_mode.csv")
+  
+  species_label <- st_read(connectionDB, query = "SELECT * FROM species.species_asfis") %>%
+    janitor::clean_names()
+  fishing_fleet_label <- st_read(connectionDB, query = "SELECT * FROM fishing_fleet.fishingfleet_firms") %>%
+    janitor::clean_names()
 
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1") %>%
     dplyr::select(Code = code, Gear = label)
+
   flog.info("Loaded cl_cwp_gear_level2 data")
 
   shapefile.fix <- st_read(connectionDB, query = "SELECT * FROM area.cwp_grid") %>%
@@ -96,7 +111,6 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
-  
   flog.info("Sourced all required functions")
   
   for (entity_dir in entity_dirs) {
@@ -149,7 +163,12 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons", 
                                                                                          measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit)) 
 
-            qs::qsave(data, file = file)
+              data <- data %>% dplyr::left_join(cl_fishing_mode %>% dplyr::select(fishing_mode_label = label), by = c("fishing_mode" = "code"))
+              
+              
+              data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
+              data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
+              qs::qsave(data, file = file)
             flog.info("Processed and saved data for file: %s", file)
           }
         }
