@@ -27,45 +27,7 @@
       }
     ]
   },
-  "software": [
-    {
-      "id": "my-database-read",
-      "type": "input",
-      "software_type": "dbi",
-      "parameters": {
-        "drv": "PostgreSQL",
-        "user": "{{DB_USER}}",
-        "password": "{{DB_PASSWORD}}",
-        "host": "{{DB_HOST}}",
-        "port": "{{DB_PORT}}",
-        "dbname": "{{DB_NAME}}"
-      }
-    },
-    {
-      "id": "my-database-write",
-      "type": "output",
-      "software_type": "dbi",
-      "parameters": {
-        "drv": "PostgreSQL",
-        "user": "{{DB_USER}}",
-        "password": "{{DB_PASSWORD}}",
-        "host": "{{DB_HOST}}",
-        "port": "{{DB_PORT}}",
-        "dbname": "{{DB_NAME}}"
-      },
-      "properties" : {}
-    },
-    {
-      "id": "googledrive",
-      "type": "input",
-      "software_type": "googledrive",
-      "parameters": {
-        "email": "{{GMAIL_USER}}",
-        "token": "{{GMAIL_TOKEN}}"
-      },
-      "properties" : {}
-    }
-  ],
+  "software": [],
   "actions": [
   
 	{

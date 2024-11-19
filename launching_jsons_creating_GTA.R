@@ -137,15 +137,15 @@ Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_
 
 executeWorkflow("manu_geoflow_gta_config_model.json")
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
-tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
+# tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_metadata_for_new_level2")
 ### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
 create_materialized_view <- ""
-compare_nominal_georef_corrected <- function(nominal, georef_mapped, list_strata = list(c("species", "year", "source_authority", "gear_type", "fishing_fleet"))) {
+compare_nominal_georef_corrected <- function(nominal, georef_mapped, list_strata = list(c("species", "year", "source_authority", "gear_type", "fishing_fleet", "geographic_identifier_nom"))) {
   # Convertir les data.frames en data.tables
   setDT(nominal)
   setDT(georef_mapped)
@@ -249,25 +249,25 @@ source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisher
 
 # IRD_data <- readr::read_csv("data/IOTC_conv_fact_mapped.csv")
 # specieslist <- unique(IRD_data$species)
-specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF")
-
-entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
-# entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20241007133651_global_datasets_level1_2/entities/global_catch_ird_level2_without_IRD"
-for (entity_dir in entity_dirs) {
-  entity_name <- basename(entity_dir)
-  setwd(here::here(entity_dir))
-  sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
-  details <- file.info(sub_list_dir_2)
-  details <- details[with(details, order(as.POSIXct(mtime))), ]
-  sub_list_dir_2 <- rownames(details)
-  flog.info("Processed sub_list_dir_2")
-  sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
-  a <- process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
-  combined_df <- create_combined_dataframe(a)
-  qflextable(combined_df)
-  # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
-  qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
-}
+# specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF")
+# 
+# entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
+# # entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20241007133651_global_datasets_level1_2/entities/global_catch_ird_level2_without_IRD"
+# for (entity_dir in entity_dirs) {
+#   entity_name <- basename(entity_dir)
+#   setwd(here::here(entity_dir))
+#   sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
+#   details <- file.info(sub_list_dir_2)
+#   details <- details[with(details, order(as.POSIXct(mtime))), ]
+#   sub_list_dir_2 <- rownames(details)
+#   flog.info("Processed sub_list_dir_2")
+#   sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+#   a <- process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
+#   combined_df <- create_combined_dataframe(a)
+#   qflextable(combined_df)
+#   # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
+#   qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
+# }
 
 # uncomment the follwoing lines to go the shared path for analysis
 # tunaatlas_qa_global_datasets_catch_path <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data"
@@ -284,7 +284,11 @@ con <- config$software$output$dbi
 # )
 source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/Summarising_step.R")
 setwd("~/firms-gta/geoflow-tunaatlas")
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = TRUE, usesave = FALSE)
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("all"))
+
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
 # Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
