@@ -496,10 +496,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           #   dplyr::anti_join(wcpfc_notok, by = setdiff(colnames(georef_dataset), c("measurement_value"))) %>%
           #   dplyr::anti_join(iattc_notok, by = setdiff(colnames(georef_dataset), c("measurement_value")))
           
-          
-          georef_dataset <- georef_dataset %>% 
-            dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type == "09.32", "09.31", gear_type))
-          
           Description <- paste0("As dataset is to be raised on the basis of nominal catch that are displayed with a time resolution of year, the data is filtered to keep, for each source_authority,", 
           " only the years where catch data are provided from January to December. As well we remove stratas data displayed in number for WCPFC in 09.31 and IATTC in 09.32 for dataset in 5 degrees", 
           "which corresponds to duplicated data to the equivalent stratas in tons.")
@@ -571,6 +567,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                       (source_authority == "ICCAT" & year >= 1957) |
                       (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
       dplyr::select(-year) %>% dplyr::rename(geographic_identifier_nom = geographic_identifier)
+    
+    nominal_catch <- nominal_catch %>% 
+      dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type == "09.31", "09.32", gear_type))
     
     nominal_catch <- nominal_catch %>% 
       dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>%
