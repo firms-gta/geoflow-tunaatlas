@@ -49,7 +49,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     
     utils::download.file(url, destination, method = "curl")
   }
-  
+  setwd(ancient_wd)
   cl_fishing_mode <- readr::read_csv("data/cl_fishing_mode.csv")
   
   species_label <- st_read(connectionDB, query = "SELECT * FROM species.species_asfis") %>%
@@ -163,7 +163,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons", 
                                                                                          measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit)) 
 
-              data <- data %>% dplyr::left_join(cl_fishing_mode %>% dplyr::select(fishing_mode_label = label), by = c("fishing_mode" = "code"))
+              data <- data %>% dplyr::left_join(cl_fishing_mode %>% dplyr::select(code, fishing_mode_label = label), by = c("fishing_mode" = "code"))
               
               
               data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
