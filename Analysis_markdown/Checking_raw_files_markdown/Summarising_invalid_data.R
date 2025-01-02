@@ -1,4 +1,4 @@
-Summarising_invalid_data = function(main_dir, connectionDB){
+Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
   ancient_wd <- getwd()
   setwd(main_dir)
   dir.create("Recap_on_pre_harmo")
@@ -151,6 +151,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   # PART 3: Generate a summary CSV for each entity
   `%notin%` <- Negate(`%in%`)
+  all_data <- list()
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
     entity_data <- combined_results[combined_results$Entity == entity_name, ]
@@ -176,7 +177,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
                                                      cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
       }
       if("gridtype"%in% colnames(data_list)){
-        data_list <- data_list %>% rename(GRIDTYPE = gridtype)
+        data_list <- data_list %>% dplyr::rename(GRIDTYPE = gridtype)
       }
       saveRDS(data_list, file = data_path)
       
@@ -188,13 +189,39 @@ Summarising_invalid_data = function(main_dir, connectionDB){
       # Combine all problematic data into one data frame with an additional column specifying the input file
       combined_problematic_data <- do.call(rbind, lapply(1:length(problematic_data), function(i) {
         data_frame <- as.data.frame(problematic_data[[i]])
-        data_frame$InputFile <- problematic_files[i]
+        data_frame$Issue <- problematic_files[i]
         return(data_frame)
       }))
+      
+      all_data[[entity_name]] <- combined_problematic_data
+      # Combine all dataframes into one
+
       
       # Write the combined data frame to a CSV file
       write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")), 
                 progress = show_progress())
+      combined_data <- bind_rows(all_data, .id = "entity_name")
+    }
+    
+    combined_data <- combined_data %>% dplyr::rename(gridtype = GRIDTYPE) %>% 
+      dplyr::rename(dataset  = entity_name) %>% 
+      dplyr::mutate(Issue = gsub(".rds","", Issue)) %>% 
+      dplyr::rename(codesource_area = geographic_identifier)
+    combined_data$time_start <- as.Date(combined_data$time_start)
+    combined_data$time_end <- as.Date(combined_data$time_end)
+    combined_data$year <- as.integer(format(combined_data$time_end, "%Y"))
+    combined_data$month <- as.integer(format(combined_data$time_end, "%m"))
+    combined_data$quarter <- as.integer(substr(quarters(combined_data$time_end), 2, 2))
+    # Save the combined data as a .qs file
+    qs::qsave(combined_data, "All_invalid_data.qs")
+    if(upload_DB){
+    dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
+    dbExecute(connectionDB, "
+  CREATE MATERIALIZED VIEW public.issueddata AS
+  SELECT * FROM temp_tableissueddata;
+")
+    dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
+    # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
     }
   }
   
@@ -273,6 +300,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
   
+  if(upload_drive){
   sapply(all_files, function(file) {
     destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
     file.copy(file, destination_file)
@@ -283,7 +311,6 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   # 
   path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
   drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
-  
     read_last_csv <- function(path) {
       csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
       if (length(csv_files) == 0) return(NULL)
@@ -324,6 +351,7 @@ Summarising_invalid_data = function(main_dir, connectionDB){
   # Apply the safe upload function to each path in your list
   result_list <- lapply(combined_data_list, drive_upload_safe)
   
+  }
   
   setwd(ancient_wd)
 
