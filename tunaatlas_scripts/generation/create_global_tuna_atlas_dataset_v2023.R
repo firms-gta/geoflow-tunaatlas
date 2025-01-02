@@ -330,27 +330,27 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           }
         }
         
-      }
-      
-      georef_dataset <-
-        double_unit_data_handling( #to add handling of strata having multiples unit (tonnes and number which arrivent)
-          con = con,
-          entity = entity,
-          config = config,
-          fact = fact,
-          unit_conversion_csv_conversion_factor_url =
-            NULL,
-          unit_conversion_codelist_geoidentifiers_conversion_factors =
-            opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
-          mapping_map_code_lists = opts$mapping_map_code_lists,
-          georef_dataset = georef_dataset
+        georef_dataset <-
+          double_unit_data_handling( #to add handling of strata having multiples unit (tonnes and number which arrivent)
+            con = con,
+            entity = entity,
+            config = config,
+            fact = fact,
+            unit_conversion_csv_conversion_factor_url =
+              NULL,
+            unit_conversion_codelist_geoidentifiers_conversion_factors =
+              opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
+            mapping_map_code_lists = opts$mapping_map_code_lists,
+            georef_dataset = georef_dataset
+          )
+        function_recap_each_step(
+          "Removing NOMT and converting MTNO in MT",
+          georef_dataset,
+          "The data initially in MTNO is converted in MT and the data in NTMO is removed",
+          "double_unit_data_handling"
         )
-      function_recap_each_step(
-        "Removing NOMT and converting MTNO in MT",
-        georef_dataset,
-        "The data initially in MTNO is converted in MT and the data in NTMO is removed",
-        "double_unit_data_handling"
-      )
+        
+      }
       
       ## OVERLAPPPING ZONES---------------------------------------------------
       # This function handles the processing of overlapping zones.
@@ -418,6 +418,16 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species")),# not usefull anymore as handled in pre harmo
         iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "species", "year"))
       )
+      
+      if(opts$fact == "effort"){
+        zones_config <- list(
+          iattc_wcpfc = list(main = c(WCPFC = "IATTC"), default_strata = c("geographic_identifier", "year")),
+          # wcpfc_ccsbt = list(main = c(WCPFC = "CCSBT"), default_strata = c("species")), # not usefull anymore as handled in pre harmo
+          # iccat_ccsbt = list(main = c(ICCAT = "CCSBT"), default_strata = c("species")),# not usefull anymore as handled in pre harmo
+          # iotc_ccsbt = list(main = c(IOTC = "CCSBT"), default_strata = c("species")),# not usefull anymore as handled in pre harmo
+          iotc_wcpfc = list(main = c(WCPFC = "IOTC"), default_strata = c("geographic_identifier", "year"))
+        )
+      }
       
       # Loop over each zone and handle overlap using the defined configuration
       for (zone_key in names(zones_config)) {
