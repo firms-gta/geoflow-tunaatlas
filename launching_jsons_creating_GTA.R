@@ -27,7 +27,15 @@ install_and_load <- function(package) {
 
 # Apply the function to each required package
 sapply(required_packages, install_and_load)
-
+executeAndRename <- function(executed_file, suffix) {
+  
+  # Derive folder and file names
+  folder_file <- file.path("jobs", basename(executed_file))
+  
+  # Rename the file with the given suffix
+  file.rename(folder_file, paste0("jobs/", basename(executed_file), suffix))
+  return(paste0("jobs/", basename(executed_file), suffix))
+}
 require(geoflow)
 
 # Note: This script assumes that the internet connection is available and
@@ -99,34 +107,37 @@ raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
 running_time_of_workflow(raw_data_georef_effort)
 
-source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
-safe_rewrite_functions_as_rmd <- function(source_path) {
-  tryCatch({
-    rewrite_functions_as_rmd(source_path)
-  }, error = function(e) {
-    message(sprintf("Error processing %s: %s", source_path, e$message))
-  })
-}
-
-# Appels aux fonctions avec gestion des erreurs
-safe_rewrite_functions_as_rmd(raw_nominal_catch)
-safe_rewrite_functions_as_rmd(raw_data_georef)
-safe_rewrite_functions_as_rmd(raw_data_georef_effort)
+# source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
+# safe_rewrite_functions_as_rmd <- function(source_path) {
+#   tryCatch({
+#     rewrite_functions_as_rmd(source_path)
+#   }, error = function(e) {
+#     message(sprintf("Error processing %s: %s", source_path, e$message))
+#   })
+# }
+# 
+# # Appels aux fonctions avec gestion des erreurs
+# safe_rewrite_functions_as_rmd(raw_nominal_catch)
+# safe_rewrite_functions_as_rmd(raw_data_georef)
+# safe_rewrite_functions_as_rmd(raw_data_georef_effort)
 
 ## Summarising the invalid data for all the datasets pre-harmonized
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
 config <- initWorkflow(here::here("All_raw_data_georef.json"), handleMetadata = FALSE)
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 time_Summarising_invalid_data <- system.time({
   Summarising_invalid_data(raw_data_georef, connectionDB = con)
 })
+
+
 #Around 1 minute
 time_Summarising_invalid_data_georef <- system.time({
   Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
 })
 
-Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_nominal_catch', connectionDB = con)
+# Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_nominal_catch', connectionDB = con)
 
 # Around 50 seconds
 ## These two lines of codes creates a recap for each entity of the irregularities of the data for the datasets. 
@@ -137,8 +148,11 @@ Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_
 
 executeWorkflow("manu_geoflow_gta_config_model.json")
 
-# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
+tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("create_effort_dataset.json"))
+tunaatlas_qa_services <- initWorkflow("tunaatlas_qa_services.json")
+save.image()
 # tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_metadata_for_new_level2")
 ### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
@@ -274,6 +288,7 @@ source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisher
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
+# config <- initWorkflow(here::here("create_effort_dataset.json"))
 config <- initWorkflow(here::here("creating_dataset.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
@@ -291,6 +306,8 @@ Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionD
 
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
+setwd("~/firms-gta/geoflow-tunaatlas/")
+source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
 # Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
 # 
 # georef_dataset <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20241002142921_global_datasets_level1_2/entities/global_catch_ird_level2/Markdown/Level2_RF1/ancient.qs")
