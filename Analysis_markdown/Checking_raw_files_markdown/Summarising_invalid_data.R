@@ -189,7 +189,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       # Combine all problematic data into one data frame with an additional column specifying the input file
       combined_problematic_data <- do.call(rbind, lapply(1:length(problematic_data), function(i) {
         data_frame <- as.data.frame(problematic_data[[i]])
-        data_frame$Issue <- problematic_files[i]
+        data_frame$issue <- problematic_files[i]
         return(data_frame)
       }))
       
