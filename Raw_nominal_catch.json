@@ -77,7 +77,7 @@
     {
       "id": "geometacreateiso19115debug",
       "script": "./iso19115debugtest.R",
-      "run": true,
+      "run": false,
       "options": {
         "doi": true,
         "logo": true
@@ -87,7 +87,7 @@
     {
       "id": "create_report_global_action",
       "script": "./tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
-      "run": false,
+      "run": true,
       "options": {
       }
     }
