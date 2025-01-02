@@ -17,7 +17,7 @@
     "entities": [
 		{
 		  "handler": "gsheet",
-		  "source": "https://docs.google.com/spreadsheets/d/12zi49c5wd9Nc7N1anv3lCM4f66L-5x3-Xsh6ZGGc-ns/edit?usp=sharing"
+		  "source": "https://docs.google.com/spreadsheets/d/12zi49c5wd9Nc7N1anv3lCM4f66L-5x3-Xsh6ZGGc-ns/edit?gid=543137458#gid=543137458"
 		}
 	],
     "contacts" : [
