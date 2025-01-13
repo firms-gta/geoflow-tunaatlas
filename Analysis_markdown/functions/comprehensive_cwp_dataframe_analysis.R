@@ -75,12 +75,10 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
       stop("Invalid 'parameter_final'")
     }
   }
-  
   if(!print_map | parameter_geographical_dimension_groupping %notin% colnames(init)){
     init <- init %>% dplyr::mutate(GRIDTYPE = "GRIDTYPE")
     final <- final %>% dplyr::mutate(GRIDTYPE = "GRIDTYPE")
   }
-  
   if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse) {
     if(!is.data.frame(parameter_final)) {
       parameter_titre_dataset_2 <- last_path_reduced(as.character(parameter_final))
@@ -114,7 +112,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim = parameter_geographical_dimension
   formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_fact = parameter_fact
   formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
-  formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim_group = parameter_geographical_dimension_groupping
+  formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim_group = "GRIDTYPE"
   
   init <- function_geographic_identifier_renaming_and_not_standards_unit(init)
   final <- function_geographic_identifier_renaming_and_not_standards_unit(final)
@@ -137,7 +135,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   if (!exists("fig.path")) {
     fig.path <- getwd()
   }
-  
   #cat("Grouping differences...\n")
   groupping_differences_list <- groupping_differences(init, final, parameter_time_dimension, parameter_geographical_dimension, parameter_geographical_dimension_groupping)
   
@@ -165,7 +162,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     if (length(parameter_geographical_dimension) != 0 && print_map) {
       Geographicdiff <- geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1, 
                                         parameter_titre_dataset_2, outputonly)
-      if(removemap| print_map){
+      if(removemap| !print_map){
         Geographicdiff$plott <- NULL
         gc()
       }
@@ -198,34 +195,69 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   } else {
     spatial_coverage_analysis_list <- NULL
   }
-  combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init", final, parameter_titre_dataset_2 = "Final") {
+  library(ggplot2)
+  library(data.table)
+  library(aplot)
+  library(gridExtra)
+  combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init", 
+                                                  final, parameter_titre_dataset_2 = "Final") {
+    # Convertir en data.table
     setDT(init)  
     summary_number_row_init <- init[, .(Number_different_stratas = .N), by = measurement_unit]
     summary_number_row_init[, data_source := parameter_titre_dataset_1]  
     
-    
     setDT(final)  
     summary_number_row_final <- final[, .(Number_different_stratas = .N), by = measurement_unit]
     summary_number_row_final[, data_source := parameter_titre_dataset_2] 
+    
+    # Combiner les résumés
     combined_summary <- rbind(summary_number_row_init, summary_number_row_final)
     combined_summary[, Percent := Number_different_stratas / sum(Number_different_stratas) * 100, by = data_source]
     
-    
-    
+    # Calcul des totaux pour chaque dataset
     total_rows <- combined_summary[, .(Total_rows = sum(Number_different_stratas)), by = data_source]
     combined_summary <- merge(combined_summary, total_rows, by = "data_source")
     
-    combined_summary_histogram <- ggplot(combined_summary, aes(x = factor(paste0(data_source, "\n(Number of different stratas=", Total_rows, ")")), y = Percent, fill = measurement_unit)) +
-      geom_bar(stat = "identity", position = "fill") +  # Stacked bars with 100% scale
-      scale_fill_manual(values = c("Tons" = "#4C72B0", "Number of fish" = "#55A868")) +  # Custom blue-green colors
-      scale_y_continuous(labels = scales::percent_format()) + geom_text(aes(label = paste0(round(Percent, 1), "%")), 
-                                                                        position = position_fill(vjust = 0.5), color = "black") +# y-axis as percentages
+    # Créer le graphique principal (histogramme)
+    combined_summary_histogram <- ggplot(combined_summary, 
+                                         aes(x = factor(paste0(data_source)),#, "\n(Number of different stratas=", Total_rows, ")")), 
+                                             y = Percent, fill = measurement_unit)) +
+      geom_bar(stat = "identity", position = "fill") +  # Barres empilées avec échelle à 100%
+      scale_fill_manual(values = c("Tons" = "#4C72B0", "Number of fish" = "#55A868")) +  # Couleurs personnalisées
+      scale_y_continuous(labels = scales::percent_format()) + 
+      geom_text(aes(label = paste0(round(Percent, 1), "%")), 
+                position = position_fill(vjust = 0.5), color = "black") + # Texte à l'intérieur des barres
       labs(title = "Distribution of number strata for each measurement_unit by dataset",
            x = "Dataset",
            y = "Percentage",
            fill = "Measurement unit") +
       theme_minimal()
-    return(combined_summary_histogram)
+    
+    combined_table <- rbind(summary_number_row_init, summary_number_row_final)[, .(
+      `Measurement Unit` = measurement_unit, 
+      `Dataset` = data_source, 
+      `Number of Strata` = Number_different_stratas
+    )]
+    
+    # Créer le tableau comme un objet graphique
+    table_grob <- gridExtra::tableGrob(combined_table, rows = NULL, theme = ttheme_minimal(
+      core = list(fg_params = list(cex = 0.7)),  # Taille du texte plus petite
+      colhead = list(fg_params = list(cex = 0.8, fontface = "bold"))
+    ))
+    
+    
+    # Dessiner le graphique combiné
+    combined_plot <- ggplotGrob(combined_summary_histogram)
+    
+    # Positionner le tableau en bas à droite
+    final_plot <- grid.arrange(
+      combined_plot,
+      table_grob,
+      ncol = 2,
+      heights = c(5, 1)  # Ajuster la hauteur relative du plot et du tableau
+    )
+    
+    return(final_plot)
   }
   
   combined_summary_histogram <- combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2)

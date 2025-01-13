@@ -95,7 +95,8 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   flog.info("Initialized child environment")
 
   i <- 1
-  file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
+  # file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
+  file_path_url <- "~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions"
   source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
   source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
   source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
@@ -236,7 +237,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       child_env_last_result$parameter_mapped <- TRUE
       child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
       child_env_last_result$parameter_titre_dataset_2 <- NULL
-
+      
       child_env_first_to_last_result <- comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[1],
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],

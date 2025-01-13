@@ -398,16 +398,31 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                 by = c("geographic_identifier" = "code")))
   
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
-    if (plotting_type == "view") {
-      image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
-    } else {
-      image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)+
-        tm_shape(continent) + tm_borders()
-    }
+      inner_join_data <- inner_join_data %>%
+        dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
+      tmap_options(component.autoscale = FALSE) # Globally disable autoscale warnings
+      
+      if (plotting_type == "view") {
+        image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
+          tm_fill(
+            "measurement_value",
+            fill.scale = tm_scale_continuous(values = "brewer.rd_yl_gn", midpoint = 0, n = 8),
+            id = "geographic_identifier" 
+          ) +
+          tm_layout(legend.outside = TRUE) +
+          tm_facets(by = "Group", fill.free = TRUE)
+      } else {
+        image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
+          tm_fill(
+            "measurement_value",
+            fill.scale = tm_scale_continuous(values = "brewer.rd_yl_gn", midpoint = 0, n = 8),
+            id = "geographic_identifier" 
+          ) +
+          tm_layout(legend.outside = TRUE) +
+          tm_facets(by = "Group", fill.free = TRUE) +
+          tm_shape(continent) +
+          tm_borders()
+      }
     
     return(image)
   }
@@ -658,7 +673,8 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
     dplyr::mutate_if(is.numeric, round)), size = 3, aes(x = 1, 
     y = ypos_ligne/100, label = paste0(round(pourcentage), 
       "%")), color = "black") + theme(axis.ticks.x = element_blank(), 
-    axis.text.x = element_blank()) + labs(x = "", y = "") + 
+    axis.text.x = element_blank(),
+    plot.margin = margin(0, 0, 0, 0)) + labs(x = "", y = "") + 
     scale_fill_manual(values = pal) + guides(fill = guide_legend(title = toupper(r))) + 
     facet_wrap("measurement_unit")
   if (!is.null(second)) {
@@ -676,7 +692,8 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
       dplyr::filter(!is.na(class)) %>% dplyr::mutate_if(is.numeric, 
       round)), size = 3, aes(x = 1, y = ypos_ligne/100, 
       label = paste0(round(pourcentage), "%")), color = "black") + 
-      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())  +
+      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(),
+            plot.margin = margin(0, 0, 0, 0))  +
       labs(x = "", y = "") +  scale_fill_manual(values = pal) +
       guides(fill = guide_legend(title = toupper(r))) + 
     facet_wrap("measurement_unit") + 
@@ -932,7 +949,8 @@ bar_plot_default <- function(first,
         legend.title = element_blank(),
         legend.text = element_text(size = 7), 
         legend.key.size = unit(.4, "cm"),
-        axis.text.x = element_blank()) + 
+        axis.text.x = element_blank(),
+        plot.margin = margin(0, 0, 0, 0)) + 
   ggtitle(title)+ 
     facet_grid(c("measurement_unit", "dataset"))
 
