@@ -398,30 +398,18 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                 by = c("geographic_identifier" = "code")))
   
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
-      inner_join_data <- inner_join_data %>%
-        dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
-      tmap_options(component.autoscale = FALSE) # Globally disable autoscale warnings
+      # inner_join_data <- inner_join_data %>%
+      #   dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
       
       if (plotting_type == "view") {
         image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-          tm_fill(
-            "measurement_value",
-            fill.scale = tm_scale_continuous(values = "brewer.rd_yl_gn", midpoint = 0, n = 8),
-            id = "geographic_identifier" 
-          ) +
-          tm_layout(legend.outside = TRUE) +
-          tm_facets(by = "Group", fill.free = TRUE)
+          tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
+          tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
       } else {
         image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-          tm_fill(
-            "measurement_value",
-            fill.scale = tm_scale_continuous(values = "brewer.rd_yl_gn", midpoint = 0, n = 8),
-            id = "geographic_identifier" 
-          ) +
-          tm_layout(legend.outside = TRUE) +
-          tm_facets(by = "Group", fill.free = TRUE) +
-          tm_shape(continent) +
-          tm_borders()
+          tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
+          tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)+
+          tm_shape(continent) + tm_borders()
       }
     
     return(image)

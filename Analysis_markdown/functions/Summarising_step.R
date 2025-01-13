@@ -3,7 +3,7 @@
 #' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
 #' processing it, and rendering output reports.
 #'
-#' @param main_dir Character. The main directory containing the entities.
+#' @param main_dir Character. The main directory containing the entities. (jobs/entities)
 #' @param connectionDB Object. The database connection.
 #' @param config List. Configuration list containing metadata and options for processing.
 #' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
