@@ -9,7 +9,6 @@
 #' @param parameter_columns_to_keep Columns to keep in the comparison.
 #' @param parameter_diff_value_or_percent Difference value or percent, default is "Difference (in %)".
 #' @param parameter_UNK_for_not_standards_unit Whether to use UNK for non-standard units, default is TRUE.
-#' @param parameter_mapped Whether the data is mapped, default is TRUE.
 #' @param parameter_filtering Filtering parameters.
 #' @param parameter_time_dimension Time dimension parameters, default is c("time_start").
 #' @param parameter_geographical_dimension Geographical dimension parameter, default is "geographic_identifier".
@@ -21,6 +20,7 @@
 #' @param parameter_titre_dataset_1 Title for dataset 1.
 #' @param parameter_titre_dataset_2 Title for dataset 2.
 #' @param unique_analyse Whether the analysis is unique.
+#' @param coverage Whether to analysis the time, geo and other dimension (if no analysing only summary)
 #' @return A list containing results of various analyses.
 #' @export
 comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final, 
@@ -33,7 +33,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
                                                                                "Difference in value"),
                                                  parameter_diff_value_or_percent = "Difference (in %)",
                                                  parameter_UNK_for_not_standards_unit = TRUE,
-                                                 parameter_mapped = TRUE,
                                                  parameter_filtering = list(species = NULL, fishing_fleet = NULL),
                                                  parameter_time_dimension = c("time_start"),
                                                  parameter_geographical_dimension = "geographic_identifier",
@@ -176,7 +175,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     plot_titles_list <- NULL
     Geographicdiff <- NULL
     compare_dimension_differences_list <- NULL
-    GrouppedGRIDTYPE <- NULL
   }
   
   if (length(parameter_time_dimension) != 0 && coverage) {
@@ -201,6 +199,10 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   library(gridExtra)
   combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init", 
                                                   final, parameter_titre_dataset_2 = "Final") {
+    library(data.table)
+    library(ggplot2)
+    library(ggpubr) # Pour ggtexttable
+    
     # Convertir en data.table
     setDT(init)  
     summary_number_row_init <- init[, .(Number_different_stratas = .N), by = measurement_unit]
@@ -220,7 +222,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     
     # Créer le graphique principal (histogramme)
     combined_summary_histogram <- ggplot(combined_summary, 
-                                         aes(x = factor(paste0(data_source)),#, "\n(Number of different stratas=", Total_rows, ")")), 
+                                         aes(x = factor(data_source), 
                                              y = Percent, fill = measurement_unit)) +
       geom_bar(stat = "identity", position = "fill") +  # Barres empilées avec échelle à 100%
       scale_fill_manual(values = c("Tons" = "#4C72B0", "Number of fish" = "#55A868")) +  # Couleurs personnalisées
@@ -233,32 +235,26 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
            fill = "Measurement unit") +
       theme_minimal()
     
-    combined_table <- rbind(summary_number_row_init, summary_number_row_final)[, .(
-      `Measurement Unit` = measurement_unit, 
-      `Dataset` = data_source, 
-      `Number of Strata` = Number_different_stratas
-    )]
+    # # Créer un tableau comme ggplot avec ggtexttable
+    # combined_table <- rbind(summary_number_row_init, summary_number_row_final)[, .(
+    #   `Measurement Unit` = measurement_unit, 
+    #   `Dataset` = data_source, 
+    #   `Number of Strata` = Number_different_stratas
+    # )]
+    # 
+    # table_plot <- ggtexttable(
+    #   combined_table,
+    #   rows = NULL,
+    #   theme = ttheme("minimal", base_size = 10)
+    # )
+    # 
+    # # Utiliser patchwork pour combiner le graphique et le tableau
+    # library(patchwork)
+    # final_plot <- combined_summary_histogram / table_plot + plot_layout(heights = c(3, 1))
     
-    # Créer le tableau comme un objet graphique
-    table_grob <- gridExtra::tableGrob(combined_table, rows = NULL, theme = ttheme_minimal(
-      core = list(fg_params = list(cex = 0.7)),  # Taille du texte plus petite
-      colhead = list(fg_params = list(cex = 0.8, fontface = "bold"))
-    ))
-    
-    
-    # Dessiner le graphique combiné
-    combined_plot <- ggplotGrob(combined_summary_histogram)
-    
-    # Positionner le tableau en bas à droite
-    final_plot <- grid.arrange(
-      combined_plot,
-      table_grob,
-      ncol = 2,
-      heights = c(5, 1)  # Ajuster la hauteur relative du plot et du tableau
-    )
-    
-    return(final_plot)
+    return(combined_summary_histogram)
   }
+  
   
   combined_summary_histogram <- combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2)
   
@@ -282,6 +278,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     parameter_titre_dataset_2 = parameter_titre_dataset_2, 
     parameter_filtering = parameter_filtering, 
     parameter_resolution_filter = parameter_resolution_filter, 
-    fig.path = fig.path
+    fig.path = fig.path, parameter_short = parameter_short
   ))
 }
