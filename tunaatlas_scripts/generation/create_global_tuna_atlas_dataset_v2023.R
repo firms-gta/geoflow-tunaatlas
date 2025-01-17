@@ -456,6 +456,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         stop("Please provide a georeferenced catch dataset")
       }
     }
+    
+    
+    
         # Filtering on complete year ----------------------------------------------
         if(DATASET_LEVEL == 2){
           
@@ -524,6 +527,19 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         "download_zenodo_csv"  ,
         list(opts$doi, opts$key), entity
       ) 
+      
+      ### Removing duplicated data 
+      #issue(#48)
+      georef_dataset <- georef_dataset %>% dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
+        dplyr::mutate(number_unit = n_distinct(measurement_unit)) %>% dplyr::filter(! (measurement_unit == "no" & nupmuber_unit == 2)) %>% 
+        dplyr::select(-number_unit)
+      
+      function_recap_each_step(
+        paste0("Removing_duplicated_units"),
+        georef_dataset,
+        "As some data is in fact duplicated, we check all the duplicated data and remove when same",
+        ""
+      )
     
     config$logger.info(
       "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
@@ -617,7 +633,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         iotc <- georef_dataset %>% dplyr::filter(source_authority == "IOTC")
         
         iotc <- iotc %>% 
-          group_by(time_start,time_end, species, fishing_fleet, gear_type, source_authority, fishing_mode, geographic_identifier) %>%
+          dplyr::group_by(time_start,time_end, species, fishing_fleet, gear_type, source_authority, fishing_mode, geographic_identifier) %>%
             dplyr::mutate(numberunit = n_distinct(measurement_unit)) 
         
         iotc_lvl0_onlynumber <- iotc %>% dplyr::filter(measurement_unit == "no" & numberunit ==1)%>% 
