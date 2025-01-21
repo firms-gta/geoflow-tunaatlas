@@ -125,7 +125,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     opts$raising_raise_only_for_PS_LL = if(!is.null(opts$raising_raise_only_for_PS_LL)) opts$raising_raise_only_for_PS_LL else FALSE
     opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg = if(!is.null(opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg)) opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg else "none"
     opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg = if(!is.null(opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg)) opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg else "none"
-    opts$curation_absurd_converted_data = if(!is.null(opts$curation_absurd_converted_data)) opts$curation_absurd_converted_data else TRUE
     opts$cache = if(!is.null(opts$cache)) opts$cache else FALSE
     opts$level2RF2 = if(!is.null(opts$level2RF2)) opts$level2RF2 else FALSE
     opts$upgradeIOTC_fact_conv = if(!is.null(opts$upgradeIOTC_fact_conv)) opts$upgradeIOTC_fact_conv else FALSE
@@ -532,7 +531,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       #issue(#48)
       georef_dataset <- georef_dataset %>% dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
         dplyr::mutate(number_unit = n_distinct(measurement_unit)) %>% dplyr::filter(! (measurement_unit == "no" & number_unit == 2)) %>% 
-        dplyr::select(-number_unit)
+        dplyr::select(-number_unit) %>% dplyr::mutate(fishing_mode = case_when(fishing_mode %in%c("OTH", "DEL") ~ "UNK", 
+                                                                               TRUE ~ fishing_mode))
       
       function_recap_each_step(
         paste0("Removing_duplicated_units"),
