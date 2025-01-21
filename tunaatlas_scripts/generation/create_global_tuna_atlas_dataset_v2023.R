@@ -531,7 +531,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       ### Removing duplicated data 
       #issue(#48)
       georef_dataset <- georef_dataset %>% dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
-        dplyr::mutate(number_unit = n_distinct(measurement_unit)) %>% dplyr::filter(! (measurement_unit == "no" & nupmuber_unit == 2)) %>% 
+        dplyr::mutate(number_unit = n_distinct(measurement_unit)) %>% dplyr::filter(! (measurement_unit == "no" & number_unit == 2)) %>% 
         dplyr::select(-number_unit)
       
       function_recap_each_step(
