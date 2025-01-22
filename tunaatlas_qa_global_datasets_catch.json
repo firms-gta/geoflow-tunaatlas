@@ -16,8 +16,8 @@
   "metadata": {
     "entities" : [
       {
-      "handler": "csv",
-      "source": "geoflow_entities_tuna_global_datasets_IRD_level1_2022 - IRD_level2.csv"
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1JhS1ADsnqTpWOEEvljk-c9EdzBurkc8A8__JOHJmkOk/edit?gid=1555058995#gid=1555058995"
       }
     ],
     "contacts" : [
@@ -27,13 +27,59 @@
       }
     ]
   },
-  "software": [],
+  "software": [
+    {
+      "id": "my-database-read",
+      "type": "input",
+      "software_type": "dbi",
+      "parameters": {
+        "drv": "PostgreSQL",
+        "user": "{{DB_USER}}",
+        "password": "{{DB_PASSWORD}}",
+        "host": "{{DB_HOST}}",
+        "port": "{{DB_PORT}}",
+        "dbname": "{{DB_NAME}}"
+      },
+      		"properties" : {
+			"user": "{{DB_USER}}",
+			"onend_r": {
+				"script": "./tunaatlas_scripts/create_materialized_view_for_shiny_apps.R",
+				"fun": "create_materialized_view_for_shiny_apps"
+			}
+		}
+
+    },
+    {
+      "id": "my-database-write",
+      "type": "output",
+      "software_type": "dbi",
+      "parameters": {
+        "drv": "PostgreSQL",
+        "user": "{{DB_USER}}",
+        "password": "{{DB_PASSWORD}}",
+        "host": "{{DB_HOST}}",
+        "port": "{{DB_PORT}}",
+        "dbname": "{{DB_NAME}}"
+      },
+      "properties" : {}
+    },
+    {
+      "id": "googledrive",
+      "type": "input",
+      "software_type": "googledrive",
+      "parameters": {
+        "email": "{{GMAIL_USER}}",
+        "token": "{{GMAIL_TOKEN}}"
+      },
+      "properties" : {}
+    }
+  ],
   "actions": [
   
 	{
 		"id": "load_dataset",
 		"script": "./tunaatlas_actions/load_dataset.R",
-		"run": false,
+		"run": true,
 		"options": {
 			"upload_to_db": true,
 			"create_materialized_view" : true,
@@ -44,17 +90,17 @@
 	{
 		"id": "enrich_metadata",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
-		"run": false
+		"run": true
 	},
 	{
 		"id": "enrich_for_db_services",
-		"script": "./tunaatlas_actions/enrich_db_for_services.R",
-		"run": false
+		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_db_for_services.R",
+		"run": true
 	},
 	{
 		"id": "load_metadata",
 		"script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
-		"run": false
+		"run": true
 	},
     {
       "id": "geometa-create-iso-19115",
