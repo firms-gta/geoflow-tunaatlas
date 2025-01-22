@@ -1,0 +1,31 @@
+---
+title: "Issue with raising/decreasing data"
+output: html_document
+date: "2025-01-22"
+---
+
+![RF1 every species every ocean]("~/firms-gta/geoflow-tunaatlas/jobs/20250121084658_ancient_level2_01_2025/entities/global_catch_ird_level2_rf1_convert_decrease/tableau_recapbookdowntest_files/figure-html/evolvaluedimdiff-1.png")
+
+```{r pressure, echo=FALSE, fig.cap="RF1 every species every ocean", out.width = '100%'}
+knitr::include_graphics("~/firms-gta/geoflow-tunaatlas/jobs/20250121084658_ancient_level2_01_2025/entities/global_catch_ird_level2_rf1_convert_decrease/tableau_recapbookdowntest_files/figure-html/evolvaluedimdiff-1.png")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
