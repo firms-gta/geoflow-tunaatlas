@@ -184,6 +184,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       
       return(data_list)
     })
+  }
     
     if (length(problematic_files) > 0) {
       # Combine all problematic data into one data frame with an additional column specifying the input file
@@ -205,7 +206,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     
     combined_data <- combined_data %>% dplyr::rename(gridtype = GRIDTYPE) %>% 
       dplyr::rename(dataset  = entity_name) %>% 
-      dplyr::mutate(Issue = gsub(".rds","", Issue)) %>% 
+      dplyr::mutate(issue = gsub(".rds","", issue)) %>% 
       dplyr::rename(codesource_area = geographic_identifier)
     combined_data$time_start <- as.Date(combined_data$time_start)
     combined_data$time_end <- as.Date(combined_data$time_end)
@@ -223,7 +224,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
     # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
     }
-  }
+
   
   
   

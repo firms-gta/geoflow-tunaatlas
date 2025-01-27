@@ -3,7 +3,7 @@
 #' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
 #' processing it, and rendering output reports.
 #'
-#' @param main_dir Character. The main directory containing the entities.
+#' @param main_dir Character. The main directory containing the entities. (jobs/entities)
 #' @param connectionDB Object. The database connection.
 #' @param config List. Configuration list containing metadata and options for processing.
 #' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
@@ -95,7 +95,8 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   flog.info("Initialized child environment")
 
   i <- 1
-  file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
+  # file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
+  file_path_url <- "~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions"
   source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
   source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
   source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
@@ -230,19 +231,17 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       dir.create(new_path, recursive = TRUE)
       child_env_last_result$fig.path <- new_path
       child_env_last_result$step_title_t_f <- FALSE
-      child_env_last_result$parameter_short <- FALSE
+      # child_env_last_result$parameter_short <- FALSE
       child_env_last_result$child_header <- "#"
-      child_env_last_result$unique_analyse <- TRUE
-      child_env_last_result$parameter_mapped <- TRUE
-      child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
-      child_env_last_result$parameter_titre_dataset_2 <- NULL
-
+      # child_env_last_result$unique_analyse <- TRUE
+      # child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
+      # child_env_last_result$parameter_titre_dataset_2 <- NULL
+      
       child_env_first_to_last_result <- comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[1],
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
         fig.path = parameters_child_global$fig.path,
         parameter_fact = "catch",
-        parameter_mapped = TRUE,
         parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
                                        "fishing_mode", "geographic_identifier",
                                        "measurement_unit", "measurement_value", "GRIDTYPE",
@@ -261,9 +260,8 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       dir.create(new_path, recursive = TRUE)
       child_env_first_to_last_result$fig.path <- new_path
       child_env_first_to_last_result$step_title_t_f <- FALSE
-      child_env_first_to_last_result$parameter_short <- FALSE
-      child_env_first_to_last_result$parameter_mapped <- TRUE
-      child_env_first_to_last_result$unique_analyse <- FALSE
+      # child_env_first_to_last_result$parameter_short <- FALSE
+      # child_env_first_to_last_result$unique_analyse <- FALSE
       child_env_first_to_last_result$parameter_titre_dataset_1 <- "Initial_data"
       child_env_first_to_last_result$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
       child_env_first_to_last_result$child_header <- "#"
@@ -282,7 +280,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         
         gc()
         step_mapping <- sum(which(sub_list_dir == "Markdown/mapping_codelist"))
-        parameter_mapped <- ifelse(counting != step_mapping, TRUE, FALSE)
+        # parameter_mapped <- ifelse(counting != step_mapping, TRUE, FALSE)
         parameter_init <- paste0(sub_list_dir[counting], "/data.qs")
         parameter_final <- paste0(sub_list_dir[counting + 1], "/data.qs")
         parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
@@ -330,10 +328,9 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_result$step_title_t_f <- TRUE
           child_env_result$step_title <- paste0(" Treatment : ", basename(sub_list_dir[counting + 1]))
           child_env_result$step <- counting
-          child_env_result$parameter_short <- parameter_short
+          # child_env_result$parameter_short <- parameter_short
           child_env_result$treatment <- FALSE
-          child_env_result$parameter_mapped <- TRUE
-          child_env_result$unique_analyse <- FALSE
+          # child_env_result$unique_analyse <- FALSE
           child_env_result$parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
           child_env_result$parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
           child_env_result$child_header <- "##"

@@ -7,16 +7,15 @@ output: html_document
 
 Here is represented for each area the polygons keeping all the initial information, the ones losing a part, and the ones losing all the information.
 
-```{r nametitleplotting, echo=FALSE, fig.cap=Geographicdiff$title ,fig.height=0.1, fig.width=0.1}
-
-par(mar = c(0, 0, 0, 0))
-plot.new()
-
-```
-
-```{r echo=FALSE, out.width="100%"}
+```{r nametitleplotting, echo=FALSE, fig.cap=Geographicdiff$title, out.width="100%"}
 
 Geographicdiff$plott
 
 ```
+
+<!-- ```{r echo=FALSE, out.width="100%"} -->
+
+<!-- Geographicdiff$plott -->
+
+<!-- ``` -->
 
