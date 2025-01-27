@@ -2,7 +2,10 @@
 title: "Recap on pre-harmonisation"
 author: "BastienG"
 date: "2023-10-18"
-output: html_document
+output:
+  bookdown::html_document2:
+    number_sections: true
+    toc: true
 ---
 
 

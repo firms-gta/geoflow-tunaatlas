@@ -1,10 +1,65 @@
 ---
 title: "`r paste0('Report on raw data for dataset: ', ifelse(exists('dataset', envir = environment()), dataset, 'NULL'))`"
-author: "BastienG"
-date: "2023-10-12"
-output: html_document
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author:
+  - name: Bastien Grasset
+    email: bastien.grasset@ird.fr
+    affiliation:
+      - IRD
+      - MARBEC
+  - name: Julien Barde
+    affiliation:
+      - IRD
+      - MARBEC
+address:
+  - code: IRD
+    address: Institut de Recherche pour le Développement (IRD), av. Jean Monnet, CS 30171, 34203 Sète cédex, France
+  - code: MARBEC
+    address: MARBEC, University of Montpellier, CNRS, Ifremer, IRD, Sète, France
+csl: dmk-format.csl
+link-citations: TRUE
+output:
+  bookdown::gitbook:
+    config:
+      toc:
+        collapse: subsection
+        scroll_highlight: true
+        before: null
+        after: null
+  bookdown::pdf_document2:
+    latex_engine: lualatex 
+    extra_dependencies: ["adjustbox", "subfig", "flafter", "makecell"]
+    toc: TRUE
+    keep_tex: TRUE
+    template: template.tex
+    #md_extensions: "-autolink_bare_uris"
+    number_sections: TRUE
+    citation_package: default # Can also be "natbib"
+    always_allow_html: TRUE
+    keep_md: TRUE
+abstract: "This doc is to show the issue with raw data"
+geometry: "margin=20mm"
+papersize: a4
+endfloat: FALSE
+numberlines: FALSE
+authblk: FALSE
+footnotehyper: FALSE
+urlcolor: blue
+linkcolor: blue
+citecolor: blue
+graphics: TRUE
+tables: TRUE
+fancyhdr:
+  first:
+    headleft: "Issued data"
+    headright: "2023"
+    headrulewidth: 0pt
+  subsequent:
+    headleft: "Issued data"
+    headright: "2023"
+    headrulewidth: 1pt
+    footrulewidth: 0pt
 ---
-
 
 
 ```{r include=FALSE}
@@ -52,193 +107,63 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 ```
 
 
+```{r processallandHIDe, echo=FALSE, results='hide'}
 
-```{r sourcingfunctionsmarkdown}
+# Function to process each list item and knit the child document
+process_list_item <- function(list_item, template) {
+  child_env_result <- list2env(list_item, new.env())
+  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_result)
+  
+  res <- knitr::knit_child(template, envir = child_env_result, quiet = TRUE)
+  rm(child_env_result)
+  gc()
+  return(res)
+}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R")
+# Iterate over all items in all_list and process each one
 
+if(!is.null(all_list)){
+results <- lapply(all_list, process_list_item, template = "comparison.Rmd")
 
+# Perform garbage collection
+gc()
+}
 ```
 
-```{r first}
 
-directory <-ifelse(exists("parameter_directory",envir = environment()), parameter_directory, "~/Documents/geoflow-tunaatlas/jobs/20231013172118/entities/catch_1deg_1m_bb_iattc_level0__tuna_byflag/")
+```{r unlistallcomp,echo=FALSE, results='asis'}
 
-fig.path = directory
-
-```
-
-```{r statsirregularareas}
-
-if(file.exists(file.path(directory, "/data/stats_irregular_areas.rds"))){stats_irregular_areas <- readRDS(file.path(directory, "/data/stats_irregular_areas.rds"))
+if(!is.null(all_list)){
+cat(unlist(results), sep =  "\\clearpage")
 }
 
 ```
 
-```{r not_mapped_total}
+```{r include=FALSE}
 
-if(file.exists(file.path(directory, "/data/not_mapped_total.rds"))){not_mapped_total <- readRDS(file.path(directory, "/data/not_mapped_total.rds"))} 
-
-```
-
-
-```{r results = 'asis', eval=file.exists(file.path(directory, "/data/outside_juridiction.rds"))}
-
-cat("# Outside juridiction area\n
-
-The data displayed by tRFMOs is supposed to concern the spatial area of the juridiction of the tRFMO. However, some data is displayed outside.")
-
-child_env$parameter_init<- file.path(directory, "/data/outside_juridiction.rds")
-
-res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-
-child_env$parameter_init <- NULL
-child_env$parameter_titre_1 <- NULL
-        
-        
-```
-
-```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/outside_juridiction.rds")), echo=FALSE, results='asis'}
-
-cat(res, sep =  "\\clearpage")
+if(!is.null(all_list)){
+rm(results)
+gc()
+}
 
 ```
 
 
-```{r results = 'asis', eval=file.exists(file.path(directory, "/data/areas_in_land.rds"))}
-
-cat("# Overview of data located on land\n
-
-Only the squares where the integrity of the area is located on land are considered in the analysis.")
-
-child_env$parameter_init<- file.path(directory, "/data/areas_in_land.rds")
-
-child_env$parameter_titre_1  <- "On_continent"
-res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-        
-child_env$parameter_init <- NULL
-child_env$parameter_titre_1 <- NULL
-
-        
-        
-```
+# Annexe
 
 ```{r statsirregularareasflextable,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/stats_irregular_areas.rds"))}
 
+stats_irregular_areas <- readRDS(file.path(entity_dir, "/data/stats_irregular_areas.rds"))
 qflextable2(stats_irregular_areas, captionn ="Summary of the irregular area reallocation by unit", pgwidth = 6,  save_folder = "Summary")
 
 ```
 
-```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/areas_in_land.rds")), echo=FALSE, results='asis'}
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-
-```{r results = 'asis', eval=file.exists(file.path(directory, "/data/removed_irregular_areas.rds"))}
-
-cat("# Area not in cwp grid\n
-
-Some square does not correspond to the cwp grid standards")
-
-child_env$parameter_init<- file.path(directory, "/data/removed_irregular_areas.rds")
-
-child_env$parameter_titre_dataset_1  <- "Not_cwp"
-res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-        
-        
-child_env$parameter_init <- NULL
-child_env$parameter_titre_1 <- NULL
-
-        
-```
-
-```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/removed_irregular_areas.rds")), echo=FALSE, results='asis'}
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-
-```{r results = 'asis', eval=file.exists(file.path(directory, "/data/not_conform_conversion_factors.rds"))}
-
-cat("# Not conform conversion factors\n
-
-Some data provided in Number of fish and tons are not plausible")
-
-child_env$parameter_init<- file.path(directory,  "not_conform_conversion_factors.rds")
-child_env$parameter_titre_1  <- "Not_conform_conversions_factors"
-
-res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-
-child_env$parameter_init <- NULL
-child_env$parameter_titre_1 <- NULL
-       
-        
-        
-```
-
-```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/not_conform_conversion_factors.rds")), echo=FALSE, results='asis'}
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-```{r results = 'asis', eval=file.exists(file.path(directory, "/data/negative_values.rds"))}
-
-cat("# Negative or null values in provided data\n
-
-Some data are provided with a measurement_value inferior or equal to 0 ")
-
-child_env$parameter_init<- file.path(directory,  "negative_values.rds")
-child_env$parameter_titre_1  <- "Negative_or_null_values"
-
-res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-
-child_env$parameter_init <- NULL
-child_env$parameter_titre_1 <- NULL
-        
-        
-        
-```
-
-```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/negative_values.rds")), echo=FALSE, results='asis'}
-
-cat(res, sep =  "\\clearpage")
-
-```
-
-
-
-```{r results = 'asis', eval=file.exists(file.path(directory, "/data/not_mapped_total.rds"))}
-
-cat("# Not mapped data \n
-
-Some data provided does not correspond to any mapping")
-
-# child_env$parameter_init<- file.path(directory, "/data/not_mapped_total.rds")
-# child_env$parameter_titre_1  <- "not_mapped"
-# 
-#       res <- knitr::knit_child("comparison.Rmd", envir = child_env, quiet = TRUE)
-#         
-#         
-#         
-        
-```
-
-<!-- ```{r complastfirstcat, eval=file.exists(file.path(directory, "/data/not_mapped_total.rds")), echo=FALSE, results='asis'} -->
-
-<!-- cat(res, sep =  "\\clearpage") -->
-
-<!-- ``` -->
-
 ```{r summaryofthenotmappedfactors,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/not_mapped_total.rds"))}
 
+not_mapped_total <- readRDS(file.path(entity_dir, "/data/not_mapped_total.rds"))
 qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and so replaced by 'UNK', '99.9', or 'NEI'", pgwidth = 6,  save_folder = "Summary", fig.path = getwd())
 
 ```
-
-
 
 
