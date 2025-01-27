@@ -184,6 +184,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       
       return(data_list)
     })
+  }
     
     if (length(problematic_files) > 0) {
       # Combine all problematic data into one data frame with an additional column specifying the input file
@@ -223,7 +224,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
     # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
     }
-  }
+
   
   
   

@@ -128,7 +128,7 @@ config <- initWorkflow(here::here("All_raw_data_georef.json"), handleMetadata = 
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 time_Summarising_invalid_data <- system.time({
-  Summarising_invalid_data(raw_data_georef, connectionDB = con)
+  Summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE)
 })
 
 
@@ -300,14 +300,26 @@ con <- config$software$output$dbi
 source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/Summarising_step.R")
 setwd("~/firms-gta/geoflow-tunaatlas")
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("WCPFC" ,"all" ))
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("WCPFC" ,"all" ))
+
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                  source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
                  source_authoritylist = c("all"))
 
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),
+                 savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
 setwd("~/firms-gta/geoflow-tunaatlas/")
-source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
+
+# config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(source_authority = c("WCPFC"))
+# config$metadata$content$entities[[2]]$data$actions[[1]]$options$parameter_filtering <- list(source_authority = c("WCPFC"))
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "long",source_authoritylist = c("WCPFC"),
+                 savestep = TRUE, usesave = FALSE, nameoutput = "longwcpfctounderstanddecrease")
+
+# source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
 # Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
 # 
 # georef_dataset <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20241002142921_global_datasets_level1_2/entities/global_catch_ird_level2/Markdown/Level2_RF1/ancient.qs")

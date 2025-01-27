@@ -10,22 +10,9 @@ date: "2025-01-22"
 knitr::include_graphics("~/firms-gta/geoflow-tunaatlas/jobs/20250121084658_ancient_level2_01_2025/entities/global_catch_ird_level2_rf1_convert_decrease/tableau_recapbookdowntest_files/figure-html/evolvaluedimdiff-1.png")
 ```
 
-## R Markdown
+Observing the data with the shiny apps, we can see that there is no signifacnt differences with georeferenced data that can explain this (for BET, SKJ, YFT), let's check in the nominal. 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+On voit déjà que dans le nominal il n'y a pas de NEI. donc difficile de faire le raising sans NEI pour WCPFC, on pourrait mettre le nominal en NEI pour WCPFC parce que sinon on fait une méga decrease pour certaines années ou la plupart des captures ont été données en NEI. On voit aussi que les deux pics de données ou ça décroit ça correspond aux années ou il y a eu un pic de données TWN. On va regarder en détail sur les nominales. Attention le pic est en fait juste pour number of fish. (on voit pas grand chose en fait pas sûr que ça soit ça)
 
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+En gros ce que je comprends pour le moment, c'est que les données NEI georef sont vraiment baissées beaucoup ces années là (pourquoi pas les autres c'est un mystère), le mieux serait de faire un level 2 sans les fishing_fleet pour WCPFC. Mais ça serait intéressant de comprendre ce qu'il se passe pour wcpfc dans le RF1_basic

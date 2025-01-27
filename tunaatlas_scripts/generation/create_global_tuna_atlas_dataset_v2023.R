@@ -135,7 +135,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     
     opts$level2RF2number = if(!is.null(opts$level2RF2number)) opts$level2RF2number else FALSE
     opts$decrease_when_rf_inferior_to_one = if(!is.null(opts$decrease_when_rf_inferior_to_one)) opts$decrease_when_rf_inferior_to_one else FALSE
-
     # LEVEL 0 FIRMS PRODUCT ---------------------------------------------------
     
       if(DATASET_LEVEL == 0 | from_level0){
@@ -444,8 +443,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     } else {
       ## RETRIEVING DATA FROM DOI ---------------------------------------------------
       # Load georeferenced dataset
-      if (file.exists(here::here(file.path("data", opts$keylevel0))) && !opts$forceuseofdoi) {
-        georef_dataset <- readr::read_csv(here::here(file.path("data", opts$keylevel0)), guess_max = 0)
+      if (file.exists((file.path("data", opts$keylevel0))) && !opts$forceuseofdoi) {
+        georef_dataset <- readr::read_csv((file.path("data", opts$keylevel0)), guess_max = 0)
         class(georef_dataset$measurement_value) <- "numeric" 
       } else if (!is.null(opts$doilevel0)) {
         zen4R::download_zenodo(doi = opts$doilevel0, files = opts$keylevel0, path = "data")
@@ -462,7 +461,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         if(DATASET_LEVEL == 2){
           
           if (file.exists(here::here("data/geographic_identifier_to_nominal.csv"))) {
-            geographic_identifier_to_nominal <- readr::read_csv(here::here("data/geographic_identifier_to_nominal.csv"))
+            geographic_identifier_to_nominal <- readr::read_csv("data/geographic_identifier_to_nominal.csv")
             class(geographic_identifier_to_nominal$code) <- "character"
             
           } else {
@@ -529,10 +528,12 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       
       ### Removing duplicated data 
       #issue(#48)
-      georef_dataset <- georef_dataset %>% dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
-        dplyr::mutate(number_unit = n_distinct(measurement_unit)) %>% dplyr::filter(! (measurement_unit == "no" & number_unit == 2)) %>% 
-        dplyr::select(-number_unit) %>% dplyr::mutate(fishing_mode = case_when(fishing_mode %in%c("OTH", "DEL") ~ "UNK", 
-                                                                               TRUE ~ fishing_mode))
+      georef_dataset <- georef_dataset %>%
+        dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
+        dplyr::filter(!(measurement_unit == "no" & n_distinct(measurement_unit) == 2)) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(fishing_mode = ifelse(fishing_mode %in% c("OTH", "DEL"), "UNK", fishing_mode))
+      
       
       function_recap_each_step(
         paste0("Removing_duplicated_units"),
@@ -544,20 +545,18 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     config$logger.info(
       "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
     )
-    
-    if(file.exists(here::here(file.path("data", opts$keynominal))) && !opts$forceuseofdoi){
+    if(file.exists(file.path("data", opts$keynominal)) && !opts$forceuseofdoi){
       nominal_catch <-
         readr::read_csv(here::here(file.path("data", opts$keynominal)),
                         guess_max = 0)
       class(nominal_catch$measurement_value) <- "numeric"
-      
       #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
-    } else if(!is.null(opts$doinominal)){
-      zen4R::download_zenodo(doi = opts$doinominal, files = opts$keynominal, path = "data")
-      nominal_catch <-
-        readr::read_csv(here::here(file.path("data", opts$keynominal)),
-                        guess_max = 0)
-      class(nominal_catch$measurement_value) <- "numeric"
+    # } else if(!is.null(opts$doinominal)){
+    #   zen4R::download_zenodo(doi = opts$doinominal, files = opts$keynominal, path = "data")
+    #   nominal_catch <-
+    #     readr::read_csv(here::here(file.path("data", opts$keynominal)),
+    #                     guess_max = 0)
+    #   class(nominal_catch$measurement_value) <- "numeric"
       
     } else {
       stop("Please provide a nominal catch dataset")
@@ -729,91 +728,52 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           # 
           # data.table::fwrite(join_updated_iotc, "data/fact_conv_IRD_upgraded.csv")
           
-          if(DATASET_LEVEL == 2){
-            strata_list <-  c("source_authority", "species", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom", "fishing_mode")
-            
-            convert_number_to_nominal_output <- convert_number_to_nominal(georef_dataset, nominal_catch, raise_only_unmatched = TRUE, 
-                                                                          strata = strata_list)
-            
-            # we convert/raise only the stratas being recorded only in number of fish
-            
-            georef_dataset <- convert_number_to_nominal_output$georef_dataset
-            saveRDS(convert_number_to_nominal_output$not_converted_number, "data/numberwithnonominal.rds")
-            function_recap_each_step(
-              paste0("Conv_NO_nominal_full_strata"),
-              georef_dataset,
-              paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions", toString(strata_list), 
-                     "does not contain catch information in tons, is converted and raised using the nominal dataset ", opts$doinominal, ". The key identifier for this operation is: ", opts$keynominal,
-                     ". This process relies on the assumption that for a given stratum with a unique measurement unit, raising the data to match the nominal catch serves as a reasonable approximation of what would result", 
-                     " from a conversion using the available conversion factors from Number of Fish to Tons. However, this step applies the same conversion factor to all catch within the same strata, which may not fully ", 
-                     "reflect the variability in reality. Consequently, this step is performed for strata where solid conversion factors are not available."),
-              ""
-            )
-            
-            strata_list <-  c("source_authority", "species", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom")
-
-convert_number_to_nominal_output <- convert_number_to_nominal(georef_dataset, nominal_catch, raise_only_unmatched = TRUE, 
-                                                              strata = strata_list)
-
-georef_dataset <- convert_number_to_nominal_output$georef_dataset
-saveRDS(convert_number_to_nominal_output$not_converted_number, "data/numberwithnonominal.rds")
-function_recap_each_step(
-  paste0("Conv_NO_nominal_basic_strata"),
-  georef_dataset,
-  paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions", toString(strata_list), 
-         "does not contain catch information in tons, is converted and raised using the nominal dataset ", opts$doinominal, ". The key identifier for this operation is: ", opts$keynominal,
-         ". This process relies on the assumption that for a given stratum with a unique measurement unit, raising the data to match the nominal catch serves as a reasonable approximation of what would result", 
-         " from a conversion using the available conversion factors from Number of Fish to Tons. However, this step applies the same conversion factor to all catch within the same strata, which may not fully ", 
-         "reflect the variability in reality. Consequently, this step is performed for strata where solid conversion factors are not available."),
-  ""
-)
-          }
           
           # IOTC Upgraded conversion factors -------------------------------------------------
-          if(opts$upgradeIOTC_fact_conv){
-            
-            opts$min_q1_etc = if(!is.null(opts$min_q1_etc)) opts$min_q1_etc else "min"
-            
-            IOTC_conv_fact_mapped_filtered <- IOTC_conv_fact_mapped %>% 
-              dplyr::group_by(gear_type, species, year) %>% 
-              dplyr::summarise(
-                mean = mean(measurement_value, na.rm = TRUE), 
-                Q1 = quantile(measurement_value, probs = 0.25, na.rm = TRUE),
-                median = median(measurement_value, na.rm = TRUE),
-                Q3 = quantile(measurement_value, probs = 0.75, na.rm = TRUE),
-                min = min(measurement_value, na.rm = TRUE)
-              ) %>% 
-              dplyr::mutate(conversion = case_when(
-                opts$min_q1_etc == "min" ~ min,
-                opts$min_q1_etc == "Q1" ~ Q1,
-                opts$min_q1_etc == "Q3" ~ Q3,
-                opts$min_q1_etc == "mean" ~ mean,
-                opts$min_q1_etc == "median" ~ median,
-                TRUE ~ NA_real_  # Valeur par défaut au cas où aucune condition n'est remplie
-              )) %>% 
-              dplyr::select(gear_type, species, conversion, year)
-            
-            
-            georef_dataset_tons <- georef_dataset %>% dplyr::filter(measurement_unit == "t")
-            georef_dataset_no <- georef_dataset %>% dplyr::filter(measurement_unit == "no")
-            
-            georef_dataset_no_l <- georef_dataset_no %>% dplyr::mutate(year = lubridate::year(time_start)) %>% dplyr::left_join(IOTC_conv_fact_mapped_filtered) 
-            georef_dataset_no_conv_fact <- georef_dataset_no_l %>% dplyr::filter(is.na(conversion)) %>% dplyr::select(-c(conversion, year))
-            
-            georef_dataset_no <- georef_dataset_no_l %>% dplyr::filter(!is.na(conversion)) %>% 
-              dplyr::mutate(measurement_value = conversion * measurement_value) %>% 
-              dplyr::mutate(measurement_unit = "t") %>% dplyr::select(-c(conversion, year))
-            
-            georef_dataset <- rbind(georef_dataset_no, georef_dataset_tons, georef_dataset_no_conv_fact)
-            
-            function_recap_each_step(
-              paste0("Converting NO using upgraded IOTC convfact",  (opts$min_q1_etc)),
-              georef_dataset,
-              paste0("We use minimal recorded IOTC conversion factors for each couple gear/species and use those to convert the Number of fish of other source_authority"),
-              ""
-            )
-            
-          }
+          # if(opts$upgradeIOTC_fact_conv){
+          #   
+          #   opts$min_q1_etc = if(!is.null(opts$min_q1_etc)) opts$min_q1_etc else "min"
+          #   
+          #   IOTC_conv_fact_mapped_filtered <- IOTC_conv_fact_mapped %>% 
+          #     dplyr::group_by(gear_type, species, year) %>% 
+          #     dplyr::summarise(
+          #       mean = mean(measurement_value, na.rm = TRUE), 
+          #       Q1 = quantile(measurement_value, probs = 0.25, na.rm = TRUE),
+          #       median = median(measurement_value, na.rm = TRUE),
+          #       Q3 = quantile(measurement_value, probs = 0.75, na.rm = TRUE),
+          #       min = min(measurement_value, na.rm = TRUE)
+          #     ) %>% 
+          #     dplyr::mutate(conversion = case_when(
+          #       opts$min_q1_etc == "min" ~ min,
+          #       opts$min_q1_etc == "Q1" ~ Q1,
+          #       opts$min_q1_etc == "Q3" ~ Q3,
+          #       opts$min_q1_etc == "mean" ~ mean,
+          #       opts$min_q1_etc == "median" ~ median,
+          #       TRUE ~ NA_real_  # Valeur par défaut au cas où aucune condition n'est remplie
+          #     )) %>% 
+          #     dplyr::select(gear_type, species, conversion, year)
+          #   
+          #   
+          #   georef_dataset_tons <- georef_dataset %>% dplyr::filter(measurement_unit == "t")
+          #   georef_dataset_no <- georef_dataset %>% dplyr::filter(measurement_unit == "no")
+          #   
+          #   georef_dataset_no_l <- georef_dataset_no %>% dplyr::mutate(year = lubridate::year(time_start)) %>% dplyr::left_join(IOTC_conv_fact_mapped_filtered) 
+          #   georef_dataset_no_conv_fact <- georef_dataset_no_l %>% dplyr::filter(is.na(conversion)) %>% dplyr::select(-c(conversion, year))
+          #   
+          #   georef_dataset_no <- georef_dataset_no_l %>% dplyr::filter(!is.na(conversion)) %>% 
+          #     dplyr::mutate(measurement_value = conversion * measurement_value) %>% 
+          #     dplyr::mutate(measurement_unit = "t") %>% dplyr::select(-c(conversion, year))
+          #   
+          #   georef_dataset <- rbind(georef_dataset_no, georef_dataset_tons, georef_dataset_no_conv_fact)
+          #   
+          #   function_recap_each_step(
+          #     paste0("Converting NO using upgraded IOTC convfact",  (opts$min_q1_etc)),
+          #     georef_dataset,
+          #     paste0("We use minimal recorded IOTC conversion factors for each couple gear/species and use those to convert the Number of fish of other source_authority"),
+          #     ""
+          #   )
+          #   
+          # }
           if(opts$upgradeIRD_fact_conv){
             
             ## CONVERT USING IRD CONVERSION FACTORS ---------------------------------------------------
@@ -860,7 +820,7 @@ function_recap_each_step(
             georef_dataset,
             paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions:", toString(strata), 
                    "containing catch information in tons, is converted and raised using the nominal dataset ", opts$doinominal, ". The key identifier for this operation is: ", opts$keynominal,
-                   ". This process relies on the fact that for a strata reported in both number and tons, the spatial footprint of the data in number is more often containing th spatial footprint of the data in tons.", 
+                   ". This process relies on the fact that for a strata reported in both number and tons, the spatial footprint of the data in number is more often containing the spatial footprint of the data in tons.", 
                    "Then, as there is need to choose one of the measurment_unit for the raising and with limited conversion factors, we choose to keep raise the data in 'Number of fish' on the basis of the equivalent nominal strata ", 
                    "downgraded by the corresponding georeferenced catch in tons."),
             ""
@@ -985,15 +945,19 @@ function_recap_each_step(
           # idee raise only les données qui sont que en tonnes
           
           
+          wcpfc_not_to_raise <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
+          dataset_to_compute_rf = georef_dataset
+          
           function_raise_data_output<-function_raise_data(fact,
-                                                          source_authority_filter = c("IOTC","ICCAT","IATTC", "WCPFC", "CCSBT"),
-                                                          dataset_to_raise = georef_dataset,
+                                                          source_authority_filter = c("IOTC","ICCAT","IATTC", "CCSBT"), 
+                                                          dataset_to_raise = not_raising_dim_wcpfc,
                                                           dataset_to_compute_rf=dataset_to_compute_rf,
                                                           nominal_dataset_df = nominal_catch,
-                                                          x_raising_dimensions = x_raising_dimensions, 
-                                                          decrease_when_rf_inferior_to_one = opts$decrease_when_rf_inferior_to_one)
+                                                          x_raising_dimensions = x_raising_dimensions, decrease_when_rf_inferior_to_one = TRUE)
           
-          georef_dataset <- function_raise_data_output$data_raised
+          raised_data <- function_raise_data_output$data_raised 
+          
+          georef_dataset <- rbind(wcpfc_not_to_raise, raised_data)
           
           rm(dataset_to_compute_rf)
           
@@ -1017,16 +981,19 @@ function_recap_each_step(
           }
           
           x_raising_dimensions = c("gear_type", "species", "year", "source_authority", "fishing_fleet", "geographic_identifier_nom")
+          wcpfc_not_to_raise <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
           dataset_to_compute_rf = georef_dataset
+
           function_raise_data_output<-function_raise_data(fact,
-                                                          source_authority_filter = c("IOTC","ICCAT","IATTC", "WCPFC", "CCSBT"),
-                                                          dataset_to_raise = georef_dataset,
+                                                          source_authority_filter = c("IOTC","ICCAT","IATTC", "CCSBT"), 
+                                                          dataset_to_raise = not_raising_dim_wcpfc,
                                                           dataset_to_compute_rf=dataset_to_compute_rf,
                                                           nominal_dataset_df = nominal_catch,
-                                                          x_raising_dimensions = x_raising_dimensions, 
-                                                          decrease_when_rf_inferior_to_one = opts$decrease_when_rf_inferior_to_one)
+                                                          x_raising_dimensions = x_raising_dimensions, decrease_when_rf_inferior_to_one = TRUE)
           
-          georef_dataset <- function_raise_data_output$data_raised
+          raised_data <- function_raise_data_output$data_raised 
+          
+          georef_dataset <- rbind(wcpfc_not_to_raise, raised_data)
           
           rm(dataset_to_compute_rf)
           
