@@ -50,7 +50,6 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
-  entity_dirs <- c("~/firms-gta/geoflow-tunaatlas/jobs/20250117135138_raw_data_georef/entities/catch_iccat_level0")
   # Function to determine tRFMO from entity name
   determine_tRFMO <- function(entity_name) {
     trfmo_labels <- c("iattc", "wcpfc", "ccsbt", "iotc", "iccat") # the labels to look for
