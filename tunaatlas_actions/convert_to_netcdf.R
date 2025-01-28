@@ -222,7 +222,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     #         'effort' = unite <- '???',
     #         'catch_at_size' = unite <- '???')
     varXd <- ncvar_def(name=as.character(variable),  units=as.character(unite), dim=listDims, missval=nonAvailable, prec="float", compression = compression)
-
+    
     ######################################################################
     ##### CREATE EMPTY NETCDF FILE  ##########  # create netCDF file and put arrays
     ######################################################################
@@ -507,6 +507,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   } else {
     dataset <- dataset %>% dplyr::filter(measurement_unit == "t")
     print(config$logger.info("Multiple units shouldn't be handled by netcdf only tons are kept"))
+    dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
   }
   
   dataset_metadata$variable<-sub('.*\\.', '',dataset_metadata$database_table_name )
@@ -568,7 +569,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   # start_time <- Sys.time()
   
   write_NetCDF(config = config, con = con, dataset_metadata,Variable='auto',dimensions='all', res_dimensions_and_variables = dataset, path = "data", 
-                 specie = "all")
+               specie = "all")
   
   # end_time <- Sys.time()
   # time_all_in_one <- difftime(start_time, end_time)

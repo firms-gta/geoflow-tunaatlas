@@ -1,0 +1,18 @@
+---
+title: "Issue with raising/decreasing data"
+output: html_document
+date: "2025-01-22"
+---
+
+![RF1 every species every ocean]("~/firms-gta/geoflow-tunaatlas/jobs/20250121084658_ancient_level2_01_2025/entities/global_catch_ird_level2_rf1_convert_decrease/tableau_recapbookdowntest_files/figure-html/evolvaluedimdiff-1.png")
+
+```{r pressure, echo=FALSE, fig.cap="RF1 every species every ocean", out.width = '100%'}
+knitr::include_graphics("~/firms-gta/geoflow-tunaatlas/jobs/20250121084658_ancient_level2_01_2025/entities/global_catch_ird_level2_rf1_convert_decrease/tableau_recapbookdowntest_files/figure-html/evolvaluedimdiff-1.png")
+```
+
+Observing the data with the shiny apps, we can see that there is no signifacnt differences with georeferenced data that can explain this (for BET, SKJ, YFT), let's check in the nominal. 
+
+
+On voit déjà que dans le nominal il n'y a pas de NEI. donc difficile de faire le raising sans NEI pour WCPFC, on pourrait mettre le nominal en NEI pour WCPFC parce que sinon on fait une méga decrease pour certaines années ou la plupart des captures ont été données en NEI. On voit aussi que les deux pics de données ou ça décroit ça correspond aux années ou il y a eu un pic de données TWN. On va regarder en détail sur les nominales. Attention le pic est en fait juste pour number of fish. (on voit pas grand chose en fait pas sûr que ça soit ça)
+
+En gros ce que je comprends pour le moment, c'est que les données NEI georef sont vraiment baissées beaucoup ces années là (pourquoi pas les autres c'est un mystère), le mieux serait de faire un level 2 sans les fishing_fleet pour WCPFC. Mais ça serait intéressant de comprendre ce qu'il se passe pour wcpfc dans le RF1_basic
