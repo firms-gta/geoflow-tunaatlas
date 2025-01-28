@@ -299,7 +299,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           ),
           "areas_in_land" = paste0(
             "# Overview of data located on land\n\n",
-            "Only the squares where the integrity of the area is located on land are considered in the analysis.\n"
+            "Only the squares where the integrity of the area is located on land are considered in the analysis.\n The analysis has been perform using the cwp grid dataset that can be found : https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip", 
+            "\n\n More details : https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133"
           ),
           "removed_irregular_areas" = paste0(
             "# Area not in CWP grid\n\n",
@@ -328,7 +329,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           parameter_fact = "catch",
           plotting_type = "plot",
           parameter_colnames_to_keep = c(
-            "source_authority", "species", "gear_type", "fishing_fleet",
+            # "source_authority", 
+            "species", "gear_type", "fishing_fleet",
             "fishing_mode", "geographic_identifier", "measurement_unit",
             "measurement_value", "GRIDTYPE", "species_group", "Gear"
           ),
@@ -374,8 +376,14 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       #                   output_dir = entity_dir, output_file =output_file_name ,
       #                   envir = render_env
       # )
+      summary_invalid_data <- read_csv(file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")))
+      render_env$summary_invalid_data <- summary_invalid_data
+      qs::qsave(render_env, file.path(entity_dir, paste0(entity_name, "render_env.qs")))
+      
       rmarkdown::render(input = "Report_on_raw_data.Rmd", envir = render_env, output_format = "bookdown::html_document2",
-                            output_dir =entity_dir, output_file = entity_name)
+                        output_dir =entity_dir, output_file = entity_name)
+      # rmarkdown::render(input = "Report_on_raw_data_iccat.Rmd", envir = render_env, output_format = "bookdown::html_document2",
+      #                   output_dir ="~/firms-gta/geoflow-tunaatlas/jobs/20250117135138_raw_data_georef/entities/catch_iccat_level0", output_file = "catch_iccat_level0_detailed.html")
       # rmarkdown::render(input = "Report_on_raw_data.Rmd", envir = render_env, output_format = "pdf_document",
       #                   output_dir =entity_dir, output_file = entity_name)
       # rmarkdown::render(input = "Report_on_raw_data.Rmd", envir = render_env, output_format = "bookdown::markdown_document2",

@@ -37,7 +37,7 @@ output:
     citation_package: default # Can also be "natbib"
     always_allow_html: TRUE
     keep_md: TRUE
-abstract: "This doc is to show the issue with raw data"
+abstract: "This document aims to identify and present key issues related to the raw data used in the analysis. It highlights inconsistencies, gaps, or ambiguities in the data structure, content, or processing steps that may impact the reliability and comparability of the results. By systematically addressing these issues, this report seeks to provide clarity on the challenges inherent in the raw data and to propose areas where further refinement, validation, or clarification is needed. The ultimate goal is to ensure a solid foundation for subsequent analyses and to support informed decision-making regarding data preparation and use."
 geometry: "margin=20mm"
 papersize: a4
 endfloat: FALSE
@@ -166,4 +166,12 @@ qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and s
 
 ```
 
+
+Overview of the data provided for which the captures are in land corresponding to CWP standards. This dataset is `r nrow(summary_invalid_data)` rows and `r sum((summary_invalid_data %>% dplyr::filter(measurement_unit == "Tons"))$measurement_value)` tons and `r sum((summary_invalid_data %>% dplyr::filter(measurement_unit == "Number of fish"))$measurement_value)` number of fish.
+
+```{r, fig.cap="Data with known issues"}
+
+DT::datatable(summary_invalid_data)
+
+```
 
