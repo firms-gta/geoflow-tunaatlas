@@ -11,10 +11,18 @@ res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment
 # envir = parent.frame() ne marche pas bien car il faut appeler dans le nouveau markdown (child) envir$obj
 ```
 
-```{r eval=exists("Add_lines") && file.exists(Add_lines), results='asis'}
+```{r results='asis'}
 
-res <- knitr::knit_child(Add_lines, quiet = TRUE, envir = environment())
-cat(res)
+if (exists("Add_lines")) {
+  if (file.exists(Add_lines)) {
+    # Add_lines est un fichier existant
+    res <- knitr::knit_child(Add_lines, quiet = TRUE, envir = environment())
+  } else {
+    # Add_lines est du texte brut
+    res <- knitr::knit_child(text = Add_lines, quiet = TRUE, envir = environment())
+  }
+  cat(res)
+}
 
 ```
 
