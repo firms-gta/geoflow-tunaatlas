@@ -827,25 +827,25 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           )
           
           
-          strata <- c("source_authority", "species", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom")
-          
-          convert_number_to_nominal_output <- convert_number_to_nominal(georef_dataset, nominal_catch, strata = strata, 
-                                                                        raise_only_unmatched = FALSE)
-          
-          georef_dataset <- convert_number_to_nominal_output$georef_dataset
-          
-          saveRDS(convert_number_to_nominal_output$not_converted_number, "data/numberwithnonominalsecond.rds")
-          
-          function_recap_each_step(
-            paste0("Conv_NO_nominal_no_t_basic"),
-            georef_dataset,
-            paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions:", toString(strata), 
-                   "containing catch information in tons, is converted and raised using the nominal dataset ", opts$doinominal, ". The key identifier for this operation is: ", opts$keynominal,
-                   ". This process relies on the fact that for a strata reported in both number and tons, the spatial footprint of the data in number is more often containing th spatial footprint of the data in tons.", 
-                   "Then, as there is need to choose one of the measurment_unit for the raising and with limited conversion factors, we choose to keep raise the data in 'Number of fish' on the basis of the equivalent nominal strata ", 
-                   "downgraded by the corresponding georeferenced catch in tons."),
-            ""
-          )
+          # strata <- c("source_authority", "species", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom")
+          # 
+          # convert_number_to_nominal_output <- convert_number_to_nominal(georef_dataset, nominal_catch, strata = strata, 
+          #                                                               raise_only_unmatched = FALSE)
+          # 
+          # georef_dataset <- convert_number_to_nominal_output$georef_dataset
+          # 
+          # saveRDS(convert_number_to_nominal_output$not_converted_number, "data/numberwithnonominalsecond.rds")
+          # 
+          # function_recap_each_step(
+          #   paste0("Conv_NO_nominal_no_t_basic"),
+          #   georef_dataset,
+          #   paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions:", toString(strata), 
+          #          "containing catch information in tons, is converted and raised using the nominal dataset ", opts$doinominal, ". The key identifier for this operation is: ", opts$keynominal,
+          #          ". This process relies on the fact that for a strata reported in both number and tons, the spatial footprint of the data in number is more often containing th spatial footprint of the data in tons.", 
+          #          "Then, as there is need to choose one of the measurment_unit for the raising and with limited conversion factors, we choose to keep raise the data in 'Number of fish' on the basis of the equivalent nominal strata ", 
+          #          "downgraded by the corresponding georeferenced catch in tons."),
+          #   ""
+          # )
           
           
           stepLogger(level = 2, step = stepnumber, "Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
@@ -946,14 +946,16 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           
           
           wcpfc_not_to_raise <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
-          dataset_to_compute_rf = georef_dataset
+          georef_dataset <- georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
+          dataset_to_compute_rf = georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
           
           function_raise_data_output<-function_raise_data(fact,
                                                           source_authority_filter = c("IOTC","ICCAT","IATTC", "CCSBT"), 
-                                                          dataset_to_raise = not_raising_dim_wcpfc,
+                                                          dataset_to_raise = georef_dataset,
                                                           dataset_to_compute_rf=dataset_to_compute_rf,
                                                           nominal_dataset_df = nominal_catch,
-                                                          x_raising_dimensions = x_raising_dimensions, decrease_when_rf_inferior_to_one = TRUE)
+                                                          x_raising_dimensions = x_raising_dimensions, 
+                                                          decrease_when_rf_inferior_to_one = TRUE)
           
           raised_data <- function_raise_data_output$data_raised 
           
@@ -964,42 +966,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           if(recap_each_step){
             function_recap_each_step(
               paste0("Level2_RF1_full"),
-              georef_dataset,
-              paste0(
-                "The georeferenced data is adjusted to more accurately align with the nominal dataset. ",
-                "To achieve this, all strata with corresponding equivalents in the nominal data—based on the following variables: ", 
-                toString(x_raising_dimensions), "—are adjusted upward to match the nominal values. Conversely, if the georeferenced data exceeds the nominal value for any given stratum, ",
-                "it is adjusted downward to correspond to the nominal data. The nominal dataset used for this adjustment is accessible via the following DOI: ",
-                opts$doinominal, " with the key identifier being: ", opts$keynominal, ". Similarly, georeferenced strata expressed in numbers ",
-                "that correspond to nominal strata undergoing adjustment are also removed if existing."),
-              "function_raising_georef_to_nominal",
-              list(
-                opts$raising_georef_to_nominal ,
-                fact
-              ), entity
-            )
-          }
-          
-          x_raising_dimensions = c("gear_type", "species", "year", "source_authority", "fishing_fleet", "geographic_identifier_nom")
-          wcpfc_not_to_raise <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
-          dataset_to_compute_rf = georef_dataset
-
-          function_raise_data_output<-function_raise_data(fact,
-                                                          source_authority_filter = c("IOTC","ICCAT","IATTC", "CCSBT"), 
-                                                          dataset_to_raise = not_raising_dim_wcpfc,
-                                                          dataset_to_compute_rf=dataset_to_compute_rf,
-                                                          nominal_dataset_df = nominal_catch,
-                                                          x_raising_dimensions = x_raising_dimensions, decrease_when_rf_inferior_to_one = TRUE)
-          
-          raised_data <- function_raise_data_output$data_raised 
-          
-          georef_dataset <- rbind(wcpfc_not_to_raise, raised_data)
-          
-          rm(dataset_to_compute_rf)
-          
-          if(recap_each_step){
-            function_recap_each_step(
-              paste0("Level2_RF1_basic"),
               georef_dataset,
               paste0(
                 "The georeferenced data is adjusted to more accurately align with the nominal dataset. ",
