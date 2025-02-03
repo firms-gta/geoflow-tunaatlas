@@ -64,7 +64,7 @@ if(!is.data.frame(mapping_dataset)){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/map_codelist.R")
   
   if (fact == "catch") {
-    dimension_to_map <- c("gear_type", "species", "fishing_fleet", "fishing_mode", "measurement_type")
+    dimension_to_map <- c("gear_type", "species", "fishing_fleet", "fishing_mode")
   } else if (fact == "effort") {
     dimension_to_map <- c("gear_type", "fishing_fleet", "fishing_mode", "measurement_unit")
   }
