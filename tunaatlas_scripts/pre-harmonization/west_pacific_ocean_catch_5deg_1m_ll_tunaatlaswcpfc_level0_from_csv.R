@@ -143,9 +143,6 @@ catches_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="t"
 index.catchinnumberonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="N")
 catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
 
-# School
-catches_pivot_WCPFC$School<-"ALL"
-
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 
@@ -156,7 +153,7 @@ catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID
 catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
 catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
-catches_pivot_WCPFC$CatchType <- "ALL"
+catches_pivot_WCPFC$CatchType <- "RC" # retained catch
 
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
 catches <- catches_pivot_WCPFC[colToKeep_captures]

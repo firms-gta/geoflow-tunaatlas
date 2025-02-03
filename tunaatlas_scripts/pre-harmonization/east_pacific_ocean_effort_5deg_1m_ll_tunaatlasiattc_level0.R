@@ -105,7 +105,7 @@ function(action, entity, config){
   efforts$SquareSize<-5
   efforts$CodeSquareSize<-6
   efforts$Gear<-"LL"
-  efforts$SetType<-"ALL"
+  efforts$SetType<-"UNK" #School type later
   efforts <- efforts %>% select(-Record)
   
   # Reach the catches harmonized DSD using a function in IATTC_functions.R

@@ -92,13 +92,13 @@ RFMO_CE<-format_time_db_format(RFMO_CE)
 RFMO_CE<-harmo_spatial_5(RFMO_CE,"LATITUDE","LONGITUDE",5,6)
 
 #School
-RFMO_CE$School<-"ALL"
+RFMO_CE$School<-"UNK"
 
 #Species
 RFMO_CE$Species<-"SBF"
 
 #CatchType
-RFMO_CE$CatchType<-"ALL"
+RFMO_CE$CatchType<- "RC" # Retained catches
 
 
 

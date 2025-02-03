@@ -122,7 +122,7 @@ function(action, entity, config){
   efforts_pivot_WCPFC$Gear<-"L"
   
   # School
-efforts_pivot_WCPFC$School<-"ALL"
+efforts_pivot_WCPFC$School<-"UNK"
 efforts_pivot_WCPFC$Gear<-"L"
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")

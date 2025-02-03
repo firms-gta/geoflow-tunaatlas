@@ -76,8 +76,8 @@ colnames(NC_harm_IATTC)<-c("Year", "Flag","Gear","Species","Catch")
 
 NC_harm_IATTC$AreaName<-"EPO"
 NC_harm_IATTC$AreaCWPgrid<-NA
-NC_harm_IATTC$School<-"ALL"
-NC_harm_IATTC$CatchType<-"ALL"
+NC_harm_IATTC$School<-"UNK"
+NC_harm_IATTC$CatchType<-"NC" #measurement_type
 NC_harm_IATTC$CatchUnits<-"t"
 NC_harm_IATTC$RFMO<-"IATTC"
 NC_harm_IATTC$Ocean<-"PAC_E"

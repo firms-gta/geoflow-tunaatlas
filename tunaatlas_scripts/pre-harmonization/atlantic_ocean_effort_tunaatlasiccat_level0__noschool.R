@@ -103,7 +103,7 @@ source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sar
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
 
 # School
-efforts_pivot_ICCAT$School<-"ALL"
+efforts_pivot_ICCAT$School<-"UNK"
 
 # Flag
 efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode

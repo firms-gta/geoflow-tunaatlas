@@ -97,7 +97,7 @@ index.catchinnumberonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="N")
 catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
 
 # School
-catches_pivot_WCPFC$School<-"ALL"
+catches_pivot_WCPFC$School<-"UNK"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")

@@ -93,7 +93,7 @@ function(action, entity, config){
   CCSBT_NC<-format_time_db_format(CCSBT_NC)
   
   #School
-  CCSBT_NC$fishing_mode<-"ALL"
+  CCSBT_NC$fishing_mode<-"UNK"
   
   #Species
   CCSBT_NC$species<-"SBF"

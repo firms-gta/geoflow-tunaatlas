@@ -88,7 +88,7 @@ catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(RFMO_CE=t2ce,
 config$logger.info(paste0(" END function   \n"))
 
 #School
-catches_pivot_ICCAT$School<-"ALL"
+catches_pivot_ICCAT$School<-"UNK"
 
 #FishingFleet
 catches_pivot_ICCAT$FishingFleet<-catches_pivot_ICCAT$FlagCode

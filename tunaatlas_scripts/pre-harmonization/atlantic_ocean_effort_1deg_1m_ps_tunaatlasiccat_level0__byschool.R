@@ -101,7 +101,7 @@ index_school_fs<-which(efforts_pivot_ICCAT$EffortUnits == "Hours.FSC")
 index_school_fd<-which(efforts_pivot_ICCAT$EffortUnits == "Hours.FAD")
 index_school_all<-which(efforts_pivot_ICCAT$EffortUnits %in% setdiff(unique(efforts_pivot_ICCAT$EffortUnits),c("Hours.FAD","Hours.FSC")))
 
-efforts_pivot_ICCAT$School<-"ALL"
+efforts_pivot_ICCAT$School<-"UNK"
 efforts_pivot_ICCAT$School[index_school_fs]<-"fs"
 efforts_pivot_ICCAT$School[index_school_fd]<-"fd"
 

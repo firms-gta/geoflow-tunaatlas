@@ -97,7 +97,7 @@ NC$SP_NAME <- NULL
 NC$FLEET_CODE <- NULL
 
 NCAreaCWPgrid<-NA
-NC$School<-"ALL"
+NC$School<-"UNK"
 NC$CatchType<-"NC"
 NC$CatchUnits<-"t"
 NC$RFMO<-"WCPFC"

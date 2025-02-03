@@ -116,13 +116,13 @@ function(action, entity, config){
   RFMO_CE<-harmo_spatial_5(RFMO_CE,"LATITUDE","LONGITUDE",1,5)
   
   #School
-  RFMO_CE$School<-"ALL"
+  RFMO_CE$School<-"UNK"
   
   #Species
   RFMO_CE$Species<-"SBF"
   
   #CatchType
-  RFMO_CE$CatchType<-"ALL"
+  RFMO_CE$CatchType<-"UNK" #not used later as it is no catch
 
   
 efforts<-RFMO_CE

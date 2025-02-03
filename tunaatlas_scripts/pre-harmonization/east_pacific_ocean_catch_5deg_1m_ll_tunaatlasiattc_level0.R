@@ -116,7 +116,7 @@ colnames(catches)<-c("variable","value","CatchUnits","Year","Month","Flag","Lat"
 catches$SquareSize<-5
 catches$CodeSquareSize<-6
 catches$Gear<-"LL"
-catches$SetType<-"ALL"
+catches$SetType<-"UNK" #School type later
 
 catches$variable[which(catches[,"variable"]=="BuM")]<-"BUM"
 

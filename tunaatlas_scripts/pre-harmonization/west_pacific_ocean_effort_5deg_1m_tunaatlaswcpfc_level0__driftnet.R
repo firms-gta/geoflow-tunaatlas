@@ -118,7 +118,7 @@ index.nr <- which( efforts_pivot_WCPFC[,"CatchUnits"] == "N" )
 efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
 
 # School
-efforts_pivot_WCPFC$School<-"ALL"
+efforts_pivot_WCPFC$School<-"UNK"
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
 efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)

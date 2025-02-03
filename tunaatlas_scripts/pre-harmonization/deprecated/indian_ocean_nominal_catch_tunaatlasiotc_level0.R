@@ -78,7 +78,7 @@ colnames(NC_harm_IOTC)<-c("FishingFleet", "AreaName","Year","Gear","Species","Ca
 
 NC_harm_IOTC$Catch<-as.numeric(NC_harm_IOTC$Catch)
 NC_harm_IOTC$AreaCWPgrid<-NA
-NC_harm_IOTC$School<-"ALL"
+NC_harm_IOTC$School<-"UNK"
 NC_harm_IOTC$CatchType<-"ALL"
 NC_harm_IOTC$CatchUnits<-"t"
 NC_harm_IOTC$RFMO<-"IOTC"

@@ -119,9 +119,6 @@ catches_pivot_WCPFC[index.kg,"CatchUnits"]<- "t"
 index.nr <- which( catches_pivot_WCPFC[,"CatchUnits"] == "N" )
 catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
 
-# School
-catches_pivot_WCPFC$School<-"ALL"
-
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 
