@@ -22,7 +22,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iotc_data <- NULL
                       if(options$include_IOTC){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_iotc <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                        dataset_files_iotc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                               regexpr("iotc", names(dataset_files)) > 0]))
                         iotc_data <- do.call("rbind", lapply(dataset_files_iotc, readr::read_csv, guess_max = 0))
                         iotc_data <- as.data.frame(iotc_data)
@@ -40,7 +40,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       wcpfc_data <- NULL
                       if(options$include_WCPFC){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_wcpfc <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                        dataset_files_wcpfc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("wcpfc", names(dataset_files)) > 0]))
                         wcpfc_data <- do.call("rbind", lapply(dataset_files_wcpfc, readr::read_csv, guess_max = 0))
                         wcpfc_data <- as.data.frame(wcpfc_data)
@@ -59,7 +59,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       ccsbt_data <- NULL
                       if(options$include_CCSBT){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_ccsbt <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                        dataset_files_ccsbt <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("ccsbt", names(dataset_files)) > 0]))
                         ccsbt_data <- do.call("rbind", lapply(dataset_files_ccsbt, readr::read_csv, guess_max = 0))
                         ccsbt_data <- as.data.frame(ccsbt_data)
@@ -77,7 +77,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iccat_data <- NULL
                       if(options$include_ICCAT){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_iccat <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                        dataset_files_iccat <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("byschool", names(dataset_files)) < 0 &
                                                                regexpr("iccat", names(dataset_files)) > 0]))
                         iccat_data <- do.call("rbind", lapply(dataset_files_iccat, readr::read_csv, guess_max = 0))
@@ -147,7 +147,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         if(variable == "catch") {
                           
                           config$logger.info(sprintf("Get %s data", rfmo))
-                          dataset_files_iattc <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                          dataset_files_iattc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                  regexpr("ps", names(dataset_files)) < 0 & 
                                                                  regexpr("effort", names(dataset_files)) < 0 &
                                                                  regexpr("iattc", names(dataset_files)) > 0]))
@@ -162,11 +162,11 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           config$logger.info(sprintf("Case %s data", variable))
                           
                           # Extract tuna catch
-                          df_catch_tuna_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_tuna_catch], guess_max = 0))
+                          df_catch_tuna_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_tuna_catch]), guess_max = 0))
                           df_catch_tuna_flag <- df_catch_tuna_flag[,columns_to_keep]
                           class(df_catch_tuna_flag$measurement_value) <- "numeric"
                           
-                          df_catch_tuna_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_tuna_catch], guess_max = 0))
+                          df_catch_tuna_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_tuna_catch]), guess_max = 0))
                           df_catch_tuna_settype <- df_catch_tuna_settype[,columns_to_keep]
                           class(df_catch_tuna_settype$measurement_value) <- "numeric"
                           
@@ -183,15 +183,15 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                               config$logger.info(sprintf("Catch file which will be raised to efffort: %s ", dataset_file_billfish_or_shark_catch))
                               
                               
-                              billfish_or_shark_catch <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_billfish_or_shark_catch], guess_max = 0))
+                              billfish_or_shark_catch <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_billfish_or_shark_catch]), guess_max = 0))
                               billfish_or_shark_catch <- billfish_or_shark_catch[,columns_to_keep]
                               class(billfish_or_shark_catch$measurement_value) <- "numeric"
                               
-                              billfish_or_shark_effort <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_billfish_or_shark_effort], guess_max = 0))
+                              billfish_or_shark_effort <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_billfish_or_shark_effort]), guess_max = 0))
                               billfish_or_shark_effort <- billfish_or_shark_effort[,columns_to_keep_effort]
                               class(billfish_or_shark_effort$measurement_value) <- "numeric"
                               
-                              tuna_effort <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_tuna_effort], guess_max = 0))
+                              tuna_effort <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_tuna_effort]), guess_max = 0))
                               tuna_effort <- tuna_effort[,columns_to_keep_effort]
                               class(tuna_effort$measurement_value) <- "numeric"
                               
@@ -238,19 +238,19 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                                                      raising_dimensions=c("gear_type","fishing_mode","time_start","time_end","geographic_identifier"))
                             
                           } else { # Else do not raise (i.e. for billfish/shark, keep catch only from billfish / shark)
-                            df_catch_billfish_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_billfish_catch], guess_max = 0))
+                            df_catch_billfish_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_billfish_catch]), guess_max = 0))
                             df_catch_billfish_flag <- df_catch_billfish_flag[,columns_to_keep]
                             class(df_catch_billfish_flag$measurement_value) <- "numeric"
                             
-                            df_catch_billfish_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_billfish_catch], guess_max = 0))
+                            df_catch_billfish_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_billfish_catch]), guess_max = 0))
                             df_catch_billfish_settype <- df_catch_billfish_settype[,columns_to_keep]
                             class(df_catch_billfish_settype$measurement_value) <- "numeric"
                             
-                            df_catch_shark_flag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSFlag_shark_catch],guess_max = 0))
+                            df_catch_shark_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_shark_catch]),guess_max = 0))
                             df_catch_shark_flag <- df_catch_shark_flag[,columns_to_keep]
                             class(df_catch_shark_flag$measurement_value) <- "numeric"
                             
-                            df_catch_shark_settype <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_PSSetType_shark_catch],guess_max = 0))
+                            df_catch_shark_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_shark_catch]),guess_max = 0))
                             df_catch_shark_settype <- df_catch_shark_settype[,columns_to_keep]
                             class(df_catch_shark_settype$measurement_value) <- "numeric"
                           }
@@ -303,11 +303,10 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           )
                           
                           # For the effort data, we keep only effort from one of the files (tuna or billfishes or shark). This is driven by the parameter "iattc_ps_effort_to_extract"
-                          
-                          df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_effort_settype], guess_max = 0))
+                          df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_settype]), guess_max = 0))
                           df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
                           class(df_iattc_effort_PSSetType$measurement_value) <- "numeric"
-                          df_iattc_effort_PSFlag <- as.data.frame(readr::read_csv(dataset_files[names(dataset_files)==dataset_file_effort_flag], guess_max = 0))
+                          df_iattc_effort_PSFlag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_flag]), guess_max = 0))
                           df_iattc_effort_PSFlag <- df_iattc_effort_PSFlag[,columns_to_keep_effort]
                           class(df_iattc_effort_PSFlag$measurement_value) <- "numeric"
                           
