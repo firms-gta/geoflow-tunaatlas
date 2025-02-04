@@ -538,88 +538,89 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       function_recap_each_step(
         paste0("Removing_duplicated_units"),
         georef_dataset,
-        "As some data is in fact duplicated, we check all the duplicated data and remove when same",
+        "As some data is in fact duplicated for catch, we check all the duplicated data and remove the data in number when same dimensions",
         ""
       )
     
-    config$logger.info(
-      "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
-    )
-    if(file.exists(file.path("data", opts$keynominal)) && !opts$forceuseofdoi){
-      nominal_catch <-
-        readr::read_csv(here::here(file.path("data", opts$keynominal)),
-                        guess_max = 0)
-      class(nominal_catch$measurement_value) <- "numeric"
-      #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
-    # } else if(!is.null(opts$doinominal)){
-    #   zen4R::download_zenodo(doi = opts$doinominal, files = opts$keynominal, path = "data")
-    #   nominal_catch <-
-    #     readr::read_csv(here::here(file.path("data", opts$keynominal)),
-    #                     guess_max = 0)
-    #   class(nominal_catch$measurement_value) <- "numeric"
-      
-    } else {
-      stop("Please provide a nominal catch dataset")
-      # nominal_catch <- retrieve_nominal_catch(entity, config, opts)
-    }
-    
-    class(nominal_catch$measurement_value) <- "numeric"
-    mapping_keep_src_code <- FALSE
-    
-    class(nominal_catch$measurement_unit) <- "character"
-    
-    if (any(nominal_catch$measurement_unit == "t"))
-      nominal_catch[nominal_catch$measurement_unit == "t",]$measurement_unit <- "t"
-    if (any(nominal_catch$measurement_unit == "TRUE"))
-      nominal_catch[nominal_catch$measurement_unit == "TRUE",]$measurement_unit <- "t"
-    if (any(nominal_catch$measurement_unit == "no"))
-      nominal_catch[nominal_catch$measurement_unit == "no",]$measurement_unit <- "no"
-    class(nominal_catch$measurement_value) <- "numeric"
-    
-    # Based on this analysis, the following cutoff years were determined for data completeness:
-    #   
-    # IOTC: Keep data starting from 1953.
-    # ICCAT: Keep data starting from 1957.
-    # WCPFC: Keep data starting from 1952.
-    # IATTC: Keep data starting from 1957.
-    # CCSBT: Keep all data, although years 2017 and 2020 have missing months, likely due to no fishing activity rather than missing data.
-    
-    nominal_catch <- nominal_catch %>% 
-      dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet))%>%
-      dplyr::mutate(year =lubridate::year(time_start)) %>%
-      dplyr::filter((source_authority == "WCPFC" & year >= 1952) |
-                      (source_authority == "IOTC" & year >= 1953) |
-                      (source_authority == "ICCAT" & year >= 1957) |
-                      (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
-      dplyr::select(-year) %>% dplyr::rename(geographic_identifier_nom = geographic_identifier)
-    
-    nominal_catch <- nominal_catch %>% 
-      dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type == "09.31", "09.32", gear_type))
-    
-    nominal_catch <- nominal_catch %>% 
-      dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>%
-      dplyr::ungroup() %>%
-      dplyr::group_by(across(-measurement_value)) %>% 
-      dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
-
-  #   georef_sup_nom_init <- compare_nominal_georef_corrected(nominal_catch, georef_dataset,  
-  # list(c("species", "year", "source_authority", "gear_type", "fishing_fleet")))$`species, year, source_authority, gear_type, fishing_fleet`$georef_sup_nominal %>%
-  #   # dplyr::select(c("species", "year", "source_authority", "gear_type", "fishing_fleet")) %>%
-  #     dplyr::distinct() %>% dplyr::group_by(source_authority, year, species) %>% dplyr::mutate(sum = sum(Difference))
-  #   # 
-  #   # georef_sup_nom_init_species_year_gear <- compare_nominal_georef_corrected(nominal_catch, georef_dataset, list(c("species", "year", "source_authority", "gear_type")))$`species, year, source_authority, gear_type`$georef_sup_nominal %>% 
-  #   #   dplyr::select(c("species", "year", "source_authority", "gear_type"))%>%
-  #   #   dplyr::distinct()
-  #   # 
-  #   georef_sup_nom_init_species_year <- compare_nominal_georef_corrected(nominal_catch, georef_dataset, list(c("species", "year", "source_authority")))$`species, year, source_authority`$georef_sup_nominal %>%
-  #     # dplyr::select(c("species", "year", "source_authority"))%>%
-  #     dplyr::distinct()
-    # 
-    # global_nominal_catch_firms_level0_nei <- nominal_catch %>% dplyr::filter(species %in% c("TUN", "TUS", "BIL")) %>% dplyr::mutate(year = as.character(year(ymd(time_start)))) %>% 
-    #   dplyr::inner_join(georef_sup_nom_init_species_year, by = c("year", "source_authority")) %>% dplyr::group_by(species.x, year) %>% dplyr::mutate(sumx = sum(measurement_value))
-    
     # LEVEL 1 IRD ---------------------------------------------------
     if(DATASET_LEVEL >= 1){
+      
+      config$logger.info(
+        "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
+      )
+      if(file.exists(file.path("data", opts$keynominal)) && !opts$forceuseofdoi){
+        nominal_catch <-
+          readr::read_csv(here::here(file.path("data", opts$keynominal)),
+                          guess_max = 0)
+        class(nominal_catch$measurement_value) <- "numeric"
+        #@juldebar if not provided by Google drive line below should be used if nominal catch has to be extracted from the database
+        # } else if(!is.null(opts$doinominal)){
+        #   zen4R::download_zenodo(doi = opts$doinominal, files = opts$keynominal, path = "data")
+        #   nominal_catch <-
+        #     readr::read_csv(here::here(file.path("data", opts$keynominal)),
+        #                     guess_max = 0)
+        #   class(nominal_catch$measurement_value) <- "numeric"
+        
+      } else {
+        stop("Please provide a nominal catch dataset")
+        # nominal_catch <- retrieve_nominal_catch(entity, config, opts)
+      }
+      
+      class(nominal_catch$measurement_value) <- "numeric"
+      mapping_keep_src_code <- FALSE
+      
+      class(nominal_catch$measurement_unit) <- "character"
+      
+      if (any(nominal_catch$measurement_unit == "t"))
+        nominal_catch[nominal_catch$measurement_unit == "t",]$measurement_unit <- "t"
+      if (any(nominal_catch$measurement_unit == "TRUE"))
+        nominal_catch[nominal_catch$measurement_unit == "TRUE",]$measurement_unit <- "t"
+      if (any(nominal_catch$measurement_unit == "no"))
+        nominal_catch[nominal_catch$measurement_unit == "no",]$measurement_unit <- "no"
+      class(nominal_catch$measurement_value) <- "numeric"
+      
+      # Based on this analysis, the following cutoff years were determined for data completeness:
+      #   
+      # IOTC: Keep data starting from 1953.
+      # ICCAT: Keep data starting from 1957.
+      # WCPFC: Keep data starting from 1952.
+      # IATTC: Keep data starting from 1957.
+      # CCSBT: Keep all data, although years 2017 and 2020 have missing months, likely due to no fishing activity rather than missing data.
+      
+      nominal_catch <- nominal_catch %>% 
+        dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == "UNK", "NEI", fishing_fleet))%>%
+        dplyr::mutate(year =lubridate::year(time_start)) %>%
+        dplyr::filter((source_authority == "WCPFC" & year >= 1952) |
+                        (source_authority == "IOTC" & year >= 1953) |
+                        (source_authority == "ICCAT" & year >= 1957) |
+                        (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
+        dplyr::select(-year) %>% dplyr::rename(geographic_identifier_nom = geographic_identifier)
+      
+      nominal_catch <- nominal_catch %>% 
+        dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type == "09.31", "09.32", gear_type))
+      
+      nominal_catch <- nominal_catch %>% 
+        dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(across(-measurement_value)) %>% 
+        dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
+      
+      #   georef_sup_nom_init <- compare_nominal_georef_corrected(nominal_catch, georef_dataset,  
+      # list(c("species", "year", "source_authority", "gear_type", "fishing_fleet")))$`species, year, source_authority, gear_type, fishing_fleet`$georef_sup_nominal %>%
+      #   # dplyr::select(c("species", "year", "source_authority", "gear_type", "fishing_fleet")) %>%
+      #     dplyr::distinct() %>% dplyr::group_by(source_authority, year, species) %>% dplyr::mutate(sum = sum(Difference))
+      #   # 
+      #   # georef_sup_nom_init_species_year_gear <- compare_nominal_georef_corrected(nominal_catch, georef_dataset, list(c("species", "year", "source_authority", "gear_type")))$`species, year, source_authority, gear_type`$georef_sup_nominal %>% 
+      #   #   dplyr::select(c("species", "year", "source_authority", "gear_type"))%>%
+      #   #   dplyr::distinct()
+      #   # 
+      #   georef_sup_nom_init_species_year <- compare_nominal_georef_corrected(nominal_catch, georef_dataset, list(c("species", "year", "source_authority")))$`species, year, source_authority`$georef_sup_nominal %>%
+      #     # dplyr::select(c("species", "year", "source_authority"))%>%
+      #     dplyr::distinct()
+      # 
+      # global_nominal_catch_firms_level0_nei <- nominal_catch %>% dplyr::filter(species %in% c("TUN", "TUS", "BIL")) %>% dplyr::mutate(year = as.character(year(ymd(time_start)))) %>% 
+      #   dplyr::inner_join(georef_sup_nom_init_species_year, by = c("year", "source_authority")) %>% dplyr::group_by(species.x, year) %>% dplyr::mutate(sumx = sum(measurement_value))
+      
       #with this condition code will be run to deal with dataset level 1 and above
       config$logger.info("Level 1 start")
 
