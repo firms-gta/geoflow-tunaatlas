@@ -22,8 +22,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iotc_data <- NULL
                       if(options$include_IOTC){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_iotc <- basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-                                                              regexpr("iotc", names(dataset_files)) > 0])
+                        dataset_files_iotc <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                                                              regexpr("iotc", names(dataset_files)) > 0]))
                         iotc_data <- do.call("rbind", lapply(dataset_files_iotc, readr::read_csv, guess_max = 0))
                         iotc_data <- as.data.frame(iotc_data)
                         class(iotc_data$measurement_value) <- "numeric"
@@ -40,8 +40,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       wcpfc_data <- NULL
                       if(options$include_WCPFC){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_wcpfc <- basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-                                                               regexpr("wcpfc", names(dataset_files)) > 0])
+                        dataset_files_wcpfc <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                                                               regexpr("wcpfc", names(dataset_files)) > 0]))
                         wcpfc_data <- do.call("rbind", lapply(dataset_files_wcpfc, readr::read_csv, guess_max = 0))
                         wcpfc_data <- as.data.frame(wcpfc_data)
                         class(wcpfc_data$measurement_value) <- "numeric"
@@ -59,8 +59,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       ccsbt_data <- NULL
                       if(options$include_CCSBT){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_ccsbt <- basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-                                                               regexpr("ccsbt", names(dataset_files)) > 0])
+                        dataset_files_ccsbt <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                                                               regexpr("ccsbt", names(dataset_files)) > 0]))
                         ccsbt_data <- do.call("rbind", lapply(dataset_files_ccsbt, readr::read_csv, guess_max = 0))
                         ccsbt_data <- as.data.frame(ccsbt_data)
                         class(ccsbt_data$measurement_value) <- "numeric"
@@ -77,9 +77,9 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iccat_data <- NULL
                       if(options$include_ICCAT){
                         config$logger.info(sprintf("Get %s data", rfmo))
-                        dataset_files_iccat <- basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                        dataset_files_iccat <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("byschool", names(dataset_files)) < 0 &
-                                                               regexpr("iccat", names(dataset_files)) > 0])
+                                                               regexpr("iccat", names(dataset_files)) > 0]))
                         iccat_data <- do.call("rbind", lapply(dataset_files_iccat, readr::read_csv, guess_max = 0))
                         iccat_data <- as.data.frame(iccat_data)
 
@@ -147,10 +147,10 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         if(variable == "catch") {
                           
                           config$logger.info(sprintf("Get %s data", rfmo))
-                          dataset_files_iattc <- basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                          dataset_files_iattc <- basename(file.path("data",dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                  regexpr("ps", names(dataset_files)) < 0 & 
                                                                  regexpr("effort", names(dataset_files)) < 0 &
-                                                                 regexpr("iattc", names(dataset_files)) > 0])
+                                                                 regexpr("iattc", names(dataset_files)) > 0]))
                           iattc_data <- do.call("rbind", lapply(dataset_files_iattc, readr::read_csv, guess_max = 0))
                           iattc_data <- as.data.frame(iattc_data)
                           
