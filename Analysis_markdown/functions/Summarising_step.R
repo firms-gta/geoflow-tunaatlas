@@ -95,8 +95,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   flog.info("Initialized child environment")
 
   i <- 1
-  # file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
-  file_path_url <- "~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions"
+  file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
   source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
   source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
   source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
@@ -282,7 +281,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
       if(opts$fact == "effort"){
-      process_fisheries_data_list <- process_fisheries_effort(sub_list_dir_3,  parameter_filtering)
+      process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
       } else {
         process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
       }
