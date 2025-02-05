@@ -95,8 +95,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   flog.info("Initialized child environment")
 
   i <- 1
-  # file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
-  file_path_url <- "~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions"
+  file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
   source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
   source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
   source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
@@ -112,6 +111,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
   source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
+  source(file.path(file_path_url,"process_fisheries_effort_data.R"), local = TRUE)
   flog.info("Sourced all required functions")
   
   for (entity_dir in entity_dirs) {
@@ -125,7 +125,17 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     if (opts$fact == "effort") {
       flog.warn("Effort dataset not displayed for now")
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
+                                     "measurement_unit", "measurement_value", "GRIDTYPE","species_group")
+      topnumberfact = 3
     } else {
+      parameter_colnames_to_keep_fact = c("source_authority", "species", "gear_type", "fishing_fleet",
+                                     "fishing_mode", "geographic_identifier",
+                                     "measurement_unit", "measurement_value", "GRIDTYPE",
+                                     "species_group", "Gear")
+      topnumberfact = 6
+      
+    }
       entity_name <- basename(entity_dir)
       setwd(here::here(entity_dir))
       copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
@@ -168,14 +178,22 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               
               
               data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
+              if("species" %in% colnames(data)){
               data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
+              }
+              
+              if(opts$fact == "effort"){
+                data <- data %>% dplyr::filter(measurement_unit%in%c("HOOKS", "FDAYS", "SETS", "NO.HOOKS", "NO.LINES", "NETS")) #only two first measuremnt_unit for each dataset
+              }
               qs::qsave(data, file = file)
             flog.info("Processed and saved data for file: %s", file)
           }
         }
         } else {
           flog.info("Retrieving processed data: %s", file)
-          
+          data <- qs::qread(gsub(pattern = basename(file), replacement = "ancient.qs", file)) #hotifx
+          data <- data %>% dplyr::filter(measurement_unit%in%c("HOOKS", "FDAYS", "SETS", "NO.HOOKS", "NO.LINES", "NETS"))
+          qs::qsave(data, file = file)
       }
       }
       parameter_resolution_filter <- opts$resolution_filter
@@ -213,17 +231,14 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         parameter_final = NULL,
         fig.path = parameters_child_global$fig.path,
         parameter_fact = "catch",
-        parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                       "fishing_mode", "geographic_identifier",
-                                       "measurement_unit", "measurement_value", "GRIDTYPE",
-                                       "species_group", "Gear"),
+        parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
         coverage = TRUE,
         shapefile_fix = shapefile.fix,
         continent = continent,
         parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
         parameter_filtering = parameters_child_global$parameter_filtering,
         parameter_titre_dataset_1 = entity$identifiers[["id"]],
-        unique_analyse = TRUE
+        unique_analyse = TRUE, topnumber = topnumberfact
       )
 
       filename <- paste0("Report_on_", entity$identifiers[["id"]])
@@ -242,10 +257,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
         fig.path = parameters_child_global$fig.path,
         parameter_fact = "catch",
-        parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                       "fishing_mode", "geographic_identifier",
-                                       "measurement_unit", "measurement_value", "GRIDTYPE",
-                                       "species_group", "Gear"),
+        parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
         shapefile_fix = shapefile.fix,
         continent = continent,
         coverage = TRUE,
@@ -253,7 +265,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         parameter_filtering = parameters_child_global$parameter_filtering,
         parameter_titre_dataset_1 = "FirmsLevel0",
         parameter_titre_dataset_2 = entity$identifiers[["id"]],
-        unique_analyse = FALSE
+        unique_analyse = FALSE, topnumber = topnumberfact
       )
 
       new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
@@ -268,7 +280,11 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
-      process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
+      if(opts$fact == "effort"){
+      process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
+      } else {
+        process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
+      }
       flog.info("Processed process_fisheries_data_list")
 
       render_env$process_fisheries_data_list <- process_fisheries_data_list
@@ -308,10 +324,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             fig.path = new_path,
             parameter_fact = "catch",
             plotting_type = "view",
-            parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                           "fishing_mode", "geographic_identifier",
-                                           "measurement_unit", "measurement_value", "GRIDTYPE",
-                                           "species_group", "Gear"),
+            parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
             shapefile_fix = shapefile.fix,
             continent = continent,
             coverage = coverage,
@@ -319,7 +332,7 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             parameter_filtering = parameters_child_global$parameter_filtering,
             parameter_titre_dataset_1 = parameter_titre_dataset_1,
             parameter_titre_dataset_2 = parameter_titre_dataset_2,
-            unique_analyse = FALSE
+            unique_analyse = FALSE, topnumber = topnumberfact
           )
           
           # Log successful analysis
@@ -410,7 +423,6 @@ Summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     sprintf("entity: %s is done", entity_dir)
 
-    }
     }
   try(setwd(ancient_wd))
   flog.info("Finished Summarising_step function")
