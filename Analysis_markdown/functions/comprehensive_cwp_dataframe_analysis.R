@@ -48,7 +48,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
                                                  parameter_titre_dataset_1 = "Dataset 1",
                                                  parameter_titre_dataset_2 = "Dataset 2",
                                                  unique_analyse = FALSE, 
-                                                 removemap = FALSE) {
+                                                 removemap = FALSE, topnumber = 6) {
   # Process 'parameter_init'
   if (is.character(parameter_init)) {
     init <- read_data(parameter_init) %>% 
@@ -151,7 +151,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     compare_strata_differences_list$title <- paste0("Disappearing or appearing strata between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
     
     
-    compare_dimension_differences_list <- compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = 6)
+    compare_dimension_differences_list <- compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = topnumber)
     compare_dimension_differences_list$title <-paste0("Difference between the non appearing/disappearing stratas between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
     
     if (length(parameter_time_dimension) != 0) {
@@ -220,12 +220,15 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     total_rows <- combined_summary[, .(Total_rows = sum(Number_different_stratas)), by = data_source]
     combined_summary <- merge(combined_summary, total_rows, by = "data_source")
     
-    # Créer le graphique principal (histogramme)
+    unique_units <- unique(combined_summary$measurement_unit)
+    color_palette <- scales::hue_pal()(length(unique_units))
+    names(color_palette) <- unique_units
+    
     combined_summary_histogram <- ggplot(combined_summary, 
                                          aes(x = factor(data_source), 
                                              y = Percent, fill = measurement_unit)) +
       geom_bar(stat = "identity", position = "fill") +  # Barres empilées avec échelle à 100%
-      scale_fill_manual(values = c("Tons" = "#4C72B0", "Number of fish" = "#55A868")) +  # Couleurs personnalisées
+      scale_fill_manual(values = color_palette) +  # Couleurs personnalisées pour chaque unité de mesure
       scale_y_continuous(labels = scales::percent_format()) + 
       geom_text(aes(label = paste0(round(Percent, 1), "%")), 
                 position = position_fill(vjust = 0.5), color = "black") + # Texte à l'intérieur des barres

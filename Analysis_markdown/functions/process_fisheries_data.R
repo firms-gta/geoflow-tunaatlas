@@ -131,11 +131,11 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     
     no_fish_plot <- ggplot(reduced, aes(x = Step, group = 1)) +
       geom_line(aes(y = `Millions of fish`, group = 1), size = 0.5) +
-      theme(axis.text.x = element_text(angle = 90))
+      theme(axis.text.x = element_text(angle = 90))+scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1)))
     
     tons_plot <- ggplot(reduced, aes(x = Step, group = 1)) +
       geom_line(aes(y = `Millions of tons`, group = 1), size = 0.5) +
-      theme(axis.text.x = element_text(angle = 90))
+      theme(axis.text.x = element_text(angle = 90))+scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1)))
     
     cowplot <- cowplot::plot_grid(no_fish_plot, tons_plot)
     columns_to_color = c("Difference (in % of tons)","Difference (in % of fish)")
