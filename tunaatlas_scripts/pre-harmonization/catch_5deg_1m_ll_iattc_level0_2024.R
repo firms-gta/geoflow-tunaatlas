@@ -7,9 +7,19 @@
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' @keywords IATTC, tuna, billfish, sharks, fisheries, data harmonization, longline catches and efforts
 #' @export
-convert_to_cwp <- function(df) {
+function(action, entity, config){
   library(dplyr)
   library(tidyr)
+  require(readr)
+  filename1 <- entity$data$source[[1]] #data
+  # Historical name for the dataset at source  PublicPSSharkFlag.csv
+  filename2 <- entity$data$source[[2]] #structure
+  # Historical name for the dataset at source  iattc_catch_code_lists.csv
+  path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  opts <- options()
+  options(encoding = "UTF-8")
+  df <- readr::read_csv(path_to_raw_dataset)
   # A tibble: 6 × 26
   # Year Month Flag  LatC5 LonC5 Hooks  BSHn  CCLn  FALn  MAKn  OCSn  RSKn  SKHn  SMAn  SPNn  THRn BSHmt CCLmt FALmt MAKmt
   # <dbl> <dbl> <chr> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
@@ -43,7 +53,7 @@ convert_to_cwp <- function(df) {
       fishing_fleet = Flag,
       fishing_mode = "UNK",
       source_authority = "IATTC",
-      gear_type = "UNK"
+      gear_type = "UNK", measurement = "catch", measurement_type = "RC" # Retained catches
     ) %>%
     dplyr::select(
       source_authority,  
@@ -54,7 +64,7 @@ convert_to_cwp <- function(df) {
       time_start,
       time_end,
       LatC5, LonC5,
-      measurement_unit,
+      measurement_unit,measurement_type,measurement,
       measurement_value
     )
   
@@ -65,5 +75,23 @@ convert_to_cwp <- function(df) {
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
   df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
   
-  return(df)
+  df$time_start <- as.Date(catches$time_start)
+  df$time_end <- as.Date(catches$time_end)
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <- paste(
+    paste0(format(min(df$time_start), "%Y"), "-01-01"),
+    paste0(format(max(df$time_end), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  entity$setTemporalExtent(dataset_temporal_extent)
+  
+  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+  write.csv(df, output_name_dataset, row.names = FALSE)
+  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
+  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  #----------------------------------------------------------------------------------------------------------------------------  
+  entity$addResource("source", path_to_raw_dataset)
+  entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("codelists", output_name_codelists)
+  
 }
