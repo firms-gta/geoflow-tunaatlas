@@ -75,8 +75,8 @@ function(action, entity, config){
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
   df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
   
-  df$time_start <- as.Date(catches$time_start)
-  df$time_end <- as.Date(catches$time_end)
+  df$time_start <- as.Date(df$time_start)
+  df$time_end <- as.Date(df$time_end)
   #we enrich the entity with temporal coverage
   dataset_temporal_extent <- paste(
     paste0(format(min(df$time_start), "%Y"), "-01-01"),
