@@ -132,7 +132,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     if (file.exists(not_mapped_file_path)) {
       # Read the .rds file and store the data with the entity's name
       not_mapped_data <- readRDS(not_mapped_file_path)
-      if(nrow(not_mapped_data))!= 0{
+      if(nrow(not_mapped_data)!= 0){
       not_mapped_data$Entity <- entity_name  # add an 'Entity' column to keep track of the entity
       not_mapped_data_list[[entity_name]] <- not_mapped_data
       }
