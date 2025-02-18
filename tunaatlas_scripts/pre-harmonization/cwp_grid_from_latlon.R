@@ -17,25 +17,6 @@
 #'                       squaresize = c(1, 1, 5, 10))
 #' df_result <- cwp_grid_from_latlon(df_test, "latitude", "longitude", "squaresize")
 #' print(df_result)
-#' Convert Latitude and Longitude to CWP Grid Code
-#'
-#' This function converts latitude and longitude coordinates into a 7-digit CWP grid code
-#' following FAO's Coordinated Working Party (CWP) Areal Grid System.
-#'
-#' @param df_input A data frame containing latitude, longitude, and grid size information.
-#' @param colname_latitude The name of the column containing latitude values.
-#' @param colname_longitude The name of the column containing longitude values.
-#' @param colname_squaresize The name of the column containing the grid size (e.g., 1, 5, 10).
-#'
-#' @return A data frame with an additional column `geographic_identifier` containing the 7-digit CWP grid code.
-#' @export
-#'
-#' @examples
-#' df_test <- data.frame(latitude = c(12.4, -8.6, -5.2, 47.3), 
-#'                       longitude = c(34.7, -75.2, 12.1, -122.5), 
-#'                       squaresize = c(1, 1, 5, 10))
-#' df_result <- cwp_grid_from_latlon(df_test, "latitude", "longitude", "squaresize")
-#' print(df_result)
 cwp_grid_from_latlon <- function(df_input, colname_latitude, colname_longitude, colname_squaresize) {
   library(dplyr)
   
