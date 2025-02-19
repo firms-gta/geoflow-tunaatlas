@@ -83,7 +83,7 @@ clean_script <- function(script_path) {
     "# ",
     "# This R Markdown document is designed to transform data that is not in CWP format into CWP format.",
     "# Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.",
-    "# This markdown is created from a function so the documentation keep the format of roxygen2 skeleton",
+    paste0("# This markdown is automatically created from the function:", script_path ,  ", the documentation keep the format of roxygen2 skeleton"),
     "# A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.",
     "# Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.",
     "# If you are interested in further details, the results and codes are available for review."
