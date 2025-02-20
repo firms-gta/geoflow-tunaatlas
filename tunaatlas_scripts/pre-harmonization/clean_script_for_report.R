@@ -94,6 +94,12 @@ clean_script <- function(script_path) {
     "#*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly. It is also possible to run the code chunk by chunk but be sure to be in the correct working directory i.e. the one of the .Rmd*"
   )
   
+  setup_lines <- c(
+    "```{r setup, include=FALSE}",
+    "knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)",
+    "```"
+  )
+  
   extra_lines <- c(
     "#' @ Load pre-harmonization scripts and apply mappings",
     
@@ -109,7 +115,7 @@ clean_script <- function(script_path) {
     "print(head(mapping_codelist$recap_mapping))"
   )
   
-  lines <- c(intro_lines,lines_add,  lines, extra_lines)
+  lines <- c(intro_lines, setup_lines, lines_add, lines, extra_lines)
   
   
   
