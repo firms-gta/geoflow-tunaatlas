@@ -68,7 +68,7 @@ if(!is.data.frame(mapping_dataset)){
   } else if (fact == "effort") {
     dimension_to_map <- c("gear_type", "fishing_fleet", "fishing_mode", "measurement_unit")
   }
-  
+  source_authority_mapped <- unique(dataset_to_map$source_authority)
   dimension_to_map <- dimension_to_map[dimension_to_map %in% colnames(dataset_to_map)]
   data_not_to_map <- dataset_to_map[!dataset_to_map$source_authority %in% source_authority_to_map,]
   dataset_to_map <- dataset_to_map[dataset_to_map$source_authority %in% source_authority_to_map,]
@@ -119,7 +119,7 @@ if(!is.data.frame(mapping_dataset)){
       }
     }
   }
-  
+  recap_mapping <- recap_mapping %>% dplyr::filter(source_authority %in% source_authority_mapped)
   dataset_mapped <- rbind(dataset_to_map, data_not_to_map)
   dataset_mapped <- list(dataset_mapped = dataset_mapped, recap_mapping = recap_mapping, stats_total = stats_total, not_mapped_total = not_mapped_total)
   
