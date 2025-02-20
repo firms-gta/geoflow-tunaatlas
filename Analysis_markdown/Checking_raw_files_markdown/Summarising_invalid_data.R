@@ -81,10 +81,10 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   
   
   
-  # PART 2: Checking for specific .rds files
+  # PART 2: Checking for specific .csv files
   
-  target_files <- c("negative_values.rds", "not_conform_conversion_factors.rds", "removed_irregular_areas.rds", 
-                    "areas_in_land.rds", "outside_juridiction.rds")
+  target_files <- c("negative_values.csv", "not_conform_conversion_factors.csv", "removed_irregular_areas.csv", 
+                    "areas_in_land.csv", "outside_juridiction.csv")
   
   
   
@@ -118,20 +118,20 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     # group_by(tRFMO) %>%
     # summarise(across(where(is.logical), sum)) %>% 
     distinct()
-  saveRDS(grouped_results, file.path(entity_dir, "data", "grouped_results_invalid_data.rds"))
+  readr::write_csv(grouped_results, file.path(entity_dir, "data", "grouped_results_invalid_data.csv"))
   
   not_mapped_data_list <- list()
   
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
     
-    # Define the path to the 'not_mapped_total.rds' file for the current entity
-    not_mapped_file_path <- file.path(entity_dir, "data", "not_mapped_total.rds")
+    # Define the path to the 'not_mapped_total.csv' file for the current entity
+    not_mapped_file_path <- file.path(entity_dir, "data", "not_mapped_total.csv")
     
     # Check if the file exists
     if (file.exists(not_mapped_file_path)) {
-      # Read the .rds file and store the data with the entity's name
-      not_mapped_data <- readRDS(not_mapped_file_path)
+      # Read the .csv file and store the data with the entity's name
+      not_mapped_data <- readr::read_csv(not_mapped_file_path)
       if(nrow(not_mapped_data)!= 0){
       not_mapped_data$Entity <- entity_name  # add an 'Entity' column to keep track of the entity
       not_mapped_data_list[[entity_name]] <- not_mapped_data
@@ -142,20 +142,20 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   # Bind all collected data.frames into one
   all_not_mapped_data <- bind_rows(not_mapped_data_list) %>% distinct()
   
-  saveRDS(all_not_mapped_data, file.path(path, "all_not_mapped_data.rds"))
+  readr::write_csv(all_not_mapped_data, file.path(path, "all_not_mapped_data.csv"))
   
   recap_mapping_data_list <- list()
   
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
     
-    # Define the path to the 'recap_mapping.rds' file for the current entity
-    recap_mapping_file_path <- file.path(entity_dir, "data", "recap_mapping.rds")
+    # Define the path to the 'recap_mapping.csv' file for the current entity
+    recap_mapping_file_path <- file.path(entity_dir, "data", "recap_mapping.csv")
     
     # Check if the file exists
     if (file.exists(recap_mapping_file_path)) {
-      # Read the .rds file and store the data with the entity's name
-      recap_mapping_data <- readRDS(recap_mapping_file_path)
+      # Read the .csv file and store the data with the entity's name
+      recap_mapping_data <- readr::read_csv(recap_mapping_file_path)
       recap_mapping_data$Entity <- entity_name  # add an 'Entity' column to keep track of the entity
       recap_mapping_data_list[[entity_name]] <- recap_mapping_data
     }
@@ -164,7 +164,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   # Bind all collected data.frames into one
   all_recap_mapping_data <- bind_rows(recap_mapping_data_list) %>% distinct()
   
-  saveRDS(all_recap_mapping_data, file.path(path, "all_recap_mapping.rds"))
+  readr::write_csv(all_recap_mapping_data, file.path(path, "all_recap_mapping.csv"))
   
   # PART 3: Generate a summary CSV for all entity
   `%notin%` <- Negate(`%in%`)
@@ -179,7 +179,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     problematic_files <- na.omit(problematic_files)
     problematic_data <- lapply(problematic_files, function(file) {
       data_path <- file.path(entity_dir, "data", file)
-      data_list <- readRDS(data_path)
+      data_list <- readr::read_csv(data_path)
       if("Gear.x" %in% colnames(data_list)){
         # Removing columns that end in '.y' and renaming '.x' columns
         data_list <- data_list %>%
@@ -196,7 +196,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       if("gridtype"%in% colnames(data_list)){
         data_list <- data_list %>% dplyr::rename(GRIDTYPE = gridtype)
       }
-      saveRDS(data_list, file = data_path)
+      readr::write_csv(data_list, file = data_path)
       
       
       return(data_list)
@@ -223,7 +223,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   combined_data <- bind_rows(all_data, .id = "entity_name")
   combined_data <- combined_data %>% dplyr::rename(gridtype = GRIDTYPE) %>% 
     dplyr::rename(dataset  = entity_name) %>% 
-    dplyr::mutate(issue = gsub(".rds","", issue)) %>% 
+    dplyr::mutate(issue = gsub(".csv","", issue)) %>% 
     dplyr::rename(codesource_area = geographic_identifier)
   combined_data$time_start <- as.Date(combined_data$time_start)
   combined_data$time_end <- as.Date(combined_data$time_end)
@@ -267,10 +267,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copy_project_files.R", local = TRUE)
-  # 
-  # copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
-  # copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
+  copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
+  copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
   
   
   
@@ -281,7 +279,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     # Identify problematic files
     problematic_files <- target_files[as.logical(entity_data[3:ncol(entity_data)])]
     problematic_files <- na.omit(problematic_files)
-    problematic_files <- setdiff(problematic_files, "not_mapped_total.rds")
+    problematic_files <- setdiff(problematic_files, "not_mapped_total.csv")
     
     
     if (length(problematic_files) > 0) {

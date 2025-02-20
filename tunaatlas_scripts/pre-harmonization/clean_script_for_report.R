@@ -72,6 +72,10 @@ clean_script <- function(script_path) {
     lines_add <- c(lines_add, 'path_to_raw_dataset_catch <- ') 
     lines_add <- c(lines_add, 'path_to_raw_dataset_effort <- ') 
     
+  } else if(sum(grepl("path_to_raw_dataset1",  as.character(lines)))>0){
+    lines_add <- c(lines_add, 'path_to_raw_dataset1 <- XLS_WCPFC.csv') 
+    lines_add <- c(lines_add, 'path_to_raw_dataset2 <- XLS_WCPO.csv') 
+    
   } else if(sum(grepl("path_to_raw_dataset",  lines))) {
     lines_add <- c(lines_add, 'path_to_raw_dataset <- ') 
   }
@@ -86,7 +90,8 @@ clean_script <- function(script_path) {
     paste0("# This markdown is automatically created from the function:", script_path ,  ", the documentation keep the format of roxygen2 skeleton"),
     "# A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.",
     "# Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.",
-    "# If you are interested in further details, the results and codes are available for review."
+    "# If you are interested in further details, the results and codes are available for review.", 
+    "#*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly. It is also possible to run the code chunk by chunk but be sure to be in the correct working directory i.e. the one of the .Rmd*"
   )
   
   extra_lines <- c(
@@ -99,11 +104,9 @@ clean_script <- function(script_path) {
     "#' @ Handle unmapped values and save the results",
     "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
     "fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')",
-    "fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')",
     "fwrite(georef_dataset, 'CWP_dataset.csv')",
     "# Display the first few rows of the mapping summaries",
-    "print(head(mapping_codelist$recap_mapping))",
-    "print(head(mapping_codelist$not_mapped_total))"
+    "print(head(mapping_codelist$recap_mapping))"
   )
   
   lines <- c(intro_lines,lines_add,  lines, extra_lines)

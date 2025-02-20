@@ -50,8 +50,19 @@ if(!require(reshape)){
   install.packages("reshape")
   require(reshape)
 }
+if(!require(lubridate)){
+    install.packages("lubridate")
+    require(lubridate)
+}
 
-  
+  if(!require(data.table)){
+    install.packages("data.table")
+    require(data.table)
+  }  
+  if(!require(reshape2)){
+    install.packages("reshape2")
+    require(reshape2)
+  }
  #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow
@@ -60,8 +71,8 @@ if(!require(reshape)){
 filename1 <- entity$data$source[[1]] #WCPFC data
 filename2 <- entity$data$source[[2]] #WCPO data
 filename3 <- entity$data$source[[3]] #structure
-path_to_raw_dataset1 <- entity$getJobDataResource(config, filename1)
-path_to_raw_dataset2 <- entity$getJobDataResource(config, filename2)
+path_to_raw_dataset1 <- entity$getJobDataResource(config, filename1) #WCPFC data
+path_to_raw_dataset2 <- entity$getJobDataResource(config, filename2) #WCPO data
 config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
 opts <- options()
 options(encoding = "UTF-8")

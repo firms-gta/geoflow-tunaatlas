@@ -89,7 +89,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     if(recap_each_step){
       function_recap_each_step("negative_values",georef_dataset,paste0("In this step,handle negative values in the measurement_values of the data"))
       
-      saveRDS(negative_values,"data/negative_values.rds")
+      readr::write_csv(negative_values,"data/negative_values.csv")
       
     }
   }
@@ -123,7 +123,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
 					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
       "curation_absurd_converted_data"
     )
-    saveRDS(not_conform_conversion_factors, "data/not_conform_conversion_factors.rds")
+    readr::write_csv(not_conform_conversion_factors, "data/not_conform_conversion_factors.csv")
     
   }
   
@@ -173,7 +173,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
         "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
         "spatial_curation_data_mislocated"
       )
-      saveRDS(areas_in_land,"data/areas_in_land.rds")
+      readr::write_csv(areas_in_land,"data/areas_in_land.csv")
     }
     gc()
     
@@ -188,7 +188,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
         "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
         "spatial_curation_data_mislocated"
       )
-      saveRDS(dataset_not_cwp_grid,"data/removed_irregular_areas.rds")
+      readr::write_csv(dataset_not_cwp_grid,"data/removed_irregular_areas.csv")
       # names_list_irregular_areas <-
       #   c("dataset_not_cwp_grid") #file we want to save
       # 
@@ -224,7 +224,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
           ) ,
           "function_outside_juridiction",
         )
-        saveRDS(outside_juridiction,"data/outside_juridiction.rds")
+        readr::write_csv(outside_juridiction,"data/outside_juridiction.csv")
         
       }
       
@@ -235,11 +235,11 @@ Tidying_and_mapping_data = function(action, entity, config) {
 
   
   
-  files_to_check <- c("data/not_conform_conversion_factors.rds",
-                      "data/removed_irregular_areas.rds",
-                      "data/areas_in_land.rds",
-                      "data/outside_juridiction.rds",
-                      "data/not_mapped_total.rds")
+  files_to_check <- c("data/not_conform_conversion_factors.csv",
+                      "data/removed_irregular_areas.csv",
+                      "data/areas_in_land.csv",
+                      "data/outside_juridiction.csv",
+                      "data/not_mapped_total.csv")
   
   if(any(file.exists(files_to_check))) {
     parameter_directory <- getwd()
@@ -291,8 +291,8 @@ Tidying_and_mapping_data = function(action, entity, config) {
       stats_total <- mapping_codelist$stats_total
       not_mapped_total <- mapping_codelist$not_mapped_total
       
-      saveRDS(not_mapped_total,"data/not_mapped_total.rds")
-      saveRDS(recap_mapping,"data/recap_mapping.rds")
+      readr::write_csv(not_mapped_total,"data/not_mapped_total.csv")
+      readr::write_csv(recap_mapping,"data/recap_mapping.csv")
       
       config$logger.info("Saving recap of mapping ok")
       

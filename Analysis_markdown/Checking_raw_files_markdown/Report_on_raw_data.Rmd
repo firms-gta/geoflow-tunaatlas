@@ -152,16 +152,16 @@ gc()
 
 # Annexe
 
-```{r statsirregularareasflextable,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/stats_irregular_areas.rds"))}
+```{r statsirregularareasflextable,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/stats_irregular_areas.csv"))}
 
-stats_irregular_areas <- readRDS(file.path(entity_dir, "/data/stats_irregular_areas.rds"))
+stats_irregular_areas <- readr::read_csv(file.path(entity_dir, "/data/stats_irregular_areas.csv"))
 qflextable2(stats_irregular_areas, captionn ="Summary of the irregular area reallocation by unit", pgwidth = 6,  save_folder = "Summary")
 
 ```
 
-```{r summaryofthenotmappedfactors,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/not_mapped_total.rds"))}
+```{r summaryofthenotmappedfactors,echo=FALSE, results = 'asis', eval=file.exists(file.path(directory, "/data/not_mapped_total.csv"))}
 
-not_mapped_total <- readRDS(file.path(entity_dir, "/data/not_mapped_total.rds"))
+not_mapped_total <- readr::read_csv(file.path(entity_dir, "/data/not_mapped_total.csv"))
 qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and so replaced by 'UNK', '99.9', or 'NEI'", pgwidth = 6,  save_folder = "Summary", fig.path = getwd())
 
 ```

@@ -58,7 +58,7 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 
 ```{r}
 
-invalid_data <- readRDS(file.path(path, "grouped_results_invalid_data.rds")) %>%ungroup() %>% arrange(tRFMO)%>%  distinct()
+invalid_data <- readr::read_csv(file.path(path, "grouped_results_invalid_data.csv")) %>%ungroup() %>% arrange(tRFMO)%>%  distinct()
 
 columns_to_color <- names(invalid_data)[-c(1,2)]
 
@@ -69,8 +69,8 @@ issued_dataframes <- invalid_data%>% dplyr::filter(All_good == FALSE) %>% dplyr:
 
 column_names = colnames(issued_dataframes)
 
-# Remove '.rds' from each column name
-cleaned_column_names <- gsub(".rds", "", column_names)
+# Remove '.csv' from each column name
+cleaned_column_names <- gsub(".csv", "", column_names)
 
 colnames(issued_dataframes) <- cleaned_column_names
 columns_to_color <- names(issued_dataframes)[-c(1,2)]
@@ -118,7 +118,7 @@ no_issued_dataframes
 
 ```{r all-not-mapped}
 
-recap_mapping <- readRDS(file.path(path,"all_not_mapped_data.rds")) %>%ungroup() %>% arrange(source_authority) %>% distinct() %>% arrange(Dimension)
+recap_mapping <- readr::read_csv(file.path(path,"all_not_mapped_data.csv")) %>%ungroup() %>% arrange(source_authority) %>% distinct() %>% arrange(Dimension)
 
 ```
 
@@ -133,7 +133,7 @@ qflextable2(recap_mapping, captionn = "All the code not being mapped during the 
 
 ```{r all-recap-mapping}
 
-recap_mapping <- readRDS(file.path(path,"all_recap_mapping.rds")) %>%ungroup() %>% arrange(source_authority)%>% dplyr::select(-Entity)  %>% filter(src_code != trg_code) %>% distinct()
+recap_mapping <- readr::read_csv(file.path(path,"all_recap_mapping.csv")) %>%ungroup() %>% arrange(source_authority)%>% dplyr::select(-Entity)  %>% filter(src_code != trg_code) %>% distinct()
 
 ```
 
