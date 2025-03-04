@@ -30,7 +30,18 @@ function(action, entity, config){
 #packages
 
   
-
+  if(!require(data.table)){
+    install.packages("data.table")
+    require(data.table)
+  }
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
+  if(!require(reshape2)){
+    install.packages("reshape2")
+    require(reshape2)
+  }
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded

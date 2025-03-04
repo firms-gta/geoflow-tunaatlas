@@ -350,6 +350,24 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         
       }
       
+
+# Minor mapping for efforts -----------------------------------------------
+
+      
+      
+      if(opts$fact == "effort"){
+        
+        georef_dataset <- georef_dataset %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit == "NO.HOOKS", "HOOKS", measurement_unit))
+        
+        function_recap_each_step(
+          "Removing NOMT and converting MTNO in MT",
+          georef_dataset,
+          "The data in 'NO.HOOKS' is converted to 'HOOKS' as the two units are identicals.",
+          "mutate"
+        )
+        
+      }
+      
       ## OVERLAPPPING ZONES---------------------------------------------------
       # This function handles the processing of overlapping zones.
       handle_overlap <- function(zone_key, rfmo_main, default_strata, recap_step = TRUE) {
@@ -944,7 +962,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             df_rf$measurement_unit=NULL
           }
           # idee raise only les données qui sont que en tonnes
-          
           
           wcpfc_not_to_raise <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
           georef_dataset <- georef_dataset %>% dplyr::filter(source_authority != "WCPFC")

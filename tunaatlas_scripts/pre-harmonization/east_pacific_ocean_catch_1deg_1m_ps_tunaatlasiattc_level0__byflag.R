@@ -29,7 +29,18 @@ function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
 #packages
 
-
+  if(!require(data.table)){
+    install.packages("data.table")
+    require(data.table)
+  }
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
+  if(!require(reshape2)){
+    install.packages("reshape2")
+    require(reshape2)
+  }
 #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow

@@ -42,7 +42,18 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
-
+if(!require(data.table)){
+  install.packages("data.table")
+  require(data.table)
+}
+if(!require(dplyr)){
+  install.packages("dplyr")
+  require(dplyr)
+}
+if(!require(reshape2)){
+  install.packages("reshape2")
+  require(reshape2)
+}
 ## Catches
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
 # Reach the catches pivot DSD using a function stored in IATTC_functions.R
