@@ -34,7 +34,11 @@ list(
   
   tar_target(
     entity,
-    config$metadata$content$entities[[1]]
+    {
+      entityfile <- config$metadata$content$entities[[1]]
+      entityfile$relations <- NULL # Pour éviter l'échec lors du chargement de la codelist depuis Google Drive si non connecté
+      entityfile
+    }
   ),
   
   tar_target(
@@ -48,11 +52,18 @@ list(
   tar_target(
     catch_file,
     {
-      # 🔹 Ajout explicite des valeurs de opts pour créer une dépendance
+      # 🔹 Récupération des paramètres de téléchargement
       key <- opts$keygeoref  
       doi <- opts$doigeoref  
+      file_path <- here::here("data", key)  # Chemin du fichier cible
       
-      zen4R::download_zenodo(doi = doi, files = key, path = here::here("data"))
+      # 🔹 Vérification si le fichier existe déjà
+      if (!file.exists(file_path)) {
+        zen4R::download_zenodo(doi = doi, files = key, path = here::here("data"))
+      }
+      
+      # 🔹 Retourne le chemin du fichier (existant ou téléchargé)
+      file_path
     },
     format = "file"
   ),
@@ -60,10 +71,18 @@ list(
   tar_target(
     nominal_catch_file,
     {
+      # 🔹 Récupération des paramètres de téléchargement
       keynominal <- opts$keynominal  
       doinominal <- opts$doinominal  
+      file_path <- here::here("data", keynominal)  # Définition du chemin attendu
       
-      zen4R::download_zenodo(doi = doinominal, files = keynominal, path = here::here("data"))
+      # 🔹 Vérification si le fichier existe déjà
+      if (!file.exists(file_path)) {
+        zen4R::download_zenodo(doi = doinominal, files = keynominal, path = here::here("data"))
+      }
+      
+      # 🔹 Retourne le chemin du fichier
+      file_path
     },
     format = "file"
   ),
@@ -76,7 +95,6 @@ list(
       # 🔹 Ajout explicite des fichiers pour créer une dépendance
       nominal_catch <- nominal_catch_file  
       catch <- catch_file  
-      
       create_global_tuna_atlas_dataset_v2023(action, entity, config)
       
       output_file <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
@@ -96,7 +114,9 @@ list(
     save_results,
     {
       df <- read.csv(results_file)  # Lire le fichier généré
-      write.csv(df, "results/tuna_atlas_results.csv")  # Sauvegarde finale
+      if (!exists(here::here("results"))) {
+        dir.create(here::here("results"))}
+      write.csv(df, here::here("results/tuna_atlas_results.csv"))  # Sauvegarde finale
       "results/tuna_atlas_results.csv"
     },
     format = "file"
