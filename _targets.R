@@ -10,9 +10,8 @@ renv::restore()
 
 # 🔹 SOURCING des fonctions nécessaires
 source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"))
-source(here::here("~/firms-gta/geoflow-tunaatlas/R/running_time_of_workflow.R"))
-source(here::here("~/firms-gta/geoflow-tunaatlas/R/executeAndRename.R"))
-
+source(here::here("R/running_time_of_workflow.R"))
+source(here::here("R/executeAndRename.R"))
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(

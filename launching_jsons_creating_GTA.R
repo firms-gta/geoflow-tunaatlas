@@ -48,8 +48,8 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")
-source(here::here("~/firms-gta/geoflow-tunaatlas/R/running_time_of_workflow.R"))
-source(here::here("~/firms-gta/geoflow-tunaatlas/R/executeAndRename.R"))
+source(here::here("R/running_time_of_workflow.R"))
+source(here::here("R/executeAndRename.R"))
 
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
