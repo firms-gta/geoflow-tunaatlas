@@ -33,10 +33,6 @@
     "keywords": [
       "Tuna fisheries",
       "FAIR services",
-      "web mapping",
-      "Shiny app",
-      "Darwin Core",
-      "GBIF",
       "reproducible research",
       "Open Science",
       "R"
@@ -65,6 +61,12 @@
       "identifier": "https://dx.doi.org/10.5281/zenodo.5746041",
       "relation": "isSupplementTo",
       "resource_type": "dataset"
+      },
+      {
+      "scheme": "url",
+      "identifier": "https://github.com/firms-gta/geoflow-tunaatlas/",
+      "relation": "isIdenticalTo",
+      "resource_type": "software"
       }
     ],
     "communities": [
