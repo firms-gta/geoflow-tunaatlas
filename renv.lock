@@ -3296,6 +3296,19 @@
       ],
       "Hash": "e372cf3f70e3c7a768ec5ea14f0f3edd"
     },
+    "qs2": {
+      "Package": "qs2",
+      "Version": "0.1.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "RcppParallel",
+        "stringfish"
+      ],
+      "Hash": "0b821571b2f7af824b0bd45e09592dc2"
+    },
     "quantreg": {
       "Package": "quantreg",
       "Version": "5.97",
