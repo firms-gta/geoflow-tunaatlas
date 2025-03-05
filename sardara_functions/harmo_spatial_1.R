@@ -59,12 +59,17 @@ harmo_spatial_1 = function (df_input, colname_longitude, colname_latitude, colna
   }
   index.Get_SampAreaCode_instead_of_SquareCodeList <- which(df_input[, 
                                                                      colname_squaresize] == "98")
-  if (length(index.Get_SampAreaCode_instead_of_SquareCodeList)) {
-    df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, 
-             "AreaName"] <- df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, 
-                                     colname_samplingareacode]
-    df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, 
-             "AreaCWPgrid"] <- NA
+  if (length(index.Get_SampAreaCode_instead_of_SquareCodeList) > 0 &&
+      !all(is.na(index.Get_SampAreaCode_instead_of_SquareCodeList)) &&
+      colname_samplingareacode %in% colnames(df_input) &&
+      any(!is.na(df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, colname_samplingareacode]))) {
+    
+    df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, "AreaName"] <- 
+      df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, colname_samplingareacode]
+    
+    df_input[index.Get_SampAreaCode_instead_of_SquareCodeList, "AreaCWPgrid"] <- NA
   }
+  
+  
   return(df_input)
 }
