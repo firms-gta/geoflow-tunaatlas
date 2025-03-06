@@ -4,14 +4,16 @@ library(here)
 library(futile.logger)
 library(geoflow)
 
+if (!file.exists(here::here("results"))) {
+  dir.create(here::here("results"))}
 # Restaurer l'environnement `renv`
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
 
 # 🔹 SOURCING des fonctions nécessaires
-source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"))
-source(here::here("R/running_time_of_workflow.R"))
-source(here::here("R/executeAndRename.R"))
+source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"), encoding = "UTF-8")
+source(here::here("R/running_time_of_workflow.R"), encoding = "UTF-8")
+source(here::here("R/executeAndRename.R"), encoding = "UTF-8")
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(
@@ -20,7 +22,13 @@ tar_option_set(
     "rpostgis", "ggplot2", "readr", "sf", "bookdown", "knitr", "tidyr"
   )
 )
+options(
+  encoding = "UTF-8",
+  stringsAsFactors = FALSE, 
+  dplyr.summarise.inform = FALSE
+)
 
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
 # config <- initWorkflow(here::here("catch_ird_level2_local.json"))  # 🔥 Charge en dehors de `{targets}`
 # entity <- config$metadata$content$entities[[1]]
 # action <- entity$data$actions[[1]]
@@ -114,8 +122,7 @@ list(
     save_results,
     {
       df <- read.csv(results_file)  # Lire le fichier généré
-      if (!exists(here::here("results"))) {
-        dir.create(here::here("results"))}
+
       write.csv(df, here::here("results/tuna_atlas_results.csv"))  # Sauvegarde finale
       "results/tuna_atlas_results.csv"
     },

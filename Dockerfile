@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y \
     libcairo2-dev
+RUN apt-get update && apt-get install -y libpoppler-cpp-dev
 
 
 # Update and upgrade the system
@@ -88,13 +89,13 @@ RUN R -e "renv::activate()"
 # Used to setup the environment (with the path cache)
 RUN R -e "renv::restore()" 
 
-
 # Copy the rest of the application code
 COPY . .
 
 COPY _targets.R ._targets.R
 
 # Run the data to donwload GTA data for species label, species group, cwp_shape
+RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
 RUN R -e "targets::tar_make()"
 
 # Create directories for configuration

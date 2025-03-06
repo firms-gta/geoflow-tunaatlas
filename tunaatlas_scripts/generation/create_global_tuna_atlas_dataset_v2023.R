@@ -496,7 +496,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                             (source_authority == "IATTC" & year >= 1957) | source_authority == "CCSBT") %>%
             dplyr::select(-year) %>% dplyr::left_join(geographic_identifier_to_nominal, by = c("geographic_identifier" = "code", "source_authority"))
           
-          # # Fonction de filtrage pour une source d'autorité
+          # # Fonction de filtrage pour une source d'autorite
           # filter_problematic_units <- function(dataset, authority, species_list) {
           #   dataset %>%
           #     dplyr::filter(
@@ -511,7 +511,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           #     dplyr::select(-n)
           # }
           
-          # # Listes d'espèces
+          # # Listes d'especes
           # species_list_wcpfc <- c("ALB", "BET", "MAK", "MLS", "SWO", "YFT", "BLM", "BUM", "POR", "OCS", "FAL", "SPN", "THR")
           # species_list_iattc <- c("BSH", "FAL", "OCS", "MAK", "THR", "RSK", "SMA", "SKH", "SPN", "BET", "MLS", "SWO", "BUM", 
           #                         "BLM", "YFT", "SFA", "ALB", "BIL", "SSP", "SKJ", "TUN", "PBF")
@@ -520,7 +520,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           # wcpfc_notok <- filter_problematic_units(georef_dataset, "WCPFC", species_list_wcpfc)
           # iattc_notok <- filter_problematic_units(georef_dataset, "IATTC", species_list_iattc)
           
-          # # Jeu de données final en supprimant les enregistrements problématiques
+          # # Jeu de donnees final en supprimant les enregistrements problematiques
           # georef_dataset_filtered <- georef_dataset %>%
           #   dplyr::anti_join(wcpfc_notok, by = setdiff(colnames(georef_dataset), c("measurement_value"))) %>%
           #   dplyr::anti_join(iattc_notok, by = setdiff(colnames(georef_dataset), c("measurement_value")))
@@ -768,7 +768,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           #       opts$min_q1_etc == "Q3" ~ Q3,
           #       opts$min_q1_etc == "mean" ~ mean,
           #       opts$min_q1_etc == "median" ~ median,
-          #       TRUE ~ NA_real_  # Valeur par défaut au cas où aucune condition n'est remplie
+          #       TRUE ~ NA_real_  # Valeur par defaut au cas ou aucune condition n'est remplie
           #     )) %>% 
           #     dplyr::select(gear_type, species, conversion, year)
           #   
@@ -961,7 +961,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             raising_dimensions=x_raising_dimensions
             df_rf$measurement_unit=NULL
           }
-          # idee raise only les données qui sont que en tonnes
+          # idee raise only les donnees qui sont que en tonnes
           
           wcpfc_not_to_raise <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
           georef_dataset <- georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
@@ -987,8 +987,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
               georef_dataset,
               paste0(
                 "The georeferenced data is adjusted to more accurately align with the nominal dataset. ",
-                "To achieve this, all strata with corresponding equivalents in the nominal data—based on the following variables: ", 
-                toString(x_raising_dimensions), "—are adjusted upward to match the nominal values. Conversely, if the georeferenced data exceeds the nominal value for any given stratum, ",
+                "To achieve this, all strata with corresponding equivalents in the nominal data-based on the following variables: ", 
+                toString(x_raising_dimensions), "-are adjusted upward to match the nominal values. Conversely, if the georeferenced data exceeds the nominal value for any given stratum, ",
                 "it is adjusted downward to correspond to the nominal data. The nominal dataset used for this adjustment is accessible via the following DOI: ",
                 opts$doinominal, " with the key identifier being: ", opts$keynominal, ". Similarly, georeferenced strata expressed in numbers ",
                 "that correspond to nominal strata undergoing adjustment are also removed if existing."),
@@ -1045,11 +1045,11 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 georef_dataset,
                 paste0(
                   "The georeferenced data is adjusted to more accurately align with the nominal dataset. ",
-                  "To achieve this, all strata with corresponding equivalents in the nominal data—based on the following variables: ", 
+                  "To achieve this, all strata with corresponding equivalents in the nominal data-based on the following variables: ", 
                   toString(x_raising_dimensions), 
-                  "—are adjusted upward to match the nominal values. Conversely, if the georeferenced data exceeds the nominal value for any given stratum, ",
+                  "-are adjusted upward to match the nominal values. Conversely, if the georeferenced data exceeds the nominal value for any given stratum, ",
                   "it is adjusted downward to correspond to the nominal data. The nominal dataset used for this adjustment is accessible via the following DOI: ",
-                  opts$doinominal, " with the key identifier being ", opts$keynominal, ". Strata without complete equivalence in the nominal data—particularly for the year 1950—",
+                  opts$doinominal, " with the key identifier being ", opts$keynominal, ". Strata without complete equivalence in the nominal data-particularly for the year 1950-",
                   "have been excluded, as the year is incomplete and cannot be fully raised from the nominal dataset. Similarly, georeferenced strata expressed in numbers ",
                   "that correspond to nominal strata undergoing adjustment are also removed. In most cases, strata reported in both number and tons maintain a consistent ",
                   "spatial footprint, as the nominal data encompasses the corresponding spatial representation. Thus, the spatial coverage remains largely unaffected, aside from ",
@@ -1121,7 +1121,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         function_recap_each_step(
           "Disaggregate5deg",
           georef_dataset,
-          paste0("The data is disaggregated data on resolution higher than 5° in 5° resolution."),
+          paste0("The data is disaggregated data on resolution higher than 5o in 5o resolution."),
           "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
           list(
             options_disaggregate_on_5deg_data_with_resolution_superior_to_5deg
@@ -1154,7 +1154,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         function_recap_each_step(
           "Disaggregate1deg",
           georef_dataset,
-          "This step disaggregate data on resolution higher than 1° in 1° resolution",
+          "This step disaggregate data on resolution higher than 1o in 1o resolution",
           "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
           list(
             options_disaggregate_on_1deg_data_with_resolution_superior_to_1deg
@@ -1169,9 +1169,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
 
     # SPATIAL AGGREGATION ---------------------------------------------------
     if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
-      stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
+      stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5o resolution quadrants)")
       stepnumber = stepnumber+1
-      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5o quadrant resolution to corresponding 5o quadrant...")
       
       one_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
       five_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
@@ -1183,7 +1183,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       
       georef_dataset <- as.data.frame(base::rbind(one_degree_aggregated, five_degree))
       
-      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5o quadrant resolution to corresponding 5o quadrant OK")
       
       if(recap_each_step){
         names_list_aggregation <-
@@ -1194,7 +1194,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         function_recap_each_step(
           "Aggregation",
           georef_dataset,
-          "The data with resolution lower to 5° is aggregated on resolution of 5°.",
+          "The data with resolution lower to 5o is aggregated on resolution of 5o.",
           "spatial_curation_upgrade_resolution",
           list(
             options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg
