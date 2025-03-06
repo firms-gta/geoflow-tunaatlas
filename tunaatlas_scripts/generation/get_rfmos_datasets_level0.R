@@ -76,6 +76,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       #For ICCAT, only data reading (since the move to CWP RH standard exchange format)
                       iccat_data <- NULL
                       if(options$include_ICCAT){
+                        if(variable == "catch"){
                         config$logger.info(sprintf("Get %s data", rfmo))
                         dataset_files_iccat <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("byschool", names(dataset_files)) < 0 &
@@ -86,6 +87,18 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         class(iccat_data$measurement_value) <- "numeric"
                         
                         iccat_data<- iccat_data[, columns_to_keep]
+                      } else {
+                          # for efforts data only use the noSchool (the byschool has changed the format and thus it is super difficult for now to retrieve what was done)
+                        dataset_files_iccat <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
+                                                                                         regexpr("byschool", names(dataset_files)) > 0 &
+                                                                                         regexpr("iccat", names(dataset_files)) > 0]))
+                        iccat_data <- do.call("rbind", lapply(dataset_files_iccat, readr::read_csv, guess_max = 0))
+                        iccat_data <- as.data.frame(iccat_data)
+                        
+                        class(iccat_data$measurement_value) <- "numeric"
+                        
+                        iccat_data<- iccat_data[, columns_to_keep]
+                        }
 
                       }else{
                         config$logger.warn(sprintf("Option include_%s = FALSE. Ignoring data...", rfmo))
