@@ -22,7 +22,6 @@
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' @keywords ICCAT, tuna, fisheries, data harmonization
 function(action, entity, config){
-  
 
 keep_fleet_instead_of_flag=FALSE
 
@@ -74,7 +73,9 @@ options(encoding = "UTF-8")
 
 ## Catches
 
-RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
+# RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
+RFMO_CE <- read_excel(path_to_raw_dataset,
+                sheet = "Data")
 names(RFMO_CE)[names(RFMO_CE) == 'Flag'] <- 'FishingFleet'
 
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
@@ -86,7 +87,7 @@ if(keep_fleet_instead_of_flag==TRUE){
 
 ##Efforts
 
-last_column_not_catch_value=22
+last_column_not_catch_value=26
 RFMO_CE<-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
@@ -108,6 +109,7 @@ efforts_pivot_ICCAT$School[index_school_fd]<-"fd"
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::rename(SquareTypeCode = GeoStrataCode) # to match definition in ICCAT_CE_effort_pivotDSD_to_harmonizedDSD
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
