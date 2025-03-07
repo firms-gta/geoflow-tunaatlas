@@ -64,7 +64,7 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
     additional_metadata = NULL,
     codelists = df_codelists # In case the entity was provided with a link to codelists
   )
-  
+  dataset_list$dataset$geographic_identifier = as.character(dataset_list$dataset$geographic_identifier)
   # Export dataset as CSV
   output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
   readr::write_csv(dataset_list$dataset, output_name_dataset)
@@ -90,7 +90,7 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   }
   
   #write to service dbi
-  dataset_enriched$geographic_identifier = as.character(dataset_enriched$geographic_identifier)
+  dataset_enriched$geographic_identifier = as.character(dataset_enriched$geographic_identifier)  
   entity$data$features = dataset_enriched
   # if(entity$data$upload) writeWorkflowJobDataResource(entity=entity,config=config,type="dbtable",useFeatures=TRUE,useUploadSource=TRUE, createIndexes=TRUE)
   
