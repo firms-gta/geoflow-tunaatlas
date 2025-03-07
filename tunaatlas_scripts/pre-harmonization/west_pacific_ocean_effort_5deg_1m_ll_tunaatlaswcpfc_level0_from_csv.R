@@ -28,16 +28,26 @@ function(action, entity, config){
   
   
 
-  
   if(!require(readr)){
     install.packages("readr")
+    require(readr)
   }
-  require(readr)
+  
+  if(!require(tidyr)){
+    install.packages("tidyr")
+    require(tidyr)
+  }
   
   if(!require(dplyr)){
     install.packages("dplyr")
+    require(dplyr)
   }
-  require(dplyr)
+  
+  
+  if(!require(reshape)){
+    install.packages("reshape")
+    require(reshape)
+  }
   
   
   
@@ -141,9 +151,10 @@ function(action, entity, config){
   #2020-11-13 @eblondel
   efforts_pivot_WCPFC$RFMO <- "WCPFC"
   efforts_pivot_WCPFC$Ocean <- "PAC_W"
-  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID #@eblondel added
+  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID 
   efforts_pivot_WCPFC <- harmo_time_2(efforts_pivot_WCPFC, "YY", "MM")
-  efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+  efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
+  #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
   efforts_pivot_WCPFC$CatchType <- "ALL"
   
   efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
