@@ -89,7 +89,8 @@ function(action, entity, config){
   DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
   
   # Reach the efforts pivot DSD using a function in WCPFC_functions.R
-  #2020-11-13 @eblondel
+  #2020-11-13 
+  #@eblondel
   #Changes
   #	- Flag column added add UNK where missing
   #	- Change id upper index for melting
@@ -148,7 +149,8 @@ function(action, entity, config){
   ### Reach the efforts harmonized DSD using a function in WCPFC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
   #efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_captures)
-  #2020-11-13 @eblondel
+  #2020-11-13 
+  #@eblondel
   efforts_pivot_WCPFC$RFMO <- "WCPFC"
   efforts_pivot_WCPFC$Ocean <- "PAC_W"
   efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID 
