@@ -266,7 +266,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     # mapping_codelist <-map_codelists(con, opts$fact, mapping_dataset = mapping_dataset,dataset_to_map = georef_dataset, mapping_keep_src_code,summary_mapping = TRUE,source_authority_to_map = source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     mapping_codelist <-map_codelists_no_DB(opts$fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", 
                                            dataset_to_map = georef_dataset, 
-                                           mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) 
+                                           mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "IOTC", "ICCAT")) 
     
     
     georef_dataset <- mapping_codelist$dataset_mapped
