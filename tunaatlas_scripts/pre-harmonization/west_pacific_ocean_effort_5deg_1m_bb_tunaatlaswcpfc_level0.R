@@ -103,8 +103,10 @@ DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
 DF$variable <- as.character(DF$variable)
 colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
 DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
-DF$CatchUnits <- toupper(DF$CatchUnits) #@eblondel to upper
-DF$Species <- toupper(DF$Species) #@eblondel to upper
+DF$CatchUnits <- toupper(DF$CatchUnits) 
+#@eblondel to upper
+DF$Species <- toupper(DF$Species) 
+#@eblondel to upper
 DF$Species <- sub("_C", "", DF$Species)
 DF$Species <- sub("_N", "", DF$Species)
 DF$School <- "OTH"
