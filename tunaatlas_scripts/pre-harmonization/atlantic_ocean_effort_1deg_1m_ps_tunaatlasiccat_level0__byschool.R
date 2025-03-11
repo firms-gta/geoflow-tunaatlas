@@ -125,7 +125,8 @@ dataset_temporal_extent <- paste(
   sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
-efforts$geographic_identifier = as.character(efforts$geographic_identifier)
+efforts$geographic_identifier <- format(as.integer(efforts$geographic_identifier), scientific = FALSE, trim = TRUE)
+
 #@geoflow -> export as csv
 output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".xlsx"))[1], "_harmonized.csv"), path_to_raw_dataset)
 write.csv(efforts, output_name_dataset, row.names = FALSE)

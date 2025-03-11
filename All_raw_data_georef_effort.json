@@ -17,7 +17,7 @@
     "entities": [
       {
         "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1tHkgvLNAPjAytLaRDqdjtDae_OBO8Yke0XWvgNl7DRk/edit#gid=170301494"
+        "source": "https://docs.google.com/spreadsheets/d/1tHkgvLNAPjAytLaRDqdjtDae_OBO8Yke0XWvgNl7DRk/edit?gid=170301494#gid=170301494"
       }
     ],
     "contacts" : [
@@ -66,7 +66,7 @@
     {
       "id": "load_dataset",
       "script": "./tunaatlas_actions/load_dataset.R",
-      "run": false,
+      "run": true,
       "options": {
         "upload_to_db": true,
         "create_materialized_view": false,
