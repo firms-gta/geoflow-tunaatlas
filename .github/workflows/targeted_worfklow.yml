@@ -89,11 +89,8 @@ jobs:
               .
           fi
       
-      - name: 📦 Sauvegarder l’image Docker
-        run: docker save -o my-targets-pipeline.tar my-targets-pipeline
-
       - name: 📤 Uploader l’image Docker comme un artefact
         uses: actions/upload-artifact@v4
         with:
           name: docker-image
-          path: my-targets-pipeline.tar
+          path: /tmp/docker-image.tar
