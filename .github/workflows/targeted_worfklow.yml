@@ -81,6 +81,13 @@ jobs:
               --output type=docker,dest=/tmp/docker-image.tar \
               .
           fi
+      
+      - name: Login to image repository
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: 📦 Sauvegarder l’image Docker
         run: docker save -o my-targets-pipeline.tar my-targets-pipeline
