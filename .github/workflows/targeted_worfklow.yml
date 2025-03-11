@@ -1,4 +1,4 @@
-name: Run targets in Docker
+name: Build and Save Docker Image
 
 on:
   push:
@@ -6,46 +6,87 @@ on:
       - "v*"
   workflow_dispatch:
     inputs:
-      rerun:
-        description: "Rerun the workflow manually"
-        required: false
-        default: "true"
+      base_branch:
+        description: "Branch to base the Docker image on (e.g., main, dev)"
+        required: true
+        default: "main"
+      action:
+        description: "Action to perform: build, build-no-cache"
+        required: true
+        default: "build" 
+
+env:
+  CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-cache
+  DOCKER_BUILDKIT: 1
+  RENV_PATHS_ROOT: /root/.cache/R/renv
 
 jobs:
-  build_and_run:
+  docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 140
+
     steps:
-      - name: 📥 Cloner le dépôt
-        uses: actions/checkout@v3
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
 
-      - name: 🔍 Vérifier les fichiers après checkout
-        run: ls -la && ls -la renv/
-
-      - name: 🐳 Construire et exécuter {targets} avec Docker
-        run: docker build -t my-targets-pipeline .
-
-      - name: 📦 Vérifier l'existence des résultats avant upload
+      - name: 🔍 Calculate `renv.lock` Hash
+        id: renv_lock
         run: |
-          if [ -z "$(ls -A results/ 2>/dev/null)" ]; then
-            echo "No results to upload."
-            exit 0
+          if [ -f renv.lock ]; then
+            echo "renv_lock_hash=$(sha256sum renv.lock | cut -d' ' -f1)" >> $GITHUB_ENV
+          else
+            echo "renv_lock_hash=default" >> $GITHUB_ENV
           fi
 
-      - name: 📦 Stocker les résultats (Artifact GitHub)
-        if: github.ref != 'refs/tags/v*'
+      - name: 🔍 Calculate `DOI.csv` Hash
+        id: doi_csv
+        run: |
+          if [ -f data/DOI.csv ]; then
+            echo "doi_csv_hash=$(sha256sum data/DOI.csv | cut -d' ' -f1)" >> $GITHUB_ENV
+          else
+            echo "doi_csv_hash=default" >> $GITHUB_ENV
+          fi
+          
+      - name: 🛠️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: image=moby/buildkit:master,network=host
+
+      - name: 🐳 Build Docker Image
+        if: ${{ !contains(github.event.head_commit.message, 'No building docker image') }}
+        run: |
+          BRANCH_NAME=$(echo ${{ github.ref_name }} | tr '/' '_' | tr ':' '_')
+    
+          if [[ "${{ github.event.inputs.action }}" == "build-no-cache" ]]; then
+            echo "🚀 Building without cache..."
+            docker buildx build \
+              --no-cache \
+              --progress=plain \
+              --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
+              --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
+              --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
+              --tag my-targets-pipeline \
+              --output type=docker,dest=/tmp/docker-image.tar \
+              .
+          else
+            echo "🚀 Building with cache..."
+            docker buildx build \
+              --progress=plain \
+              --cache-from type=registry,ref=$CACHE_IMAGE:${BRANCH_NAME} \
+              --cache-to type=registry,ref=$CACHE_IMAGE:${BRANCH_NAME},mode=max \
+              --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
+              --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
+              --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
+              --tag my-targets-pipeline \
+              --output type=docker,dest=/tmp/docker-image.tar \
+              .
+          fi
+
+      - name: 📦 Sauvegarder l’image Docker
+        run: docker save -o my-targets-pipeline.tar my-targets-pipeline
+
+      - name: 📤 Uploader l’image Docker comme un artefact
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ github.run_number }}
-          path: results/
-
-      - name: 📤 Créer une Release et uploader les résultats
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: "Release ${{ github.ref_name }}"
-          draft: false
-          prerelease: false
-          files: results/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: docker-image
+          path: my-targets-pipeline.tar
