@@ -140,15 +140,17 @@ file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"),
 
 
 effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
-file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"), 
+file.copy(list.files(file.path(effort_path, "data"), 
                      full.names = TRUE), 
           here::here("data"), 
           recursive = TRUE)
+
 # have to download every file.
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
 
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("create_effort_dataset.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
+effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
 # tunaatlas_qa_services <- initWorkflow("tunaatlas_qa_services.json")
 # save.image()
 # tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
