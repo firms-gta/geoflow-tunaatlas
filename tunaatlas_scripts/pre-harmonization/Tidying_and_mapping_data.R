@@ -254,7 +254,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
   #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   options("OutDec" = ".")
-  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("CCSBT", "IATTC", "WCPFC")
+  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("CCSBT", "IATTC", "WCPFC", "ICCAT", "IOTC")
   
   if(any(unique(georef_dataset$source_authority)%in%source_authority_to_map)){
     stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
