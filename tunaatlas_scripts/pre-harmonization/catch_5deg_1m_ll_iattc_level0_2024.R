@@ -54,7 +54,7 @@ function(action, entity, config){
       fishing_fleet = Flag,
       fishing_mode = "UNK",
       source_authority = "IATTC",
-      gear_type = "UNK", measurement = "catch", measurement_type = "RC" # Retained catches
+      gear_type = "LL", measurement = "catch", measurement_type = "RC" # Retained catches
     ) %>%
     dplyr::select(
       source_authority,  
