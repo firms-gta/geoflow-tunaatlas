@@ -50,7 +50,7 @@ function(action, entity, config){
       fishing_fleet = Flag,
       fishing_mode = "UNK",
       source_authority = "IATTC",
-      gear_type = "LL" %>% 
+      gear_type = "LL" )%>% 
     dplyr::select(
       source_authority,  
       gear_type,  
