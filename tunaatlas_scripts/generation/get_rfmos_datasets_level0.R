@@ -336,17 +336,18 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                              "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
                                                              "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
                           )
-                          dataset_file_effort_settype <- switch(options$iattc_ps_effort_to_extract,
-                                                                "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
-                                                                "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv",
-                                                                "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-                          )
-                          
+                          # dataset_file_effort_settype <- switch(options$iattc_ps_effort_to_extract,
+                          #                                       "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
+                          #                                       "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv",
+                          #                                       "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
+                          #                                       
+                          # )
                           # For the effort data, we keep only effort from one of the files (tuna or billfishes or shark). This is driven by the parameter "iattc_ps_effort_to_extract"
-                          df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_settype]), guess_max = 0))
-                          df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
-                          class(df_iattc_effort_PSSetType$measurement_value) <- "numeric"
-                          df_iattc_effort_PSFlag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_flag]), guess_max = 0))
+                          # df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_settype]), guess_max = 0))
+                          # df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
+                          # class(df_iattc_effort_PSSetType$measurement_value) <- "numeric"
+                          df_iattc_effort_PSFlag <- rbind(as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_flag]), guess_max = 0)), 
+                                                          as.data.frame(readr::read_csv(file.path("data",basename("effort_5deg_1m_ll_iattc_level0.csv")), guess_max = 0)))
                           df_iattc_effort_PSFlag <- df_iattc_effort_PSFlag[,columns_to_keep_effort]
                           class(df_iattc_effort_PSFlag$measurement_value) <- "numeric"
                           
