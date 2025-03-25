@@ -81,13 +81,13 @@ running_time_of_workflow(raw_nominal_catch)
 
 ## Georeferenced catch: These datasets contains catch AND EFFORT FOR SOME DATA as effort are used to raise catch data for level 0 to 2
 # Around 1.2 hours
-raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json"))
+raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json")) 
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024")
 running_time_of_workflow(raw_data_georef)
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 # Around 30 minutes
-raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))
+raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
 running_time_of_workflow(raw_data_georef_effort)
 
@@ -139,8 +139,8 @@ file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"),
           recursive = TRUE)
 
 
-effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
-file.copy(list.files(file.path(effort_path, "data"), 
+tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
+file.copy(list.files(file.path(tunaatlas_qa_global_datasets_effort_path, "data"), 
                      full.names = TRUE), 
           here::here("data"), 
           recursive = TRUE)
@@ -150,7 +150,7 @@ file.copy(list.files(file.path(effort_path, "data"),
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
 
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("create_effort_dataset.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
-effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
+tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
 # tunaatlas_qa_services <- initWorkflow("tunaatlas_qa_services.json")
 # save.image()
 # tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
@@ -203,7 +203,8 @@ Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionD
                  source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
                  source_authoritylist = c("all"))
-
+Summarising_step(main_dir = tunaatlas_qa_global_datasets_effort_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist =c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),
                  savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")

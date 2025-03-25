@@ -80,7 +80,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   entities_df <- do.call(rbind, entities_trfmo)
   
   
-  
+  flog.info("patrt1")
   # PART 2: Checking for specific .csv files
   
   target_files <- c("negative_values.csv", "not_conform_conversion_factors.csv", "removed_irregular_areas.csv", 
@@ -165,6 +165,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   all_recap_mapping_data <- bind_rows(recap_mapping_data_list) %>% distinct()
   
   readr::write_csv(all_recap_mapping_data, file.path(path, "all_recap_mapping.csv"))
+  flog.info("patrt2")
   
   # PART 3: Generate a summary CSV for all entity
   `%notin%` <- Negate(`%in%`)
@@ -188,6 +189,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
         
         
       } else if ("GRIDTYPE" %notin% colnames(data_list)){
+        data_list <- data_list %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
         data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
                                                      shape = shape_without_geom, 
                                                      species_group_dataframe = species_group,
@@ -201,7 +203,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       
       return(data_list)
     })
-  
+    flog.info("patrt4")
+    
   if (length(problematic_files) > 0) {
     # Combine all problematic data into one data frame with an additional column specifying the input file
     combined_problematic_data <- do.call(rbind, lapply(1:length(problematic_data), function(i) {
@@ -320,7 +323,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           # Valeur par défaut si le fichier n'a pas de description
           paste0("# Unknown issue\n\nNo specific description available for this dataset.\n")
         )
-        
+        file_path <- readr::read_csv(file_path) %>% dplyr::mutate(geographic_identifier = as.numeric(geographic_identifier))
         # Générer l'environnement pour ce fichier
         child_env_result <- comprehensive_cwp_dataframe_analysis(
           parameter_init = file_path,

@@ -60,7 +60,8 @@ function(action, entity, config){
   
   catches <- catches %>% filter(measurement_value!= 0)
   
-  catches<-catches %>% dplyr::select("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value", "source_authority")
+  catches<-catches %>% dplyr::select("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value", "source_authority") %>% 
+    dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
   
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
