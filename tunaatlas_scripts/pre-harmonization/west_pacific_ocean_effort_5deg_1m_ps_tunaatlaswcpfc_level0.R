@@ -92,32 +92,46 @@ options(encoding = "UTF-8")
 
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
-DF$CWP_GRID <- NULL
+DF <- as.data.frame(DF)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/harmo_spatial_3.R")
+DF <- harmo_spatial_3(DF, 
+                                       "LAT5", "LON5", 5, 6)  %>% dplyr::select(-CWP_GRID)
 
-DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
+efforts <- DF %>%
+  dplyr::mutate(
+    time_start = as.Date(paste(YY, MM, "01", sep = "-")),
+    time_end = time_start + lubridate::days(30),
+    AreaName = paste0(
+      substr(LON5, 1, nchar(LON5) - 1),
+      substr(LON5, nchar(LON5), nchar(LON5)),
+      substr(LAT5, 1, nchar(LAT5) - 1),
+      substr(LAT5, nchar(LAT5), nchar(LAT5))
+    )
+  ) %>%
+  tidyr::pivot_longer(
+    cols = c(DAYS, SETS_UNA, SETS_LOG, SETS_DFAD, SETS_AFAD, SETS_OTH),
+    names_to = "EffortUnits",
+    values_to = "Effort"
+  ) %>%
+  dplyr::mutate(
+    School = dplyr::case_when(
+      grepl("UNA", EffortUnits) ~ "UNA",
+      grepl("LOG", EffortUnits) ~ "LOG",
+      grepl("DFAD", EffortUnits) ~ "DFAD",
+      grepl("AFAD", EffortUnits) ~ "AFAD",
+      grepl("OTH", EffortUnits) ~ "OTH",
+      EffortUnits == "DAYS" ~ "ALL"
+    ),
+    EffortUnits = dplyr::if_else(EffortUnits == "DAYS", "DAYS", "SETS"),
+    Flag = "ALL",
+    Gear = "S"
+  ) %>%
+  dplyr::select(Flag, Gear, time_start, time_end, AreaName, School, EffortUnits, Effort) %>%
+  dplyr::filter(Effort > 0)
 
-DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
-DF$variable <- as.character(DF$variable)
-colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
-DF$School <- substr(DF$Species, 7, nchar(DF$Species))
-DF$Species <- sub("_C_UNA", "", DF$Species)
-DF$Species <- sub("_C_LOG", "", DF$Species)
-DF$Species <- sub("_C_DFAD", "", DF$Species)
-DF$Species <- sub("_C_AFAD", "", DF$Species)
-DF$Species <- sub("_C_OTH", "", DF$Species)
-DF$CatchUnits <- "t"
-DF$EffortUnits <- colnames(DF[5])
-colnames(DF)[5] <- "Effort"
-efforts_pivot_WCPFC <- DF; rm(DF)
 
 #-----------------------------------------------------------
-#Gear
-efforts_pivot_WCPFC$Gear<-"S"
-
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
-efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
-
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"WCPFC"
 efforts$measurement <- "effort" 
