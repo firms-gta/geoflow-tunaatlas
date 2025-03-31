@@ -100,13 +100,7 @@ DF <- harmo_spatial_3(DF,
 efforts <- DF %>%
   dplyr::mutate(
     time_start = as.Date(paste(YY, MM, "01", sep = "-")),
-    time_end = time_start + lubridate::days(30),
-    AreaName = paste0(
-      substr(LON5, 1, nchar(LON5) - 1),
-      substr(LON5, nchar(LON5), nchar(LON5)),
-      substr(LAT5, 1, nchar(LAT5) - 1),
-      substr(LAT5, nchar(LAT5), nchar(LAT5))
-    )
+    time_end = time_start + lubridate::days(30)
   ) %>%
   tidyr::pivot_longer(
     cols = c(DAYS, SETS_UNA, SETS_LOG, SETS_DFAD, SETS_AFAD, SETS_OTH),
@@ -131,7 +125,6 @@ efforts <- DF %>%
 
 
 #-----------------------------------------------------------
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"WCPFC"
 efforts$measurement <- "effort" 
@@ -148,9 +141,9 @@ dataset_temporal_extent <- paste(
 entity$setTemporalExtent(dataset_temporal_extent)
 
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_harmonized.csv"), path_to_raw_dataset)
+output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
 write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_codelists.csv"), path_to_raw_dataset)
+output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
 file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
