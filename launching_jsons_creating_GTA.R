@@ -71,6 +71,17 @@ running_time_of_workflow(mappings)
 
 # Third step is pre-harmonizing the datasets provide by tRFMOs: This step is divided in 3 
 # substep depending on the type of the data:
+copy_all_nested_data_folders <- function(source_root, target_data_folder = here::here("data")) {
+  # Cherche tous les dossiers nommés 'data' à n'importe quel niveau
+  data_dirs <- list.dirs(source_root, recursive = TRUE, full.names = TRUE)
+  data_dirs <- data_dirs[basename(data_dirs) == "data"]
+  
+  # Boucle sur chaque dossier 'data' trouvé et copie son contenu
+  for (dir in data_dirs) {
+    files_to_copy <- list.files(dir, full.names = TRUE, recursive = TRUE)
+    file.copy(files_to_copy, target_data_folder, overwrite = TRUE, recursive = TRUE)
+  }
+}
 
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
@@ -83,20 +94,16 @@ running_time_of_workflow(raw_nominal_catch)
 # Around 1.2 hours
 raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json")) 
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024")
-file.copy(list.files(file.path(raw_data_georef, "data"), 
-                     full.names = TRUE), 
-          here::here("data"), 
-          recursive = TRUE)
+copy_all_nested_data_folders(raw_data_georef)
+
 running_time_of_workflow(raw_data_georef)
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 # Around 30 minutes
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
-file.copy(list.files(file.path(raw_data_georef_effort, "data"), 
-                     full.names = TRUE), 
-          here::here("data"), 
-          recursive = TRUE)
+copy_all_nested_data_folders(raw_data_georef_effort)
+copy_all_nested_data_folders(raw_data_georef_effort, target_data_folder = "efforts_all")
 running_time_of_workflow(raw_data_georef_effort)
 
 # source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
@@ -148,11 +155,7 @@ file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"),
 
 
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
-file.copy(list.files(file.path(tunaatlas_qa_global_datasets_effort_path, "data"), 
-                     full.names = TRUE), 
-          here::here("data"), 
-          recursive = TRUE)
-
+copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path, target_data_folder = "efforts_2025")
 # have to download every file.
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
