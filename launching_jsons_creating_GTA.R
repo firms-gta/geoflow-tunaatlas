@@ -83,12 +83,20 @@ running_time_of_workflow(raw_nominal_catch)
 # Around 1.2 hours
 raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef.json")) 
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024")
+file.copy(list.files(file.path(raw_data_georef, "data"), 
+                     full.names = TRUE), 
+          here::here("data"), 
+          recursive = TRUE)
 running_time_of_workflow(raw_data_georef)
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 # Around 30 minutes
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
+file.copy(list.files(file.path(raw_data_georef_effort, "data"), 
+                     full.names = TRUE), 
+          here::here("data"), 
+          recursive = TRUE)
 running_time_of_workflow(raw_data_georef_effort)
 
 # source("~/firms-gta/geoflow-tunaatlas/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
