@@ -22,7 +22,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
       path
     }
   ) #for local, preventing having data/./data/ in path 
-  names(dataset_files) <- basename(entity$data$source[2:length(entity$data$source)])
+  names(dataset_files) <- entity$data$source[2:length(entity$data$source)]
+  names(dataset_files) <- basename(names(dataset_files))
   
   #georeferenced grid datasets
   dataset <- switch(rfmo,
