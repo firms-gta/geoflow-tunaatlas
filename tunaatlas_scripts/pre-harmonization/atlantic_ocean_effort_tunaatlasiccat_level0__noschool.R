@@ -72,6 +72,7 @@ if(!require(dplyr)){
 #  ARG   LL 1967-07-01 1967-08-01  7330040    ALL    NO.HOOKS  50000
 
 ## download database
+# to get .mdb ./tunaatlas_scripts/pre-harmonization/data_iccat_from_mdb.R
 filename1 <- entity$data$source[[1]] #data
 # Historical name for the dataset at source  t2ce_noSchool.csv
 filename2 <- entity$data$source[[2]] #structure
@@ -85,7 +86,6 @@ keep_fleet_instead_of_flag=FALSE
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 
-# Flags<-mdb.get(paste0(working_directory_init,"/db.mdb"),tables='Flags',stringsAsFactors=FALSE,strip.white=TRUE)
 config$logger.info(paste0("BEGIN  function   \n"))
 
 # data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
