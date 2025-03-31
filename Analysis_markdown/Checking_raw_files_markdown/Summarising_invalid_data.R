@@ -1,3 +1,16 @@
+#' Summarizes invalid data in the provided dataset
+#'
+#' This function identifies, aggregates, and processes invalid data within a geoflow entity from rawdata in geoflow-tunaatlas workflow by analyzing various
+#' entities and their respective tRFMOs. It checks for missing data, incorrect values, and geographic inconsistencies.
+#' The function can optionally upload results to a database and Google Drive.
+#'
+#' @param main_dir The main working directory containing the dataset and necessary files.
+#' @param connectionDB A database connection object used for querying relevant tables.
+#' @param upload_drive Logical, whether to upload results to Google Drive (default: FALSE).
+#' @param upload_DB Logical, whether to upload processed data to a database (default: TRUE).
+#'
+#' @return Writes multiple summary CSV files and optional database tables, returning no explicit value.
+#' @export
 Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
   ancient_wd <- getwd()
   setwd(main_dir)
@@ -10,6 +23,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
     dplyr::rename(GRIDTYPE = gridtype)
   
+  if(file.exists(here::here(file.path("data", "continent.qs")))){
+    continent <- qs::qread(here::here(file.path("data", "continent.qs"))) } else {
   continent <- tryCatch({
     st_read(connectionDB, query = "SELECT * from public.continent")
   }, error = function(e) {
@@ -26,27 +41,9 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     continent = WFS$getFeatures("fifao:UN_CONTINENT2")
     
   }
+  qs::qsave(continet, here::here(file.path("data", "continent.qs")))
+    }
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
-  
-  # file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
-  file_path_url <- "~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions"
-  source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
-  source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
-  source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_temporal_differences_dygraphs.R"), local = TRUE)
-  source(file.path(file_path_url,"other_dimension_analysis_dygraphs.R"), local = TRUE)
-  source(file.path(file_path_url,"Groupping_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_strata_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_dimension_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_temporal_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"geographic_diff.R"), local = TRUE)
-  source(file.path(file_path_url,"time_coverage_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
-  
-  
   
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
@@ -264,13 +261,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
-  copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
-  copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
-  
-  
   
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
@@ -378,8 +370,9 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       summary_invalid_data <- read_csv(file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")))
       render_env$summary_invalid_data <- summary_invalid_data
       qs::qsave(render_env, file.path(entity_dir, paste0(entity_name, "render_env.qs")))
+      Report_on_raw_data <- system.file("rmd", "Report_on_raw_data.Rmd", package = "CWP.dataset")
       
-      rmarkdown::render(input = "Report_on_raw_data.Rmd", envir = render_env, output_format = "bookdown::html_document2",
+      rmarkdown::render(input = Report_on_raw_data, envir = render_env, output_format = "bookdown::html_document2",
                         output_dir =entity_dir, output_file = entity_name)
       # rmarkdown::render(input = "Report_on_raw_data_iccat.Rmd", envir = render_env, output_format = "bookdown::html_document2",
       #                   output_dir ="~/firms-gta/geoflow-tunaatlas/jobs/20250117135138_raw_data_georef/entities/catch_iccat_level0", output_file = "catch_iccat_level0_detailed.html")
@@ -390,13 +383,13 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       rm(render_env, envir = environment())
     }
   }
-  
-  rmarkdown::render(file.path(path,"Recap_on_pre_harmo.Rmd"),
+  Recap_on_pre_harmo <- system.file("rmd", "Report_on_raw_data.Rmd", package = "CWP.dataset")
+  rmarkdown::render(file.path(path,Recap_on_pre_harmo),
                     output_dir = path,
                     envir = environment()
   )
   
-  rmarkdown::render(file.path(path,"Recap_on_pre_harmo.Rmd"),
+  rmarkdown::render(file.path(path,Recap_on_pre_harmo),
                     output_dir = path,
                     envir = environment(), output_format = "pdf_document2")
   
