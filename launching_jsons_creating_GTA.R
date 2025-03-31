@@ -188,8 +188,8 @@ source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisher
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
-# config <- initWorkflow(here::here("create_effort_dataset.json"))
-config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json"))
+# config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 #removed of Sumamrising step required_packages <- c("webshot","here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
@@ -197,14 +197,29 @@ con <- config$software$output$dbi
 #                        "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
 #                        "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
 # )
-source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/Summarising_step.R")
+require(CWP.dataset)
 setwd("~/firms-gta/geoflow-tunaatlas")
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                  source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
                  source_authoritylist = c("all"))
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_effort_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
-                 source_authoritylist =c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
+config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+
+b <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20250324174607new_efforts/entities/global_georeferenced_effort_ird/Markdown/Level0_Firms/data.qs")
+measurement_unit <- unique(b$measurement_unit)
+measurement_unit <- c("HOOKS", "DAYS")
+for (i in unique(measurement_unit)){
+
+  config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(measurement_unit = i)
+  
+  CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_effort_path, connectionDB = con, config  = config, 
+                                sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                                source_authoritylist =c("all"), nameoutput = paste0(i, "pdf"))
+
+}
+
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),
                  savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
