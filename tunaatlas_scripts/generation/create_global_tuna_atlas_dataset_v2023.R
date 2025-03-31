@@ -327,7 +327,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             )
           }
         }
-        
+        if(opts$fact == "catch"){
         georef_dataset <-
           double_unit_data_handling( #to add handling of strata having multiples unit (tonnes and number which arrivent)
             con = con,
@@ -349,7 +349,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         )
         
       }
-      
+      }
 
 # Minor mapping for efforts -----------------------------------------------
 
@@ -360,7 +360,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         georef_dataset <- georef_dataset %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit == "NO.HOOKS", "HOOKS", measurement_unit))
         
         function_recap_each_step(
-          "Removing NOMT and converting MTNO in MT",
+          "No.HOOKS to HOOKS",
           georef_dataset,
           "The data in 'NO.HOOKS' is converted to 'HOOKS' as the two units are identicals.",
           "mutate"
