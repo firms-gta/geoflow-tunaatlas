@@ -57,7 +57,7 @@ list(
     {
     path <- executeWorkflow(here::here("create_effort_dataset.json"))  # 🔥 recréer `config` depuis le fichier
       entity_tar <- entity
-      output_file <- file.path(path, "data", paste0(entity_tar$identifiers[["id"]], "_harmonized.csv"))
+      output_file <- file.path(path,"entities",entity_tar$identifiers[["id"]], "data", paste0(entity_tar$identifiers[["id"]], "_harmonized.csv"))
       
       if (file.exists(output_file)) {
         flog.info("Fichier généré avec succès : %s", output_file)
