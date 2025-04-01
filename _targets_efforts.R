@@ -9,6 +9,7 @@ if (!file.exists(here::here("results_efforts_2025"))) {
 # Restaurer l'environnement `renv`
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
+
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(
@@ -36,66 +37,41 @@ list(
   ),
   
   tar_target(
-    entities,
-    {
-      entity_list <- config$metadata$content$entities
-      lapply(seq_along(entity_list), function(i) {
-        e <- entity_list[[i]]
-        e$relations <- NULL  # évite erreur Google Drive
-        e
-      })
-    }
-  )
-  ,
-  tar_target(
     entity,
-    entities,
-    pattern = map(entities)
+    {
+      entityfile <- config$metadata$content$entities[[1]]
+      entityfile$relations <- NULL # Pour éviter l'échec lors du chargement de la codelist depuis Google Drive si non connecté
+      entityfile
+    }
   ),
   tar_target(
-    results_file,
+    output_file,
     {
-      path <- executeWorkflow(here::here("create_effort_dataset.json"))
-      output_file <- file.path(
-        path, "entities", entity$identifiers[["id"]], "data",
-        paste0(entity$identifiers[["id"]], "_harmonized.csv")
-      )
+    path <- executeWorkflow(here::here("create_effort_dataset.json"))  # 🔥 recréer `config` depuis le fichier
+      entity_tar <- entity
+      output_file <- file.path(path,"entities",entity_tar$identifiers[["id"]], "data", paste0(entity_tar$identifiers[["id"]], "_harmonized.csv"))
       
       if (file.exists(output_file)) {
-        flog.info("✅ Fichier généré : %s", output_file)
+        flog.info("Fichier généré avec succès : %s", output_file)
         output_file
       } else {
-        flog.error("❌ Fichier non généré : %s", output_file)
+        flog.error("Le fichier attendu n'a pas été généré : %s", output_file)
         stop("Erreur : fichier non généré")
       }
     },
-    pattern = map(entity),
     format = "file"
-  )
-  ,
-  tar_target(
-    read_result,
-    {
-      df <- read.csv(results_file)
-      df$entity_id <- entity$identifiers[["id"]]
-      df
-    },
-    pattern = map(results_file),
-    iteration = "list"
-  )
-  ,
+  ),
+  # 🔹 4. Lire et sauvegarder le fichier généré
   tar_target(
     save_results,
     {
-      df_final <- dplyr::bind_rows(read_result)
-      out_path <- here::here("results_efforts_2025/tuna_atlas_results.qs")
-      write.csv(df_final, out_path, row.names = FALSE)
-      out_path
+      df <- read.csv(output_file)  # Lire le fichier généré
+      
+      write.csv(df, here::here("results_efforts_2025/tuna_atlas_results.csv"))  # Sauvegarde finale
+      "results_efforts_2025/tuna_atlas_results.csv"
     },
     format = "file"
   )
-  
-  
 )
 # # Définition du pipeline
 # list(
