@@ -11,9 +11,8 @@ if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
 
 # 🔹 SOURCING des fonctions nécessaires
-source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"), encoding = "UTF-8")
-source(here::here("R/running_time_of_workflow.R"), encoding = "UTF-8")
-source(here::here("R/executeAndRename.R"), encoding = "UTF-8")
+targets::tar_source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"))
+
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(

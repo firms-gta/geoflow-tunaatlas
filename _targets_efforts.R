@@ -10,10 +10,6 @@ if (!file.exists(here::here("results_efforts_2025"))) {
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
 
-# 🔹 SOURCING des fonctions nécessaires
-source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"), encoding = "UTF-8")
-source(here::here("R/running_time_of_workflow.R"), encoding = "UTF-8")
-source(here::here("R/executeAndRename.R"), encoding = "UTF-8")
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(
@@ -33,10 +29,6 @@ options(
 )
 
 Sys.setlocale("LC_ALL", "en_US.UTF-8")
-# config <- initWorkflow(here::here("catch_ird_level2_local.json"))  # 🔥 Charge en dehors de `{targets}`
-# entity <- config$metadata$content$entities[[1]]
-# action <- entity$data$actions[[1]]
-# opts <- action$options
 # Définition du pipeline
 list(
   tar_target(
@@ -45,41 +37,68 @@ list(
   ),
   
   tar_target(
-    entity,
+    entities,
     {
-      entityfile <- config$metadata$content$entities[[1]]
-      entityfile$relations <- NULL # Pour éviter l'échec lors du chargement de la codelist depuis Google Drive si non connecté
-      entityfile
+      entity_list <- config$metadata$content$entities
+      lapply(seq_along(entity_list), function(i) {
+        e <- entity_list[[i]]
+        e$relations <- NULL  # évite erreur Google Drive
+        e
+      })
     }
+  )
+  ,
+  tar_target(
+    entity,
+    entities,
+    pattern = map(entities)
   ),
   tar_target(
-    output_file,
+    results_file,
     {
-    path <- executeWorkflow(here::here("create_effort_dataset.json"))  # 🔥 recréer `config` depuis le fichier
-      entity_tar <- entity
-      output_file <- file.path(path,"entities",entity_tar$identifiers[["id"]], "data", paste0(entity_tar$identifiers[["id"]], "_harmonized.csv"))
+      path <- executeWorkflow(here::here("create_effort_dataset.json"))
+      output_file <- file.path(
+        path, "entities", entity$identifiers[["id"]], "data",
+        paste0(entity$identifiers[["id"]], "_harmonized.csv")
+      )
+      
+      create_global_tuna_atlas_dataset_v2023(entity$data$actions[[1]], entity, config)
       
       if (file.exists(output_file)) {
-        flog.info("Fichier généré avec succès : %s", output_file)
+        flog.info("✅ Fichier généré : %s", output_file)
         output_file
       } else {
-        flog.error("Le fichier attendu n'a pas été généré : %s", output_file)
+        flog.error("❌ Fichier non généré : %s", output_file)
         stop("Erreur : fichier non généré")
       }
     },
+    pattern = map(entity),
     format = "file"
-  ),
-  # 🔹 4. Lire et sauvegarder le fichier généré
+  )
+  ,
+  tar_target(
+    read_result,
+    {
+      df <- read.csv(results_file)
+      df$entity_id <- entity$identifiers[["id"]]
+      df
+    },
+    pattern = map(results_file),
+    iteration = "list"
+  )
+  ,
   tar_target(
     save_results,
     {
-      df <- read.csv(output_file)  # Lire le fichier généré
-      
-      write.csv(df, here::here("results_efforts_2025/tuna_atlas_results.csv"))  # Sauvegarde finale
-      "results_efforts_2025/tuna_atlas_results.csv"
+      df_final <- dplyr::bind_rows(read_result)
+      out_path <- here::here("results_efforts_2025/tuna_atlas_results.qs")
+      write.csv(df_final, out_path, row.names = FALSE)
+      out_path
     },
     format = "file"
   )
+  
+  
 )
 # # Définition du pipeline
 # list(
