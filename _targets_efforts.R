@@ -9,7 +9,6 @@ if (!file.exists(here::here("results_efforts_2025"))) {
 # Restaurer l'environnement `renv`
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
-
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(
@@ -61,8 +60,6 @@ list(
         path, "entities", entity$identifiers[["id"]], "data",
         paste0(entity$identifiers[["id"]], "_harmonized.csv")
       )
-      
-      create_global_tuna_atlas_dataset_v2023(entity$data$actions[[1]], entity, config)
       
       if (file.exists(output_file)) {
         flog.info("✅ Fichier généré : %s", output_file)
