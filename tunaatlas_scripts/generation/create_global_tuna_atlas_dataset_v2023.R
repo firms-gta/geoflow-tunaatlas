@@ -354,20 +354,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
 # Minor mapping for efforts -----------------------------------------------
 
       
-      
-      if(opts$fact == "effort"){
-        
-        georef_dataset <- georef_dataset %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit == "NO.HOOKS", "HOOKS", measurement_unit))
-        
-        function_recap_each_step(
-          "No.HOOKS to HOOKS",
-          georef_dataset,
-          "The data in 'NO.HOOKS' is converted to 'HOOKS' as the two units are identicals.",
-          "mutate"
-        )
-        
-      }
-      
       ## OVERLAPPPING ZONES---------------------------------------------------
       # This function handles the processing of overlapping zones.
       handle_overlap <- function(zone_key, rfmo_main, default_strata, recap_step = TRUE) {
