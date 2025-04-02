@@ -197,7 +197,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           
           # filter the georef_dataset based on the minimum time_start of all the maximum time_start of each source_authority
           georef_dataset <- georef_dataset %>%
-            filter(time_start <= min_time_start)
+            dplyr::filter(time_start <= min_time_start)
           
           if (recap_each_step) {
             function_recap_each_step(

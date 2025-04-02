@@ -76,7 +76,7 @@ require(readr)
   #entity --> the entity you are managing
   #get data from geoflow current job dir
   filename1 <- entity$data$source[[1]] #data
-# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Surface_1950-2021.csv
+# Historical name for the dataset at source  IOTC-DATASETS-2023-04-24-CE-Surface_1950-2021.csv , IOTC-DATASETS-2025-03-13-CEOthers.csv
   filename2 <- entity$data$source[[2]] #structure
 # Historical name for the dataset at source  iotc_effort_code_lists_2023.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
@@ -100,6 +100,8 @@ colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 efforts$source_authority<-"IOTC"
 efforts$measurement <- "efforts"
 
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/split_measurement_multimonth_if_needed.R")
+efforts <- split_measurement_multimonth_if_needed(efforts)
 
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
