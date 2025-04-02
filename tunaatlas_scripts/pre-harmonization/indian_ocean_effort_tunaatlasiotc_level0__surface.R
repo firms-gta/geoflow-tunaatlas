@@ -29,7 +29,6 @@ if(!require(readr)){
   install.packages("readr")
 }
 
-require(rtunaatlas)
 require(readr)
   if(!require(dplyr)){
     install.packages("dplyr")
