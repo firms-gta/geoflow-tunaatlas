@@ -100,7 +100,7 @@ DF <- harmo_spatial_3(DF,
 efforts <- DF %>%
   dplyr::mutate(
     time_start = as.Date(paste(YY, MM, "01", sep = "-")),
-    time_end = time_start + lubridate::days(30)
+    time_end = lubridate::ceiling_date(time_start, unit = "month") - 1
   ) %>%
   tidyr::pivot_longer(
     cols = c(DAYS, SETS_UNA, SETS_LOG, SETS_DFAD, SETS_AFAD, SETS_OTH),
@@ -122,6 +122,7 @@ efforts <- DF %>%
   ) %>%
   dplyr::select(Flag, Gear, time_start, time_end, AreaName, School, EffortUnits, Effort) %>%
   dplyr::filter(Effort > 0)
+
 
 
 #-----------------------------------------------------------

@@ -28,11 +28,11 @@ IOTC_CE_effort_pivotDSD_to_harmonizedDSD <- function(efforts_pivot_IOTC, colToKe
     dplyr::rowwise() %>%
     dplyr::mutate(
       time_start = as.Date(sprintf("%04d-%02d-01", Year, MonthStart)),
-      time_end = ifelse(
+      time_end = as.Date(ifelse(
         MonthEnd == MonthStart,
-        time_start + lubridate::months(1),
-        as.Date(sprintf("%04d-%02d-01", Year, MonthEnd)) + lubridate::months(1)
-      )
+        as.character(lubridate::ceiling_date(time_start, "month") - 1),
+        as.character(lubridate::ceiling_date(as.Date(sprintf("%04d-%02d-01", Year, MonthEnd)), "month") - 1)
+      ))
     ) %>%
     dplyr::ungroup()
   
