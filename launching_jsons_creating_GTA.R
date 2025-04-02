@@ -156,6 +156,7 @@ file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"),
 
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
 copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path, target_data_folder = "efforts_2025")
+copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path)
 # have to download every file.
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("creating_dataset.json"))
@@ -217,10 +218,19 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
+tunaatlas_qa_global_datasets_effort_path <- "~/firms-gta/geoflow-tunaatlas/jobs/20250402100623_efforts_global_2025_all/"
+df1 <- qs::qread(paste0(tunaatlas_qa_global_datasets_effort_path, "entities/global_georeferenced_effort_ird/Markdown/Level0_Firms/data.qs"))
+df2 <- qs::qread(paste0(tunaatlas_qa_global_datasets_effort_path, "entities/global_georeferenced_effort_ird/Markdown/rawdata/data.qs"))
 
-b <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20250324174607new_efforts/entities/global_georeferenced_effort_ird/Markdown/Level0_Firms/data.qs")
-measurement_unit <- unique(b$measurement_unit)
-measurement_unit <- c("HOOKS", "DAYS")
+diff1 <- dplyr::anti_join(df1, df2)
+diff2 <- dplyr::anti_join(df2, df1)
+
+# Combiner les différences
+differences <- dplyr::bind_rows(diff1, diff2)
+
+measurement_unit <- unique(differences$measurement_unit)
+measurement_unit
+# measurement_unit <- c("HOOKS", "DAYS")
 for (i in unique(measurement_unit)){
 
   config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(measurement_unit = i)
@@ -229,6 +239,43 @@ for (i in unique(measurement_unit)){
                                 sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
                                 source_authoritylist =c("all"), nameoutput = paste0(i, "pdf"))
 
+}
+measurement_unit_all <- setdiff(unique(df2$measurement_unit),measurement_unit)
+shapefile.fix <- st_read(con, query = "SELECT * FROM area.cwp_grid") %>% 
+  dplyr::rename(GRIDTYPE = gridtype)
+futile.logger::flog.info("Loaded shapefile.fix data")
+continent <- tryCatch({
+  st_read(con, query = "SELECT * FROM public.continent")
+}, error = function(e) {
+  futile.logger::flog.error("An error occurred while reading continent data: %s", 
+                            e$message)
+  NULL
+})
+
+for (i in unique(measurement_unit_all)){
+  
+  child_env_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
+    parameter_init = df2,
+    parameter_final = NULL,
+    fig.path = paste0("efforts", i),
+    parameter_fact = "efforts",
+    coverage = TRUE,
+    shapefile_fix = shapefile.fix,
+    continent = continent,
+    parameter_filtering = list(measurement_unit = i),
+    parameter_titre_dataset_1 = paste0("Efforts_",i),
+    unique_analyse = TRUE
+  )
+  
+  child_env_global = new.env()
+  # Ajouter les paramètres supplémentaires à l'environnement
+  child_env_last_result$step_title_t_f <- FALSE
+  child_env_last_result$treatment <- FALSE
+  child_env_last_result$child_header <- ""
+  list2env(child_env_last_result, envir = child_env_global)
+  rmarkdown::render(system.file("rmd/comparison.Rmd", package = "CWP.dataset"),
+                    envir = child_env_global,
+                    output_file = "effort.html", output_format = "html_document2")
 }
 
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
