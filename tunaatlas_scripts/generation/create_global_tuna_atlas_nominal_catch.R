@@ -20,7 +20,7 @@ function(action, entity, config){
   opts <- action$options
   # #############
   #action options
-  recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else FALSE #default FALSE
+  recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else TRUE #default FALSE
   SBF_data_rfmo_to_keep = if(!is.null(opts$SBF_data_rfmo_to_keep)) opts$SBF_data_rfmo_to_keep else "CCSBT"
   from_repo = if(!is.null(opts$from_repo)) opts$from_repo else FALSE
   
