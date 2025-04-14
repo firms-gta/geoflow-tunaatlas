@@ -12,7 +12,7 @@ retrieve_nominal_catch <- function(entity, config, options){
 	if(!options$include_CCSBT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("ccsbt",names(dataset_files_nominal_catch))>0]
 	if(!options$include_IATTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("iattc",names(dataset_files_nominal_catch))>0]
 	
-	columns_to_keep=c("source_authority","species","gear_type", "fishing_mode","fishing_fleet","time_start","time_end","geographic_identifier","measurement_unit","measurement_value")
+	columns_to_keep=c("source_authority","species","gear_type", "fishing_mode","fishing_fleet","time_start","time_end","geographic_identifier","measurement_unit","measurement_value", "measurement_type", "measurement")
 	
 	nominal_catch <- as.data.frame(do.call("rbind", lapply(dataset_files_nominal_catch, function(x){ readr::read_csv(x, guess_max = 0) %>% dplyr::select(all_of(columns_to_keep))})))
 	nominal_catch$measurement_value = as(nominal_catch$measurement_value, "numeric")
