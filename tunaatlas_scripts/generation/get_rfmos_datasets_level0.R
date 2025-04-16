@@ -200,9 +200,9 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           
                           config$logger.info(sprintf("Get %s data", rfmo))
                           dataset_files_iattc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
-                                                                 regexpr("ps", names(dataset_files)) < 0 & 
-                                                                 regexpr("effort", names(dataset_files)) < 0 &
-                                                                 regexpr("iattc", names(dataset_files)) > 0]))
+                                                                                           regexpr("ps", names(dataset_files)) < 0 & 
+                                                                                           regexpr("effort", names(dataset_files)) < 0 &
+                                                                                           regexpr("iattc", names(dataset_files)) > 0]))
                           iattc_data <- do.call("rbind", lapply(dataset_files_iattc, readr::read_csv, guess_max = 0))
                           iattc_data <- as.data.frame(iattc_data)
                           
@@ -294,21 +294,24 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                             df_catch_billfish_flag <- df_catch_billfish_flag[,columns_to_keep]
                             class(df_catch_billfish_flag$measurement_value) <- "numeric"
                             
-                            df_catch_billfish_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_billfish_catch]), guess_max = 0))
-                            df_catch_billfish_settype <- df_catch_billfish_settype[,columns_to_keep]
-                            class(df_catch_billfish_settype$measurement_value) <- "numeric"
-                            
                             df_catch_shark_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_shark_catch]),guess_max = 0))
                             df_catch_shark_flag <- df_catch_shark_flag[,columns_to_keep]
                             class(df_catch_shark_flag$measurement_value) <- "numeric"
                             
-                            df_catch_shark_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_shark_catch]),guess_max = 0))
-                            df_catch_shark_settype <- df_catch_shark_settype[,columns_to_keep]
-                            class(df_catch_shark_settype$measurement_value) <- "numeric"
                           }
                           
                           if(options$iattc_ps_raise_flags_to_schooltype){
+                            
                             source(geoflow::get_config_resource_path(config, "./sardara_functions/raise_datasets_by_dimension.R"))
+                            
+                            df_catch_billfish_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_billfish_catch]), guess_max = 0))
+                            df_catch_billfish_settype <- df_catch_billfish_settype[,columns_to_keep]
+                            class(df_catch_billfish_settype$measurement_value) <- "numeric"
+                            
+                            df_catch_shark_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_shark_catch]),guess_max = 0))
+                            df_catch_shark_settype <- df_catch_shark_settype[,columns_to_keep]
+                            class(df_catch_shark_settype$measurement_value) <- "numeric"
+                            
                             df_catch_billfish<-raise_datasets_by_dimension(df1=df_catch_billfish_flag,
                                                                            df2=df_catch_billfish_settype,
                                                                            dimension_missing_df1="fishing_mode",
