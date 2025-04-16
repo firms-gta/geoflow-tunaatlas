@@ -50,7 +50,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     source(file.path(url_scripts_create_own_tuna_atlas,"download_zenodo_csv.R"))
     
     #for level 0 - FIRMS
-    source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+    # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+    source(here::here("./tunaatlas_scripts/generation/get_rfmos_datasets_level0.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
     source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/map_codelists.R") #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
@@ -92,7 +93,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     #action options
     filtering_on_minimum_year_declared = if(!is.null(opts$filtering_on_minimum_year_declared)) opts$filtering_on_minimum_year_declared else TRUE
     recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else TRUE
-    from_level0 <- if(!is.null(opts$from_level0)){opts$from_level0} else if(opts$fact == "effort"){FALSE}  else TRUE
+    from_rawdata <- if(!is.null(opts$from_rawdata)){opts$from_rawdata} else if(opts$fact == "effort"){TRUE}  else FALSE
     
     opts$doilevel0 = if(!is.null(opts$doilevel0)) opts$doilevel0 else "10.5281/zenodo.11460074"
     opts$keylevel0 =  if(!is.null(opts$keylevel0)) opts$keylevel0 else "global_catch_firms_level0_harmonized.csv"
@@ -109,8 +110,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     opts$recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else TRUE
     opts$source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("IATTC", "CCSBT", "WCPFC")
     opts$iccat_ps_include_type_of_school = if(!is.null(opts$iccat_ps_include_type_of_school)) opts$iccat_ps_include_type_of_school else TRUE
-    opts$iattc_ps_raise_flags_to_schooltype = if(!is.null(opts$iattc_ps_raise_flags_to_schooltype)) opts$iattc_ps_raise_flags_to_schooltype else TRUE
-    opts$iattc_ps_catch_billfish_shark_raise_to_effort = if(!is.null(opts$iattc_ps_catch_billfish_shark_raise_to_effort)) opts$iattc_ps_catch_billfish_shark_raise_to_effort else TRUE
+    opts$iattc_ps_raise_flags_to_schooltype = if(!is.null(opts$iattc_ps_raise_flags_to_schooltype)) opts$iattc_ps_raise_flags_to_schooltype else FALSE
+    opts$iattc_ps_catch_billfish_shark_raise_to_effort = if(!is.null(opts$iattc_ps_catch_billfish_shark_raise_to_effort)) opts$iattc_ps_catch_billfish_shark_raise_to_effort else FALSE
     opts$mapping_map_code_lists = if(!is.null(opts$mapping_map_code_lists)) opts$mapping_map_code_lists else TRUE
     opts$mapping_keep_src_code = if(!is.null(opts$mapping_keep_src_code)) opts$mapping_keep_src_code else FALSE
     opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg = if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg else FALSE
@@ -137,7 +138,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     opts$decrease_when_rf_inferior_to_one = if(!is.null(opts$decrease_when_rf_inferior_to_one)) opts$decrease_when_rf_inferior_to_one else FALSE
     # LEVEL 0 FIRMS PRODUCT ---------------------------------------------------
     
-      if(DATASET_LEVEL == 0 | from_level0){
+      if(DATASET_LEVEL == 0 | from_rawdata){
       ## INITIALISATION OF MULTIPLES DATASET---------------------------------------------------
       config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
       
@@ -457,7 +458,16 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       } else {
         stop("Please provide a georeferenced catch dataset")
       }
-    }
+      function_recap_each_step(
+        "Level0_Firms",
+        georef_dataset,
+        paste0(
+          "Retrieving level 0 data on the basis of the following DOI: ",
+          opts$doi, " the key being: ", opts$key,". ", Description),
+        "download_zenodo_csv"  ,
+        list(opts$doi, opts$key), entity
+      )
+      }
     
     
     
@@ -465,7 +475,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         if(DATASET_LEVEL == 2){
           
           if (file.exists(here::here("data/geographic_identifier_to_nominal.csv"))) {
-            geographic_identifier_to_nominal <- readr::read_csv("data/geographic_identifier_to_nominal.csv")
+            geographic_identifier_to_nominal <- readr::read_csv(here::here("data/geographic_identifier_to_nominal.csv"))
             class(geographic_identifier_to_nominal$code) <- "character"
             
           } else {
@@ -473,7 +483,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           }
           
           georef_dataset <- georef_dataset %>% 
-            dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>% 
+            # dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>% 
             # dplyr::mutate(fishing_fleet = ifelse(source_authority == "CCSBT", "NEI",fishing_fleet))%>%
             dplyr::mutate(year =lubridate::year(time_start)) %>%
             dplyr::filter((source_authority == "WCPFC" & year >= 1952) |
@@ -520,24 +530,16 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           Description <- NULL
         }
         
-      function_recap_each_step(
-        "Level0_Firms",
-        georef_dataset,
-        paste0(
-          "Retrieving level 0 data on the basis of the following DOI: ",
-          opts$doi, " the key being: ", opts$key,". ", Description),
-        "download_zenodo_csv"  ,
-        list(opts$doi, opts$key), entity
-      ) 
+
       
       ### Removing duplicated data 
       #issue(#48)
+      if(opts$fact == "catch"){
       georef_dataset <- georef_dataset %>%
         dplyr::group_by(across(setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit")))) %>%
         dplyr::filter(!(measurement_unit == "no" & n_distinct(measurement_unit) == 2)) %>%
         dplyr::ungroup() %>%
         dplyr::mutate(fishing_mode = ifelse(fishing_mode %in% c("OTH", "DEL"), "UNK", fishing_mode))
-      
       
       function_recap_each_step(
         paste0("Removing_duplicated_units"),
@@ -545,6 +547,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         "As some data is in fact duplicated for catch, we check all the duplicated data and remove the data in number when same dimensions",
         ""
       )
+      }
     
     # LEVEL 1 IRD ---------------------------------------------------
     if(DATASET_LEVEL >= 1){
@@ -604,7 +607,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         dplyr::mutate(gear_type = ifelse(source_authority == "WCPFC" & gear_type == "09.31", "09.32", gear_type))
       
       nominal_catch <- nominal_catch %>% 
-        dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>%
+        # dplyr::select(-dplyr::any_of(c("measurement", "measurement_status", "measurement_type")))%>%
         dplyr::ungroup() %>%
         dplyr::group_by(across(-measurement_value)) %>% 
         dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
@@ -810,9 +813,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       
       if (!is.null(opts$raising_georef_to_nominal))
         if (opts$raising_georef_to_nominal) {
-          
-          strata <- c("source_authority", "species", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom", "fishing_mode")
-          
+          strata <- c("source_authority", "species", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom")
           convert_number_to_nominal_output <- convert_number_to_nominal(georef_dataset, nominal_catch, strata = strata, 
                                                                         raise_only_unmatched = FALSE)
           

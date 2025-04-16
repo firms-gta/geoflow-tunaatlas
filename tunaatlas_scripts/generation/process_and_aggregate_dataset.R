@@ -93,7 +93,6 @@ process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts,
   dataset_enriched$geographic_identifier = as.character(dataset_enriched$geographic_identifier)  
   entity$data$features = dataset_enriched
   # if(entity$data$upload) writeWorkflowJobDataResource(entity=entity,config=config,type="dbtable",useFeatures=TRUE,useUploadSource=TRUE, createIndexes=TRUE)
-  
   entity$addResource("fact", opts$fact)
   entity$addResource("geom_table", opts$geom_table)
   

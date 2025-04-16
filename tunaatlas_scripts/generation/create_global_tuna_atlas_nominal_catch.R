@@ -48,6 +48,10 @@ function(action, entity, config){
   url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation"
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
   
+  # For final processing
+  source(file.path(url_scripts_create_own_tuna_atlas, "process_and_aggregate_dataset.R"))
+  
+  
   #for reporting
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
@@ -93,62 +97,10 @@ function(action, entity, config){
   }
   }
   #final step
-  dataset<-nominal_catch %>% dplyr::group_by_(.dots = setdiff(colnames(nominal_catch),"measurement_value")) %>% dplyr::summarise(measurement_value=sum(measurement_value))
-  dataset<-data.frame(dataset)
-  if(!is.na(any(dataset$measurement_unit) == "TRUE")) if(any(dataset$measurement_unit) == "TRUE") dataset[(dataset$measurement_unit) == "TRUE",]$measurement_unit <- "t"  #patch because of https://github.com/firms-gta/geoflow-tunaatlas/issues/41
   
-  #----------------------------------------------------------------------------------------------------------------------------
-  #@eblondel additional formatting for next time support
-  dataset$time_start <- as.Date(dataset$time_start)
-  dataset$time_end <- as.Date(dataset$time_end)
-  #we enrich the entity with temporal coverage
-  dataset_temporal_extent <- paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
-  entity$setTemporalExtent(dataset_temporal_extent)
-  #if there is any entity relation with name 'codelists' we read the file
-  df_codelists <- NULL
-  cl_relations <- entity$relations[sapply(entity$relations, function(x){x$name=="codelists"})]
-  if(length(cl_relations)>0){
-    config$logger.info("Appending codelists to global dataset generation action output")
-    googledrive_baseurl <- "https://drive.google.com/open?id="
-    if(startsWith(cl_relations[[1]]$link, googledrive_baseurl)){
-      #managing download through google drive
-      config$logger.info("Downloading file using Google Drive R interface")
-      drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
-      drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
-      googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")), overwrite = TRUE)
-      df_codelists <- read.csv(file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
-    }else{
-      df_codelists <- read.csv(cl_relations[[1]]$link)
-    }
-  }
-  #@geoflow -> output structure as initially used by https://raw.githubusercontent.com/ptaconet/rtunaatlas_scripts/master/workflow_etl/scripts/generate_dataset.R
-  dataset <- list(
-    dataset = dataset, 
-    additional_metadata = NULL, #nothing here
-    codelists = df_codelists #in case the entity was provided with a link to codelists
-  )
-  
-  #@geoflow -> export as csv
-  output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-  write.csv(dataset$dataset, output_name_dataset, row.names = FALSE)
-  #-------------------------------------------------------
-
-  output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
-  dataset_enriched = dataset$dataset
-  dataset_enriched$year = as.integer(format(dataset_enriched$time_end, "%Y"))
-  dataset_enriched$month = as.integer(format(dataset_enriched$time_end, "%m"))
-  dataset_enriched$quarter = as.integer(substr(quarters(dataset_enriched$time_end), 2, 2))
-  dataset_enriched = dataset_enriched[,c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")]
-  readr::write_csv(dataset_enriched, output_name_dataset_public)
-
-	#-------------------------------------------------------
-  output_name_codelists <- file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv"))
-  write.csv(dataset$codelists, output_name_codelists, row.names = FALSE)
-  #----------------------------------------------------------------------------------------------------------------------------  
-  entity$addResource("harmonized", output_name_dataset)
-  entity$addResource("public", output_name_dataset_public)
-  entity$addResource("codelists", output_name_codelists)
-  entity$addResource("geom_table", opts$geom_table)
+  process_and_aggregate_dataset(nominal_catch, entity, config, opts, 
+                                columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode",
+                                                    "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value"))
   
   #### END
   config$logger.info("End: Your tuna atlas dataset has been created!")

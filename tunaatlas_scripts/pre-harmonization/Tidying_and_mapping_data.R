@@ -94,159 +94,160 @@ Tidying_and_mapping_data = function(action, entity, config) {
     }
   }
   
-
+  
   
   if (!grepl("nominal", harmonized)){
-  
-  # Curation absurd converted data ------------------------------------------
-  stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
-  stepnumber = stepnumber+1
-  
-  curation_absurd_converted_data_list <-
-    curation_absurd_converted_data(georef_dataset = georef_dataset,
-                                   max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/max_conversion_factor.csv")
-  
-  georef_dataset <- curation_absurd_converted_data_list$georef_dataset
-  
-  if(exists("not_conform_conversion_factors")){
-    rm(not_conform_conversion_factors)
-  }
-  
-  not_conform_conversion_factors <- curation_absurd_converted_data_list$conversion_factor_not_to_keep
-  
-  if(nrow(not_conform_conversion_factors) != 0){
     
-    function_recap_each_step(
-      "Removing_absurd_nomt",
-      georef_dataset,
-      "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
-					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
-      "curation_absurd_converted_data"
-    )
-    readr::write_csv(not_conform_conversion_factors, "data/not_conform_conversion_factors.csv")
+    # Curation absurd converted data ------------------------------------------
+    stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
+    stepnumber = stepnumber+1
     
-  }
-  
-  #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
-  stepLogger(level = 0, step = stepnumber, msg = "Standardizing unit of measures")
-  stepnumber = stepnumber+1
-  #-------------------------------------------------------------------------------------------------------------------------------------
-  
-  georef_dataset$measurement_unit[which(georef_dataset$measurement_unit == "MTNO")]<-"t"
-  georef_dataset<-georef_dataset[!(georef_dataset$measurement_unit=="NOMT"),]
-  
-  # 
-  # unit_weight_to_remap = c("MT", "MTNO")
-  # unit_number_to_remap = c("NO", "NOMT")
-  # georef_dataset <- georef_dataset %>%
-  #   dplyr::mutate(
-  #     measurement_unit = case_when(
-  #       measurement_unit %in% unit_weight_to_remap ~ "t",
-  #       measurement_unit %in% unit_number_to_remap ~ "no",
-  #       TRUE ~ measurement_unit
-  #     )
-  #   )
-  
-  # -----------spatial_curation_data_mislocated------------------------------------------------------
-  
-  
-  stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$action_on_mislocated))
-  stepnumber = stepnumber+1
-  
-  
-  spatial_curation_data_mislocated_list <- spatial_curation_data_mislocated(config = config,df = georef_dataset,action_on_mislocated = "remove")
-  
-  if(exists("areas_in_land")){
-    rm(areas_in_land)
-  }
-  
-  georef_dataset <- spatial_curation_data_mislocated_list$dataset
-  areas_in_land <- spatial_curation_data_mislocated_list$areas_in_land
-  dataset_not_cwp_grid <- spatial_curation_data_mislocated_list$dataset_not_cwp_grid
-  
-  if (!is.null(areas_in_land) && is.data.frame(areas_in_land) && nrow(areas_in_land) != 0) {
+    curation_absurd_converted_data_list <-
+      curation_absurd_converted_data(georef_dataset = georef_dataset,
+                                     max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/max_conversion_factor.csv")
     
-    if(recap_each_step){
-      function_recap_each_step(
-        "Realocating_removing_mislocated_data",
-        georef_dataset,
-        "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
-        "spatial_curation_data_mislocated"
-      )
-      readr::write_csv(areas_in_land,"data/areas_in_land.csv")
+    georef_dataset <- curation_absurd_converted_data_list$georef_dataset
+    
+    if(exists("not_conform_conversion_factors")){
+      rm(not_conform_conversion_factors)
     }
-    gc()
     
+    not_conform_conversion_factors <- curation_absurd_converted_data_list$conversion_factor_not_to_keep
     
-  }
-  if (!is.null(dataset_not_cwp_grid) && is.data.frame(dataset_not_cwp_grid) && nrow(dataset_not_cwp_grid) != 0) {
-    
-    if(recap_each_step){
+    if(nrow(not_conform_conversion_factors) != 0){
+      
       function_recap_each_step(
-        "Realocating_removing_mislocated_data",
+        "Removing_absurd_nomt",
         georef_dataset,
-        "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
-        "spatial_curation_data_mislocated"
+        "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
+					   We either remove NOMT strata which corresponds to MTNO declaration implausible or me remove the corresponding MTNO data. More details are available in the pdf file attached.",
+        "curation_absurd_converted_data"
       )
-      readr::write_csv(dataset_not_cwp_grid,"data/removed_irregular_areas.csv")
-      # names_list_irregular_areas <-
-      #   c("dataset_not_cwp_grid") #file we want to save
-      # 
-      # try(lapply(names_list_irregular_areas, function_write_RDS))
+      readr::write_csv(not_conform_conversion_factors, "data/not_conform_conversion_factors.csv")
       
     }
-    gc()
+    
+    #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
+    stepLogger(level = 0, step = stepnumber, msg = "Standardizing unit of measures")
+    stepnumber = stepnumber+1
+    #-------------------------------------------------------------------------------------------------------------------------------------
+    
+    # georef_dataset$measurement_unit[which(georef_dataset$measurement_unit == "MTNO")]<-"t"
+    # georef_dataset$measurement_unit[which(georef_dataset$measurement_unit == "NOMT")]<-"no"
+    # georef_dataset<-georef_dataset[!(georef_dataset$measurement_unit=="NOMT"),]
+    
+    # 
+    unit_weight_to_remap = c("MT", "MTNO")
+    unit_number_to_remap = c("NO", "NOMT")
+    georef_dataset <- georef_dataset %>%
+      dplyr::mutate(
+        measurement_unit = case_when(
+          measurement_unit %in% unit_weight_to_remap ~ "t",
+          measurement_unit %in% unit_number_to_remap ~ "no",
+          TRUE ~ measurement_unit
+        )
+      )
+    
+    # -----------spatial_curation_data_mislocated------------------------------------------------------
     
     
-  }
-  
-  
-  if(!is.null(NULL)){
+    stepLogger(level = 0, step = stepnumber, msg = sprintf("Reallocation of mislocated data  (i.e. on land areas or without any spatial information) (data with no spatial information have the dimension 'geographic_identifier' set to 'UNK/IND' or 'NA'). Option is: [%s] ", opts$action_on_mislocated))
+    stepnumber = stepnumber+1
     
-    # Outside juridiction -----------------------------------------------------
     
-    function_outside_juridiction <- function_outside_juridiction(georef_dataset,con)
-    if(exists("outside_juridiction")){
-      rm(outside_juridiction)
+    spatial_curation_data_mislocated_list <- spatial_curation_data_mislocated(config = config,df = georef_dataset,action_on_mislocated = "remove")
+    
+    if(exists("areas_in_land")){
+      rm(areas_in_land)
     }
     
-    georef_dataset <- function_outside_juridiction$georef_dataset
-    outside_juridiction <- function_outside_juridiction$outside_juridiction
+    georef_dataset <- spatial_curation_data_mislocated_list$dataset
+    areas_in_land <- spatial_curation_data_mislocated_list$areas_in_land
+    dataset_not_cwp_grid <- spatial_curation_data_mislocated_list$dataset_not_cwp_grid
     
-    if(!is.null(outside_juridiction) && is.data.frame(outside_juridiction) && nrow(outside_juridiction) != 0) {
+    if (!is.null(areas_in_land) && is.data.frame(areas_in_land) && nrow(areas_in_land) != 0) {
       
       if(recap_each_step){
         function_recap_each_step(
-          "outside_juridiction",
+          "Realocating_removing_mislocated_data",
           georef_dataset,
-          paste0(
-            "In this step, we handle areas that does not match with the shape of the source_authority declaring"
-          ) ,
-          "function_outside_juridiction",
+          "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
+          "spatial_curation_data_mislocated"
         )
-        readr::write_csv(outside_juridiction,"data/outside_juridiction.csv")
+        readr::write_csv(areas_in_land,"data/areas_in_land.csv")
+      }
+      gc()
+      
+      
+    }
+    if (!is.null(dataset_not_cwp_grid) && is.data.frame(dataset_not_cwp_grid) && nrow(dataset_not_cwp_grid) != 0) {
+      
+      if(recap_each_step){
+        function_recap_each_step(
+          "Realocating_removing_mislocated_data",
+          georef_dataset,
+          "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
+          "spatial_curation_data_mislocated"
+        )
+        readr::write_csv(dataset_not_cwp_grid,"data/removed_irregular_areas.csv")
+        # names_list_irregular_areas <-
+        #   c("dataset_not_cwp_grid") #file we want to save
+        # 
+        # try(lapply(names_list_irregular_areas, function_write_RDS))
+        
+      }
+      gc()
+      
+      
+    }
+    
+    
+    if(!is.null(NULL)){
+      
+      # Outside juridiction -----------------------------------------------------
+      
+      function_outside_juridiction <- function_outside_juridiction(georef_dataset,con)
+      if(exists("outside_juridiction")){
+        rm(outside_juridiction)
+      }
+      
+      georef_dataset <- function_outside_juridiction$georef_dataset
+      outside_juridiction <- function_outside_juridiction$outside_juridiction
+      
+      if(!is.null(outside_juridiction) && is.data.frame(outside_juridiction) && nrow(outside_juridiction) != 0) {
+        
+        if(recap_each_step){
+          function_recap_each_step(
+            "outside_juridiction",
+            georef_dataset,
+            paste0(
+              "In this step, we handle areas that does not match with the shape of the source_authority declaring"
+            ) ,
+            "function_outside_juridiction",
+          )
+          readr::write_csv(outside_juridiction,"data/outside_juridiction.csv")
+          
+        }
         
       }
       
     }
     
-  }
-  
-
-  
-  
-  files_to_check <- c("data/not_conform_conversion_factors.csv",
-                      "data/removed_irregular_areas.csv",
-                      "data/areas_in_land.csv",
-                      "data/outside_juridiction.csv",
-                      "data/not_mapped_total.csv")
-  
-  if(any(file.exists(files_to_check))) {
-    parameter_directory <- getwd()
-    base::options(knitr.duplicate.label = "allow")
-  }
-  
-  
+    
+    
+    
+    files_to_check <- c("data/not_conform_conversion_factors.csv",
+                        "data/removed_irregular_areas.csv",
+                        "data/areas_in_land.csv",
+                        "data/outside_juridiction.csv",
+                        "data/not_mapped_total.csv")
+    
+    if(any(file.exists(files_to_check))) {
+      parameter_directory <- getwd()
+      base::options(knitr.duplicate.label = "allow")
+    }
+    
+    
   }
   
   
@@ -359,14 +360,14 @@ Tidying_and_mapping_data = function(action, entity, config) {
     }
   }
   
-
-# Adding measurement column for CWP standards ----------------------------
-
+  
+  # Adding measurement column for CWP standards ----------------------------
+  
   georef_dataset$measurement <- as.character(opts$fact)
-
-# Final tidying -----------------------------------------------------------
-
-
+  
+  # Final tidying -----------------------------------------------------------
+  
+  
   
   
   #we do an aggregation by dimensions

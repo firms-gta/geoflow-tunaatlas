@@ -151,7 +151,6 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iattc_data <- NULL
                       if(options$include_IATTC){
                         
-                        
                         ## IATTC PS catch-and-effort are stratified as following:
                         # - 1 dataset for tunas, stratified by type of school (but not fishingfleet)
                         # - 1 dataset for tunas, stratified by fishingfleet (but not type of school)
@@ -177,7 +176,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         # The effort is expressed here in terms of number of sets. This means in the case of the EPO that the effort given in some datasets may correspond to a part of the total effort allocated to a stratum since it is the observed effort, i.e. for which there was an observer on board the purse seine vessel. From my point of view, (1) the unique and homogeneous effort would be that of tropical tunas and (2) to standardize the set of catches per stratum, it is necessary to calculate a ratio of shark catches per set (observed) and swordfish catches per set (observed) and then multiply them by the effort carried over for tropical tunas since this is considered to be the effort of the fishery (which targets tunas). The raising factor is tuna effort/billfish effort and tuna effort/shark effort.
                         
                         
-                        columns_to_keep_effort=c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value")
+                        columns_to_keep_effort=c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value", "measurement", "measurement_type")
                         
                         # Get metadata of Catch datasets (for tuna, billfish and shark, and stratified by fishingfleet and then by type of school)
                         dataset_file_PSSetType_tuna_catch <- "catch_1deg_1m_ps_iattc_level0__tuna_byschool.csv"
@@ -218,9 +217,6 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           df_catch_tuna_flag <- df_catch_tuna_flag[,columns_to_keep]
                           class(df_catch_tuna_flag$measurement_value) <- "numeric"
                           
-                          df_catch_tuna_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_tuna_catch]), guess_max = 0))
-                          df_catch_tuna_settype <- df_catch_tuna_settype[,columns_to_keep]
-                          class(df_catch_tuna_settype$measurement_value) <- "numeric"
                           
                           # Extract billfish and shark catch.
                           # If the user decides to raise shark/billfish catch to ratio effort tuna / effort shark/billfish:
@@ -303,6 +299,10 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           if(options$iattc_ps_raise_flags_to_schooltype){
                             
                             source(geoflow::get_config_resource_path(config, "./sardara_functions/raise_datasets_by_dimension.R"))
+                            
+                            df_catch_tuna_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_tuna_catch]), guess_max = 0))
+                            df_catch_tuna_settype <- df_catch_tuna_settype[,columns_to_keep]
+                            class(df_catch_tuna_settype$measurement_value) <- "numeric"
                             
                             df_catch_billfish_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_billfish_catch]), guess_max = 0))
                             df_catch_billfish_settype <- df_catch_billfish_settype[,columns_to_keep]
