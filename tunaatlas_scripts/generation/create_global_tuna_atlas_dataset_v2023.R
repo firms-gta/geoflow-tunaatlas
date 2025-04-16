@@ -474,8 +474,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         # Filtering on complete year ----------------------------------------------
         if(DATASET_LEVEL == 2){
           
-          if (file.exists(here::here("data/geographic_identifier_to_nominal.csv"))) {
-            geographic_identifier_to_nominal <- readr::read_csv(here::here("data/geographic_identifier_to_nominal.csv"))
+          if (file.exists("data/geographic_identifier_to_nominal.csv")) {
+            geographic_identifier_to_nominal <- readr::read_csv("data/geographic_identifier_to_nominal.csv")
             class(geographic_identifier_to_nominal$code) <- "character"
             
           } else {
