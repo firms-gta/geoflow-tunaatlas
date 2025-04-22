@@ -105,11 +105,17 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
   
   georef_and_nominal_augmentation <- georef_dataset_number %>%
     dplyr::left_join(global_nominal_catch_firms_level0, by = strata) %>%
+    dplyr::mutate(id___temp = dplyr::row_number()) %>%  # identifiant temporaire pour chaque ligne
     dplyr::group_by(across(all_of(strata))) %>%
     dplyr::mutate(sum = sum(measurement_value.x, na.rm = TRUE)) %>%
-    dplyr::mutate(raising_factor = measurement_value.y / sum) %>%
-    dplyr::mutate(percentageoftotalstrata = 100 * (measurement_value.x / sum)) %>%
-    dplyr::mutate(new_measurement = (percentageoftotalstrata * measurement_value.y) / 100)
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      raising_factor = measurement_value.y / sum,
+      percentageoftotalstrata = 100 * (measurement_value.x / sum),
+      new_measurement = (percentageoftotalstrata * measurement_value.y) / 100
+    ) %>%
+    dplyr::select(-sum)
+  
   
   saveRDS(georef_and_nominal_augmentation, "data/raisingfactorfromnumber_to_nominal.rds")
   flog.info("Saved raising factors from numbers to nominal.")
