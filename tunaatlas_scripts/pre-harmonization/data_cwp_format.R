@@ -56,6 +56,10 @@ function(action, entity, config){
   catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
   }
   
+  if(!"measurement_processing_level" %in% colnames(catches)){
+    catches$measurement_processing_level <- "raised"
+  }
+  
   catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier), measurement_value = as.numeric(catches$measurement_value))
   
   catches <- catches %>% filter(measurement_value!= 0)
