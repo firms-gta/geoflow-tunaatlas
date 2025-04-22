@@ -135,7 +135,8 @@ catches <- aggregate(catches$Catch, FUN = sum,
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
 catches$source_authority<-"CCSBT"
 catches$measurement_type <- "RC" # Retained catches
-catches$measurement <- "catch" 
+catches$measurement <- "catch"
+catches$measurement_processing_level <- "unknown"
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 catches$time_start <- as.Date(catches$time_start)
