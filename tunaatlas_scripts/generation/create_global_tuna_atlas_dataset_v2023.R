@@ -1249,7 +1249,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     # PROCESS AND AGGREGATE DATA ---------------------------------------------------
     process_and_aggregate_dataset(georef_dataset, entity, config, opts, 
                                   columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode",
-                                                      "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value") ) 
+                                                      "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value", "measurement_type", "measurement_processing_level") ) 
     config$logger.info("End: Your tuna atlas dataset has been created!")
     
     # Clean up
