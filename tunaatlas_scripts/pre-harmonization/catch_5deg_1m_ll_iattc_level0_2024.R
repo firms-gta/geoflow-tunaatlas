@@ -83,7 +83,7 @@ function(action, entity, config){
   df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
   
   if (stringr::str_detect(filename1, "shark")) {
-    df$measurement_processing_level <- "original sample"
+    df$measurement_processing_level <- "original_sample"
   } else {
     df$measurement_processing_level <- "unknown"
   }
