@@ -29,9 +29,16 @@
 # 6 IATTC            SWO     UNK       JPN           UNK          1954-10-01 1954-10-31 no                               4 6406138
 #' @export
 function(action, entity, config){
-  library(dplyr)
-  library(tidyr)
-  require(readr)
+  
+  packages <- c("dplyr", "tidyr", "readr", "stringr")
+  
+  for (pkg in packages) {
+    if (!requireNamespace(pkg, quietly = TRUE)) {
+      install.packages(pkg)
+    }
+    library(pkg, character.only = TRUE)
+  }
+  
   filename1 <- entity$data$source[[1]] #data
   # Historical name for the dataset at source  PublicLLSharkMt.csv and PublicLLTunaBillfishMt.csv
   filename2 <- entity$data$source[[2]] #structure
@@ -74,6 +81,14 @@ function(action, entity, config){
   df$Square_size <- 5 # 5-degree squares
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
   df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
+  
+  if (stringr::str_detect(filename1, "shark")) {
+    df$measurement_processing_level <- "original sample"
+  } else {
+    df$measurement_processing_level <- "unknown"
+  }
+  
+  
   
   df$time_start <- as.Date(df$time_start)
   df$time_end <- as.Date(df$time_end)

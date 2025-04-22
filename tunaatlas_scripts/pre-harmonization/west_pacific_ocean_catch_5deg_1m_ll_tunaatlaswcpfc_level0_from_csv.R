@@ -183,6 +183,7 @@ colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 catches$source_authority<-"WCPFC"
 catches$measurement_type <- "RC" # Retained catches
 catches$measurement <- "catch" 
+catches$measurement_processing_level <- "raised"
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 catches$time_start <- as.Date(catches$time_start)

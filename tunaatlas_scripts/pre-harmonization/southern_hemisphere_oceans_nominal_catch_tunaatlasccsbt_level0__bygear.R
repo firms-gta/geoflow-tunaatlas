@@ -131,7 +131,8 @@ function(action, entity, config){
   colnames(NC)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
   
   NC$source_authority<-"CCSBT"
-  NC$measurement <- "catch" 
+  NC$measurement <- "catch"
+  NC$measurement_processing_level<-"raised"
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
   NC$time_start <- as.Date(NC$time_start)

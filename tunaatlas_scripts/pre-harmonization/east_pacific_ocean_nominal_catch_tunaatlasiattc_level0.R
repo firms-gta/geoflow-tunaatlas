@@ -120,6 +120,7 @@ colnames(NC)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_
 NC$source_authority<-"IATTC"
 NC$measurement_type<-"NC"
 NC$measurement<-"catch"
+NC$measurement_processing_level<-"raised"
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 NC$time_start <- as.Date(NC$time_start)
