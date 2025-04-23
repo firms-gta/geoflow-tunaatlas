@@ -31,32 +31,35 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   con <- config$software$output$dbi
   
   tryCatch({
-    # Votre requête DBI::dbGetQuery
-    cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P,cwp_code from area.cwp_grid") %>%
+    # Tentative de connexion à la base de données
+    cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P, cwp_code FROM area.cwp_grid") %>%
       dplyr::rename(geographic_identifier = cwp_code)
   }, error = function(e) {
-    message("no connexion to DB trying to unzip file")
+    message("No connection to DB, trying to unzip file.")
     csv_file <- here::here("data/cl_areal_grid.csv")
-    if(!file.exists(csv_file)){
-      message("no connexion to DB nor zip, downloading cwp_grid")
+    
+    if (!file.exists(csv_file)) {
+      message("No local CSV found, downloading cwp_grid...")
       
-      # Téléchargement du fichier ZIP depuis l'URL
+      # Téléchargement
       zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
-      local_file <- here::here("data", "cwp_grid.zip")
-      download.file(zip_url, local_file, mode = "wb")
+      local_zip <- here::here("data", "cwp_grid.zip")
+      download.file(zip_url, local_zip, mode = "wb")
       
-      # Extraction du contenu du fichier ZIP
-      unzip(local_file, exdir = here::here("data"))
-      
-      # Lecture du fichier CSV extrait
-      
-    } 
+      # Décompression
+      unzip(local_zip, exdir = here::here("data"))
+    }
+    
+    # Lecture du CSV après téléchargement ou s'il existait déjà
     cwp_grid <- read.csv(csv_file)
     
-    # Renommage de colonnes
-    cwp_grid <- cwp_grid %>% dplyr::select(ON_LAND_P, CWP_CODE) %>% 
-      dplyr::rename(geographic_identifier = CWP_CODE, on_land_p = ON_LAND_P)
+    # Nettoyage et renommage
+    cwp_grid <- cwp_grid %>%
+      dplyr::select(ON_LAND_P, CWP_CODE) %>%
+      dplyr::rename(geographic_identifier = CWP_CODE,
+                    on_land_p = ON_LAND_P)
   })
+  
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/identification_data_on_land_cwp.R")
   cat("Reallocating data that are in land areas")
