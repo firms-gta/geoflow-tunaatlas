@@ -30,37 +30,45 @@
 spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocated= "remove"){
   con <- config$software$output$dbi
   
-  tryCatch({
-    # Tentative de connexion à la base de données
+  # Définition du fichier local
+  # Définition du fichier local
+  csv_file <- here::here("data/cl_areal_grid.csv")
+  
+  # Initialisation
+  db_working <- FALSE
+  
+  # Vérification de la connexion si elle existe
+  if (!is.null(con)) {
+    if (DBI::dbIsValid(con)) {
+      res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
+      db_working <- !inherits(res, "try-error")
+    }
+  }
+  
+  if (db_working) {
+    message("Connexion à la base réussie, récupération des données...")
     cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P, cwp_code FROM area.cwp_grid") %>%
       dplyr::rename(geographic_identifier = cwp_code)
-  }, error = function(e) {
-    message("No connection to DB, trying to unzip file.")
-    csv_file <- here::here("data/cl_areal_grid.csv")
+  } else {
+    message("Pas de connexion à la base. Utilisation du fichier local...")
     
     if (!file.exists(csv_file)) {
-      message("No local CSV found, downloading cwp_grid...")
+      message("Fichier local introuvable. Téléchargement en cours...")
       
-      # Téléchargement
       zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
       local_zip <- here::here("data", "cwp_grid.zip")
-      download.file(zip_url, local_zip, mode = "wb")
       
-      # Décompression
+      download.file(zip_url, local_zip, mode = "wb")
       unzip(local_zip, exdir = here::here("data"))
     }
     
-    # Lecture du CSV après téléchargement ou s'il existait déjà
-    cwp_grid <- read.csv(csv_file)
-    
-    # Nettoyage et renommage
-    cwp_grid <- cwp_grid %>%
+    cwp_grid <- read.csv(csv_file) %>%
       dplyr::select(ON_LAND_P, CWP_CODE) %>%
       dplyr::rename(geographic_identifier = CWP_CODE,
                     on_land_p = ON_LAND_P)
-  })
+  }
   
-  
+  cwp_grid <- cwp_grid %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/generation/identification_data_on_land_cwp.R")
   cat("Reallocating data that are in land areas")
   
