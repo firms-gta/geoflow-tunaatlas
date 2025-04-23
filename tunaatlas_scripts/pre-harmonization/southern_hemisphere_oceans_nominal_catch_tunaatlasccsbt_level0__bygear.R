@@ -103,7 +103,9 @@ function(action, entity, config){
   
   #Geographic identifier
   CCSBT_NC <- CCSBT_NC  %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "Indian"~"IOTC", 
-                                        geographic_identifier == "Pacific" ~ "WCPFC", TRUE ~ geographic_identifier))
+                                        geographic_identifier == "Pacific" ~ "WCPFC",
+                                        geographic_identifier == "Atlantic" ~ "AT", 
+                                        TRUE ~ geographic_identifier))
   
   #measurement_unit
   CCSBT_NC$measurement_unit<-"t"
