@@ -67,7 +67,10 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   cat("Executing spatial_curation_intersect_areas")
   georef_dataset <- df
   
-  areas_in_land<-identification_data_on_land_cwp(con , georef_dataset)
+  CA_WITH_GRIDS <- merge(georef_dataset, cwp_grid, by = "geographic_identifier")
+  CA_WITH_GRIDS$on_land_p <- as.numeric(CA_WITH_GRIDS$on_land_p)
+  areas_in_land <- CA_WITH_GRIDS %>% dplyr::filter(on_land_p == 100)
+  
   dataset_in_land <- georef_dataset %>% dplyr::filter(geographic_identifier %in%areas_in_land)
   
   df_input_cwp_grid <- georef_dataset %>% dplyr::inner_join(cwp_grid) %>% dplyr::select(-c(on_land_p))
