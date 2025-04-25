@@ -4,13 +4,87 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork")
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+
+```
+
+```{r echo=TRUE, results='hide'}
+packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
 })
 ```
+
+
+## 📥 Download and load the file
+
+```{r}
+
+
+
+
+qs_file <- "global_catch_tunaatlasird_level2.qs"
+if (!file.exists(qs_file)) {
+  download.file("https://zenodo.org/record/15221705/files/global_catch_tunaatlasird_level2.qs?download=1", qs_file, mode = "wb")
+}
+catch_data <- qs::qread(qs_file)
+
+catch_data$geom_wkt <- NULL 
+```
+
+## First lines
+
+
+```{r}
+kableExtra::kable(head(catch_data))
+```
+
+As the geometry can be heavy, we propose to remove it and to add it when necessary in plots.
+
+## 📊 Data overview
+
+This dataset provides monthly records of tuna and tuna-like species catches at the global scale between 1950 and 2021. Here is a description of the columns:
+
+- `source_authority`: Regional Fisheries Management Organization (RFMO) that provided the data
+- `fishing_fleet`: Code of the flag state or fleet (e.g., AUS, JPN)
+- `time_start`, `time_end`: Start and end dates of the observation period (monthly granularity, sometimes annualy)
+- `geographic_identifier`: Code identifying the spatial grid cell, from CWP grid dataset.
+- `gear_type`: Code of the fishing gear used
+- `species`: Species code (e.g., SBF for Southern Bluefin Tuna)
+- `fishing_mode`: Code indicating the fishing mode
+- `measurement_unit`: Unit used to report catches (e.g., Tons, Number)
+- `measurement_value`: Numeric value of the measured catch
+- `GRIDTYPE`: Spatial grid type (e.g., 1deg_x_1deg)
+- `species_group`: Taxonomic group (e.g., SCOMBROIDEI)
+- `gear_label`: Human-readable gear name
+- `fishing_fleet_label`: Human-readable label for the flag or fleet
+- `species_label`: Common name of the species
+- `species_definition`: Scientific name of the species
+- `geom_wkt`: Geometry in WKT format (MULTIPOLYGON)
+- `ocean`: RFMO area of activity
+<!-- - `fishing_mode_label`: Human-readable label for fishing mode -->
+
+```{r}
+dplyr::glimpse(catch_data)
+```
+
+
+```{r}
+summary(catch_data$measurement_value)
+```
+
+
+```{r}
+kableExtra::kable(table(catch_data$measurement_unit))
+```
+
 
 ```{r}
   cwp_grid_file <- here("data/cl_areal_grid.csv")
@@ -53,55 +127,11 @@ sf::st_crs(continent) <- 4326
 
 
 
-## 📥 Download and load the File
-
-```{r}
-qs_file <- "global_catch_tunaatlasird_level2.qs"
-if (!file.exists(qs_file)) {
-  download.file("https://zenodo.org/record/15221705/files/global_catch_tunaatlasird_level2.qs?download=1", qs_file, mode = "wb")
-}
-catch_data <- qs::qread(qs_file)
-
-catch_data$geom_wkt <- NULL 
-```
-
-As the geometry can be heavy, we propose to remove it and to add it when necessary in plots.
-
-
-## 📊 Data overview
-
-This dataset provides monthly records of tuna and tuna-like species catches at the global scale between 1950 and 2021. Here is a description of the columns:
-
-- `source_authority`: Regional Fisheries Management Organization (RFMO) that provided the data
-- `fishing_fleet`: Code of the flag state or fleet (e.g., AUS, JPN)
-- `time_start`, `time_end`: Start and end dates of the observation period (monthly granularity, sometimes annualy)
-- `geographic_identifier`: Code identifying the spatial grid cell, from CWP grid dataset.
-- `gear_type`: Code of the fishing gear used
-- `species`: Species code (e.g., SBF for Southern Bluefin Tuna)
-- `fishing_mode`: Code indicating the fishing mode
-- `measurement_unit`: Unit used to report catches (e.g., Tons, Number)
-- `measurement_value`: Numeric value of the measured catch
-- `GRIDTYPE`: Spatial grid type (e.g., 1deg_x_1deg)
-- `species_group`: Taxonomic group (e.g., SCOMBROIDEI)
-- `gear_label`: Human-readable gear name
-- `fishing_fleet_label`: Human-readable label for the flag or fleet
-- `species_label`: Common name of the species
-- `species_definition`: Scientific name of the species
-- `geom_wkt`: Geometry in WKT format (MULTIPOLYGON)
-- `ocean`: RFMO area of activity
-- `fishing_mode_label`: Human-readable label for fishing mode
-
-```{r}
-dplyr::glimpse(catch_data)
-summary(catch_data$measurement_value)
-table(catch_data$measurement_unit)
-```
-
 ## 🗺️ Catch map
 
 This map shows the spatial distribution of catches or effort aggregated by geographic grid cell. The `measurement_value` is summed per area.
 
-```{r, eval = "geometry" %in% names(catch_data)}
+```{r}
 catch_summary_by_unit <- catch_data %>%
   dplyr::group_by(geographic_identifier, measurement_unit) %>%
   dplyr::summarise(total = sum(measurement_value, na.rm = TRUE), .groups = "drop")
@@ -123,7 +153,7 @@ plots <- catch_summary_geom %>%
       ggplot2::theme_minimal()
   })
 
-wrap_plots(plots, ncol = 2)
+patchwork::wrap_plots(plots, ncol = 2)
 
 
 ```

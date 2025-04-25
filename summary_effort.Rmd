@@ -4,14 +4,81 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate")
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+```
+
+```{r echo=TRUE, results='hide'}
+packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
 })
 ```
 
+## 📥 Download and load the file
+
+```{r}
+
+qs_file <- "global_effort_tunaatlasird_level0_1950_2023.qs"
+if (!file.exists(qs_file)) {
+  download.file("https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1", qs_file, mode = "wb")
+}
+effort_data <- qs::qread(qs_file)
+
+effort_data$geom <- NULL 
+
+```
+
+## 📊 Data Overview
+
+This dataset provides monthly records of tuna and tuna-like species effort at the global scale between 1950 and 2023. Here is a description of the columns:
+
+```{r}
+kableExtra::kable(head(effort_data))
+```
+
+
+```{r}
+dplyr::glimpse(effort_data)
+```
+
+
+- `source_authority`: The source RFMO (e.g., CCSBT, IOTC)
+- `fishing_fleet`: Code for the flag or national fleet (e.g., AUS)
+- `time_start` / `time_end`: Temporal coverage of the observation (monthly granularity)
+- `geographic_identifier`: Unique spatial ID for each grid cell
+- `gear_type`: Code describing the type of gear used
+- `fishing_mode`: Code describing the fishing mode or school association
+- `measurement_unit`: Unit of measurement used for effort (e.g., Days, Hours)
+- `measurement_value`: Numeric value of the reported effort
+- `GRIDTYPE`: Type of grid used (e.g., 1deg_x_1deg)
+- `gear_type_label`: Human-readable label for the gear type
+- `fishing_fleet_label`: Label for the fleet or flag state
+- `species_label`: Common name of the species
+- `species_definition`: Scientific name of the species
+- `geom`: Geometry in WKT format for mapping purposes
+- `fishing_mode_label`: Human-readable label for fishing mode)
+
+
+```{r}
+summary(effort_data$measurement_value)
+```
+
+
+```{r}
+kableExtra::kable(table(effort_data$measurement_unit))
+```
+
+
+## 🗺️ Effort map
+
+First let's download the geometry. 
 
 ```{r}
   cwp_grid_file <- here("data/cl_areal_grid.csv")
@@ -48,56 +115,27 @@ if (!file.exists(qs_file)) {
   message("Loading cached UN_CONTINENT2 from local file...")
   continent <- qs::qread(qs_file)
 }
+
 sf::st_crs(continent) <- 4326
 
 ```
 
-
-## 📥 Download and load the ile
-
-```{r}
-qs_file <- "global_effort_tunaatlasird_level0_1950_2023.qs"
-if (!file.exists(qs_file)) {
-  download.file("https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1", qs_file, mode = "wb")
-}
-effort_data <- qs::qread(qs_file)
-```
-
-## 📊 Data Overview
-
-This dataset provides monthly records of tuna and tuna-like species effort at the global scale between 1950 and 2023. Here is a description of the columns:
-
-- `source_authority`: The source RFMO (e.g., CCSBT, IOTC)
-- `fishing_fleet`: Code for the flag or national fleet (e.g., AUS)
-- `time_start` / `time_end`: Temporal coverage of the observation (monthly granularity)
-- `geographic_identifier`: Unique spatial ID for each grid cell
-- `gear_type`: Code describing the type of gear used
-- `fishing_mode`: Code describing the fishing mode or school association
-- `measurement_unit`: Unit of measurement used for effort (e.g., Days, Hours)
-- `measurement_value`: Numeric value of the reported effort
-- `GRIDTYPE`: Type of grid used (e.g., 1deg_x_1deg)
-- `gear_type_label`: Human-readable label for the gear type
-- `fishing_fleet_label`: Label for the fleet or flag state
-- `species_label`: Common name of the species
-- `species_definition`: Scientific name of the species
-- `geom`: Geometry in WKT format for mapping purposes
-- `ocean`: Ocean or RFMO area (e.g., WCPFC, IOTC)
-- `fishing_mode_label`: Human-readable label for fishing mode
+This map displays the spatial distribution of effort, aggregated by geographic grid cell. The measurement_value is summed for each area, and only the top 6 values are shown.
 
 ```{r}
-dplyr::glimpse(effort_data)
-table(effort_data$measurement_unit)
-```
+
+top_units <- effort_data %>%
+  dplyr::group_by(measurement_unit) %>%
+  dplyr::summarise(filtertop = sum(measurement_value)) %>%
+  dplyr::arrange(desc(filtertop)) %>%
+  dplyr::slice_head(n = 6) %>%
+  dplyr::pull(measurement_unit)
 
 
-## 🗺️ Catch map
-
-This map shows the spatial distribution of catches or effort aggregated by geographic grid cell. The `measurement_value` is summed per area.
-
-```{r, eval = "geometry" %in% names(effort_data)}
 effort_summary_by_unit <- effort_data %>%
+  dplyr::filter(measurement_unit %in% top_units) %>% 
   dplyr::group_by(geographic_identifier, measurement_unit) %>%
-  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE), .groups = "drop")
+  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE), .groups = "drop") 
 
 effort_summary_geom <- effort_summary_by_unit %>%
   dplyr::inner_join(cwp_grid %>% dplyr::select(cwp_code, geom), by = c("geographic_identifier" = "cwp_code")) %>%
@@ -116,7 +154,7 @@ plots <- effort_summary_geom %>%
       ggplot2::theme_minimal()
   })
 
-wrap_plots(plots, ncol = 2)
+patchwork::wrap_plots(plots, ncol = 2)
 
 
 ```
