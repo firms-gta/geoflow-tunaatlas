@@ -42,7 +42,7 @@ function(action, entity, config){
   options(encoding = "UTF-8")
   df <- readr::read_csv(path_to_raw_dataset)
   df <- df %>%
-    select(-matches("(n|mt)$")) %>% 
+    dplyr::select(-matches("(n|mt)$")) %>% 
     dplyr::mutate(
       measurement_unit = "Hooks",
       time_start = as.Date(paste(Year, Month, "01", sep = "-")),
