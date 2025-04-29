@@ -1,22 +1,20 @@
 # Utiliser une image R de base
 FROM rocker/verse:latest
 
-# Installer les packages nécessaires
+# Necessary packages for downloading ang plots for Rmd
 RUN R -e "install.packages(c('qs', 'dplyr', 'ggplot2', 'sf', 'lubridate', 'here', 'ows4R', 'patchwork', 'kableExtra', 'readr', 'knitr', 'rmarkdown'))"
 
-# Créer les dossiers nécessaires
+# Data directory for fdiwg grid
 RUN mkdir -p /workspace/data
 
-# Se placer dans /workspace
 WORKDIR /workspace
 
-# Télécharger les fichiers nécessaires une seule fois à la création du Docker
+# Downloading necessary files before launching .Rmd (for caching validation in docker)
 RUN curl -L "https://zenodo.org/record/15221705/files/global_catch_tunaatlasird_level2.qs?download=1" -o global_catch_tunaatlasird_level2.qs
 RUN curl -L "https://zenodo.org/records/15221705/files/global_catch_tunaatlasird_level2%20(without_geom).csv?download=1" -o "global_catch_tunaatlasird_level2 (without_geom).csv"
 RUN curl -L "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip" -o data/cwp_grid.zip && unzip data/cwp_grid.zip -d data/
 
-# Copier tout ton dépôt dans l'image
 COPY . /workspace
 
-# Compiler le Rmd pour générer l'html dans docs/
-CMD ["Rscript", "-e", "rmarkdown::render('your_file.Rmd', output_dir = 'docs')"]
+# Generate html in docs
+CMD ["Rscript", "-e", "rmarkdown::render('summary_catch.Rmd', output_dir = 'docs')"]
