@@ -98,6 +98,26 @@ copy_all_nested_data_folders(raw_data_georef)
 
 running_time_of_workflow(raw_data_georef)
 
+
+#same in local 
+setwd("~/firms-gta/geoflow-tunaatlas/data")
+raw_data_georef <- executeWorkflow(here::here("All_raw_data_georef_local.json"))
+config <- initWorkflow(here::here("All_raw_data_georef_local.json"))
+raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024_local")
+dir.create("data_raw_georef")
+copy_all_nested_data_folders(file.path("data",raw_data_georef), "data_raw_georef")
+
+
+source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+config <- initWorkflow(here::here("All_raw_data_georef_local.json"), handleMetadata = FALSE)
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+con <- NULL
+time_Summarising_invalid_data <- system.time({
+  setwd("~/firms-gta/geoflow-tunaatlas")
+  summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+})
+
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 # Around 30 minutes
 raw_data_georef_effort <- executeWorkflow(here::here("All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
@@ -127,7 +147,7 @@ config <- initWorkflow(here::here("All_raw_data_georef.json"), handleMetadata = 
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 time_Summarising_invalid_data <- system.time({
-  Summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE)
+  summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE)
 })
 
 
@@ -355,6 +375,7 @@ source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Ana
 upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data",
                                                                          connectionDB = con)
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_with_catches_without_effort.R")
+
 CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
                                            connectionDB = con)
 
