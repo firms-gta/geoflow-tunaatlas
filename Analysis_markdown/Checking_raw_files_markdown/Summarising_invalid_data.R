@@ -1,53 +1,145 @@
-Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
+summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
   ancient_wd <- getwd()
   setwd(main_dir)
   dir.create("Recap_on_pre_harmo")
   path = file.path(getwd())#, "Recap_on_pre_harmo")
   
-  species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code) 
-  cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
+  library(sf)
+  library(dplyr)
+  library(readr)
+  library(janitor)
+  library(DBI)
+  library(here)
   
-  shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>% 
-    dplyr::rename(GRIDTYPE = gridtype)
+  # Définition des chemins
+  dir.create(here("data"), showWarnings = FALSE)
   
-  continent <- tryCatch({
-    st_read(connectionDB, query = "SELECT * from public.continent")
-  }, error = function(e) {
-    cat("An error occurred:", e$message, "\n")
-    NULL  
-  })
-  
-  if(is.null(continent)){
-    url= "https://www.fao.org/fishery/geoserver/wfs" 
-    serviceVersion = "1.0.0" 
-    logger = "INFO"
-    # SOURCE: OGC ####
-    WFS = WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
-    continent = WFS$getFeatures("fifao:UN_CONTINENT2")
+  # Fonctions de fallback
+  try_db_query <- function(con, query, fallback_file, fallback_read_fun, download_url = NULL) {
+    if (!is.null(con) && DBI::dbIsValid(con)) {
+      res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
+      if (!inherits(res, "try-error")) {
+        message("Connexion à la base réussie, récupération via SQL : ", query)
+        return(DBI::dbGetQuery(con, query))
+      }
+    }
     
+    message("Pas de connexion valide. ")
+    if (!file.exists(fallback_file)) {
+      if (!is.null(download_url)) {
+        message("Téléchargement depuis ", download_url)
+        download.file(download_url, fallback_file, mode = "wb")
+      } else {
+        stop("Fichier requis manquant : ", fallback_file)
+      }
+    }
+    message("Chargement depuis le fichier local : ", fallback_file)
+    return(fallback_read_fun(fallback_file))
   }
-  shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
   
-  # file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
-  file_path_url <- "~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions"
-  source(file.path(file_path_url,"copy_project_files.R"), local = TRUE)
-  source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
-  source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_temporal_differences_dygraphs.R"), local = TRUE)
-  source(file.path(file_path_url,"other_dimension_analysis_dygraphs.R"), local = TRUE)
-  source(file.path(file_path_url,"Groupping_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_strata_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_dimension_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"compare_temporal_differences.R"), local = TRUE)
-  source(file.path(file_path_url,"geographic_diff.R"), local = TRUE)
-  source(file.path(file_path_url,"time_coverage_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
-  source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
+  try_st_read <- function(con, query, fallback_file, download_url = NULL) {
+    if (!is.null(con) && DBI::dbIsValid(con)) {
+      res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
+      if (!inherits(res, "try-error")) {
+        message("Connexion à la base réussie, lecture via st_read : ", query)
+        return(st_read(con, query = query))
+      }
+    }
+    
+    if (!file.exists(fallback_file)) {
+      if (!is.null(download_url)) {
+        message("Téléchargement de ", download_url)
+        download.file(download_url, fallback_file, mode = "wb")
+        if (grepl("\\.zip$", fallback_file)) {
+          unzip(fallback_file, exdir = dirname(fallback_file))
+        }
+      } else {
+        stop("Fichier requis manquant : ", fallback_file)
+      }
+    }
+    message("Lecture du fichier local shapefile : ", fallback_file)
+    return(st_read(fallback_file))
+  }
+  
+  # Connexion (à ajuster selon ton environnement)
+  # con <- config$software$output$dbi
+  con <- tryCatch(connectionDB, error = function(e) NULL)
+  
+  # Récupération des données
+  species_group <- try_db_query(
+    con,
+    "SELECT taxa_order, code FROM species.species_asfis",
+    here("data/cl_asfis_species.csv"),
+    function(f) read_csv(f) %>% janitor::clean_names() %>% select(species_group = taxa_order, species = code),
+    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv"
+  )
+  
+  cl_cwp_gear_level2 <- try_db_query(
+    con,
+    "SELECT * FROM gear_type.isscfg_revision_1",
+    here("data/cl_isscfg_pilot_gear.csv"),
+    function(f) read_csv(f) %>% select(Code = code, Gear = label),
+    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv"
+  )
+  
+  # Lecture CWP grid via CSV si pas de DB
+  cwp_grid_file <- here("data/cl_areal_grid.csv")
+  if (!file.exists(cwp_grid_file)) {
+    message("Fichier cl_areal_grid.csv manquant. Téléchargement en cours...")
+    zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
+    zip_path <- here("data/cwp_grid.zip")
+    download.file(zip_url, zip_path, mode = "wb")
+    unzip(zip_path, exdir = here("data"))
+  }
+  cwp_grid <- st_read(cwp_grid_file)
+  cwp_grid <- st_as_sf(
+    cwp_grid,
+    wkt = "geom_wkt",   # la colonne contenant les géométries
+    crs = 4326          # ou un autre CRS si tu en connais un spécifique
+  ) %>%
+    dplyr::rename(cwp_code = CWP_CODE) %>%
+    dplyr::rename(geom = geom_wkt)
+  
+  try_get_continent_layer <- function(con = NULL, fallback_file = "UN_CONTINENT2.qs") {
+    # 1. Try to read from database
+    if (!is.null(con) && DBI::dbIsValid(con)) {
+      message("Attempting to read continent layer from database...")
+      res <- try(sf::st_read(con, query = "SELECT * FROM public.continent"), silent = TRUE)
+      if (!inherits(res, "try-error")) {
+        message("Continent layer successfully read from database.")
+        sf::st_crs(res) <- 4326
+        qs::qsave(res, fallback_file)
+        return(res)
+      }
+    }
+    
+    # 2. Try to load from local .qs file
+    if (file.exists(fallback_file)) {
+      message("Loading continent layer from local file: ", fallback_file)
+      continent <- qs::qread(fallback_file)
+      sf::st_crs(continent) <- 4326
+      return(continent)
+    }
+    
+    # 3. Download from FAO GeoServer using ows4R
+    message("Fetching continent layer from FAO GeoServer...")
+    WFS <- ows4R::WFSClient$new(
+      url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
+      serviceVersion = "1.0.0",
+      logger = "INFO"
+    )
+    continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
+    sf::st_crs(continent) <- 4326
+    qs::qsave(continent, fallback_file)
+    return(continent)
+  }
+  continent <- try_get_continent_layer(connectionDB)
   
   
-  
+  shape_without_geom  <- cwp_grid %>% as_tibble() %>%dplyr::select(-geom)
+  shapefile.fix <- cwp_grid
+  rm(cwp_grid)
+  require(CWP.dataset)
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
   # Function to determine tRFMO from entity name
@@ -83,7 +175,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   flog.info("patrt1")
   # PART 2: Checking for specific .csv files
   
-  target_files <- c("negative_values.csv", "not_conform_conversion_factors.csv", "removed_irregular_areas.csv", 
+  target_files <- c("negative_values.csv", "not_conform_conversion_factors.csv", "removed_irregular_areas.csv",
                     "areas_in_land.csv", "outside_juridiction.csv")
   
   
@@ -100,7 +192,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   
   results_df <- do.call(rbind, lapply(entity_file_existence, function(x) {
     data <- as.data.frame(t(unlist(x)))
-    rownames(data) <- NULL  
+    rownames(data) <- NULL
     return(data)
   }))
   
@@ -116,7 +208,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   # Group data by tRFMO
   grouped_results <- combined_results %>%
     # group_by(tRFMO) %>%
-    # summarise(across(where(is.logical), sum)) %>% 
+    # summarise(across(where(is.logical), sum)) %>%
     distinct()
   readr::write_csv(grouped_results, file.path(entity_dir, "data", "grouped_results_invalid_data.csv"))
   
@@ -133,8 +225,8 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       # Read the .csv file and store the data with the entity's name
       not_mapped_data <- readr::read_csv(not_mapped_file_path)
       if(nrow(not_mapped_data)!= 0){
-      not_mapped_data$Entity <- entity_name  # add an 'Entity' column to keep track of the entity
-      not_mapped_data_list[[entity_name]] <- not_mapped_data
+        not_mapped_data$Entity <- entity_name  # add an 'Entity' column to keep track of the entity
+        not_mapped_data_list[[entity_name]] <- not_mapped_data
       }
     }
   }
@@ -191,7 +283,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       } else if ("GRIDTYPE" %notin% colnames(data_list)){
         data_list <- data_list %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
         data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
-                                                     shape = shape_without_geom, 
+                                                     shape = shape_without_geom,
                                                      species_group_dataframe = species_group,
                                                      cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
       }
@@ -204,29 +296,29 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       return(data_list)
     })
     flog.info("patrt4")
-    
-  if (length(problematic_files) > 0) {
-    # Combine all problematic data into one data frame with an additional column specifying the input file
-    combined_problematic_data <- do.call(rbind, lapply(1:length(problematic_data), function(i) {
-      data_frame <- as.data.frame(problematic_data[[i]])
-      data_frame$issue <- problematic_files[i]
-      return(data_frame)
-    }))
-    
-    all_data[[entity_name]] <- combined_problematic_data
-    # Combine all dataframes into one
-    
-    
-    # Write the combined data frame to a CSV file
-    write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")), 
-              progress = show_progress())
-    
+    if (length(problematic_files) > 0) {
+      # Combine all problematic data into one data frame with an additional column specifying the input file
+      combined_problematic_data <- do.call(rbind, lapply(1:length(problematic_data), function(i) {
+        data_frame <- as.data.frame(problematic_data[[i]])
+        data_frame$issue <- problematic_files[i]
+        return(data_frame)
+      }))
+      
+      all_data[[entity_name]] <- combined_problematic_data
+      # Combine all dataframes into one
+      
+      
+      # Write the combined data frame to a CSV file
+      write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
+                progress = show_progress())
+      
+    }
   }
-  }
+  if(length(all_data) !=0){
   combined_data <- bind_rows(all_data, .id = "entity_name")
-  combined_data <- combined_data %>% dplyr::rename(gridtype = GRIDTYPE) %>% 
-    dplyr::rename(dataset  = entity_name) %>% 
-    dplyr::mutate(issue = gsub(".csv","", issue)) %>% 
+  combined_data <- combined_data %>% dplyr::rename(gridtype = GRIDTYPE) %>%
+    dplyr::rename(dataset  = entity_name) %>%
+    dplyr::mutate(issue = gsub(".csv","", issue)) %>%
     dplyr::rename(codesource_area = geographic_identifier)
   combined_data$time_start <- as.Date(combined_data$time_start)
   combined_data$time_end <- as.Date(combined_data$time_end)
@@ -235,16 +327,17 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   combined_data$quarter <- as.integer(substr(quarters(combined_data$time_end), 2, 2))
   # Save the combined data as a .qs file
   qs::qsave(combined_data,"All_invalid_data.qs")
-    if(upload_DB){
-      dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
-      dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
-      dbExecute(connectionDB, "
+  if(upload_DB){
+    dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
+    dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
+    dbExecute(connectionDB, "
     CREATE MATERIALIZED VIEW public.issueddata AS
     SELECT * FROM temp_tableissueddata;
   ")
-      dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
-      # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
-    }
+    dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
+    # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
+  }
+  }
   # Directory for the R Markdown template
   base::options(knitr.duplicate.label = "allow")
   
@@ -255,12 +348,12 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   
   parameters_child <- list(
     parameter_colnames_to_keep = c("fishing_fleet", "gear_type", "geographic_identifier",
-                                   "fishing_mode", "species", "measurement_unit", "measurement_value", 
+                                   "fishing_mode", "species", "measurement_unit", "measurement_value",
                                    "Gear", "species_group", "GRIDTYPE"),
-    shapefile.fix = shapefile.fix, 
-    outputonly = FALSE, 
-    print_map = TRUE, 
-    parameter_time_dimension = c("time_start"), 
+    shapefile.fix = shapefile.fix,
+    outputonly = FALSE,
+    print_map = TRUE,
+    parameter_time_dimension = c("time_start"),
     unique_analyse = TRUE, child_header = "",continent = continent,
     child = TRUE, parameter_final = NULL
   )
@@ -270,11 +363,6 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
   
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
-  copy_project_files(original_repo_path = here("Analysis_markdown/Checking_raw_files_markdown"), new_repo_path = path)
-  copy_project_files(original_repo_path = here("Analysis_markdown/"), new_repo_path = path)
-  
-  
-  
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)
     entity_data <- combined_results[combined_results$Entity == entity_name, ]
@@ -283,7 +371,6 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     problematic_files <- target_files[as.logical(entity_data[3:ncol(entity_data)])]
     problematic_files <- na.omit(problematic_files)
     problematic_files <- setdiff(problematic_files, "not_mapped_total.csv")
-    
     
     if (length(problematic_files) > 0) {
       output_file_name <- paste0(entity_name, "_report.html") # name of the output file
@@ -301,7 +388,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           ),
           "areas_in_land" = paste0(
             "# Overview of data located on land\n\n",
-            "Only the squares where the integrity of the area is located on land are considered in the analysis.\n The analysis has been perform using the cwp grid dataset that can be found : https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip", 
+            "Only the squares where the integrity of the area is located on land are considered in the analysis.\n The analysis has been perform using the cwp grid dataset that can be found : https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip",
             "\n\n More details : https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133"
           ),
           "removed_irregular_areas" = paste0(
@@ -331,7 +418,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           parameter_fact = "catch",
           plotting_type = "plot",
           parameter_colnames_to_keep = c(
-            # "source_authority", 
+            # "source_authority",
             "species", "gear_type", "fishing_fleet",
             "fishing_mode", "geographic_identifier", "measurement_unit",
             "measurement_value", "GRIDTYPE", "species_group", "Gear"
@@ -350,7 +437,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
         child_env_result$treatment <- FALSE
         child_env_result$parameter_titre_dataset_1 <- file_name
         child_env_result$child_header <- ""
-        child_env_result$Add_lines <- Addlines  
+        child_env_result$Add_lines <- Addlines
         
         gc()
         
@@ -368,7 +455,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
                          shapefile.fix = shapefile.fix,
                          continent = continent,
                          coverage = TRUE)
-
+      
       all_list <- all_list[!sapply(all_list, is.null)]
       render_env$directory <- entity_dir
       render_env$dataset <- entity_name
@@ -382,8 +469,13 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       render_env$summary_invalid_data <- summary_invalid_data
       qs::qsave(render_env, file.path(entity_dir, paste0(entity_name, "render_env.qs")))
       
-      rmarkdown::render(input = "Report_on_raw_data.Rmd", envir = render_env, output_format = "bookdown::html_document2",
+      Report_on_raw_data <- system.file("rmd", "Report_on_raw_data.Rmd", package = "CWP.dataset")
+      rmarkdown::render(input = Report_on_raw_data, envir = render_env, output_format = "bookdown::html_document2",
                         output_dir =entity_dir, output_file = entity_name)
+      
+      message(sprintf("Rendering: %s", entity_name, e$message))
+      
+      
       # rmarkdown::render(input = "Report_on_raw_data_iccat.Rmd", envir = render_env, output_format = "bookdown::html_document2",
       #                   output_dir ="~/firms-gta/geoflow-tunaatlas/jobs/20250117135138_raw_data_georef/entities/catch_iccat_level0", output_file = "catch_iccat_level0_detailed.html")
       # rmarkdown::render(input = "Report_on_raw_data.Rmd", envir = render_env, output_format = "pdf_document",
@@ -392,17 +484,16 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       #                   output_dir =entity_dir, output_file = entity_name)
       rm(render_env, envir = environment())
     }
+    # Recap_on_pre_harmo <- system.file("rmd", "Recap_on_pre_harmo.Rmd", package = "CWP.dataset")
+    # rmarkdown::render(Recap_on_pre_harmo,
+    #                   output_dir = path,
+    #                   envir = environment()
+    # )
+    
+    # rmarkdown::render(Recap_on_pre_harmo,
+    #                   output_dir = path,
+    #                   envir = environment(), output_format = "pdf_document2")
   }
-  
-  rmarkdown::render(file.path(path,"Recap_on_pre_harmo.Rmd"),
-                    output_dir = path,
-                    envir = environment()
-  )
-  
-  rmarkdown::render(file.path(path,"Recap_on_pre_harmo.Rmd"),
-                    output_dir = path,
-                    envir = environment(), output_format = "pdf_document2")
-  
   folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
   
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
@@ -415,7 +506,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
       
     })
-    # 
+    #
     path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
     drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
     read_last_csv <- function(path) {
