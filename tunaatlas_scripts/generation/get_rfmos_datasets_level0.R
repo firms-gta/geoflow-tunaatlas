@@ -194,6 +194,11 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         dataset_file_PSFlag_billfish_effort <- "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv"
                         dataset_file_PSFlag_shark_effort <- "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
                         
+                        effort_5deg_1m_ll_iattc_level0_shark <- "effort_5deg_1m_ll_iattc_level0__shark.csv"
+                        effort_5deg_1m_ll_iattc_level0__tuna_billfish <- "effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv"
+                        catch_5deg_1m_ll_iattc_level0__shark <- "catch_5deg_1m_ll_iattc_level0__shark.csv"
+                        catch_5deg_1m_ll_iattc_level0__tuna_billfish <- "catch_5deg_1m_ll_iattc_level0__tuna_billfish.csv"
+
                         #for catch fact
                         if(variable == "catch") {
                           
@@ -285,6 +290,11 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                                                      dataset_file_billfish_or_shark_effort=dataset_file_PSSetType_shark_effort,
                                                                                      raising_dimensions=c("gear_type","fishing_mode","time_start","time_end","geographic_identifier"))
                             
+                            df_catch_shark_5deg_flag <- function_raise_catch_to_effort(dataset_file_tuna_effort=effort_5deg_1m_ll_iattc_level0__tuna_billfish,
+                                                                                     dataset_file_billfish_or_shark_catch=catch_5deg_1m_ll_iattc_level0__shark,
+                                                                                     dataset_file_billfish_or_shark_effort=effort_5deg_1m_ll_iattc_level0__shark,
+                                                                                     raising_dimensions=c("gear_type","fishing_mode","time_start","time_end","geographic_identifier"))
+                            
                           } else { # Else do not raise (i.e. for billfish/shark, keep catch only from billfish / shark)
                             df_catch_billfish_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_billfish_catch]), guess_max = 0))
                             df_catch_billfish_flag <- df_catch_billfish_flag[,columns_to_keep]
@@ -334,14 +344,20 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                               df_catch_billfish <- df_catch_billfish_flag
                               df_catch_shark <- df_catch_shark_flag
                               df_catch_tuna <- df_catch_tuna_flag
+                              data_5deg <- df_catch_shark_5deg_flag
+                              
+                              iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna, data_5deg)
+                              
                             } else if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishing_mode'){
                               df_catch_billfish <- df_catch_billfish_settype
                               df_catch_shark <- df_catch_shark_settype
                               df_catch_tuna <- df_catch_tuna_settype
+                              
+                              iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna)
+                              
                             }
                           }
                           
-                          iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna)
                           
                         }else if (variable=="effort"){
                           config$logger.info(sprintf("Case %s data", variable))
@@ -362,7 +378,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           # df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
                           # class(df_iattc_effort_PSSetType$measurement_value) <- "numeric"
                           df_iattc_effort_PSFlag <- rbind(as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_flag]), guess_max = 0)), 
-                                                          as.data.frame(readr::read_csv(file.path("data",basename("effort_5deg_1m_ll_iattc_level0.csv")), guess_max = 0)))
+                                                          as.data.frame(readr::read_csv(file.path("data",basename("effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv")), guess_max = 0))) # need to update csv to match this 
                           df_iattc_effort_PSFlag <- df_iattc_effort_PSFlag[,columns_to_keep_effort]
                           class(df_iattc_effort_PSFlag$measurement_value) <- "numeric"
                           

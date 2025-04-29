@@ -168,6 +168,13 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       class(georef_dataset$measurement_value) <- "numeric"
       rm(dataset)
       
+      species_to_force <- c("BSH", "FAL", "MAK", "OCS", "RSK", "SKH", "SMA", "SPN", "THR")
+      georef_dataset <- georef_dataset %>%
+        dplyr::mutate(measurement_processing_level = dplyr::case_when(
+          source_authority == "IATTC" & species %in% species_to_force ~ "original_sample",
+          TRUE ~ measurement_processing_level
+        ))
+      
       
       if(recap_each_step){
         function_recap_each_step(
