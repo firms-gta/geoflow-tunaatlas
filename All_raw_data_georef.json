@@ -78,7 +78,7 @@
     {
       "id": "create_report_global_action",
       "script": "./tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
-      "run": true,
+      "run": false,
       "options": {
       }
     }
