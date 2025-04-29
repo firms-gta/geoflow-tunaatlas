@@ -16,7 +16,6 @@
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
 
 function(action, entity, config){
-  
   opts <- action$options
   # #############
   #action options
@@ -97,10 +96,10 @@ function(action, entity, config){
   }
   }
   #final step
-  
+  source(file.path(url_scripts_create_own_tuna_atlas, "process_and_aggregate_dataset.R"))
   process_and_aggregate_dataset(nominal_catch, entity, config, opts, 
-                                columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode",
-                                                    "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value"))
+                                columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value", 
+                                                    "measurement", "measurement_type", "measurement_processing_level"))
   
   #### END
   config$logger.info("End: Your tuna atlas dataset has been created!")
