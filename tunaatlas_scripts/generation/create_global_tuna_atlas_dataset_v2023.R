@@ -328,9 +328,10 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             )
           }
         }
+        
         if(opts$fact == "catch"){
         georef_dataset <-
-          double_unit_data_handling( #to add handling of strata having multiples unit (tonnes and number which arrivent)
+          double_unit_data_handling( #to add handling of strata having multiples unit (tonnes and number which happen)
             con = con,
             entity = entity,
             config = config,
