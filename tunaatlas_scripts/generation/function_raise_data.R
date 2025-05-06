@@ -37,13 +37,17 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
     dplyr::group_by(across(-measurement_value)) %>% 
     dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
   
-  raising_factor_with_raising <- df_rf %>% dplyr::filter(round(rf,6) > 1)
+  if(decrease_when_rf_inferior_to_one){
+    df_rf <- df_rf
+  } else { # si on decrease pas, on enlève pas les nombres qui correspondent à des tonnes qui n'ont pas été augmentées
+    df_rf <- df_rf %>% dplyr::filter(round(rf,6) > 1)
+  }
   
   corresponding_number_to_raised_data <- data_raised %>% 
     dplyr::filter(measurement_unit == "no") %>% 
     dplyr::mutate(year = lubridate::year(time_start))%>% 
     dplyr::select(x_raising_dimensions) %>% dplyr::distinct() %>% 
-    dplyr::inner_join(raising_factor_with_raising %>% 
+    dplyr::inner_join(df_rf %>% 
                         dplyr::select(x_raising_dimensions)%>% dplyr::distinct(),
                       by = x_raising_dimensions) %>% 
     dplyr::mutate(measurement_unit = "no") %>%
