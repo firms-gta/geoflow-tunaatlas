@@ -72,6 +72,10 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   data$Gear <- NULL
   data$GRIDTYPE <- NULL
   
+  data <- data %>% dplyr::mutate(measurement_unit = case_when(measurement_unit == "Tons" ~ "t", 
+                                                              measurement_unit == "Number of fish" ~ "no",
+                                                              TRUE ~ measurement_unit))
+  
   if("geom_wkt" %in% colnames(data)){
     data <- data %>% dplyr::rename(geom = geom_wkt)
   }
@@ -114,11 +118,13 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   )
   
   cl_measurement_type <- {
-    catch_file <- here::here("data/cl_measurement_type_catch.csv")
-    effort_file <- here::here("data/cl_measurement_type_effort.csv")
+    
+    catch_file <- here::here("data/cl_catch_concepts.csv")
+    effort_file <- here::here("data/cl_measurement_types_effort.csv")
     if (!file.exists(catch_file)) {
-      utils::download.file("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_types_catch.csv", catch_file, mode = "wb")
+      utils::download.file("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cwp/cl_catch_concepts.csv", catch_file, mode = "wb")
     }
+    # to be fixed here 
     if (!file.exists(effort_file)) {
       utils::download.file("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_types_effort.csv", effort_file, mode = "wb")
     }
@@ -148,7 +154,8 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   
   # Measurement unit labels
   measurement_unit_label <- {
-    files <- c("cl_effortunit_wcpfc.csv", "cl_effortunit_ccsbt.csv", "cl_effortunit_iattc.csv", "cl_effortunit_iccat.csv", "cl_effortunit_iotc.csv")
+    files <- c("cl_effortunit_wcpfc.csv", "cl_effortunit_ccsbt.csv", "cl_effortunit_iattc.csv", "cl_effortunit_iccat.csv", "cl_effortunit_iotc.csv", "cl_catchunit_rfmos.csv")
+               
     base_url <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/"
     files %>%
       lapply(function(file) {
@@ -160,7 +167,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
             stringr::str_detect(file, "iccat") ~ "ICCAT",
             stringr::str_detect(file, "iotc") ~ "IOTC",
             stringr::str_detect(file, "wcpfc") ~ "WCPFC",
-            TRUE ~ "UNKNOWN"
+            TRUE ~ "ALL"
           ))
       }) %>%
       dplyr::bind_rows() %>%
@@ -199,10 +206,39 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   }
   
   if (!"measurement_unit_label" %in% names(enriched_data)) {
+    
+    # Séparer les labels spécifiques et globaux
+    measurement_unit_label_global <- measurement_unit_label %>% 
+      dplyr::filter(source_authority == "ALL")
+    
+    measurement_unit_label_specific <- measurement_unit_label %>% 
+      dplyr::filter(source_authority != "ALL")
+    
+    # 1. Jointure avec les labels spécifiques (effort avec source_authority)
     enriched_data <- enriched_data %>%
-      dplyr::left_join(measurement_unit_label %>% dplyr::select(code, source_authority, measurement_unit_label = label),
-                       by = c("measurement_unit" = "code", "source_authority"))
+      dplyr::left_join(
+        measurement_unit_label_specific %>%
+          dplyr::select(code, source_authority, measurement_unit_label_specific = label),
+        by = c("measurement_unit" = "code", "source_authority")
+      )
+    
+    # 2. Jointure avec les labels globaux (catch)
+    enriched_data <- enriched_data %>%
+      dplyr::left_join(
+        measurement_unit_label_global %>%
+          dplyr::select(code, measurement_unit_label_global = label),
+        by = c("measurement_unit" = "code")
+      )
+    
+    # 3. Fusion des deux labels dans une seule colonne
+    enriched_data <- enriched_data %>%
+      dplyr::mutate(
+        measurement_unit_label = dplyr::coalesce(measurement_unit_label_specific, measurement_unit_label_global)
+      ) %>%
+      dplyr::select(-measurement_unit_label_specific, -measurement_unit_label_global)
   }
+  
+
   # Enrich measurement_type_label if missing
   
   if (!"measurement_type_label" %in% names(enriched_data)) {
@@ -232,6 +268,35 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
                        by = c("fishing_mode" = "code"))
   }
   
+  reorder_with_labels <- function(df) {
+    original_cols <- names(df)
+    new_order <- character()
+    
+    for (col in original_cols) {
+      # On saute les colonnes *_label ici, elles seront ajoutées à côté de leur base
+      if (grepl("_label$", col)) next
+      new_order <- c(new_order, col)
+      label_col <- paste0(col, "_label")
+      if (label_col %in% original_cols) {
+        new_order <- c(new_order, label_col)
+      }
+    }
+    
+    # Ajouter les colonnes *_label orphelines non associées (s'il y en a)
+    orphan_labels <- setdiff(
+      grep("_label$", original_cols, value = TRUE),
+      new_order
+    )
+    new_order <- c(new_order, orphan_labels)
+    
+    # Réorganiser le data.frame
+    df[, new_order, drop = FALSE]
+  }
+  
+  
+  enriched_data <- reorder_with_labels(enriched_data)
+  
+  
   if (!"gridtype" %in% names(enriched_data)) {
     enriched_data <- enriched_data %>%
       dplyr::left_join(shapefile.fix %>% dplyr::select(geographic_identifier = cwp_code, gridtype = GRIDTYPE), by = "geographic_identifier")
@@ -248,9 +313,11 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     enriched_data_no_geom <- enriched_data %>% dplyr::select(-any_of("geom"))
     fwrite(enriched_data_no_geom, paste0(save_prefix, "_without_geom.csv"))
   }
+  without_geom <- enriched_data 
+  without_geom$geom <- NULL 
   
   return(list(
     with_geom = enriched_data,
-    without_geom = enriched_data %>% dplyr::select(-any_of("geom"))
+    without_geom = without_geom
   ))
 }
