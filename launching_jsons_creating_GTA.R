@@ -173,7 +173,21 @@ file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"),
           here::here("data"), 
           recursive = TRUE)
 
-
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("level_2_catch_2025.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+config <- initWorkflow(here::here("level_2_catch_2025.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+require(CWP.dataset)
+setwd("~/firms-gta/geoflow-tunaatlas")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all"))
+configshilky <- config
+configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = "FAL")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all"), nameoutput = "Silkysharks")
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
 copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path, target_data_folder = "efforts_2025")
 copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path)
@@ -195,10 +209,11 @@ source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisher
 
 # IRD_data <- readr::read_csv("data/IOTC_conv_fact_mapped.csv")
 # specieslist <- unique(IRD_data$species)
-# specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF")
+# specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF", "FAL)
 # 
 # entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 # # entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20241007133651_global_datasets_level1_2/entities/global_catch_ird_level2_without_IRD"
+entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20250506194609/entities/global_catch_ird_lvl2_rawdata_1950_2023_upgrade_nominal"
 # for (entity_dir in entity_dirs) {
 #   entity_name <- basename(entity_dir)
 #   setwd(here::here(entity_dir))
