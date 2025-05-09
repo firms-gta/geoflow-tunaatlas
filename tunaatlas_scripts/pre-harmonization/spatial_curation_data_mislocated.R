@@ -36,14 +36,14 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   # Initialisation
   db_working <- FALSE
-  
+  library(RPostgreSQL)
   # Vérification de la connexion si elle existe
-  if (!is.null(con)) {
-    if (DBI::dbIsValid(con)) {
-      res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
-      db_working <- !inherits(res, "try-error")
-    }
-  }
+  # if (!is.null(con)) {
+  #   if (DBI::dbIsValid(con)) {
+  #     res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
+  #     db_working <- !inherits(res, "try-error")
+  #   }
+  # }
   
   if (db_working) {
     message("Connexion à la base réussie, récupération des données...")

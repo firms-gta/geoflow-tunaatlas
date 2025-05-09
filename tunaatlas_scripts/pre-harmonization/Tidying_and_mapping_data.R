@@ -17,7 +17,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   # Set options and configurations
   harmonized <- entity$resources$harmonized
   output_name_dataset_mapped <- gsub("harmonized", "mapped", harmonized)
-  
+  library(RPostgreSQL)
   opts <- action$options
   con <- config$software$output$dbi
   options(encoding = "UTF-8")
@@ -38,6 +38,8 @@ Tidying_and_mapping_data = function(action, entity, config) {
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
+  
+  source(here::here("./tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
   
   # Additional scripts for reporting and functions
   reporting_functions <- c(
