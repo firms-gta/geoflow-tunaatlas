@@ -35,7 +35,7 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
     df_input_incomplete <- df_input_incomplete %>%
       dplyr::mutate(value_raised = ifelse(!is.na(rf),
                                    measurement_value * rf, 
-                                   value_raised))
+                                   0)) #if there is no conversion factor, just remove, to change this better put in the value_raised 1 if na prior to this.
   }   else {
     
     df_input_incomplete <- df_input_incomplete %>%
