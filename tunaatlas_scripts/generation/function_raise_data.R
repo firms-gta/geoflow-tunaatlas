@@ -1,5 +1,5 @@
 function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions,
-                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE){
+                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE, do_not_decrease_unk_data = TRUE){
   
   dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
   
@@ -20,6 +20,19 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   } else if (fact=="effort"){
     raising_dimensions=x_raising_dimensions
     df_rf$measurement_unit=NULL
+  }
+  
+  
+  # if you want to decrease data but not remove data that has no correspondande run df_rf <- df_rf %>% dplyr::rowwise() %>% dplyr::mutate(rf = ifelse(is.na(rf), 1, rf))
+  
+  if(do_not_decrease_unk_data){
+    conds <- list()
+    if ("fishing_mode"  %in% names(df_rf)) conds <- append(conds, expr(fishing_mode  == "UNK"))
+    if ("fishing_fleet" %in% names(df_rf)) conds <- append(conds, expr(fishing_fleet == "NEI"))
+    if ("gear_type"     %in% names(df_rf)) conds <- append(conds, expr(gear_type     == "99.9"))
+    
+    df_rf <- df_rf %>%
+      dplyr::filter(!!!conds)
   }
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
