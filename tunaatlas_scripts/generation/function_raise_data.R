@@ -1,6 +1,17 @@
 function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions,
-                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE, do_not_decrease_unk_data = TRUE){
+                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE, do_not_decrease_unk_data = TRUE, raise_only_on_unk = TRUE, do_not_raise_perfectly_compatible_data = TRUE){
   
+  # we recommend, if runnning with do_not_raise_perfectly_compatible_data to true, to raise only_on_unk .
+  number_data_to_raise <- dataset_to_raise %>% dplyr::filter(measurement_unit =="no")
+  dataset_to_raise <- dataset_to_raise %>% dplyr::filter(measurement_unit =="t")
+  dataset_to_compute_rf <- dataset_to_compute_rf %>% dplyr::filter(measurement_unit =="t")
+  
+  dataset_to_raise$year <- as.numeric(substr(dataset_to_raise$time_start, 
+                                             0, 4))
+  nominal_dataset_df$year <- as.numeric(substr(nominal_dataset_df$time_start, 
+                                               0, 4))
+  dataset_to_compute_rf$year <- as.numeric(substr(dataset_to_compute_rf$time_start, 
+                                               0, 4))
   dataset_to_raise<-dataset_to_raise[which(dataset_to_raise$source_authority %in% source_authority_filter),]
   
   dataset_to_compute_rf<-dataset_to_compute_rf[which(dataset_to_compute_rf$source_authority %in% source_authority_filter),]
@@ -8,6 +19,44 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   nominal_dataset_df<-nominal_dataset_df[which(nominal_dataset_df$source_authority %in% source_authority_filter),]
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_get_rf.R")
+  
+  dim_perfectly_compatible_data <- c("species", "fishing_mode", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom", "source_authority")
+  
+  if(do_not_raise_perfectly_compatible_data){
+    conds <- list()
+    if ("fishing_mode"  %in% names(dataset_to_raise)) conds <- append(conds, expr(fishing_mode  == "UNK"))
+    if ("fishing_fleet" %in% names(dataset_to_raise)) conds <- append(conds, expr(fishing_fleet == "NEI"))
+    if ("gear_type"     %in% names(dataset_to_raise)) conds <- append(conds, expr(gear_type     == "99.9"))
+    
+    
+    perfectly_compatible_data <- inner_join(dataset_to_raise, nominal_dataset_df, by =dim_perfectly_compatible_data ) %>% 
+      dplyr::select(dim_perfectly_compatible_data) %>% 
+      dplyr::filter(!!!conds)
+    
+    perfectly_compatible_data_value <- dplyr::semi_join(dataset_to_raise, perfectly_compatible_data)
+    
+    dataset_to_raise <- dplyr::anti_join(dataset_to_raise, perfectly_compatible_data)
+    nominal_dataset_df <- dplyr::anti_join(nominal_dataset_df, perfectly_compatible_data)
+    
+  }
+  
+  if(raise_only_on_unk){
+    unk_dim <- setdiff(dim_perfectly_compatible_data, x_raising_dimensions)
+    conds <- list()
+    if ("fishing_mode"  %in% (unk_dim)) conds <- append(conds, expr(fishing_mode  == "UNK"))
+    if ("fishing_fleet" %in% (unk_dim)) conds <- append(conds, expr(fishing_fleet == "NEI"))
+    if ("gear_type"     %in% (unk_dim)) conds <- append(conds, expr(gear_type     == "99.9"))
+    
+    if (length(conds)) {
+      # réduire la liste en un unique OR
+      cond_or <- reduce(conds, ~ expr( (!!.x) | (!!.y) ))
+      
+      nominal_dataset_df <- nominal_dataset_df %>%
+        dplyr::filter(!!cond_or)
+    }
+    
+  }
+  
   
   df_rf <- raise_get_rf(df_input_incomplete = dataset_to_compute_rf,
                         df_input_total = nominal_dataset_df,
@@ -25,7 +74,7 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   
   # if you want to decrease data but not remove data that has no correspondande run df_rf <- df_rf %>% dplyr::rowwise() %>% dplyr::mutate(rf = ifelse(is.na(rf), 1, rf))
   
-  if(do_not_decrease_unk_data){
+  if(decrease_when_rf_inferior_to_one && do_not_decrease_unk_data){
     conds <- list()
     if ("fishing_mode"  %in% names(df_rf)) conds <- append(conds, expr(fishing_mode  == "UNK"))
     if ("fishing_fleet" %in% names(df_rf)) conds <- append(conds, expr(fishing_fleet == "NEI"))
@@ -44,8 +93,10 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
                                                          decrease_when_rf_inferior_to_one = decrease_when_rf_inferior_to_one,
                                                          threshold_rf = NULL)
   
+  data_raised <- rbind(number_data_to_raise, data_raised$df)
+  
   if(remove_corresponding_number){
-  data_raised <- data_raised$df %>%
+  data_raised <- data_raised %>%
     dplyr::ungroup() %>%
     dplyr::group_by(across(-measurement_value)) %>% 
     dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
@@ -73,6 +124,9 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
     dplyr::mutate(year = lubridate::year(time_start)) %>% 
     anti_join(corresponding_number_to_raised_data, by = c(x_raising_dimensions,"measurement_unit")) %>% 
     dplyr::select(-year)
+  }
+  if(do_not_raise_perfectly_compatible_data){
+    data_raised <- rbind(data_raised, perfectly_compatible_data_value %>% dplyr::select(-year))
   }
   
   return(list(data_raised = data_raised, df_rf = df_rf))

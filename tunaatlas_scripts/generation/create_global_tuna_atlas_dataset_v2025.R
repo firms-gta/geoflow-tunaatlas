@@ -72,9 +72,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
   #for level 2 - IRD
   source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
   source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas, "convert_number_to_nominal.R")) #modified for geoflow
   source(here::here("tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas, "function_raise_data.R")) #modified for geoflow
+  source(here::here("tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
+  source(here::here("tunaatlas_scripts/generation/function_raise_data.R")) #modified for geoflow
   
   
   # For filtering/aggregating
@@ -745,8 +745,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                                                     georef_df,
                                                     strata_cols   = c("species",
                                                                       "source_authority",
-                                                                      "geographic_identifier_nom",
                                                                       "year",
+                                                                      "geographic_identifier_nom",
                                                                       "measurement_unit"),
                                                     step_order    = c("fishing_mode",
                                                                       "gear_type",
@@ -756,7 +756,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                                                                          fishing_mode  = "UNK"),
                                                     mode        = opts$strong_weak_upgrade,
                                                     logger        = message) {
-              
               ## add helper year column if needed
               if (!"year" %in% names(nominal_df))
                 nominal_df <- nominal_df %>%
@@ -774,7 +773,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 # -------- proportions from GEO -----------------------------
                 geo_props <- georef_df %>%
                   # keep ALL codes, including the unknown one
-                  dplyr::group_by(dplyr::across(dplyr::all_of(c(strata_cols, dim_col)))) %>%
+                  dplyr::group_by(dplyr::across(dplyr::all_of(c(strata_cols, step_order)))) %>%
                   dplyr::summarise(val = sum(measurement_value, na.rm = TRUE), .groups = "drop") %>%
                   dplyr::group_by(dplyr::across(dplyr::all_of(strata_cols))) %>%
                   dplyr::mutate(prop = val / sum(val, na.rm = TRUE), total = sum(val)) %>%
@@ -795,12 +794,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 
                 sum(to_specify$measurement_value)
                 if (mode == "weak"){
-                  prop_diff_de_un <- to_specify %>% dplyr::filter(prop != 1)
-                  prop_de_un <- to_specify %>% dplyr::filter(prop == 1)
                   
-                  
-                  prop_diff_de_un_diff <- prop_diff_de_un %>% dplyr::filter(measurement_value > total)
-                  prop_diff_de_un_prop <- prop_diff_de_un %>% dplyr::filter(measurement_value <= total)
+                  prop_diff_de_un_diff <- to_specify %>% dplyr::filter(measurement_value > total)
+                  prop_diff_de_un_prop <- to_specify %>% dplyr::filter(measurement_value <= total)
                   
                   prop_diff_de_un_prop_specified <- prop_diff_de_un_prop %>%
                     dplyr::mutate(measurement_value = measurement_value * prop,
@@ -839,9 +835,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                     dplyr::ungroup() 
                   prop_diff_specified_final <- rbind(prop_diff_specified, data_init)
                   
-                  specified <- rbind(prop_de_un%>%
-                                       dplyr::select(all_of(names(nominal_df))), 
-                                     prop_diff_de_un_prop_specified%>%
+                  specified <- rbind(prop_diff_de_un_prop_specified%>%
                                        dplyr::select(all_of(names(nominal_df))),
                                      prop_diff_specified_final%>%
                                        dplyr::select(all_of(names(nominal_df))))
@@ -867,22 +861,50 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 
                 # ------- log the volumes re-allocated ----------------------
                 raised_t  <- specified %>%
-                  filter(measurement_unit %in% c("t", "MT", "MTNO")) %>%
-                  summarise(sum_val = sum(measurement_value, na.rm = TRUE)) %>%
-                  pull(sum_val)
+                  dplyr::ungroup() %>% 
+                  dplyr::filter(measurement_unit %in% c("t", "MT", "MTNO")) %>%
+                  dplyr::summarise(sum_val = sum(measurement_value, na.rm = TRUE)) %>%
+                  dplyr::pull(sum_val)
                 raised_no <- specified %>%
-                  filter(measurement_unit %in% c("no", "NO", "NOMT")) %>%
-                  summarise(sum_val = sum(measurement_value, na.rm = TRUE)) %>%
-                  pull(sum_val)
+                  dplyr::ungroup() %>%
+                  dplyr::filter(measurement_unit %in% c("no", "NO", "NOMT")) %>%
+                  dplyr::summarise(sum_val = sum(measurement_value, na.rm = TRUE)) %>%
+                  dplyr::pull(sum_val)
                 
                 logger(sprintf("Specified %s — %.3f t, %.3f no",
                                dim_col, raised_t, raised_no))
               }
               
+              nominal_df <- nominal_df %>% ungroup() %>% dplyr::group_by(across(-measurement_value)) %>% 
+                dplyr::summarise(measurement_value = sum(measurement_value),
+                                 .groups = "drop")
+              
               nominal_df
             } # juste definition de la fonction, qui est longe, on l'utilise après dans le iterative
             
+            strata_cols_updated <- c("gear_type", "species", "year", "source_authority",
+                                     "fishing_fleet", "geographic_identifier_nom", "fishing_mode")
+              # on spécifie deux fois comme ça ça converge direct
+            step_order_updated <-  c("fishing_mode", "gear_type", "fishing_fleet")
             
+            strata_cols_updated <- setdiff(strata_cols_updated, step_order_updated)
+              nominal_catch <- specify_nominal_with_georef(nominal_catch,
+                                                           georef_dataset,
+                                                           strata_cols   = strata_cols_updated ,
+                                                           step_order    =  step_order_updated,
+                                                           mode = "weak", # could be strong
+                                                           logger = function(msg) {
+                                                             cat("[Specify] ", msg, "\n")
+                                                           })
+              
+              nominal_catch <- specify_nominal_with_georef(nominal_catch,
+                                                           georef_dataset,
+                                                           strata_cols   = strata_cols_updated ,
+                                                           step_order    =  step_order_updated,
+                                                           mode = "weak", # could be strong
+                                                           logger = function(msg) {
+                                                             cat("[Specify] ", msg, "\n")
+                                                           })
             
           }
           
@@ -894,11 +916,10 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                                         georef_dataset,    # geo-referenced data.frame
                                         nominal_catch,     # nominal data.frame
                                         entity,            # object used by your loggers
-                                        passes            = 5L,   # 1–5
+                                        passes            = 7L,   # 1–8
                                         decrease_on_last  = TRUE,
                                         recap_each_step   = TRUE,
                                         stepnumber        = 1, 
-                                        upgrading_nominal_on_georef = opts$upgrading_nominal_on_georef, 
                                         decrease_every_time = opts$decrease_every_time) {
             
             ## ----- 0. Dimension sets in fixed order -----
@@ -912,8 +933,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
               setdiff(full_dims, c("fishing_fleet")),
               setdiff(full_dims, c("fishing_mode", "gear_type")),
               setdiff(full_dims, c("fishing_mode", "fishing_fleet")),
-              setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet")),
-              setdiff(full_dims, c("fishing_mode", "geographic_identifier_nom", "gear_type", "fishing_fleet"))
+              setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet"))
             )
             
             passes <- max(0L, min(as.integer(passes), length(dim_sets)))
@@ -921,6 +941,13 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             
             ## ----- 1. Loop over passes -----
             for (i in seq_len(passes)) {
+              
+              
+              x_dims        <- dim_sets[[i]]
+              decrease_flag <- isTRUE(decrease_on_last) && i == passes | isTRUE(decrease_every_time)
+              
+              
+              strata_cols_updated <- x_dims
               
               x_dims        <- dim_sets[[i]]
               strata_cols_updated <- x_dims
@@ -945,26 +972,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
               
               # wcpfc <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
               # georef_dataset <- georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
-              
-              x_dims        <- dim_sets[[i]]
-              decrease_flag <- isTRUE(decrease_on_last) && i == passes | isTRUE(decrease_every_time)
-              
-              
-              strata_cols_updated <- x_dims
-              
-              fallback_cols <- c("fishing_mode", "gear_type", "fishing_fleet")
-              step_order_updated <- setdiff(fallback_cols, x_dims)
-              if(opts$upgrading_nominal_on_georef){
-              
-              nominal_catch <- specify_nominal_with_georef(nominal_catch,
-                                                           georef_dataset,
-                                                           strata_cols   = strata_cols_updated ,
-                                                           step_order    =  step_order_updated,
-                                                           mode = "weak", # could be strong
-                                                           logger = function(msg) {
-                                                             cat("[Specify] ", msg, "\n")
-                                                           })
-              }
               
               ## 1.1 – log start of pass
               stepLogger(level = 2,
@@ -996,7 +1003,8 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 dataset_to_compute_rf             = georef_dataset,
                 nominal_dataset_df                = nominal_catch,
                 x_raising_dimensions              = x_dims,
-                decrease_when_rf_inferior_to_one  = decrease_flag
+                decrease_when_rf_inferior_to_one  = decrease_flag,
+                do_not_raise_perfectly_compatible_data = ifelse(identical(full_dims,x_dims), FALSE, TRUE)
               )
               
               georef_dataset <- raise_out$data_raised %>% dplyr::distinct()
@@ -1073,8 +1081,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           }
           
           if(is.null(opts$passes)){
-            opts$passes <- 5
+            opts$passes <- 4
           }
+          
           
           georef_dataset <- iterative_raising(
             fact              = "catch",

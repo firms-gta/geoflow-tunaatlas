@@ -14,6 +14,8 @@
 #' @param raise_only_unmatched Logical, if TRUE, the function will raise only the strata that
 #'        do not have equivalent strata in tons. If FALSE, it will raise all strata, including 
 #'        those that have an equivalent in tons. Default is TRUE.
+#' @param raise_only_on_unk Logical, if TRUE, the function will raise only the strata containing UNK, NEI or 99.9, this 
+#'        is to make sure no data for instance of a certain gear_type is allocated to another gear_type if the gear_type dimension is not used
 #'
 #' @return A list containing two datasets:
 #' \item{georef_dataset}{The combined dataset with measurements in tons and numbers.}
@@ -24,8 +26,27 @@
 #'
 convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms_level0, 
                                       strata = c("source_authority", "species", "gear_type", "fishing_fleet", "year"),
-                                      raise_only_unmatched = TRUE) {
+                                      raise_only_unmatched = TRUE, 
+                                      raise_only_on_unk = TRUE) {
   
+  dim_perfectly_compatible_data <- c("species", "fishing_mode", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom", "source_authority")
+  
+  if(raise_only_on_unk){
+    unk_dim <- setdiff(dim_perfectly_compatible_data, strata)
+    conds <- list()
+    if ("fishing_mode"  %in% (unk_dim)) conds <- append(conds, expr(fishing_mode  == "UNK"))
+    if ("fishing_fleet" %in% (unk_dim)) conds <- append(conds, expr(fishing_fleet == "NEI"))
+    if ("gear_type"     %in% (unk_dim)) conds <- append(conds, expr(gear_type     == "99.9"))
+    
+    if (length(conds)) {
+      # réduire la liste en un unique OR
+      cond_or <- reduce(conds, ~ expr( (!!.x) | (!!.y) ))
+      
+      global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>%
+        dplyr::filter(!!cond_or)
+    }
+    
+  }
   columns <- colnames(georef_dataset)
   
   global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>%
@@ -101,7 +122,8 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
     flog.info("Processing all strata using the nominal dataset.")
   }
   
-  global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% dplyr::select(c(strata, "measurement_value"))
+  global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% dplyr::select(c(strata, "measurement_value")) %>% 
+    dplyr::group_by(across(-measurement_value)) %>% dplyr::summarise(measurement_value = sum(measurement_value))
   
   georef_and_nominal_augmentation <- georef_dataset_number %>%
     dplyr::left_join(global_nominal_catch_firms_level0, by = strata) %>%
@@ -142,7 +164,7 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
     not_converted_number
   )
   
-  georef_dataset <- georef_dataset %>% dplyr::group_by(across(setdiff(everything(), "measurement_value"))) %>% dplyr::summarise(measurement_value = sum(measurement_value)) %>% 
+  georef_dataset <- georef_dataset %>% dplyr::group_by(across(-measurement_value)) %>% dplyr::summarise(measurement_value = sum(measurement_value)) %>% 
     dplyr::ungroup()
   
   flog.info("Completed the conversion of numbers to tons and combined datasets.")

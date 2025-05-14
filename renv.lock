@@ -25,7 +25,7 @@
       "RemoteRepo": "CWP.dataset",
       "RemoteUsername": "bastienird",
       "RemoteRef": "HEAD",
-      "RemoteSha": "13b333d216188d4608120310ec1c7861d7e1c950",
+      "RemoteSha": "57af06d687e4658b86b8236e4bd019b28e0aa13f",
       "Requirements": [
         "DT",
         "R",
@@ -62,7 +62,7 @@
         "utils",
         "xts"
       ],
-      "Hash": "abf200f284c7080ee5db5fe9c2eb76e8"
+      "Hash": "672dcc328391ab1597005b9e93ef91d0"
     },
     "DBI": {
       "Package": "DBI",
@@ -1538,14 +1538,14 @@
     },
     "generics": {
       "Package": "generics",
-      "Version": "0.1.3",
+      "Version": "0.1.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
       ],
-      "Hash": "15e9634c0fcd294799e9b2e929ed1b86"
+      "Hash": "4b29bf698d0c7bdb9f1e4976e7ade41d"
     },
     "geoflow": {
       "Package": "geoflow",
@@ -2625,6 +2625,26 @@
         "R"
       ],
       "Hash": "7ce2733a9826b3aeb1775d56fd305472"
+    },
+    "maptiles": {
+      "Package": "maptiles",
+      "Version": "0.10.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "curl",
+        "digest",
+        "grDevices",
+        "graphics",
+        "png",
+        "sf",
+        "slippymath",
+        "terra",
+        "tools",
+        "utils"
+      ],
+      "Hash": "bdb05d511b6b52994be88b176a028392"
     },
     "markdown": {
       "Package": "markdown",
@@ -4143,6 +4163,20 @@
       ],
       "Hash": "e418b532e9bb4eb22a714b9a9f1acee7"
     },
+    "slippymath": {
+      "Package": "slippymath",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "png",
+        "purrr",
+        "raster",
+        "stats"
+      ],
+      "Hash": "abdaf883004a4791545655d79ca3aae0"
+    },
     "snakecase": {
       "Package": "snakecase",
       "Version": "0.11.1",
@@ -4624,11 +4658,12 @@
     },
     "tmap": {
       "Package": "tmap",
-      "Version": "4.0",
+      "Version": "4.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
+        "base64enc",
         "classInt",
         "cli",
         "cols4all",
@@ -4641,6 +4676,7 @@
         "leaflegend",
         "leaflet",
         "leafsync",
+        "maptiles",
         "methods",
         "rlang",
         "s2",
@@ -4651,7 +4687,7 @@
         "tmaptools",
         "units"
       ],
-      "Hash": "984decf95d1e5d976214b581f0d4c2ce"
+      "Hash": "417af47411bf8024878c5686c1a58d13"
     },
     "tmaptools": {
       "Package": "tmaptools",
