@@ -1,6 +1,8 @@
 function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,dataset_to_compute_rf,nominal_dataset_df,x_raising_dimensions,
-                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE, do_not_decrease_unk_data = TRUE, raise_only_on_unk = TRUE, do_not_raise_perfectly_compatible_data = TRUE){
-  
+                              decrease_when_rf_inferior_to_one = FALSE, remove_corresponding_number = TRUE,
+                              do_not_decrease_unk_data = TRUE, 
+                              raise_only_on_unk = TRUE, do_not_raise_perfectly_compatible_data = TRUE, 
+                              do_not_raise_any_unk = TRUE){
   # we recommend, if runnning with do_not_raise_perfectly_compatible_data to true, to raise only_on_unk .
   number_data_to_raise <- dataset_to_raise %>% dplyr::filter(measurement_unit =="no")
   dataset_to_raise <- dataset_to_raise %>% dplyr::filter(measurement_unit =="t")
@@ -61,7 +63,8 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   df_rf <- raise_get_rf(df_input_incomplete = dataset_to_compute_rf,
                         df_input_total = nominal_dataset_df,
                         x_raising_dimensions = c(x_raising_dimensions,"measurement_unit")
-  )
+  ) 
+  df_rf <- df_rf %>% dplyr::mutate(rf = ifelse(is.na(rf), 0, rf))
   saveRDS(df_rf, paste0("data/",gsub(Sys.time(),pattern = " ", replacement = "_"),"raisingfactordataset.rds"))
   
   if (fact=="catch"){
@@ -74,15 +77,44 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   
   # if you want to decrease data but not remove data that has no correspondande run df_rf <- df_rf %>% dplyr::rowwise() %>% dplyr::mutate(rf = ifelse(is.na(rf), 1, rf))
   
-  if(decrease_when_rf_inferior_to_one && do_not_decrease_unk_data){
-    conds <- list()
-    if ("fishing_mode"  %in% names(df_rf)) conds <- append(conds, expr(fishing_mode  == "UNK"))
-    if ("fishing_fleet" %in% names(df_rf)) conds <- append(conds, expr(fishing_fleet == "NEI"))
-    if ("gear_type"     %in% names(df_rf)) conds <- append(conds, expr(gear_type     == "99.9"))
+  if (decrease_when_rf_inferior_to_one && do_not_decrease_unk_data) {
+    cols <- intersect(names(df_rf),
+                      c("fishing_mode","fishing_fleet","gear_type"))
     
-    df_rf <- df_rf %>%
-      dplyr::filter(!!!conds)
+    if (length(cols)>0) {
+      # drapeaux de "unk" ligne à ligne
+      flag <- Reduce(`|`, lapply(cols, function(col)
+        df_rf[[col]] %in% c("UNK","NEI","99.9")
+      ), init = FALSE)
+      
+      # on ne touche qu'aux lignes concernées
+      df_rf$rf[flag & df_rf$rf < 1] <- 1L
+    }
   }
+  
+  
+  if (do_not_raise_any_unk) {
+    cols <- intersect(
+      names(df_rf),
+      c("fishing_mode", "fishing_fleet", "gear_type")
+    )
+    
+    if (length(cols) > 0) {
+      # sapply() construit une matrice nrow×length(cols)
+      mat <- sapply(cols, function(col) {
+        df_rf[[col]] %in% c("UNK","NEI","99.9")
+      })
+      unk_flag <- rowSums(mat, na.rm = TRUE) > 0
+    } else {
+      unk_flag <- rep(FALSE, nrow(df_rf))
+    }
+    
+    # puis on remplace là où il faut
+    df_rf$rf[unk_flag & df_rf$rf > 1] <- 1L #alors on force a 1 pour ne pas raise un unk
+    
+  }
+  
+  
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/raise_incomplete_dataset_to_total_dataset.R")
   
@@ -123,7 +155,8 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
   data_raised <- data_raised %>% 
     dplyr::mutate(year = lubridate::year(time_start)) %>% 
     anti_join(corresponding_number_to_raised_data, by = c(x_raising_dimensions,"measurement_unit")) %>% 
-    dplyr::select(-year)
+    dplyr::select(-year) %>% 
+    dplyr::mutate(measurement_processing_level = "raised")
   }
   if(do_not_raise_perfectly_compatible_data){
     data_raised <- rbind(data_raised, perfectly_compatible_data_value %>% dplyr::select(-year))

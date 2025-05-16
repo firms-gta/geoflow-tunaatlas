@@ -175,19 +175,26 @@ file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"),
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("level_2_catch_2025.json")) # FROM DRIVE
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+gc()
 config <- initWorkflow(here::here("level_2_catch_2025.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
+gc()
 require(CWP.dataset)
 setwd("~/firms-gta/geoflow-tunaatlas")
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
+
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "middle",
+                              savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all"), fast_and_heavy = FALSE)
 configshilky <- config
 configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = "FAL")
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("all"), nameoutput = "Silkysharks")
+summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 
+                              sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all" ,"WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ), nameoutput = "Silkysharks")
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
 copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path, target_data_folder = "efforts_2025")
 copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path)
@@ -209,26 +216,26 @@ source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisher
 
 # IRD_data <- readr::read_csv("data/IOTC_conv_fact_mapped.csv")
 # specieslist <- unique(IRD_data$species)
-# specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF", "FAL)
+specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF", "FAL")
 # 
-# entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
+entity_dirs <- list.dirs(file.path("~/firms-gta/geoflow-tunaatlas/jobs/20250512091934level_2_catch_2025", "entities"), full.names = TRUE, recursive = FALSE)
 # # entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20241007133651_global_datasets_level1_2/entities/global_catch_ird_level2_without_IRD"
-entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20250506194609/entities/global_catch_ird_lvl2_rawdata_1950_2023_upgrade_nominal"
-# for (entity_dir in entity_dirs) {
-#   entity_name <- basename(entity_dir)
-#   setwd(here::here(entity_dir))
-#   sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
-#   details <- file.info(sub_list_dir_2)
-#   details <- details[with(details, order(as.POSIXct(mtime))), ]
-#   sub_list_dir_2 <- rownames(details)
-#   flog.info("Processed sub_list_dir_2")
-#   sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
-#   a <- process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
-#   combined_df <- create_combined_dataframe(a)
-#   qflextable(combined_df)
-#   # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
-#   qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
-# }
+# entity_dirs <- 
+for (entity_dir in entity_dirs) {
+  entity_name <- basename(entity_dir)
+  setwd(here::here(entity_dir))
+  sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
+  details <- file.info(sub_list_dir_2)
+  details <- details[with(details, order(as.POSIXct(mtime))), ]
+  sub_list_dir_2 <- rownames(details)
+  flog.info("Processed sub_list_dir_2")
+  sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+  a <- process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
+  combined_df <- create_combined_dataframe(a)
+  qflextable(combined_df)
+  # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
+  qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
+}
 
 # uncomment the follwoing lines to go the shared path for analysis
 # tunaatlas_qa_global_datasets_catch_path <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data"
@@ -323,7 +330,7 @@ setwd("~/firms-gta/geoflow-tunaatlas/")
 Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "long",source_authoritylist = c("WCPFC"),
                  savestep = TRUE, usesave = FALSE, nameoutput = "longwcpfctounderstanddecrease")
 
-# source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
+source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
 # Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
 # 
 # georef_dataset <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20241002142921_global_datasets_level1_2/entities/global_catch_ird_level2/Markdown/Level2_RF1/ancient.qs")

@@ -175,6 +175,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         TRUE ~ measurement_processing_level
       ))
     
+    georef_dataset <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) != "7") # removing 10 degrees
     
     if(recap_each_step){
       function_recap_each_step(
@@ -916,7 +917,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                                         georef_dataset,    # geo-referenced data.frame
                                         nominal_catch,     # nominal data.frame
                                         entity,            # object used by your loggers
-                                        passes            = 7L,   # 1–8
+                                        passes            = 8L,   # 1–8
                                         decrease_on_last  = TRUE,
                                         recap_each_step   = TRUE,
                                         stepnumber        = 1, 
@@ -933,6 +934,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
               setdiff(full_dims, c("fishing_fleet")),
               setdiff(full_dims, c("fishing_mode", "gear_type")),
               setdiff(full_dims, c("fishing_mode", "fishing_fleet")),
+              setdiff(full_dims, c("gear_type", "fishing_fleet")),
               setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet"))
             )
             
@@ -968,11 +970,6 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 ""
               )
               
-              
-              
-              # wcpfc <- georef_dataset %>% dplyr::filter(source_authority == "WCPFC")
-              # georef_dataset <- georef_dataset %>% dplyr::filter(source_authority != "WCPFC")
-              
               ## 1.1 – log start of pass
               stepLogger(level = 2,
                          step  = stepnumber,
@@ -1004,7 +1001,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 nominal_dataset_df                = nominal_catch,
                 x_raising_dimensions              = x_dims,
                 decrease_when_rf_inferior_to_one  = decrease_flag,
-                do_not_raise_perfectly_compatible_data = ifelse(identical(full_dims,x_dims), FALSE, TRUE)
+                raise_only_on_unk = TRUE, 
+                do_not_raise_perfectly_compatible_data = ifelse(identical(full_dims,x_dims), FALSE, TRUE), 
+                do_not_raise_any_unk = opts$do_not_raise_any_unk
               )
               
               georef_dataset <- raise_out$data_raised %>% dplyr::distinct()
@@ -1051,13 +1050,17 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                           raised_tons, decr_tons),
                   sprintf("Numbers raised %.3f, decreased %.3f. ",
                           raised_num,  decr_num),
-                  if (decrease_flag)
+                  if (ifelse(identical(full_dims, x_dims), FALSE, TRUE)) {
+                    "As one or multiple dimensions are removed in this pass for the raising, the raising is only done on the corresponding unspecified data of the stratas. The strata having a 'perfect' match in the nominal is not included in this raising."
+                  } else {
+                    ""
+                  },
+                  if (decrease_flag) {
                     "Values above the nominal total were scaled down on this pass."
-                  else
+                  } else {
                     "No down-scaling was applied on this pass."
+                  }
                 )
-                
-                # georef_dataset <- rbind(georef_dataset, wcpfc)
                 
                 function_recap_each_step(
                   step_name   = paste0("RF_pass_", i),
