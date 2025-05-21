@@ -188,7 +188,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "middle",
-                              savestep = FALSE, usesave = FALSE, 
+                              savestep = FALSE, usesave = TRUE, 
                               source_authoritylist = c("all"), fast_and_heavy = FALSE)
 configshilky <- config
 configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = "FAL")
