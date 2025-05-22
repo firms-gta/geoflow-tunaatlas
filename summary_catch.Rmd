@@ -204,13 +204,13 @@ catch_data %>%
 
 If you want to use only part of the data you can filter the dataset using the dimensison provided exemple, here let's focus on silky sharks (note that this only concern catch data as effort cannot be related to species)
 
-```{r}
+```{r silky}
 
 silky_sharks <- catch_data %>% dplyr::filter(species_label == "Silky shark")
 
 ```
 
-```{r}
+```{r silkybyyear}
 
 silky_sharks %>%
   dplyr::group_by(year = lubridate::year(time_start), measurement_unit) %>%
@@ -224,7 +224,7 @@ silky_sharks %>%
 
 ## Let's decompose the data for some dimensions
 
-```{r}
+```{r silkybyyeargear}
 
 groupped_gear <- silky_sharks %>% dplyr::group_by(gear_type_label, time_start, measurement_unit) %>% 
   dplyr::summarise(measurement_value = sum(measurement_value))
@@ -245,7 +245,7 @@ ggplot(groupped_gear) +
 ```
 
 
-```{r, eval=FALSE}
+```{r silkybyyearff, eval=FALSE}
 groupped_fishing_fleet <- silky_sharks %>% dplyr::group_by(fishing_fleet_label, time_start, measurement_unit) %>% 
   dplyr::summarise(measurement_value = sum(measurement_value))
 
@@ -263,7 +263,7 @@ ggplot(groupped_fishing_fleet) +
 ```
 
 
-```{r}
+```{r silkybyyeartrfmos}
 groupped_source_auth <- silky_sharks %>% dplyr::group_by(source_authority, time_start, measurement_unit) %>% 
   dplyr::summarise(measurement_value = sum(measurement_value))
 
@@ -284,7 +284,7 @@ ggplot(groupped_source_auth) +
 
 # How to aggregate data from 1 deg to 5 deg ? 
 
-```{r}
+```{r aggregate}
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
 
@@ -302,7 +302,7 @@ silky_sharks_aggregated <- one_degree %>% rowwise() %>%
 # How to disaggregate ? (need connection to DB for now, this operation is in most case very time and bandwidth consuming)
 
 
-```{r eval=FALSE, include=TRUE}
+```{r disaggregate, eval=FALSE, include=TRUE}
 
 source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
 
