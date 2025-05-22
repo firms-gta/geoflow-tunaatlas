@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r echo=TRUE, results='hide'}
-packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra")
+packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
@@ -27,25 +27,25 @@ lapply(packages, function(pkg) {
 
 ### From qs (if you want to download geometry as well, it can be heavy)
 
+If the timeout make impossible the downlading from R code, please download it from zenodo and then rename the file. 
+
 ```{r}
 
 qs_file <- "global_catch_tunaatlasird_level2.qs"
 if (!file.exists(qs_file)) {
-  download.file("https://zenodo.org/record/15221705/files/global_catch_tunaatlasird_level2.qs?download=1", qs_file, mode = "wb")
+  download.file("https://zenodo.org/record/15405414/files/global_catch_tunaatlasird_level2_1950_2023.qs?download=1", qs_file, mode = "wb")
 }
 catch_data <- qs::qread(qs_file)
-
-catch_data$geom_wkt <- NULL 
 
 ```
 
 ### From csv (geometry can be downloaded from github, downloading is slower and the dataset is close to 1GB).
 
-```{r}
+```{r eval=FALSE}
 
 csv_file <- "global_catch_tunaatlasird_level2 (without_geom).csv"
 if (!file.exists(csv_file)) {
-  download.file("https://zenodo.org/records/15221705/files/global_catch_tunaatlasird_level2%20(without_geom).csv?download=1", csv_file, mode = "wb")
+  download.file("https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1", csv_file, mode = "wb")
 }
 catch_data <- readr::read_csv(csv_file) %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
 
@@ -61,28 +61,41 @@ kableExtra::kable(head(catch_data))
 
 As the geometry can be heavy, we propose to remove it and to add it when necessary in plots.
 
+```{r}
+catch_data$geom <- NULL 
+```
+
+
 ## 📊 Data overview
 
-This dataset provides monthly records of tuna and tuna-like species catches at the global scale between 1950 and 2021. Here is a description of the columns:
+This dataset provides monthly records of tuna and tuna-like species catches at the global scale between 1950 and 2023. Here is a description of the columns:
 
-- `source_authority`: Regional Fisheries Management Organization (RFMO) that provided the data
-- `fishing_fleet`: Code of the flag state or fleet (e.g., AUS, JPN)
-- `time_start`, `time_end`: Start and end dates of the observation period (monthly granularity, sometimes annualy)
-- `geographic_identifier`: Code identifying the spatial grid cell, from CWP grid dataset.
-- `gear_type`: Code of the fishing gear used
-- `species`: Species code (e.g., SBF for Southern Bluefin Tuna)
-- `fishing_mode`: Code indicating the fishing mode
-- `measurement_unit`: Unit used to report catches (e.g., Tons, Number)
-- `measurement_value`: Numeric value of the measured catch
-- `GRIDTYPE`: Spatial grid type (e.g., 1deg_x_1deg)
-- `species_group`: Taxonomic group (e.g., SCOMBROIDEI)
-- `gear_label`: Human-readable gear name
-- `fishing_fleet_label`: Human-readable label for the flag or fleet
-- `species_label`: Common name of the species
-- `species_definition`: Scientific name of the species
-- `geom_wkt`: Geometry in WKT format (MULTIPOLYGON)
-- `ocean`: RFMO area of activity
-<!-- - `fishing_mode_label`: Human-readable label for fishing mode -->
+| Column                             | Description                                                                                       |
+|------------------------------------|---------------------------------------------------------------------------------------------------|
+| **source_authority**               | Regional Fisheries Management Organization (RFMO) providing the data (e.g., CCSBT, WCPFC, IOTC).   |
+| **species**                        | Species code (e.g., "SBF" for Southern Bluefin Tuna).                                            |
+| **species_label**                  | Common name of the species (e.g., "Southern bluefin tuna").                                      |
+| **gear_type**                      | Gear code indicating the fishing gear used (e.g., "01.1").                                       |
+| **gear_type_label**                | Human-readable gear name (e.g., "Purse seines").                                                 |
+| **fishing_fleet**                  | Flag state or fleet code (e.g., "AUS", "JPN").                                                 |
+| **fishing_fleet_label**            | Human-readable fleet label (e.g., "Australia").                                                  |
+| **fishing_mode**                   | Fishing mode code (e.g., "UNK").                                                                 |
+| **fishing_mode_label**             | Human-readable mode label (e.g., "Undefined school").                                            |
+| **time_start**                     | Start date of the observation period (monthly resolution, format "YYYY-MM-01").                  |
+| **time_end**                       | End date of the observation period (monthly resolution, format "YYYY-MM-30/31").                  |
+| **geographic_identifier**          | Numeric code identifying the spatial grid cell from the CWP grid dataset.                          |
+| **geographic_identifier_nom**      | RFMO area name corresponding to the grid cell (e.g., "WCPFC", "IOTC").                         |
+| **measurement**                    | Measurement type (e.g., "catch").                                                                |
+| **measurement_label**              | Human-readable measurement label (e.g., "Catch").                                                |
+| **measurement_type**               | Catch type code (e.g., "RC" for Retained Catch).                                                 |
+| **measurement_type_label**         | Human-readable catch type label (e.g., "Retained catch").                                        |
+| **measurement_unit**               | Unit of measurement (e.g., "t" for tonnes).                                                        |
+| **measurement_processing_level**   | Data processing level (e.g., "raised").                                                           |
+| **measurement_processing_level_label** | Human-readable processing level label (e.g., "Raised").                                           |
+| **measurement_value**              | Numeric value of the measurement (e.g., tonnes, number of fish).                                    |
+| **species_group**                  | Taxonomic group of the species (e.g., "SCOMBROIDEI").                                            |
+| **gridtype**                       | Spatial grid resolution type (e.g., "1deg_x_1deg").                                             |
+| **geom**                           | Spatial geometry of the grid cell as an sf MULTIPOLYGON object. 
 
 ```{r}
 dplyr::glimpse(catch_data)
@@ -213,14 +226,14 @@ silky_sharks %>%
 
 ```{r}
 
-groupped_gear <- silky_sharks %>% dplyr::group_by(gear_label, time_start, measurement_unit) %>% 
+groupped_gear <- silky_sharks %>% dplyr::group_by(gear_type_label, time_start, measurement_unit) %>% 
   dplyr::summarise(measurement_value = sum(measurement_value))
 
 ggplot(groupped_gear) +
   aes(
     x = time_start,
     y = measurement_value,
-    colour = gear_label
+    colour = gear_type_label
   ) +
   geom_line() +  #
   geom_point() +
@@ -286,7 +299,7 @@ silky_sharks_aggregated <- one_degree %>% rowwise() %>%
 ```
 
 
-# How to disaggregate ? (need connection to DB for now)
+# How to disaggregate ? (need connection to DB for now, this operation is in most case very time and bandwidth consuming)
 
 
 ```{r eval=FALSE, include=TRUE}
