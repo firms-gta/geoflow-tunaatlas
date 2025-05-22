@@ -148,7 +148,8 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
     dplyr::rename(measurement_value = new_measurement) %>%
     dplyr::ungroup() %>%
     dplyr::select(all_of(columns)) %>%
-    dplyr::mutate(measurement_unit = "t")
+    dplyr::mutate(measurement_unit = "t")%>% 
+    dplyr::mutate(measurement_processing_level = "raised")
   
   # Handle hopeless cases (entries without conversion)
   not_converted_number <- georef_and_nominal_augmentation %>%

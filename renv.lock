@@ -25,8 +25,9 @@
       "RemoteRepo": "CWP.dataset",
       "RemoteUsername": "bastienird",
       "RemoteRef": "HEAD",
-      "RemoteSha": "57af06d687e4658b86b8236e4bd019b28e0aa13f",
+      "RemoteSha": "a12a8872748ccc512417906a64c2b81b1395c91e",
       "Requirements": [
+        "DBI",
         "DT",
         "R",
         "RColorBrewer",
@@ -62,7 +63,7 @@
         "utils",
         "xts"
       ],
-      "Hash": "672dcc328391ab1597005b9e93ef91d0"
+      "Hash": "4b95df6532f9db39816e2beee58228dc"
     },
     "DBI": {
       "Package": "DBI",
