@@ -20,7 +20,7 @@
 #' }
 #' @export
 #' 
-create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
+create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   
   # Initialisation ----------------------------------------------------------
   
@@ -783,13 +783,13 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                 
                 # -------- unknown rows from NOMINAL ------------------------
                 unknown_rows <- nominal_df %>%
-                  filter(.data[[dim_col]] == unk_code)
+                  dplyr::filter(.data[[dim_col]] == unk_code)
                 
                 if (nrow(unknown_rows) == 0) next  # nothing to specify
                 
                 # join with props – keeps only strata where geo has detail
                 to_specify <- unknown_rows %>%
-                  inner_join(geo_props, by = strata_cols, suffix = c("", "_geo"))
+                  dplyr::inner_join(geo_props, by = strata_cols, suffix = c("", "_geo"))
                 
                 if (nrow(to_specify) == 0) next  # no geo detail for these strata
                 
@@ -806,7 +806,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                   
                   # 1) turn it into val copy + compute leftover
                   prop_diff_part <- prop_diff_de_un_diff %>%
-                    ungroup() %>% 
+                    dplyr::ungroup() %>% 
                     dplyr::mutate(
                       total_nom         = measurement_value,               # original UNK
                       measurement_value = val,                             # copy geo
@@ -876,7 +876,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
                                dim_col, raised_t, raised_no))
               }
               
-              nominal_df <- nominal_df %>% ungroup() %>% dplyr::group_by(across(-measurement_value)) %>% 
+              nominal_df <- nominal_df %>% dplyr::ungroup() %>% dplyr::group_by(across(-measurement_value)) %>% 
                 dplyr::summarise(measurement_value = sum(measurement_value),
                                  .groups = "drop")
               

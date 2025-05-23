@@ -14,7 +14,7 @@ required_packages <- c(
   "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
   "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
   "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
-  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
+  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", "fs" ,
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
   "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
 )
@@ -108,7 +108,8 @@ dir.create("data_raw_georef")
 copy_all_nested_data_folders(file.path("data",raw_data_georef), "data_raw_georef")
 
 
-source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+source("~/firms-gta/geoflow-tunaatlas/Analysis
+       _markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
 config <- initWorkflow(here::here("All_raw_data_georef_local.json"), handleMetadata = FALSE)
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
@@ -190,6 +191,14 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
                               config  = config, sizepdf = "middle",
                               savestep = FALSE, usesave = TRUE, 
                               source_authoritylist = c("all"), fast_and_heavy = FALSE)
+
+configshilky <- config
+configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species_label = "Silky shark")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 
+                 sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("all" ), nameoutput = "Silkysharks")
+
+
 configshilky <- config
 configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = "FAL")
 summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 

@@ -25,7 +25,7 @@
       "RemoteRepo": "CWP.dataset",
       "RemoteUsername": "bastienird",
       "RemoteRef": "HEAD",
-      "RemoteSha": "a12a8872748ccc512417906a64c2b81b1395c91e",
+      "RemoteSha": "af1516b93a88e2eb4407bc60b311e9a6ceba473c",
       "Requirements": [
         "DBI",
         "DT",
@@ -37,6 +37,7 @@
         "dplyr",
         "dygraphs",
         "flextable",
+        "fs",
         "futile.logger",
         "ggplot2",
         "googledrive",
@@ -61,9 +62,10 @@
         "tmap",
         "tools",
         "utils",
-        "xts"
+        "xts",
+        "yaml"
       ],
-      "Hash": "4b95df6532f9db39816e2beee58228dc"
+      "Hash": "4d10d50fa16524828fd0df4d92bff95d"
     },
     "DBI": {
       "Package": "DBI",

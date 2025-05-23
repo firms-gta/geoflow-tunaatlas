@@ -17,7 +17,7 @@
     "entities" : [
       {
         "handler": "csv",
-        "source": "geoflow_entities_tuna_global_datasets_IRD_level1_2022_local - IRD_level2.csv"
+        "source": "geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv"
       }
     ],
     "contacts" : [

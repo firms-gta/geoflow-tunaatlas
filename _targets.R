@@ -6,19 +6,21 @@ library(geoflow)
 
 if (!file.exists(here::here("results"))) {
   dir.create(here::here("results"))}
+if (!file.exists(here::here("data"))) {
+  dir.create(here::here("data"))}
 # Restaurer l'environnement `renv`
 if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
 
 # 🔹 SOURCING des fonctions nécessaires
-targets::tar_source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2023.R"))
+targets::tar_source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R"))
 
 # Définir les options globales de `{targets}`
 tar_option_set(
   packages = c(
     "jsonlite", "here", "purrr", "futile.logger", "geoflow",
     "dotenv", "data.table", "dplyr", "DBI", "RPostgreSQL",
-    "rpostgis", "ggplot2", "readr", "sf", "bookdown", "knitr", "tidyr"
+    "rpostgis", "ggplot2", "readr", "sf", "bookdown", "knitr", "tidyr", "CWP.dataset", "utils", "ows4R", "callr"
   )
 )
 options(
@@ -28,7 +30,7 @@ options(
 )
 
 Sys.setlocale("LC_ALL", "en_US.UTF-8")
-# config <- initWorkflow(here::here("catch_ird_level2_local.json"))  # 🔥 Charge en dehors de `{targets}`
+# config <- initWorkflow(here::here("catch_ird_level2_local.json"))  # 
 # entity <- config$metadata$content$entities[[1]]
 # action <- entity$data$actions[[1]]
 # opts <- action$options
@@ -36,7 +38,7 @@ Sys.setlocale("LC_ALL", "en_US.UTF-8")
 list(
   tar_target(
     config,
-    initWorkflow(here::here("catch_ird_level2_local.json"))  # 🔥 recréer `config` depuis le fichier
+    initWorkflow(here::here("catch_ird_level2_local.json"))  #
   ),
   
   tar_target(
@@ -57,25 +59,6 @@ list(
     action$options
   ),
   tar_target(
-    catch_file,
-    {
-      # 🔹 Récupération des paramètres de téléchargement
-      key <- opts$keygeoref  
-      doi <- opts$doigeoref  
-      file_path <- here::here("data", key)  # Chemin du fichier cible
-      
-      # 🔹 Vérification si le fichier existe déjà
-      if (!file.exists(file_path)) {
-        zen4R::download_zenodo(doi = doi, files = key, path = here::here("data"))
-      }
-      
-      # 🔹 Retourne le chemin du fichier (existant ou téléchargé)
-      file_path
-    },
-    format = "file"
-  ),
-  
-  tar_target(
     nominal_catch_file,
     {
       # 🔹 Récupération des paramètres de téléchargement
@@ -92,20 +75,46 @@ list(
       file_path
     },
     format = "file"
-  ),
-  # 🔹 3. Exécuter `create_global_tuna_atlas_dataset_v2023()` avec cette entité
+  )
+  # ,
+  # tar_target(
+  #   all_raw_data,
+  #   {
+  #     # 1) Prépare le dossier et le chemin du ZIP
+  #     zipfile <- file.path("data", "All_rawdata_for_level2.zip")
+  #     url     <- "https://zenodo.org/record/15496164/files/All_rawdata_for_level2.zip"
+  # 
+  #     # 2) Télécharge si nécessaire
+  #     if (!file.exists(zipfile)) {
+  #       utils::download.file(url, zipfile, mode = "wb")
+  #     }
+  # 
+  #     # 3) Dézippe si pas déjà décompressé
+  #     files_in_data <- list.files("data", all.files = TRUE, no.. = TRUE)
+  #     # on considère qu'il est déjà décompressé s'il y a au moins un fichier qui n'est pas le ZIP
+  #     need_unzip <- !any(!grepl("\\.zip$", files_in_data))
+  #     if (need_unzip) {
+  #       unzip(zipfile, exdir = "data")
+  #     }
+  # 
+  #     # 4) On renvoie la liste des fichiers extraits
+  #     list.files("data", full.names = TRUE)
+  #   },
+  #   format = "file"
+  # )
+  ,
+  # 🔹 3. Exécuter `create_global_tuna_atlas_dataset_v2025()` avec cette entité
   tar_target(
     results_file,
     {
       flog.info("Traitement de l'entité : %s", entity$identifiers[["id"]])
-      
+
       # 🔹 Ajout explicite des fichiers pour créer une dépendance
-      nominal_catch <- nominal_catch_file  
-      catch <- catch_file  
-      create_global_tuna_atlas_dataset_v2023(action, entity, config)
-      
+      nominal_catch <- nominal_catch_file
+      create_global_tuna_atlas_dataset_v2025(action, entity, config)
+
       output_file <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-      
+
       if (file.exists(output_file)) {
         flog.info("Fichier généré avec succès : %s", output_file)
         output_file
@@ -115,18 +124,63 @@ list(
       }
     },
     format = "file"
-  ),
-  # 🔹 4. Lire et sauvegarder le fichier généré
-  tar_target(
-    save_results,
-    {
-      df <- read.csv(results_file)  # Lire le fichier généré
-
-      write.csv(df, here::here("results/tuna_atlas_results.csv"))  # Sauvegarde finale
-      "results/tuna_atlas_results.csv"
-    },
-    format = "file"
   )
+  # ,
+  # # 🔹 4. Lire et sauvegarder le fichier généré
+  # tar_target(
+  #   save_results,
+  #   {
+  #     df <- read.csv(results_file)  # Lire le fichier généré
+  # 
+  #     write.csv(df, here::here("results/tuna_atlas_results.csv"))  # Sauvegarde finale
+  #     "results/tuna_atlas_results.csv"
+  #   },
+  #   format = "file"
+  # )
+  # ,
+  # tar_target(
+  #   markdown_report,
+  #   {
+  #     # répertoire racine de votre projet
+  #     main_dir <- here::here()
+  #     # connexion à la BDD
+  #     con <- config$software$output$dbi
+  #     
+  #     # génération du rapport "court"
+  #     CWP.dataset::summarising_step(
+  #       main_dir             = main_dir,
+  #       connectionDB         = con,
+  #       config               = config,
+  #       sizepdf              = "short",
+  #       savestep             = TRUE,
+  #       usesave              = TRUE,
+  #       source_authoritylist = "all"
+  #     )
+  #     
+  #     # génération du rapport "moyen"
+  #     CWP.dataset::summarising_step(
+  #       main_dir             = main_dir,
+  #       connectionDB         = con,
+  #       config               = config,
+  #       sizepdf              = "middle",
+  #       savestep             = TRUE,
+  #       usesave              = TRUE,
+  #       source_authoritylist = "all",
+  #       fast_and_heavy       = FALSE
+  #     )
+  #     
+  #     # 2) on liste les PDF produits
+  #     pdfs <- list.files(
+  #       path       = file.path(main_dir, "_book"), # ou le dossier où sont créés les PDF
+  #       pattern    = "\\.(pdf)$",
+  #       full.names = TRUE
+  #     )
+  #     
+  #     # on renvoie la liste des chemins produits
+  #     pdfs
+  #   },
+  #   format = "file"
+  # )
 )
 # # Définition du pipeline
 # list(

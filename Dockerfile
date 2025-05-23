@@ -29,7 +29,9 @@ RUN apt-get update && apt-get install -y \
     librdf0-dev \
     libfontconfig1-dev \
     libharfbuzz-dev libfribidi-dev \
-    redland-utils && \
+    redland-utils \
+    unzip && \
+    rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
 
@@ -51,8 +53,12 @@ WORKDIR /root/geoflow-tunaatlas
 RUN mkdir -p data 
 
 # Add files downloaded from Zenodo DOIs => https://docs.docker.com/reference/dockerfile/#add
-ADD https://zenodo.org/record/11410529/files/global_nominal_catch_firms_level0_harmonized.csv ./data/global_nominal_catch_firms_level0_harmonized.csv
-ADD https://zenodo.org/record/11460074/files/global_catch_firms_level0_harmonized.csv ./data/global_catch_firms_level0_harmonized.csv
+ADD https://zenodo.org/record/15311770/files/global_nominal_catch_firms_level0_2025.csv ./data/global_nominal_catch_firms_level0_2025.csv
+ADD https://zenodo.org/record/15496164/files/All_rawdata_for_level2.zip ./data/All_rawdata_for_level2.zip
+RUN unzip /tmp/All_rawdata_for_level2.zip -d /data && \
+    rm /tmp/All_rawdata_for_level2.zip
+    
+
 RUN cd ./data && ls -la
 
 # ARG defines a constructor argument called RENV_PATHS_ROOT. Its value is passed from the YAML file. An initial value is set up in case the YAML does not provide one
@@ -92,11 +98,11 @@ RUN R -e "renv::restore()"
 # Copy the rest of the application code
 COPY . .
 
-COPY _targets.R ._targets.R
+COPY level_2_catch_local.R .level_2_catch_local.R
 
 # Run the data to donwload GTA data for species label, species group, cwp_shape
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
-RUN R -e "targets::tar_make()"
+RUN R -e "source('level_2_catch_local.R')"
 
 # Create directories for configuration
 RUN mkdir -p /etc/geoflow-tunaatlas/
