@@ -2,7 +2,7 @@
 FROM rocker/verse:latest
 
 # Necessary packages for downloading ang plots for Rmd
-RUN R -e "install.packages(c('qs', 'dplyr', 'ggplot2', 'sf', 'lubridate', 'here', 'ows4R', 'patchwork', 'kableExtra', 'readr', 'knitr', 'rmarkdown', 'CWP.dataset', purrr'))"
+RUN R -e "install.packages(c('qs', 'dplyr', 'ggplot2', 'sf', 'lubridate', 'here', 'ows4R', 'patchwork', 'kableExtra', 'readr', 'knitr', 'rmarkdown', 'CWP.dataset', 'purrr'))"
 
 # Data directory for fdiwg grid
 RUN mkdir -p /workspace/data
