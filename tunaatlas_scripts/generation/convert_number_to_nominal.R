@@ -51,7 +51,8 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
   
   global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>%
     dplyr::mutate(year = lubridate::year(time_start)) %>% 
-    ungroup() %>% dplyr::group_by(across(strata)) %>% dplyr::summarise(measurement_value = sum(measurement_value))
+    dplyr::ungroup() %>% dplyr::group_by(across(strata)) %>%
+    dplyr::summarise(measurement_value = sum(measurement_value))
   
   flog.info("Starting conversion of fish capture numbers to tons.")
   
@@ -59,27 +60,27 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
   georef_dataset_tons <- georef_dataset %>%
     dplyr::filter(measurement_unit == "t") %>%
     dplyr::mutate(year = lubridate::year(time_start)) %>%
-    ungroup()
+    dplyr::ungroup()
   
   flog.info("Filtered georeferenced dataset to include only entries measured in tons.")
   
   # Select distinct strata in the "tons" dataset
   strata_tons <- georef_dataset_tons %>%
     dplyr::select(all_of(strata)) %>%
-    distinct()
+    dplyr::distinct()
   
   # Filter dataset for records with "numbers" as the measurement unit
   georef_dataset_number <- georef_dataset %>%
     dplyr::filter(measurement_unit == "no") %>%
     dplyr::mutate(year = lubridate::year(time_start)) %>%
-    ungroup()
+    dplyr::ungroup()
   
   flog.info("Filtered georeferenced dataset to include only entries measured in numbers.")
   
   # Select distinct strata in the "numbers" dataset
   strata_number <- georef_dataset_number %>%
     dplyr::select(all_of(strata)) %>%
-    distinct()
+    dplyr::distinct()
   
   # Find matching strata between tons and numbers datasets
   strates_existantes_en_tonnes <- strata_number %>%
