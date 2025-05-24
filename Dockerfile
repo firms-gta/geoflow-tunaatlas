@@ -51,14 +51,15 @@ WORKDIR /root/geoflow-tunaatlas
 
 # Create data repository to copy DOI.csv, a file listing the dataset to download from zenodo
 RUN mkdir -p data 
+COPY data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip
 
-# Add files downloaded from Zenodo DOIs => https://docs.docker.com/reference/dockerfile/#add
-ADD https://zenodo.org/record/15311770/files/global_nominal_catch_firms_level0_2025.csv ./data/global_nominal_catch_firms_level0_2025.csv
-ADD https://zenodo.org/record/15496164/files/All_rawdata_for_level2.zip ./data/All_rawdata_for_level2.zip
-RUN unzip /tmp/All_rawdata_for_level2.zip -d /data && \
-    rm /tmp/All_rawdata_for_level2.zip
+RUN mkdir -p /data && \
+    cp ./data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip 2>/dev/null || \
+      echo "Pas de zip local, on passera au download ensuite" && \
+    if [ ! -f /data/All_rawdata_for_level2.zip ]; then \
+      curl -fSL -o /data/All_rawdata_for_level2.zip https://zenodo.org/record/15496164/files/All_rawdata_for_level2.zip; \
+    fi
     
-
 RUN cd ./data && ls -la
 
 # ARG defines a constructor argument called RENV_PATHS_ROOT. Its value is passed from the YAML file. An initial value is set up in case the YAML does not provide one

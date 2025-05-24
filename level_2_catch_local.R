@@ -52,7 +52,7 @@ install_and_load <- function(package) {
 # Apply the function to each required package
 sapply(required_packages, install_and_load)
 require(geoflow)
-
+Sys.setlocale("LC_ALL", "C.UTF-8")         # pour être sûr  
 # ─── Préparation des dossiers ────────────────────────────────────────────────
 if (!dir.exists(here("results"))) {
   dir.create(here("results"), recursive = TRUE)
