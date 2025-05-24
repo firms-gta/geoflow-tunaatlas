@@ -774,7 +774,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
                 # -------- proportions from GEO -----------------------------
                 geo_props <- georef_df %>%
                   # keep ALL codes, including the unknown one
-                  dplyr::group_by(dplyr::across(dplyr::all_of(c(strata_cols, step_order)))) %>%
+                  dplyr::group_by(dplyr::across(dplyr::all_of(c(strata_cols, dim_col)))) %>%
                   dplyr::summarise(val = sum(measurement_value, na.rm = TRUE), .groups = "drop") %>%
                   dplyr::group_by(dplyr::across(dplyr::all_of(strata_cols))) %>%
                   dplyr::mutate(prop = val / sum(val, na.rm = TRUE), total = sum(val)) %>%
