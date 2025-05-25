@@ -106,11 +106,11 @@ if (!file.exists(zipfile)) {
 files_in_data <- list.files(here("data"), all.files = TRUE, no.. = TRUE)
 only_zip <- identical(files_in_data, basename(zipfile))
 
-if (only_zip) {
-  message("Décompression de All_rawdata_for_level2.zip dans data/ …")
-  utils::unzip(zipfile, exdir = here("data"))
+if (file.exists(zipfile)) {
+  message("Décompression forcée de All_rawdata_for_level2.zip dans data/ …")
+  utils::unzip(zipfile, exdir = here::here("data"), overwrite = TRUE)
 } else {
-  message("data/ contient déjà d’autres fichiers, skip décompression.")
+  message("Fichier zip introuvable, aucune décompression effectuée.")
 }
 
 # ─── 6) Exécution du script principal de génération ─────────────────────────
