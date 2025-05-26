@@ -105,11 +105,4 @@ COPY level_2_catch_local.R .level_2_catch_local.R
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
 RUN R -e "source('level_2_catch_local.R')"
 
-# Create directories for configuration
-RUN mkdir -p /etc/geoflow-tunaatlas/
 
-# Define the entry point to run the Shiny app
-# CMD ["R", "-e", "print(head(results.csv))"]
-
-# Génère le Bookdown
-# CMD ["Rscript", "scripts/generate_book.R"]

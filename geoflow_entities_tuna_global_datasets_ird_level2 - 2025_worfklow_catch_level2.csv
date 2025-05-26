@@ -67,4 +67,5 @@ action_option_geom_table:area.grid_area_labels_
 action_option_decrease_when_rf_inferior_to_one:false_
 action_option_upgrading_nominal_on_georef:true_
 action_option_passes:8_
+action_option_recap_each_step:false_
 action_option_do_not_raise_any_unk:false"
