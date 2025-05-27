@@ -1,0 +1,8 @@
+renv/library
+.Rproj.user
+.RData
+.Rhistory
+report_level2_docker.R
+!report_level2_docker.R
+Markdown/
+report/
