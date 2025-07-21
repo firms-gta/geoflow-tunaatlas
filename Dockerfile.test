@@ -98,6 +98,8 @@ COPY renv/settings.json renv/
 #using remotes incase cache keep ancient renv version
 
 RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
+RUN Rscript -e "install.packages('rstudioapi', repos='https://cloud.r-project.org')"
+
 RUN Rscript -e "remotes::install_version('renv', version = jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version, repos = 'https://cran.r-project.org')"
 
 COPY renv/library/R-4.2/x86_64-pc-linux-gnu/ renv/library/R-4.2/x86_64-pc-linux-gnu/
@@ -121,7 +123,6 @@ COPY tunaatlas_sql/ tunaatlas_sql/
 COPY tunaatlas_scripts/ tunaatlas_scripts/
 COPY tunaatlas_actions/ tunaatlas_actions/
 COPY sardara_functions/ sardara_functions/
-COPY enriching_data.R ./
 COPY launching_jsons_creating_GTA.R ./
 COPY _summary_targets.R ./_summary_targets.R
 COPY _target_test.R ./_target_test.R
@@ -133,26 +134,33 @@ RUN mkdir -p /etc/geoflow-tunaatlas/
 
 RUN R -e "renv::isolate()" 
 
-RUN mkdir -p /home/rstudio/geoflow-tunaatlas && \
-    cp -a /root/geoflow-tunaatlas/. /home/rstudio/geoflow-tunaatlas && \
-    chown -R rstudio:rstudio /home/rstudio
+# ----------------------------------------------------------------------------
+# 9) Copie le projet dans le home et prépare le .Rprofile global
+# ----------------------------------------------------------------------------
+RUN rm -rf /home/rstudio/renv \
+ && mkdir -p /home/rstudio/geoflow-tunaatlas \
+ && cp -a /root/geoflow-tunaatlas/. /home/rstudio/geoflow-tunaatlas \
+ && chown -R rstudio:rstudio /home/rstudio
 
-# ✅ Ce .Rprofile du HOME ouvre le projet ET active renv
 ENV R_PROFILE_USER=/home/rstudio/.Rprofile
-RUN echo "if (interactive()) { \
-            if (requireNamespace('rstudioapi', quietly = TRUE) && rstudioapi::isAvailable()) { \
-              current_proj <- tryCatch(rstudioapi::getActiveProject(), error = function(e) NULL); \
-              if (is.null(current_proj) || current_proj != '/home/rstudio/geoflow-tunaatlas') { \
-                try(rstudioapi::openProject('/home/rstudio/geoflow-tunaatlas', newSession = FALSE), silent = TRUE) \
-              } \
-            }; \
-            if (requireNamespace('renv', quietly = TRUE)) { \
-              try(source('/home/rstudio/geoflow-tunaatlas/renv/activate.R'), silent = TRUE) \
-            } \
-          }" \
-    > /home/rstudio/.Rprofile && \
-    chown rstudio:rstudio /home/rstudio/.Rprofile
 
+RUN printf "%s\n" \
+"if (interactive() && requireNamespace('rstudioapi', quietly=TRUE) && rstudioapi::isAvailable()) {" \
+"  proj <- tryCatch(rstudioapi::getActiveProject(), error=function(e) NULL)" \
+"  if (is.null(proj) || proj != '/home/rstudio/geoflow-tunaatlas') {" \
+"    rstudioapi::openProject('/home/rstudio/geoflow-tunaatlas', newSession=FALSE)" \
+"    Sys.sleep(1)" \
+"  }" \
+"}" \
+"if (file.exists('/home/rstudio/geoflow-tunaatlas/renv/activate.R')) {" \
+"  source('/home/rstudio/geoflow-tunaatlas/renv/activate.R')" \
+"}" \
+> /home/rstudio/.Rprofile && \
+chown rstudio:rstudio /home/rstudio/.Rprofile
+
+# ----------------------------------------------------------------------------
+# 10) Expose & run
+# ----------------------------------------------------------------------------
 EXPOSE 8787
 WORKDIR /home/rstudio/geoflow-tunaatlas
 CMD ["/init"]

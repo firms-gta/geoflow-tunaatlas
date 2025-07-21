@@ -4,7 +4,7 @@ renv::restore(prompt = FALSE)
 # 2) Lister tous les packages à tester
 packages <- names(renv::lockfile_read()$Packages)
 packages <- setdiff(packages, "R") # retirer l'entrée pour R lui-même
-
+packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
 # 3) Fonction pour tester un package
 check_and_reinstall <- function(pkg) {
   message(sprintf("🔍 Test du package : %s", pkg))
