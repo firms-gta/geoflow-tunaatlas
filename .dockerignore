@@ -1,4 +1,4 @@
-renv/library
+# renv/library
 .Rproj.user
 .RData
 .Rhistory

@@ -1,0 +1,13 @@
+---
+title: "Results summary"
+output: html_document
+---
+  
+## Overview
+  
+```{r}
+require(here)
+df <- read.csv(here::here("results/tuna_atlas_results.csv"))
+head(df)
+summary(df)
+```

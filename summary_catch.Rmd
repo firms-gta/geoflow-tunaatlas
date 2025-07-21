@@ -31,32 +31,40 @@ If the timeout make impossible the downlading from R code, please download it fr
 
 ```{r downloadingqs}
 
-qs_file <- "global_catch_tunaatlasird_level2.qs"
-if (!file.exists(qs_file)) {
-  download.file("https://zenodo.org/record/15405414/files/global_catch_tunaatlasird_level2_1950_2023.qs?download=1", qs_file, mode = "wb")
+qs_file <- "data/global_catch_tunaatlasird_level2_1950_2023.qs"
+qs_file_downloaded <- "data/global_catch_tunaatlasird_level2_1950_2023_15496164.qs"
+if (!dir.exists(dirname(qs_file))) {
+  dir.create(dirname(qs_file), recursive = TRUE)
 }
-catch_data <- qs::qread(qs_file)
 
+if (!file.exists(qs_file)) {
+  if (!file.exists(qs_file_downloaded)) {
+    download.file(
+      "https://zenodo.org/record/15405414/files/global_catch_tunaatlasird_level2_1950_2023.qs?download=1",
+      qs_file_downloaded,
+      mode = "wb"
+    )
+  }
+  file.rename(qs_file_downloaded, qs_file)
+}
+
+catch_data <- qs::qread(qs_file)
+catch_data$geom <- NULL 
 ```
 
 ### From csv (geometry can be downloaded from github, downloading is slower and the dataset is close to 1GB).
 
 ```{r downloadingcsv, eval=FALSE}
 
-csv_file <- "global_catch_tunaatlasird_level2_without_geom.csv"
-if (!file.exists(csv_file)) {
-  download.file("https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1", csv_file, mode = "wb")
-}
-catch_data <- readr::read_csv(csv_file) %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
-
+# csv_file <- "global_catch_tunaatlasird_level2_without_geom.csv"
+# if (!file.exists(csv_file)) {
+#   download.file("https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1", csv_file, mode = "wb")
+# }
+# catch_data <- readr::read_csv(csv_file) %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
 
 ```
 
 As the geometry can be heavy, we propose to remove it and to add it when necessary in plots.
-
-```{r removinggeom}
-catch_data$geom <- NULL 
-```
 
 ## First lines
 

@@ -31,9 +31,16 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
     if ("gear_type"     %in% names(dataset_to_raise)) conds <- append(conds, expr(gear_type     == "99.9"))
     
     
-    perfectly_compatible_data <- inner_join(dataset_to_raise, nominal_dataset_df, by =dim_perfectly_compatible_data ) %>% 
-      dplyr::select(dim_perfectly_compatible_data) %>% 
-      dplyr::filter(!!!conds)
+    perfectly_compatible_data <- dataset_to_raise %>%
+      # 1. Projection+filtrage 
+      dplyr::select(all_of(dim_perfectly_compatible_data)) %>%
+      dplyr::filter(!!!conds) %>%
+      # 2. Inner‐join léger
+      dplyr::inner_join(
+        nominal_dataset_df %>% dplyr::select(all_of(dim_perfectly_compatible_data)),
+        by = dim_perfectly_compatible_data
+      ) %>%
+      dplyr::distinct() 
     
     perfectly_compatible_data_value <- dplyr::semi_join(dataset_to_raise, perfectly_compatible_data)
     
@@ -58,14 +65,29 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
     }
     
   }
+  years   <- intersect(dataset_to_compute_rf$year, nominal_dataset_df$year)
+  rf_list <- vector("list", length(years))
   
+  for (i in seq_along(years)) {
+    y <- years[i]
+    sub_incomp <- dataset_to_compute_rf[dataset_to_compute_rf$year == y, ]
+    sub_total  <- nominal_dataset_df[  nominal_dataset_df$year == y, ]
+    
+    rf_list[[i]] <- raise_get_rf(
+      df_input_incomplete = sub_incomp,
+      df_input_total      = sub_total,
+      x_raising_dimensions= c(x_raising_dimensions,"measurement_unit")
+    ) %>%
+      dplyr::mutate(rf = ifelse(is.na(rf), 0, rf))
+    
+    # libère la mémoire des objets temporaires
+    rm(sub_incomp, sub_total)
+    gc()
+  }
   
-  df_rf <- raise_get_rf(df_input_incomplete = dataset_to_compute_rf,
-                        df_input_total = nominal_dataset_df,
-                        x_raising_dimensions = c(x_raising_dimensions,"measurement_unit")
-  ) 
-  df_rf <- df_rf %>% dplyr::mutate(rf = ifelse(is.na(rf), 0, rf))
-  saveRDS(df_rf, paste0("data/",gsub(Sys.time(),pattern = " ", replacement = "_"),"raisingfactordataset.rds"))
+  df_rf <- dplyr::bind_rows(rf_list)
+  rm(rf_list)
+  gc()
   
   if (fact=="catch"){
     raising_dimensions=c(x_raising_dimensions,"measurement_unit")
@@ -124,7 +146,7 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
                                                          x_raising_dimensions = raising_dimensions,
                                                          decrease_when_rf_inferior_to_one = decrease_when_rf_inferior_to_one,
                                                          threshold_rf = NULL)
-  
+  rm(dataset_to_raise, nominal_dataset_df, df_rf)
   data_raised <- rbind(number_data_to_raise, data_raised$df)
   
   if(remove_corresponding_number){

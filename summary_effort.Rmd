@@ -25,10 +25,24 @@ lapply(packages, function(pkg) {
 
 ```{r}
 
-qs_file <- "global_effort_tunaatlasird_level0_1950_2023.qs"
-if (!file.exists(qs_file)) {
-  download.file("https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1", qs_file, mode = "wb")
+qs_file <- "data/global_effort_tunaatlasird_level0_1950_2023.qs"
+qs_file_downloaded <- "data/global_catch_tunaatlasird_level2_1950_2023_15221705.qs"
+
+if (!dir.exists(dirname(qs_file))) {
+  dir.create(dirname(qs_file), recursive = TRUE)
 }
+
+if (!file.exists(qs_file)) {
+  if (!file.exists(qs_file_downloaded)) {
+    download.file(
+      "https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1",
+      qs_file_downloaded,
+      mode = "wb"
+    )
+  }
+  file.rename(qs_file_downloaded, qs_file)
+}
+
 effort_data <- qs::qread(qs_file)
 
 effort_data$geom <- NULL 
