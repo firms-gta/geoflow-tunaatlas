@@ -45,6 +45,8 @@ transform_cwp_code_from_1deg_to_5deg <- function(input_identifier) {
   
   new_cwp_code <- as.numeric(paste0("6", quadrant, sprintf("%02d", latitude_adj), sprintf("%03d", longitude_adj)))
   
+  new_cwp_code <- as.character(new_cwp_code)
+  
   return(new_cwp_code)
 }
 
