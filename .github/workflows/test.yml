@@ -25,11 +25,12 @@ jobs:
         run: |
           set -e
           IMAGE=ghcr.io/${{ github.repository }}
-          docker buildx build --progress=plain \
+          docker buildx build \
+            --progress=plain \
             --file - \
             -t $IMAGE:ping \
-            --push \
-            <<'EOF'
+            --push . <<'EOF'
           FROM busybox
           CMD ["echo","ping"]
           EOF
+
