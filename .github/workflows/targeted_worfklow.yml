@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       base_branch:
-        description: "Branch to base the Docker image on (e.g., main, dev)"
+        description: "Branch to base the Docker image on (e.g., master, dev)"
         required: true
-        default: "main"
+        default: "master"
       action:
         description: "Action to perform: build, build-no-cache"
         required: true
