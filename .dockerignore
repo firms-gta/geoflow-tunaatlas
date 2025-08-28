@@ -6,3 +6,7 @@ report_level2_docker.R
 !report_level2_docker.R
 Markdown/
 report/
+# 1) Exclure tout le dossier data
+data/*
+!data/global_nominal_catch_firms_level0_2025.csv
+!data/All_rawdata_for_level2.zip
