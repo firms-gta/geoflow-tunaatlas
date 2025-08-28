@@ -49,10 +49,6 @@ RUN install2.r --error --skipinstalled --ncpus -1 httpuv
 # Set the working directory
 WORKDIR /root/geoflow-tunaatlas
 
-# Create data repository to copy DOI.csv, a file listing the dataset to download from zenodo
-RUN mkdir -p data 
-COPY data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip
-
 RUN mkdir -p /data && \
     cp ./data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip 2>/dev/null || \
       echo "Pas de zip local, on passera au download ensuite" && \
