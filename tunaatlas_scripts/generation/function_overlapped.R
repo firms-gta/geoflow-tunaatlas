@@ -67,7 +67,7 @@ function_overlapped <- function(dataset,
   if ("year" %in% strata) {
     dataset <- dataset %>%
       dplyr::mutate(year = as.character(lubridate::year(time_start)))
-    columns_to_keep <- unique(c(
+    columns_to_keep_new <- unique(c(
       setdiff(columns_to_keep, c("time_start", "time_end")),
       "year"
     ))
@@ -78,7 +78,7 @@ function_overlapped <- function(dataset,
     dplyr::filter(!source_authority %in% c(rfmo_to_keep, rfmo_not_to_keep))
   
   # Determine effective strata
-  strata <- intersect(strata, columns_to_keep)
+  strata <- intersect(strata, columns_to_keep_new)
   
   # Split datasets
   rfmo_keep <- dataset %>% dplyr::filter(source_authority == rfmo_to_keep)
@@ -122,7 +122,7 @@ function_overlapped <- function(dataset,
       dplyr::group_by(across(c(strata, "source_authority"))) %>%
       dplyr::mutate(overlap = n_distinct(source_authority)) %>%
       dplyr::ungroup() %>%
-      dplyr::filter(!(overlap == 2 & geographic_identifier %in% c("UNK", "NEI", "99.9", "MZZ"))) %>%
+      dplyr::filter(!(overlap == 2 & (species == "MZZ" | gear_type == "99.9" | fishing_fleet == "NEI" ))) %>%
       dplyr::select(-overlap)
   }
   

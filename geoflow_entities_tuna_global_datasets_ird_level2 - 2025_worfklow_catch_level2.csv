@@ -55,8 +55,10 @@ action:create_global_tuna_atlas_dataset.R[R generation script]@./tunaatlas_scrip
 action_option_fact:catch_
 action_option_dataset_level:2_
 action_option_from_rawdata:true_
+action_option_doigeoref:10.5281/zenodo.11460074_
+action_option_keygeoref:global_catch_firms_level0_harmonized.csv_
+action_option_doinominal: 10.5281/zenodo.11410529_
 action_option_keynominal:global_nominal_catch_firms_level0_2025.csv_
-action_option_doinominal:global_nominal_catch_firms_level0_2025.csv_
 action_option_mapping_map_code_lists:true_
 action_option_unit_conversion_convert:false_
 action_option_raising_georef_to_nominal:true_

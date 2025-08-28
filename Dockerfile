@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.7
 FROM rocker/r-ver:4.2.3
 
 # Maintainer information
@@ -49,14 +50,16 @@ RUN install2.r --error --skipinstalled --ncpus -1 httpuv
 # Set the working directory
 WORKDIR /root/geoflow-tunaatlas
 
-RUN mkdir -p /data && \
-    cp ./data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip 2>/dev/null || \
-      echo "Pas de zip local, on passera au download ensuite" && \
-    if [ ! -f /data/All_rawdata_for_level2.zip ]; then \
-      curl -fSL -o /data/All_rawdata_for_level2.zip https://zenodo.org/record/15496164/files/All_rawdata_for_level2.zip; \
-    fi
-    
-RUN cd ./data && ls -la
+COPY data/ /build-data/
+RUN set -eux; \
+    mkdir -p /data; \
+    if [ -f /build-data/All_rawdata_for_level2.zip ]; then \
+      cp /build-data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip; \
+    else \
+      curl -fSL -o /data/All_rawdata_for_level2.zip "$DATA_ZIP_URL"; \
+    fi; \
+    ls -lh /data
+
 
 # ARG defines a constructor argument called RENV_PATHS_ROOT. Its value is passed from the YAML file. An initial value is set up in case the YAML does not provide one
 ARG RENV_PATHS_ROOT=/root/.cache/R/renv
@@ -87,18 +90,34 @@ COPY renv.lock ./
 COPY renv/activate.R renv/
 COPY renv/settings.json renv/
 
+COPY renv/library/ renv/library/
+
 # Restore renv packages
 RUN R -e "renv::activate()" 
-# Used to setup the environment (with the path cache)
+# Used to setup the environment (with the path cache) carreful keep in multiple lines
 RUN R -e "renv::restore()" 
+RUN R -e "renv::repair()" 
 
-# Copy the rest of the application code
-COPY . .
+ARG TEST_SCRIPT_REF=main
+ARG TEST_SCRIPT_URL="https://raw.githubusercontent.com/firms-gta/tunaatlas_pie_map_shiny/${TEST_SCRIPT_REF}/testing_loading_of_all_packages.R"
 
-COPY level_2_catch_local.R .level_2_catch_local.R
+# Option A: via R directement (connexion URL)
+RUN R -e "source(url('$TEST_SCRIPT_URL'), local=TRUE, encoding='UTF-8')"
+
+# syntax=docker/dockerfile:1.7
+RUN mkdir -p data
+
+COPY ["data/All_rawdata_for_level2.zip", "data/All_rawdata_for_level2.zip"]
+COPY ["data/global_nominal_catch_firms_level0_2025.csv", "data/global_nominal_catch_firms_level0_2025.csv"]
+
+COPY level_2_catch_local.R ./
+COPY ["geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv", "./"]
+COPY sardara_functions/ sardara_functions/
+COPY tunaatlas_actions/ tunaatlas_actions/
+COPY tunaatlas_scripts/ tunaatlas_scripts/
+COPY catch_ird_level2_local.json ./
 
 # Run the data to donwload GTA data for species label, species group, cwp_shape
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
 RUN R -e "source('level_2_catch_local.R')"
-
 
