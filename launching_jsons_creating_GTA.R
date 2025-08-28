@@ -7,7 +7,8 @@ library(renv)
 # renv::activate()
 # Restore the project library (if using renv)
 renv::restore()
-
+library(readr)
+presence_absence_flagging <- read_csv("Species_Presence___Absence.csv")
 # Define all required packages (excluding 'base' and 'utils' as they are always available)
 required_packages <- c(
   "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
@@ -409,6 +410,9 @@ source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Ana
 
 CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
                                            connectionDB = con)
+
+
+
 
 catch_without_effort <- CPUE %>% dplyr::filter(((is.na(measurement_value_effort) | measurement_value_effort == 0)) & measurement_value_catch != 0)
 effort_without_catch <- CPUE %>% dplyr::filter(((is.na(measurement_value_catch) | measurement_value_catch == 0)) & measurement_value_effort != 0)
