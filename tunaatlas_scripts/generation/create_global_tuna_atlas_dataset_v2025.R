@@ -912,11 +912,10 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
           if(is.null(opts$decrease_every_time)){
             opts$decrease_every_time <- FALSE
           }
-          
           iterative_raising <- function(fact               = "catch",
                                         georef_dataset,    # geo-referenced data.frame
                                         nominal_catch,     # nominal data.frame
-                                        entity,            # object used by your loggers
+                                        entity,            
                                         passes            = 8L,   # 1–8
                                         decrease_on_last  = TRUE,
                                         recap_each_step   = TRUE,
@@ -943,7 +942,6 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             
             ## ----- 1. Loop over passes -----
             for (i in seq_len(passes)) {
-              
               
               x_dims        <- dim_sets[[i]]
               decrease_flag <- isTRUE(decrease_on_last) && i == passes | isTRUE(decrease_every_time)
@@ -1082,6 +1080,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             
             georef_dataset
           }
+          
           
           if(is.null(opts$passes)){
             opts$passes <- 4

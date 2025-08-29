@@ -146,7 +146,7 @@ function_raise_data<-function(fact,source_authority_filter,dataset_to_raise,data
                                                          x_raising_dimensions = raising_dimensions,
                                                          decrease_when_rf_inferior_to_one = decrease_when_rf_inferior_to_one,
                                                          threshold_rf = NULL)
-  rm(dataset_to_raise, nominal_dataset_df, df_rf)
+  rm(dataset_to_raise, nominal_dataset_df)
   data_raised <- rbind(number_data_to_raise, data_raised$df)
   
   if(remove_corresponding_number){

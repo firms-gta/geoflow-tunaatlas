@@ -1,4 +1,5 @@
-# renv/library
+renv/library
+renv/staging
 .Rproj.user
 .RData
 .Rhistory
@@ -8,5 +9,5 @@ Markdown/
 report/
 # 1) Exclure tout le dossier data
 data/*
-!data/global_nominal_catch_firms_level0_2025.csv
+!data/global_nominal_catch_firms_level0_harmonized.csv
 !data/All_rawdata_for_level2.zip

@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1.7
-FROM rocker/r-ver:4.2.3
+ARG MODE=prod
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE:-rocker/r-ver:4.2.3}
 
 # Maintainer information
 LABEL org.opencontainers.image.authors="julien.barde@ird.fr" org.opencontainers.image.authors="bastien.grasset@ird.fr"
@@ -50,47 +52,40 @@ RUN install2.r --error --skipinstalled --ncpus -1 httpuv
 # Set the working directory
 WORKDIR /root/geoflow-tunaatlas
 
-COPY data/ /build-data/
-RUN set -eux; \
-    mkdir -p /data; \
-    if [ -f /build-data/All_rawdata_for_level2.zip ]; then \
-      cp /build-data/All_rawdata_for_level2.zip /data/All_rawdata_for_level2.zip; \
-    else \
-      curl -fSL -o /data/All_rawdata_for_level2.zip "$DATA_ZIP_URL"; \
-    fi; \
-    ls -lh /data
+RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org'); \
+                remotes::install_version('jsonlite', version = '1.9.1', upgrade = 'never', repos = 'https://cran.r-project.org')"
 
+ENV RENV_PATHS_ROOT=/root/.cache/R/renv
 
-# ARG defines a constructor argument called RENV_PATHS_ROOT. Its value is passed from the YAML file. An initial value is set up in case the YAML does not provide one
-ARG RENV_PATHS_ROOT=/root/.cache/R/renv
-ENV RENV_PATHS_ROOT=${RENV_PATHS_ROOT}
+# Si en mode dev, changer pour le user rstudio
+RUN if [ "$MODE" = "dev" ]; then \
+      export NEW_PATH="/home/rstudio/.cache/R/renv" && \
+      mkdir -p "$NEW_PATH" && \
+      chown -R rstudio:rstudio "$(dirname $NEW_PATH)" && \
+      echo "RENV_PATHS_ROOT=$NEW_PATH" >> /etc/environment && \
+      echo "RENV_PATHS_CACHE=$NEW_PATH" >> /etc/environment; \
+    fi
 
-# Set environment variables for renv cache
+# Ces variables sont utilisées par R/renv à runtime
 ENV RENV_PATHS_CACHE=${RENV_PATHS_ROOT}
 
-# Echo the RENV_PATHS_ROOT for logging
-RUN echo "RENV_PATHS_ROOT=${RENV_PATHS_ROOT}"
-RUN echo "RENV_PATHS_CACHE=${RENV_PATHS_CACHE}"
-
-# Define the build argument for the hash of renv.lock to stop cache if renv.lock has changed
 ARG RENV_LOCK_HASH
 RUN if [ -z "${RENV_LOCK_HASH}" ]; then \
       export RENV_LOCK_HASH=$(sha256sum renv.lock | cut -d' ' -f1); \
     fi && \
     echo "RENV_LOCK_HASH=${RENV_LOCK_HASH}" > /tmp/renv_lock_hash.txt
 
-# Create the renv cache directory
 RUN mkdir -p ${RENV_PATHS_ROOT}
-
-# Install renv package that records the packages used in the shiny app
-RUN R -e "install.packages('renv', repos='https://cran.r-project.org/')"
-
-# Copy renv configuration and lockfile
 COPY renv.lock ./
 COPY renv/activate.R renv/
 COPY renv/settings.json renv/
 
-COPY renv/library/ renv/library/
+#using remotes incase cache keep ancient renv version
+
+RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
+RUN Rscript -e "remotes::install_version('renv', version = jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version, repos = 'https://cran.r-project.org')"
+
+# COPY renv/library/ renv/library/
 
 # Restore renv packages
 RUN R -e "renv::activate()" 
@@ -101,14 +96,11 @@ RUN R -e "renv::repair()"
 ARG TEST_SCRIPT_REF=main
 ARG TEST_SCRIPT_URL="https://raw.githubusercontent.com/firms-gta/tunaatlas_pie_map_shiny/${TEST_SCRIPT_REF}/testing_loading_of_all_packages.R"
 
-# Option A: via R directement (connexion URL)
 RUN R -e "source(url('$TEST_SCRIPT_URL'), local=TRUE, encoding='UTF-8')"
 
-# syntax=docker/dockerfile:1.7
 RUN mkdir -p data
 
-COPY ["data/All_rawdata_for_level2.zip", "data/All_rawdata_for_level2.zip"]
-COPY ["data/global_nominal_catch_firms_level0_2025.csv", "data/global_nominal_catch_firms_level0_2025.csv"]
+COPY data/ data/
 
 COPY level_2_catch_local.R ./
 COPY ["geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv", "./"]
