@@ -122,7 +122,7 @@ function_overlapped <- function(dataset,
       dplyr::group_by(across(c(strata, "source_authority"))) %>%
       dplyr::mutate(overlap = n_distinct(source_authority)) %>%
       dplyr::ungroup() %>%
-      dplyr::filter(!(overlap == 2 & (species == "MZZ" | gear_type == "99.9" | fishing_fleet == "NEI" ))) %>%
+      dplyr::filter(!(overlap == 2 & (species == "MZZ" | gear_type == "99.9" | fishing_fleet == "NEI" ))) %>% 
       dplyr::select(-overlap)
   }
   
