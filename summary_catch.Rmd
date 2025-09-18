@@ -29,38 +29,62 @@ lapply(packages, function(pkg) {
 
 If the timeout make impossible the downlading from R code, please download it from zenodo and then rename the file. 
 
-```{r downloadingqs}
+### From csv (geometry can be downloaded from github, downloading is slower and the dataset is close to 1GB).
+
+```{r downloadingcsv}
+
+csv_file <- "global_catch_tunaatlasird_level2_without_geom.csv"
+source_file_csv <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_shiny_apps/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv"
+
+if (!file.exists(csv_file)) {
+  if (file.exists(source_file_csv)) {
+    # copie depuis le dataspace
+    file.copy(source_file_csv, csv_file, overwrite = TRUE)
+  } else {
+    # sinon téléchargement
+    download.file(
+      "https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1",
+      csv_file,
+      mode = "wb"
+    )
+  }
+}
+
+catch_data <- readr::read_csv(csv_file) %>%
+  dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
+
+```
+
+```{r downloadingqs, eval=FALSE}
 
 qs_file <- "data/global_catch_tunaatlasird_level2_1950_2023.qs"
 qs_file_downloaded <- "data/global_catch_tunaatlasird_level2_1950_2023_15496164.qs"
+source_file <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_shiny_apps/global_catch_tunaatlasird_level2_1950_2023.qs"
+
+# Crée le dossier data si besoin
 if (!dir.exists(dirname(qs_file))) {
   dir.create(dirname(qs_file), recursive = TRUE)
 }
 
 if (!file.exists(qs_file)) {
-  if (!file.exists(qs_file_downloaded)) {
-    download.file(
-      "https://zenodo.org/record/15405414/files/global_catch_tunaatlasird_level2_1950_2023.qs?download=1",
-      qs_file_downloaded,
-      mode = "wb"
-    )
+  if (file.exists(source_file)) {
+    # copie depuis le dataspace
+    file.copy(source_file, qs_file, overwrite = TRUE)
+  } else {
+    # sinon téléchargement depuis Zenodo
+    if (!file.exists(qs_file_downloaded)) {
+      download.file(
+        "https://zenodo.org/record/15405414/files/global_catch_tunaatlasird_level2_1950_2023.qs?download=1",
+        qs_file_downloaded,
+        mode = "wb"
+      )
+    }
+    file.rename(qs_file_downloaded, qs_file)
   }
-  file.rename(qs_file_downloaded, qs_file)
 }
 
 catch_data <- qs::qread(qs_file)
-catch_data$geom <- NULL 
-```
-
-### From csv (geometry can be downloaded from github, downloading is slower and the dataset is close to 1GB).
-
-```{r downloadingcsv, eval=FALSE}
-
-# csv_file <- "global_catch_tunaatlasird_level2_without_geom.csv"
-# if (!file.exists(csv_file)) {
-#   download.file("https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1", csv_file, mode = "wb")
-# }
-# catch_data <- readr::read_csv(csv_file) %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
+catch_data$geom <- NULL
 
 ```
 
