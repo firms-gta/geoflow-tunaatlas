@@ -108,6 +108,7 @@ COPY sardara_functions/ sardara_functions/
 COPY tunaatlas_actions/ tunaatlas_actions/
 COPY tunaatlas_scripts/ tunaatlas_scripts/
 COPY catch_ird_level2_local.json ./
+COPY summary_catch.Rmd ./
 
 # Run the data to donwload GTA data for species label, species group, cwp_shape
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
