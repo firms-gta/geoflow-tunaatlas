@@ -113,3 +113,5 @@ COPY catch_ird_level2_local.json ./
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
 RUN R -e "source('level_2_catch_local.R')"
 
+RUN R -e "rmarkdown::render('summary_catch.Rmd', output_format = 'bookdown::pdf_document2', output_dir = getwd(), output_file = 'Summarycatchlevel2.html', envir = .GlobalEnv)"
+

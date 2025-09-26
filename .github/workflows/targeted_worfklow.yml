@@ -16,13 +16,15 @@ on:
         default: "build"
 
 permissions:
-  contents: read
+  contents: write
   packages: write   
 
 env:
   CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-cache
   DOCKER_BUILDKIT: 1
   RENV_PATHS_ROOT: /root/.cache/R/renv
+
+# The dockerfile used is the default one : Dockerfile
 
 jobs:
   docker:
@@ -106,28 +108,53 @@ jobs:
             --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
             "${TAG_ARGS[@]}" \
             --push .
-
-      # -------- Build en TAR (réutilise le cache du build précédent) --------
-      - name: 📦 Build image to TAR
+      
+      - name: 🏷 Pick run tag
+        id: pick
         run: |
-          set -e
-          # On génère un seul tag arbitraire pour le tar (peu importe, c'est l'archive qui compte)
-          IMAGE="${{ steps.tags.outputs.image }}"
-          TAR_TAG="${IMAGE}:export-tar"
-          docker buildx build \
-            --progress=plain \
-            --cache-from type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }} \
-            --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
-            --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
-            --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
-            -t "$TAR_TAG" \
-            --output type=docker,dest=/tmp/docker-image.tar \
-            .
-          ls -lh /tmp/docker-image.tar
+          echo "run_tag=${{ steps.tags.outputs.image }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+            
+      - name: 📦 Extraire l’HTML déjà présent dans l’image
+        env:
+          RUN_TAG: ${{ steps.pick.outputs.run_tag }}
+          HTML_IN_IMAGE: /opt/site/Summarycatchlevel2.html   # <-- adapte ce chemin
+        run: |
+          mkdir -p docs
+          CID=$(docker create "$RUN_TAG")
+          docker cp "$CID":"$HTML_IN_IMAGE" docs/Summarycatchlevel2.html
+          docker rm "$CID"
+          ls -lah docs
 
-      - name: Upload TAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image
-          path: /tmp/docker-image.tar
-          retention-days: 30  
+      - name: 🚀 Commit & Push docs/ (GitHub Pages)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Publish summary_catch HTML"
+          git push
+
+# 
+      # -------- Build en TAR (réutilise le cache du build précédent pas utile pour le moment) --------
+      # - name: 📦 Build image to TAR
+      #   run: |
+      #     set -e
+      #     # On génère un seul tag arbitraire pour le tar (peu importe, c'est l'archive qui compte)
+      #     IMAGE="${{ steps.tags.outputs.image }}"
+      #     TAR_TAG="${IMAGE}:export-tar"
+      #     docker buildx build \
+      #       --progress=plain \
+      #       --cache-from type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }} \
+      #       --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
+      #       --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
+      #       --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
+      #       -t "$TAR_TAG" \
+      #       --output type=docker,dest=/tmp/docker-image.tar \
+      #       .
+      #     ls -lh /tmp/docker-image.tar
+      # 
+      # - name: Upload TAR artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: docker-image
+      #     path: /tmp/docker-image.tar
+      #     retention-days: 30
