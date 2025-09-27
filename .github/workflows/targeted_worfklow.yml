@@ -16,7 +16,7 @@ on:
         default: "build"
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   pages: write
   id-token: write
@@ -36,6 +36,9 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     timeout-minutes: 140
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}  
 
     steps:
       - name: 📥 Checkout code
