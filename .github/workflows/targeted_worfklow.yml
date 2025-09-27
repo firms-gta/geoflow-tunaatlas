@@ -122,7 +122,7 @@ jobs:
       - name: 📦 Extraire l’HTML déjà présent dans l’image
         env:
           RUN_TAG: ${{ steps.pick.outputs.run_tag }}
-          HTML_IN_IMAGE: Summarycatchlevel2.html
+          HTML_IN_IMAGE: /site/Summarycatchlevel2.html
         run: |
           mkdir -p docs
           CID=$(docker create "$RUN_TAG")
