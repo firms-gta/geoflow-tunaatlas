@@ -21,17 +21,16 @@ permissions:
   pages: write
   id-token: write
   
-concurrency:
-group: "pages"
-cancel-in-progress: true
-
-
 env:
   CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-cache
   DOCKER_BUILDKIT: 1
   RENV_PATHS_ROOT: /root/.cache/R/renv
 
 # The dockerfile used is the default one : Dockerfile
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
   docker:
