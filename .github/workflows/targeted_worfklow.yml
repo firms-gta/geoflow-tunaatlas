@@ -80,7 +80,7 @@ jobs:
             BR_SAFE=$(echo "$BR" | tr '/:' '__')
             SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-12)
             echo "image=$IMAGE" >> $GITHUB_OUTPUT
-            echo "tags=$IMAGE:manual-${BR_SAFE},$IMAGE:${SHORT_SHA}" >> $GITHUB_OUTPUT
+            echo "tags=$IMAGE:manual-${BR_SAFE},$IMAGE:${SHORT_SHA},$IMAGE:${{ github.sha }}" >> $GITHUB_OUTPUT
             echo "cache_key=${BR_SAFE}" >> $GITHUB_OUTPUT
           fi
 
@@ -108,7 +108,12 @@ jobs:
             --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
             "${TAG_ARGS[@]}" \
             --push .
-      
+            
+      - name: 🔎 Debug tags
+        run: |
+          echo "IMAGE=${{ steps.tags.outputs.image }}"
+          echo "TAGS=${{ steps.tags.outputs.tags }}"
+
       - name: 🏷 Pick run tag
         id: pick
         run: |
@@ -117,7 +122,7 @@ jobs:
       - name: 📦 Extraire l’HTML déjà présent dans l’image
         env:
           RUN_TAG: ${{ steps.pick.outputs.run_tag }}
-          HTML_IN_IMAGE: /opt/site/Summarycatchlevel2.html   # <-- adapte ce chemin
+          HTML_IN_IMAGE: Summarycatchlevel2.html
         run: |
           mkdir -p docs
           CID=$(docker create "$RUN_TAG")
