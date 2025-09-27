@@ -16,8 +16,15 @@ on:
         default: "build"
 
 permissions:
-  contents: write
-  packages: write   
+  contents: read
+  packages: write
+  pages: write
+  id-token: write
+  
+concurrency:
+group: "pages"
+cancel-in-progress: true
+
 
 env:
   CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-cache
@@ -130,13 +137,17 @@ jobs:
           docker rm "$CID"
           ls -lah docs
 
-      - name: 🚀 Commit & Push docs/ (GitHub Pages)
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Publish summary_catch HTML"
-          git push
+      - name: 📦 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      
+      - name: 🚀 Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
 
 # 
       # -------- Build en TAR (réutilise le cache du build précédent pas utile pour le moment) --------
