@@ -55,7 +55,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Build dev image
+      - name: Build dev image # type of name
         run: |
           docker buildx build \
             --progress=plain \
