@@ -25,8 +25,6 @@ lapply(packages, function(pkg) {
 
 ## 📥 Download and load the file
 
-### From qs (if you want to download geometry as well, it can be heavy)
-
 If the timeout make impossible the downlading from R code, please download it from zenodo and then rename the file. 
 
 ### From csv (geometry can be downloaded from github, downloading is slower and the dataset is close to 1GB).
@@ -54,6 +52,8 @@ catch_data <- readr::read_csv(csv_file) %>%
   dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
 
 ```
+
+### From qs (if you want to download geometry as well, it can be heavy, not recommended unless specific use)
 
 ```{r downloadingqs, eval=FALSE}
 
@@ -91,7 +91,6 @@ catch_data$geom <- NULL
 As the geometry can be heavy, we propose to remove it and to add it when necessary in plots.
 
 ## First lines
-
 
 ```{r head}
 kableExtra::kable(head(catch_data))

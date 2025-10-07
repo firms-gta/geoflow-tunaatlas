@@ -23,13 +23,7 @@ lapply(packages, function(pkg) {
 ```
 
 
-## 📥 Download and load the file
-
-### From qs (if you want to download geometry as well, it can be heavy)
-
-If the timeout make impossible the downlading from R code, please download it from zenodo and then rename the file. 
-
-### From csv (geometry can be downloaded from github, downloading is slower and the dataset is close to 1GB).
+## Reading the harmonized file from level 2 workflow output
 
 ```{r downloadingcsv}
 
@@ -41,17 +35,14 @@ catch_data <- readr::read_csv(csv_file) %>%
 
 ```
 
-As the geometry can be heavy, we propose to remove it and to add it when necessary in plots.
-
-## First lines
-
+# First lines
 
 ```{r head}
 kableExtra::kable(head(catch_data))
 ```
 
 
-## 📊 Data overview
+# 📊 Data overview
 
 This dataset provides monthly records of tuna and tuna-like species catches at the global scale between 1950 and 2023. Here is a description of the columns:
 
@@ -87,8 +78,10 @@ dplyr::glimpse(catch_data)
 ```
 
 
-```{r summary}
-summary(catch_data$measurement_value)
+```{r summary-by-unit}
+
+tapply(catch_data$measurement_value, catch_data$measurement_unit, summary)
+
 ```
 
 
@@ -138,7 +131,7 @@ sf::st_crs(continent) <- 4326
 
 
 
-## 🗺️ Catch map
+# 🗺️ Catch map
 
 This map shows the spatial distribution of catches or effort aggregated by geographic grid cell. The `measurement_value` is summed per area.
 
@@ -169,7 +162,7 @@ patchwork::wrap_plots(plots, ncol = 2)
 
 ```
 
-## 📈 Annual catch trends
+# 📈 Annual catch trends
 
 ```{r catchtrendsbytime}
 
