@@ -1,9 +1,0 @@
-book_filename: "tableau_recapbookdowntest"
-output_dir: "docs"
-delete_merged_file: true
-new_session: false
-rmd_files:
-  - "index.Rmd"
-  - "first_and_first_to_last_and_process.Rmd"
-  - "all_child_process.Rmd"
-  - "Annexenew.Rmd"

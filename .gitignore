@@ -28,4 +28,4 @@ georef_not_nominal_markdown/
 iattc_analysis
 Analysis_markdown/*.pdf
 Analysis_markdown/Figures/
-*.qs
+*.qsAnalysis_markdown/
