@@ -1,0 +1,139 @@
+---
+title: "Harmonize data structure of IATTC LP (Pole-and-line) catch datasets"
+output: 
+  html_document: 
+    code_folding: hide
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+This R Markdown document is designed to transform data that is not in CWP format into CWP format.
+Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
+This markdown is created from a function so the documentation keep the format of roxygen2 skeleton
+A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.
+Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+If you are interested in further details, the results and codes are available for review.
+
+```{r}
+path_to_raw_dataset <- here::here('tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicLPTunaFlag.csv')
+```
+
+Harmonize data structure of IATTC LP (Pole-and-line) catch datasets
+
+This function harmonizes the structure of IATTC catch-and-effort datasets specifically for
+LP (Pole-and-line) catches under the 'LPTunaFlag' designation. The function transforms raw
+dataset inputs into a harmonized format suitable for integration into the Tuna Atlas database.
+The function assumes specific initial data columns and outputs a structured dataset with
+additional metadata and code lists as needed.
+
+
+@return This function does not return a value but outputs harmonized datasets and
+        related files specified by the process for integration within the Tuna Atlas database.
+
+@importFrom dplyr %>% select mutate
+@import reshape
+@seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType}} to convert IATTC nominal catch data structure,
+         \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} to convert IATTC LLTunaBillfish and LLShark data structure,
+@keywords IATTC, tuna, fisheries, data harmonization
+@export
+@author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+@author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+Input data sample:
+Year Month Flag LatC1  LonC1 NumSets ALB BET BKJ BZX PBF   SKJ TUN  YFT
+1978     1  USA   3.5  -79.5       2   0   0   0   0   0  6.05   0 4.74
+1978     1  USA  20.5 -114.5       2   0   0   0   0   0  3.53   0 2.76
+1978     1  USA  23.5 -111.5       2   0   0   0   0   0 20.80   0 4.50
+1978     1  USA  23.5 -109.5       1   0   0   0   0   0  0.00   0 0.90
+1978     1  USA  24.5 -111.5       1   0   0   0   0   0  1.51   0 1.18
+1978     1  USA  25.5 -114.5       2   0   0   0   0   0  5.00   0 3.60
+Catch: final data sample:
+FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+USA   LL 1992-07-01 1992-08-01  6425135    ALL     BSH       ALL         NO     4
+USA   LL 1993-04-01 1993-05-01  6425135    ALL     BSH       ALL         NO    75
+USA   LL 1993-04-01 1993-05-01  6430135    ALL     BSH       ALL         NO    15
+USA   LL 1993-05-01 1993-06-01  6425135    ALL     BSH       ALL         NO    24
+USA   LL 1994-03-01 1994-04-01  6425135    ALL     BSH       ALL         NO    14
+USA   LL 1994-03-01 1994-04-01  6430135    ALL     BSH       ALL         NO     4
+packages
+
+```{r}
+if(!require(reshape)){
+  install.packages("reshape")
+  require(reshape)
+}
+if(!require(dplyr)){
+  install.packages("dplyr")
+  require(dplyr)
+}
+```
+
+Historical name for the dataset at source  PublicLPTunaFlag.csv
+
+```{r}
+opts <- options()
+options(encoding = "UTF-8")
+```
+
+----------------------------------------------------------------------------------------------------------------------------  
+# Catches
+Reach the catches pivot DSD using a function stored in IATTC_functions.R
+
+```{r}
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
+catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"Flag","LP")
+catches_pivot_IATTC$NumSets<-NULL
+
+colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
+
+colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
+catches$source_authority<-"IATTC"
+catches$measurement_type <- "RC" # Retained catches
+catches$measurement <- "catch"
+```
+
+
+```{r}
+catches$time_start <- as.Date(catches$time_start)
+catches$time_end <- as.Date(catches$time_end)
+dataset_temporal_extent <- paste(
+	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+	paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+	sep = "/"
+)
+
+output_name_dataset <- "Dataset_harmonized.csv"
+write.csv(catches, output_name_dataset, row.names = FALSE)
+georef_dataset <- catches
+```
+
+----------------------------------------------------------------------------------------------------------------------------  
+@ Load pre-harmonization scripts and apply mappings
+
+```{r}
+download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
+source('local_map_codelists_no_DB.R')
+fact <- "catch"
+mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
+```
+
+@ Handle unmapped values and save the results
+
+```{r}
+georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
+fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
+fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
+fwrite(georef_dataset, 'CWP_dataset.csv')
+```
+
+Display the first few rows of the mapping summaries
+
+```{r}
+print(head(mapping_codelist$recap_mapping))
+print(head(mapping_codelist$not_mapped_total))
+```
+

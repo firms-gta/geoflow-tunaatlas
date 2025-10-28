@@ -1,0 +1,166 @@
+ARG MODE=prod
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE:-rocker/r-ver:4.2.3}
+
+LABEL maintainer="Julien Barde <julien.barde@ird.fr>"
+
+# Install system libraries
+RUN apt-get update && apt-get install -y \
+    sudo \
+    libssl-dev \
+    libcurl4-gnutls-dev \
+    libxml2-dev \
+    libudunits2-dev \
+    libproj-dev \
+    libgeos-dev \
+    libgdal-dev \
+    libv8-dev \
+    libsodium-dev \
+    git \
+    wget \
+    curl \
+    udunits-bin \
+    gdal-bin \
+    dos2unix && \
+    apt-get clean
+
+RUN install2.r --error --skipinstalled --ncpus -1 httpuv
+
+WORKDIR /root/geoflow-tunaatlas
+
+RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org'); \
+                remotes::install_version('qs', version = '0.26.3', upgrade = 'never', repos = 'https://cran.r-project.org'); \
+                remotes::install_version('jsonlite', version = '1.9.1', upgrade = 'never', repos = 'https://cran.r-project.org'); \
+                remotes::install_version('readr', version = '2.1.5', upgrade = 'never', repos = 'https://cran.r-project.org')"
+
+ARG DOI_CSV_HASH
+RUN echo "DOI_CSV_HASH=${DOI_CSV_HASH}" > /tmp/doi_csv_hash.txt
+
+RUN mkdir -p data 
+COPY DOI.csv ./DOI.csv
+COPY data/global_catch_tunaatlasird_level2_1950_2023.qs ./data/global_catch_tunaatlasird_level2_1950_2023.qs
+COPY data/global_effort_tunaatlasird_level0_1950_2023.qs ./data/global_effort_tunaatlasird_level0_1950_2023.qs
+
+RUN dos2unix DOI.csv && sed -i -e '$a\' DOI.csv
+
+RUN bash -c "tail -n +2 DOI.csv | tr -d '\r' | \
+    while IFS=',' read -r DOI FILE; do \
+        RECORD_ID=\$(echo \"\$DOI\" | awk -F/ '{print \$NF}' | sed 's/zenodo\\.//'); \
+        EXT=\${FILE##*.}; BASE=\${FILE%.*}; \
+        ORIGINAL=\"./data/\$FILE\"; \
+        if [ \"\$EXT\" = \"qs\" ]; then \
+            TARGET=\"./data/\${BASE}_\${RECORD_ID}.qs\"; \
+        else \
+            TARGET_CSV=\"./data/\${BASE}_\${RECORD_ID}.\${EXT}\"; \
+            TARGET=\"\${TARGET_CSV%.*}.qs\"; \
+        fi; \
+        URL=\"https://zenodo.org/record/\$RECORD_ID/files/\$FILE?download=1\"; \
+        if [ -f \"\$TARGET\" ]; then continue; fi; \
+        if [ -f \"\$ORIGINAL\" ]; then \
+            if [ \"\$EXT\" = \"qs\" ]; then cp \"\$ORIGINAL\" \"\$TARGET\"; \
+            else cp \"\$ORIGINAL\" \"\$TARGET_CSV\"; fi; \
+        else \
+            if [ \"\$EXT\" = \"qs\" ]; then \
+                wget -nv -O \"\$TARGET\" \"\$URL\" || { echo \"\$FILE\" >> DOI_failed.csv; continue; } \
+            else \
+                wget -nv -O \"\$TARGET_CSV\" \"\$URL\" || { echo \"\$FILE\" >> DOI_failed.csv; continue; } \
+            fi; \
+        fi; \
+        if [ \"\$EXT\" != \"qs\" ]; then \
+            Rscript -e \"qs::qsave(readr::read_csv('\$TARGET_CSV'), '\$TARGET')\" && rm -f \"\$TARGET_CSV\"; \
+        fi; \
+    done"
+
+ENV RENV_PATHS_ROOT=/root/.cache/R/renv
+
+# Comme mode dev, changer pour le user rstudio
+ENV RENV_PATHS_ROOT=/home/rstudio/.cache/R/renv
+ENV RENV_PATHS_CACHE=/home/rstudio/.cache/R/renv
+
+RUN mkdir -p /home/rstudio/.cache/R/renv && \
+    chown -R rstudio:rstudio /home/rstudio/.cache
+
+
+# Ces variables sont utilisées par R/renv à runtime
+ENV RENV_PATHS_CACHE=${RENV_PATHS_ROOT}
+
+ARG RENV_LOCK_HASH
+RUN if [ -z "${RENV_LOCK_HASH}" ]; then \
+      export RENV_LOCK_HASH=$(sha256sum renv.lock | cut -d' ' -f1); \
+    fi && \
+    echo "RENV_LOCK_HASH=${RENV_LOCK_HASH}" > /tmp/renv_lock_hash.txt
+
+RUN mkdir -p ${RENV_PATHS_ROOT}
+COPY renv.lock ./
+COPY renv/activate.R renv/
+COPY renv/settings.json renv/
+
+#using remotes incase cache keep ancient renv version
+
+RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org')"
+RUN Rscript -e "install.packages('rstudioapi', repos='https://cloud.r-project.org')"
+
+RUN Rscript -e "remotes::install_version('renv', version = jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version, repos = 'https://cran.r-project.org')"
+
+COPY renv/library/R-4.2/x86_64-pc-linux-gnu/ renv/library/R-4.2/x86_64-pc-linux-gnu/
+
+# Restore renv packages
+RUN R -e "renv::activate()" 
+# Used to setup the environment (with the path cache) carreful keep in multiple lines
+RUN R -e "renv::restore()" 
+RUN R -e "renv::repair()" 
+
+COPY R ./R
+
+RUN R -e "source('R/loading_all_packages.R')"
+
+RUN echo "✅ Listing files in ./data after conversion:" && ls -lh ./data
+
+COPY docs/reports/summary.Rmd ./docs/reports/summary.Rmd
+COPY docs/reports/summary_effort.Rmd ./docs/reports/summary_effort.Rmd
+COPY docs/reports/summary_catch.Rmd ./docs/reports/summary_catch.Rmd
+COPY tunaatlas_sql/ tunaatlas_sql/
+COPY tunaatlas_scripts/ tunaatlas_scripts/
+COPY R/tunaatlas_actions/ R/tunaatlas_actions/
+COPY R/sardara_functions/ R/sardara_functions/
+COPY launching_jsons_creating_GTA.R ./
+COPY pipelines/_summary_targets.R ./pipelines/_summary_targets.R
+COPY pipelines/_target_test.R ./pipelines/_target_test.R
+COPY pipelines/_targets_efforts.R ./pipelines/_targets_efforts.R
+COPY docs/ docs/
+COPY geoflow-tunaatlas.Rproj ./geoflow-tunaatlas.Rproj
+
+RUN mkdir -p /etc/geoflow-tunaatlas/
+
+RUN R -e "renv::isolate()" 
+
+# ----------------------------------------------------------------------------
+# 9) Copie le projet dans le home et prépare le .Rprofile global
+# ----------------------------------------------------------------------------
+RUN rm -rf /home/rstudio/renv \
+ && mkdir -p /home/rstudio/geoflow-tunaatlas \
+ && cp -a /root/geoflow-tunaatlas/. /home/rstudio/geoflow-tunaatlas \
+ && chown -R rstudio:rstudio /home/rstudio
+
+ENV R_PROFILE_USER=/home/rstudio/.Rprofile
+
+RUN printf "%s\n" \
+"if (interactive() && requireNamespace('rstudioapi', quietly=TRUE) && rstudioapi::isAvailable()) {" \
+"  proj <- tryCatch(rstudioapi::getActiveProject(), error=function(e) NULL)" \
+"  if (is.null(proj) || proj != '/home/rstudio/geoflow-tunaatlas') {" \
+"    rstudioapi::openProject('/home/rstudio/geoflow-tunaatlas', newSession=FALSE)" \
+"    Sys.sleep(1)" \
+"  }" \
+"}" \
+"if (file.exists('/home/rstudio/geoflow-tunaatlas/renv/activate.R')) {" \
+"  source('/home/rstudio/geoflow-tunaatlas/renv/activate.R')" \
+"}" \
+> /home/rstudio/.Rprofile && \
+chown rstudio:rstudio /home/rstudio/.Rprofile
+
+# ----------------------------------------------------------------------------
+# 10) Expose & run
+# ----------------------------------------------------------------------------
+EXPOSE 8787
+WORKDIR /home/rstudio/geoflow-tunaatlas
+CMD ["/init"]
