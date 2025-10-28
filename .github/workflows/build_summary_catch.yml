@@ -33,7 +33,7 @@ jobs:
           docker buildx build \
             --load \
             --build-arg BASE_IMAGE=${IMAGE}:${BASE_SHA} \
-            -f Dockerfile.summary_catch \
+            -f docker/Dockerfile.summary_catch \
             -t summary-catch-builder .
 
       - name: Render Rmd → docs/index.html
@@ -76,7 +76,7 @@ jobs:
 #           --cache-from=type=local,src=/tmp/.buildx-cache \
 #           --cache-to=type=local,dest=/tmp/.buildx-cache-new \
 #           --load \
-#           -f Dockerfile.summary_catch \
+#           -f docker/Dockerfile.summary_catch \
 #           -t summary-catch-builder .
 # 
 #     - name: Move cache

@@ -736,7 +736,7 @@ ggplot(groupped_source_auth) +
 </div>
 <div id="how-to-aggregate-data-from-1-deg-to-5-deg" class="section level1">
 <h1>How to aggregate data from 1 deg to 5 deg ?</h1>
-<pre class="r"><code>source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R&quot;)
+<pre class="r"><code>source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R&quot;)
 
 one_degree &lt;- silky_sharks %&gt;% dplyr::filter(substr(geographic_identifier, 1, 1) == &quot;5&quot;)
 five_degree &lt;- silky_sharks %&gt;% dplyr::filter(substr(geographic_identifier, 1, 1) == &quot;6&quot;)
@@ -745,7 +745,7 @@ silky_sharks_aggregated &lt;- one_degree %&gt;% rowwise() %&gt;%
 </div>
 <div id="how-to-disaggregate-need-connection-to-db-for-now" class="section level1">
 <h1>How to disaggregate ? (need connection to DB for now)</h1>
-<pre class="r"><code>source(&quot;https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R&quot;)
+<pre class="r"><code>source(&quot;https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R&quot;)
 
 georef_dataset&lt;-spatial_curation_downgrade_resolution(con,silky_sharks,resolution = 1 , remove = FALSE)</code></pre>
 </div>

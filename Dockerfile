@@ -102,22 +102,22 @@ RUN mkdir -p data
 
 COPY data/ data/
 
-COPY level_2_catch_local.R ./
-COPY ["geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv", "./"]
-COPY sardara_functions/ sardara_functions/
-COPY tunaatlas_actions/ tunaatlas_actions/
+COPY pipelines/data_creation/level_2_catch_local.R ./pipelines/data_creation/
+COPY ["config/geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv", "./config/"]
+COPY R/sardara_functions/ R/sardara_functions/
+COPY R/tunaatlas_actions/ R/tunaatlas_actions/
 COPY tunaatlas_scripts/ tunaatlas_scripts/
-COPY catch_ird_level2_local.json ./
-COPY summary_catch_level2_after_workflow.Rmd ./
+COPY config/catch_ird_level2_local.json ./config/
+COPY docs/reports/summary_catch_level2_after_workflow.Rmd ./docs/reports/
 
 # Run the data to donwload GTA data for species label, species group, cwp_shape
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
-RUN R -e "source('level_2_catch_local.R')"
+RUN R -e "source('pipelines/data_creation/level_2_catch_local.R')"
 
 ENV SITE_DIR=/site
 RUN mkdir -p "$SITE_DIR"
 
-RUN R -q -e "rmarkdown::render('summary_catch_level2_after_workflow.Rmd', \
+RUN R -q -e "rmarkdown::render('docs/reports/summary_catch_level2_after_workflow.Rmd', \
   output_format = 'bookdown::html_document2', \
   output_dir = Sys.getenv('SITE_DIR'), \
   output_file = 'Summarycatchlevel2.html', \

@@ -1,0 +1,183 @@
+---
+title: "Harmonize IATTC PSSetType Effort Datasets"
+output: 
+  html_document: 
+    code_folding: hide
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+This R Markdown document is designed to transform data that is not in CWP format into CWP format.
+Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
+This markdown is created from a function so the documentation keep the format of roxygen2 skeleton
+A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.
+Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+If you are interested in further details, the results and codes are available for review.
+
+```{r}
+path_to_raw_dataset_catch <- here::here('tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'data', 'PublicCatchOrigFormatTunaBillfish.csv')
+path_to_raw_dataset_effort <- here::here('tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'data', 'PublicEffortOrigFormatTunaBillfish.csv')
+```
+
+Harmonize IATTC PSSetType Effort Datasets
+
+This function harmonizes the IATTC PSSetType effort datasets,
+preparing them for integration into the Tuna Atlas database, according to specified format requirements.
+
+
+@return None; the function outputs files directly, including harmonized datasets,
+        optional metadata, and code lists for integration within the Tuna Atlas database.
+
+@details This function modifies the dataset to ensure compliance with the standardized
+         format, including renaming, reordering, and recalculating specific fields as necessary.
+         Metadata integration is contingent on the intended use within the Tuna Atlas database.
+
+@import dplyr
+@import readr
+@importFrom stringr str_replace
+@seealso \code{\link{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD}} 
+@export
+@keywords data harmonization, fisheries, IATTC, tuna
+@author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+@author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+Catch input data sample:
+Record Spp DTypeID Number Weight
+11407 ALB       2     17     NA
+11407 BUM       2      4     NA
+11407 BLM       2      2     NA
+11407 SWO       2     10     NA
+11407 BET       2    403     NA
+11407 BIL       2      1     NA
+Catch: final data sample:
+FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+USA   LL 1992-07-01 1992-08-01  6425135    ALL     BSH       ALL         NO     4
+USA   LL 1993-04-01 1993-05-01  6425135    ALL     BSH       ALL         NO    75
+USA   LL 1993-04-01 1993-05-01  6430135    ALL     BSH       ALL         NO    15
+USA   LL 1993-05-01 1993-06-01  6425135    ALL     BSH       ALL         NO    24
+USA   LL 1994-03-01 1994-04-01  6425135    ALL     BSH       ALL         NO    14
+USA   LL 1994-03-01 1994-04-01  6430135    ALL     BSH       ALL         NO     4
+packages
+
+```{r}
+  if(!require(reshape)){
+    install.packages("reshape")
+    require(reshape)
+  }
+  if(!require(dplyr)){
+    install.packages("dplyr")
+    require(dplyr)
+  }
+  if(!require(tidyr)){
+    install.packages("tidyr")
+    require(tidyr)
+  }
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+Historical name for the dataset at source  PublicCatchOrigFormatTunaBillfish.csv or PublicCatchOrigFormatShark.csv
+Historical name for the dataset at source  
+Historical name for the dataset at source  PublicEffortOrigFormatTunaBillfish.csv or PublicEffortOrigFormatShark.csv (keep the same order as for catch)
+
+```{r}
+  opts <- options()
+  options(encoding = "UTF-8")
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+# Catches
+
+```{r}
+  catches<-read.csv(path_to_raw_dataset_catch, stringsAsFactors = F)
+  efforts<-read.csv(path_to_raw_dataset_effort, stringsAsFactors = F)
+```
+
+catches <- melt(catches, id.vars=c("Record","Spp","DTypeID"))  #@juldebar error with melt function from reshape package
+catches <-melt(as.data.table(catches),id.vars=c("Record","Spp","DTypeID"))
+
+```{r}
+  efforts <- efforts %>% tidyr::gather(variable, value, -c("Record","Lat", "Lon", "Year", "Month", "FlagAbv"))
+```
+
+remove values=0
+
+```{r}
+  efforts <- efforts  %>% 
+    dplyr::filter( ! value %in% 0 ) %>%
+    dplyr::filter( ! is.na(value)) 
+  colnames(efforts)[colnames(efforts)=="FlagAbv"] <- "FishingFleet"
+  colnames(efforts)[colnames(efforts)=="variable"] <- "EffortUnits"
+  colnames(efforts)[colnames(efforts)=="value"] <- "Effort"
+```
+
+Set catchunit values
+DType code 1 means that the data was submitted in both weight and number for the same catch
+DType code 2 means that the data was submitted as number only
+DType code 3 means that the data was submitted as weight only
+Initialisation
+
+```{r}
+  efforts$SquareSize<-5
+  efforts$CodeSquareSize<-6
+  efforts$Gear<-"LL"
+  efforts$SetType<-"ALL"
+  efforts <- efforts %>% select(-Record)
+```
+
+Reach the catches harmonized DSD using a function in IATTC_functions.R
+
+```{r}
+  colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName", "School","EffortUnits","Effort")
+  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+  efforts<-IATTC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts,colToKeep_efforts)
+  
+  colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
+  efforts$source_authority<-"IATTC"
+  efforts$measurement <- "effort"
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+
+```{r}
+  efforts$time_start <- as.Date(efforts$time_start)
+  efforts$time_end <- as.Date(efforts$time_end)
+  dataset_temporal_extent <- paste(
+    paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
+    paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  
+  output_name_dataset <- "Dataset_harmonized.csv"
+  write.csv(efforts, output_name_dataset, row.names = FALSE)
+georef_dataset <- efforts
+```
+
+----------------------------------------------------------------------------------------------------------------------------  
+@ Load pre-harmonization scripts and apply mappings
+
+```{r}
+download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
+source('local_map_codelists_no_DB.R')
+fact <- "effort"
+mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))
+```
+
+@ Handle unmapped values and save the results
+
+```{r}
+georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
+fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
+fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
+fwrite(georef_dataset, 'CWP_dataset.csv')
+```
+
+Display the first few rows of the mapping summaries
+
+```{r}
+print(head(mapping_codelist$recap_mapping))
+print(head(mapping_codelist$not_mapped_total))
+```
+
