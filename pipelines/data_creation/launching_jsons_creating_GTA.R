@@ -201,7 +201,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 
 configshilky <- config
 configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = "FAL")
-summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 
                               sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all" ,"WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ), nameoutput = "Silkysharks")
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
@@ -221,7 +221,6 @@ tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
 create_materialized_view <- ""
-source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/process_fisheries_data_by_species.R")
 
 # IRD_data <- readr::read_csv("data/IOTC_conv_fact_mapped.csv")
 # specieslist <- unique(IRD_data$species)
@@ -239,7 +238,7 @@ for (entity_dir in entity_dirs) {
   sub_list_dir_2 <- rownames(details)
   flog.info("Processed sub_list_dir_2")
   sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
-  a <- process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
+  a <- CWP.dataset::process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
   combined_df <- create_combined_dataframe(a)
   qflextable(combined_df)
   # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
@@ -250,7 +249,6 @@ for (entity_dir in entity_dirs) {
 # tunaatlas_qa_global_datasets_catch_path <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data"
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
 config <- initWorkflow(here::here("config/tunaatlas_qa_global_datasets_effort.json"))
 # config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
@@ -330,17 +328,17 @@ for (i in unique(measurement_unit_all)){
 }
 
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),
                  savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
 setwd("~/firms-gta/geoflow-tunaatlas/")
 
 # config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(source_authority = c("WCPFC"))
 # config$metadata$content$entities[[2]]$data$actions[[1]]$options$parameter_filtering <- list(source_authority = c("WCPFC"))
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "long",source_authoritylist = c("WCPFC"),
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "long",source_authoritylist = c("WCPFC"),
                  savestep = TRUE, usesave = FALSE, nameoutput = "longwcpfctounderstanddecrease")
 
 source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
-# Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
+# CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
 # 
 # georef_dataset <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20241002142921_global_datasets_level1_2/entities/global_catch_ird_level2/Markdown/Level2_RF1/ancient.qs")
 # species <- unique(georef_dataset$species)
@@ -355,7 +353,7 @@ source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
 #   
 #   config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = i)
 #   
-# Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short",
+# CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short",
 #                  source_authoritylist = c("all"),savestep = FALSE, nameoutput = paste0(i, "pdf"), usesave = FALSE )
 # 
 # }
@@ -365,8 +363,7 @@ source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
 # a <- comprehensive_cwp_dataframe_analysis(parameter_init = `2024-08-28_11:12:03nominal_inferior_to_georeferenced`,
 # unique_analyse = TRUE, print_map = FALSE, removemap = TRUE)
 # source("~/firms-gta/geoflow-tunaatlas/comparing_conversion_factors.R")
-source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/functions/compare_georef_nominal.R")
-results <- compare_georef_nominal(georeferenced, global_nominal_catch_firms_level0, connectionDB = con)
+results <- CWP.dataset::compare_georef_nominal(georeferenced, global_nominal_catch_firms_level0, connectionDB = con)
 saveRDS(results, "data/resultsonallthegeorefsuptonom.rds")
 ## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_actions/convert_to_netcdf.R")
@@ -401,13 +398,10 @@ process_entities_for_DOI(tunaatlas_qa_global_datasets_catch_path, "~/firms-gta/g
 # for several stratas used to inspect the data (more details in the report)
 
 # This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
-
-upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data",
+upgraded_nominal <- CWP.dataset::strata_in_georef_but_not_in_nominal_report_launching("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data",
                                                                          connectionDB = con)
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_with_catches_without_effort.R")
 
-CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
+CPUE <- CWP.dataset::strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
                                            connectionDB = con)
 
 

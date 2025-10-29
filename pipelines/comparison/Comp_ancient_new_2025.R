@@ -36,7 +36,7 @@ run_analysis <- function(init, final, source_authority) {
   output_dir <- here::here(paste0("docs/", source_authority, "_comp"))
   
   # Rendre le document
-  setwd(here::here("Analysis_markdown")) 
+  # setwd(here::here("Analysis_markdown")) 
   rmarkdown::render(
     input = "comparison.Rmd",
     envir = render_env,
@@ -90,7 +90,7 @@ run_analysis(
 # 
 # render_env <- new.env()
 # list2env(wcpfc_georef, render_env)
-# setwd(here::here("Analysis_markdown")) 
+# # setwd(here::here("Analysis_markdown")) 
 # 
 # rmarkdown::render(input = "comparison.Rmd",
 #                   envir = render_env,
@@ -132,7 +132,7 @@ ccsbt_georef$Add_lines <- "Add_lines.Rmd"
 
 render_env <- new.env()
 list2env(ccsbt_georef, render_env)
-setwd(here::here("Analysis_markdown")) 
+# setwd(here::here("Analysis_markdown")) 
 
 rmarkdown::render(input = "comparison.Rmd",
                   envir = render_env,
@@ -170,7 +170,7 @@ wcpfc_raw$Add_lines <- "Add_lines.Rmd"
 
 render_env <- new.env()
 list2env(wcpfc_raw, render_env)
-setwd(here::here("Analysis_markdown")) 
+# setwd(here::here("Analysis_markdown")) 
 
 rmarkdown::render(input = "comparison.Rmd",
                   envir = render_env,
@@ -209,7 +209,7 @@ wcpfc_raw$Add_lines <- "Add_lines.Rmd"
 
 render_env <- new.env()
 list2env(wcpfc_raw, render_env)
-setwd(here::here("Analysis_markdown")) 
+# setwd(here::here("Analysis_markdown")) 
 
 rmarkdown::render(input = "comparison.Rmd",
                   envir = render_env,
@@ -244,7 +244,7 @@ wcpfc_raw$Add_lines <- "Add_lines.Rmd"
 
 render_env <- new.env()
 list2env(wcpfc_raw, render_env)
-setwd(here::here("Analysis_markdown")) 
+# setwd(here::here("Analysis_markdown")) 
 
 rmarkdown::render(input = "comparison.Rmd",
                   envir = render_env,
@@ -279,7 +279,7 @@ wcpfc_raw$Add_lines <- "Add_lines.Rmd"
 
 render_env <- new.env()
 list2env(wcpfc_raw, render_env)
-setwd(here::here("Analysis_markdown")) 
+# setwd(here::here("Analysis_markdown")) 
 
 rmarkdown::render(input = "comparison.Rmd",
                   envir = render_env,

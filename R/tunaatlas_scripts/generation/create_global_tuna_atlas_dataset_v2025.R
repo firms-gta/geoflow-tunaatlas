@@ -27,8 +27,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   opts <- action$options
   con <- config$software$output$dbi
   options(encoding = "UTF-8")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
-  write_options_to_csv(opts)
+  CWP.dataset::write_options_to_csv(opts)
   # List of required packages
   packages <- c("dplyr","zen4R" ,"sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
   
@@ -85,9 +84,6 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
   }
   
-  #for reporting
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copyrmd.R")
   # Saving options in a csv file and creating a new variable for each options
   
   #action options
@@ -178,7 +174,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     georef_dataset <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) != "7") # removing 10 degrees
     
     if(recap_each_step){
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "rawdata",
         georef_dataset,
         "The georeferenced data of the included tRFMOS, are binded.",
@@ -209,7 +205,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
           dplyr::filter(time_start <= min_time_start)
         
         if (recap_each_step) {
-          function_recap_each_step(
+          CWP.dataset::function_recap_each_step(
             "rawdata_time_harmonized",
             georef_dataset,
             "Years provided by not every tRFMOs are removed",
@@ -264,7 +260,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
         }
         
         if(recap_each_step){
-          function_recap_each_step(
+          CWP.dataset::function_recap_each_step(
             "iattc enriched",
             georef_dataset,
             "This step is using the different datasets provided by IATTC (6 datasets) and creating a binded version of all of them.
@@ -321,7 +317,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
         }
         
         if(recap_each_step){
-          function_recap_each_step(
+          CWP.dataset::function_recap_each_step(
             "iattc raised for billfish and shark",
             georef_dataset,
             "The effort is expressed here in terms of number of sets. This means in the case of the EPO 
@@ -351,7 +347,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       #       mapping_map_code_lists = opts$mapping_map_code_lists,
       #       georef_dataset = georef_dataset
       #     )
-      #   function_recap_each_step(
+      #   CWP.dataset::function_recap_each_step(
       #     "Removing NOMT and converting MTNO in MT",
       #     georef_dataset,
       #     "The data initially in MTNO is converted in MT and the data in NTMO is removed",
@@ -406,7 +402,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       
       # If required, recap the steps undertaken
       if(recap_step){
-        function_recap_each_step(
+        CWP.dataset::function_recap_each_step(
           paste0("overlap_", zone_key),
           georef_dataset,
           paste0("The georeferenced data present on the overlapping zone between ", rfmo_main, " and ", names(rfmo_main)[[1]], " is handled.",
@@ -467,7 +463,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     } else {
       stop("Please provide a georeferenced catch dataset")
     }
-    function_recap_each_step(
+    CWP.dataset::function_recap_each_step(
       "Level0_Firms",
       georef_dataset,
       paste0(
@@ -513,7 +509,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   #     dplyr::ungroup() %>%
   #     dplyr::mutate(fishing_mode = ifelse(fishing_mode %in% c("OTH", "DEL"), "UNK", fishing_mode))
   #   
-  #   function_recap_each_step(
+  #   CWP.dataset::function_recap_each_step(
   #     paste0("Removing_duplicated_units"),
   #     georef_dataset,
   #     "As some data is in fact duplicated for catch, we check all the duplicated data and remove the data in number when same dimensions",
@@ -614,7 +610,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       dplyr::filter(year >= min_complete_year) %>%
       dplyr::select(-min_complete_year)
     
-    function_recap_each_step(
+    CWP.dataset::function_recap_each_step(
       paste0("Removing_data_with_no_nominal"),
       georef_dataset,
       "Since the nominal catch dataset does not cover every year, and the georeferenced data for the first years are not complete, raising would only apply to certain years and/or raising would be not accurate for first years. To avoid mixing raised and unraised data, we prefer to remove records for years that have no equivalent in the nominal dataset.",
@@ -957,7 +953,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
               # mais la question est donc qu'est ce que sont les données en nombre restantes? Celles sans équivalent en nominal ? 
               georef_dataset <- convert_number_to_nominal_output$georef_dataset
               
-              function_recap_each_step(
+              CWP.dataset::function_recap_each_step(
                 paste0("Conv_NO_nominal", i),
                 georef_dataset,
                 paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions:", toString(strata_cols_updated), 
@@ -1060,7 +1056,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
                   }
                 )
                 
-                function_recap_each_step(
+                CWP.dataset::function_recap_each_step(
                   step_name   = paste0("RF_pass_", i),
                   rds_data    = georef_dataset,
                   explanation = recap_msg,
@@ -1121,7 +1117,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       )
       
       georef_dataset <- georef_dataset$dataset
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Disaggregate5deg",
         georef_dataset,
         paste0("The data is disaggregated data on resolution higher than 5o in 5o resolution."),
@@ -1154,7 +1150,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       
       georef_dataset <- georef_dataset$dataset
       
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Disaggregate1deg",
         georef_dataset,
         "This step disaggregate data on resolution higher than 1o in 1o resolution",
@@ -1194,7 +1190,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       
       # try(lapply(names_list_aggregation, function_write_RDS))
       
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Aggregation",
         georef_dataset,
         "The data with resolution lower to 5o is aggregated on resolution of 5o.",
@@ -1218,7 +1214,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     georef_dataset <- filtering_resolution_filter(georef_dataset, opts$resolution_filter)
     
     if(recap_each_step){
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "filtering_on_spatial_resolution",
         georef_dataset,
         "This step is to filter on the wanted resolution.",
@@ -1252,7 +1248,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     }
     
     if(recap_each_step){
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Filtering on every other dimension",
         georef_dataset,
         paste0("Filtering on the following paremeters :", parameter_filtering),

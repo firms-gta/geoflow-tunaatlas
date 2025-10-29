@@ -51,8 +51,7 @@ load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 config <- initWorkflow(here::here("config/creating_dataset.json"))
 con <- config$software$output$dbi
 # Load function and run summarizing step
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Summarising_step.R")
-Summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config = config, sizepdf = "middle", savestep = TRUE, usesave = FALSE)
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config = config, sizepdf = "middle", savestep = TRUE, usesave = FALSE)
 
 
 # NetCDF Creation

@@ -56,7 +56,7 @@ perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codel
     )
     
     # Log the step
-    function_recap_each_step(
+    CWP.dataset::function_recap_each_step(
       step_description,
       georef_dataset,
       paste0(sprintf("The number of fish is converted into tons using the following dataset:  %s. ",
