@@ -18,7 +18,7 @@ list(
     {
       flog.info("Début du résumé des résultats avec Summarising_step")
       
-      Summarising_step(
+      CWP.dataset::summarising_step(
         main_dir = tunaatlas_qa_global_datasets_catch_path,
         connectionDB = con,
         config = config,

@@ -41,18 +41,8 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
   
-  # Additional scripts for reporting and functions
-  reporting_functions <- c(
-    "functions/write_options_to_csv.R",
-    "functions/function_recap_each_step.R",
-    "functions/copyrmd.R"
-  )
-  
-  lapply(reporting_functions, function(func) {
-    source(file.path(base_url, "Analysis_markdown/", func))})
-  
   # Save options in a CSV file
-  write_options_to_csv(opts)
+  CWP.dataset::write_options_to_csv(opts)
   
   
   stepnumber <- 1
@@ -72,7 +62,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   }
   
   if(recap_each_step){
-    function_recap_each_step(
+    CWP.dataset::function_recap_each_step(
       "rawdata",
       df_to_load)
   }
@@ -89,7 +79,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   georef_dataset <- georef_dataset %>% dplyr::filter(measurement_value > 0)
   if(nrow(negative_values)!=0){
     if(recap_each_step){
-      function_recap_each_step("negative_values",georef_dataset,paste0("In this step,handle negative values in the measurement_values of the data"))
+      CWP.dataset::function_recap_each_step("negative_values",georef_dataset,paste0("In this step,handle negative values in the measurement_values of the data"))
       
       readr::write_csv(negative_values,"data/negative_values.csv")
       
@@ -118,7 +108,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     
     if(nrow(not_conform_conversion_factors) != 0){
       
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Removing_absurd_nomt",
         georef_dataset,
         "In this step, we target implausible data. We check data having declaration both in NOMT and MTNO and if the conversion factor is implausible.
@@ -170,7 +160,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     if (!is.null(areas_in_land) && is.data.frame(areas_in_land) && nrow(areas_in_land) != 0) {
       
       if(recap_each_step){
-        function_recap_each_step(
+        CWP.dataset::function_recap_each_step(
           "Realocating_removing_mislocated_data",
           georef_dataset,
           "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
@@ -185,7 +175,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     if (!is.null(dataset_not_cwp_grid) && is.data.frame(dataset_not_cwp_grid) && nrow(dataset_not_cwp_grid) != 0) {
       
       if(recap_each_step){
-        function_recap_each_step(
+        CWP.dataset::function_recap_each_step(
           "Realocating_removing_mislocated_data",
           georef_dataset,
           "In this step, the mislocated data is hanlded. Either removed, reallocated or let alone, the data on continent and the data outside the competent rfmo area are targeted. ",
@@ -219,7 +209,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       if(!is.null(outside_juridiction) && is.data.frame(outside_juridiction) && nrow(outside_juridiction) != 0) {
         
         if(recap_each_step){
-          function_recap_each_step(
+          CWP.dataset::function_recap_each_step(
             "outside_juridiction",
             georef_dataset,
             paste0(
@@ -299,7 +289,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       
       config$logger.info("Saving recap of mapping ok")
       
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "mapping_codelist",
         georef_dataset,
         "This step is to map all the data with the same codes for gears, species, and fishingfleet,
@@ -344,7 +334,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
                                                            by = c("species" = "species", "source_authority" = "source_authority"))
     
     if(recap_each_step){
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Filtering species",
         georef_dataset,
         paste0(

@@ -52,11 +52,7 @@ function(action, entity, config){
   
   
   #for reporting
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/write_options_to_csv.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/function_recap_each_step.R") # new function to create rds for each treatment
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/copyrmd.R")
-  # Saving options in a csv file and creating a new variable for each options
-  write_options_to_csv(opts)
+  CWP.dataset::write_options_to_csv(opts)
   
   
   #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
@@ -65,7 +61,7 @@ function(action, entity, config){
   config$logger.info("Retrieving RFMOs nominal catch OK")
   
   if(recap_each_step){
-    function_recap_each_step(
+    CWP.dataset::function_recap_each_step(
       "rawdata",
       nominal_catch, "rawdata","retrieve_nominal_catch",NULL)
   }
@@ -83,7 +79,7 @@ function(action, entity, config){
     config$logger.info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
     
     if(recap_each_step){
-      function_recap_each_step(
+      CWP.dataset::function_recap_each_step(
         "Filtering_SBF_data",
         nominal_catch,
         paste0(
