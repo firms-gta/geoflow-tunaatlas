@@ -29,7 +29,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   options(encoding = "UTF-8")
   CWP.dataset::write_options_to_csv(opts)
   # List of required packages
-  packages <- c("dplyr","zen4R" ,"sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
+  packages <- c("dplyr" ,"sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
   
   # Function to check and install missing packages
   install_and_load <- function(package) {
@@ -454,7 +454,9 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       georef_dataset <- readr::read_csv((file.path("data", opts$keylevel0)), guess_max = 0)
       class(georef_dataset$measurement_value) <- "numeric" 
     } else if (!is.null(opts$doilevel0)) {
-      zen4R::download_zenodo(doi = opts$doilevel0, files = opts$keylevel0, path = "data")
+      rec <- sub("^.*zenodo\\.(\\d+).*$", "\\1", opts$doilevel0)
+      url <- sprintf("https://zenodo.org/records/%s/files/%s?download=1", rec, opts$keylevel0)
+      download.file(url, file.path("data", opts$keylevel0), mode = "wb")
       georef_dataset <- readr::read_csv(here::here(file.path("data", opts$keylevel0)), guess_max = 0)
       class(georef_dataset$measurement_value) <- "numeric"
     } else {
