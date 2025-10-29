@@ -49,12 +49,10 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   source(file.path(url_scripts_create_own_tuna_atlas,"download_zenodo_csv.R"))
   
   #for level 0 - FIRMS
-  # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
-  source(here::here("./R/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists.R") #modified for geoflow
-  # source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
-  source(here::here("R/tunaatlas_scripts/generation/function_overlapped.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) #modified for geoflow
   #for filtering if needed
   source(file.path(url_scripts_create_own_tuna_atlas, "dimension_filtering_function.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
@@ -71,9 +69,8 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   #for level 2 - IRD
   source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
   source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/generation/function_raise_data.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "convert_number_to_nominal.R")) #modified for geoflow
+  source(file.path(url_scripts_create_own_tuna_atlas, "function_raise_data.R")) #modified for geoflow
   
   
   # For filtering/aggregating
