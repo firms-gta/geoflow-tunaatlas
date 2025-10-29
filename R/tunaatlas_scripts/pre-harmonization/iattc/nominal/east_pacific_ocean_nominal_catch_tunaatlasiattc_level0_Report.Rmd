@@ -18,7 +18,7 @@ Additional operations are performed next to verify other aspects of the data, su
 If you are interested in further details, the results and codes are available for review.
 
 ```{r}
-path_to_raw_dataset <- here::here('tunaatlas_scripts/pre-harmonization', 'iattc', 'nominal', 'data', 'CatchFlagGear.csv')
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'nominal', 'data', 'CatchFlagGear.csv')
 ```
 
 Harmonize IATTC Nominal Catch Datasets

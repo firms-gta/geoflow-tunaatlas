@@ -13,7 +13,7 @@ if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
 
 # 🔹 SOURCING des fonctions nécessaires
-targets::tar_source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R"))
+targets::tar_source(here::here("R/tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R"))
 
 # Définir les options globales de `{targets}`
 tar_option_set(

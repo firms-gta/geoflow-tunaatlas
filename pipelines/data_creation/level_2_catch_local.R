@@ -66,7 +66,7 @@ if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
 renv::restore()
 
 # ─── Chargement des fonctions externes ──────────────────────────────────────
-source(here::here("tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R"))
+source(here::here("R/tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R"))
 
 # ─── 1) Initialisation du workflow ───────────────────────────────────────────
 config <- initWorkflow(here("config/catch_ird_level2_local.json"))

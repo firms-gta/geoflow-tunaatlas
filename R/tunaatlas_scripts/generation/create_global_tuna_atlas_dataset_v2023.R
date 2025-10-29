@@ -73,7 +73,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
     source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "convert_number_to_nominal.R")) #modified for geoflow
-    source(here::here("tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
+    source(here::here("R/tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "function_raise_data.R")) #modified for geoflow
     
     

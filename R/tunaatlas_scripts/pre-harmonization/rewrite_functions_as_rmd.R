@@ -109,16 +109,16 @@ rewrite_functions_as_rmd <- function(source_path) {
     data_files <- data_files[!str_detect(data_files, "harmonized")]
     
     if (!is.na(trfmo) && type == "nominal" && trfmo == "wcpfc") {
-      lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') \n path_to_raw_dataset2 <- here::here('tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')", lines)
+      lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') \n path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')", lines)
     } else {
       if (length(data_files) >= 1) {
-        lines <- gsub("path_to_raw_dataset <-.*", paste0("path_to_raw_dataset <- here::here('tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[1]), "')"), lines)
+        lines <- gsub("path_to_raw_dataset <-.*", paste0("path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[1]), "')"), lines)
       }
       if (any(grepl("path_to_raw_dataset_catch <-", lines)) && length(data_files) >= 1) {
-        lines <- gsub("path_to_raw_dataset_catch <-.*", paste0("path_to_raw_dataset_catch <- here::here('tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[1]), "')"), lines)
+        lines <- gsub("path_to_raw_dataset_catch <-.*", paste0("path_to_raw_dataset_catch <- here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[1]), "')"), lines)
       }
       if (any(grepl("path_to_raw_dataset_effort <-", lines)) && length(data_files) >= 2) {
-        lines <- gsub("path_to_raw_dataset_effort <-.*", paste0("path_to_raw_dataset_effort <- here::here('tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[2]), "')"), lines)
+        lines <- gsub("path_to_raw_dataset_effort <-.*", paste0("path_to_raw_dataset_effort <- here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[2]), "')"), lines)
       }
     }
     
@@ -200,7 +200,7 @@ remove_specific_files <- function(root_dir) {
 }
 
 # Appel à la fonction pour supprimer les fichiers spécifiques
-remove_specific_files(here::here("tunaatlas_scripts/pre-harmonization"))
+remove_specific_files(here::here("R/tunaatlas_scripts/pre-harmonization"))
 
 
 # Troncature des fichiers CSV et XLSX après la génération des fichiers HTML
