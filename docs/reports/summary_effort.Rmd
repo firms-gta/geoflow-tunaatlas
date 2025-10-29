@@ -1,0 +1,213 @@
+---
+title: "Effort Dataset Analysis (Global Tuna Atlas - IRD Level 0)"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+```
+
+```{r echo=TRUE, results='hide'}
+packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra")
+lapply(packages, function(pkg) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg)
+  library(pkg, character.only = TRUE)
+})
+```
+
+## 📥 Download and load the file
+
+```{r}
+
+qs_file <- "data/global_effort_tunaatlasird_level0_1950_2023.qs"
+qs_file_downloaded <- "data/global_catch_tunaatlasird_level2_1950_2023_15221705.qs"
+
+if (!dir.exists(dirname(qs_file))) {
+  dir.create(dirname(qs_file), recursive = TRUE)
+}
+
+if (!file.exists(qs_file)) {
+  if (!file.exists(qs_file_downloaded)) {
+    download.file(
+      "https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1",
+      qs_file_downloaded,
+      mode = "wb"
+    )
+  }
+  file.rename(qs_file_downloaded, qs_file)
+}
+
+effort_data <- qs::qread(qs_file)
+
+effort_data$geom <- NULL 
+
+```
+
+## 📊 Data Overview
+
+This dataset provides monthly records of tuna and tuna-like species effort at the global scale between 1950 and 2023. Here is a description of the columns:
+
+```{r}
+kableExtra::kable(head(effort_data))
+```
+
+
+```{r}
+dplyr::glimpse(effort_data)
+```
+
+
+- `source_authority`: The source RFMO (e.g., CCSBT, IOTC)
+- `fishing_fleet`: Code for the flag or national fleet (e.g., AUS)
+- `time_start` / `time_end`: Temporal coverage of the observation (monthly granularity)
+- `geographic_identifier`: Unique spatial ID for each grid cell
+- `gear_type`: Code describing the type of gear used
+- `fishing_mode`: Code describing the fishing mode or school association
+- `measurement_unit`: Unit of measurement used for effort (e.g., Days, Hours)
+- `measurement_value`: Numeric value of the reported effort
+- `GRIDTYPE`: Type of grid used (e.g., 1deg_x_1deg)
+- `gear_type_label`: Human-readable label for the gear type
+- `fishing_fleet_label`: Label for the fleet or flag state
+- `species_label`: Common name of the species
+- `species_definition`: Scientific name of the species
+- `geom`: Geometry in WKT format for mapping purposes
+- `fishing_mode_label`: Human-readable label for fishing mode)
+
+
+```{r}
+summary(effort_data$measurement_value)
+```
+
+
+```{r}
+kableExtra::kable(table(effort_data$measurement_unit))
+```
+
+
+## 🗺️ Effort map
+
+First let's download the geometry. 
+
+```{r}
+  cwp_grid_file <- here("data/cl_areal_grid.csv")
+  if (!file.exists(cwp_grid_file)) {
+    message("Downloading cl_area from github repo")
+    zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
+    zip_path <- here("data/cwp_grid.zip")
+    download.file(zip_url, zip_path, mode = "wb")
+    unzip(zip_path, exdir = here("data"))
+  }
+  cwp_grid <- st_read(cwp_grid_file)
+  cwp_grid <- st_as_sf(
+    cwp_grid,
+    wkt = "geom_wkt",   
+    crs = 4326         
+  ) %>%
+     dplyr::rename(cwp_code = CWP_CODE) %>%
+    dplyr::rename(geom = geom_wkt)
+  
+qs_file <- "UN_CONTINENT2.qs"
+
+if (!file.exists(qs_file)) {
+  message("Downloading UN_CONTINENT2 from FAO GeoServer...")
+  WFS <- WFSClient$new(
+    url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
+    serviceVersion = "1.0.0",
+    logger = "INFO"
+  )
+  continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
+  
+  # Save to .qs for faster reloads later
+  qs::qsave(continent, qs_file)
+} else {
+  message("Loading cached UN_CONTINENT2 from local file...")
+  continent <- qs::qread(qs_file)
+}
+
+sf::st_crs(continent) <- 4326
+
+```
+
+This map displays the spatial distribution of effort, aggregated by geographic grid cell. The measurement_value is summed for each area, and only the top 6 values are shown.
+
+```{r}
+
+top_units <- effort_data %>%
+  dplyr::group_by(measurement_unit) %>%
+  dplyr::summarise(filtertop = sum(measurement_value)) %>%
+  dplyr::arrange(desc(filtertop)) %>%
+  dplyr::slice_head(n = 6) %>%
+  dplyr::pull(measurement_unit)
+
+
+effort_summary_by_unit <- effort_data %>%
+  dplyr::filter(measurement_unit %in% top_units) %>% 
+  dplyr::group_by(geographic_identifier, measurement_unit) %>%
+  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE), .groups = "drop") 
+
+effort_summary_geom <- effort_summary_by_unit %>%
+  dplyr::inner_join(cwp_grid %>% dplyr::select(cwp_code, geom), by = c("geographic_identifier" = "cwp_code")) %>%
+  sf::st_as_sf()
+
+plots <- effort_summary_geom %>%
+  dplyr::group_split(measurement_unit) %>%
+  purrr::map(function(df) {
+    unit <- unique(df$measurement_unit)
+    
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = continent, fill = "gray90", color = "gray60") +
+      ggplot2::geom_sf(data = df, ggplot2::aes(fill = total), color = NA) +
+      ggplot2::scale_fill_viridis_c(option = "plasma", trans = "log", na.value = "transparent") +
+      ggplot2::labs(title = paste("Unit:", unit), fill = "effort Total") +
+      ggplot2::theme_minimal()
+  })
+
+patchwork::wrap_plots(plots, ncol = 2)
+
+
+```
+
+## 📈 Annual effort trends
+
+```{r}
+
+effort_data %>%
+  dplyr::group_by(year = lubridate::year(time_start), measurement_unit) %>%
+  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE)) %>%
+  ggplot2::ggplot(ggplot2::aes(x = year, y = total)) +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap(~measurement_unit, scales = "free_y") +
+  ggplot2::labs(title = "Total effort by year and 'measurement_unit'", y = "Measurement_value", x = "Year")
+
+
+```
+
+
+<!-- # Your turn: -->
+
+<!-- If you want to use only part of the data you can filter the dataset using the dimensison provided exemple, here let's focus on Silky sharks (note that this only concern catch data as effort cannot be related to species) -->
+
+<!-- ```{r} -->
+
+<!-- silky_sharks <- effort_data %>% dplyr::filter(species_label == "Silky shark") -->
+
+<!-- ``` -->
+
+<!-- ```{r} -->
+
+<!-- silky_sharks %>% -->
+<!--   dplyr::group_by(year = lubridate::year(time_start), measurement_unit) %>% -->
+<!--   dplyr::summarise(total = sum(measurement_value, na.rm = TRUE)) %>% -->
+<!--   ggplot2::ggplot(ggplot2::aes(x = year, y = total)) + -->
+<!--   ggplot2::geom_line() + -->
+<!--   ggplot2::facet_wrap(~measurement_unit, scales = "free_y") + -->
+<!--   ggplot2::labs(title = "Total catches by Year and Measurement unit", y = "Measured Value", x = "Year") -->
+
+<!-- ``` -->
+

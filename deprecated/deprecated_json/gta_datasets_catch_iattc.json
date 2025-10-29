@@ -1,0 +1,73 @@
+{
+  "profile": {
+    "id": "firms-gta-datasets-iattc",
+    "mode": "entity",
+	"environment": {
+  		"file": "envs/qa.env",
+  		"hide_env_vars": ["USER", "PASSWORD", "TOKEN"]
+  	}, 
+	"project": "FIRMS Tuna Atlas",
+	"organization": "FIRMS Tuna Atlas",
+	"logos": [
+	   "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+	   "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+	   "http://www.umr-marbec.fr/images/logo-ird-en.png"
+	],
+	"options": {
+		"line_separator": "_\n"
+    }
+  },
+  "metadata": {
+    "entities": [
+      {
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1G0EhEUC0H89nDFZsZBn7Y6Q9eyX5yR90mdVxrEUXMpY/edit#gid=0"
+      }
+    ],
+    "contacts" : [
+      {
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+      }
+    ]
+  },
+  "software": [
+	{
+		"id": "my-database-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "{{DB_DRV}}",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {}
+	},
+	{
+		"id": "googledrive",
+		"type": "input",
+		"software_type": "googledrive",
+		"parameters": {
+			"email": "{{GMAIL_USER}}",
+			"token": "{{GMAIL_TOKEN}}"
+		},
+		"properties" : {}
+	}
+  ],
+  "actions": [
+	{
+		"id": "load_dataset",
+		"script": "./R/tunaatlas_actions/load_dataset.R",
+		"run": true,
+		"options": {
+			"upload_to_db": true,
+			"create_materialized_view": false,
+			"upload_to_googledrive": true
+		}
+	}
+  
+  ]
+}

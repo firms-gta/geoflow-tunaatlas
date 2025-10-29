@@ -1,0 +1,92 @@
+{
+  "profile": {
+  	"id": "firms-gta-dbmodel-codelists",
+  	"mode": "entity",
+  	"environment": {
+  		"file": "envs/qa.env",
+  		"hide_env_vars": ["USER", "PASSWORD", "TOKEN"]
+  	},
+  	"project": "FIRMS Tuna Atlas",
+  	"organization": "FIRMS Tuna Atlas",
+  	"logos": [
+  		"http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+  		"http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+  		"http://www.umr-marbec.fr/images/logo-ird-en.png"
+  	],
+  	"options": {
+  		"line_separator": "_\n"
+  	}
+  },
+  "metadata": {
+    "entities": [
+		{
+		  "handler": "gsheet",
+		  "source": "https://docs.google.com/spreadsheets/d/12zi49c5wd9Nc7N1anv3lCM4f66L-5x3-Xsh6ZGGc-ns/edit?usp=sharing"
+		}
+	],
+    "contacts" : [
+		{
+		  "handler": "gsheet",
+		  "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+		}
+	]
+  },
+  "software": [
+	{
+		"id": "tunaatlas-db-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "{{DB_DRV}}",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {
+			"user_readonly": "{{DB_USER_READONLY}}",
+			"onstart_r": {
+				"script": "./R/tunaatlas_scripts/deploy_database_model.R",
+				"fun": "deploy_database_model"
+			},
+			"onend_r": {
+				"script": "./R/tunaatlas_scripts/create_grid_views.R",
+				"fun": "create_grid_views"
+			}
+		}
+	},
+	{
+		"id": "tunaatlas-db-read",
+		"type": "input",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "{{DB_DRV}}",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {
+		}
+	},
+	{
+		"id": "googledrive",
+		"type": "input",
+		"software_type": "googledrive",
+		"parameters": {
+			"email": "{{GMAIL_USER}}",
+			"token": "{{GMAIL_TOKEN}}"
+		},
+		"properties" : {}
+	}
+  ],
+  "actions": [
+	{
+		"id": "load_codelist",
+		"script": "./R/tunaatlas_actions/load_codelist.R",
+		"run": true
+	}
+  ]
+}

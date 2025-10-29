@@ -1,6 +1,6 @@
 {
     "title": "Global Tuna Atlas : data generation worklow",
-    "description": "This R worklfow is used to generate the Global Tuna Atlas datasets. The code has been developped and can be directly executed in the virtual environments of the RStudio server hosted in the same <a href=\"https://blue-cloud.d4science.org/group/globalfisheriesatlas\">Virtual Lab<\/a> provided by <a href=\"https://blue-cloud.d4science.org\">Blue-Cloud 2026<\/a> project which implements best practices for Open Science and FAIR data management. Find more details about these datasets on <a href=\"https://www.fao.org/fishery/en/collection/firms-tuna-atlas\">FIRMS Website<\/a>.",
+    "description": "This R worklfow is used to generate the Global Tuna Atlas datasets. The code has been developped and can be directly executed in the virtual environments of the RStudio server hosted in the same <a href=\"https://blue-cloud.d4science.org/group/globalfisheriesatlas\">Virtual Lab<\/a> provided by <a href=\"https://blue-cloud.d4science.org\">Blue-Cloud 2026<\/a> project which implements best practices for Open Science and FAIR data management. Find more details about these datasets on <a href=\"https://www.fao.org/fishery/en/collection/firms-tuna-atlas\">FIRMS Website<\/a>. Check related <a href=\"https://github.com/firms-gta/geoflow-tunaatlas\">GitHub repository<\/a>.",
     "license": "CC-BY-4.0",
     "upload_type": "software",
     "access_right": "open",
@@ -33,10 +33,6 @@
     "keywords": [
       "Tuna fisheries",
       "FAIR services",
-      "web mapping",
-      "Shiny app",
-      "Darwin Core",
-      "GBIF",
       "reproducible research",
       "Open Science",
       "R"
@@ -65,6 +61,12 @@
       "identifier": "https://dx.doi.org/10.5281/zenodo.5746041",
       "relation": "isSupplementTo",
       "resource_type": "dataset"
+      },
+      {
+      "scheme": "url",
+      "identifier": "https://github.com/firms-gta/geoflow-tunaatlas/",
+      "relation": "isIdenticalTo",
+      "resource_type": "software"
       }
     ],
     "communities": [

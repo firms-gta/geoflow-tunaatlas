@@ -1,0 +1,96 @@
+name: Build and Deploy summary_catch HTML
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish Docker Image"]   # nom du workflow targeted_worfklow.yml
+    types: [completed]
+
+permissions:
+  contents: write      # commit/push docs
+  packages: read       # pull GHCR
+
+jobs:
+  render:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
+      BASE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT || secrets.GHCR_TOKEN || github.token }}
+
+      - name: Build renderer image (FROM built image)
+        run: |
+          docker buildx build \
+            --load \
+            --build-arg BASE_IMAGE=${IMAGE}:${BASE_SHA} \
+            -f docker/Dockerfile.summary_catch \
+            -t summary-catch-builder .
+
+      - name: Render Rmd → docs/index.html
+        run: |
+          mkdir -p docs
+          docker run --rm -v "${{ github.workspace }}/docs:/workspace/docs" summary-catch-builder
+          ls -lah docs
+
+      - name: Commit & Push docs
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update summary_catch HTML"
+          git push
+
+
+
+# jobs:
+#   build-summary-catch:
+#     runs-on: ubuntu-latest
+# 
+#     steps:
+#     - uses: actions/checkout@v4
+# 
+#     - name: Set up Docker Buildx
+#       uses: docker/setup-buildx-action@v3
+# 
+#     - name: Cache Docker layers
+#       uses: actions/cache@v4
+#       with:
+#         path: /tmp/.buildx-cache
+#         key: ${{ runner.os }}-buildx-${{ github.sha }}
+#         restore-keys: |
+#           ${{ runner.os }}-buildx-
+# 
+#     - name: Build Docker image with buildx
+#       run: |
+#         docker buildx build \
+#           --cache-from=type=local,src=/tmp/.buildx-cache \
+#           --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+#           --load \
+#           -f docker/Dockerfile.summary_catch \
+#           -t summary-catch-builder .
+# 
+#     - name: Move cache
+#       run: |
+#         rm -rf /tmp/.buildx-cache
+#         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+# 
+#     - name: Run Docker container
+#       run: docker run --rm -v ${{ github.workspace }}/docs:/workspace/docs summary-catch-builder
+# 
+#     - name: Commit and push HTML output
+#       run: |
+#         git config --global user.name 'github-actions[bot]'
+#         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+#         git add docs/
+#         git diff --quiet && git diff --staged --quiet || (git commit -m "Update summary_catch HTML" && git push)
+

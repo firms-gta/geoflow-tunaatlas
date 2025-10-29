@@ -1,0 +1,178 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Branch to base the Docker image on (e.g., master, dev)"
+        required: true
+        default: "master"
+      action:
+        description: "Action to perform: build, build-no-cache"
+        required: true
+        default: "build"
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+  
+env:
+  CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-cache
+  DOCKER_BUILDKIT: 1
+  RENV_PATHS_ROOT: /root/.cache/R/renv
+
+# The dockerfile used is the default one : Dockerfile
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 140
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}  
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_branch || github.ref }}
+
+      - name: 🔍 Hash renv.lock
+        run: |
+          if [ -f renv.lock ]; then
+            echo "renv_lock_hash=$(sha256sum renv.lock | cut -d' ' -f1)" >> $GITHUB_ENV
+          else
+            echo "renv_lock_hash=default" >> $GITHUB_ENV
+          fi
+
+      - name: 🔍 Hash data/DOI.csv
+        run: |
+          if [ -f data/DOI.csv ]; then
+            echo "doi_csv_hash=$(sha256sum data/DOI.csv | cut -d' ' -f1)" >> $GITHUB_ENV
+          else
+            echo "doi_csv_hash=default" >> $GITHUB_ENV
+          fi
+
+      - name: 🛠️ Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          # Utilise le PAT si dispo, sinon le GITHUB_TOKEN du repo
+          password: ${{ secrets.GHCR_PAT || secrets.GHCR_TOKEN || github.token }}
+
+      - name: 🧮 Prepare tags
+        id: tags
+        run: |
+          IMAGE="ghcr.io/${{ github.repository }}"
+          if [[ "${{ github.event_name }}" == "push" && "${{ startsWith(github.ref_name, 'v') }}" == "true" ]]; then
+            VER="${GITHUB_REF_NAME}"             # v1.2.3
+            CLEAN="${VER#v}"                     # 1.2.3
+            echo "image=$IMAGE" >> $GITHUB_OUTPUT
+            echo "tags=$IMAGE:${VER},$IMAGE:${CLEAN},$IMAGE:latest,$IMAGE:${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "cache_key=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+          else
+            # Run manuel: tag lisible basé sur la branche + SHA court
+            BR="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_branch || github.ref_name }}"
+            BR_SAFE=$(echo "$BR" | tr '/:' '__')
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-12)
+            echo "image=$IMAGE" >> $GITHUB_OUTPUT
+            echo "tags=$IMAGE:manual-${BR_SAFE},$IMAGE:${SHORT_SHA},$IMAGE:${{ github.sha }}" >> $GITHUB_OUTPUT
+            echo "cache_key=${BR_SAFE}" >> $GITHUB_OUTPUT
+          fi
+
+      # -------- Build & PUSH vers GHCR --------
+      - name: 🐳 Build & Push image
+        run: |
+          set -e
+          IFS=',' read -ra TAGS <<< "${{ steps.tags.outputs.tags }}"
+          TAG_ARGS=()
+          for t in "${TAGS[@]}"; do TAG_ARGS+=("-t" "$t"); done
+
+          # Option no-cache selon l'input
+          NO_CACHE=""
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.action }}" == "build-no-cache" ]]; then
+            NO_CACHE="--no-cache"
+          fi
+
+          docker buildx build \
+            --progress=plain \
+            ${NO_CACHE} \
+            --cache-from type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }} \
+            --cache-to   type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }},mode=max \
+            --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
+            --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
+            --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
+            "${TAG_ARGS[@]}" \
+            --push .
+            
+      - name: 🔎 Debug tags
+        run: |
+          echo "IMAGE=${{ steps.tags.outputs.image }}"
+          echo "TAGS=${{ steps.tags.outputs.tags }}"
+
+      - name: 🏷 Pick run tag
+        id: pick
+        run: |
+          echo "run_tag=${{ steps.tags.outputs.image }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+            
+      - name: 📦 Extraire l’HTML déjà présent dans l’image
+        env:
+          RUN_TAG: ${{ steps.pick.outputs.run_tag }}
+          HTML_IN_IMAGE: /site/Summarycatchlevel2.html
+        run: |
+          mkdir -p docs
+          CID=$(docker create "$RUN_TAG")
+          docker cp "$CID":"$HTML_IN_IMAGE" docs/Summarycatchlevel2.html
+          docker rm "$CID"
+          ls -lah docs
+
+      - name: 📦 Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      
+      - name: 🚀 Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+
+# 
+      # -------- Build en TAR (réutilise le cache du build précédent pas utile pour le moment) --------
+      # - name: 📦 Build image to TAR
+      #   run: |
+      #     set -e
+      #     # On génère un seul tag arbitraire pour le tar (peu importe, c'est l'archive qui compte)
+      #     IMAGE="${{ steps.tags.outputs.image }}"
+      #     TAR_TAG="${IMAGE}:export-tar"
+      #     docker buildx build \
+      #       --progress=plain \
+      #       --cache-from type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }} \
+      #       --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
+      #       --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
+      #       --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
+      #       -t "$TAR_TAG" \
+      #       --output type=docker,dest=/tmp/docker-image.tar \
+      #       .
+      #     ls -lh /tmp/docker-image.tar
+      # 
+      # - name: Upload TAR artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: docker-image
+      #     path: /tmp/docker-image.tar
+      #     retention-days: 30

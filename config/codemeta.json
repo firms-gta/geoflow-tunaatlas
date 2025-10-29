@@ -1,0 +1,146 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@id": "https://doi.org/10.5281/zenodo.14039665",
+  "@type": "https://schema.org/SoftwareSourceCode",
+  "identifier": {
+    "@type": "doi",
+    "value": "10.5281/zenodo.14039665",
+    "propertyID": "http://doi.org/10.5281/zenodo.14039665"
+  },
+  "name": "Global Tuna Atlas : data generation worklow",
+  "creator": [
+    {
+      "name": "FIRMS GTA Technical Working Group",
+      "familyName": "FIRMS GTA Technical Working Group",
+      "@id": "https://orcid.org/0009-0007-6967-0300",
+      "@type": "Person"
+    },
+    {
+      "name": "Grasset, Bastien",
+      "givenName": "Bastien",
+      "familyName": "Grasset",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "IRD"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0002-9946-1338",
+      "@type": "Person"
+    },
+    {
+      "name": "Barde, Julien",
+      "givenName": "Julien",
+      "familyName": "Barde",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "IRD"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0002-3519-6141",
+      "@type": "Person"
+    },
+    {
+      "name": "Taconet, Paul",
+      "givenName": "Paul",
+      "familyName": "Taconet",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "IRD"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0001-7429-7204",
+      "@type": "Person"
+    },
+    {
+      "name": "Blondel, Emmanuel",
+      "givenName": "Emmanuel",
+      "familyName": "Blondel",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "FAO"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0002-5870-5762",
+      "@type": "Person"
+    }
+  ],
+  "author": [
+    {
+      "name": "FIRMS GTA Technical Working Group",
+      "familyName": "FIRMS GTA Technical Working Group",
+      "@id": "https://orcid.org/0009-0007-6967-0300",
+      "@type": "Person"
+    },
+    {
+      "name": "Grasset, Bastien",
+      "givenName": "Bastien",
+      "familyName": "Grasset",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "IRD"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0002-9946-1338",
+      "@type": "Person"
+    },
+    {
+      "name": "Barde, Julien",
+      "givenName": "Julien",
+      "familyName": "Barde",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "IRD"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0002-3519-6141",
+      "@type": "Person"
+    },
+    {
+      "name": "Taconet, Paul",
+      "givenName": "Paul",
+      "familyName": "Taconet",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "IRD"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0001-7429-7204",
+      "@type": "Person"
+    },
+    {
+      "name": "Blondel, Emmanuel",
+      "givenName": "Emmanuel",
+      "familyName": "Blondel",
+      "affiliation": [
+        {
+          "@type": "Organization",
+          "name": "FAO"
+        }
+      ],
+      "@id": "https://orcid.org/0000-0002-5870-5762",
+      "@type": "Person"
+    }
+  ],
+  "publisher": {
+    "@type": "Organization",
+    "name": "Zenodo"
+  },
+  "keywords": "Tuna fisheries, FAIR services, web mapping, Shiny app, Darwin Core, GBIF, reproducible research, Open Science, R",
+  "dateCreated": "2024-11-05T11:03:58.098623+00:00",
+  "dateModified": "2024-11-05T11:15:53.151530+00:00",
+  "datePublished": "2024-11-05",
+  "contentSize": "9.92 MB",
+  "size": "9.92 MB",
+  "version": "v1.0.0",
+  "license": "https://creativecommons.org/licenses/by/4.0/legalcode",
+  "description": "This R worklfow is used to generate the Global Tuna Atlas datasets. The code has been developped and can be directly executed in the virtual environments of the RStudio server hosted in the same <a href=\"https://blue-cloud.d4science.org/group/globalfisheriesatlas\">Virtual Lab</a> provided by <a href=\"https://blue-cloud.d4science.org\">Blue-Cloud 2026</a> project which implements best practices for Open Science and FAIR data management. Find more details about these datasets on <a href=\"https://www.fao.org/fishery/en/collection/firms-tuna-atlas\">FIRMS Website</a>.",
+  "funding": "https://cordis.europa.eu/projects/101094227",
+  "url": "https://zenodo.org/records/14039665"
+}

@@ -1,0 +1,424 @@
+# Load 'renv' for project-specific environments
+# if (!require("renv")) install.packages("renv")
+library(renv)
+# install.packages("pak")
+# pak::pak("bastienird/CWP.dataset")
+# Activate the project environment (if using project-specific libraries)
+# renv::activate()
+# Restore the project library (if using renv)
+renv::restore()
+library(readr)
+presence_absence_flagging <- read_csv("Species_Presence___Absence.csv")
+# Define all required packages (excluding 'base' and 'utils' as they are always available)
+required_packages <- c(
+  "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
+  "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
+  "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
+  "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
+  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", "fs" ,
+  "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
+  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
+)
+
+# Function to check, install (if necessary), and load a package
+install_and_load <- function(package) {
+  if (!require(package, character.only = TRUE)) {
+    # install.packages(package)
+    library(package, character.only = TRUE)
+  }
+}
+
+# Apply the function to each required package
+sapply(required_packages, install_and_load)
+require(geoflow)
+
+# Note: This script assumes that the internet connection is available and
+# the CRAN/GitHub repositories are accessible for package installation.
+
+# Choose your .env in which you have stored you password for googledrive (if wanted) and database (mandatory)
+
+default_file <- ".env"
+
+if(file.exists(here::here("geoserver_sdi_lab.env"))){
+  default_file <- "geoserver_sdi_lab.env"
+} # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
+
+# if(file.exists(here("geoserver_cines.env"))){
+#   default_file <- here("geoserver_cines.env")
+# } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
+
+load_dot_env(file = here::here(default_file)) # to be replaced by the one used
+# load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")
+source(here::here("R/running_time_of_workflow.R"))
+source(here::here("R/executeAndRename.R"))
+
+config <- initWorkflow(here::here("config/tunaatlas_qa_global_datasets_catch.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+
+entity <- config$metadata$content$entities[[1]]
+action <- entity$data$actions[[1]]
+
+stop("Stop")
+# First step is creation of the database model and loading of the codelist (around 5 minutes)
+db_model <- executeWorkflow(here("config/tunaatlas_qa_dbmodel+codelists.json"))
+db_model <- executeAndRename(db_model, "_db_model")
+running_time_of_workflow(db_model)
+
+# Second step is the loading of the mappings (around 1.2 minutes)
+mappings <- executeWorkflow(here("config/tunaatlas_qa_mappings.json"))
+mappings <- executeAndRename(mappings, "_mappings")
+running_time_of_workflow(mappings)
+
+# Third step is pre-harmonizing the datasets provide by tRFMOs: This step is divided in 3 
+# substep depending on the type of the data:
+copy_all_nested_data_folders <- function(source_root, target_data_folder = here::here("data")) {
+  # Cherche tous les dossiers nommés 'data' à n'importe quel niveau
+  data_dirs <- list.dirs(source_root, recursive = TRUE, full.names = TRUE)
+  data_dirs <- data_dirs[basename(data_dirs) == "data"]
+  
+  # Boucle sur chaque dossier 'data' trouvé et copie son contenu
+  for (dir in data_dirs) {
+    files_to_copy <- list.files(dir, full.names = TRUE, recursive = TRUE)
+    file.copy(files_to_copy, target_data_folder, overwrite = TRUE, recursive = TRUE)
+  }
+}
+
+## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
+# Around 2.7 minutes
+raw_nominal_catch <- executeWorkflow(here::here("config/Raw_nominal_catch.json"))
+raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch_2024")
+running_time_of_workflow(raw_nominal_catch)
+
+
+## Georeferenced catch: These datasets contains catch AND EFFORT FOR SOME DATA as effort are used to raise catch data for level 0 to 2
+# Around 1.2 hours
+raw_data_georef <- executeWorkflow(here::here("config/All_raw_data_georef.json")) 
+raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024")
+copy_all_nested_data_folders(raw_data_georef)
+
+running_time_of_workflow(raw_data_georef)
+
+
+#same in local 
+setwd("~/firms-gta/geoflow-tunaatlas/data")
+raw_data_georef <- executeWorkflow(here::here("config/All_raw_data_georef_local.json"))
+config <- initWorkflow(here::here("config/All_raw_data_georef_local.json"))
+raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024_local")
+dir.create("data_raw_georef")
+copy_all_nested_data_folders(file.path("data",raw_data_georef), "data_raw_georef")
+
+
+# source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+config <- initWorkflow(here::here("config/All_raw_data_georef_local.json"), handleMetadata = FALSE)
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+con <- NULL
+time_Summarising_invalid_data <- system.time({
+  setwd("~/firms-gta/geoflow-tunaatlas")
+  summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+})
+
+## Goereferenced effort: These datasets are used to create the georeferenced effort
+# Around 30 minutes
+raw_data_georef_effort <- executeWorkflow(here::here("config/All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
+raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
+copy_all_nested_data_folders(raw_data_georef_effort)
+copy_all_nested_data_folders(raw_data_georef_effort, target_data_folder = "efforts_all")
+running_time_of_workflow(raw_data_georef_effort)
+
+# source("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
+# safe_rewrite_functions_as_rmd <- function(source_path) {
+#   tryCatch({
+#     rewrite_functions_as_rmd(source_path)
+#   }, error = function(e) {
+#     message(sprintf("Error processing %s: %s", source_path, e$message))
+#   })
+# }
+# 
+# # Appels aux fonctions avec gestion des erreurs
+# safe_rewrite_functions_as_rmd(raw_nominal_catch)
+# safe_rewrite_functions_as_rmd(raw_data_georef)
+# safe_rewrite_functions_as_rmd(raw_data_georef_effort)
+
+## Summarising the invalid data for all the datasets pre-harmonized
+# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+# source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+config <- initWorkflow(here::here("config/All_raw_data_georef.json"), handleMetadata = FALSE)
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+time_Summarising_invalid_data <- system.time({
+  summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE)
+})
+
+
+#Around 1 minute
+time_Summarising_invalid_data_georef <- system.time({
+  Summarising_invalid_data(raw_data_georef_effort, connectionDB = con)
+})
+
+# Summarising_invalid_data('~/firms-gta/geoflow-tunaatlas/jobs/20240430091226_raw_nominal_catch', connectionDB = con)
+
+# Around 50 seconds
+## These two lines of codes creates a recap for each entity of the irregularities of the data for the datasets. 
+# They also creates a report summarising the irregular data for each entity so it is easier to target them
+
+
+# Create 5 datasets catch and effort. These entities are the final one published on zenodo. 
+
+executeWorkflow("manu_geoflow_gta_config_model.json")
+
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/tunaatlas_qa_global_datasets_catch.json")) # FROM DRIVE
+file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"), 
+                     full.names = TRUE), 
+          here::here("data"), 
+          recursive = TRUE)
+
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/level_2_catch_2025.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+gc()
+config <- initWorkflow(here::here("config/level_2_catch_2025.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+gc()
+require(CWP.dataset)
+setwd("~/firms-gta/geoflow-tunaatlas")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all"))
+
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "middle",
+                              savestep = FALSE, usesave = TRUE, 
+                              source_authoritylist = c("all"), fast_and_heavy = FALSE)
+
+configshilky <- config
+configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species_label = "Silky shark")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 
+                 sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("all" ), nameoutput = "Silkysharks")
+
+
+configshilky <- config
+configshilky$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = "FAL")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = configshilky, 
+                              sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all" ,"WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ), nameoutput = "Silkysharks")
+tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/tunaatlas_qa_global_datasets_effort.json")) # FROM DRIVE
+copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path, target_data_folder = "efforts_2025")
+copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path)
+# have to download every file.
+
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/creating_dataset.json"))
+
+tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/create_effort_dataset.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
+tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
+# tunaatlas_qa_services <- initWorkflow("tunaatlas_qa_services.json")
+# save.image()
+# tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "new_level_1_2_01_2025")
+### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
+
+running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
+create_materialized_view <- ""
+
+# IRD_data <- readr::read_csv("data/IOTC_conv_fact_mapped.csv")
+# specieslist <- unique(IRD_data$species)
+specieslist <- c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT", "SBF", "FAL")
+# 
+entity_dirs <- list.dirs(file.path("~/firms-gta/geoflow-tunaatlas/jobs/20250512091934level_2_catch_2025", "entities"), full.names = TRUE, recursive = FALSE)
+# # entity_dirs <- "~/firms-gta/geoflow-tunaatlas/jobs/20241007133651_global_datasets_level1_2/entities/global_catch_ird_level2_without_IRD"
+# entity_dirs <- 
+for (entity_dir in entity_dirs) {
+  entity_name <- basename(entity_dir)
+  setwd(here::here(entity_dir))
+  sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
+  details <- file.info(sub_list_dir_2)
+  details <- details[with(details, order(as.POSIXct(mtime))), ]
+  sub_list_dir_2 <- rownames(details)
+  flog.info("Processed sub_list_dir_2")
+  sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+  a <- CWP.dataset::process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
+  combined_df <- create_combined_dataframe(a)
+  qflextable(combined_df)
+  # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
+  qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
+}
+
+# uncomment the follwoing lines to go the shared path for analysis
+# tunaatlas_qa_global_datasets_catch_path <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data"
+
+## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
+config <- initWorkflow(here::here("config/tunaatlas_qa_global_datasets_effort.json"))
+# config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+#removed of Sumamrising step required_packages <- c("webshot","here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
+#                        "bookdown", "knitr", "purrr", "readxl", "base", "remotes", "utils", "DBI", 
+#                        "odbc", "rlang", "kableExtra", "readr", "tidyr", "ggplot2", "stats", "RColorBrewer", 
+#                        "cowplot", "tmap", "RPostgreSQL", "curl", "officer", "gdata", "tidyr", "knitr", "tmap"
+# )
+require(CWP.dataset)
+setwd("~/firms-gta/geoflow-tunaatlas")
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("all", "WCPFC", "IATTC", "ICCAT", "CCSBT", "IOTC" ))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                 source_authoritylist = c("all"))
+config <- initWorkflow(here::here("config/tunaatlas_qa_global_datasets_effort.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+tunaatlas_qa_global_datasets_effort_path <- "~/firms-gta/geoflow-tunaatlas/jobs/20250402100623_efforts_global_2025_all/"
+df1 <- qs::qread(paste0(tunaatlas_qa_global_datasets_effort_path, "entities/global_georeferenced_effort_ird/Markdown/Level0_Firms/data.qs"))
+df2 <- qs::qread(paste0(tunaatlas_qa_global_datasets_effort_path, "entities/global_georeferenced_effort_ird/Markdown/rawdata/data.qs"))
+
+diff1 <- dplyr::anti_join(df1, df2)
+diff2 <- dplyr::anti_join(df2, df1)
+
+# Combiner les différences
+differences <- dplyr::bind_rows(diff1, diff2)
+
+measurement_unit <- unique(differences$measurement_unit)
+measurement_unit
+# measurement_unit <- c("HOOKS", "DAYS")
+for (i in unique(measurement_unit)){
+
+  config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(measurement_unit = i)
+  
+  CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_effort_path, connectionDB = con, config  = config, 
+                                sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                                source_authoritylist =c("all"), nameoutput = paste0(i, "pdf"))
+
+}
+measurement_unit_all <- setdiff(unique(df2$measurement_unit),measurement_unit)
+shapefile.fix <- st_read(con, query = "SELECT * FROM area.cwp_grid") %>% 
+  dplyr::rename(GRIDTYPE = gridtype)
+futile.logger::flog.info("Loaded shapefile.fix data")
+continent <- tryCatch({
+  st_read(con, query = "SELECT * FROM public.continent")
+}, error = function(e) {
+  futile.logger::flog.error("An error occurred while reading continent data: %s", 
+                            e$message)
+  NULL
+})
+
+for (i in unique(measurement_unit_all)){
+  
+  child_env_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
+    parameter_init = df2,
+    parameter_final = NULL,
+    fig.path = paste0("efforts", i),
+    parameter_fact = "efforts",
+    coverage = TRUE,
+    shapefile_fix = shapefile.fix,
+    continent = continent,
+    parameter_filtering = list(measurement_unit = i),
+    parameter_titre_dataset_1 = paste0("Efforts_",i),
+    unique_analyse = TRUE
+  )
+  
+  child_env_global = new.env()
+  # Ajouter les paramètres supplémentaires à l'environnement
+  child_env_last_result$step_title_t_f <- FALSE
+  child_env_last_result$treatment <- FALSE
+  child_env_last_result$child_header <- ""
+  list2env(child_env_last_result, envir = child_env_global)
+  rmarkdown::render(system.file("rmd/comparison.Rmd", package = "CWP.dataset"),
+                    envir = child_env_global,
+                    output_file = "effort.html", output_format = "html_document2")
+}
+
+config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "TUN", "TUS"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "middle",source_authoritylist = c("all"),
+                 savestep = TRUE, usesave = FALSE, nameoutput = "majortunas")
+setwd("~/firms-gta/geoflow-tunaatlas/")
+
+# config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(source_authority = c("WCPFC"))
+# config$metadata$content$entities[[2]]$data$actions[[1]]$options$parameter_filtering <- list(source_authority = c("WCPFC"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  = config, sizepdf = "long",source_authoritylist = c("WCPFC"),
+                 savestep = TRUE, usesave = FALSE, nameoutput = "longwcpfctounderstanddecrease")
+
+source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
+# CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short")
+# 
+# georef_dataset <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20241002142921_global_datasets_level1_2/entities/global_catch_ird_level2/Markdown/Level2_RF1/ancient.qs")
+# species <- unique(georef_dataset$species)
+# rm(georef_dataset)
+# 
+# config$metadata$content$entities[[1]] <- config$metadata$content$entities[[2]]
+# # Remove the 2nd and 3rd elements from the list
+# config$metadata$content$entities <- config$metadata$content$entities[-c(2, 3)]
+# 
+# 
+# for (i in unique(species)){
+#   
+#   config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = i)
+#   
+# CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config  =config, sizepdf = "short",
+#                  source_authoritylist = c("all"),savestep = FALSE, nameoutput = paste0(i, "pdf"), usesave = FALSE )
+# 
+# }
+
+
+# `2024-08-28_11:12:03nominal_inferior_to_georeferenced`$GRIDTYPE <- "GRIDTYPE"
+# a <- comprehensive_cwp_dataframe_analysis(parameter_init = `2024-08-28_11:12:03nominal_inferior_to_georeferenced`,
+# unique_analyse = TRUE, print_map = FALSE, removemap = TRUE)
+# source("~/firms-gta/geoflow-tunaatlas/comparing_conversion_factors.R")
+results <- CWP.dataset::compare_georef_nominal(georeferenced, global_nominal_catch_firms_level0, connectionDB = con)
+saveRDS(results, "data/resultsonallthegeorefsuptonom.rds")
+## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_actions/convert_to_netcdf.R")
+entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
+wd <- getwd()
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+# tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
+
+config <- initWorkflow(here::here("config/tunaatlas_qa_global_datasets_catch.json"))
+unlink(config$job, recursive = TRUE)
+
+
+for (entitynumber in 1:length(config$metadata$content$entities)){
+  entity <- config$metadata$content$entities[[entitynumber]]
+  dataset_pid <- entity$identifiers[["id"]]
+  setwd(file.path(tunaatlas_qa_global_datasets_catch_path,"entities", dataset_pid))
+  action <- entity$data$actions[[1]]
+  convert_to_netcdf(action, config, entity, uploadgoogledrive = FALSE)
+} #could also be in global action but keep in mind it is very long
+
+setwd(wd)
+
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_actions/process_entities_for_DOI.R")
+process_entities_for_DOI(tunaatlas_qa_global_datasets_catch_path, "~/firms-gta/geoflow-tunaatlas/jobs/processed_entities_for_DOI")
+
+# Pakcages for markdown
+
+# These step is to be done once nominal and georeferenced data are created. It extract irregular data that is :
+# - Existing on the georeferenced dataset but not in the nominal
+# - Superior in the georeferenced dataset than in the nominal
+# The strata_in_georef_but_not_in_nominal_report_launching function return several html files for each tRFMO and 
+# for several stratas used to inspect the data (more details in the report)
+
+# This function also return an upgraded_nominal dataset which is the nominal dataset raised from the georeferenced data
+upgraded_nominal <- CWP.dataset::strata_in_georef_but_not_in_nominal_report_launching("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data",
+                                                                         connectionDB = con)
+
+CPUE <- CWP.dataset::strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path,
+                                           connectionDB = con)
+
+
+
+
+catch_without_effort <- CPUE %>% dplyr::filter(((is.na(measurement_value_effort) | measurement_value_effort == 0)) & measurement_value_catch != 0)
+effort_without_catch <- CPUE %>% dplyr::filter(((is.na(measurement_value_catch) | measurement_value_catch == 0)) & measurement_value_effort != 0)
+
+# Check on CPUE data for georeferenced in case some catch are not displayed with any effort
+global_catch_firms_level0_public <- read_csv(file.path(tunaatlas_qa_global_datasets_catch_path,"entities/global_catch_firms_level0/data/global_catch_firms_level0_public.csv"))
+cwp_catch <- unique(global_catch_firms_level0_public$geographic_identifier)
+
+
+# Putting dataset on geoserver, geonetwork and zenodo #For now zenodo does not work due to issue with api
+tunaatlas_qa_services <- initWorkflow("config/tunaatlas_qa_services.json")
+
+# Enriching data with copernicus data
+all_files <- list.files(getwd(), pattern = "\\.nc$", full.names = TRUE, recursive = TRUE)
+netcdf_file_to_enrich <- all_files[!grepl("nominal", all_files)]
+

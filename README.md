@@ -19,7 +19,7 @@ git clone -b sample https://github.com/firms-gta/geoflow-tunaatlas
 
 2) Configure environment file:
 
-To fully recreate the workflow and populate a database with the processed data, it is necessary to have a configuration file in the format of `template.env`. This file should include the connection details to a database where the data will be stored. Ensure that you have the proper database access and credentials before attempting to execute the workflow.
+To fully recreate the workflow and populate a database with the processed data, it is necessary to have a configuration file in the format of `config/template.env`. This file should include the connection details to a database where the data will be stored. Ensure that you have the proper database access and credentials before attempting to execute the workflow.
   
 3) Execute GeoFlow
 ```

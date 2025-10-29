@@ -1,0 +1,59 @@
+{
+  "id": "tuna-atlas",
+  "profile": {
+	"project": "FIRMS Tuna Atlas",
+	"organization": "FIRMS Tuna Atlas",
+	"logos": [
+		"http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+		"http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+		"http://www.umr-marbec.fr/images/logo-ird-en.png"
+	]
+  },
+  "options": {
+	"line_separator": "_\n"
+  },
+  "mode": "entity",
+  "metadata": {
+    "entities": {
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1rMQn3JVvSyeTFkDTe4YN6MiT92IaYqJ9rPJioFKCeN8/edit?usp=sharing"
+    },
+    "contacts" : {
+      "handler": "gsheet",
+      "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+    }
+  },
+  "software": [
+	{
+		"id": "my-database-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "postgres",
+			"password": "postgres",
+			"host": "localhost",
+			"port": "{{DB_PORT}}",
+			"dbname": "geoflow"
+		},
+		"properties" : {}
+	},
+	{
+		"id": "googledrive",
+		"type": "input",
+		"software_type": "googledrive",
+		"parameters": {
+			"email": "<email>",
+			"token": "<token>"
+		},
+		"properties" : {}
+	}
+  ],
+  "actions": [
+	{
+		"id": "load_mapping",
+		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_actions/load_mapping.R",
+		"run": true
+	}
+  ]
+}

@@ -1,0 +1,290 @@
+---
+title: "Catch dataset analysis (Global Tuna Atlas - IRD Level 2)"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+
+
+```
+
+```{r packages, echo=TRUE, results='hide'}
+packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
+lapply(packages, function(pkg) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg)
+  library(pkg, character.only = TRUE)
+})
+```
+
+
+## Reading the harmonized file from level 2 workflow output
+
+```{r downloadingcsv}
+
+csv_file <- here::here("data/global_catch_ird_level2_1950_2023_harmonized.csv")
+
+catch_data <- readr::read_csv(csv_file) %>%
+  dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
+
+
+```
+
+# First lines
+
+```{r head}
+kableExtra::kable(head(catch_data))
+```
+
+
+# 📊 Data overview
+
+This dataset provides monthly records of tuna and tuna-like species catches at the global scale between 1950 and 2023. Here is a description of the columns:
+
+| Column                             | Description                                                                                       |
+|------------------------------------|---------------------------------------------------------------------------------------------------|
+| **source_authority**               | Regional Fisheries Management Organization (RFMO) providing the data (e.g., CCSBT, WCPFC, IOTC).   |
+| **species**                        | Species code (e.g., "SBF" for Southern Bluefin Tuna).                                            |
+| **species_label**                  | Common name of the species (e.g., "Southern bluefin tuna").                                      |
+| **gear_type**                      | Gear code indicating the fishing gear used (e.g., "01.1").                                       |
+| **gear_type_label**                | Human-readable gear name (e.g., "Purse seines").                                                 |
+| **fishing_fleet**                  | Flag state or fleet code (e.g., "AUS", "JPN").                                                 |
+| **fishing_fleet_label**            | Human-readable fleet label (e.g., "Australia").                                                  |
+| **fishing_mode**                   | Fishing mode code (e.g., "UNK").                                                                 |
+| **fishing_mode_label**             | Human-readable mode label (e.g., "Undefined school").                                            |
+| **time_start**                     | Start date of the observation period (monthly resolution, format "YYYY-MM-01").                  |
+| **time_end**                       | End date of the observation period (monthly resolution, format "YYYY-MM-30/31").                  |
+| **geographic_identifier**          | Numeric code identifying the spatial grid cell from the CWP grid dataset.                          |
+| **geographic_identifier_nom**      | RFMO area name corresponding to the grid cell (e.g., "WCPFC", "IOTC").                         |
+| **measurement**                    | Measurement type (e.g., "catch").                                                                |
+| **measurement_label**              | Human-readable measurement label (e.g., "Catch").                                                |
+| **measurement_type**               | Catch type code (e.g., "RC" for Retained Catch).                                                 |
+| **measurement_type_label**         | Human-readable catch type label (e.g., "Retained catch").                                        |
+| **measurement_unit**               | Unit of measurement (e.g., "t" for tonnes).                                                        |
+| **measurement_processing_level**   | Data processing level (e.g., "raised").                                                           |
+| **measurement_processing_level_label** | Human-readable processing level label (e.g., "Raised").                                           |
+| **measurement_value**              | Numeric value of the measurement (e.g., tonnes, number of fish).                                    |
+| **species_group**                  | Taxonomic group of the species (e.g., "SCOMBROIDEI").                                            |
+| **gridtype**                       | Spatial grid resolution type (e.g., "1deg_x_1deg").                                             |
+| **geom**                           | Spatial geometry of the grid cell as an sf MULTIPOLYGON object. 
+
+```{r glimpse}
+dplyr::glimpse(catch_data)
+```
+
+
+```{r summary-by-unit}
+
+tapply(catch_data$measurement_value, catch_data$measurement_unit, summary)
+
+```
+
+
+```{r catchbyunit}
+kableExtra::kable(table(catch_data$measurement_unit))
+```
+
+
+```{r downloadinggrid, message=FALSE, warning=FALSE, include=FALSE}
+  cwp_grid_file <- here("data/cl_areal_grid.csv")
+  if (!file.exists(cwp_grid_file)) {
+    message("Downloading cl_area from github repo")
+    zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
+    zip_path <- here("data/cwp_grid.zip")
+    download.file(zip_url, zip_path, mode = "wb")
+    unzip(zip_path, exdir = here("data"))
+  }
+  cwp_grid <- st_read(cwp_grid_file)
+  cwp_grid <- st_as_sf(
+    cwp_grid,
+    wkt = "geom_wkt",   
+    crs = 4326         
+  ) %>%
+     dplyr::rename(cwp_code = CWP_CODE) %>%
+    dplyr::rename(geom = geom_wkt)
+  
+qs_file <- "UN_CONTINENT2.qs"
+
+if (!file.exists(qs_file)) {
+  message("Downloading UN_CONTINENT2 from FAO GeoServer...")
+  WFS <- WFSClient$new(
+    url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
+    serviceVersion = "1.0.0",
+    logger = "INFO"
+  )
+  continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
+  
+  # Save to .qs for faster reloads later
+  qs::qsave(continent, qs_file)
+} else {
+  message("Loading cached UN_CONTINENT2 from local file...")
+  continent <- qs::qread(qs_file)
+}
+sf::st_crs(continent) <- 4326
+
+```
+
+
+
+# 🗺️ Catch map
+
+This map shows the spatial distribution of catches or effort aggregated by geographic grid cell. The `measurement_value` is summed per area.
+
+```{r catchmaps}
+catch_summary_by_unit <- catch_data %>%
+  dplyr::group_by(geographic_identifier, measurement_unit) %>%
+  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE), .groups = "drop")
+
+catch_summary_geom <- catch_summary_by_unit %>%
+  dplyr::inner_join(cwp_grid %>% dplyr::select(cwp_code, geom), by = c("geographic_identifier" = "cwp_code")) %>%
+  sf::st_as_sf()
+
+plots <- catch_summary_geom %>%
+  dplyr::group_split(measurement_unit) %>%
+  purrr::map(function(df) {
+    unit <- unique(df$measurement_unit)
+    
+    ggplot2::ggplot() +
+      ggplot2::geom_sf(data = continent, fill = "gray90", color = "gray60") +
+      ggplot2::geom_sf(data = df, ggplot2::aes(fill = total), color = NA) +
+      ggplot2::scale_fill_viridis_c(option = "plasma", trans = "log", na.value = "transparent") +
+      ggplot2::labs(title = paste("Unit:", unit), fill = "Catch Total") +
+      ggplot2::theme_minimal()
+  })
+
+patchwork::wrap_plots(plots, ncol = 2)
+
+
+```
+
+# 📈 Annual catch trends
+
+```{r catchtrendsbytime}
+
+catch_data %>%
+  dplyr::group_by(year = lubridate::year(time_start), measurement_unit) %>%
+  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE)) %>%
+  ggplot2::ggplot(ggplot2::aes(x = year, y = total)) +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap(~measurement_unit, scales = "free_y") +
+  ggplot2::labs(title = "Total catches by Year and Measurement unit", y = "Measured Value", x = "Year")
+
+
+```
+
+
+# Your turn:
+
+If you want to use only part of the data you can filter the dataset using the dimensison provided exemple, here let's focus on silky sharks (note that this only concern catch data as effort cannot be related to species)
+
+```{r silky}
+
+silky_sharks <- catch_data %>% dplyr::filter(species == "SKH")
+
+```
+
+```{r silkybyyear}
+
+silky_sharks %>%
+  dplyr::group_by(year = lubridate::year(time_start), measurement_unit) %>%
+  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE)) %>%
+  ggplot2::ggplot(ggplot2::aes(x = year, y = total)) +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap(~measurement_unit, scales = "free_y") +
+  ggplot2::labs(title = "Total catches by Year and Measurement unit", y = "Measured Value", x = "Year")
+
+```
+
+## Let's decompose the data for some dimensions
+
+```{r silkybyyeargear}
+
+groupped_gear <- silky_sharks %>% dplyr::group_by(gear_type, time_start, measurement_unit) %>% 
+  dplyr::summarise(measurement_value = sum(measurement_value))
+
+ggplot(groupped_gear) +
+  aes(
+    x = time_start,
+    y = measurement_value,
+    colour = gear_type
+  ) +
+  geom_line() +  #
+  geom_point() +
+  scale_color_hue(direction = 1) +
+  theme_minimal() +
+  facet_wrap(vars(measurement_unit), scales = "free")
+
+
+```
+
+
+```{r silkybyyearff, eval=FALSE}
+groupped_fishing_fleet <- silky_sharks %>% dplyr::group_by(fishing_fleet, time_start, measurement_unit) %>% 
+  dplyr::summarise(measurement_value = sum(measurement_value))
+
+ggplot(groupped_fishing_fleet) +
+  aes(
+    x = time_start,
+    y = measurement_value,
+    colour = fishing_fleet
+  ) +
+  geom_line() +  #
+  geom_point() +
+  scale_color_hue(direction = 1) +
+  theme_minimal() +
+  facet_wrap(vars(measurement_unit), scales = "free")
+```
+
+
+```{r silkybyyeartrfmos}
+groupped_source_auth <- silky_sharks %>% dplyr::group_by(source_authority, time_start, measurement_unit) %>% 
+  dplyr::summarise(measurement_value = sum(measurement_value))
+
+ggplot(groupped_source_auth) +
+  aes(
+    x = time_start,
+    y = measurement_value,
+    colour = source_authority
+  ) +
+  geom_line() +  #
+  geom_point() +
+  scale_color_hue(direction = 1) +
+  theme_minimal() +
+  facet_wrap(vars(measurement_unit), scales = "free")
+
+
+```
+
+# How to aggregate data from 1 deg to 5 deg ? 
+
+```{r aggregate}
+
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
+
+one_degree <- silky_sharks %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
+five_degree <- silky_sharks %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
+silky_sharks_aggregated <- one_degree %>% rowwise() %>% 
+  dplyr::mutate(geographic_identifier = transform_cwp_code_from_1deg_to_5deg(geographic_identifier))
+
+
+
+
+```
+
+
+# How to disaggregate ? (need connection to DB for now, this operation is in most case very time and bandwidth consuming)
+
+
+```{r disaggregate, eval=FALSE, include=TRUE}
+
+source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
+
+georef_dataset<-spatial_curation_downgrade_resolution(con,silky_sharks,resolution = 1 , remove = FALSE)
+
+```
+
