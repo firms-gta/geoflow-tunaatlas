@@ -106,7 +106,7 @@ COPY pipelines/data_creation/level_2_catch_local.R ./pipelines/data_creation/
 COPY ["config/geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv", "./config/"]
 COPY R/sardara_functions/ R/sardara_functions/
 COPY R/tunaatlas_actions/ R/tunaatlas_actions/
-COPY tunaatlas_scripts/ tunaatlas_scripts/
+COPY R/tunaatlas_scripts/ R/tunaatlas_scripts/
 COPY config/catch_ird_level2_local.json ./config/
 COPY docs/reports/summary_catch_level2_after_workflow.Rmd ./docs/reports/
 
