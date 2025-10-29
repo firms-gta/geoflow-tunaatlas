@@ -722,9 +722,9 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
           
           config$logger.info("Executing function function_raising_georef_to_nominal")
           
-          if (fact=="catch"){
+          if (opts$fact=="catch"){
             raising_dimensions=c(x_raising_dimensions,"measurement_unit")
-          } else if (fact=="effort"){
+          } else if (opts$fact=="effort"){
             raising_dimensions=x_raising_dimensions
             df_rf$measurement_unit=NULL
           }
