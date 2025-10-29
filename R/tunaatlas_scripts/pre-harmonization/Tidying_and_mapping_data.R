@@ -29,7 +29,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   }
   
   # Define the base URL for scripts
-  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/"
+  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/"
   
   # Source scripts from URLs
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))

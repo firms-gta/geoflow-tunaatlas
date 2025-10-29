@@ -18,8 +18,8 @@ Additional operations are performed next to verify other aspects of the data, su
 If you are interested in further details, the results and codes are available for review.
 
 ```{r}
-path_to_raw_dataset_catch <- here::here('tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicCatchOrigFormatTunaBillfish.csv')
-path_to_raw_dataset_effort <- here::here('tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicEffortOrigFormatTunaBillfish.csv')
+path_to_raw_dataset_catch <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicCatchOrigFormatTunaBillfish.csv')
+path_to_raw_dataset_effort <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicEffortOrigFormatTunaBillfish.csv')
 ```
 
 Harmonize IATTC Longline Catch Datasets

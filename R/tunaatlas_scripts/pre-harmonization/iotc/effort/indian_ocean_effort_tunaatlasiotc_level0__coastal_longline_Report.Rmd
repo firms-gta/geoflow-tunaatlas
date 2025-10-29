@@ -18,7 +18,7 @@ Additional operations are performed next to verify other aspects of the data, su
 If you are interested in further details, the results and codes are available for review.
 
 ```{r}
-path_to_raw_dataset <- here::here('tunaatlas_scripts/pre-harmonization', 'iotc', 'effort', 'data', 'IOTC-DATASETS-2023-04-24-CE-Longline_1950-2021.csv')
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iotc', 'effort', 'data', 'IOTC-DATASETS-2023-04-24-CE-Longline_1950-2021.csv')
 ```
 
 Harmonize IOTC Coastal and Longline Effort Datasets

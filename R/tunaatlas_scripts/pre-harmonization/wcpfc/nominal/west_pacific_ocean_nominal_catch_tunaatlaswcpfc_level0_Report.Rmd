@@ -18,8 +18,8 @@ Additional operations are performed next to verify other aspects of the data, su
 If you are interested in further details, the results and codes are available for review.
 
 ```{r}
-path_to_raw_dataset1 <- here::here('tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') 
- path_to_raw_dataset2 <- here::here('tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')
+path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') 
+ path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')
 ```
 
 Harmonize WCPFC Nominal Catch Datasets
