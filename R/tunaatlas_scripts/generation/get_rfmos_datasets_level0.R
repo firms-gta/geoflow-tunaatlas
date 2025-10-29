@@ -249,7 +249,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                               class(tuna_effort$measurement_value) <- "numeric"
                               
                               # Get RF for effort (rf=effort tuna / effort billfish   or    effort tuna / effort shark)
-                              source(geoflow::get_config_resource_path(config, "./R/sardara_functions/raise_get_rf.R"))
+                              source(here::here("./R/sardara_functions/raise_get_rf.R"))
                               df_rf <- raise_get_rf(
                                 df_input=billfish_or_shark_effort,
                                 df_input_total=tuna_effort,
@@ -259,7 +259,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                               df_rf$measurement_unit<-NULL
                               
                               # Raise the data
-                              source(geoflow::get_config_resource_path(config, "./R/sardara_functions/raise_incomplete_dataset_to_total_dataset.R"))
+                              source(here::here("./R/sardara_functions/raise_incomplete_dataset_to_total_dataset.R"))
                               catch_raised <- raise_incomplete_dataset_to_total_dataset(
                                 df_input_incomplete=billfish_or_shark_catch,
                                 df_input_total=billfish_or_shark_catch,
@@ -325,7 +325,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           
                           if(options$iattc_ps_raise_flags_to_schooltype){
                             
-                            source(geoflow::get_config_resource_path(config, "./R/sardara_functions/raise_datasets_by_dimension.R"))
+                            source(here::here("./R/sardara_functions/raise_datasets_by_dimension.R"))
                             
                             df_catch_tuna_settype <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSSetType_tuna_catch]), guess_max = 0))
                             df_catch_tuna_settype <- df_catch_tuna_settype[,columns_to_keep]
