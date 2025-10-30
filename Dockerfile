@@ -122,11 +122,12 @@ WORKDIR /root/geoflow-tunaatlas
 # this command can be ran also outside dockerfile
 RUN R -q -e "site_dir <- Sys.getenv('SITE_DIR'); \
              if (identical(site_dir, '')) site_dir <- 'docs/reports'; \
-             rmarkdown::render(
-               input = here::here('docs/reports/summary_catch_level2_after_workflow.Rmd'),
-               output_format = 'bookdown::html_document2',
-               output_dir = site_dir,
-               output_file = 'Summarycatchlevel2.html',
-               envir = .GlobalEnv,
-               knit_root_dir = here::here()
+             rmarkdown::render( \
+               input = here::here('docs/reports/summary_catch_level2_after_workflow.Rmd'), \
+               output_format = 'bookdown::html_document2', \
+               output_dir = site_dir, \
+               output_file = 'Summarycatchlevel2.html', \
+               envir = .GlobalEnv, \
+               knit_root_dir = here::here() \
              )"
+
