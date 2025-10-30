@@ -6,9 +6,10 @@ output: html_document
 ```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(
-	echo = TRUE,
-	message = FALSE,
-	warning = FALSE
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.path = "figures/summarycatchlevel2-"
 )
 
 
@@ -108,7 +109,7 @@ kableExtra::kable(table(catch_data$measurement_unit))
      dplyr::rename(cwp_code = CWP_CODE) %>%
     dplyr::rename(geom = geom_wkt)
   
-qs_file <- "UN_CONTINENT2.qs"
+qs_file <- here::here("data/UN_CONTINENT2.qs")
 
 if (!file.exists(qs_file)) {
   message("Downloading UN_CONTINENT2 from FAO GeoServer...")
@@ -282,7 +283,7 @@ silky_sharks_aggregated <- one_degree %>% rowwise() %>%
 
 ```{r disaggregate, eval=FALSE, include=TRUE}
 
-source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
 
 georef_dataset<-spatial_curation_downgrade_resolution(con,silky_sharks,resolution = 1 , remove = FALSE)
 

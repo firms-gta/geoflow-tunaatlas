@@ -85,14 +85,14 @@ keynominal <- opts$keynominal
 doinominal <- opts$doinominal
 nominal_catch_file <- here::here("data", keynominal)
 dir.create("data")
-if (!file.exists(nominal_catch_file)) {
-  message("Téléchargement de ", keynominal, " depuis Zenodo…")
-  rec <- sub("^.*zenodo\\.(\\d+).*$", "\\1", doinominal)
-  url <- sprintf("https://zenodo.org/records/%s/files/%s?download=1", rec, keynominal)
-  download.file(url, nominal_catch_file, mode = "wb")
-} else {
-  message("Fichier nominal déjà présent : ", nominal_catch_file)
-}
+# if (!file.exists(nominal_catch_file)) {
+#   message("Téléchargement de ", keynominal, " depuis Zenodo…")
+#   rec <- sub("^.*zenodo\\.(\\d+).*$", "\\1", doinominal)
+#   url <- sprintf("https://zenodo.org/records/%s/files/%s?download=1", rec, keynominal)
+#   download.file(url, nominal_catch_file, mode = "wb")
+# } else {
+#   message("Fichier nominal déjà présent : ", nominal_catch_file)
+# }
 
 # ─── 5) Téléchargement et décompression de All_rawdata_for_level2.zip ───────
 zipfile <- here("data", "All_rawdata_for_level2.zip")
