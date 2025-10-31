@@ -50,7 +50,8 @@ RUN apt-get update && apt-get upgrade -y
 RUN install2.r --error --skipinstalled --ncpus -1 httpuv
 
 # Set the working directory
-WORKDIR /root/geoflow-tunaatlas
+ARG APP_DIR=/root/geoflow-tunaatlas
+WORKDIR $APP_DIR
 
 RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org'); \
                 remotes::install_version('jsonlite', version = '1.9.1', upgrade = 'never', repos = 'https://cran.r-project.org')"
@@ -114,10 +115,13 @@ COPY docs/reports/summary_catch_level2_after_workflow.Rmd ./docs/reports/
 RUN R -e "options(encoding = \"UTF-8\", stringsAsFactors = FALSE, dplyr.summarise.inform = FALSE)"
 RUN R -e "source('pipelines/data_creation/level_2_catch_local.R')"
 
-ENV SITE_DIR=/site
-RUN mkdir -p "$SITE_DIR"
+ARG APP_DIR=/root/geoflow-tunaatlas
+WORKDIR $APP_DIR
+ENV SITE_DIR=$APP_DIR/site
 
-WORKDIR /root/geoflow-tunaatlas
+RUN mkdir -p "$SITE_DIR"ENV SITE_DIR=$APP_DIR/site
+
+RUN mkdir -p "$SITE_DIR"
 
 # this command can be ran also outside dockerfile
 RUN R -q -e "site_dir <- Sys.getenv('SITE_DIR'); \

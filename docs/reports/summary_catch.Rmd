@@ -31,7 +31,7 @@ If the timeout make impossible the downlading from R code, please download it fr
 
 ```{r downloadingcsv}
 
-csv_file <- "global_catch_tunaatlasird_level2_without_geom.csv"
+csv_file <- here::here("data/global_catch_tunaatlasird_level2_without_geom.csv")
 source_file_csv <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_shiny_apps/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv"
 
 if (!file.exists(csv_file)) {
