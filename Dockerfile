@@ -119,8 +119,6 @@ ARG APP_DIR=/root/geoflow-tunaatlas
 WORKDIR $APP_DIR
 ENV SITE_DIR=$APP_DIR/site
 
-RUN mkdir -p "$SITE_DIR"ENV SITE_DIR=$APP_DIR/site
-
 RUN mkdir -p "$SITE_DIR"
 
 # this command can be ran also outside dockerfile
