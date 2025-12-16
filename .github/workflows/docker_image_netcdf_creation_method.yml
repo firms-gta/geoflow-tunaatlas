@@ -133,13 +133,12 @@ jobs:
         with:
           driver: docker-container
 
-      - name: 🔐 Login to GHCR
+      - name: Login to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          # Utilise le PAT si dispo, sinon le GITHUB_TOKEN du repo
-          password: ${{ secrets.GHCR_PAT || secrets.GHCR_TOKEN || github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Prepare tags
         id: tags
