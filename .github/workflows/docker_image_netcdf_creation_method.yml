@@ -179,13 +179,14 @@ jobs:
       - name: Build & push
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: docker/Dockerfile.netcdf
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/docker/Dockerfile.netcdf
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           no-cache: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'build-no-cache' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          
   skip:
     name: Skip (no relevant changes)
     needs: changes
