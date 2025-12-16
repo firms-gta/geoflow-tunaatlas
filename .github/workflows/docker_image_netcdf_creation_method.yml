@@ -36,6 +36,7 @@ permissions:
   id-token: write
   
 env:
+  REGISTRY: ghcr.io
   CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation-cache
   IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation
   DOCKER_BUILDKIT: 1
