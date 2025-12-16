@@ -85,8 +85,8 @@ if (file.exists(cwp_grid_file)) {
 
 cwp_grid <- sf::st_read(cwp_grid_file) 
 
-default_dims <- c("no"
-)
+default_dims <- c("no")
+
 get_bool <- function(flag, default = FALSE) {
   if (!has_arg(flag)) return(default)
   val <- get_arg(flag, default = NA_character_)
@@ -100,7 +100,7 @@ one_by_species <- get_bool("--one_by_species", default = FALSE)
 dimensions_raw <- get_arg("--dimensions", NA)
 
 path_to_dataset <- get_arg("--path_to_dataset", "data/global_catch_tunaatlasird_level2_1950_2023.qs")
-path       <- get_arg("--path", "data")
+path       <- get_arg("--path", "outputs")
 name     <- get_arg("--name", "")
 
 parameter_filtering_raw <- get_arg(

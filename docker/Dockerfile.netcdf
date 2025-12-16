@@ -38,7 +38,6 @@ RUN Rscript ./R/netcdf_creation/mapping_cwp_to_raster.R
 RUN mkdir -p /workspace/outputs
 
 ENTRYPOINT ["Rscript", "./R/netcdf_creation/launching_netcdf_creation.R"]
-CMD ["--path_to_dataset","/workspace/data/global_catch_tunaatlasird_level2_1950_2023.qs","--path","/workspace/outputs","--dimensions","no"]
 
 # Rscript ./R/netcdf_creation/launching_netcdf_creation.R \
 #  --path outputs \
