@@ -1,0 +1,195 @@
+name: Build and Deploy docker image as method to create NetCDF from level 2 dataset for use in CCP
+
+name: Build and Publish Docker Image
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Branch to compare against (e.g., master, dev)"
+        required: true
+        default: "master"
+      action:
+        description: "Action to perform"
+        required: true
+        default: "build"
+        type: choice
+        options:
+          - build
+          - build-no-cache
+
+permissions:
+  contents: write
+  packages: write
+  pages: write
+  id-token: write
+  
+env:
+  CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation-cache
+  IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation
+  DOCKER_BUILDKIT: 1
+  RENV_PATHS_ROOT: /root/.cache/R/renv
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.diff.outputs.relevant }}
+      diff: ${{ steps.diff.outputs.diff }}
+    steps:
+      - name: Checkout (full history for diff)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute diff range and detect changes
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Paths that should trigger a build
+          WATCH_1="R/create_netcdf/"
+          WATCH_2=".github/workflows/createnetcdf.yml"
+
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            # Tag push: compare the tagged commit to its first parent
+            # (If it's the first commit or a weird case, fallback to empty diff)
+            RANGE="${GITHUB_SHA}^..${GITHUB_SHA}"
+          else
+            # Manual: compare base_branch to the currently checked-out ref
+            BASE="${{ inputs.base_branch }}"
+            git fetch --no-tags origin "${BASE}:${BASE}" || true # do not stop if problem with || true
+            RANGE="${BASE}..${GITHUB_SHA}"
+          fi
+
+          echo "Using diff range: $RANGE"
+          DIFF=$(git diff --name-only $RANGE || true) # do not stop if problem with || true
+          echo "Changed files:"
+          echo "$DIFF"
+
+          RELEVANT="false"
+          if echo "$DIFF" | grep -qE "^${WATCH_1}|^${WATCH_2}$"; then
+            RELEVANT="true"
+          fi
+
+          echo "relevant=$RELEVANT" >> "$GITHUB_OUTPUT"
+          
+          {
+            echo "diff<<EOF"
+            echo "$DIFF"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          
+  docker-build-and-push:
+    name: Build & Push
+    needs: changes
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant == 'true' # if there is a diff in the files for netcdf creation
+    timeout-minutes: 140
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_branch || github.ref }}
+
+      - name: 🔐 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          # Utilise le PAT si dispo, sinon le GITHUB_TOKEN du repo
+          password: ${{ secrets.GHCR_PAT || secrets.GHCR_TOKEN || github.token }}
+
+      - name: 🧮 Prepare tags
+        id: tags
+        shell: bash
+        run: |
+          set -euo pipefail #stop at the first problem
+      
+          IMAGE="${{ env.IMAGE }}"  
+      
+          SHORT_SHA="$(echo "${{ github.sha }}" | cut -c1-12)"
+          SHA_TAG="sha-${SHORT_SHA}"
+      
+          if [[ "${{ github.event_name }}" == "push" && "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" == v* ]]; then
+            VER="${GITHUB_REF_NAME}"         # v1.2.3
+            CLEAN="${VER#v}"                 # 1.2.3
+            echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+            echo "tags=$IMAGE:${VER},$IMAGE:${CLEAN},$IMAGE:latest,$IMAGE:${SHA_TAG}" >> "$GITHUB_OUTPUT"
+            echo "cache_key=${VER}" >> "$GITHUB_OUTPUT"
+          else
+            BR="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_branch || github.ref_name }}"
+            BR_SAFE="$(echo "$BR" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_.-]+/_/g')"
+            echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+            echo "tags=$IMAGE:manual-${BR_SAFE},$IMAGE:${SHA_TAG}" >> "$GITHUB_OUTPUT"
+            echo "cache_key=${BR_SAFE}" >> "$GITHUB_OUTPUT"
+          fi
+      
+      - name: 🔎 Debug tags
+        run: |
+          echo "IMAGE=${{ steps.tags.outputs.image }}"
+          echo "TAGS=${{ steps.tags.outputs.tags }}"
+      
+      - name: 🏷 Pick run tag
+        id: pick
+        run: |
+          echo "run_tag=${{ steps.tags.outputs.image }}:${{ github.sha }}" >> $GITHUB_OUTPUT
+          
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.netcdf
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          no-cache: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'build-no-cache' }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+  skip:
+    name: Skip (no relevant changes)
+    needs: changes
+    runs-on: ubuntu-latest
+    if: needs.changes.outputs.relevant != 'true'
+    steps:
+      - run: |
+          echo "No changes in R/create_netcdf/ or workflow file."
+          echo "Diff was:"
+          echo "${{ needs.changes.outputs.diff }}"
+          
+# Autre moyen de faire la même chose que build-push-action@v6 en gerant le cache soi meme. la on utilise cache gha qui est le cahce natif de GitHub Actions, a pa utiliser si on veut gerer ca hors GitHub
+#       # -------- Build & PUSH vers GHCR --------
+#       - name: 🐳 Build & Push image
+#         run: |
+#           set -e
+#           IFS=',' read -ra TAGS <<< "${{ steps.tags.outputs.tags }}"
+#           TAG_ARGS=()
+#           for t in "${TAGS[@]}"; do TAG_ARGS+=("-t" "$t"); done
+# 
+#           # Option no-cache selon l'input
+#           NO_CACHE=""
+#           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.action }}" == "build-no-cache" ]]; then
+#             NO_CACHE="--no-cache"
+#           fi
+# 
+#           docker buildx build \
+#             --progress=plain \
+#             ${NO_CACHE} \
+#             --cache-from type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }} \
+#             --cache-to   type=registry,ref=${{ env.CACHE_IMAGE }}:${{ steps.tags.outputs.cache_key }},mode=max \
+#             --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
+#             --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
+#             --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
+#             -f docker/Dockerfile.netcdf \
+#             "${TAG_ARGS[@]}" \
+#             --push .
+            

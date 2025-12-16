@@ -1,0 +1,14 @@
+
+How to launch the netdcd creation
+
+Rscript ./R/netcdf_creation/launching_netcdf_creation.R \
+  --path outputs \
+  --name majortunasall \
+  --dimensions species_label,gear_type_label,fishing_fleet_label \
+  --parameter_filtering "species=SBF,YFT,SKJ,ALB,BET" \
+  --one_by_species true
+
+Rscript ./R/netcdf_creation/launching_netcdf_creation.R \
+  --parameter_filtering "species=SBF;gear_type=09.32;fishing_fleet=JPN,KOR" \
+  --path outputs \
+  --dimensions species_label
