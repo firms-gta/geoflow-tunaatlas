@@ -176,6 +176,16 @@ jobs:
         run: |
           echo "run_tag=${{ steps.tags.outputs.image }}:${{ github.sha }}" >> $GITHUB_OUTPUT
           
+      - name: Debug paths
+        run: |
+          echo "PWD=$(pwd)"
+          echo "WORKSPACE=${GITHUB_WORKSPACE}"
+          ls -la
+          ls -la docker || true
+          find . -maxdepth 3 -type f -name "Dockerfile.netcdf" -print
+          echo "---- .dockerignore ----"
+          test -f .dockerignore && cat .dockerignore || echo "no .dockerignore"
+          
       - name: Build & push
         uses: docker/build-push-action@v6
         with:
