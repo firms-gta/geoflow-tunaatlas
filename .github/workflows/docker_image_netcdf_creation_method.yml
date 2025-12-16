@@ -1,7 +1,5 @@
 name: Build and Deploy docker image as method to create NetCDF from level 2 dataset for use in CCP
 
-name: Build and Publish Docker Image
-
 on:
   push:
     tags:
