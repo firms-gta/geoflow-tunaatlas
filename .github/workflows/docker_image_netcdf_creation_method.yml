@@ -179,7 +179,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.netcdf
+          file: ./docker/Dockerfile.netcdf
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           no-cache: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'build-no-cache' }}
