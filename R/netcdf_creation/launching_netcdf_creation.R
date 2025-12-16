@@ -184,7 +184,7 @@ message("cols dataset_filtered = ", paste(head(names(dataset_filtered), 50), col
 #   }
 # }
 out <- export_netcdf_by_unit_and_resolution(
-  dataset_filtered = head(dataset_filtered,1000),
+  dataset_filtered = dataset_filtered,
   name = name,
   dims = dims,
   path = path,
