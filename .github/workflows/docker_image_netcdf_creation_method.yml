@@ -213,7 +213,8 @@ jobs:
           echo "Diff was:"
           echo "${{ needs.changes.outputs.diff }}"
           
-# Autre moyen de faire la même chose que build-push-action@v6 en gerant le cache soi meme. la on utilise cache gha qui est le cahce natif de GitHub Actions, a pa utiliser si on veut gerer ca hors GitHub
+# Autre moyen de faire la meme chose que build-push-action@v6 en gerant le cache soi meme. la on utilise cache gha qui est le cahce natif de GitHub Actions, a pa utiliser si on veut gerer ca hors GitHub
+# La novuelle methode permet de gerer le cache meme si ça sarrete vvant le push
 #       # -------- Build & PUSH vers GHCR --------
 #       - name: 🐳 Build & Push image
 #         run: |
