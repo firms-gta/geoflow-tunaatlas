@@ -37,8 +37,7 @@ permissions:
   
 env:
   REGISTRY: ghcr.io
-  CACHE_IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation-cache
-  IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation
+  IMAGE: ghcr.io/firms-gta/geoflow-tunaatlas-netcdf-creation-method
   DOCKER_BUILDKIT: 1
   RENV_PATHS_ROOT: /root/.cache/R/renv
 
@@ -133,7 +132,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           driver: docker-container
-
+          
+      - name: Show workflow permissions (debug)
+        run: |
+          echo "actor=${{ github.actor }}"
+          echo "owner=${{ github.repository_owner }}"
+          echo "event=${{ github.event_name }}"
+    
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -187,7 +192,7 @@ jobs:
           test -f .dockerignore && cat .dockerignore || echo "no .dockerignore"
           
       - name: Build & push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v6 # may be creating issue with rewriting above other package
         with:
           context: ${{ github.workspace }}
           file: ${{ github.workspace }}/docker/Dockerfile.netcdf
