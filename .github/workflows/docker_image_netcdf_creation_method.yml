@@ -18,6 +18,16 @@ on:
         options:
           - build
           - build-no-cache
+      build_policy:
+        description: "Manual runs build by default. Choose 'no-building' to only run checks."
+        required: true
+        default: "build-anyway"
+        type: choice
+        options:
+          - build-anyway     # default: always build
+          - diff-only        # build only if relevant diff vs base_branch
+          - no-building      # never build (useful for debugging)
+
 
 permissions:
   contents: write
@@ -53,6 +63,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          
+          # Manual run policy:
+          # - build-anyway  => force relevant=true, no diff needed
+          # - diff-only     => compute diff (current behavior)
+          # - no-building   => force relevant=false
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            POLICY="${{ github.event.inputs.build_policy }}"
+            if [[ "$POLICY" == "build-anyway" ]]; then
+              echo "relevant=true" >> "$GITHUB_OUTPUT"
+              echo "diff=forced (manual build-anyway)" >> "$GITHUB_OUTPUT"
+              exit 0
+            elif [[ "$POLICY" == "no-building" ]]; then
+              echo "relevant=false" >> "$GITHUB_OUTPUT"
+              echo "diff=skipped (manual no-building)" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            # else diff-only: continue with normal diff logic below
+          fi
 
           # Paths that should trigger a build
           WATCH_1="R/create_netcdf/"
@@ -64,7 +92,7 @@ jobs:
             RANGE="${GITHUB_SHA}^..${GITHUB_SHA}"
           else
             # Manual: compare base_branch to the currently checked-out ref
-            BASE="${{ inputs.base_branch }}"
+            BASE="${{ github.event.inputs.base_branch }}"
             git fetch --no-tags origin "${BASE}:${BASE}" || true # do not stop if problem with || true
             RANGE="${BASE}..${GITHUB_SHA}"
           fi
