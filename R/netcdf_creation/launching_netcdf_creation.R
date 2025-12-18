@@ -137,24 +137,33 @@ parameter_filtering <- parse_parameter_filtering(parameter_filtering_raw)
 safe_filter <- function(df, filters) {
   if (!length(filters)) return(df)
   
-  # stop si colonnes dupliquées
   dup <- names(df)[duplicated(names(df))]
-  if (length(dup)) {
-    stop("Duplicated columns in dataset: ", paste(unique(dup), collapse = ", "))
-  }
+  if (length(dup)) stop("Duplicated columns in dataset: ", paste(unique(dup), collapse = ", "))
   
   for (nm in names(filters)) {
-    if (!nm %in% names(df)) {
-      stop("Unknown filter column: ", nm)
+    if (!nm %in% names(df)) stop("Unknown filter column: ", nm)
+    
+    op <- filters[[nm]]$op
+    vals <- filters[[nm]]$values
+    
+    if (op == "=") {
+      df <- df[df[[nm]] %in% vals, , drop = FALSE]
+    } else if (op == "!=") {
+      df <- df[!(df[[nm]] %in% vals), , drop = FALSE]
+    } else {
+      stop("Unsupported operator for ", nm, ": ", op)
     }
-    df <- df[df[[nm]] %in% filters[[nm]], , drop = FALSE]
   }
   
   df
 }
 if (isTRUE(one_by_species)) dims <- setdiff(dims, "species_label")
 message("parameter_filtering = ",
-        paste(names(parameter_filtering), collapse = ", "))
+        paste(sprintf("%s%s%s",
+                      names(parameter_filtering),
+                      vapply(parameter_filtering, `[[`, "", "op"),
+                      vapply(parameter_filtering, function(z) paste(z$values, collapse=","), "")),
+              collapse = "; "))
 print(parameter_filtering)
 
 dataset <- qs::qread(path_to_dataset)

@@ -898,16 +898,26 @@ make_dataset_metadata <- function(
 }
 
 parse_parameter_filtering <- function(x) {
-  if (is.null(x) || is.na(x) || x == "") {
-    return(list())
-  }
+  if (is.null(x) || is.na(x) || !nzchar(x)) return(list())
   
-  parts <- strsplit(x, ";")[[1]]
+  parts <- strsplit(x, ";", fixed = TRUE)[[1]]
+  parts <- trimws(parts)
+  parts <- parts[parts != ""]
   
   res <- list()
   
   for (p in parts) {
-    kv <- strsplit(p, "=", fixed = TRUE)[[1]]
+    op <- NULL
+    if (grepl("!=", p, fixed = TRUE)) {
+      op <- "!="
+      kv <- strsplit(p, "!=", fixed = TRUE)[[1]]
+    } else if (grepl("=", p, fixed = TRUE)) {
+      op <- "="
+      kv <- strsplit(p, "=", fixed = TRUE)[[1]]
+    } else {
+      next
+    }
+    
     if (length(kv) != 2) next
     
     key <- trimws(kv[1])
@@ -915,11 +925,11 @@ parse_parameter_filtering <- function(x) {
     
     if (key == "" || val == "" || toupper(val) == "NULL") next
     
-    values <- trimws(strsplit(val, ",")[[1]])
+    values <- trimws(strsplit(val, ",", fixed = TRUE)[[1]])
     values <- values[values != "" & toupper(values) != "NULL"]
     
     if (length(values)) {
-      res[[key]] <- values
+      res[[key]] <- list(op = op, values = values)
     }
   }
   
