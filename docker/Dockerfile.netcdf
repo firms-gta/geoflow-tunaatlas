@@ -40,6 +40,7 @@ RUN mkdir -p /workspace/outputs
 COPY ./R/netcdf_creation/run.sh /workspace/run.sh
 RUN chmod +x /workspace/run.sh
 
+ENTRYPOINT ["/workspace/run.sh"]
 CMD ["bash"]
 
 # Rscript ./R/netcdf_creation/launching_netcdf_creation.R \
