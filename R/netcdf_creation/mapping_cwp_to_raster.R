@@ -420,10 +420,10 @@ convert_to_netcdf_simple <- function(
   )
   
   # ---- Output filename ----
-  nc_file <- file.path(path, paste0(specie, identifier, ".nc"))
-  if (file.exists(nc_file)) file.remove(nc_file)
+  nc_filetempo <- here::here(paste0("tmpfile",specie, identifier, ".nc"))
+
   
-  nc <- ncdf4::nc_create(nc_file, list(var_main, var_crs), force_v4 = TRUE, verbose = FALSE)
+  nc <- ncdf4::nc_create(nc_filetempo, list(var_main, var_crs), force_v4 = TRUE, verbose = FALSE)
   
   # ---- Prepare indices for looping over non-spatial dims + time ----
   idx_df <- if (length(dims)) dataset_agg[dims] else data.frame(dummy = rep(NA, nrow(dataset_agg)))
@@ -649,7 +649,7 @@ convert_to_netcdf_simple <- function(
   }
   
   t_write <- as.numeric(difftime(Sys.time(), t_write0, units = "secs"))
-  log_line("Write completed in %.1fs | output=%s", t_write, nc_file)
+  log_line("Write completed in %.1fs | output=%s", t_write, nc_filetempo)
   
   # ---- Meanings attributes for character dims ----
   if (length(dims)) {
@@ -704,7 +704,11 @@ convert_to_netcdf_simple <- function(
   }
   
   ncdf4::nc_close(nc)
-  return(nc_file)
+  nc_file_final <- file.path(path, paste0(specie, identifier, ".nc"))
+  if (file.exists(nc_file_final)) file.remove(nc_file_final)
+  file.copy(from = nc_filetempo, nc_file_final)
+  file.remove(nc_filetempo)
+  return(nc_file_final)
 }
 
 # ------------------------------------------------------------
