@@ -130,3 +130,69 @@ Sys.sleep(1)
 }
 
 print(jobs)
+
+
+# Merging all contents ----------------------------------------------------
+
+library(fs)
+library(stringr)
+
+## --- Paramètres ---
+src_root  <- "~/workspace/CCP/outputs/Clone_of_TunaAtlas_NetCDF_export_(unit_×_resolution)_New_image_EDITO__v._1.0.2"
+dest_root <- "~/workspace/CCP/outputs/ALL_MERGED"
+
+# Crée le dossier de destination (sans toucher aux permissions)
+dir.create(dest_root, recursive = TRUE, showWarnings = FALSE)
+
+# Dossiers outputs, outputs(1), outputs(2)...
+out_dirs <- list.dirs(src_root, recursive = FALSE, full.names = TRUE)
+out_dirs <- out_dirs[grepl("^outputs(\\(\\d+\\))?$", basename(out_dirs))]
+
+# Tous les .nc (récursif dans chaque dossier)
+nc_files <- unlist(lapply(out_dirs, function(d) {
+  list.files(d, pattern = "\\.nc$", recursive = TRUE, full.names = TRUE)
+}), use.names = FALSE)
+
+# Parser unit + res depuis le nom : *_<unit>_<res>.nc (res = 1deg/5deg)
+parse_unit_res <- function(filename) {
+  m <- regexec("_([A-Za-z0-9]+)_(\\ddeg)\\.nc$", filename)
+  mm <- regmatches(filename, m)[[1]]
+  if (length(mm) == 0) return(list(unit = "unknown", res = "unknown"))
+  list(unit = mm[2], res = mm[3])
+}
+
+# Renommer si doublon
+unique_dest_path <- function(dest_path) {
+  if (!file.exists(dest_path)) return(dest_path)
+  
+  ext  <- sub("^.*\\.", "", dest_path)
+  stem <- sub(paste0("\\.", ext, "$"), "", basename(dest_path))
+  dir  <- dirname(dest_path)
+  
+  i <- 1L
+  repeat {
+    candidate <- file.path(dir, sprintf("%s_duplicated_%03d.%s", stem, i, ext))
+    if (!file.exists(candidate)) return(candidate)
+    i <- i + 1L
+  }
+}
+
+copied <- 0L
+
+for (f in nc_files) {
+  fn <- basename(f)
+  info <- parse_unit_res(fn)
+  
+  dest_dir <- file.path(dest_root, paste0("res=", info$res), paste0("unit=", info$unit))
+  dir.create(dest_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  dest_path <- file.path(dest_dir, fn)
+  dest_path <- unique_dest_path(dest_path)
+  
+  ok <- file.copy(f, dest_path, overwrite = FALSE)
+  if (!ok) warning("Copy failed for: ", f, " -> ", dest_path)
+  
+  copied <- copied + 1L
+}
+
+cat("Done. Copied:", copied, "NetCDF files into:", dest_root, "\n")
