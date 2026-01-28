@@ -1,0 +1,158 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+id:nominal_catch_iccat_level0,"title:Annual catch of tuna, tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by FAO zone (ICCAT level 0)","abstract:This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Indian Ocean Tuna Commission (ICCAT) from %temporal_extent:start% to %temporal_extent:start%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country and area (FAO areas). It corresponds to the ICCAT nominal catch (task1) dataset.
+ 
+This dataset was downloaded on the ICCAT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the ICCAT web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Nominal catch datasets for stock assessments should be accessed through the dedicated meeting page for the ICCAT working party.
+ 
+This table lists annual catches for each ICCAT statistical area, by species and fishing gear made by vessels flying the flag of the reporting country in live weight equivalent. These data are aggregated by calendar year for tuna and tuna-like species and non-target species (by-catch). The data set extends back to the 1950’s when industrial longlining started in the Indian Ocean. The data are in the public domain. Nominal catches are available in spreadsheet format (Microsoft excel) both for ICCAT species and sharks. Please, refer to the worksheet NOTES within the downloadable spreadsheet if you want to use this dataset.
+ 
+Note that the catch estimates in this data file differ from the ‘best scientific estimates’ of nominal catch used for stock assessment purposes and published on the dedicated meeting pages for each ICCAT Working Party. The best scientific estimates disaggregates catches recorded under species or gear aggregates recorded in the ICCAT database reported by countries, which are then assigned by species or gear when the Secretariat has access to alternate sources of information such as statistical publications, fishery bulletins or other information. For this reason, catches by individual species or gear published on the ICCAT meeting pages may differ from the nominal catches available from the data file available here.
+ 
+Nominal catch by species and gear, by vessel flag reporting country for 1950-2016, last updated 03-11-2017. Catches for 2016 are preliminary",,"owner:fabio.fiorellato@ICCAT.org_
+pointOfContact:fabio.fiorellato@ICCAT.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:fabio.fiorellato@ICCAT.org_
+principalInvestigator:fabio.fiorellato@ICCAT.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-10_
+access:2020-11-10",dataset,eng,,,"http:website[Source website]@http://ICCAT.org/data/datasets_
+http:data[Source data]@https://drive.google.com/file/d/1hNoe9MOAn-IkIZH3cikzXmMZZLsklaE4/view?usp=sharing_
+http:metadata[Source metadata]@http://ICCAT.org/documents/nominal-catch-species-and-gear-vessel-flag-reporting-country_",,"statement:Data management workflow_
+process:Data submission[""The dataset was submitted by ICCAT to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:iccat_nominal_catch_firms_level0_20250424.csv,iccat_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:data_cwp_format.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
+id:nominal_catch_iattc_level0,title:Annual catch of tuna and tuna-like species in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) (IATTC level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of tuna and tuna-like species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country. It corresponds to the IATTC nominal catch (task1) dataset.
+
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2019-08-14_
+access:2020-10-21",dataset,eng,,,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/CatchByFlagGear.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/CatchByFlagGear.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1Q5xUXSBrjc9zXCTwpOpmKIQFjV4-h3H9",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:CatchByFlagGear1918-2023.csv,iattc_nominal_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:east_pacific_ocean_nominal_catch_tunaatlasiattc_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_nominal_catch_tunaatlasiattc_level0.R"
+nominal_catch_wcpfc_level0,"title:Annual catch of tuna, tuna-like and shark species in the West Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) (WCPFC level 0)","abstract:This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Western and Central Pacific Fisheries Commission (WCPFC) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country. It corresponds to the catch part of the WCPFC nominal catch (task1) dataset.
+ 
+This dataset was downloaded on the WCPFC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the WCPFC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+The tables of catch statistics cover the main commercial tuna and billfish species caught in the region: albacore (Thunnus alalunga), bigeye (Thunnus obesus), skipjack (Katsuwonus pelamis), yellowfin (Thunnus albacares), black marlin (Makaira indica), blue marlin (Makaira nigricans), striped marlin (Tetrapturus audax) and swordfish (Xiphias gladius). The WCFPC, through their member countries, are now obliged to compile estimates of key shark species, some of which are now covered in the longline fleet tables: blue shark (Prionace glauca), silky shark (Carcharhinus falciformis), oceanic whitetip shark (Carcharhinus longimanus) and mako sharks (Isurus spp.). Catches of other species are not covered explicitly, and discards are not considered.
+ 
+The main industrial fishing methods employed in the WCPFC region include longline, pole-and-line, purse seine and troll. The domestic fisheries of Indonesia and the Philippines employ several other methods. Driftnet fishing for albacore in the South Pacific Ocean ceased in 1991. Individual fleets presented herein cover vessels that are flagged to that nation and those vessels considered to be 'chartered' according to the WCPFC Conservation and Management Measure (CMM-2012-05) on Charter Notification.
+ 
+For the purse-seine fishery, recent studies using observer data (e.g. Lawson, 2007, Lawson, 2010, Lawson, 2012, Lawson, 2013, Lawson, 2014, Hampton and Williams, 2011, Hampton and Williams, 2015) show that the logsheet-reported catch, mainly for associated sets, should contain higher quantities of yellowfin and bigeye tuna that have been misreported as skipjack tuna. Purse-seine catch estimates that have been adjusted with species compositions determined from observer grab samples corrected for size selectivity bias (see Lawson, 2010, Lawson, 2012, Lawson, 2013, and Lawson, 2014) are presented herein as the best available WCFPC purse-seine catch estimates for skipjack, yellowfin and bigeye tuna. All composite tables and figures referring to purse-seine species catch are consistent with these estimates. The estimates of purse seine catch by species may differ from the original estimates provided by WCPFC member countries for their fleets, but total purse seine catch will not differ. The purse seine species catch estimates are produced from statistical models and will therefore change from year to year as more data become available.
+ 
+For the longline fishery, estimates of key shark species have improved in recent years but for most fleets remain uncertain due to (i) clear under-reporting of catches, or (ii) very low coverage of observer data used to estimate these catches.
+ 
+The tables of annual catch estimates for individual fleets cover those years during which the fleet is known to have fished; the lack of recent years in a table implies that the fleet has ceased fishing.
+ 
+The sources of the estimates are available from the SPC Oceanic Fisheries Programme.",,"owner:PeterW@spc.int_
+pointOfContact:PeterW@spc.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:PeterW@spc.int_
+principalInvestigator:PeterW@spc.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-10-21_
+access:2020-11-13",dataset,eng,,,"http:website[Source website]@https://www.wcpfc.int/folder/statistical-bulletins_
+http:data[Source data]@https://www.wcpfc.int/file/546125/download?token=cGogXnHE_
+http:metadata[Source metadata]@https://www.wcpfc.int/statistical-bulletins_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1dyK5MMqijpt7ZHd1FaZ6y3o7chCKOXcf",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%. The file named ‘XLS_WCPFC.xlsx’ was retained.""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:XLS_WCPFC.csv,XLS_WCPO.csv,wcpfc_nominal_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"
+id:nominal_catch_ccsbt_level0__bygear,title:Annual catch of Southern Bluefin Tuna in the Southern hemisphere oceans (%temporal_extent:start% - %temporal_extent:end%) (CCSBT level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of Southern Bluefin Tuna (SBT) from the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year and fishing gear. It corresponds to the CCSBT nominal catch (task1) dataset.
+ 
+This dataset was downloaded on the CCSBT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the CCSBT web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Estimates of the global SBT catch will be updated on an annual basis within two months of the CCSBT annual meeting in October of each year. Note: reviews of SBT data in 2006 indicated that southern bluefin tuna catches may have been substantially under-reported over the previous 10-20 years and the data presented here do not yet include estimates for this unreported catch.
+ 
+It should be noted that the data for individual Flag States and fishing entities shown here may differ to data that those Flag States and fishing entities have provided separately to other organisations. This is in part due to the data manipulations conducted by the CCSBT in producing this dataset (a variety of data sources were used, requiring a range of correction and raising techniques) and in part due to differences in the data provided by individual Flag States and fishing entities to the CCSBT and to other organisations. In particular, the post 1994 SBT data provided by Japan to the CCSBT differs from the post 1994 SBT data that Japan provides to other regional fishery management organisations. The data that Japan provides to CCSBT takes advantage of a Real Time Monitoring Program for SBT to collect daily catch and effort reports from SBT targeting fishing vessels and this is considered to minimise the time lag in availability of the Japanese SBT log book data.""",,"owner:CMillar@ccsbt.org_
+pointOfContact:CMillar@ccsbt.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-01_
+access:2021-07-28",dataset,eng,,,"http:website[Source website]@https://www.ccsbt.org/en/content/sbt-data_
+http:data[Source data]@https://www.ccsbt.org/userfiles/file/data/GlobalCatch_Flag_Gear.xlsx_
+http:metadata[Source metadata]@https://www.ccsbt.org/en/content/sbt-data_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1uzdsnoKIbKYL0fVNtXT0-SuT0Lmv3h0d",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]. The sheet named ‘Catch by Gear’ was retained._
+process:Data harmonization[""The catches from 1952 to 1974 made by purse seiners, pole-and-liners and trolling are not differentiated in the source dataset. They were all assigned to purse seine.""]_
+process:Data conversion[""The source MS Excel (xlsx) dataset was manually converted to CSV format. The column separator was set to comma (« , ») and the decimal separator of numerical values was set to point (« . »).""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:CCSBT_Global_Catch.xlsx,ccsbt_nominal_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R"
+id:nominal_catch_iotc_level0,"title:Annual catch of tuna, tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by FAO zone (IOTC level 0)","abstract:This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Indian Ocean Tuna Commission (IOTC) from %temporal_extent:start% to %temporal_extent:start%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country and area (FAO areas). It corresponds to the IOTC nominal catch (task1) dataset.
+ 
+This dataset was downloaded on the IOTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IOTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Nominal catch datasets for stock assessments should be accessed through the dedicated meeting page for the IOTC working party.
+ 
+This table lists annual catches for each IOTC statistical area, by species and fishing gear made by vessels flying the flag of the reporting country in live weight equivalent. These data are aggregated by calendar year for tuna and tuna-like species and non-target species (by-catch). The data set extends back to the 1950’s when industrial longlining started in the Indian Ocean. The data are in the public domain. Nominal catches are available in spreadsheet format (Microsoft excel) both for IOTC species and sharks. Please, refer to the worksheet NOTES within the downloadable spreadsheet if you want to use this dataset.
+ 
+Note that the catch estimates in this data file differ from the ‘best scientific estimates’ of nominal catch used for stock assessment purposes and published on the dedicated meeting pages for each IOTC Working Party. The best scientific estimates disaggregates catches recorded under species or gear aggregates recorded in the IOTC database reported by countries, which are then assigned by species or gear when the Secretariat has access to alternate sources of information such as statistical publications, fishery bulletins or other information. For this reason, catches by individual species or gear published on the IOTC meeting pages may differ from the nominal catches available from the data file available here.
+ 
+Nominal catch by species and gear, by vessel flag reporting country for 1950-2016, last updated 03-11-2017. Catches for 2016 are preliminary",,"owner:fabio.fiorellato@iotc.org_
+pointOfContact:fabio.fiorellato@iotc.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:fabio.fiorellato@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-10_
+access:2020-11-10",dataset,eng,,,"http:website[Source website]@http://iotc.org/data/datasets_
+http:data[Source data]@https://drive.google.com/file/d/1hNoe9MOAn-IkIZH3cikzXmMZZLsklaE4/view?usp=sharing_
+http:metadata[Source metadata]@http://iotc.org/documents/nominal-catch-species-and-gear-vessel-flag-reporting-country",,"statement:Data management workflow_
+process:Data submission[""The dataset was submitted by IOTC to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:iotc_nominal_catch_firms_level0_2025-04-01.csv,iotc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:data_cwp_format.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
