@@ -1,0 +1,421 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+id:catch_iotc_level0,"title:Monthly catch of tuna, tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%)","abstract:This table lists catch in weight (purse seine) and/or numbers of fish (longline) of tuna and tuna-like species, preferably raised to the total nominal catch and fishing effort by month, species and gear. The maximum spatial aggregation should be by 1°x1° grid area for purse seine and 5°x5° grid area for longline. This is not, however, the case with all CE data available: CE data recorded for most artisanal fleets refers to irregular areas (e.g. CE data recorded per port of unloading).
+Catches and effort are not available for all Nominal catches strata. When recorded, the catches in these datasets might represent the total catches of the species in the year for the fleet and gear concerned or represent simply a sample of those.
+These data, as well as the length-frequency data listed below are considered to be in the public domain, provided that the catch of no individual vessel can be identified within a time/area stratum. In cases when an individual vessel can be identified, the data are aggregated prior to release by time, area or flag to preclude such identification, and will then be in the public domain.
+Catch-and-effort and length-frequency data grouped at a finer level of time-area stratification are only released with written authorization from the sources of the data and are subject to a number of constraints destined to preserve confidentiality.
+CE data are available in text (CSV) format. Please, refer to the detailed CE reference if you want to use this dataset.
+
+Catch-and-effort for all fisheries by month, species and gear, by vessel flag reporting country, 1950-2021, last updated  23rd January 2023",,"owner:fabio.fiorellato@iotc.org_
+pointOfContact:fabio.fiorellato@iotc.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:fabio.fiorellato@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-09-08_
+access:2020-11-10",dataset,eng,,,"http:website[Source website]@http://iotc.org/data/datasets_
+http:codelists[Source codelists]@https://drive.google.com/drive/u/1/folders/1plxPeeB8QUjjABgLPE-vfzwCXmxbT-PY_
+http:metadata[Source metadata]@https://iotc.org/data/datasets/latest/CE/All",,"statement:Data management workflow_
+process:Data submission[""The dataset was submitted by IOTC to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:iotc_catch_all_1m_firms_level0_2025-04-11.csv,iotc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:data_cwp_format.R@./tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
+id:catch_iccat_level0,"title:Monthly catch of tuna, tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%)","abstract:This table lists catch in weight (purse seine) and/or numbers of fish (longline) of tuna and tuna-like species, preferably raised to the total nominal catch and fishing effort by month, species and gear. The maximum spatial aggregation should be by 1°x1° grid area for purse seine and 5°x5° grid area for longline. This is not, however, the case with all CE data available: CE data recorded for most artisanal fleets refers to irregular areas (e.g. CE data recorded per port of unloading).
+Catches and effort are not available for all Nominal catches strata. When recorded, the catches in these datasets might represent the total catches of the species in the year for the fleet and gear concerned or represent simply a sample of those.
+These data, as well as the length-frequency data listed below are considered to be in the public domain, provided that the catch of no individual vessel can be identified within a time/area stratum. In cases when an individual vessel can be identified, the data are aggregated prior to release by time, area or flag to preclude such identification, and will then be in the public domain.
+Catch-and-effort and length-frequency data grouped at a finer level of time-area stratification are only released with written authorization from the sources of the data and are subject to a number of constraints destined to preserve confidentiality.
+CE data are available in text (CSV) format. Please, refer to the detailed CE reference if you want to use this dataset.
+
+Catch-and-effort for all fisheries by month, species and gear, by vessel flag reporting country, 1950-2021, last updated  23rd January 2023",,"owner:fabio.fiorellato@ICCAT.org_
+pointOfContact:fabio.fiorellato@ICCAT.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:fabio.fiorellato@ICCAT.org_
+principalInvestigator:fabio.fiorellato@ICCAT.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-09-08_
+access:2020-11-10",dataset,eng,,,"http:website[Source website]@http://ICCAT.org/data/datasets_
+http:codelists[Source codelists]@https://drive.google.com/drive/u/1/folders/1plxPeeB8QUjjABgLPE-vfzwCXmxbT-PY_
+http:metadata[Source metadata]@https://ICCAT.org/data/datasets/latest/CE/All",,"statement:Data management workflow_
+process:Data submission[""The dataset was submitted by ICCAT to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:iccat_catch_all_1m_firms_level0_20250319.csv,iccat_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:data_cwp_format.R@./tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
+id:catch_5deg_1m_ll_ccsbt_level0,title:Monthly catch of Southern Bluefin Tuna in the Southern hemisphere oceans (%temporal_extent:start% - %temporal_extent:end%) by longliners aggregated by statistical squares of 5° longitude and latitude (CCSBT level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of Southern Bluefin Tuna (SBT) from the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) for the commercial longline fisheries from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the CCSBT catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the CCSBT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the CCSBT web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+It should be noted that the data for individual Flag States and fishing entities available here may differ to data that they provided to other organisations. This is in part due to the data manipulations conducted by the CCSBT in producing this dataset (a variety of data sources were used, requiring a range of correction and raising techniques) and in part due to differences in the data provided by individual Flag States and fishing entities to the CCSBT and to other organisations. In particular, the post 1994 SBT data provided by Japan to the CCSBT differs from the post 1994 SBT data that Japan provides to other regional fishery management organisations. The data that Japan provides to CCSBT takes advantage of a Real Time Monitoring Program for SBT to collect daily catch and effort reports from SBT targeting fishing vessels and this is considered to minimise the time lag in availability of the Japanese SBT log book data.
+ 
+It should also be noted that the catch data provided here do not cover the full time-series of SBT fishing by each Flag State and fishing entity, nor do they contain the entire SBT catch for any year. In addition, prior to 1996, the SBT catch reported here for the Fishing Entity of Taiwan has been estimated from mixed bluefin tuna (species not reported separately) data. The reason for incomplete time series is that the catch and effort data is compiled from vessel logbooks or similar detailed records that may not have been collected throughout a nations fishing history. Similarly, in some years, there may not be complete coverage of a particular fleet by catch and effort data collection systems.
+ It should be further noted that in cases where information on the number of vessels has been provided to the Secretariat, the subsets provided here are made up of observations with a minimum of three vessels per strata. This is due to the CCSBT confidentiality rules.
+ 
+For some CCSBT Members, the data provided here are not restricted to fishing that targeted SBT. Instead, the data represents all longline fishing in which catches of SBT were feasible. This includes fishing that targeted SBT, fishing that targeted other tuna or tuna like species, and/or fishing conducted in strata (year/month/area) where SBT were also taken. As a consequence, there are many fishing records with no SBT catch. Note: the extent to which fishing effort associated with past unreported catches has been reported is currently unknown. This causes difficulties for a meaningful interpretation of catch per unit effort trends from these data.
+ 
+It should also be noted that the weight of SBT retained in these data are usually only approximate visual estimates of the weights.""",,"owner:CMillar@ccsbt.org_
+pointOfContact:CMillar@ccsbt.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-01_
+access:2021-07-28",dataset,eng,,,"http:website[Source website]@https://www.ccsbt.org/en/content/sbt-data_
+http:data[Source data]@https://www.ccsbt.org/userfiles/file/CEData_Longline.xlsx_
+http:metadata[Source metadata]@https://www.ccsbt.org/en/content/sbt-data_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1OOh-9owoFxnBo3M2T-Z6SXKJPA5xeUGR",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data conversion[""The source MS Excel (xlsx) dataset was manually converted to CSV format. The column separator was set to comma (« , ») and the decimal separator of numerical values was set to point (« . »).""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]_",,"access:googledrive_
+source:CEData_Longline.xlsx,ccsbt_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:southern_hemisphere_oceans_catch_5deg_1m_ll_tunaatlasccsbt_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_catch_5deg_1m_ll_tunaatlasccsbt_level0.R"
+id:catch_1deg_1m_ccsbt_level0__surface,title:Monthly catch of Southern Bluefin Tuna in the Southern hemisphere oceans (%temporal_extent:start% - %temporal_extent:end%) by surface fisheries gears aggregated by statistical squares of 1° longitude and latitude (CCSBT level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of Southern Bluefin Tuna (SBT) from the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) for the commercial surface (purse seine, pole and line only) fisheries from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the CCSBT catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the CCSBT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the CCSBT web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+It should be noted that the data for individual Flag States and fishing entities available here may differ to data that they provided to other organisations. This is in part due to the data manipulations conducted by the CCSBT in producing this dataset (a variety of data sources were used, requiring a range of correction and raising techniques) and in part due to differences in the data provided by individual Flag States and fishing entities to the CCSBT and to other organisations. In particular, the post 1994 SBT data provided by Japan to the CCSBT differs from the post 1994 SBT data that Japan provides to other regional fishery management organisations. The data that Japan provides to CCSBT takes advantage of a Real Time Monitoring Program for SBT to collect daily catch and effort reports from SBT targeting fishing vessels and this is considered to minimise the time lag in availability of the Japanese SBT log book data.
+ 
+It should also be noted that the catch data provided here do not cover the full time-series of SBT fishing by each Flag State and fishing entity, nor do they contain the entire SBT catch for any year. In addition, prior to 1996, the SBT catch reported here for the Fishing Entity of Taiwan has been estimated from mixed bluefin tuna (species not reported separately) data. The reason for incomplete time series is that the catch and effort data is compiled from vessel logbooks or similar detailed records that may not have been collected throughout a nations fishing history. Similarly, in some years, there may not be complete coverage of a particular fleet by catch and effort data collection systems.
+ 
+It should be further noted that in cases where information on the number of vessels has been provided to the Secretariat, the subsets provided here are made up of observations with a minimum of three vessels per strata. This is due to the CCSBT confidentiality rules.
+ 
+For some CCSBT Members, the data provided here are not restricted to fishing that targeted SBT. Instead, the data represents all purse seine and pole & line fishing in which catches of SBT were feasible. This includes fishing that targeted SBT, fishing that targeted other tuna or tuna like species, and/or fishing conducted in strata (year/month/area) where SBT were also taken. As a consequence, there are many fishing records with no SBT catch. Note: the extent to which fishing effort associated with past unreported catches has been reported is currently unknown. This causes difficulties for a meaningful interpretation of catch per unit effort trends from these data.
+ 
+It should also be noted that the weight of SBT retained in these data are usually only approximate visual estimates of the weights.""",,"owner:CMillar@ccsbt.org_
+pointOfContact:CMillar@ccsbt.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-01_
+access:2021-07-28",dataset,eng,,,"http:website[Source website]@https://www.ccsbt.org/en/content/sbt-data_
+http:data[Source data]@https://www.ccsbt.org/userfiles/file/CEData_Surface.xlsx_
+http:metadata[Source metadata]@https://www.ccsbt.org/en/content/sbt-data_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1OOh-9owoFxnBo3M2T-Z6SXKJPA5xeUGR",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data conversion[""The source MS Excel (xlsx) dataset was manually converted to CSV format. The column separator was set to comma (« , ») and the decimal separator of numerical values was set to point (« . »).""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:CEData_Surface.xlsx,ccsbt_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:southern_hemisphere_oceans_catch_1deg_1m_tunaatlasccsbt_level0__surface.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_catch_1deg_1m_tunaatlasccsbt_level0__surface.R"
+id:catch_5deg_1m_ll_iattc_level0__tuna_billfish,title:Monthly catch of tuna and tuna-like species in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by longliners aggregated by statistical squares of 5° longitude and latitude (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of tuna and tuna-like species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by longliners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+The file contain data provided by Members and Cooperating Non-Members. No attempt has been made to convert numbers to weight or weight to numbers.
+ 
+Estimated East Pacific Ocean tuna catch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm).""",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-10-21_
+access:2020-10-21",dataset,eng,,,http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz,,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:PublicLLTunaBillfishMt.csv,iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:catch_5deg_1m_ll_iattc_level0_2024.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/catch_5deg_1m_ll_iattc_level0_2024.R"
+id:catch_5deg_1m_ll_iattc_level0__shark,title:Monthly catch of shark species in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by longliners aggregated by statistical squares of 5° longitude and latitude (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of shark species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by longliners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded. 
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+The file contain data provided by Members and Cooperating Non-Members. No attempt has been made to convert numbers to weight or weight to numbers.
+ 
+Estimated East Pacific Ocean tuna catch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm).""",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-10-21_
+access:2020-10-21",dataset,eng,,,http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz,,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:PublicLLSharkMt.csv,iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:catch_5deg_1m_ll_iattc_level0_2024.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/catch_5deg_1m_ll_iattc_level0_2024.R"
+id:catch_1deg_1m_ps_iattc_level0__billfish_byflag,title:Monthly catch of billfishes in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of billfish species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %year_start% to %year_end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. Observers record billfish bycatch in number of individuals. 
+ 
+Estimated East Pacific Ocean billfish bycatch totals are presented in the Inter-American Tropical Tuna Commission (IATTC) Fishery Status Reports
+(http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.""",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-05-27_
+access:2020-10-21",dataset,eng,,,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/PublicPSBillfish.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicPSBillfish.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:PublicPSBillfishFlag.csv,iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__byflag.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__byflag.R"
+id:catch_1deg_1m_ps_iattc_level0__shark_byflag,title:Monthly catch of sharks in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of shark species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. Observers record shark bycatch in number of individuals or weight, and in this file the data are presented in the original units, not converted from numbers to weight or vice-versa.""
+ 
+Estimated East Pacific Ocean shark bycatch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-05-27_
+access:2020-10-21",dataset,eng,,,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/PublicPSShark.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicPSShark.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:PublicPSSharkFlag.csv,iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__shark_byflag.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__shark_byflag.R"
+id:catch_1deg_1m_ps_iattc_level0__tuna_byflag,title:Monthly catch of tunas in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. The data on catch are recorded by on-board observers at sea, or abstracted from vessel logbooks when observer data are not available. The data on catch weight and species composition are not adjusted by data from other sources, such as unloadings or sets for which catch data is not available
+ 
+Estimated EPO tuna catch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.""",,"owner:ird@ird.fr_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-06-01_
+access:2020-10-21",dataset,eng,,,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/PublicPSTuna.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicPSTuna.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:PublicPSTunaFlag.csv,iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__byflag.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__byflag.R"
+id:catch_1deg_1m_bb_iattc_level0__tuna_byflag,title:Monthly catch of tunas in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by pole-and-liners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by pole-and-line vessels (baitboats) from %year_start% to %year_end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. The data on catch are as abstracted from vessel logbooks. The data on catch weight and species composition are not adjusted by data from other sources, such as unloadings or sets for which catch data is not available
+ 
+ Estimated EPO tuna catch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.""",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-06-01_
+access:2020-10-21",dataset,eng,,,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicLPTuna.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:PublicLPTunaFlag.csv,iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:east_pacific_ocean_catch_1deg_1m_bb_tunaatlasiattc_level0__byflag.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_bb_tunaatlasiattc_level0__byflag.R"
+catch_5deg_1m_ps_wcpfc_level0,title:Monthly catch of tuna and tuna-like species in the West Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 5° longitude and latitude (WCPFC level 0),"abstract:This dataset lists the monthly-spatially aggregated catch of tuna and tuna-like species from the Western and Central Pacific Fisheries Commission (WCPFC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing mode (i.e. type of school used) and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the WCPFC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the WCPFC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the WCPFC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+This database represents the most complete purse seine data available to the WCPFC that can be disseminated into the public domain in accordance with the current “Rules and Procedures for the Protection, Access to, and Dissemination of Data Compiled by the Commission” (“RAP” – see http://www.wcpfc.int/doc/data-02/rules-and-procedures-protection-access-and-dissemination-data-compiled-commission ).
+In reference to the RAP (Paragraph 9), cells where effort is less than or equal to the maximum value estimated to represent the activities of two vessels have been removed from the public domain data (the cells are retained with their time/area information, but all catch and effort information in these have been set to zero).",,"owner:PeterW@spc.int_
+pointOfContact:PeterW@spc.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:PeterW@spc.int_
+principalInvestigator:PeterW@spc.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-10-21_
+access:2020-11-13",dataset,eng,,,"http:website[Source website]@https://www.wcpfc.int/folder/public-domain-data_
+http:data[Source data]@https://www.wcpfc.int/system/files/purse_seine_6.zip_
+http:metadata[Source metadata]@https://www.wcpfc.int/system/files/purse_seine_2.pdf_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1migb6HXly-HHgzLysEu0Kwa9iUnAMNQ0",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:WCPFC_S_PUBLIC_BY_YR_MON.csv,wcpfc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:west_pacific_ocean_catch_5deg_1m_ps_tunaatlaswcpfc_level0.R@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_ps_tunaatlaswcpfc_level0.R"
+catch_5deg_1m_ll_wcpfc_level0,title:Monthly catch of tuna and tuna-like species in the West Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by longliners aggregated by statistical squares of 5° longitude and latitude (WCPFC level 0),"abstract:This dataset lists the monthly-spatially aggregated catch of tuna and tuna-like species from the Western and Central Pacific Fisheries Commission (WCPFC) by longliners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the WCPFC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the WCPFC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the WCPFC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+This database represents the most complete longline data available to the WCPFC that can be disseminated into the public domain in accordance with the current “Rules and Procedures for the Protection, Access to, and Dissemination of Data Compiled by the Commission” (“RAP” – see http://www.wcpfc.int/doc/data-02/rules-and-procedures-protection-access-and-dissemination-data-compiled-commission ).
+In reference to the RAP (Paragraph 9), cells where effort is less than or equal to the maximum value estimated to represent the activities of two vessels have been removed from the public domain data (the cells are retained with their time/area information, but all catch and effort information in these have been set to zero).",,"owner:PeterW@spc.int_
+pointOfContact:PeterW@spc.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:PeterW@spc.int_
+principalInvestigator:PeterW@spc.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-16_
+access:2020-11-17",dataset,eng,,,"http:website[Source website]@https://www.wcpfc.int/folder/public-domain-data_
+http:data[Source data]@https://www.wcpfc.int/system/files/WCPFC_L_PUBLIC_BY_FLAG_MON_1.zip_
+http:metadata[Source metadata]@https://www.wcpfc.int/file/215658/download?token=CbSbAGkP_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1migb6HXly-HHgzLysEu0Kwa9iUnAMNQ0",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:WCPFC_L_PUBLIC_BY_FLAG_MON.csv,wcpfc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:west_pacific_ocean_catch_5deg_1m_ll_tunaatlaswcpfc_level0_from_csv.R@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_ll_tunaatlaswcpfc_level0_from_csv.R"
+catch_5deg_1m_driftnet_wcpfc_level0,title:Monthly catch of tuna and tuna-like species in the West Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by driftnets aggregated by statistical squares of 5° longitude and latitude (WCPFC level 0),"abstract:This dataset lists the monthly-spatially aggregated catch of Albacore from the Western and Central Pacific Fisheries Commission (WCPFC) by driftnets from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the WCPFC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the WCPFC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the WCPFC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+This database represents the most complete driftnet data available to the WCPFC that can be disseminated into the public domain in accordance with the current “Rules and Procedures for the Protection, Access to, and Dissemination of Data Compiled by the Commission” (“RAP” – see http://www.wcpfc.int/doc/data-02/rules-and-procedures-protection-access-and-dissemination-data-compiled-commission ).
+In reference to the RAP (Paragraph 9), cells where effort is less than or equal to the maximum value estimated to represent the activities of two vessels have been removed from the public domain data (the cells are retained with their time/area information, but all catch and effort information in these have been set to zero).",,"owner:PeterW@spc.int_
+pointOfContact:PeterW@spc.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:PeterW@spc.int_
+principalInvestigator:PeterW@spc.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-10-21_
+access:2020-11-13",dataset,eng,,,"http:website[Source website]@https://www.wcpfc.int/folder/public-domain-data_
+http:data[Source data]@https://www.wcpfc.int/system/files/drifnet_0.zip_
+http:metadata[Source metadata]@https://www.wcpfc.int/system/files/driftnet.pdf_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1migb6HXly-HHgzLysEu0Kwa9iUnAMNQ0",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:WCPFC_G_PUBLIC_BY_YR_MON.csv,wcpfc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:west_pacific_ocean_catch_5deg_1m_tunaatlaswcpfc_level0__driftnet.R@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_tunaatlaswcpfc_level0__driftnet.R"
+catch_5deg_1m_bb_wcpfc_level0,title:Monthly catch of tuna and tuna-like species in the West Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by pole-and-liners aggregated by statistical squares of 5° longitude and latitude (WCPFC level 0),"abstract:This dataset lists the monthly-spatially aggregated catch of tuna and tuna-like species from the Western and Central Pacific Fisheries Commission (WCPFC) by pole-and-liners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month and area (statistical squares of 5° longitude and latitude). It corresponds to the catch part of the WCPFC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the WCPFC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the WCPFC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+This database represents the most complete pole-and-line data available to the WCPFC that can be disseminated into the public domain in accordance with the current “Rules and Procedures for the Protection, Access to, and Dissemination of Data Compiled by the Commission” (“RAP” – see http://www.wcpfc.int/doc/data-02/rules-and-procedures-protection-access-and-dissemination-data-compiled-commission ).
+In reference to the RAP (Paragraph 9), cells where effort is less than or equal to the maximum value estimated to represent the activities of two vessels have been removed from the public domain data (the cells are retained with their time/area information, but all catch and effort information in these have been set to zero).",,"owner:PeterW@spc.int_
+pointOfContact:PeterW@spc.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:PeterW@spc.int_
+principalInvestigator:PeterW@spc.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-19_
+access:2020-11-19",dataset,eng,,,"http:website[Source website]@https://www.wcpfc.int/folder/public-domain-data_
+http:data[Source data]@https://www.wcpfc.int/system/files/pole_and_line_6.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1migb6HXly-HHgzLysEu0Kwa9iUnAMNQ0",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"access:googledrive_
+source:WCPFC_P_PUBLIC_BY_YR_MON.csv,wcpfc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:west_pacific_ocean_catch_5deg_1m_bb_tunaatlaswcpfc_level0.R@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_bb_tunaatlaswcpfc_level0.R"
