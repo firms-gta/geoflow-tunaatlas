@@ -152,7 +152,7 @@ catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID
 
 catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
-catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
+catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
 catches_pivot_WCPFC$CatchType <- "RC" # retained catch
 
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value

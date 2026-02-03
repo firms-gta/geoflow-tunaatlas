@@ -155,8 +155,8 @@ function(action, entity, config){
   efforts_pivot_WCPFC$Ocean <- "PAC_W"
   efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID 
   efforts_pivot_WCPFC <- harmo_time_2(efforts_pivot_WCPFC, "YY", "MM")
-  efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
-  #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+  efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
+  #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT # rechanged as reupdated by WCPFC in 2026
   efforts_pivot_WCPFC$CatchType <- "ALL"
   
   efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
