@@ -16,47 +16,17 @@
   "metadata": {
     "entities": [
       {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1tHkgvLNAPjAytLaRDqdjtDae_OBO8Yke0XWvgNl7DRk/edit?gid=1362671221#gid=1362671221"
+        "handler": "csv",
+        "source": "../../config/geoflow_entities_tuna_datasets - Georef_data_2026_noIOTC_ICCAT_oneline.csv"
       }
     ],
-    "contacts" : [
-      {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-      }
-    ]
+    "contacts" : []
   },
-  "software": [
-    {
-      "id": "my-database-write",
-      "type": "output",
-      "software_type": "dbi",
-      "parameters": {
-        "drv": "PostgreSQL",
-        "user": "{{DB_USER}}",
-        "password": "{{DB_PASSWORD}}",
-        "host": "{{DB_HOST}}",
-        "port": "{{DB_PORT}}",
-        "dbname": "{{DB_NAME}}"
-      },
-      "properties" : {}
-    },
-    {
-      "id": "googledrive",
-      "type": "input",
-      "software_type": "googledrive",
-      "parameters": {
-        "email": "{{GMAIL_USER}}",
-        "token": "{{GMAIL_TOKEN}}"
-      },
-      "properties" : {}
-    }
-  ],
+  "software": [],
   "actions": [
     {
       "id": "Tidying_and_mapping_data",
-      "script": "./R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
       "run": true,
       "options": {
         "recap_each_step": true
@@ -65,8 +35,8 @@
     
     {
       "id": "load_dataset",
-      "script": "./R/tunaatlas_actions/load_dataset.R",
-      "run": true,
+      "script": "../R/tunaatlas_actions/load_dataset.R",
+      "run": false,
       "options": {
         "upload_to_db": true,
         "create_materialized_view": false,
@@ -77,7 +47,7 @@
     
     {
       "id": "create_report_global_action",
-      "script": "./R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
       "run": false,
       "options": {
       }
