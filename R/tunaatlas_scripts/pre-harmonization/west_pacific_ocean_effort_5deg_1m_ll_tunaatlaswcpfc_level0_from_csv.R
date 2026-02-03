@@ -97,7 +97,7 @@ function(action, entity, config){
   #---------------------------------------
   DF$cwp_grid=NULL # remove column cwp_grid
   colnames(DF)<-toupper(colnames(DF))
-  if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+  if(any(DF$FLAG_CODE == "")) DF[DF$FLAG_CODE == "",]$FLAG_CODE <- "UNK"
   # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
   # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
   DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
@@ -153,7 +153,7 @@ function(action, entity, config){
   #@eblondel
   efforts_pivot_WCPFC$RFMO <- "WCPFC"
   efforts_pivot_WCPFC$Ocean <- "PAC_W"
-  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID 
+  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_CODE 
   efforts_pivot_WCPFC <- harmo_time_2(efforts_pivot_WCPFC, "YY", "MM")
   efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
   #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT # rechanged as reupdated by WCPFC in 2026

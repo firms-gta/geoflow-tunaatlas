@@ -97,7 +97,7 @@ DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FAL
 #---------------------------------------
 DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)<-toupper(colnames(DF))
-if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+if(any(DF$flag_code == "")) DF[DF$flag_code == "",]$flag_code <- "UNK"
 # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
 # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
@@ -145,16 +145,14 @@ catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-
 catches_pivot_WCPFC$RFMO <- "WCPFC"
 catches_pivot_WCPFC$Ocean <- "PAC_W"
-catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID
+catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_CODE
 
 catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
 catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
 catches_pivot_WCPFC$CatchType <- "RC" # retained catch
-
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
 catches <- catches_pivot_WCPFC[colToKeep_captures]
 rm(catches_pivot_WCPFC)
