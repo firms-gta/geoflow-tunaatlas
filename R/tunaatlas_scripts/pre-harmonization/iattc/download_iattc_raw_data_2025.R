@@ -13,7 +13,7 @@ urls <- c(
   "https://www.iattc.org/getmedia/7ddad259-8ab4-42b3-a8c7-5863945f6e40/PublicSizePSBillfish.zip",
   "https://www.iattc.org/getmedia/b8f0bdbb-595d-4c16-9965-cbedcf122aaa/PublicLLTunaBillfish.zip",
   "https://www.iattc.org/getmedia/334da158-5f3e-495b-9df8-05b873977751/PublicLLShark.zip",
-  "https://www.iattc.org/getmedia/0c5f64fe-186c-4479-8f05-064f411e66f2/PublicLPTuna.zip",
+  "https://www.iattc.org/getmedia/0c5f64fe-186c-4479-8f05-064f411e66f2/PublicLPTuna.zip"
 )
 
 for (url in urls) {
