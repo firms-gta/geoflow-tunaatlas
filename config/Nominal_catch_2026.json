@@ -1,0 +1,49 @@
+{
+  "profile": {
+    "id": "tuna-atlas-datasets-iattc",
+    "mode": "entity",
+    "project": "FIRMS Tuna Atlas",
+    "organization": "FIRMS Tuna Atlas",
+    "logos": [
+      "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+      "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+      "http://www.umr-marbec.fr/images/logo-ird-en.png"
+    ],
+    "options": {
+      "line_separator": "_\n"
+    }
+  },
+  "metadata": {
+    "entities": [
+      {
+        "handler": "csv",
+        "source": "../../config/geoflow_entities_tuna_global_datasets - Nominal_catch_2026_ONLY_WCPFC.csv"
+      }
+    ],
+    "contacts" : [
+      {
+        "handler": "gsheet",
+        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+      }
+    ]
+  },
+  "software": [],
+  "actions": [
+    {
+      "id": "Tidying_and_mapping_data",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "run": true,
+      "options": {
+        "recap_each_step": true
+      }
+    }, 
+    {
+      "id": "create_report_global_action",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "run": true,
+      "options": {
+      }
+    }
+    
+  ]
+}

@@ -45,7 +45,6 @@ function(action, entity, config){
     install.packages("dplyr")
     require(dplyr)
   }
-
 # Input data sample:
 # YY MM LAT5 LON5 DAYS SETS_UNA SETS_LOG SETS_DFAD SETS_AFAD SETS_OTH SKJ_C_UNA YFT_C_UNA BET_C_UNA OTH_C_UNA SKJ_C_LOG YFT_C_LOG BET_C_LOG OTH_C_LOG SKJ_C_DFAD
 # 1967  2  30N 135E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0

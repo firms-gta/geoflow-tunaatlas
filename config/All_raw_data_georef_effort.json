@@ -1,23 +1,23 @@
 {
   "profile": {
-    "id": "tuna-atlas-datasets-iattc",
+    "id": "tuna-atlas-catch",
     "mode": "entity",
     "project": "FIRMS Tuna Atlas",
     "organization": "FIRMS Tuna Atlas",
     "logos": [
       "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
-      "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
-      "http://www.umr-marbec.fr/images/logo-ird-en.png"
+      "https://www.blue-cloud.org/sites/default/files/styles/logo_small/public/FAO_2lines_500x500_1.png?itok=igwPSL5v",
+      "https://en.ird.fr/sites/ird_fr/files/2019-08/logo_IRD_2016_BLOC_UK_COUL.png"
     ],
     "options": {
       "line_separator": "_\n"
     }
   },
   "metadata": {
-    "entities": [
+    "entities" : [
       {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1tHkgvLNAPjAytLaRDqdjtDae_OBO8Yke0XWvgNl7DRk/edit?gid=216380869#gid=216380869"
+      "handler": "csv",
+      "source": "../../config/geoflow_entities_tuna_datasets - Effort_data_2026.csv"
       }
     ],
     "contacts" : [
@@ -27,36 +27,11 @@
       }
     ]
   },
-  "software": [
-    {
-      "id": "my-database-write",
-      "type": "output",
-      "software_type": "dbi",
-      "parameters": {
-        "drv": "PostgreSQL",
-        "user": "{{DB_USER}}",
-        "password": "{{DB_PASSWORD}}",
-        "host": "{{DB_HOST}}",
-        "port": "{{DB_PORT}}",
-        "dbname": "{{DB_NAME}}"
-      },
-      "properties" : {}
-    },
-    {
-      "id": "googledrive",
-      "type": "input",
-      "software_type": "googledrive",
-      "parameters": {
-        "email": "{{GMAIL_USER}}",
-        "token": "{{GMAIL_TOKEN}}"
-      },
-      "properties" : {}
-    }
-  ],
+  "software": [],
   "actions": [
     {
       "id": "Tidying_and_mapping_data",
-      "script": "./R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
       "run": true,
       "options": {
         "recap_each_step": true
@@ -65,8 +40,8 @@
     
     {
       "id": "load_dataset",
-      "script": "./R/tunaatlas_actions/load_dataset.R",
-      "run": true,
+      "script": "../R/tunaatlas_actions/load_dataset.R",
+      "run": false,
       "options": {
         "upload_to_db": true,
         "create_materialized_view": false,
@@ -77,7 +52,7 @@
     
     {
       "id": "create_report_global_action",
-      "script": "./R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
       "run": false,
       "options": {
       }
