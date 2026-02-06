@@ -102,19 +102,19 @@ NC <- NC[NC$Catch != 0,]
 NC <- NC[!is.na(NC$Catch),] 
 
 NC <- aggregate(NC$Catch,
-		FUN = sum,
-		by = list(
-			FishingFleet = NC$FishingFleet,
-			Gear = NC$Gear,
-			time_start = NC$time_start,
-			time_end = NC$time_end,
-			AreaName = NC$AreaName,
-			School = NC$School,
-			Species = NC$Species,
-			CatchType = NC$CatchType,
-			CatchUnits = NC$CatchUnits
-		)
-	)
+                FUN = sum,
+                by = list(
+                  FishingFleet = NC$FishingFleet,
+                  Gear = NC$Gear,
+                  time_start = NC$time_start,
+                  time_end = NC$time_end,
+                  AreaName = NC$AreaName,
+                  School = NC$School,
+                  Species = NC$Species,
+                  CatchType = NC$CatchType,
+                  CatchUnits = NC$CatchUnits
+                )
+)
 
 colnames(NC)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
 NC$source_authority<-"IATTC"
@@ -127,22 +127,26 @@ NC$time_start <- as.Date(NC$time_start)
 NC$time_end <- as.Date(NC$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
-	paste0(format(min(NC$time_start), "%Y"), "-01-01"),
-	paste0(format(max(NC$time_end), "%Y"), "-12-31"),
-	sep = "/"
+  paste0(format(min(NC$time_start), "%Y"), "-01-01"),
+  paste0(format(max(NC$time_end), "%Y"), "-12-31"),
+  sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
+base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+# sorties same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(NC, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
 entity$addResource("codelists", output_name_codelists)
 
- 
+
 
 }

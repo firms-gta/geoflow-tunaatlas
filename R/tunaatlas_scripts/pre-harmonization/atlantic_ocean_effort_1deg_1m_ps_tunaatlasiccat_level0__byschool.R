@@ -128,10 +128,15 @@ entity$setTemporalExtent(dataset_temporal_extent)
 efforts$geographic_identifier <- format(as.integer(efforts$geographic_identifier), scientific = FALSE, trim = TRUE)
 
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".xlsx"))[1], "_harmonized.csv"), path_to_raw_dataset)
+base1 <- tools::file_path_sans_ext(basename(filename1))
+#@geoflow -> export as csv
+# sorties same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".xlsx"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
