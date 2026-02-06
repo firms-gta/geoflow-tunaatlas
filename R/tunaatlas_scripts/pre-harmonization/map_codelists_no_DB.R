@@ -57,7 +57,7 @@ library(dplyr)
 map_codelists_no_DB <- function(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map, mapping_keep_src_code = FALSE, summary_mapping = FALSE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC")) {
   
 if(!is.data.frame(mapping_dataset)){
-  mapping_dataset <-read.csv(mapping_dataset,stringsAsFactors = F,colClasses = "character")
+  mapping_dataset <-read.csv(mapping_dataset,stringsAsFactors = F,colClasses = "character") %>% dplyr::mutate(dimensions_to_map = ifelse(dimensions_to_map == "fishingfleet", "fishing_fleet", dimensions_to_map))
 }  
   
   base_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/regional-to-global/"
