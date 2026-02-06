@@ -1,0 +1,9 @@
+dimension,code_list_identifier
+area,cwp_grid
+measurement_type,catchtype_iotc
+measurement_unit,effortunit_iotc
+fishing_fleet,flag_iotc
+gear_type,gear_iotc
+fishing_mode,schooltype_iotc
+species,species_iotc
+source_authority,source_authority

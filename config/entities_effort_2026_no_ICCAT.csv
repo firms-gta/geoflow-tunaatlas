@@ -1,0 +1,78 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+id:global_effort_2026_no_ICCAT,title:Global monthly catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) FIRMS level 0,"abstract:This dataset lists the monthly-spatially aggregated catch of tuna and tuna-like species (i.e. billfish, bonitos, and mackerel) by purse seiners and pole-and-liners from %temporal_extent:start% to %temporal_extent:end% in the Indian, Atlantic and Eastern Pacific Oceans. 
+
+This dataset was computed using public domain georeferenced catch-and-effort datasets released by the five tuna Regional Fisheries Management Organizations: the Commission for the Conservation of Southern Bluefin Tuna (CCSBT), the Inter-American Tropical Tuna Commission (IATTC), the International Commission for the Conservation of Atlantic Tunas (ICCAT), the Indian Ocean Tuna Commission (IOTC) and the Western and Central Pacific Fisheries Commission (WCPFC). 
+
+Species-specific catches expressed in weight or number are stratified by year, month, reporting / fishing fleet, fishing gear, fishing mode (i.e. type of school association) and area (statistical squares of 1° longitude and latitude). 
+
+Data from the Western Pacific ocean were not included because WCPFC only provides purse seine and pole-and-line catch at a spatial resolution of statistical squares of 5° longitude and latitude. 
+
+“FIRMS level 0” identifies the processes applied to the primary datasets by the FIsheries and Resources Monitoring System (FIRMS)  to generate the dataset.     
+
+t-RFMO specific descriptions of the original input data sets can be found at the following links:
+
+- CCSBT: https://www.ccsbt.org/en/content/sbt-data 
+- IATTC: https://www.iattc.org/
+- ICCAT: https://www.iccat.int/en/accesingdb.html
+- IOTC: https://iotc.org/data/datasets/latest/CESurface 
+- WCPFC: https://www.wcpfc.int/public-domain
+
+The processes applied to produce this FIRMS level 0 dataset at global scale consist of a series of steps:
+
+Original catch-and-effort data are disseminated in such a way that redundancy may exist between the various datasets released, or that dimensions may be split over the datasets for some strata. To cope with these issues and collate a unique and (possibly)  complete value of catch per stratum (i.e. with all the available dimensions), the original datasets had to be merged and post-processed by removing the duplicated strata or reassembling those strata with all available dimensions split over multiple datasets;
+Overlapping zone between RFMO lead to providing redundant data, which is removed from the dataset. (See details in Markdown).
+Errors in CTOI's cwp code reulsts in modifying data from the provided dataset by renaming the grid.
+
+Removal Southern Bluefin Tuna data provided by t-RFMOs other than the Commission for the Conservation of Southern Bluefin Tuna (CCSBT), which is considered the only authoritative source of information for the species. The years in which no data is provided by CCSBT but it is by other RFMOS, this data is kept.
+Mapping of the original code lists (t-RFMO specific) to standard FAO / CWP code lists (e.g., for gears and species) or to ad-hoc classifications as in the case of reporting / fishing fleets. These mappings have been done in collaboration with the t-RFMOs Secretariats and might be subject to future revisions
+
+More details on the processes are provided in the lineage section._
+info:- Due to IATTC confidentiality policies, information on reporting / fishing fleet and school type for Eastern Pacific geo-referenced purse seine catches is available in separate files;
+- For each stratum, the catch from the fleet-detailed dataset was raised to the catch from the school type-detailed dataset to get an estimation of the catches by fleet and school type in each stratum;
+- Some t-RFMO-specific codes could not be mapped onto standard code lists, in particular for what concerns codes representing an aggregation of other existing codes (e.g., IDPH - Indonesia and Philippines as a WCPFC fleet code, or Otun - other tuna as a species code for ICCAT). In those cases, the code for species is set to UNK (Unknown). However, when possible these codes have been mapped with entries representing comparable aggregates when available in the respective standard code lists (i.e., group of species from the ASFIS);
+- A fraction of the original data is available only at spatial resolutions wider than 1° longitude and latitude statistical squares, and therefore has been removed from the final output;
+- A fraction of the original data is available only at temporal resolutions greater than 1 month, and therefore has been removed from the final output._
+edition:2021.1.0_",,"owner:FAO-HQ@fao.org_
+custodian:FAO-HQ@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+publisher:FIRMS-Secretariat@fao.org_
+Data structure:FIRMS-Secretariat@fao.org_
+principalInvestigator:ird@ird.fr_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2021-12-01_
+edition:2021-12-01",dataset,eng,"SRID=4326;POLYGON((-180 -90,-180 90,180 90,180 -90,-180 -90))",2023-01-01,"thumbnail:Map overview@https://github.com/eblondel/geoflow-tunaatlas/raw/master/assets/global_catch_1deg_1m_ps_bb_firms_level0.png",,"statement:Data management workflow_
+process:Public domain datasets from IOTC were collated through the RFMO website (www.iotc.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
+process:Public domain datasets from CCSBT were collated through the RFMO website (www.ccsbt.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
+process:Public domain datasets from ICCAT were collated through the RFMO website (www.iccat.int). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
+process:Public domain datasets from IATTC were collated through the RFMO website (www.iattc.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
+process:""ICCAT data processing - Concerns ICCAT purse seine datasets. ICCAT delivers two catch-and-efforts datasets for purse seiners: one that gives the detail of the type of school (Fad|Free school) for purse seine fisheries and that starts in 1994 (called Task II catch|effort by operation mode Fad|Free school) and one that does not give the information of the type of school and that covers all the time period (from 1950) (called Task II catch|effort). These data are redundant (i.e. the data from the dataset Task II catch|effort by operation mode are also available in the dataset Task II catch|effort) but in the latter, the information on the type of school is not available. Both datasets were combined to produce a dataset that covers the whole time period, with fishing mode information (Fad | free school).""_
+process:""IATTC data processing - Concerns IATTC purse seine datasets: IATTC Purse seine catch-and-effort are available in 3 separate files according to the group of species: tuna, billfishes, sharks. This is due to the fact that PS data is collected from 2 sources: observer and fishing vessel logbooks. Observer records are used when available, and for unobserved trips logbooks are used. Both sources collect tuna data but only observers collect shark and billfish data. As an example, a strata may have observer effort and the number of sets from the observed trips would be counted for tuna and shark and billfish. But there may have also been logbook data for unobserved sets in the same strata so the tuna catch and number of sets for a cell would be added. This would make a higher total number of sets for tuna catch than shark or billfish. Efforts in the billfish and shark datasets might hence represent only a proportion of the total effort allocated in some strata since it is the observed effort, i.e. for which there was an observer onboard. As a result, catch in the billfish and shark datasets might represent only a proportion of the total catch allocated in some strata. Hence, shark and billfish catch were raised to the fishing effort reported in the tuna dataset.""_
+process:""Coding systems and nomenclatures used to describe the data may differ according to tRFMOs. Codes used by the tuna RFMOs in their respective datasets were mapped with global code lists for gear (ISSCFG), flag (ISO3 countries codes), and species (ASFIS). These mappings have been done with the collaboration of the tRFMOs Secretariats. Some codes could not be mapped to standard code lists, for some tRFMOs own-defined codes that usually are aggregation of existing codes (e.g. flag 'IDPH' standing for Indonesia and Philippines within WCPFC or the species “Otun” standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species and groups of gears. Information regarding the data that have species set to Unknown, i.e. data for which raw species do not have any correspondence in ASFIS: the catches that have species set to Unknown represent percentage_catches_species_unknown_mt % of the catches expressed in weight and percentage_catches_species_unknown_no % of the catches expressed in number of fishes.""_
+process:nly data from purse seiners and pole-and-liners were kept. These data are overall defined on 1° quadrant spatial resolutions in the source datasets. So as to keep only data from purse seiners and pole-and-liners, the following gears from the ISSCFG code list (resulting from the code list mapping stated above) were kept:  09.1 (Handlines and hand-operated pole-and-lines), 09.2 (Mechanized lines and pole-and-lines), 01.1 (Purse seines), 01.2 (Surrounding nets without purse lines)._
+process:""Processing of Southern Bluefin Tuna (SBF) data: SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Data from CCSBT and the other RFMOs may be redundant. For the Southern Bluefin Tuna, only data from CCSBT were kept. Information regarding the SBF data: after the potential other corrections applied, e.g. raisings, units conversions, etc., the ratio between the catches from CCSBT and those from the other RFMOs for SBF was of: ratio_ccsbt_otherrfmos_mt for the catches expressed in weight. A total of catches_sbf_ccsbt_no fishes were available in the CCSBT datasets - while no data in number were available in the other RFMOs datasets.""_
+process:All the datasets were merged.",,"source:./data/GTA_2026/dataoutputpreharmo/effort_1deg_1m_ps_iattc_level0__shark_byflag.csv,./data/GTA_2026/dataoutputpreharmo/effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv,./data/GTA_2026/dataoutputpreharmo/effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv,./data/GTA_2026/dataoutputpreharmo/effort_iotc_level0.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_bb_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_driftnet_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_ll_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_ps_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_ll_iattc_level0__shark.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv,./data/GTA_2026/dataoutputpreharmo/effort_1deg_1m_ccsbt_level0__surface.csv,./data/GTA_2026/dataoutputpreharmo/effort_5deg_1m_ll_ccsbt_level0.csv_
+sourceType:other_
+action_option_recap_each_step:true_
+action_option_include_IATTC:true_
+action_option_include_ICCAT:false_
+action_option_include_IOTC:true_
+action_option_include_WCPFC:true_
+action_option_include_CCSBT:true_
+uploadSource:fact_tables.effort_
+uploadType:dbtable_
+featureType:effort_
+action:create_global_tuna_atlas_dataset.R[R generation script]@./R/tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R_
+action_option_fact:effort_
+action_option_dataset_level:0_
+action_option_from_level0:true_
+action_option_iccat_ps_include_type_of_school:true_
+action_option_iattc_ps_raise_flags_to_schooltype:true_
+action_option_iattc_ps_catch_billfish_shark_raise_to_effort:true_
+action_option_mapping_map_code_lists:true_
+action_option_mapping_keep_src_code:false_
+action_option_aggregate_on_5deg_data_with_resolution_inferior_to_5deg:false_
+action_option_overlapping_zone_iattc_wcpfc_data_to_keep:IATTC_
+action_option_overlapping_zone_iotc_wcpfc_data_to_keep:IOTC_
+action_option_spatial_curation_data_mislocated:remove_
+action_option_geom_table:area.grid_area_labels_
+action_option_iattc_ps_effort_to_extract:tuna"
