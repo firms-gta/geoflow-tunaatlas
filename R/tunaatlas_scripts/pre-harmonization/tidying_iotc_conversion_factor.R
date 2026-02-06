@@ -76,13 +76,17 @@ tidying_iotc_conversion_factor <- function(action, entity, config){
   
   filename1 <- entity$data$source[[1]] #data
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
   
-  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
-  write.csv(iotc_data_final, output_name_dataset, row.names = FALSE)
+  write.csv(catches, output_name_dataset, row.names = FALSE)
+  
   #----------------------------------------------------------------------------------------------------------------------------
   # entity$addResource("source", output_name_dataset)
   entity$addResource("harmonized", output_name_dataset)
-
+  
   
 }  
 

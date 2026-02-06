@@ -84,8 +84,8 @@ function(action, entity, config){
   CCSBT_NC <- readxl::read_excel(path_to_raw_dataset, sheet = "Sheet1")
   
   CCSBT_NC <- CCSBT_NC %>% dplyr::select(Year = Calendar_Year, fishing_fleet = Flag_Code, 
-                                  geographic_identifier = Ocean, gear_type = Gear, 
-                                  measurement_value = Catch_mt)
+                                         geographic_identifier = Ocean, gear_type = Gear, 
+                                         measurement_value = Catch_mt)
   #Year and period
   CCSBT_NC$MonthStart<-1
   CCSBT_NC$Period<-12
@@ -103,9 +103,9 @@ function(action, entity, config){
   
   #Geographic identifier
   CCSBT_NC <- CCSBT_NC  %>% dplyr::mutate(geographic_identifier = case_when(geographic_identifier == "Indian"~"IOTC", 
-                                        geographic_identifier == "Pacific" ~ "WCPFC",
-                                        geographic_identifier == "Atlantic" ~ "AT", 
-                                        TRUE ~ geographic_identifier))
+                                                                            geographic_identifier == "Pacific" ~ "WCPFC",
+                                                                            geographic_identifier == "Atlantic" ~ "AT", 
+                                                                            TRUE ~ geographic_identifier))
   
   #measurement_unit
   CCSBT_NC$measurement_unit<-"t"
@@ -146,12 +146,16 @@ function(action, entity, config){
     sep = "/"
   )
   entity$setTemporalExtent(dataset_temporal_extent)
-  
+  efforts$measurement_processing_level <- "unknown" 
+  base1 <- tools::file_path_sans_ext(basename(filename1))
   #@geoflow -> export as csv
-  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".xlsx"))[1], "_harmonized.csv"), path_to_raw_dataset)
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
   write.csv(NC, output_name_dataset, row.names = FALSE)
-  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".xlsx"))[1], "_codelists.csv"), path_to_raw_dataset)
-  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  
+  file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
   #----------------------------------------------------------------------------------------------------------------------------  
   entity$addResource("source", path_to_raw_dataset)
   entity$addResource("harmonized", output_name_dataset)

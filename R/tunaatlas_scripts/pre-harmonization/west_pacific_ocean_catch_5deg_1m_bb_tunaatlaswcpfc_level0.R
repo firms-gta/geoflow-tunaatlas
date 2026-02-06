@@ -79,85 +79,89 @@ if(!require(dplyr)){
 #entity --> the entity you are managing
 #get data from geoflow current job dir
   
-filename1 <- entity$data$source[[1]] #data
-# Historical name for the dataset at source  WCPFC_P_PUBLIC_BY_YR_MON.csv
-filename2 <- entity$data$source[[2]] #structure
-# Historical name for the dataset at source  wcpfc_catch_code_lists.csv
-path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
-opts <- options()
-options(encoding = "UTF-8")
-#----------------------------------------------------------------------------------------------------------------------------
-
-
-## Catches
-
-### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
-#-------------
-#Changes:
-#	- switch to csv
-#	- switch to upper colnames
-#	- CWP grid (removed for the timebeing to apply rtunaatlas codes)
-#	- toupper applied to Species/CatchUnits
-
-DF <- read.csv(path_to_raw_dataset)
-colnames(DF) <- toupper(colnames(DF))
-DF$CWP_GRID <- NULL 
-
-DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
-
-DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
-DF$variable <- as.character(DF$variable)
-colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
-DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
-DF$CatchUnits <- toupper(DF$CatchUnits) 
-DF$Species <- toupper(DF$Species) 
-DF$Species <- sub("_C", "", DF$Species)
-DF$Species <- sub("_N", "", DF$Species)
-DF$School <- "OTH"
-DF$EffortUnits <- colnames(DF[5])
-colnames(DF)[5] <- "Effort"
-catches_pivot_WCPFC <- DF; rm(DF)
-#-------------
-
-#Gear
-catches_pivot_WCPFC$Gear<-"P"
-
-# Catchunits
-index.kg <- which( catches_pivot_WCPFC[,"CatchUnits"] == "C" )
-catches_pivot_WCPFC[index.kg,"CatchUnits"]<- "t"
-
-index.nr <- which( catches_pivot_WCPFC[,"CatchUnits"] == "N" )
-catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
-
-### Reach the catches harmonized DSD using a function in WCPFC_functions.R
-
-colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
-
-colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
-catches$source_authority<-"WCPFC"
-catches$measurement_type <- "RC" # Retained catches
-catches$measurement <- "catch" 
-catches$measurement_processing_level <- "raised"
-#----------------------------------------------------------------------------------------------------------------------------
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
-#we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(
-	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-	paste0(format(max(catches$time_end), "%Y"), "-12-31"),
-	sep = "/"
-)
-entity$setTemporalExtent(dataset_temporal_extent)
-
-#@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(catches, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".DBF"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
-#----------------------------------------------------------------------------------------------------------------------------
-entity$addResource("source", path_to_raw_dataset)
-entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+  filename1 <- entity$data$source[[1]] #data
+  # Historical name for the dataset at source  WCPFC_P_PUBLIC_BY_YR_MON.csv
+  filename2 <- entity$data$source[[2]] #structure
+  # Historical name for the dataset at source  wcpfc_catch_code_lists.csv
+  path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
+  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  opts <- options()
+  options(encoding = "UTF-8")
+  #----------------------------------------------------------------------------------------------------------------------------
+  
+  
+  ## Catches
+  
+  ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
+  #-------------
+  #Changes:
+  #	- switch to csv
+  #	- switch to upper colnames
+  #	- CWP grid (removed for the timebeing to apply rtunaatlas codes)
+  #	- toupper applied to Species/CatchUnits
+  
+  DF <- read.csv(path_to_raw_dataset)
+  colnames(DF) <- toupper(colnames(DF))
+  DF$CWP_GRID <- NULL 
+  
+  DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
+  
+  DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
+  DF$variable <- as.character(DF$variable)
+  colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+  DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+  DF$CatchUnits <- toupper(DF$CatchUnits) 
+  DF$Species <- toupper(DF$Species) 
+  DF$Species <- sub("_C", "", DF$Species)
+  DF$Species <- sub("_N", "", DF$Species)
+  DF$School <- "OTH"
+  DF$EffortUnits <- colnames(DF[5])
+  colnames(DF)[5] <- "Effort"
+  catches_pivot_WCPFC <- DF; rm(DF)
+  #-------------
+  
+  #Gear
+  catches_pivot_WCPFC$Gear<-"P"
+  
+  # Catchunits
+  index.kg <- which( catches_pivot_WCPFC[,"CatchUnits"] == "C" )
+  catches_pivot_WCPFC[index.kg,"CatchUnits"]<- "t"
+  
+  index.nr <- which( catches_pivot_WCPFC[,"CatchUnits"] == "N" )
+  catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
+  
+  ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
+  
+  colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+  catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
+  
+  colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
+  catches$source_authority<-"WCPFC"
+  catches$measurement_type <- "RC" # Retained catches
+  catches$measurement <- "catch" 
+  catches$measurement_processing_level <- "raised"
+  #----------------------------------------------------------------------------------------------------------------------------
+  catches$time_start <- as.Date(catches$time_start)
+  catches$time_end <- as.Date(catches$time_end)
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <- paste(
+    paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+    paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  entity$setTemporalExtent(dataset_temporal_extent)
+  efforts$measurement_processing_level <- "unknown" 
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
+  write.csv(catches, output_name_dataset, row.names = FALSE)
+  
+  file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
+  #----------------------------------------------------------------------------------------------------------------------------
+  entity$addResource("source", path_to_raw_dataset)
+  entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("codelists", output_name_codelists)
 }
