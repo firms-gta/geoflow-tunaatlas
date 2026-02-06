@@ -27,7 +27,6 @@ function(action, entity, config){
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_5.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
   
-    
   if(!require(readxl)){
     install.packages("readxl")
     require(readxl)
@@ -127,6 +126,8 @@ efforts<-as.data.frame(efforts)
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"CCSBT"
 efforts$measurement <- "effort" 
+efforts$measurement_processing_level <- "unknown" 
+
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 efforts$time_start <- as.Date(efforts$time_start)
@@ -139,11 +140,16 @@ dataset_temporal_extent <- paste(
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
+base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+# sorties same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
+
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)

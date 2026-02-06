@@ -41,7 +41,7 @@ function(action, entity, config){
   on.exit(options(opts), add = TRUE)
   
   # ---- read raw ----
-  effort_raw <- readr::read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
+  effort_raw <- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
   config$logger.info(paste0("EF_RAW columns: ", paste(colnames(effort_raw), collapse = ", ")))
   config$logger.info(sprintf("Raw effort dimensions: %s rows", nrow(effort_raw)))
   
@@ -99,7 +99,8 @@ function(action, entity, config){
   # ---- temporal extent for geoflow entity ----
   effort$time_start <- as.Date(effort$time_start)
   effort$time_end   <- as.Date(effort$time_end)
-  
+  effort$measurement_processing_level <- "unknown"
+effort$measurement <- "effort" 
   dataset_temporal_extent <- paste(
     paste0(format(min(effort$time_start, na.rm = TRUE), "%Y"), "-01-01"),
     paste0(format(max(effort$time_end, na.rm = TRUE), "%Y"), "-12-31"),
@@ -107,20 +108,15 @@ function(action, entity, config){
   )
   entity$setTemporalExtent(dataset_temporal_extent)
   
-  # ---- export + geoflow mapping ----
-  output_name_dataset <- gsub(
-    filename1,
-    paste0(unlist(strsplit(filename1, ".csv", fixed = TRUE))[1], "_harmonized.csv"),
-    path_to_raw_dataset
-  )
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
   write.csv(effort, output_name_dataset, row.names = FALSE)
   
-  output_name_codelists <- gsub(
-    filename1,
-    paste0(unlist(strsplit(filename1, ".csv", fixed = TRUE))[1], "_codelists.csv"),
-    path_to_raw_dataset
-  )
-  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
   
   entity$addResource("source", path_to_raw_dataset)
   entity$addResource("harmonized", output_name_dataset)

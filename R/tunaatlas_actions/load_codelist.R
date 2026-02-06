@@ -1,6 +1,6 @@
 load_codelist <- function(action,entity, config){
   #connection to database
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/getSQLSardaraQueries.R"))
+  source(here::here( "./R/sardara_functions/getSQLSardaraQueries.R"))
   
   CON = config$software$output$dbi
   

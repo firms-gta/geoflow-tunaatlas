@@ -81,7 +81,7 @@ function(action, entity, config){
   opts <- options()
   options(encoding = "UTF-8")
   
-
+  
   RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
   
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
@@ -123,55 +123,60 @@ function(action, entity, config){
   
   #CatchType
   RFMO_CE$CatchType<-"UNK" #not used later as it is no catch
-
   
-efforts<-RFMO_CE
-
-efforts$EffortUnits<-"NUMBER_OF_HOURS_SEARCHED"
-efforts$Effort<-efforts$NUMBER_OF_HOURS_SEARCHED
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-efforts <-efforts[colToKeep_efforts]
-
-
-#remove whitespaces on columns that should not have withespace
-
-efforts[,c("AreaName","FishingFleet")]<-as.data.frame(apply(efforts[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
-
-# remove 0 and NA values 
-
-efforts <- efforts  %>% 
-  filter( ! Effort %in% 0 ) %>%
-  filter( ! is.na(Effort)) 
-
-efforts <- efforts %>% 
-  dplyr::group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %>% 
-  dplyr::summarise(Effort = sum(Effort))  
-efforts<-as.data.frame(efforts)
-
-config$logger.info(sprintf("colnumbers",ncol(efforts)))
-
-colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
-efforts$source_authority<-"CCSBT"
-efforts$measurement <- "effort" 
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
-efforts$time_start <- as.Date(efforts$time_start)
-efforts$time_end <- as.Date(efforts$time_end)
-#we enrich the entity with temporal coverage
-dataset_temporal_extent <- paste(
-  paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
-  paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
-  sep = "/"
-)
-entity$setTemporalExtent(dataset_temporal_extent)
-#@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
-write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
-#----------------------------------------------------------------------------------------------------------------------------
-entity$addResource("source", path_to_raw_dataset)
-entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)
+  
+  efforts<-RFMO_CE
+  
+  efforts$EffortUnits<-"NUMBER_OF_HOURS_SEARCHED"
+  efforts$Effort<-efforts$NUMBER_OF_HOURS_SEARCHED
+  colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
+  efforts <-efforts[colToKeep_efforts]
+  
+  
+  #remove whitespaces on columns that should not have withespace
+  
+  efforts[,c("AreaName","FishingFleet")]<-as.data.frame(apply(efforts[,c("AreaName","FishingFleet")],2,function(x){gsub(" *$","",x)}),stringsAsFactors=FALSE)
+  
+  # remove 0 and NA values 
+  
+  efforts <- efforts  %>% 
+    filter( ! Effort %in% 0 ) %>%
+    filter( ! is.na(Effort)) 
+  
+  efforts <- efforts %>% 
+    dplyr::group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %>% 
+    dplyr::summarise(Effort = sum(Effort))  
+  efforts<-as.data.frame(efforts)
+  
+  config$logger.info(sprintf("colnumbers",ncol(efforts)))
+  
+  colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
+  efforts$source_authority<-"CCSBT"
+  efforts$measurement <- "effort" 
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
+  efforts$time_start <- as.Date(efforts$time_start)
+  efforts$time_end <- as.Date(efforts$time_end)
+  #we enrich the entity with temporal coverage
+  dataset_temporal_extent <- paste(
+    paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
+    paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  entity$setTemporalExtent(dataset_temporal_extent)
+  efforts$measurement_processing_level <- "unknown" 
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
+  write.csv(efforts, output_name_dataset, row.names = FALSE)
+  
+  file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
+  #----------------------------------------------------------------------------------------------------------------------------
+  entity$addResource("source", path_to_raw_dataset)
+  entity$addResource("harmonized", output_name_dataset)
+  entity$addResource("codelists", output_name_codelists)
 }

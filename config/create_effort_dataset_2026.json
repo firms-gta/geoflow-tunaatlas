@@ -16,8 +16,8 @@
   "metadata": {
     "entities" : [
       {
-      "handler": "csv",
-      "source": "config/geoflow_entities_tuna_datasets - Effort_data_2026_missing_two_iccat (1).csv"
+        "handler": "csv",
+        "source": "config/entities_effort_2026_no_ICCAT.csv"
       }
     ],
     "contacts" : [
@@ -29,14 +29,6 @@
   },
   "software": [],
   "actions": [
-    {
-      "id": "Tidying_and_mapping_data",
-      "script": "../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
-      "run": true,
-      "options": {
-        "recap_each_step": true
-      }
-    }, 
     
     {
       "id": "load_dataset",
@@ -44,21 +36,47 @@
       "run": true,
       "options": {
         "upload_to_db": false,
+        "upload_to_db_public": false,
         "create_materialized_view" : false,
         "add_sql_comments" : false,
         "upload_to_googledrive" : false,
-        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
+        "save_local_path": "../../../../data/GTA_2026/dataoutputGTA/",
         "save_local_overwrite": true
       }
     },
-    
     {
-      "id": "create_report_global_action",
-      "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "id": "enrich_metadata",
+      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
+      "run": false
+    },
+    {
+      "id": "enrich_for_db_services",
+      "script": "./R/tunaatlas_actions/enrich_db_for_services.R",
+      "run": false
+    },
+    {
+      "id": "load_metadata",
+      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
+      "run": false
+    },
+    {
+      "id": "geometa-create-iso-19115",
       "run": false,
       "options": {
+        "doi": true,
+        "logo": true
+      }
+    },
+    {
+      "id": "geometa-create-iso-19110",
+      "run": false,
+      "options": {
+        "exclude_attributes": ["time_start", "time_end"],
+        "exclude_values_for_attributes": ["geographic_identifier", "measurement"],
+        "extra_attributes": ["geom", "aggregation_method"]
       }
     }
+    
     
   ]
 }

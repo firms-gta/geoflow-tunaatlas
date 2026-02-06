@@ -85,15 +85,23 @@ function(action, entity, config){
   dataset_temporal_extent <- paste(min(catches$time_start),max(catches$time_end),sep = "/")
   entity$setTemporalExtent(dataset_temporal_extent)
   
-  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
   write.csv(catches, output_name_dataset, row.names = FALSE)
   
-  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)  #----------------------------------------------------------------------------------------------------------------------------
-  # entity$addResource("source", output_name_dataset)
+  file.rename(
+    from = entity$getJobDataResource(config, filename2),
+    to   = output_name_codelists
+  )
+  #----------------------------------------------------------------------------------------------------------------------------
+  entity$addResource("source", output_name_dataset)
   entity$addResource("harmonized", output_name_dataset)
   entity$addResource("codelists", output_name_codelists)
   
-
-}  
   
+}  
+

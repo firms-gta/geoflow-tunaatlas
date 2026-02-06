@@ -36,7 +36,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
   source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
   
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
@@ -46,7 +46,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   
   stepnumber <- 1
-  
   df_to_load <- as.data.frame(readr::read_csv(harmonized, guess_max=0)) %>%
     mutate(measurement_value = as.numeric(measurement_value))
   
@@ -247,7 +246,11 @@ Tidying_and_mapping_data = function(action, entity, config) {
   #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
   #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   options("OutDec" = ".")
-  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("CCSBT", "IATTC", "WCPFC")
+  if(opts$fact == "effort"){
+    source_authority_to_map <- c("CCSBT", "IATTC", "WCPFC", "IOTC", "ICCAT")
+  } else {
+    source_authority_to_map <-  c("CCSBT", "IATTC", "WCPFC")
+  }
   
   if(any(unique(georef_dataset$source_authority)%in%source_authority_to_map)){
     stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
@@ -259,7 +262,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     # mapping_codelist <-map_codelists(con, opts$fact, mapping_dataset = mapping_dataset,dataset_to_map = georef_dataset, mapping_keep_src_code,summary_mapping = TRUE,source_authority_to_map = source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     mapping_codelist <-map_codelists_no_DB(opts$fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", 
                                            dataset_to_map = georef_dataset, 
-                                           mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("CCSBT", "IATTC", "WCPFC")) 
+                                           mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map) 
     
     
     georef_dataset <- mapping_codelist$dataset_mapped

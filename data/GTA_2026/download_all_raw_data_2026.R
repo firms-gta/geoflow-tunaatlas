@@ -59,4 +59,11 @@ for (url in wcpfc_urls) {
 }
 file.rename(file.path(download_folder,"WCPFC_G_PUBLIC_BY_YR_MON.CSV"), file.path(download_folder,"WCPFC_G_PUBLIC_BY_YR_MON.csv"))
 
-# dowload IOTC
+# dowload IOTC effort
+
+
+# https://iotc.org/sites/default/files/documents/2025/10/IOTC-DATASETS-2025-10-13-CEALL.zip download for iotc
+
+# download for iccat effort
+
+# https://www.iccat.int/Data/t2ce_PS1991-2024_bySchool.zip

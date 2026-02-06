@@ -6,7 +6,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
     columns_to_keep<-c("source_authority","species","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement", "measurement_type",
                        "measurement_unit","measurement_value", "measurement_processing_level")
   } else if (variable=="effort"){
-    columns_to_keep<-c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value", "measurement_processing_level")
+    columns_to_keep<-c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value", "measurement")
   }
   
   #list of dataset files (from entity data sources)

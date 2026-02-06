@@ -49,7 +49,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   source(file.path(url_scripts_create_own_tuna_atlas,"download_zenodo_csv.R"))
   
   #for level 0 - FIRMS
-  source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
+  source(here::here("R/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
   source(here::here("R/tunaatlas_scripts/pre-harmonization/map_codelists.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) #modified for geoflow
@@ -57,7 +57,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   source(file.path(url_scripts_create_own_tuna_atlas, "dimension_filtering_function.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
   # Process and aggregate final data 
-  source(file.path(url_scripts_create_own_tuna_atlas, "process_and_aggregate_dataset.R"))
+  source(here::here("R/tunaatlas_scripts/generation/process_and_aggregate_dataset.R"))
   
   
   #for level 1 - FIRMS (candidate)
@@ -130,7 +130,6 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   opts$level2RF2number = if(!is.null(opts$level2RF2number)) opts$level2RF2number else FALSE
   opts$decrease_when_rf_inferior_to_one = if(!is.null(opts$decrease_when_rf_inferior_to_one)) opts$decrease_when_rf_inferior_to_one else FALSE
   # LEVEL 0 FIRMS PRODUCT ---------------------------------------------------
-  
   if(DATASET_LEVEL == 0 | from_rawdata){
     ## INITIALISATION OF MULTIPLES DATASET---------------------------------------------------
     config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
@@ -143,16 +142,33 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
     rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
     rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_fleet"
+    # 1) Charger chaque dataset
+    datasets_list <- lapply(
+      c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"),
+      get_rfmos_datasets_level0,
+      entity,
+      config,
+      rawdata
+    )
+    names(datasets_list) <- c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC")
     
-    dataset <-
-      do.call("rbind",
-              lapply(
-                c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"),
-                get_rfmos_datasets_level0,
-                entity,
-                config,
-                rawdata
-              ))
+    ref_cols <- names(datasets_list[[1]])
+    
+    for (nm in names(datasets_list)) {
+      cols <- names(datasets_list[[nm]])
+      cat("\n====================\n", nm, "\n====================\n", sep = "")
+      cat("ncol =", length(cols), " | nrow =", nrow(datasets_list[[nm]]), "\n", sep = "")
+      cat("Columns:\n"); print(cols)
+      
+      missing_vs_ref <- setdiff(ref_cols, cols)
+      extra_vs_ref   <- setdiff(cols, ref_cols)
+      if (length(missing_vs_ref)) { cat("Missing vs ref:\n"); print(missing_vs_ref) }
+      if (length(extra_vs_ref))   { cat("Extra vs ref:\n");   print(extra_vs_ref)   }
+    }
+    
+    # 3) rbind dans un autre objet (option: fill si pas mêmes colonnes)
+    dataset <- do.call(rbind, datasets_list)
+    
     
     dataset$time_start <-
       substr(as.character(dataset$time_start), 1, 10)
@@ -160,14 +176,14 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     georef_dataset <- dataset
     class(georef_dataset$measurement_value) <- "numeric"
     rm(dataset)
-    
+    if(opts$fact == "catch"){
     species_to_force <- c("BSH", "FAL", "MAK", "OCS", "RSK", "SKH", "SMA", "SPN", "THR")
     georef_dataset <- georef_dataset %>%
       dplyr::mutate(measurement_processing_level = dplyr::case_when(
         source_authority == "IATTC" & species %in% species_to_force ~ "original_sample",
         TRUE ~ measurement_processing_level
       ))
-    
+    }
     georef_dataset <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) != "7") # removing 10 degrees
     
     if(recap_each_step){
@@ -1260,7 +1276,8 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   # PROCESS AND AGGREGATE DATA ---------------------------------------------------
   process_and_aggregate_dataset(georef_dataset, entity, config, opts, 
                                 columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode",
-                                                    "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value", "measurement_type", "measurement_processing_level") ) 
+                                                    "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value", "measurement_type",
+                                                    "measurement_processing_level", "measurement") ) 
   config$logger.info("End: Your tuna atlas dataset has been created!")
   
   # Clean up
