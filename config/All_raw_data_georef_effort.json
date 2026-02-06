@@ -17,7 +17,7 @@
     "entities" : [
       {
       "handler": "csv",
-      "source": "../../config/geoflow_entities_tuna_datasets - Effort_data_2026.csv"
+      "source": "config/geoflow_entities_tuna_datasets - Effort_data_2026_missing_two_iccat (1).csv"
       }
     ],
     "contacts" : [
@@ -41,14 +41,16 @@
     {
       "id": "load_dataset",
       "script": "../R/tunaatlas_actions/load_dataset.R",
-      "run": false,
+      "run": true,
       "options": {
-        "upload_to_db": true,
-        "create_materialized_view": false,
-        "add_sql_comments": false,
-        "upload_to_googledrive": true
+        "upload_to_db": false,
+        "create_materialized_view" : false,
+        "add_sql_comments" : false,
+        "upload_to_googledrive" : false,
+        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
+        "save_local_overwrite": true
       }
-    }, 
+    },
     
     {
       "id": "create_report_global_action",
