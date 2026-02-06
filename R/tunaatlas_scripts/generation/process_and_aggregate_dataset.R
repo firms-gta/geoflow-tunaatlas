@@ -12,7 +12,8 @@
 #' @return No return value. The function performs operations and exports files directly.
 #' @export
 process_and_aggregate_dataset <- function(georef_dataset, entity, config, opts, 
-  columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value")) {
+  columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode", "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value", 
+                      "measurement", "measurement_processing_level")) {
   
   # Aggregation by dimensions
   dataset <- georef_dataset %>%
