@@ -17,7 +17,7 @@
     "entities": [
       {
         "handler": "csv",
-        "source": "../../config/geoflow_entities_tuna_datasets - Georef_data_2026_noIOTC_ICCAT_oneline.csv"
+        "source": "config/geoflow_entities_tuna_datasets - Georef_data_2026_noIOTC_ICCAT_oneline.csv"
       }
     ],
     "contacts" : []
@@ -36,19 +36,21 @@
     {
       "id": "load_dataset",
       "script": "../R/tunaatlas_actions/load_dataset.R",
-      "run": false,
+      "run": true,
       "options": {
-        "upload_to_db": true,
+        "upload_to_db": false,
         "create_materialized_view": false,
         "add_sql_comments": false,
-        "upload_to_googledrive": true
+        "upload_to_googledrive": false,
+        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
+        "save_local_overwrite": true
       }
     }, 
     
     {
       "id": "create_report_global_action",
       "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
-      "run": false,
+      "run": true,
       "options": {
       }
     }
