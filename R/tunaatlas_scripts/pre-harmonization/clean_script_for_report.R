@@ -83,31 +83,39 @@ clean_script <- function(script_path) {
   # Add extra lines for data processing 
   
   intro_lines <- c(
-    "# # Introduction",
-    "# ",
-    "# This R Markdown document is designed to transform data that is not in CWP format into CWP format.",
-    "# Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.",
-    paste0("# This markdown is automatically created from the function:", script_path ,  ", the documentation keep the format of roxygen2 skeleton"),
-    "# A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.",
-    "# Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.",
-    "# If you are interested in further details, the results and codes are available for review.", 
-    "#*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly. It is also possible to run the code chunk by chunk but be sure to be in the correct working directory i.e. the one of the .Rmd*"
+    "#'# Introduction",
+    "#'",
+    "#'This R Markdown document is designed to transform data that is not in CWP format into CWP format.",
+    "#'Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.",
+    paste0("#'This markdown is automatically created from the function: ", script_path, ", the documentation keeps the format of roxygen2 skeleton."),
+    "#'",
+    "#'A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.",
+    "#'The datasets are named after the historical name provided by tRFMOs while exporting and may change.",
+    "#'The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.",
+    "#'",
+    "#'Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.",
+    "#'",
+    "#'If you are interested in further details, the results and codes are available for review.",
+    "#'",
+    "#'*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.",
+    "#'It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*"
   )
   
   setup_lines <- c(
-    "```{r setup, include=FALSE}",
-    "knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)",
-    "```"
+    "#'```{r setup, include=FALSE}",
+    "#'knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)",
+    "#'```",
+    "#'"
   )
   
   extra_lines <- c(
-    "#' @ Load pre-harmonization scripts and apply mappings",
+    "#'@ Load pre-harmonization scripts and apply mappings",
     
     "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
     "source('local_map_codelists_no_DB.R')",
     line_fact,
     line_mapping,
-    "#' @ Handle unmapped values and save the results",
+    "#'@ Handle unmapped values and save the results",
     "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
     "fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')",
     "fwrite(georef_dataset, 'CWP_dataset.csv')",
