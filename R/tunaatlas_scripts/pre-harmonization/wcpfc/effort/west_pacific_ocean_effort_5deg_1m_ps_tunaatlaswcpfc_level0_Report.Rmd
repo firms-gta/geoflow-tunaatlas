@@ -1,25 +1,27 @@
----
-title: "Harmonize WCPFC Purse Seine Effort Datasets"
-output: 
-  html_document: 
-    code_folding: hide
----
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-```
-
 # Introduction
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
 Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is created from a function so the documentation keep the format of roxygen2 skeleton
-A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_effort_5deg_1m_ps_tunaatlaswcpfc_level0.R, the documentation keeps the format of roxygen2 skeleton.
+
+A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
+The datasets are named after the historical name provided by tRFMOs while exporting and may change.
+The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+
 Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+
 If you are interested in further details, the results and codes are available for review.
 
-```{r}
-path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'data', 'WCPFC_S_PUBLIC_BY_YR_MON.csv')
+*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
+It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
+
+
+````{r}
+path_to_raw_dataset <- 
+````
 
 Harmonize WCPFC Purse Seine Effort Datasets
 
@@ -45,9 +47,12 @@ preparing them for integration into the Tuna Atlas database according to specifi
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
-packages
 
-```{r}
+````{r}
+  #packages
+  
+    
+      
   if(!require(reshape)){
     install.packages("reshape")
     require(reshape)
@@ -62,7 +67,7 @@ packages
     install.packages("dplyr")
     require(dplyr)
   }
-```
+````
 
 Input data sample:
 YY MM LAT5 LON5 DAYS SETS_UNA SETS_LOG SETS_DFAD SETS_AFAD SETS_OTH SKJ_C_UNA YFT_C_UNA BET_C_UNA OTH_C_UNA SKJ_C_LOG YFT_C_LOG BET_C_LOG OTH_C_LOG SKJ_C_DFAD
@@ -87,57 +92,55 @@ ALL    S 1970-02-01 1970-03-01  6100125    ALL        DAYS     42
 ALL    S 1970-02-01 1970-03-01  6100125    LOG        SETS     42
 ALL    S 1970-02-01 1970-03-01  6100135    ALL        DAYS     57
 ALL    S 1970-02-01 1970-03-01  6100135    LOG        SETS     50
-----------------------------------------------------------------------------------------------------------------------------
 Historical name for the dataset at source  WCPFC_S_PUBLIC_BY_YR_MON.csv
 
-```{r}
+````{r}
 opts <- options()
 options(encoding = "UTF-8")
-```
+````
 
-----------------------------------------------------------------------------------------------------------------------------
 #Efforts
 
-```{r}
+````{r}
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
-DF$CWP_GRID <- NULL
+DF <- as.data.frame(DF)
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
+DF <- harmo_spatial_3(DF, 
+                                       "LAT5", "LON5", 5, 6)  %>% dplyr::select(-CWP_GRID)
 
-DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
+efforts <- DF %>%
+  dplyr::mutate(
+    time_start = as.Date(paste(YY, MM, "01", sep = "-")),
+    time_end = lubridate::ceiling_date(time_start, unit = "month") - 1
+  ) %>%
+  tidyr::pivot_longer(
+    cols = c(DAYS, SETS_UNA, SETS_LOG, SETS_DFAD, SETS_AFAD, SETS_OTH),
+    names_to = "EffortUnits",
+    values_to = "Effort"
+  ) %>%
+  dplyr::mutate(
+    School = dplyr::case_when(
+      grepl("UNA", EffortUnits) ~ "UNA",
+      grepl("LOG", EffortUnits) ~ "LOG",
+      grepl("DFAD", EffortUnits) ~ "DFAD",
+      grepl("AFAD", EffortUnits) ~ "AFAD",
+      grepl("OTH", EffortUnits) ~ "OTH",
+      EffortUnits == "DAYS" ~ "ALL"
+    ),
+    EffortUnits = dplyr::if_else(EffortUnits == "DAYS", "DAYS", "SETS"),
+    Flag = "ALL",
+    Gear = "S"
+  ) %>%
+  dplyr::select(Flag, Gear, time_start, time_end, AreaName, School, EffortUnits, Effort) %>%
+  dplyr::filter(Effort > 0)
 
-DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
-DF$variable <- as.character(DF$variable)
-colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
-DF$School <- substr(DF$Species, 7, nchar(DF$Species))
-DF$Species <- sub("_C_UNA", "", DF$Species)
-DF$Species <- sub("_C_LOG", "", DF$Species)
-DF$Species <- sub("_C_DFAD", "", DF$Species)
-DF$Species <- sub("_C_AFAD", "", DF$Species)
-DF$Species <- sub("_C_OTH", "", DF$Species)
-DF$CatchUnits <- "t"
-DF$EffortUnits <- colnames(DF[5])
-colnames(DF)[5] <- "Effort"
-efforts_pivot_WCPFC <- DF; rm(DF)
-```
 
------------------------------------------------------------
-Gear
-
-```{r}
-efforts_pivot_WCPFC$Gear<-"S"
-
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
-efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
 
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"WCPFC"
 efforts$measurement <- "effort" 
-```
-
-----------------------------------------------------------------------------------------------------------------------------
-
-```{r}
+efforts$measurement_processing_level <- "unknown" 
 efforts$time_start <- as.Date(efforts$time_start)
 efforts$time_end <- as.Date(efforts$time_end)
 dataset_temporal_extent <- paste(
@@ -146,34 +149,38 @@ dataset_temporal_extent <- paste(
   sep = "/"
 )
 
+base1 <- tools::file_path_sans_ext(basename(filename1))
+````
+
+sorties same folder as path_to_raw_dataset 
+
+````{r}
 output_name_dataset <- "Dataset_harmonized.csv"
+
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset <- efforts
-```
+````
 
-----------------------------------------------------------------------------------------------------------------------------
 @ Load pre-harmonization scripts and apply mappings
 
-```{r}
+````{r}
 download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
 source('local_map_codelists_no_DB.R')
 fact <- "effort"
 mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))
-```
+````
 
 @ Handle unmapped values and save the results
 
-```{r}
+````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
 fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
-fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
 fwrite(georef_dataset, 'CWP_dataset.csv')
-```
+````
 
 Display the first few rows of the mapping summaries
 
-```{r}
+````{r}
 print(head(mapping_codelist$recap_mapping))
-print(head(mapping_codelist$not_mapped_total))
-```
+````
 

@@ -1,0 +1,153 @@
+# Introduction
+
+This R Markdown document is designed to transform data that is not in CWP format into CWP format.
+Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R, the documentation keeps the format of roxygen2 skeleton.
+
+A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
+The datasets are named after the historical name provided by tRFMOs while exporting and may change.
+The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+
+Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+
+If you are interested in further details, the results and codes are available for review.
+
+*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
+It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+````{r}
+path_to_raw_dataset <- 
+````
+
+Harmonize IOTC Effort Dataset (standardized formatting)
+
+This geoflow step reads an IOTC effort raw dataset and formats it into the
+harmonized Tuna Atlas structure (one record per stratum with standard fields),
+
+
+@return None; the function outputs files directly and registers them as geoflow resources.
+
+@details
+The formatting logic is implemented inline:
+\itemize{
+  \item Builds `time_start` and `time_end` from YEAR/MONTH_START/MONTH_END.
+  \item Maps `FISHING_GROUND_CODE` to `geographic_identifier` and infers `gridtype`.
+  \item Standardizes key dimensions and effort value/unit fields.
+}
+
+@importFrom dplyr mutate select case_when
+@export
+@keywords IOTC, tuna, fisheries, data harmonization, effort data
+@author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+
+````{r}
+  if(!requireNamespace("dplyr", quietly = TRUE)){
+    install.packages("dplyr")
+  }
+  library(dplyr)
+  
+  
+  
+  opts <- options()
+  options(encoding = "UTF-8")
+  on.exit(options(opts), add = TRUE)
+  
+  # ---- read raw ----
+  effort_raw <- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
+  
+  # ---- format inline ----
+  effort <- effort_raw %>%
+    dplyr::mutate(
+      # dates
+      time_start = paste0(YEAR, "-", sprintf("%02d", MONTH_START), "-01"),
+      time_end   = paste0(YEAR, "-", sprintf("%02d", MONTH_END), "-01"),
+      
+      # geography + gridtype
+      geographic_identifier = as.character(FISHING_GROUND_CODE),
+      gridtype = case_when(
+        substr(as.character(FISHING_GROUND_CODE), 1, 1) == "5" ~ "1deg_x_1deg",
+        substr(as.character(FISHING_GROUND_CODE), 1, 1) == "6" ~ "5deg_x_5deg",
+        TRUE ~ "unknown"
+      ),
+      
+      # core dimensions
+      source_authority = "IOTC",
+      gear_type        = as.character(GEAR_CODE),
+      fishing_fleet    = as.character(FLEET_CODE),
+      fishing_mode     = as.character(SCHOOL_TYPE_CODE),
+      
+      # measure
+      measurement_value = EFFORT,
+      measurement_unit  = as.character(EFFORT_UNIT_CODE),
+      
+      # optional label carried along
+      fishing_fleet_label = as.character(FLEET)
+    ) %>%
+    dplyr::select(
+      source_authority, gear_type, fishing_fleet, fishing_mode, fishing_fleet_label,
+      time_start, time_end, geographic_identifier, gridtype,
+      measurement_value, measurement_unit
+    ) %>%
+    # types normalization (inline)
+    dplyr::mutate(
+      geographic_identifier = as.character(geographic_identifier),
+      time_start = as.character(time_start),
+      time_end = as.character(time_end),
+      gridtype = as.character(gridtype),
+      source_authority = as.character(source_authority),
+      gear_type = as.character(gear_type),
+      fishing_fleet = as.character(fishing_fleet),
+      fishing_mode = as.character(fishing_mode),
+      measurement_unit = as.character(measurement_unit)
+    ) %>%
+    # minimal mode normalization (inline) — si tu as déjà norm_mode() ailleurs, remplace par ça
+    dplyr::mutate(
+      fishing_mode = trimws(fishing_mode),
+      fishing_mode = ifelse(fishing_mode == "", NA_character_, fishing_mode)
+    )
+  
+  effort$time_start <- as.Date(effort$time_start)
+  effort$time_end   <- as.Date(effort$time_end)
+  effort$measurement_processing_level <- "unknown"
+effort$measurement <- "effort" 
+  dataset_temporal_extent <- paste(
+    paste0(format(min(effort$time_start, na.rm = TRUE), "%Y"), "-01-01"),
+    paste0(format(max(effort$time_end, na.rm = TRUE), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset <- "Dataset_harmonized.csv"
+  
+  write.csv(effort, output_name_dataset, row.names = FALSE)
+georef_dataset <- effort
+````
+
+@ Load pre-harmonization scripts and apply mappings
+
+````{r}
+download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
+source('local_map_codelists_no_DB.R')
+fact <- "effort"
+mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))
+````
+
+@ Handle unmapped values and save the results
+
+````{r}
+georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
+fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
+fwrite(georef_dataset, 'CWP_dataset.csv')
+````
+
+Display the first few rows of the mapping summaries
+
+````{r}
+print(head(mapping_codelist$recap_mapping))
+````
+

@@ -1,0 +1,133 @@
+# Introduction
+
+This R Markdown document is designed to transform data that is not in CWP format into CWP format.
+Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/effort_5deg_1m_ll_iattc_level0_2024.R, the documentation keeps the format of roxygen2 skeleton.
+
+A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
+The datasets are named after the historical name provided by tRFMOs while exporting and may change.
+The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+
+Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+
+If you are interested in further details, the results and codes are available for review.
+
+*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
+It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+
+````{r}
+path_to_raw_dataset <- 
+````
+
+Convert a catch dataset into CWP format
+
+This function transforms a dataset containing catch information into the CWP (Coordinating Working Party) format.
+
+@param df A dataframe containing catch data.
+@return A transformed dataframe with columns formatted according to CWP standards.
+@author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+@keywords IATTC, tuna, billfish, sharks, fisheries, data harmonization, longline catches and efforts
+Input data sample (after importing as data.frame in R):
+A tibble: 6 × 26
+Year Month Flag  LatC5 LonC5 Hooks  BSHn  CCLn  FALn  MAKn  OCSn  RSKn  SKHn  SMAn  SPNn  THRn BSHmt CCLmt FALmt MAKmt
+<dbl> <dbl> <chr> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+1  1979     1 KOR   -22.5 -128. 62901     0     0     0     0     0     0    30     0     0     0     0     0     0     0
+2  1979     1 KOR   -22.5 -122. 75482     0     0     0     0     0     0    33     0     0     0     0     0     0     0
+3  1979     1 KOR   -17.5 -132. 41705     0     0     0     0     0     0     1     0     0     0     0     0     0     0
+4  1979     1 KOR   -17.5 -128. 23322     0     0     0     0     0     0    23     0     0     0     0     0     0     0
+5  1979     1 KOR   -17.5 -122. 42136     0     0     0     0     0     0    10     0     0     0     0     0     0     0
+6  1979     1 KOR   -12.5 -148. 26128     0     0     0     0     0     0     3     0     0     0     0     0     0     0
+# ℹ 6 more variables: OCSmt <dbl>, RSKmt <dbl>, SKHmt <dbl>, SMAmt <dbl>, SPNmt <dbl>, THRmt <dbl>
+to # final data sample:
+# A tibble: 6 × 10
+source_authority species gear_type fishing_fleet fishing_mode time_start time_end   measurement_unit measurement_value geographic_identifier
+<chr>            <chr>   <chr>     <chr>         <chr>        <date>     <date>     <chr>                        <dbl> <chr>                
+1 IATTC            BET     UNK       JPN           UNK          1954-10-01 1954-10-31 no                             163 6406138              
+2 IATTC            YFT     UNK       JPN           UNK          1954-10-01 1954-10-31 no                              45 6406138              
+3 IATTC            BIL     UNK       JPN           UNK          1954-10-01 1954-10-31 no                              37 6406138              
+4 IATTC            BUM     UNK       JPN           UNK          1954-10-01 1954-10-31 no                              92 6406138              
+5 IATTC            MLS     UNK       JPN           UNK          1954-10-01 1954-10-31 no                               2 6406138              
+6 IATTC            SWO     UNK       JPN           UNK          1954-10-01 1954-10-31 no                               4 6406138
+@export
+
+````{r}
+  library(dplyr)
+  library(tidyr)
+  require(readr)
+  # Historical name for the dataset at source  PublicLLSharkMt.csv and PublicLLTunaBillfishMt.csv
+  opts <- options()
+  options(encoding = "UTF-8")
+  df <- readr::read_csv(path_to_raw_dataset)
+  df <- df %>%
+    dplyr::select(-matches("(n|mt)$")) %>% 
+    dplyr::mutate(
+      measurement_unit = "Hooks",
+      time_start = as.Date(paste(Year, Month, "01", sep = "-")),
+      time_end = as.Date(time_start) + lubridate::days(lubridate::days_in_month(time_start) - 1),
+      fishing_fleet = Flag,
+      fishing_mode = "UNK",
+      source_authority = "IATTC",
+      gear_type = "LL" )%>% 
+    dplyr::select(
+      source_authority,  
+      gear_type,  
+      fishing_fleet,
+      fishing_mode,
+      time_start,
+      time_end,
+      LatC5, LonC5,
+      measurement_unit,
+      measurement_value = Hooks
+    )
+  
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R")
+  
+  df$Square_size <- 5 # 5-degree squares
+  df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
+  df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
+  
+  df$time_start <- as.Date(df$time_start)
+  df$time_end <- as.Date(df$time_end)
+  dataset_temporal_extent <- paste(
+    paste0(format(min(df$time_start), "%Y"), "-01-01"),
+    paste0(format(max(df$time_end), "%Y"), "-12-31"),
+    sep = "/"
+  )
+  df$measurement_processing_level <- "unknown" 
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset <- "Dataset_harmonized.csv"
+  
+  write.csv(df, output_name_dataset, row.names = FALSE)
+georef_dataset <- df
+  
+  #----------------------------------------------------------------------------------------------------------------------------  
+````
+
+@ Load pre-harmonization scripts and apply mappings
+
+````{r}
+download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
+source('local_map_codelists_no_DB.R')
+fact <- "effort"
+mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))
+````
+
+@ Handle unmapped values and save the results
+
+````{r}
+georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
+fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
+fwrite(georef_dataset, 'CWP_dataset.csv')
+````
+
+Display the first few rows of the mapping summaries
+
+````{r}
+print(head(mapping_codelist$recap_mapping))
+````
+
