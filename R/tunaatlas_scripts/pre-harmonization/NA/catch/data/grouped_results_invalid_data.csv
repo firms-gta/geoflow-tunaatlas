@@ -1,11 +1,4 @@
-"Entity","tRFMO","negative_values.csv","not_conform_conversion_factors.csv","removed_irregular_areas.csv","areas_in_land.csv","outside_juridiction.csv"
-"effort_1deg_1m_ccsbt_level0__surface","CCSBT",FALSE,FALSE,TRUE,FALSE,FALSE
-"effort_1deg_1m_ps_iattc_level0__billfish_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_1deg_1m_ps_iattc_level0__shark_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_1deg_1m_ps_iattc_level0__tuna_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_5deg_1m_bb_wcpfc_level0","WCPFC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_5deg_1m_driftnet_wcpfc_level0","WCPFC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_5deg_1m_ll_ccsbt_level0","CCSBT",FALSE,FALSE,TRUE,TRUE,FALSE
-"effort_5deg_1m_ll_iattc_level0__shark","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_5deg_1m_ll_iattc_level0__tuna_billfish","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
-"effort_5deg_1m_ll_wcpfc_level0","WCPFC",FALSE,FALSE,FALSE,FALSE,FALSE
+Entity,tRFMO,negative_values.csv,not_conform_conversion_factors.csv,removed_irregular_areas.csv,areas_in_land.csv,outside_juridiction.csv
+nominal_catch_ccsbt_level0__bygear,CCSBT,FALSE,FALSE,FALSE,FALSE,FALSE
+nominal_catch_iattc_level0,IATTC,FALSE,FALSE,FALSE,FALSE,FALSE
+nominal_catch_wcpfc_level0,WCPFC,FALSE,FALSE,FALSE,FALSE,FALSE
