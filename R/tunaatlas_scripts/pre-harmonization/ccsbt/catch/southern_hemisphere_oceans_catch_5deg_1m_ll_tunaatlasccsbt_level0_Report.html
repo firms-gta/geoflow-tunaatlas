@@ -447,18 +447,25 @@ Datasets</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;CEData_Longline.xlsx&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_catch_5deg_1m_ll_tunaatlasccsbt_level0.R" class="uri">https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_catch_5deg_1m_ll_tunaatlasccsbt_level0.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;CEData_Longline.xlsx&#39;)</code></pre>
 <p>Harmonize CCSBT Longline Catch Datasets</p>
 <p>This function harmonizes CCSBT Longline catch datasets for
 integration into the Tuna Atlas database, ensuring data compliance with
@@ -473,31 +480,42 @@ Metadata integration is contingent on the intended use within the Tuna
 Atlas database.</p>
 <p><span class="citation">@importFrom</span> readxl read_excel <span class="citation">@importFrom</span> dplyr %&gt;% filter select mutate
 <span class="citation">@seealso</span> <span class="citation">@export</span> <span class="citation">@keywords</span>
-data harmonization, fisheries, CCSBT, tuna <span class="citation">@author</span> Paul Taconet, IRD <span class="citation">@author</span> Bastien Grasset, IRD Input data sample
-(after importing as data.frame in R): YEAR MONTH COUNTRY_CODE
-TARGET_SPECIES CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOOKS
-NUMBER_OF_SBT_RETAINED 1965 1 JP NA 1 -15 100 2083 4 1965 1 JP NA 1 -15
-110 9647 0 1965 1 JP NA 1 -15 115 91431 525 1965 1 JP NA 1 -10 100 23560
-56 1965 1 JP NA 1 -10 105 31232 35 1965 1 JP NA 1 -10 110 4960 10 Catch:
-final data sample: FishingFleet Gear time_start time_end AreaName School
-Species CatchType CatchUnits Catch AU LL 1987-03-01 1987-04-01 6330130
-ALL SBF ALL NO 6 AU LL 1987-05-01 1987-06-01 6335150 ALL SBF ALL NO 1 AU
-LL 1987-06-01 1987-07-01 6330150 ALL SBF ALL NO 2 AU LL 1987-06-01
-1987-07-01 6335150 ALL SBF ALL NO 47 AU LL 1987-07-01 1987-08-01 6325150
-ALL SBF ALL NO 1 AU LL 1987-09-01 1987-10-01 6330150 ALL SBF ALL NO
-14</p>
-<pre class="r"><code>  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R&quot;)
+data harmonization, fisheries, CCSBT, tuna <span class="citation">@author</span> Paul Taconet, IRD <span class="citation">@author</span> Bastien Grasset, IRD </p>
+<pre class="r"><code>  # Input data sample (after importing as data.frame in R):
+  # YEAR MONTH COUNTRY_CODE TARGET_SPECIES CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOOKS NUMBER_OF_SBT_RETAINED
+  # 1965     1           JP             NA                      1      -15       100            2083                      4
+  # 1965     1           JP             NA                      1      -15       110            9647                      0
+  # 1965     1           JP             NA                      1      -15       115           91431                    525
+  # 1965     1           JP             NA                      1      -10       100           23560                     56
+  # 1965     1           JP             NA                      1      -10       105           31232                     35
+  # 1965     1           JP             NA                      1      -10       110            4960                     10
+  
+  
+  # Catch: final data sample:
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  #   AU   LL 1987-03-01 1987-04-01  6330130    ALL     SBF       ALL         NO     6
+  #   AU   LL 1987-05-01 1987-06-01  6335150    ALL     SBF       ALL         NO     1
+  #   AU   LL 1987-06-01 1987-07-01  6330150    ALL     SBF       ALL         NO     2
+  #   AU   LL 1987-06-01 1987-07-01  6335150    ALL     SBF       ALL         NO    47
+  #   AU   LL 1987-07-01 1987-08-01  6325150    ALL     SBF       ALL         NO     1
+  #   AU   LL 1987-09-01 1987-10-01  6330150    ALL     SBF       ALL         NO    14
+
+  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R&quot;)
   source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_5.R&quot;)
-  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R&quot;)</code></pre>
-<p>packages</p>
-<pre class="r"><code>if(!require(readxl)){
+  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R&quot;)
+  #packages
+
+
+if(!require(readxl)){
     install.packages(&quot;readxl&quot;)
     require(readxl)
 }</code></pre>
 <p>Historical name for the dataset at source CEData_Longline.xlsx</p>
 <pre class="r"><code>opts &lt;- options()
-options(encoding = &quot;UTF-8&quot;)</code></pre>
-<pre class="r"><code>RFMO_CE&lt;-readxl::read_excel(path_to_raw_dataset, sheet = &quot;CEData_Longline&quot;, col_names = TRUE, col_types = NULL,na = &quot;&quot;)
+options(encoding = &quot;UTF-8&quot;)
+
+ 
+RFMO_CE&lt;-readxl::read_excel(path_to_raw_dataset, sheet = &quot;CEData_Longline&quot;, col_names = TRUE, col_types = NULL,na = &quot;&quot;)
 colnames(RFMO_CE)&lt;-gsub(&quot;\r\n&quot;, &quot;_&quot;, colnames(RFMO_CE))
 colnames(RFMO_CE)&lt;-gsub(&quot; &quot;, &quot;_&quot;, colnames(RFMO_CE))
 RFMO_CE&lt;-as.data.frame(RFMO_CE)</code></pre>
@@ -516,11 +534,11 @@ one column time_start and one time_end</p>
 <p>Area</p>
 <pre class="r"><code>RFMO_CE&lt;-harmo_spatial_5(RFMO_CE,&quot;LATITUDE&quot;,&quot;LONGITUDE&quot;,5,6)</code></pre>
 <p>School</p>
-<pre class="r"><code>RFMO_CE$School&lt;-&quot;ALL&quot;</code></pre>
+<pre class="r"><code>RFMO_CE$School&lt;-&quot;UNK&quot;</code></pre>
 <p>Species</p>
 <pre class="r"><code>RFMO_CE$Species&lt;-&quot;SBF&quot;</code></pre>
 <p>CatchType</p>
-<pre class="r"><code>RFMO_CE$CatchType&lt;-&quot;ALL&quot;</code></pre>
+<pre class="r"><code>RFMO_CE$CatchType&lt;- &quot;RC&quot; # Retained catches</code></pre>
 <p>Catch</p>
 <pre class="r"><code>RFMO_CE$Catch&lt;-RFMO_CE$NUMBER_OF_SBT_RETAINED
 
@@ -535,32 +553,34 @@ catches &lt;-RFMO_CE[colToKeep_captures]</code></pre>
 catches &lt;- catches[catches$Catch != 0,]
 
 catches &lt;- aggregate(catches$Catch, FUN = sum,
-    by = list(
-        FishingFleet = catches$FishingFleet,
-        Gear = catches$Gear,
-        time_start = catches$time_start,
-        time_end = catches$time_end,
-        AreaName = catches$AreaName,
-        School = catches$School,
-        Species = catches$Species,
-        CatchType = catches$CatchType,
-        CatchUnits = catches$CatchUnits
-    )
+                     by = list(
+                       FishingFleet = catches$FishingFleet,
+                       Gear = catches$Gear,
+                       time_start = catches$time_start,
+                       time_end = catches$time_end,
+                       AreaName = catches$AreaName,
+                       School = catches$School,
+                       Species = catches$Species,
+                       CatchType = catches$CatchType,
+                       CatchUnits = catches$CatchUnits
+                     )
 )
 
 colnames(catches)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;species&quot;,&quot;measurement_type&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
 catches$source_authority&lt;-&quot;CCSBT&quot;
 catches$measurement_type &lt;- &quot;RC&quot; # Retained catches
-catches$measurement &lt;- &quot;catch&quot; </code></pre>
-<pre class="r"><code>catches$time_start &lt;- as.Date(catches$time_start)
+catches$measurement &lt;- &quot;catch&quot;
+catches$measurement_processing_level &lt;- &quot;unknown&quot;
+catches$time_start &lt;- as.Date(catches$time_start)
 catches$time_end &lt;- as.Date(catches$time_end)
 dataset_temporal_extent &lt;- paste(
-    paste0(format(min(catches$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
-    paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
-    sep = &quot;/&quot;
-)
+  paste0(format(min(catches$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
+  paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
+  sep = &quot;/&quot;
+)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 write.csv(catches, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- catches</code></pre>
 <p>@ Load pre-harmonization scripts and apply mappings</p>
@@ -569,11 +589,13 @@ source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;catch&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension species with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
-##  mapping dimension measurement_type with code list mapping</code></pre>
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension species with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
 fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
@@ -584,16 +606,12 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 AU       AUS      flag_wcpfc       fishingfleet_firms WCPFC           
-## 2 JP       JPN      flag_wcpfc       fishingfleet_firms WCPFC           
-## 3 KR       KOR      flag_wcpfc       fishingfleet_firms WCPFC           
-## 4 NZ       NZL      flag_wcpfc       fishingfleet_firms WCPFC           
-## 5 TW       TWN      flag_wcpfc       fishingfleet_firms WCPFC           
-## 6 AU       AUS      flag_ccsbt       fishingfleet_firms CCSBT</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority        Dimension
-## 1   ALL            CCSBT     fishing_mode
-## 2    RC            CCSBT measurement_type</code></pre>
+## 1 UNK      UNK      schooltype_ccsbt schooltype_rfmos   CCSBT           
+## 2 AU       AUS      flag_ccsbt       fishingfleet_firms CCSBT           
+## 3 JP       JPN      flag_ccsbt       fishingfleet_firms CCSBT           
+## 4 KR       KOR      flag_ccsbt       fishingfleet_firms CCSBT           
+## 5 NZ       NZL      flag_ccsbt       fishingfleet_firms CCSBT           
+## 6 TW       TWN      flag_ccsbt       fishingfleet_firms CCSBT</code></pre>
 </div>
 
 

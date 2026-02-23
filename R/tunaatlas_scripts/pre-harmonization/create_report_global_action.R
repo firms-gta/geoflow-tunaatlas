@@ -19,6 +19,7 @@
 #'
 create_report_global_action = function(config, entity, action){
   source(here::here("R/tunaatlas_scripts/pre-harmonization/clean_script_for_report.R"))
+  browser()
   script_path <- entity$data$actions[[1]]$script
   cleaned_code <- clean_script(script_path)
   new_filename <- basename(script_path) |>

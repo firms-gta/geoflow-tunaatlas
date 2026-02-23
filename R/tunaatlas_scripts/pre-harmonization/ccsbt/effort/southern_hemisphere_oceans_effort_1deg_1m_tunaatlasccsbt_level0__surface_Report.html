@@ -447,18 +447,25 @@ Datasets</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;CEData_Surface.xlsx&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;CEData_Surface.xlsx&#39;)</code></pre>
 <p>Harmonize CCSBT Surface Effort Datasets</p>
 <p>Harmonizes the structure of CCSBT catch-and-effort datasets
 specifically for ‘Surface’ effort data. This involves reading the raw
@@ -503,89 +510,110 @@ time_end AreaName School EffortUnits Effort AU BB 1976-08-01 1976-09-01
 6336150 ALL HRSRH 8 AU BB 1976-09-01 1976-10-01 6334151 ALL HRSRH 21 AU
 BB 1976-09-01 1976-10-01 6335150 ALL HRSRH 4 AU BB 1976-09-01 1976-10-01
 6337150 ALL HRSRH 14 AU BB 1976-10-01 1976-11-01 6334151 ALL HRSRH 21 AU
-BB 1976-10-01 1976-11-01 6336150 ALL HRSRH 29
-—————————————————————————————————————————- Historical name for the
-dataset at source CEData_Surface.xlsx</p>
+BB 1976-10-01 1976-11-01 6336150 ALL HRSRH 29</p>
+<pre class="r"><code>  #----------------------------------------------------------------------------------------------------------------------------</code></pre>
+<p>Historical name for the dataset at source CEData_Surface.xlsx</p>
 <pre class="r"><code>  opts &lt;- options()
   options(encoding = &quot;UTF-8&quot;)
   
-
+  
   RFMO_CE&lt;-readxl::read_excel(path_to_raw_dataset, sheet = &quot;CEData_Surface&quot;, col_names = TRUE, col_types = NULL,na = &quot;&quot;)
   
   colnames(RFMO_CE)&lt;-gsub(&quot;\r\n&quot;, &quot;_&quot;, colnames(RFMO_CE))
   colnames(RFMO_CE)&lt;-gsub(&quot; &quot;, &quot;_&quot;, colnames(RFMO_CE))
   colnames(RFMO_CE)&lt;-gsub(&quot;\\(&quot;, &quot;&quot;, colnames(RFMO_CE))
   colnames(RFMO_CE)&lt;-gsub(&quot;\\)&quot;, &quot;&quot;, colnames(RFMO_CE))
-  RFMO_CE&lt;-as.data.frame(RFMO_CE)</code></pre>
-<p>Remove lines that are read in the Excel but that are not real</p>
-<pre class="r"><code>  RFMO_CE&lt;- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
-  RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED&lt;-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
-  RFMO_CE$NUMBER_OF_HOURS_SEARCHED&lt;-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)</code></pre>
-<p>FishingFleet</p>
-<pre class="r"><code>  RFMO_CE$FishingFleet&lt;-RFMO_CE$COUNTRY_CODE</code></pre>
-<p>Gear</p>
-<pre class="r"><code>  RFMO_CE$Gear&lt;-RFMO_CE$GEAR_CODE</code></pre>
-<p>replace PS by Purse Seine and BB by Pole and Line</p>
-<pre class="r"><code>  RFMO_CE$Gear[RFMO_CE$Gear == &quot;PS&quot;] &lt;- &quot;Purse Seine&quot;
-  RFMO_CE$Gear[RFMO_CE$Gear == &quot;BB&quot;] &lt;- &quot;Pole and Line&quot;</code></pre>
-<p>Year and period</p>
-<pre class="r"><code>  RFMO_CE&lt;-harmo_time_2(RFMO_CE, &quot;YEAR&quot;, &quot;MONTH&quot;)</code></pre>
-<p>Format inputDataset time to have the time format of the DB, which is
-one column time_start and one time_end</p>
-<pre class="r"><code>  RFMO_CE&lt;-format_time_db_format(RFMO_CE)</code></pre>
-<p>Area</p>
-<pre class="r"><code>  RFMO_CE&lt;-harmo_spatial_5(RFMO_CE,&quot;LATITUDE&quot;,&quot;LONGITUDE&quot;,1,5)</code></pre>
-<p>School</p>
-<pre class="r"><code>  RFMO_CE$School&lt;-&quot;ALL&quot;</code></pre>
-<p>Species</p>
-<pre class="r"><code>  RFMO_CE$Species&lt;-&quot;SBF&quot;</code></pre>
-<p>CatchType</p>
-<pre class="r"><code>  RFMO_CE$CatchType&lt;-&quot;ALL&quot;
-
+  RFMO_CE&lt;-as.data.frame(RFMO_CE)
   
-efforts&lt;-RFMO_CE
-
-efforts$EffortUnits&lt;-&quot;NUMBER_OF_HOURS_SEARCHED&quot;
-efforts$Effort&lt;-efforts$NUMBER_OF_HOURS_SEARCHED
-colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
-efforts &lt;-efforts[colToKeep_efforts]</code></pre>
-<p>remove whitespaces on columns that should not have withespace</p>
-<pre class="r"><code>efforts[,c(&quot;AreaName&quot;,&quot;FishingFleet&quot;)]&lt;-as.data.frame(apply(efforts[,c(&quot;AreaName&quot;,&quot;FishingFleet&quot;)],2,function(x){gsub(&quot; *$&quot;,&quot;&quot;,x)}),stringsAsFactors=FALSE)</code></pre>
-<p>remove 0 and NA values</p>
-<pre class="r"><code>efforts &lt;- efforts  %&gt;% 
-  filter( ! Effort %in% 0 ) %&gt;%
-  filter( ! is.na(Effort)) 
-
-efforts &lt;- efforts %&gt;% 
-  dplyr::group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %&gt;% 
-  dplyr::summarise(Effort = sum(Effort))  
-efforts&lt;-as.data.frame(efforts)
-
-
-colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
-efforts$source_authority&lt;-&quot;CCSBT&quot;
-efforts$measurement &lt;- &quot;effort&quot; </code></pre>
-<hr />
-<pre class="r"><code>efforts$time_start &lt;- as.Date(efforts$time_start)
-efforts$time_end &lt;- as.Date(efforts$time_end)
-dataset_temporal_extent &lt;- paste(
-  paste0(format(min(efforts$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
-  paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
-  sep = &quot;/&quot;
-)
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
-write.csv(efforts, output_name_dataset, row.names = FALSE)
-georef_dataset &lt;- efforts</code></pre>
-<hr />
+  #Remove lines that are read in the Excel but that are not real
+  RFMO_CE&lt;- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
+  RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED&lt;-as.numeric(RFMO_CE$WEIGHT_Kg_OF_SBT_RETAINED)
+  RFMO_CE$NUMBER_OF_HOURS_SEARCHED&lt;-as.numeric(RFMO_CE$NUMBER_OF_HOURS_SEARCHED)
+  
+  #FishingFleet
+  RFMO_CE$FishingFleet&lt;-RFMO_CE$COUNTRY_CODE
+  #Gear
+  RFMO_CE$Gear&lt;-RFMO_CE$GEAR_CODE
+  
+  # replace PS by Purse Seine and BB by Pole and Line
+  
+  RFMO_CE$Gear[RFMO_CE$Gear == &quot;PS&quot;] &lt;- &quot;Purse Seine&quot;
+  RFMO_CE$Gear[RFMO_CE$Gear == &quot;BB&quot;] &lt;- &quot;Pole and Line&quot;
+  
+  #Year and period
+  RFMO_CE&lt;-harmo_time_2(RFMO_CE, &quot;YEAR&quot;, &quot;MONTH&quot;)
+  #Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
+  RFMO_CE&lt;-format_time_db_format(RFMO_CE)
+  
+  # Area 
+  RFMO_CE&lt;-harmo_spatial_5(RFMO_CE,&quot;LATITUDE&quot;,&quot;LONGITUDE&quot;,1,5)
+  
+  #School
+  RFMO_CE$School&lt;-&quot;UNK&quot;
+  
+  #Species
+  RFMO_CE$Species&lt;-&quot;SBF&quot;
+  
+  #CatchType
+  RFMO_CE$CatchType&lt;-&quot;UNK&quot; #not used later as it is no catch
+  
+  
+  efforts&lt;-RFMO_CE
+  
+  efforts$EffortUnits&lt;-&quot;NUMBER_OF_HOURS_SEARCHED&quot;
+  efforts$Effort&lt;-efforts$NUMBER_OF_HOURS_SEARCHED
+  colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
+  efforts &lt;-efforts[colToKeep_efforts]
+  
+  
+  #remove whitespaces on columns that should not have withespace
+  
+  efforts[,c(&quot;AreaName&quot;,&quot;FishingFleet&quot;)]&lt;-as.data.frame(apply(efforts[,c(&quot;AreaName&quot;,&quot;FishingFleet&quot;)],2,function(x){gsub(&quot; *$&quot;,&quot;&quot;,x)}),stringsAsFactors=FALSE)
+  
+  # remove 0 and NA values 
+  
+  efforts &lt;- efforts  %&gt;% 
+    filter( ! Effort %in% 0 ) %&gt;%
+    filter( ! is.na(Effort)) 
+  
+  efforts &lt;- efforts %&gt;% 
+    dplyr::group_by(FishingFleet,Gear,time_start,time_end,AreaName,School,EffortUnits) %&gt;% 
+    dplyr::summarise(Effort = sum(Effort))  
+  efforts&lt;-as.data.frame(efforts)
+  
+  
+  colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
+  efforts$source_authority&lt;-&quot;CCSBT&quot;
+  efforts$measurement &lt;- &quot;effort&quot; 
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  efforts$time_start &lt;- as.Date(efforts$time_start)
+  efforts$time_end &lt;- as.Date(efforts$time_end)
+  dataset_temporal_extent &lt;- paste(
+    paste0(format(min(efforts$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
+    paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
+    sep = &quot;/&quot;
+  )
+  efforts$measurement_processing_level &lt;- &quot;unknown&quot; 
+  # sorties same folder as path_to_raw_dataset 
+  output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+  
+  write.csv(efforts, output_name_dataset, row.names = FALSE)
+georef_dataset &lt;- efforts
+  
+  #----------------------------------------------------------------------------------------------------------------------------</code></pre>
 <p>@ Load pre-harmonization scripts and apply mappings</p>
 <pre class="r"><code>download.file(&#39;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R&#39;, destfile = &#39;local_map_codelists_no_DB.R&#39;)
 source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;effort&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;, &quot;ICCAT&quot;, &quot;IOTC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
+<pre><code>## 
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
@@ -598,13 +626,10 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ##   src_code                 trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;                    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 NUMBER_OF_HOURS_SEARCHED HRSRH    effortunit_ccsbt effortunit_rfmos   CCSBT           
-## 2 AU                       AUS      flag_wcpfc       fishingfleet_firms WCPFC           
+## 2 UNK                      UNK      schooltype_ccsbt schooltype_rfmos   CCSBT           
 ## 3 AU                       AUS      flag_ccsbt       fishingfleet_firms CCSBT           
 ## 4 Pole and Line            09.1     gear_ccsbt       isscfg_revision_1  CCSBT           
 ## 5 Purse Seine              01.1     gear_ccsbt       isscfg_revision_1  CCSBT</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority    Dimension
-## 1   ALL            CCSBT fishing_mode</code></pre>
 </div>
 
 

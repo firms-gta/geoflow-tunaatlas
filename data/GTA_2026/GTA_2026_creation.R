@@ -104,8 +104,9 @@ unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 source("~/firms-gta/geoflow-tunaatlas/data/GTA_2026/jobs/20260203133402_raw_data_georef_2024/testsumarising_invalid.R")
 # source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
+source("~/firms-gta/geoflow-tunaatlas/data/GTA_2026/jobs/20260203133402_raw_data_georef_2024/testsumarising_invalid.R")
 time_Summarising_invalid_data <- system.time({
-  testsummarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+  CWP.dataset::summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
 })
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
@@ -127,8 +128,23 @@ unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 con <- NULL
 time_Summarising_invalid_data <- system.time({
-  testsummarising_invalid_data(raw_data_georef_effort, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+  summarising_invalid_data(raw_data_georef_effort, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
 })
+
+
+
+source("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
+
+safe_rewrite_functions_as_rmd(raw_data_georef)
+safe_rewrite_functions_as_rmd(raw_data_georef_effort)
+# Appel à la fonction pour supprimer les fichiers spécifiques
+remove_specific_files(here::here("R/tunaatlas_scripts/pre-harmonization"))
+
+
+# Troncature des fichiers CSV et XLSX après la génération des fichiers HTML
+truncate_files("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization")
+
+
 
 
 copy_job_reports_to_repo <- function(

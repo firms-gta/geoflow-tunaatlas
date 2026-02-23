@@ -75,8 +75,14 @@ rewrite_functions_as_rmd <- function(source_path) {
   # Fonction pour mettre à jour les chemins dans les fichiers Rmd et ajouter le titre
   update_rmd_paths <- function(rmd_file) {
     lines <- readLines(rmd_file)
-    title_line <- lines[grep("armon", lines)][1]
-    title <- sub("^'\\s*", "", title_line)
+    title_line <- lines[grepl("Harmonize", lines)][1]
+    
+    # Fallback si jamais pas trouvé
+    if (is.na(title_line)) {
+      title_line <- lines[grepl("^\\s*#?'\\s*", lines)][1]
+    }
+    
+    title <- sub("^\\s*#?'\\s*", "", title_line)
     
     yaml_header <- c(
       "---",
@@ -107,6 +113,9 @@ rewrite_functions_as_rmd <- function(source_path) {
     data_files <- data_files[!str_detect(data_files, "codelists")]
     data_files <- data_files[!str_detect(data_files, "mapped")]
     data_files <- data_files[!str_detect(data_files, "harmonized")]
+    data_files <- data_files[!str_detect(data_files, "removed_irregular_areas")]
+    data_files <- data_files[!str_detect(data_files, "recap_mapping")]
+    data_files <- data_files[!str_detect(data_files, "areas_in_land")]
     
     if (!is.na(trfmo) && type == "nominal" && trfmo == "wcpfc") {
       lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') \n path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')", lines)
@@ -128,11 +137,18 @@ rewrite_functions_as_rmd <- function(source_path) {
     # Supprimer les lignes contenant uniquement des tirets
     lines <- lines[!grepl("^[-]+$", lines)]
     
+    drop_patterns <- c(
+      "^\\s*base1\\s*<-\\s*tools::file_path_sans_ext\\(basename\\(filename1\\)\\)\\s*$",
+      "^\\s*base2\\s*<-\\s*tools::file_path_sans_ext\\(basename\\(filename2\\)\\)\\s*$"
+    )
+    
+    lines <- lines[!Reduce(`|`, lapply(drop_patterns, grepl, x = lines))]
+    
     new_data_path <- file.path(rmd_destination_path, "data")
     if (!dir_exists(new_data_path)) {
       dir_create(new_data_path)
     }
-    
+
     copy_files <- function(file_path) {
       if (str_detect(file_path, "\\.csv$")) {
         data <- read.csv(file_path)
@@ -198,10 +214,3 @@ remove_specific_files <- function(root_dir) {
     message("No specific files found to remove.")
   }
 }
-
-# Appel à la fonction pour supprimer les fichiers spécifiques
-remove_specific_files(here::here("R/tunaatlas_scripts/pre-harmonization"))
-
-
-# Troncature des fichiers CSV et XLSX après la génération des fichiers HTML
-truncate_files("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization")

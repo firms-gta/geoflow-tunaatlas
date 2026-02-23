@@ -447,18 +447,25 @@ Datasets</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;WCPFC_G_PUBLIC_BY_YR_MON.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_effort_5deg_1m_tunaatlaswcpfc_level0__driftnet.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_effort_5deg_1m_tunaatlaswcpfc_level0__driftnet.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;WCPFC_G_PUBLIC_BY_YR_MON.csv&#39;)</code></pre>
 <p>Harmonize WCPFC Driftnet Effort Datasets</p>
 <p>This function harmonizes the WCPFC Driftnet effort datasets,
 preparing them for integration into the Tuna Atlas database according to
@@ -478,8 +485,13 @@ driftnet, tuna <span class="citation">@author</span> Paul Taconet, IRD
 works with any dataset that has the first 5 columns named and ordered as
 follow: {YY|MM|LAT5|LON5|DAYS} followed by a list of columns specifing
 the species codes with “_N” for catches expressed in number and “_T” for
-catches expressed in tons packages</p>
-<pre class="r"><code>  if(!require(reshape)){
+catches expressed in tons</p>
+<pre class="r"><code>  #packages 
+  
+    
+      
+  
+  if(!require(reshape)){
     install.packages(&quot;reshape&quot;)
     require(reshape)
   }
@@ -501,14 +513,17 @@ AreaName School EffortUnits Effort ALL D 1983-11-01 1983-12-01 6330165
 ALL DAYS 133 ALL D 1983-12-01 1984-01-01 6330165 ALL DAYS 133 ALL D
 1983-12-01 1984-01-01 6335165 ALL DAYS 248 ALL D 1984-01-01 1984-02-01
 6230165 ALL DAYS 85 ALL D 1984-01-01 1984-02-01 6240160 ALL DAYS 59 ALL
-D 1984-01-01 1984-02-01 6335165 ALL DAYS 704
-—————————————————————————————————————————- Historical name for the
+D 1984-01-01 1984-02-01 6335165 ALL DAYS 704 Historical name for the
 dataset at source WCPFC_G_PUBLIC_BY_YR_MON.csv</p>
 <pre class="r"><code>opts &lt;- options()
-options(encoding = &quot;UTF-8&quot;)</code></pre>
-<hr />
-<pre class="r"><code>colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)</code></pre>
-<p>#Efforts</p>
+options(encoding = &quot;UTF-8&quot;)
+
+
+
+colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)</code></pre>
+</div>
+<div id="efforts" class="section level1">
+<h1>Efforts</h1>
 <pre class="r"><code>DF &lt;- read.csv(path_to_raw_dataset)
 colnames(DF) &lt;- toupper(colnames(DF))</code></pre>
 <p>DF &lt;- melt(DF, id = c(colnames(DF[1:5]))) #<span class="citation">@juldebar</span> error with melt function from reshape
@@ -524,9 +539,8 @@ DF$Species &lt;- sub(&quot;_C&quot;, &quot;&quot;, DF$Species)
 DF$Species &lt;- sub(&quot;_N&quot;, &quot;&quot;, DF$Species)
 DF$School &lt;- &quot;OTH&quot;
 DF$EffortUnits &lt;- colnames(DF[5])
-colnames(DF)[5] &lt;- &quot;Effort&quot;</code></pre>
-<hr />
-<pre class="r"><code>efforts_pivot_WCPFC &lt;- DF; rm(DF)</code></pre>
+colnames(DF)[5] &lt;- &quot;Effort&quot;
+efforts_pivot_WCPFC &lt;- DF; rm(DF)</code></pre>
 <p>Gear</p>
 <pre class="r"><code>efforts_pivot_WCPFC$Gear&lt;-&quot;D&quot;</code></pre>
 <p>Catchunits</p>
@@ -536,36 +550,39 @@ efforts_pivot_WCPFC[index.kg,&quot;CatchUnits&quot;]&lt;- &quot;t&quot;
 index.nr &lt;- which( efforts_pivot_WCPFC[,&quot;CatchUnits&quot;] == &quot;N&quot; )
 efforts_pivot_WCPFC[index.nr,&quot;CatchUnits&quot;]&lt;- &quot;no&quot; </code></pre>
 <p>School</p>
-<pre class="r"><code>efforts_pivot_WCPFC$School&lt;-&quot;ALL&quot;
+<pre class="r"><code>efforts_pivot_WCPFC$School&lt;-&quot;UNK&quot;
 
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R&quot;)
 efforts&lt;-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
 
 colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
 efforts$source_authority&lt;-&quot;WCPFC&quot;
-efforts$measurement &lt;- &quot;effort&quot; </code></pre>
-<hr />
-<pre class="r"><code>efforts$time_start &lt;- as.Date(efforts$time_start)
+efforts$measurement &lt;- &quot;effort&quot; 
+efforts$measurement_processing_level &lt;- &quot;unknown&quot; 
+efforts$time_start &lt;- as.Date(efforts$time_start)
 efforts$time_end &lt;- as.Date(efforts$time_end)
 dataset_temporal_extent &lt;- paste(
   paste0(format(min(efforts$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
   paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
-)
+)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts</code></pre>
-<hr />
 <p>@ Load pre-harmonization scripts and apply mappings</p>
 <pre class="r"><code>download.file(&#39;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R&#39;, destfile = &#39;local_map_codelists_no_DB.R&#39;)
 source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;effort&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;, &quot;ICCAT&quot;, &quot;IOTC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
+<pre><code>## 
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
@@ -574,16 +591,12 @@ fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
 fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 4 × 5
+<pre><code>## # A tibble: 3 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 DAYS     DAYS     effortunit_iotc  effortunit_rfmos   IOTC            
-## 2 DAYS     FDAYS    effortunit_wcpfc effortunit_rfmos   WCPFC           
-## 3 ALL      NEI      flag_wcpfc       fishingfleet_firms WCPFC           
-## 4 D        07.2     gear_wcpfc       isscfg_revision_1  WCPFC</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority    Dimension
-## 1   ALL            WCPFC fishing_mode</code></pre>
+## 1 DAYS     FDAYS    effortunit_wcpfc effortunit_rfmos   WCPFC           
+## 2 ALL      NEI      flag_wcpfc       fishingfleet_firms WCPFC           
+## 3 D        07.2     gear_wcpfc       isscfg_revision_1  WCPFC</code></pre>
 </div>
 
 

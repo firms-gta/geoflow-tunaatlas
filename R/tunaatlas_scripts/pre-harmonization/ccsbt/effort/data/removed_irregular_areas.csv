@@ -1,0 +1,11 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level","gridtype","Gear"
+"AU","Pole and Line","1987-03-01","1987-03-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",71,"CCSBT","effort","unknown",NA,NA
+"AU","Pole and Line","1996-12-01","1996-12-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",22,"CCSBT","effort","unknown",NA,NA
+"AU","Pole and Line","1997-01-01","1997-01-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",62,"CCSBT","effort","unknown",NA,NA
+"AU","Pole and Line","1997-02-01","1997-02-28",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",52,"CCSBT","effort","unknown",NA,NA
+"AU","Pole and Line","1997-03-01","1997-03-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",35,"CCSBT","effort","unknown",NA,NA
+"AU","Purse Seine","1991-04-01","1991-04-30",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",7,"CCSBT","effort","unknown",NA,NA
+"AU","Purse Seine","1996-11-01","1996-11-30",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",184,"CCSBT","effort","unknown",NA,NA
+"AU","Purse Seine","1997-01-01","1997-01-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",197,"CCSBT","effort","unknown",NA,NA
+"AU","Purse Seine","1997-02-01","1997-02-28",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",190,"CCSBT","effort","unknown",NA,NA
+"AU","Purse Seine","1998-03-01","1998-03-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",132,"CCSBT","effort","unknown",NA,NA

@@ -1,3 +1,13 @@
+---
+title: "Harmonize IOTC Effort Dataset (standardized formatting)"
+output: 
+  html_document: 
+    code_folding: hide
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
 # Introduction
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
@@ -20,7 +30,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 
 ````{r}
-path_to_raw_dataset <- 
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iotc', 'effort', 'data', 'EF_RAW.csv')
 ````
 
 Harmonize IOTC Effort Dataset (standardized formatting)
@@ -120,7 +130,6 @@ effort$measurement <- "effort"
     sep = "/"
   )
   
-  base1 <- tools::file_path_sans_ext(basename(filename1))
   # sorties same folder as path_to_raw_dataset 
   output_name_dataset <- "Dataset_harmonized.csv"
   
@@ -142,6 +151,7 @@ mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.git
 ````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
 fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
+fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
 fwrite(georef_dataset, 'CWP_dataset.csv')
 ````
 
