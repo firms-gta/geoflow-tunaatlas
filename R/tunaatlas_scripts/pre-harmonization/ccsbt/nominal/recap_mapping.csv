@@ -1,0 +1,22 @@
+src_code,trg_code,src_codingsystem,trg_codingsystem,source_authority
+UNK,UNK,schooltype_ccsbt,schooltype_rfmos,CCSBT
+AU,AUS,flag_ccsbt,fishingfleet_firms,CCSBT
+ID,IDN,flag_ccsbt,fishingfleet_firms,CCSBT
+JP,JPN,flag_ccsbt,fishingfleet_firms,CCSBT
+KR,KOR,flag_ccsbt,fishingfleet_firms,CCSBT
+NZ,NZL,flag_ccsbt,fishingfleet_firms,CCSBT
+PH,PHL,flag_ccsbt,fishingfleet_firms,CCSBT
+TW,TWN,flag_ccsbt,fishingfleet_firms,CCSBT
+ZA,ZAF,flag_ccsbt,fishingfleet_firms,CCSBT
+CC,NEI,flag_ccsbt,fishingfleet_firms,CCSBT
+??,NEI,flag_ccsbt,fishingfleet_firms,CCSBT
+ES,EUR,flag_ccsbt,fishingfleet_firms,CCSBT
+SBF,SBF,species_ccsbt,species_asfis,CCSBT
+Handline,09.1,gear_ccsbt,isscfg_revision_1,CCSBT
+Longline,09.39,gear_ccsbt,isscfg_revision_1,CCSBT
+Other,10.9,gear_ccsbt,isscfg_revision_1,CCSBT
+Pole and Line,09.1,gear_ccsbt,isscfg_revision_1,CCSBT
+Purse Seine,01.1,gear_ccsbt,isscfg_revision_1,CCSBT
+Troll,09.5,gear_ccsbt,isscfg_revision_1,CCSBT
+Gillnet,07.2,gear_ccsbt,isscfg_revision_1,CCSBT
+Unspecified Surface,99.9,gear_ccsbt,isscfg_revision_1,CCSBT

@@ -447,18 +447,25 @@ From CSV</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;WCPFC_L_PUBLIC_BY_FLAG_MON.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_ll_tunaatlaswcpfc_level0_from_csv.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_ll_tunaatlaswcpfc_level0_from_csv.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;WCPFC_L_PUBLIC_BY_YY_MM_FLAG.csv&#39;)</code></pre>
 <p>Harmonize WCPFC Longline Catch Datasets From CSV</p>
 <p>This function processes and harmonizes Western and Central Pacific
 Fisheries Commission (WCPFC) longline catch datasets provided in CSV
@@ -529,7 +536,7 @@ options(encoding = &quot;UTF-8&quot;)</code></pre>
 index for melting</p>
 <pre class="r"><code>DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)&lt;-toupper(colnames(DF))
-if(any(DF$FLAG_ID == &quot;&quot;)) DF[DF$FLAG_ID == &quot;&quot;,]$FLAG_ID &lt;- &quot;UNK&quot;</code></pre>
+if(any(DF$flag_code == &quot;&quot;)) DF[DF$flag_code == &quot;&quot;,]$flag_code &lt;- &quot;UNK&quot;</code></pre>
 <p>DF&lt;-melt(DF, id=c(colnames(DF[1:6]))) DF &lt;-
 melt(as.data.table(DF), id=c(colnames(DF[1:6])))</p>
 <pre class="r"><code>DF &lt;- DF %&gt;% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
@@ -571,23 +578,19 @@ catches_pivot_WCPFC[index.catchinweightonly,&quot;CatchUnits&quot;]=&quot;t&quot
 
 index.catchinnumberonly &lt;- which(catches_pivot_WCPFC[,&quot;CatchUnits&quot;]==&quot;N&quot;)
 catches_pivot_WCPFC[index.catchinnumberonly,&quot;CatchUnits&quot;]=&quot;no&quot;</code></pre>
-<p>School</p>
-<pre class="r"><code>catches_pivot_WCPFC$School&lt;-&quot;ALL&quot;</code></pre>
 </div>
 <div id="reach-the-catches-harmonized-dsd-using-a-function-in-wcpfc_functions.r" class="section level1">
 <h1># Reach the catches harmonized DSD using a function in
 WCPFC_functions.R</h1>
 <pre class="r"><code>colToKeep_captures &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;Species&quot;,&quot;CatchType&quot;,&quot;CatchUnits&quot;,&quot;Catch&quot;)
-
 catches_pivot_WCPFC$RFMO &lt;- &quot;WCPFC&quot;
 catches_pivot_WCPFC$Ocean &lt;- &quot;PAC_W&quot;
-catches_pivot_WCPFC$FishingFleet &lt;- catches_pivot_WCPFC$FLAG_ID
+catches_pivot_WCPFC$FishingFleet &lt;- catches_pivot_WCPFC$FLAG_CODE
 
 catches_pivot_WCPFC &lt;- harmo_time_2(catches_pivot_WCPFC, 
     &quot;YY&quot;, &quot;MM&quot;)
-catches_pivot_WCPFC &lt;- harmo_spatial_3(catches_pivot_WCPFC, &quot;LAT_SHORT&quot;, &quot;LON_SHORT&quot;, 5, 6) 
-catches_pivot_WCPFC$CatchType &lt;- &quot;ALL&quot;
-
+catches_pivot_WCPFC &lt;- harmo_spatial_3(catches_pivot_WCPFC, &quot;LAT5&quot;, &quot;LON5&quot;, 5, 6) 
+catches_pivot_WCPFC$CatchType &lt;- &quot;RC&quot; # retained catch
 catches_pivot_WCPFC$Catch &lt;- catches_pivot_WCPFC$value
 catches &lt;- catches_pivot_WCPFC[colToKeep_captures]
 rm(catches_pivot_WCPFC)
@@ -615,16 +618,18 @@ colnames(catches)[colnames(catches)==&quot;x&quot;] &lt;- &quot;Catch&quot;
 colnames(catches)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;species&quot;,&quot;measurement_type&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
 catches$source_authority&lt;-&quot;WCPFC&quot;
 catches$measurement_type &lt;- &quot;RC&quot; # Retained catches
-catches$measurement &lt;- &quot;catch&quot; </code></pre>
-<pre class="r"><code>catches$time_start &lt;- as.Date(catches$time_start)
+catches$measurement &lt;- &quot;catch&quot; 
+catches$measurement_processing_level &lt;- &quot;raised&quot;
+catches$time_start &lt;- as.Date(catches$time_start)
 catches$time_end &lt;- as.Date(catches$time_end)
 dataset_temporal_extent &lt;- paste(
     paste0(format(min(catches$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
     paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
     sep = &quot;/&quot;
-)
+)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 write.csv(catches, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- catches</code></pre>
 <p>@ Load pre-harmonization scripts and apply mappings</p>
@@ -633,11 +638,13 @@ source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;catch&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension species with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
-##  mapping dimension measurement_type with code list mapping</code></pre>
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension species with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
 fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
@@ -648,16 +655,12 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 AU       AUS      flag_wcpfc       fishingfleet_firms WCPFC           
-## 2 BZ       BLZ      flag_wcpfc       fishingfleet_firms WCPFC           
-## 3 CK       COK      flag_wcpfc       fishingfleet_firms WCPFC           
-## 4 CN       CHN      flag_wcpfc       fishingfleet_firms WCPFC           
-## 5 ES       EUESP    flag_wcpfc       fishingfleet_firms WCPFC           
-## 6 FJ       FJI      flag_wcpfc       fishingfleet_firms WCPFC</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority        Dimension
-## 1   ALL            WCPFC     fishing_mode
-## 2    RC            WCPFC measurement_type</code></pre>
+## 1 OTH      OTH      schooltype_wcpfc schooltype_rfmos   WCPFC           
+## 2 AU       AUS      flag_wcpfc       fishingfleet_firms WCPFC           
+## 3 BZ       BLZ      flag_wcpfc       fishingfleet_firms WCPFC           
+## 4 CK       COK      flag_wcpfc       fishingfleet_firms WCPFC           
+## 5 CN       CHN      flag_wcpfc       fishingfleet_firms WCPFC           
+## 6 ES       EUESP    flag_wcpfc       fishingfleet_firms WCPFC</code></pre>
 </div>
 
 

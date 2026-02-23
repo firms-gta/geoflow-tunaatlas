@@ -447,18 +447,25 @@ display: none;
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLPTunaFlag.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_bb_tunaatlasiattc_level0__byflag.R" class="uri">https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_bb_tunaatlasiattc_level0__byflag.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLPTunaFlag.csv&#39;)</code></pre>
 <p>Harmonize data structure of IATTC LP (Pole-and-line) catch
 datasets</p>
 <p>This function harmonizes the structure of IATTC catch-and-effort
@@ -475,26 +482,36 @@ process for integration within the Tuna Atlas database.</p>
 <span class="citation">@import</span> reshape <span class="citation">@seealso</span> to convert IATTC nominal catch data
 structure, to convert IATTC LLTunaBillfish and LLShark data structure,
 <span class="citation">@keywords</span> IATTC, tuna, fisheries, data
-harmonization <span class="citation">@export</span> <span class="citation">@author</span> Paul Taconet, IRD <span class="citation">@author</span> Bastien Grasset, IRD Input data sample:
-Year Month Flag LatC1 LonC1 NumSets ALB BET BKJ BZX PBF SKJ TUN YFT 1978
-1 USA 3.5 -79.5 2 0 0 0 0 0 6.05 0 4.74 1978 1 USA 20.5 -114.5 2 0 0 0 0
-0 3.53 0 2.76 1978 1 USA 23.5 -111.5 2 0 0 0 0 0 20.80 0 4.50 1978 1 USA
-23.5 -109.5 1 0 0 0 0 0 0.00 0 0.90 1978 1 USA 24.5 -111.5 1 0 0 0 0 0
-1.51 0 1.18 1978 1 USA 25.5 -114.5 2 0 0 0 0 0 5.00 0 3.60 Catch: final
-data sample: FishingFleet Gear time_start time_end AreaName School
-Species CatchType CatchUnits Catch USA LL 1992-07-01 1992-08-01 6425135
-ALL BSH ALL NO 4 USA LL 1993-04-01 1993-05-01 6425135 ALL BSH ALL NO 75
-USA LL 1993-04-01 1993-05-01 6430135 ALL BSH ALL NO 15 USA LL 1993-05-01
-1993-06-01 6425135 ALL BSH ALL NO 24 USA LL 1994-03-01 1994-04-01
-6425135 ALL BSH ALL NO 14 USA LL 1994-03-01 1994-04-01 6430135 ALL BSH
-ALL NO 4 packages</p>
-<pre class="r"><code>if(!require(reshape)){
-  install.packages(&quot;reshape&quot;)
-  require(reshape)
+harmonization <span class="citation">@export</span> <span class="citation">@author</span> Paul Taconet, IRD <span class="citation">@author</span> Bastien Grasset, IRD </p>
+<pre class="r"><code>  # Input data sample:
+  # Year Month Flag LatC1  LonC1 NumSets ALB BET BKJ BZX PBF   SKJ TUN  YFT
+  # 1978     1  USA   3.5  -79.5       2   0   0   0   0   0  6.05   0 4.74
+  # 1978     1  USA  20.5 -114.5       2   0   0   0   0   0  3.53   0 2.76
+  # 1978     1  USA  23.5 -111.5       2   0   0   0   0   0 20.80   0 4.50
+  # 1978     1  USA  23.5 -109.5       1   0   0   0   0   0  0.00   0 0.90
+  # 1978     1  USA  24.5 -111.5       1   0   0   0   0   0  1.51   0 1.18
+  # 1978     1  USA  25.5 -114.5       2   0   0   0   0   0  5.00   0 3.60
+  
+  # Catch: final data sample:
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  #  USA   LL 1992-07-01 1992-08-01  6425135    ALL     BSH       ALL         NO     4
+  #  USA   LL 1993-04-01 1993-05-01  6425135    ALL     BSH       ALL         NO    75
+  #  USA   LL 1993-04-01 1993-05-01  6430135    ALL     BSH       ALL         NO    15
+  #  USA   LL 1993-05-01 1993-06-01  6425135    ALL     BSH       ALL         NO    24
+  #  USA   LL 1994-03-01 1994-04-01  6425135    ALL     BSH       ALL         NO    14
+  #  USA   LL 1994-03-01 1994-04-01  6430135    ALL     BSH       ALL         NO     4</code></pre>
+<p>packages</p>
+<pre class="r"><code>if(!require(data.table)){
+  install.packages(&quot;data.table&quot;)
+  require(data.table)
 }
 if(!require(dplyr)){
   install.packages(&quot;dplyr&quot;)
   require(dplyr)
+}
+if(!require(reshape2)){
+  install.packages(&quot;reshape2&quot;)
+  require(reshape2)
 }</code></pre>
 <p>Historical name for the dataset at source PublicLPTunaFlag.csv</p>
 <pre class="r"><code>opts &lt;- options()
@@ -509,7 +526,7 @@ options(encoding = &quot;UTF-8&quot;)</code></pre>
 stored in IATTC_functions.R</td>
 </tr>
 <tr class="even">
-<td align="left">```r source(“<a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R</a>”)
+<td align="left">``` r source(“<a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R</a>”)
 catches_pivot_IATTC
 &lt;-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,“Flag”,“LP”)
 catches_pivot_IATTC$NumSets&lt;-NULL</td>
@@ -524,19 +541,26 @@ catches&lt;-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colTo
 <td align="left">colnames(catches)&lt;-c(“fishing_fleet”,“gear_type”,“time_start”,“time_end”,“geographic_identifier”,“fishing_mode”,“species”,“measurement_type”,“measurement_unit”,“measurement_value”)
 catches<span class="math inline">\(source_authority&lt;-&quot;IATTC&quot;
 catches\)</span>measurement_type &lt;- “RC” # Retained catches
-catches$measurement &lt;- “catch” ```</td>
+catches<span class="math inline">\(measurement &lt;- &quot;catch&quot;
+catches\)</span>measurement_processing_level &lt;- “unknown”</td>
 </tr>
 <tr class="odd">
-<td align="left">```r catches<span class="math inline">\(time_start
-&lt;- as.Date(catches\)</span>time_start) catches<span class="math inline">\(time_end &lt;- as.Date(catches\)</span>time_end)
+<td align="left">catches<span class="math inline">\(time_start &lt;-
+as.Date(catches\)</span>time_start) catches<span class="math inline">\(time_end &lt;- as.Date(catches\)</span>time_end)
 dataset_temporal_extent &lt;- paste( paste0(format(min(catches<span class="math inline">\(time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
 paste0(format(max(catches\)</span>time_end), “%Y”), “-12-31”), sep = “/”
-)</td>
+) ```</td>
 </tr>
 <tr class="even">
-<td align="left">output_name_dataset &lt;- “Dataset_harmonized.csv”
-write.csv(catches, output_name_dataset, row.names = FALSE)
-georef_dataset &lt;- catches ```</td>
+<td align="left">sorties same folder as path_to_raw_dataset</td>
+</tr>
+<tr class="odd">
+<td align="left">``` r output_name_dataset &lt;-
+“Dataset_harmonized.csv”</td>
+</tr>
+<tr class="even">
+<td align="left">write.csv(catches, output_name_dataset, row.names =
+FALSE) georef_dataset &lt;- catches ```</td>
 </tr>
 </tbody>
 </table>
@@ -546,11 +570,13 @@ source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;catch&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension species with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
-##  mapping dimension measurement_type with code list mapping</code></pre>
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension species with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
 fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
@@ -567,10 +593,6 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ## 4 BET      BET      species_iattc    species_asfis      IATTC           
 ## 5 BKJ      BKJ      species_iattc    species_asfis      IATTC           
 ## 6 BZX      BZX      species_iattc    species_asfis      IATTC</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority        Dimension
-## 1   ALL            IATTC     fishing_mode
-## 2    RC            IATTC measurement_type</code></pre>
 </div>
 
 

@@ -447,18 +447,25 @@ Datasets</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicPSTunaFlag.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__byflag.R" class="uri">https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_catch_1deg_1m_ps_tunaatlasiattc_level0__byflag.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicPSTunaFlag.csv&#39;)</code></pre>
 <p>Harmonize IATTC PS ByFlag Catch Datasets</p>
 <p>Harmonizes the structure of IATTC PS (Purse Seine) catch datasets by
 flag. This function is designed to adjust catch data to fit standardized
@@ -482,8 +489,21 @@ Paul Taconet, IRD <span class="citation">@author</span> Bastien Grasset,
 IRD <span class="citation">@keywords</span> IATTC, tuna, fisheries, data
 harmonization, catch data</p>
 <pre class="r"><code>  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R&quot;)</code></pre>
-<p>packages Historical name for the dataset at source
-PublicPSTunaFlag.csv or PublicPSBillfishFlag.csv</p>
+<p>packages</p>
+<pre class="r"><code>  if(!require(data.table)){
+    install.packages(&quot;data.table&quot;)
+    require(data.table)
+  }
+  if(!require(dplyr)){
+    install.packages(&quot;dplyr&quot;)
+    require(dplyr)
+  }
+  if(!require(reshape2)){
+    install.packages(&quot;reshape2&quot;)
+    require(reshape2)
+  }</code></pre>
+<p>Historical name for the dataset at source PublicPSTunaFlag.csv or
+PublicPSBillfishFlag.csv</p>
 <pre class="r"><code>opts &lt;- options()
 options(encoding = &quot;UTF-8&quot;)</code></pre>
 </div>
@@ -499,16 +519,18 @@ catches&lt;-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colTo
 colnames(catches)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;species&quot;,&quot;measurement_type&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
 catches$source_authority&lt;-&quot;IATTC&quot;
 catches$measurement_type &lt;- &quot;RC&quot; # Retained catches
-catches$measurement &lt;- &quot;catch&quot;</code></pre>
-<pre class="r"><code>catches$time_start &lt;- as.Date(catches$time_start)
+catches$measurement &lt;- &quot;catch&quot;
+catches$measurement_processing_level &lt;- &quot;unknown&quot;
+catches$time_start &lt;- as.Date(catches$time_start)
 catches$time_end &lt;- as.Date(catches$time_end)
 dataset_temporal_extent &lt;- paste(
     paste0(format(min(catches$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
     paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
     sep = &quot;/&quot;
-)
+)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 write.csv(catches, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- catches</code></pre>
 <hr />
@@ -518,11 +540,13 @@ source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;catch&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension species with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
-##  mapping dimension measurement_type with code list mapping</code></pre>
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension species with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
 fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
@@ -533,16 +557,12 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 BLZ      BLZ      flag_iattc       fishingfleet_firms IATTC           
-## 2 BOL      BOL      flag_iattc       fishingfleet_firms IATTC           
-## 3 CAN      CAN      flag_iattc       fishingfleet_firms IATTC           
-## 4 COL      COL      flag_iattc       fishingfleet_firms IATTC           
-## 5 CRI      CRI      flag_iattc       fishingfleet_firms IATTC           
-## 6 CYM      CYM      flag_iattc       fishingfleet_firms IATTC</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority        Dimension
-## 1   ALL            IATTC     fishing_mode
-## 2    RC            IATTC measurement_type</code></pre>
+## 1 BMU      BMU      flag_iattc       fishingfleet_firms IATTC           
+## 2 CAN      CAN      flag_iattc       fishingfleet_firms IATTC           
+## 3 COL      COL      flag_iattc       fishingfleet_firms IATTC           
+## 4 CRI      CRI      flag_iattc       fishingfleet_firms IATTC           
+## 5 CYM      CYM      flag_iattc       fishingfleet_firms IATTC           
+## 6 ECU      ECU      flag_iattc       fishingfleet_firms IATTC</code></pre>
 </div>
 
 

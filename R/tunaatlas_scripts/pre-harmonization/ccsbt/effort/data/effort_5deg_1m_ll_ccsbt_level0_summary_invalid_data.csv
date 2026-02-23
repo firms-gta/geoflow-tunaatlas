@@ -1,0 +1,6 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level","gridtype","Gear","issue"
+"NZ","Longline","1990-06-01","1990-06-30",NA,"UNK","NUMBER_OF_HOOKS",5250,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
+"NZ","Longline","1990-07-01","1990-07-31",NA,"UNK","NUMBER_OF_HOOKS",5850,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
+"NZ","Longline","1995-06-01","1995-06-30",NA,"UNK","NUMBER_OF_HOOKS",13550,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
+"NZ","Longline","1996-05-01","1996-05-31",NA,"UNK","NUMBER_OF_HOOKS",3640,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
+"ZA","Longline","2017-02-01","2017-02-28",6220015,"UNK","NUMBER_OF_HOOKS",2032,"CCSBT","effort","unknown","5deg_x_5deg",NA,"areas_in_land.csv"

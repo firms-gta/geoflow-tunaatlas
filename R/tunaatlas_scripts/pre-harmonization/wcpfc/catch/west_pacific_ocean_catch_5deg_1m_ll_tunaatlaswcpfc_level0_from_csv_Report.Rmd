@@ -12,14 +12,26 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
 Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is created from a function so the documentation keep the format of roxygen2 skeleton
-A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_ll_tunaatlaswcpfc_level0_from_csv.R, the documentation keeps the format of roxygen2 skeleton.
+
+A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
+The datasets are named after the historical name provided by tRFMOs while exporting and may change.
+The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+
 Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+
 If you are interested in further details, the results and codes are available for review.
 
-```{r}
-path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_L_PUBLIC_BY_FLAG_MON.csv')
+*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
+It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
+
+
+````{r}
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_L_PUBLIC_BY_YY_MM_FLAG.csv')
+````
 
 Harmonize WCPFC Longline Catch Datasets From CSV
 
@@ -61,14 +73,14 @@ YY MM LAT5 LON5 Effort Species value CatchUnits School EffortUnits Gear
 1984  1  40S 170W    704     ALB  3850         NO    ALL        DAYS    D
 1984  1  40S 175W     88     ALB   966         NO    ALL        DAYS    D
 
-```{r}
+````{r}
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
-```
+````
 
 packages
 
-```{r}
+````{r}
 if(!require(readr)){
   install.packages("readr")
   require(readr)
@@ -89,35 +101,35 @@ if(!require(reshape)){
   install.packages("reshape")
   require(reshape)
 }
-```
+````
 
 Historical name for the dataset at source  WCPFC_L_PUBLIC_BY_FLAG_MON.csv
 
-```{r}
+````{r}
 opts <- options()
 options(encoding = "UTF-8")
-```
+````
 
 # Catches
 
-```{r}
+````{r}
 DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FALSE,strip.white=TRUE)
-```
+````
 
 Changes
 - Flag column added add UNK where missing
 - Change id upper index for melting
 
-```{r}
+````{r}
 DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)<-toupper(colnames(DF))
-if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
-```
+if(any(DF$flag_code == "")) DF[DF$flag_code == "",]$flag_code <- "UNK"
+````
 
 DF<-melt(DF, id=c(colnames(DF[1:6]))) 
 DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
 
-```{r}
+````{r}
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
 
 DF<- DF %>% 
@@ -139,12 +151,12 @@ colnames(DF)[6]<-"Effort"
 
 catches_pivot_WCPFC=DF
 catches_pivot_WCPFC$Gear<-"L"
-```
+````
 
 Catchunits
 Check data that exist both in number and weight
 
-```{r}
+````{r}
 number_of_units_by_strata<- dplyr::summarise(group_by_(catches_pivot_WCPFC,.dots=setdiff(colnames(catches_pivot_WCPFC),c("value","CatchUnits"))), count = n())
 
 strata_in_number_and_weight<-number_of_units_by_strata[number_of_units_by_strata$count>1,]
@@ -162,28 +174,20 @@ catches_pivot_WCPFC[index.catchinweightonly,"CatchUnits"]="t"
 
 index.catchinnumberonly <- which(catches_pivot_WCPFC[,"CatchUnits"]=="N")
 catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
-```
-
-School
-
-```{r}
-catches_pivot_WCPFC$School<-"ALL"
-```
+````
 
 # # Reach the catches harmonized DSD using a function in WCPFC_functions.R
 
-```{r}
+````{r}
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-
 catches_pivot_WCPFC$RFMO <- "WCPFC"
 catches_pivot_WCPFC$Ocean <- "PAC_W"
-catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID
+catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_CODE
 
 catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
-catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
-catches_pivot_WCPFC$CatchType <- "ALL"
-
+catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
+catches_pivot_WCPFC$CatchType <- "RC" # retained catch
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
 catches <- catches_pivot_WCPFC[colToKeep_captures]
 rm(catches_pivot_WCPFC)
@@ -212,10 +216,7 @@ colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 catches$source_authority<-"WCPFC"
 catches$measurement_type <- "RC" # Retained catches
 catches$measurement <- "catch" 
-```
-
-
-```{r}
+catches$measurement_processing_level <- "raised"
 catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)
 dataset_temporal_extent <- paste(
@@ -224,33 +225,38 @@ dataset_temporal_extent <- paste(
 	sep = "/"
 )
 
+````
+
+sorties same folder as path_to_raw_dataset 
+
+````{r}
 output_name_dataset <- "Dataset_harmonized.csv"
+
 write.csv(catches, output_name_dataset, row.names = FALSE)
 georef_dataset <- catches
-```
+````
 
 @ Load pre-harmonization scripts and apply mappings
 
-```{r}
+````{r}
 download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
 source('local_map_codelists_no_DB.R')
 fact <- "catch"
 mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
-```
+````
 
 @ Handle unmapped values and save the results
 
-```{r}
+````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
 fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
 fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
 fwrite(georef_dataset, 'CWP_dataset.csv')
-```
+````
 
 Display the first few rows of the mapping summaries
 
-```{r}
+````{r}
 print(head(mapping_codelist$recap_mapping))
-print(head(mapping_codelist$not_mapped_total))
-```
+````
 

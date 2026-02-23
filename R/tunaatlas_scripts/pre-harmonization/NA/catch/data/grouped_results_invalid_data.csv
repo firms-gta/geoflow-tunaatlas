@@ -1,0 +1,4 @@
+Entity,tRFMO,negative_values.csv,not_conform_conversion_factors.csv,removed_irregular_areas.csv,areas_in_land.csv,outside_juridiction.csv
+nominal_catch_ccsbt_level0__bygear,CCSBT,FALSE,FALSE,FALSE,FALSE,FALSE
+nominal_catch_iattc_level0,IATTC,FALSE,FALSE,FALSE,FALSE,FALSE
+nominal_catch_wcpfc_level0,WCPFC,FALSE,FALSE,FALSE,FALSE,FALSE

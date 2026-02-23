@@ -1,0 +1,64 @@
+{
+  "profile": {
+}
+    "id": "tuna-atlas-catch",
+    "mode": "entity",
+    "project": "FIRMS Tuna Atlas",
+    "organization": "FIRMS Tuna Atlas",
+    "logos": [
+      "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+      "https://www.blue-cloud.org/sites/default/files/styles/logo_small/public/FAO_2lines_500x500_1.png?itok=igwPSL5v",
+      "https://en.ird.fr/sites/ird_fr/files/2019-08/logo_IRD_2016_BLOC_UK_COUL.png"
+    ],
+    "options": {
+      "line_separator": "_\n"
+    }
+  },
+  "metadata": {
+    "entities" : [
+      {
+      "handler": "csv",
+      "source": "config/geoflow_entities_tuna_datasets - Effort_data_2026_missing_two_iccat.csv"
+      }
+    ],
+    "contacts" : [
+      {
+        "handler": "gsheet",
+        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+      }
+    ]
+  },
+  "software": [],
+  "actions": [
+    {
+      "id": "Tidying_and_mapping_data",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "run": true,
+      "options": {
+        "recap_each_step": true
+      }
+    }, 
+    
+    {
+      "id": "load_dataset",
+      "script": "../R/tunaatlas_actions/load_dataset.R",
+      "run": true,
+      "options": {
+        "upload_to_db": false,
+        "create_materialized_view" : false,
+        "add_sql_comments" : false,
+        "upload_to_googledrive" : false,
+        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
+        "save_local_overwrite": true
+      }
+    },
+    
+    {
+      "id": "create_report_global_action",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "run": false,
+      "options": {
+      }
+    }
+    
+  ]
