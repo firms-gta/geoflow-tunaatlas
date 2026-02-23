@@ -12,15 +12,27 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
 Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is created from a function so the documentation keep the format of roxygen2 skeleton
-A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R, the documentation keeps the format of roxygen2 skeleton.
+
+A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
+The datasets are named after the historical name provided by tRFMOs while exporting and may change.
+The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+
 Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+
 If you are interested in further details, the results and codes are available for review.
 
-```{r}
-path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') 
- path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')
+*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
+It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
+
+
+````{r}
+path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC_2025-11-27.csv') 
+ path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO_2025-11-27.csv')
+````
 
 Harmonize WCPFC Nominal Catch Datasets
 
@@ -42,29 +54,31 @@ This function harmonizes WCPFC nominal catch datasets for integration into the T
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 Input data sample:
-yy gear flag fleet alb_mt bet_mt pbf_mt skj_mt yft_mt blm_mt bum_mt mls_mt swo_mt ham_mt mak_mt ocs_mt por_mt fal_mt thr_mt
-1950    H   PH            0      0      0      0   1196     32    508      0     19      0      0      0      0      0      0
-1950    K   PH            0      0      0   1056   4784      0      0      0      0      0      0      0      0      0      0
-1950    L   JP    DW  16713  17463      0      0  12575      0      0      0      0      0      0      0      0      0      0
-1950    L   US    HW     27    781      0     34    269      0      0      0      0      0      0      0      0      0      0
-1950    O   ID            0      0      0   2645    625      0      0      0      0      0      0      0      0      0      0
-1950    O   PH            0      0      0   2782   2314      0      0      0      0      0      0      0      0      0      0
-Catch: final data sample:
-FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
-AU    L 1985-01-01 1986-01-01    WCPFC    ALL     YFT       ALL         MT     9
-AU    L 1986-01-01 1987-01-01    WCPFC    ALL     BET       ALL         MT     1
-AU    L 1986-01-01 1987-01-01    WCPFC    ALL     YFT       ALL         MT    13
-AU    L 1987-01-01 1988-01-01    WCPFC    ALL     ALB       ALL         MT   129
-AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BET       ALL         MT    64
-AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BLM       ALL         MT    17
 
-```{r}
+````{r}
+  # yy gear flag fleet alb_mt bet_mt pbf_mt skj_mt yft_mt blm_mt bum_mt mls_mt swo_mt ham_mt mak_mt ocs_mt por_mt fal_mt thr_mt
+  # 1950    H   PH            0      0      0      0   1196     32    508      0     19      0      0      0      0      0      0
+  # 1950    K   PH            0      0      0   1056   4784      0      0      0      0      0      0      0      0      0      0
+  # 1950    L   JP    DW  16713  17463      0      0  12575      0      0      0      0      0      0      0      0      0      0
+  # 1950    L   US    HW     27    781      0     34    269      0      0      0      0      0      0      0      0      0      0
+  # 1950    O   ID            0      0      0   2645    625      0      0      0      0      0      0      0      0      0      0
+  # 1950    O   PH            0      0      0   2782   2314      0      0      0      0      0      0      0      0      0      0
+  
+  # Catch: final data sample:
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  #   AU    L 1985-01-01 1986-01-01    WCPFC    ALL     YFT       ALL         MT     9
+  #   AU    L 1986-01-01 1987-01-01    WCPFC    ALL     BET       ALL         MT     1
+  #   AU    L 1986-01-01 1987-01-01    WCPFC    ALL     YFT       ALL         MT    13
+  #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     ALB       ALL         MT   129
+  #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BET       ALL         MT    64
+  #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BLM       ALL         MT    17
+
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
-```
+````
 
 packages
 
-```{r}
+````{r}
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
@@ -73,37 +87,47 @@ if(!require(reshape)){
   install.packages("reshape")
   require(reshape)
 }
-```
+if(!require(lubridate)){
+    install.packages("lubridate")
+    require(lubridate)
+}
 
-
-```{r}
+  if(!require(data.table)){
+    install.packages("data.table")
+    require(data.table)
+  }  
+  if(!require(reshape2)){
+    install.packages("reshape2")
+    require(reshape2)
+  }
+ #----------------------------------------------------------------------------------------------------------------------------
 opts <- options()
 options(encoding = "UTF-8")
-```
+````
 
 # # Nominal catches
 from wcpfc
 
-```{r}
+````{r}
 wcpfc_species = c("ALV", "BLM", "BSH", "BTH", "BUM", "FAL", "LMA", "MAK", "OCS", "POR", "PTH", "RHN", "SMA", "SPK", "SPL", "SPN", "SPY", "SPZ", "THR")
 NC1<-read.csv(path_to_raw_dataset1)
 NC1<-NC1[NC1$SP_CODE %in% wcpfc_species,]
-```
+````
 
 from wcpo
 
-```{r}
+````{r}
 wcpo_species = c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT")
 NC2<-read.csv(path_to_raw_dataset2)
 NC2<-NC2[NC2$SP_CODE %in% wcpo_species,]
 
 NC2$AreaName <- "WCPO"
 NC1$AreaName <- "WCPFC"
-```
+````
 
 bind both sources
 
-```{r}
+````{r}
 NC <- rbind(NC1,NC2)
 
 colnames(NC)[colnames(NC) == "YY"] <- "Year"
@@ -119,7 +143,7 @@ NC$SP_NAME <- NULL
 NC$FLEET_CODE <- NULL
 
 NCAreaCWPgrid<-NA
-NC$School<-"ALL"
+NC$School<-"UNK"
 NC$CatchType<-"NC"
 NC$CatchUnits<-"t"
 NC$RFMO<-"WCPFC"
@@ -127,20 +151,20 @@ NC$Ocean<-"PAC_W"
 
 NC$MonthStart<-1
 NC$Period<-12
-```
+````
 
 Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
 
-```{r}
+````{r}
 NC<-format_time_db_format(NC)
 NC <- NC[NC$Catch !=0 ,] #not sure if needed
 
 NC <-NC[c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")]
-```
+````
 
 remove 0 and NA values 
 
-```{r}
+````{r}
 NC <- NC[!is.na(NC$Catch),]
 NC <- NC[NC$Catch != 0,]
 
@@ -160,13 +184,11 @@ NC <- aggregate(NC$Catch,
 	)
 
 
-colnames(NC)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
+colnames(NC)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type",
+                "measurement_unit","measurement_value")
 NC$source_authority<-"WCPFC"
 NC$measurement<-"catch"
-```
-
-
-```{r}
+NC$measurement_processing_level<-"raised"
 NC$time_start <- as.Date(NC$time_start)
 NC$time_end <- as.Date(NC$time_end)
 dataset_temporal_extent <- paste(
@@ -175,34 +197,43 @@ dataset_temporal_extent <- paste(
 	sep = "/"
 )
 
+````
+
+sorties same folder as path_to_raw_dataset 
+
+````{r}
 output_name_dataset <- "Dataset_harmonized.csv"
+````
+
+----------------------------------------------------------------------------------------------------------------------------  
+
+````{r}
 write.csv(NC, output_name_dataset, row.names = FALSE)
 georef_dataset <- NC
-```
+````
 
 ----------------------------------------------------------------------------------------------------------------------------  
 @ Load pre-harmonization scripts and apply mappings
 
-```{r}
+````{r}
 download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
 source('local_map_codelists_no_DB.R')
 fact <- "catch"
 mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
-```
+````
 
 @ Handle unmapped values and save the results
 
-```{r}
+````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
 fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
 fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
 fwrite(georef_dataset, 'CWP_dataset.csv')
-```
+````
 
 Display the first few rows of the mapping summaries
 
-```{r}
+````{r}
 print(head(mapping_codelist$recap_mapping))
-print(head(mapping_codelist$not_mapped_total))
-```
+````
 

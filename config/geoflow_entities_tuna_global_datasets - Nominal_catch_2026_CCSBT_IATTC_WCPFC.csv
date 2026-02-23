@@ -56,7 +56,7 @@ process:Data upload[""The CSV file was integrated into the Tuna Atlas database."
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@./R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"
+action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"
 nominal_catch_ccsbt_level0__bygear,title:Annual catch of Southern Bluefin Tuna in the Southern hemisphere oceans (%temporal_extent:start% - %temporal_extent:end%) (CCSBT level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of Southern Bluefin Tuna (SBT) from the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year and fishing gear. It corresponds to the CCSBT nominal catch (task1) dataset.
  
 This dataset was downloaded on the CCSBT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.

@@ -446,19 +446,26 @@ display: none;
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset1 &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;XLS_WCPFC.csv&#39;) 
- path_to_raw_dataset2 &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;XLS_WCPO.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R" class="uri">https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset1 &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;XLS_WCPFC_2025-11-27.csv&#39;) 
+ path_to_raw_dataset2 &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;XLS_WCPO_2025-11-27.csv&#39;)</code></pre>
 <p>Harmonize WCPFC Nominal Catch Datasets</p>
 <p>This function harmonizes WCPFC nominal catch datasets for integration
 into the Tuna Atlas database, ensuring data compliance with specified
@@ -477,19 +484,25 @@ WCPFC task 2 data structures. <span class="citation">@export</span>
 <span class="citation">@keywords</span> data harmonization, fisheries,
 WCPFC, tuna <span class="citation">@author</span> Paul Taconet, IRD
 <span class="citation">@author</span> Bastien Grasset, IRD Input data
-sample: yy gear flag fleet alb_mt bet_mt pbf_mt skj_mt yft_mt blm_mt
-bum_mt mls_mt swo_mt ham_mt mak_mt ocs_mt por_mt fal_mt thr_mt 1950 H PH
-0 0 0 0 1196 32 508 0 19 0 0 0 0 0 0 1950 K PH 0 0 0 1056 4784 0 0 0 0 0
-0 0 0 0 0 1950 L JP DW 16713 17463 0 0 12575 0 0 0 0 0 0 0 0 0 0 1950 L
-US HW 27 781 0 34 269 0 0 0 0 0 0 0 0 0 0 1950 O ID 0 0 0 2645 625 0 0 0
-0 0 0 0 0 0 0 1950 O PH 0 0 0 2782 2314 0 0 0 0 0 0 0 0 0 0 Catch: final
-data sample: FishingFleet Gear time_start time_end AreaName School
-Species CatchType CatchUnits Catch AU L 1985-01-01 1986-01-01 WCPFC ALL
-YFT ALL MT 9 AU L 1986-01-01 1987-01-01 WCPFC ALL BET ALL MT 1 AU L
-1986-01-01 1987-01-01 WCPFC ALL YFT ALL MT 13 AU L 1987-01-01 1988-01-01
-WCPFC ALL ALB ALL MT 129 AU L 1987-01-01 1988-01-01 WCPFC ALL BET ALL MT
-64 AU L 1987-01-01 1988-01-01 WCPFC ALL BLM ALL MT 17</p>
-<pre class="r"><code>  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R&quot;)</code></pre>
+sample:</p>
+<pre class="r"><code>  # yy gear flag fleet alb_mt bet_mt pbf_mt skj_mt yft_mt blm_mt bum_mt mls_mt swo_mt ham_mt mak_mt ocs_mt por_mt fal_mt thr_mt
+  # 1950    H   PH            0      0      0      0   1196     32    508      0     19      0      0      0      0      0      0
+  # 1950    K   PH            0      0      0   1056   4784      0      0      0      0      0      0      0      0      0      0
+  # 1950    L   JP    DW  16713  17463      0      0  12575      0      0      0      0      0      0      0      0      0      0
+  # 1950    L   US    HW     27    781      0     34    269      0      0      0      0      0      0      0      0      0      0
+  # 1950    O   ID            0      0      0   2645    625      0      0      0      0      0      0      0      0      0      0
+  # 1950    O   PH            0      0      0   2782   2314      0      0      0      0      0      0      0      0      0      0
+  
+  # Catch: final data sample:
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits Catch
+  #   AU    L 1985-01-01 1986-01-01    WCPFC    ALL     YFT       ALL         MT     9
+  #   AU    L 1986-01-01 1987-01-01    WCPFC    ALL     BET       ALL         MT     1
+  #   AU    L 1986-01-01 1987-01-01    WCPFC    ALL     YFT       ALL         MT    13
+  #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     ALB       ALL         MT   129
+  #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BET       ALL         MT    64
+  #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BLM       ALL         MT    17
+
+  source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R&quot;)</code></pre>
 <p>packages</p>
 <pre class="r"><code>if(!require(dplyr)){
   install.packages(&quot;dplyr&quot;)
@@ -498,8 +511,22 @@ WCPFC ALL ALB ALL MT 129 AU L 1987-01-01 1988-01-01 WCPFC ALL BET ALL MT
 if(!require(reshape)){
   install.packages(&quot;reshape&quot;)
   require(reshape)
-}</code></pre>
-<pre class="r"><code>opts &lt;- options()
+}
+if(!require(lubridate)){
+    install.packages(&quot;lubridate&quot;)
+    require(lubridate)
+}
+
+  if(!require(data.table)){
+    install.packages(&quot;data.table&quot;)
+    require(data.table)
+  }  
+  if(!require(reshape2)){
+    install.packages(&quot;reshape2&quot;)
+    require(reshape2)
+  }
+ #----------------------------------------------------------------------------------------------------------------------------
+opts &lt;- options()
 options(encoding = &quot;UTF-8&quot;)</code></pre>
 </div>
 <div id="nominal-catches" class="section level1">
@@ -531,7 +558,7 @@ NC$SP_NAME &lt;- NULL
 NC$FLEET_CODE &lt;- NULL
 
 NCAreaCWPgrid&lt;-NA
-NC$School&lt;-&quot;ALL&quot;
+NC$School&lt;-&quot;UNK&quot;
 NC$CatchType&lt;-&quot;NC&quot;
 NC$CatchUnits&lt;-&quot;t&quot;
 NC$RFMO&lt;-&quot;WCPFC&quot;
@@ -565,19 +592,22 @@ NC &lt;- aggregate(NC$Catch,
     )
 
 
-colnames(NC)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;species&quot;,&quot;measurement_type&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
+colnames(NC)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;species&quot;,&quot;measurement_type&quot;,
+                &quot;measurement_unit&quot;,&quot;measurement_value&quot;)
 NC$source_authority&lt;-&quot;WCPFC&quot;
-NC$measurement&lt;-&quot;catch&quot;</code></pre>
-<pre class="r"><code>NC$time_start &lt;- as.Date(NC$time_start)
+NC$measurement&lt;-&quot;catch&quot;
+NC$measurement_processing_level&lt;-&quot;raised&quot;
+NC$time_start &lt;- as.Date(NC$time_start)
 NC$time_end &lt;- as.Date(NC$time_end)
 dataset_temporal_extent &lt;- paste(
     paste0(format(min(NC$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
     paste0(format(max(NC$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
     sep = &quot;/&quot;
-)
-
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
-write.csv(NC, output_name_dataset, row.names = FALSE)
+)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;</code></pre>
+<hr />
+<pre class="r"><code>write.csv(NC, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- NC</code></pre>
 <hr />
 <p>@ Load pre-harmonization scripts and apply mappings</p>
@@ -586,11 +616,13 @@ source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;catch&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension species with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
-##  mapping dimension measurement_type with code list mapping</code></pre>
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension species with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
 fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
@@ -607,10 +639,6 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ## 4 CK       COK      flag_wcpfc       fishingfleet_firms WCPFC           
 ## 5 CN       CHN      flag_wcpfc       fishingfleet_firms WCPFC           
 ## 6 EC       ECU      flag_wcpfc       fishingfleet_firms WCPFC</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority        Dimension
-## 1   ALL            WCPFC     fishing_mode
-## 2    NC            WCPFC measurement_type</code></pre>
 </div>
 
 

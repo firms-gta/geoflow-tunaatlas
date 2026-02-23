@@ -72,10 +72,6 @@ clean_script <- function(script_path) {
     lines_add <- c(lines_add, 'path_to_raw_dataset_catch <- ') 
     lines_add <- c(lines_add, 'path_to_raw_dataset_effort <- ') 
     
-  } else if(sum(grepl("path_to_raw_dataset1",  as.character(lines)))>0){
-    lines_add <- c(lines_add, 'path_to_raw_dataset1 <- XLS_WCPFC.csv') 
-    lines_add <- c(lines_add, 'path_to_raw_dataset2 <- XLS_WCPO.csv') 
-    
   } else if(sum(grepl("path_to_raw_dataset",  lines))) {
     lines_add <- c(lines_add, 'path_to_raw_dataset <- ') 
   }

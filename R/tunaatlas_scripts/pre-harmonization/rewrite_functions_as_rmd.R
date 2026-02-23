@@ -116,9 +116,9 @@ rewrite_functions_as_rmd <- function(source_path) {
     data_files <- data_files[!str_detect(data_files, "removed_irregular_areas")]
     data_files <- data_files[!str_detect(data_files, "recap_mapping")]
     data_files <- data_files[!str_detect(data_files, "areas_in_land")]
-    
+    browser()
     if (!is.na(trfmo) && type == "nominal" && trfmo == "wcpfc") {
-      lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC.csv') \n path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO.csv')", lines)
+      lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC_2025-11-27.csv') \n path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO_2025-11-27.csv')", lines)
     } else {
       if (length(data_files) >= 1) {
         lines <- gsub("path_to_raw_dataset <-.*", paste0("path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[1]), "')"), lines)
@@ -130,7 +130,6 @@ rewrite_functions_as_rmd <- function(source_path) {
         lines <- gsub("path_to_raw_dataset_effort <-.*", paste0("path_to_raw_dataset_effort <- here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", path_file(data_files[2]), "')"), lines)
       }
     }
-    
     # Ajouter un espace après chaque # suivi directement d'une lettre
     lines <- gsub("(^#)(\\S)", "\\1 \\2", lines)
     
