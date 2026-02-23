@@ -150,7 +150,7 @@ if(!require(dplyr)){
     sep = "/"
   )
   entity$setTemporalExtent(dataset_temporal_extent)
-  efforts$measurement_processing_level <- "unknown" 
+  catches$measurement_processing_level <- "unknown" 
   base1 <- tools::file_path_sans_ext(basename(filename1))
   #@geoflow -> export as csv
   # sorties same folder as path_to_raw_dataset 
