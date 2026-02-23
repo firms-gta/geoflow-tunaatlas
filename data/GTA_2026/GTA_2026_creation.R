@@ -84,11 +84,12 @@ copy_all_nested_data_folders <- function(source_root, target_data_folder = here:
 
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
-setwd(here::here("data/GTA_2026"))
 raw_nominal_catch <- executeWorkflow(here::here("config/Nominal_catch_2026.json"))
 raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch_2026")
 running_time_of_workflow(raw_nominal_catch)
-
+time_Summarising_invalid_data <- system.time({
+  summarising_invalid_data(raw_nominal_catch, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+})
 
 ## Georeferenced catch: These datasets contains catch AND EFFORT FOR SOME DATA as effort are used to raise catch data for level 0 to 2
 # Around 1.2 hours
@@ -137,6 +138,7 @@ source("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization/rewr
 
 safe_rewrite_functions_as_rmd(raw_data_georef)
 safe_rewrite_functions_as_rmd(raw_data_georef_effort)
+rewrite_functions_as_rmd(raw_nominal_catch)
 # Appel à la fonction pour supprimer les fichiers spécifiques
 remove_specific_files(here::here("R/tunaatlas_scripts/pre-harmonization"))
 
