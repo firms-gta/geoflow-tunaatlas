@@ -135,17 +135,17 @@ time_Summarising_invalid_data <- system.time({
 
 # towrite rmd to commit on github
 source("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R")
-
+remove_specific_files(here::here("R/tunaatlas_scripts/pre-harmonization"))
+truncate_files("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization")
 safe_rewrite_functions_as_rmd(raw_data_georef)
 safe_rewrite_functions_as_rmd(raw_data_georef_effort)
 rewrite_functions_as_rmd(raw_nominal_catch)
 # Appel à la fonction pour supprimer les fichiers spécifiques
-remove_specific_files(here::here("R/tunaatlas_scripts/pre-harmonization"))
 
 # puis commit sur github
 
 # Troncature des fichiers CSV et XLSX après la génération des fichiers HTML
-truncate_files("~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization")
+
 
 setwd("~/firms-gta/geoflow-tunaatlas")
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/create_effort_dataset_2026.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
