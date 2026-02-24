@@ -12,14 +12,26 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
 Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is created from a function so the documentation keep the format of roxygen2 skeleton
-A summary of the mapping process is provided. The path to the dataset is specified, you will find on this same repository on github the first line of each dataset. The datasets are named after the historical name provided by tRFMOs while exporting and may change. The information provided in the Rmd allows to understand correctly which dataset should be used in this markdown.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R, the documentation keeps the format of roxygen2 skeleton.
+
+A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
+The datasets are named after the historical name provided by tRFMOs while exporting and may change.
+The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+
 Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+
 If you are interested in further details, the results and codes are available for review.
 
-```{r}
-path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'effort', 'data', 't2ce_noSchool.csv')
+*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
+It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
+
+
+````{r}
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'effort', 'data', 't2ce_noSchool.csv')
+````
 
 Harmonize Data Structure of ICCAT Effort Dataset
 
@@ -42,13 +54,13 @@ Depending on the parameter settings, either 'fleet' or 'flag' column will be kep
 
 
 
-```{r}
+````{r}
 keep_fleet_instead_of_flag=FALSE
-```
+````
 
 packages
 
-```{r}
+````{r}
 if(!require(readr)){
   install.packages("readr")
   require(readr)
@@ -57,7 +69,7 @@ if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
 }
-```
+````
 
 Input data sample: No sample. Miscrosoft Acces DB. However after the commands that read the input DB the sample is the following:
 StrataID DSetID FleetID GearGrpCode GearCode FileTypeCode YearC TimePeriodID SquareTypeCode QuadID Lat Lon Eff1 Eff1Type Eff2 Eff2Type DSetTypeID CatchUnit ALB BET     BFT BUM
@@ -90,58 +102,55 @@ ARG   LL 1967-05-01 1967-06-01  7330040    ALL    NO.HOOKS  88000
 ARG   LL 1967-06-01 1967-07-01  7330040    ALL    NO.HOOKS  66000
 ARG   LL 1967-07-01 1967-08-01  7330040    ALL    NO.HOOKS  50000
 # download database
+to get .mdb ./R/tunaatlas_scripts/pre-harmonization/data_iccat_from_mdb.R
 Historical name for the dataset at source  t2ce_noSchool.csv
-----------------------------------------------------------------------------------------------------------------------------
 
-```{r}
+````{r}
 keep_fleet_instead_of_flag=FALSE  
 
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
-ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
-```
+ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID",
+                                                    "FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode",
+                                                    "QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode", 
+                                                    "SchoolTypeCode", "FlagName", "StatusCode"))
+````
 
-Flags<-mdb.get(paste0(working_directory_init,"/db.mdb"),tables='Flags',stringsAsFactors=FALSE,strip.white=TRUE)
 data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
 # Efforts
 # Reach the efforts pivot DSD using a function in ICCAT_functions.R
 # If we want in the output dataset the column 'FleetCode' instead of 'flag'
 
-```{r}
+````{r}
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCAT_CE_species_colnames)
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
-```
+````
 
 School
 
-```{r}
-efforts_pivot_ICCAT$School<-"ALL"
-```
+````{r}
+efforts_pivot_ICCAT$School<-"UNK"
+````
 
 Flag
 
-```{r}
+````{r}
 efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
-
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
-```
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FlagCode'] <- 'FishingFleet'
+````
 
 Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 
-```{r}
+````{r}
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType <- "C" #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","measurement_type")
 efforts$source_authority<-"ICCAT"
-```
 
-----------------------------------------------------------------------------------------------------------------------------
-
-```{r}
 efforts$time_start <- as.Date(efforts$time_start)
 efforts$time_end <- as.Date(efforts$time_end)
 dataset_temporal_extent <- paste(
@@ -151,34 +160,38 @@ dataset_temporal_extent <- paste(
 )
 
 
+````
+
+sorties same folder as path_to_raw_dataset 
+
+````{r}
 output_name_dataset <- "Dataset_harmonized.csv"
+
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset <- efforts
-```
+````
 
-----------------------------------------------------------------------------------------------------------------------------
 @ Load pre-harmonization scripts and apply mappings
 
-```{r}
+````{r}
 download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
 source('local_map_codelists_no_DB.R')
 fact <- "effort"
 mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))
-```
+````
 
 @ Handle unmapped values and save the results
 
-```{r}
+````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
 fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
 fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
 fwrite(georef_dataset, 'CWP_dataset.csv')
-```
+````
 
 Display the first few rows of the mapping summaries
 
-```{r}
+````{r}
 print(head(mapping_codelist$recap_mapping))
-print(head(mapping_codelist$not_mapped_total))
-```
+````
 

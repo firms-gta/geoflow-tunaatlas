@@ -62,4 +62,12 @@ t2ce <- read_csv("data/t2ce.csv")
 
 
 t2ce_noSchool <- t2ce %>% dplyr::inner_join(flags )
+View(head(t2ce_noSchool))
+fwrite(t2ce_noSchool,"data/t2ce_noSchool.csv")
+
+
+byschool <- readxl::read_excel(("~/Downloads/t2ce_ETRO-PS1991-2024_bySchool_v1.xlsx"),
+                               sheet = "Data")
+
+t2ce_bySchool <- byschool %>% dplyr::inner_join(flags )
 fwrite(t2ce_noSchool,"data/t2ce_noSchool.csv")
