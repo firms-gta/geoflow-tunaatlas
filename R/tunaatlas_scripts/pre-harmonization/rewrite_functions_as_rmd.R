@@ -116,7 +116,6 @@ rewrite_functions_as_rmd <- function(source_path) {
     data_files <- data_files[!str_detect(data_files, "removed_irregular_areas")]
     data_files <- data_files[!str_detect(data_files, "recap_mapping")]
     data_files <- data_files[!str_detect(data_files, "areas_in_land")]
-    browser()
     if (!is.na(trfmo) && type == "nominal" && trfmo == "wcpfc") {
       lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC_2025-11-27.csv') \n path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO_2025-11-27.csv')", lines)
     } else {
