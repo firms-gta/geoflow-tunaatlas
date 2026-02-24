@@ -109,11 +109,10 @@ efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c
 efforts_pivot_ICCAT$School<-"UNK"
 
 # Flag
-efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
-efforts_pivot_ICCAT$FleetCode_short <- sub("-.*", "", RFMO_CE$efforts_pivot_ICCAT) # fleet code only what is after the '-'
+efforts_pivot_ICCAT$FleetCode_short <- sub("-.*", "", efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the '-'
 
-names(RFMO_CE)[names(RFMO_CE) == 'FleetCode_short'] <- 'FishingFleet'
-RFMO_CE <- RFMO_CE[, c("FishingFleet", setdiff(names(RFMO_CE), "FishingFleet"))] # put flag in first position
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode_short'] <- 'FishingFleet'
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT[, c("FishingFleet", setdiff(names(efforts_pivot_ICCAT), "FishingFleet"))] # put flag in first position
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
