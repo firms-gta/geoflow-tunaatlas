@@ -84,7 +84,10 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 keep_fleet_instead_of_flag=FALSE  
 
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
-ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
+ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID",
+                                                    "FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode",
+                                                    "QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode", 
+                                                    "SchoolTypeCode", "FlagName", "StatusCode"))
 
 config$logger.info(paste0("BEGIN  function   \n"))
 
@@ -107,8 +110,7 @@ efforts_pivot_ICCAT$School<-"UNK"
 
 # Flag
 efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
-
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FlagCode'] <- 'FishingFleet'
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
