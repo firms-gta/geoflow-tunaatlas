@@ -33,7 +33,7 @@ source:./data/GTA_2026/EF_RAW.csv,./data/GTA_2026/iotc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
-action:indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R_
+action:indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R_
 action_option_source_authority_to_map:IOTC,ICCAT"
 effort_iccat_level0__noschool,"title:Monthly effort of tuna, tuna-like and shark species in the Atlantic Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by statistical squares of 1° or 5° longitude and latitude (ICCAT level 0)","abstract:This dataset lists the monthly-spatially aggregated effort of tuna, tuna-like and shark species from the International Commission for the Conservation of Atlantic Tunas (ICCAT) from %temporal_extent:start% to %temporal_extent:end%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country and area (mainly 1° or statistical squares of 5° longitude and latitude). It corresponds to the effort part of the ICCAT catch-and-effort (task2) dataset.
 
@@ -80,7 +80,7 @@ source:./data/GTA_2026/t2ce_noSchool.csv,./data/GTA_2026/iccat_effort_code_lists
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
-action:atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R[R harmonization script]@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R_
+action:atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R[R harmonization script]@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R_
 action_option_source_authority_to_map:IOTC,ICCAT"
 effort_iccat_level0__byschool,title:Monthly effort of tuna and tuna-like species in the Atlantic Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude (ICCAT level 0),"abstract:This dataset lists the monthly-spatially aggregated effort of tropical tuna species from the International Commission for the Conservation of Atlantic Tunas (ICCAT) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country, fishing mode (i.e. type of school used) and area (statistical squares of 1° longitude and latitude). It corresponds to the effort part of the ICCAT catch-and-effort (task2) dataset.
 
@@ -103,7 +103,7 @@ source:./data/GTA_2026/t2ce_ETRO-PS1991-2024_bySchool_v1.xlsx,./data/GTA_2026/ic
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
-action:atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R[R harmonization script]@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R_
+action:atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R[R harmonization script]@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R_
 action_option_source_authority_to_map:IOTC,ICCAT"
 effort_5deg_1m_ll_ccsbt_level0,title:Monthly effort of Southern Bluefin Tuna in the Southern hemisphere oceans (%temporal_extent:start% - %temporal_extent:end%) by longliners aggregated by statistical squares of 5° longitude and latitude (CCSBT level 0),"abstract:""This dataset lists the monthly-spatially aggregated effort of Southern Bluefin Tuna (SBT) from the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) for the commercial longline fisheries from %temporal_extent:start% to %temporal_extent:end%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 5° longitude and latitude). It corresponds to the effort part of the CCSBT catch-and-effort (task2) dataset.
  

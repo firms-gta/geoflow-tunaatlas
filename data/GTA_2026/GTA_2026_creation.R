@@ -85,7 +85,7 @@ copy_all_nested_data_folders <- function(source_root, target_data_folder = here:
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
 raw_nominal_catch <- executeWorkflow(here::here("config/Nominal_catch_2026.json"))
-raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch_2026")
+raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch_2026_final")
 running_time_of_workflow(raw_nominal_catch)
 time_Summarising_invalid_data <- system.time({
   summarising_invalid_data(raw_nominal_catch, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
@@ -121,7 +121,7 @@ setwd("~/firms-gta/geoflow-tunaatlas")
 #         get(".geoflow_old_getJobDataResource", envir = .GlobalEnv),
 #         overwrite = TRUE)
 raw_data_georef_effort <- executeWorkflow(here::here("config/All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
-raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
+raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort_final")
 # copy_all_nested_data_folders(source_root = getwd(),target_data_folder = file.path(getwd(), "data"))
 running_time_of_workflow(raw_data_georef_effort)
 config <- initWorkflow(here::here("config/All_raw_data_georef_effort.json"), handleMetadata = FALSE)
@@ -149,8 +149,7 @@ rewrite_functions_as_rmd(raw_nominal_catch)
 
 setwd("~/firms-gta/geoflow-tunaatlas")
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/create_effort_dataset_2026.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
-tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
-
+tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts_final")
 
 # Level 0 2026 ------------------------------------------------------------
 
