@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+AUS,09.31,1987-04-01,1987-04-30,6235150,UNK,HOOKS,WCPFC,effort,unknown,9771.466
+AUS,09.31,1987-05-01,1987-05-31,6235150,UNK,HOOKS,WCPFC,effort,unknown,6059.614
+AUS,09.31,1987-07-01,1987-07-31,6220150,UNK,HOOKS,WCPFC,effort,unknown,15302.742
+AUS,09.31,1987-08-01,1987-08-31,6225150,UNK,HOOKS,WCPFC,effort,unknown,18261.228
+AUS,09.31,1987-09-01,1987-09-30,6225150,UNK,HOOKS,WCPFC,effort,unknown,13256.422

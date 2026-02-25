@@ -46,21 +46,16 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 opts <- options()
 options(encoding = "UTF-8")
 
-# Input data sample (after importing as data.frame in R):
-# DSetID StrataID      Flag      FleetCode GearCode YearC TimePeriodID SquareTypeCode QuadID Lat Lon Eff1  Eff1Type  Eff2  Eff2Type Eff3  Eff3Type Eff4  Eff4Type Eff5  Eff5Type YFTfd ALBfd BETfd BLFfd LTAfd  SKJfd
-#   2791   502973 EU.España EU.ESP-ES-ETRO       PS  1991            1            1x1      1   1   3 25.2 FISH.HOUR  50.2 HOURS.SEA 25.2 Hours.STD 6.83 Hours.FAD    0 Hours.FSC  7110     0  9500     0     0  57620
-#   2791   502975 EU.España EU.ESP-ES-ETRO       PS  1991            1            1x1      3   0   3 18.7 FISH.HOUR  37.6 HOURS.SEA 18.7 Hours.STD 1.92 Hours.FAD    0 Hours.FSC   720     0  1180     0     0   8540
-#   2791   502978 EU.España EU.ESP-ES-ETRO       PS  1991            1            1x1      3   0   9 25.3 FISH.HOUR  50.2 HOURS.SEA 25.3 Hours.STD 2.83 Hours.FAD    0 Hours.FSC  3940     0  5560     0     0  35460
-#   2791   502979 EU.España EU.ESP-ES-ETRO       PS  1991            1            1x1      3   0  10 50.5 FISH.HOUR 100.3 HOURS.SEA 50.5 Hours.STD 5.27 Hours.FAD    0 Hours.FSC 10140     0 16610     0     0 119600
-#   2791   502980 EU.España EU.ESP-ES-ETRO       PS  1991            1            1x1      3   0  11 25.3 FISH.HOUR  50.2 HOURS.SEA 25.3 Hours.STD 6.17 Hours.FAD    0 Hours.FSC  7960     0 13060     0     0  93970
-#   2791   502981 EU.España EU.ESP-ES-ETRO       PS  1991            1            1x1      3   0  12 25.3 FISH.HOUR  50.2 HOURS.SEA 25.3 Hours.STD 6.81 Hours.FAD    0 Hours.FSC  9770     0 16010     0     0 115320
-# FRIfd YFTfs ALBfs BETfs BLFfs LTAfs SKJfs FRIfs
-#     0     0     0     0     0     0     0     0
-#     0     0     0     0     0     0     0     0
-#  2090     0     0     0     0     0     0     0
-#     0     0     0     0     0     0     0     0
-#     0     0     0     0     0     0     0     0
-#     0     0     0     0     0     0     0     0
+# Input data sample (after importing as data.frame in R): 
+# A tibble: 6 × 33
+# DSetID StrataID FlagName  FleetCode      GearCode YearC Decade TimePeriodID GeoStrataCode QuadID   Lat   Lon  xLon  yLat FishMode  Eff1 Eff1Type   Eff2 Eff2Type   Eff3 Eff3Type   Eff4 Eff4Type   Eff5 Eff5Type    YFT   ALB   BET   BLF   LTA   SKJ   FRI TOTAL
+# <dbl>    <dbl> <chr>     <chr>          <chr>    <dbl>  <dbl>        <dbl> <chr>          <dbl> <dbl> <dbl> <dbl> <dbl> <chr>    <dbl> <chr>     <dbl> <chr>     <dbl> <chr>     <dbl> <chr>     <dbl> <chr>     <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+#   1   2797   509067 EU-España EU.ESP-ES-ETRO PS        1994   1990            1 1x1                1     0     1   1.5   0.5 FAD       13   FISH.HOUR  25.9 HOURS.SEA  13   Hours.STD     0 Hours.FAD  0    Hours.FSC     0     0     0     0     0     0     0     0
+# 2   2797   509068 EU-España EU.ESP-ES-ETRO PS        1994   1990            1 1x1                1     1     0   0.5   1.5 FAD       13   FISH.HOUR  25.9 HOURS.SEA  13   Hours.STD     0 Hours.FAD  0    Hours.FSC     0     0     0     0     0     0     0     0
+# 3   2797   509069 EU-España EU.ESP-ES-ETRO PS        1994   1990            1 1x1                1     1     2   2.5   1.5 FAD       13   FISH.HOUR  25.9 HOURS.SEA  13   Hours.STD     0 Hours.FAD  0    Hours.FSC     0     0     0     0     0     0     0     0
+# 4   2797   509070 EU-España EU.ESP-ES-ETRO PS        1994   1990            1 1x1                2     0     0   0.5  -0.5 FAD       13.1 FISH.HOUR  25.9 HOURS.SEA  13.1 Hours.STD     0 Hours.FAD  0    Hours.FSC     0     0     0     0     0     0     0     0
+# 5   2797   509071 EU-España EU.ESP-ES-ETRO PS        1994   1990            1 1x1                2     0     1   1.5  -0.5 FAD       26.1 FISH.HOUR  51.8 HOURS.SEA  26.1 Hours.STD     0 Hours.FAD  2.21 Hours.FSC     0     0     0     0     0     0     0     0
+# 6   2797   509072 EU-España EU.ESP-ES-ETRO PS        1994   1990            1 1x1                2     0     2   2.5  -0.5 FAD       12.1 FISH.HOUR  24   HOURS.SEA  12.1 Hours.STD     0 Hours.FAD  0    Hours.FSC     0     0     0     0     0     0     0     0
 
 # Effort: final data sample:
 # Flag Gear time_start   time_end AreaName School EffortUnits Effort
@@ -72,46 +67,43 @@ options(encoding = "UTF-8")
 
 
 ## Catches
-
 # RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
 RFMO_CE <- read_excel(path_to_raw_dataset,
                 sheet = "Data")
-names(RFMO_CE)[names(RFMO_CE) == 'Flag'] <- 'FishingFleet'
 
-## If we want in the output dataset the column 'FleetCode' instead of 'flag'
+RFMO_CE$FleetCode_short <- sub("-.*", "", RFMO_CE$FleetCode) # fleet code only what is after the '-'
 
-if(keep_fleet_instead_of_flag==TRUE){
-  RFMO_CE$Flag<-NULL
-  names(RFMO_CE)[names(RFMO_CE) == 'Fishingfleet'] <- 'Flag'
-}
+names(RFMO_CE)[names(RFMO_CE) == 'FleetCode_short'] <- 'FishingFleet'
+RFMO_CE <- RFMO_CE[, c("FishingFleet", setdiff(names(RFMO_CE), "FishingFleet"))] # oput flag in first position
+
+
+# ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
+# 
+# if(keep_fleet_instead_of_flag==TRUE){
+#   RFMO_CE$Flag<-NULL
+#   names(RFMO_CE)[names(RFMO_CE) == 'Fishingfleet'] <- 'Flag'
+# }
 
 ##Efforts
 
-last_column_not_catch_value=26
+last_column_not_catch_value=27
 RFMO_CE<-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
 
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c("Eff1","Eff2","Eff3","Eff4","Eff5"),c("Eff1Type","Eff2Type","Eff3Type","Eff4Type","Eff5Type"))
 
 # School
-# when the unit of effort is Hours.FAD: then schooltype=fd
-# when the unit of effort is Hours.FSC: then schooltype=fs
-# when the units of efforts are different that Hours.FAD or Hours.FSC: then schooltype=ALL. 
+# The format changed, the school is now in the FishMode column
 
-index_school_fs<-which(efforts_pivot_ICCAT$EffortUnits == "Hours.FSC")
-index_school_fd<-which(efforts_pivot_ICCAT$EffortUnits == "Hours.FAD")
-index_school_all<-which(efforts_pivot_ICCAT$EffortUnits %in% setdiff(unique(efforts_pivot_ICCAT$EffortUnits),c("Hours.FAD","Hours.FSC")))
-
-efforts_pivot_ICCAT$School<-"UNK"
-efforts_pivot_ICCAT$School[index_school_fs]<-"fs"
-efforts_pivot_ICCAT$School[index_school_fd]<-"fd"
-
-
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::mutate(FishMode = ifelse(FishMode == "n/a", "UNK", FishMode)) 
+efforts_pivot_ICCAT<- efforts_pivot_ICCAT %>% dplyr::rename("School" = "FishMode")
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::rename(SquareTypeCode = GeoStrataCode) # to match definition in ICCAT_CE_effort_pivotDSD_to_harmonizedDSD
+efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
-
+efforts$AreaName <- as.character(as.integer(efforts$AreaName))
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"ICCAT"
 #----------------------------------------------------------------------------------------------------------------------------
@@ -130,7 +122,7 @@ efforts$geographic_identifier <- format(as.integer(efforts$geographic_identifier
 #@geoflow -> export as csv
 base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-# sorties same folder as path_to_raw_dataset 
+# output in same folder as path_to_raw_dataset 
 output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
 output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
 

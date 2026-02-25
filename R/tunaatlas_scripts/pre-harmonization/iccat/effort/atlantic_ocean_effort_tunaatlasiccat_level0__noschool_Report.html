@@ -447,18 +447,25 @@ Dataset</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_noSchool.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_noSchool.csv&#39;)</code></pre>
 <p>Harmonize Data Structure of ICCAT Effort Dataset</p>
 <p>This function harmonizes the data structure of ICCAT effort datasets
 from voluminous Microsoft Access databases. It handles datasets by
@@ -514,14 +521,41 @@ ALL NO.HOOKS 13000 ARG LL 1967-03-01 1967-04-01 7330040 ALL NO.HOOKS
 67000 ARG LL 1967-04-01 1967-05-01 7330040 ALL NO.HOOKS 107000 ARG LL
 1967-05-01 1967-06-01 7330040 ALL NO.HOOKS 88000 ARG LL 1967-06-01
 1967-07-01 7330040 ALL NO.HOOKS 66000 ARG LL 1967-07-01 1967-08-01
-7330040 ALL NO.HOOKS 50000 # download database Historical name for the
-dataset at source t2ce_noSchool.csv
-—————————————————————————————————————————-</p>
+7330040 ALL NO.HOOKS 50000 # download database to get .mdb
+./R/tunaatlas_scripts/pre-harmonization/data_iccat_from_mdb.R Historical
+name for the dataset at source t2ce_noSchool.csv</p>
 <pre class="r"><code>keep_fleet_instead_of_flag=FALSE  
 
 t2ce &lt;- as.data.frame(readr::read_csv(path_to_raw_dataset))
-ICCAT_CE_species_colnames&lt;-setdiff(colnames(t2ce),c(&quot;StrataID&quot;,&quot;DSetID&quot;,&quot;FleetID&quot;,&quot;GearGrpCode&quot;,&quot;GearCode&quot;,&quot;FileTypeCode&quot;,&quot;YearC&quot;,&quot;TimePeriodID&quot;,&quot;SquareTypeCode&quot;,&quot;QuadID&quot;,&quot;Lat&quot;,&quot;Lon&quot;,&quot;Eff1&quot;,&quot;Eff1Type&quot;,&quot;Eff2&quot;,&quot;Eff2Type&quot;,&quot;DSetTypeID&quot;,&quot;CatchUnit&quot;, &quot;FleetCode&quot;, &quot;FleetName&quot;, &quot;FlagID&quot;, &quot;FlagCode&quot;))</code></pre>
-<p>Flags&lt;-mdb.get(paste0(working_directory_init,“/db.mdb”),tables=‘Flags’,stringsAsFactors=FALSE,strip.white=TRUE)
+ICCAT_CE_species_colnames&lt;-setdiff(colnames(t2ce),c(&quot;StrataID&quot;,&quot;DSetID&quot;,
+                                                    &quot;FleetID&quot;,&quot;GearGrpCode&quot;,&quot;GearCode&quot;,&quot;FileTypeCode&quot;,&quot;YearC&quot;,&quot;TimePeriodID&quot;,&quot;SquareTypeCode&quot;,
+                                                    &quot;QuadID&quot;,&quot;Lat&quot;,&quot;Lon&quot;,&quot;Eff1&quot;,&quot;Eff1Type&quot;,&quot;Eff2&quot;,&quot;Eff2Type&quot;,&quot;DSetTypeID&quot;,&quot;CatchUnit&quot;, &quot;FleetCode&quot;, &quot;FleetName&quot;, &quot;FlagID&quot;, &quot;FlagCode&quot;, 
+                                                    &quot;SchoolTypeCode&quot;, &quot;FlagName&quot;, &quot;StatusCode&quot;))</code></pre>
+<p>remove duplicated lines, as displayed in kilos and numbers</p>
+<pre class="r"><code>eff_cols &lt;- c(&quot;Eff1&quot;,&quot;Eff1Type&quot;,&quot;Eff2&quot;,&quot;Eff2Type&quot;)
+species_cols &lt;- ICCAT_CE_species_colnames
+
+key_cols &lt;- setdiff(
+  colnames(t2ce),
+  c(&quot;StrataID&quot;, &quot;CatchUnit&quot;, eff_cols, species_cols)
+)
+
+unit_priority &lt;- function(x) {
+  dplyr::case_when(
+    x == &quot;kg&quot; ~ 1L,
+    x == &quot;nr&quot; ~ 2L,
+    TRUE      ~ 3L
+  )
+}
+
+t2ce &lt;- t2ce %&gt;%
+  dplyr::mutate(.unit_rank = unit_priority(CatchUnit)) %&gt;%
+  dplyr::group_by(across(all_of(key_cols))) %&gt;%
+  dplyr::arrange(.unit_rank, .by_group = TRUE) %&gt;%
+  dplyr::slice(1) %&gt;%
+  dplyr::ungroup() %&gt;%
+  dplyr::select(-.unit_rank)</code></pre>
+<p>remove data displayed annualy
 data_pivot_ICCAT&lt;-left_join(t2ce,Flags,by=“FleetID”) # equivalent to
 “select FlagCode,FlagID,t2ce.* from t2ce, Flags where
 t2ce.FleetID=Flags.FleetID” # Efforts # Reach the efforts pivot DSD
@@ -533,42 +567,47 @@ efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,I
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R&quot;)
 efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c(&quot;Eff1&quot;,&quot;Eff2&quot;),c(&quot;Eff1Type&quot;,&quot;Eff2Type&quot;))</code></pre>
 <p>School</p>
-<pre class="r"><code>efforts_pivot_ICCAT$School&lt;-&quot;ALL&quot;</code></pre>
+<pre class="r"><code>efforts_pivot_ICCAT$School&lt;-&quot;UNK&quot;</code></pre>
 <p>Flag</p>
-<pre class="r"><code>efforts_pivot_ICCAT$Flag&lt;-efforts_pivot_ICCAT$FlagCode
+<pre class="r"><code>efforts_pivot_ICCAT$FleetCode_short &lt;- sub(&quot;-.*&quot;, &quot;&quot;, efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the &#39;-&#39;
 
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == &#39;FleetCode&#39;] &lt;- &#39;FishingFleet&#39;</code></pre>
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == &#39;FleetCode_short&#39;] &lt;- &#39;FishingFleet&#39;
+efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT[, c(&quot;FishingFleet&quot;, setdiff(names(efforts_pivot_ICCAT), &quot;FishingFleet&quot;))] # put flag in first position</code></pre>
 <p>Reach the efforts harmonized DSD using a function in
 ICCAT_functions.R</p>
 <pre class="r"><code>colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R&quot;)
+efforts_pivot_ICCAT$Lat &lt;- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon &lt;- floor(abs(efforts_pivot_ICCAT$Lon))
 efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType &lt;- &quot;C&quot; #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;,&quot;measurement_type&quot;)
-efforts$source_authority&lt;-&quot;ICCAT&quot;</code></pre>
-<hr />
-<pre class="r"><code>efforts$time_start &lt;- as.Date(efforts$time_start)
+efforts$source_authority&lt;-&quot;ICCAT&quot;
+
+efforts$time_start &lt;- as.Date(efforts$time_start)
 efforts$time_end &lt;- as.Date(efforts$time_end)
 dataset_temporal_extent &lt;- paste(
   paste0(format(min(efforts$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
   paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
-)
+)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
-
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts</code></pre>
-<hr />
 <p>@ Load pre-harmonization scripts and apply mappings</p>
 <pre class="r"><code>download.file(&#39;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R&#39;, destfile = &#39;local_map_codelists_no_DB.R&#39;)
 source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;effort&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;, &quot;ICCAT&quot;, &quot;IOTC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
+<pre><code>## 
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
@@ -581,14 +620,11 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 D.AT SEA DAYS     effortunit_iccat effortunit_rfmos   ICCAT           
-## 2 NO.TRAPS NO.TRAPS effortunit_iccat effortunit_rfmos   ICCAT           
-## 3 BRA      BRA      flag_iccat       fishingfleet_firms ICCAT           
+## 2 NO.BOATS BOATS    effortunit_iccat effortunit_rfmos   ICCAT           
+## 3 NO.TRAPS NO.TRAPS effortunit_iccat effortunit_rfmos   ICCAT           
 ## 4 EU.ESP   EUESP    flag_iccat       fishingfleet_firms ICCAT           
-## 5 BB       09.2     gear_iotc        isscfg_revision_1  IOTC            
-## 6 TRAP     08.9     gear_iotc        isscfg_revision_1  IOTC</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##   Value source_authority    Dimension
-## 1   ALL            ICCAT fishing_mode</code></pre>
+## 5 EU.FRA   EUFRA    flag_iccat       fishingfleet_firms ICCAT           
+## 6 YUG      YUG      flag_iccat       fishingfleet_firms ICCAT</code></pre>
 </div>
 
 

@@ -1,11 +1,11 @@
-"YEAR","QUARTER","MONTH_START","MONTH_END","FISHING_GROUND_CODE","FISHING_GROUND","FLEET_CODE","FLEET","FISHERY_TYPE_CODE","FISHERY_TYPE","FISHERY_GROUP_CODE","FISHERY_GROUP","FISHERY_CODE","FISHERY","GEAR_CODE","GEAR","SCHOOL_TYPE_CODE","EFFORT","EFFORT_UNIT_CODE"
-1996,"Q1",3,3,5225113,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",1,"DAYS"
-2007,"Q1",2,2,5232129,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",1,"DAYS"
-2001,"Q1",3,3,5232129,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",4,"DAYS"
-1999,"Q1",3,3,5232129,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",5,"DAYS"
-2009,"Q1",1,1,5232130,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",23,"DAYS"
-2006,"Q1",1,1,5232130,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",3,"DAYS"
-1996,"Q1",2,2,5232130,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",1,"DAYS"
-2002,"Q1",1,1,5232130,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",2,"DAYS"
-2001,"Q1",3,3,5232130,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",1,"DAYS"
-2003,"Q1",1,1,5232130,NA,"AUS","Australia","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",2,"DAYS"
+YEAR,QUARTER,MONTH_START,MONTH_END,FISHING_GROUND_CODE,FISHING_GROUND,FLEET_CODE,FLEET,FISHERY_TYPE_CODE,FISHERY_TYPE,FISHERY_GROUP_CODE,FISHERY_GROUP,FISHERY_CODE,FISHERY,GEAR_CODE,GEAR,SCHOOL_TYPE_CODE,EFFORT,EFFORT_UNIT_CODE
+1996,Q1,3,3,5225113,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
+2007,Q1,2,2,5232129,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
+2001,Q1,3,3,5232129,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,4,DAYS
+1999,Q1,3,3,5232129,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,5,DAYS
+2009,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,23,DAYS
+2006,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,3,DAYS
+1996,Q1,2,2,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
+2002,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,2,DAYS
+2001,Q1,3,3,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
+2003,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,2,DAYS

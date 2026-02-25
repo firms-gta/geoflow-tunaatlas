@@ -29,7 +29,6 @@ function(action, entity, config){
     install.packages("dplyr")
   }
   library(dplyr)
-  
   filename1 <- entity$data$source[[1]] # data
   filename2 <- entity$data$source[[2]] # structure / codelists
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
@@ -48,9 +47,13 @@ function(action, entity, config){
   # ---- format inline ----
   effort <- effort_raw %>%
     dplyr::mutate(
-      # dates
-      time_start = paste0(YEAR, "-", sprintf("%02d", MONTH_START), "-01"),
-      time_end   = paste0(YEAR, "-", sprintf("%02d", MONTH_END), "-01"),
+      time_start = as.Date(sprintf("%d-%02d-01", YEAR, MONTH_START)),
+      
+      time_end = as.Date(
+        sprintf("%d-%02d-01", YEAR, MONTH_END)
+      ) |>
+        (\(x) as.Date(format(x + 32, "%Y-%m-01")) - 1)()
+    ,
       
       # geography + gridtype
       geographic_identifier = as.character(FISHING_GROUND_CODE),
@@ -110,7 +113,7 @@ effort$measurement <- "effort"
   
   base1 <- tools::file_path_sans_ext(basename(filename1))
   #@geoflow -> export as csv
-  # sorties same folder as path_to_raw_dataset 
+  # output in same folder as path_to_raw_dataset 
   output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
   output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
   

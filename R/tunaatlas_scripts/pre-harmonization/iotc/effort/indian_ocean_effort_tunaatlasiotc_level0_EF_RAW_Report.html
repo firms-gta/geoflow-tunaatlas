@@ -447,7 +447,7 @@ formatting)</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R</a>,
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R</a>,
 the documentation keeps the format of roxygen2 skeleton.</p>
 <p>A summary of the mapping process is provided. The path to the dataset
 is specified. You will find on this same repository on GitHub the first
@@ -484,7 +484,6 @@ Grasset, IRD </p>
   library(dplyr)
   
   
-  
   opts &lt;- options()
   options(encoding = &quot;UTF-8&quot;)
   on.exit(options(opts), add = TRUE)
@@ -495,9 +494,13 @@ Grasset, IRD </p>
   # ---- format inline ----
   effort &lt;- effort_raw %&gt;%
     dplyr::mutate(
-      # dates
-      time_start = paste0(YEAR, &quot;-&quot;, sprintf(&quot;%02d&quot;, MONTH_START), &quot;-01&quot;),
-      time_end   = paste0(YEAR, &quot;-&quot;, sprintf(&quot;%02d&quot;, MONTH_END), &quot;-01&quot;),
+      time_start = as.Date(sprintf(&quot;%d-%02d-01&quot;, YEAR, MONTH_START)),
+      
+      time_end = as.Date(
+        sprintf(&quot;%d-%02d-01&quot;, YEAR, MONTH_END)
+      ) |&gt;
+        (\(x) as.Date(format(x + 32, &quot;%Y-%m-01&quot;)) - 1)()
+    ,
       
       # geography + gridtype
       geographic_identifier = as.character(FISHING_GROUND_CODE),
@@ -578,15 +581,13 @@ fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
 fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 6 × 5
-##   src_code trg_code src_codingsystem trg_codingsystem source_authority
-##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
-## 1 BOATS    BOATS    effortunit_iotc  effortunit_rfmos IOTC            
-## 2 DAYS     DAYS     effortunit_iotc  effortunit_rfmos IOTC            
-## 3 FDAYS    FDAYS    effortunit_iotc  effortunit_rfmos IOTC            
-## 4 FHOURS   FHOURS   effortunit_iotc  effortunit_rfmos IOTC            
-## 5 HOOKS    HOOKS    effortunit_iotc  effortunit_rfmos IOTC            
-## 6 HOURS    HOURS    effortunit_iotc  effortunit_rfmos IOTC</code></pre>
+<pre><code>## # A tibble: 4 × 5
+##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
+##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
+## 1 DAYS     DAYS     effortunit_iotc  effortunit_rfmos   IOTC            
+## 2 UNCL     UNK      schooltype_iotc  schooltype_rfmos   IOTC            
+## 3 AUS      AUS      flag_iotc        fishingfleet_firms IOTC            
+## 4 PS       01.1     gear_iotc        isscfg_revision_1  IOTC</code></pre>
 </div>
 
 

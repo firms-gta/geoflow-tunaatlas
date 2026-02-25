@@ -447,18 +447,25 @@ operation mode effort datasets</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is created from a function so the documentation keep the format
-of roxygen2 skeleton A summary of the mapping process is provided. The
-path to the dataset is specified, you will find on this same repository
-on github the first line of each dataset. The datasets are named after
-the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows to understand correctly which
-dataset should be used in this markdown. Additional operations are
-performed next to verify other aspects of the data, such as the
-consistency of the geolocation, the values, and the reported catches in
-numbers and tons. If you are interested in further details, the results
-and codes are available for review.</p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_bySchool.csv&#39;)</code></pre>
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R</a>,
+the documentation keeps the format of roxygen2 skeleton.</p>
+<p>A summary of the mapping process is provided. The path to the dataset
+is specified. You will find on this same repository on GitHub the first
+line of each dataset. The datasets are named after the historical name
+provided by tRFMOs while exporting and may change. The information
+provided in the Rmd allows understanding correctly which dataset should
+be used in this markdown.</p>
+<p>Additional operations are performed next to verify other aspects of
+the data, such as the consistency of the geolocation, the values, and
+the reported catches in numbers and tons.</p>
+<p>If you are interested in further details, the results and codes are
+available for review.</p>
+<p><em>Each <code>.Rmd</code> script requires the user to knit the
+dataset at the beginning of the script in order to execute the
+harmonization process correctly. It is also possible to run the code
+chunk by chunk but be sure to be in the correct working directory (i.e.,
+the one of the <code>.Rmd</code>).</em></p>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_ETRO-PS1991-2024_bySchool_v1.xlsx&#39;)</code></pre>
 <p>Harmonize data structure of ICCAT by operation mode effort
 datasets</p>
 <p>This function harmonizes the structure of ICCAT catch-and-effort
@@ -481,105 +488,80 @@ harmonization</p>
   install.packages(&quot;dplyr&quot;)
   require(dplyr)
 }</code></pre>
-<table>
-<colgroup>
-<col width="100%" />
-</colgroup>
-<tbody>
-<tr class="odd">
-<td align="left">Historical name for the dataset at source
-t2ce_bySchool.csv</td>
-</tr>
-<tr class="even">
-<td align="left"><code>r opts &lt;- options() options(encoding = &quot;UTF-8&quot;)</code></td>
-</tr>
-<tr class="odd">
-<td align="left">Input data sample (after importing as data.frame in R):
-DSetID StrataID Flag FleetCode GearCode YearC TimePeriodID
-SquareTypeCode QuadID Lat Lon Eff1 Eff1Type Eff2 Eff2Type Eff3 Eff3Type
-Eff4 Eff4Type Eff5 Eff5Type YFTfd ALBfd BETfd BLFfd LTAfd SKJfd 2791
-502973 EU.España EU.ESP-ES-ETRO PS 1991 1 1x1 1 1 3 25.2 FISH.HOUR 50.2
-HOURS.SEA 25.2 Hours.STD 6.83 Hours.FAD 0 Hours.FSC 7110 0 9500 0 0
-57620 2791 502975 EU.España EU.ESP-ES-ETRO PS 1991 1 1x1 3 0 3 18.7
-FISH.HOUR 37.6 HOURS.SEA 18.7 Hours.STD 1.92 Hours.FAD 0 Hours.FSC 720 0
-1180 0 0 8540 2791 502978 EU.España EU.ESP-ES-ETRO PS 1991 1 1x1 3 0 9
-25.3 FISH.HOUR 50.2 HOURS.SEA 25.3 Hours.STD 2.83 Hours.FAD 0 Hours.FSC
-3940 0 5560 0 0 35460 2791 502979 EU.España EU.ESP-ES-ETRO PS 1991 1 1x1
-3 0 10 50.5 FISH.HOUR 100.3 HOURS.SEA 50.5 Hours.STD 5.27 Hours.FAD 0
-Hours.FSC 10140 0 16610 0 0 119600 2791 502980 EU.España EU.ESP-ES-ETRO
-PS 1991 1 1x1 3 0 11 25.3 FISH.HOUR 50.2 HOURS.SEA 25.3 Hours.STD 6.17
-Hours.FAD 0 Hours.FSC 7960 0 13060 0 0 93970 2791 502981 EU.España
-EU.ESP-ES-ETRO PS 1991 1 1x1 3 0 12 25.3 FISH.HOUR 50.2 HOURS.SEA 25.3
-Hours.STD 6.81 Hours.FAD 0 Hours.FSC 9770 0 16010 0 0 115320 FRIfd YFTfs
-ALBfs BETfs BLFfs LTAfs SKJfs FRIfs 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2090
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 Effort:
-final data sample: Flag Gear time_start time_end AreaName School
-EffortUnits Effort Belize PS 2009-08-01 2009-09-01 5402000 FS FISH.HOUR
-36.50 Belize PS 2009-08-01 2009-09-01 5402000 FS Hours.FSC 3.12 Belize
-PS 2009-08-01 2009-09-01 5402000 FS HOURS.SEA 72.00 Belize PS 2009-08-01
-2009-09-01 5402000 FS Hours.STD 37.10 Belize PS 2009-09-01 2009-10-01
-5202006 LS FISH.HOUR 12.10 #Catches</td>
-</tr>
-<tr class="even">
-<td align="left"><code>r RFMO_CE&lt;-read.csv(path_to_raw_dataset,stringsAsFactors = F) names(RFMO_CE)[names(RFMO_CE) == &#39;Flag&#39;] &lt;- &#39;FishingFleet&#39;</code></td>
-</tr>
-<tr class="odd">
-<td align="left"># If we want in the output dataset the column
-‘FleetCode’ instead of ‘flag’</td>
-</tr>
-<tr class="even">
-<td align="left"><code>r if(keep_fleet_instead_of_flag==TRUE){ RFMO_CE$Flag&lt;-NULL names(RFMO_CE)[names(RFMO_CE) == &#39;Fishingfleet&#39;] &lt;- &#39;Flag&#39; }</code></td>
-</tr>
-<tr class="odd">
-<td align="left">#Efforts</td>
-</tr>
-<tr class="even">
-<td align="left">```r last_column_not_catch_value=22
-RFMO_CE&lt;-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))]</td>
-</tr>
-<tr class="odd">
-<td align="left">source(“<a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R</a>”)
-efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c(“Eff1”,“Eff2”,“Eff3”,“Eff4”,“Eff5”),c(“Eff1Type”,“Eff2Type”,“Eff3Type”,“Eff4Type”,“Eff5Type”))
-```</td>
-</tr>
-<tr class="even">
-<td align="left">School when the unit of effort is Hours.FAD: then
-schooltype=fd when the unit of effort is Hours.FSC: then schooltype=fs
-when the units of efforts are different that Hours.FAD or Hours.FSC:
-then schooltype=ALL.</td>
-</tr>
-<tr class="odd">
-<td align="left">```r index_school_fs&lt;-which(efforts_pivot_ICCAT<span class="math inline">\(EffortUnits == &quot;Hours.FSC&quot;)
-index_school_fd&lt;-which(efforts_pivot_ICCAT\)</span>EffortUnits ==
-“Hours.FAD”) index_school_all&lt;-which(efforts_pivot_ICCAT<span class="math inline">\(EffortUnits %in%
-setdiff(unique(efforts_pivot_ICCAT\)</span>EffortUnits),c(“Hours.FAD”,“Hours.FSC”)))</td>
-</tr>
-<tr class="even">
-<td align="left">efforts_pivot_ICCAT<span class="math inline">\(School&lt;-&quot;ALL&quot;
-efforts_pivot_ICCAT\)</span>School[index_school_fs]&lt;-“fs”
-efforts_pivot_ICCAT$School[index_school_fd]&lt;-“fd”</td>
-</tr>
-<tr class="odd">
-<td align="left">colToKeep_efforts &lt;-
-c(“FishingFleet”,“Gear”,“time_start”,“time_end”,“AreaName”,“School”,“EffortUnits”,“Effort”)
-source(“<a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R</a>”)
-efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)</td>
-</tr>
-<tr class="even">
-<td align="left">colnames(efforts)&lt;-c(“fishing_fleet”,“gear_type”,“time_start”,“time_end”,“geographic_identifier”,“fishing_mode”,“measurement_unit”,“measurement_value”)
-efforts$source_authority&lt;-“ICCAT” ```</td>
-</tr>
-</tbody>
-</table>
-<pre class="r"><code>efforts$time_start &lt;- as.Date(efforts$time_start)
+<p>Historical name for the dataset at source t2ce_bySchool.csv</p>
+<pre class="r"><code>opts &lt;- options()
+options(encoding = &quot;UTF-8&quot;)</code></pre>
+<p>Input data sample (after importing as data.frame in R): A tibble: 6 ×
+33 DSetID StrataID FlagName FleetCode GearCode YearC Decade TimePeriodID
+GeoStrataCode QuadID Lat Lon xLon yLat FishMode Eff1 Eff1Type Eff2
+Eff2Type Eff3 Eff3Type Eff4 Eff4Type Eff5 Eff5Type YFT ALB BET BLF LTA
+SKJ FRI TOTAL <dbl> <dbl> <chr> <chr> <chr> <dbl> <dbl> <dbl> <chr>
+<dbl> <dbl> <dbl> <dbl> <dbl> <chr> <dbl> <chr> <dbl> <chr> <dbl> <chr>
+<dbl> <chr> <dbl> <chr> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+1 2797 509067 EU-España EU.ESP-ES-ETRO PS 1994 1990 1 1x1 1 0 1 1.5 0.5
+FAD 13 FISH.HOUR 25.9 HOURS.SEA 13 Hours.STD 0 Hours.FAD 0 Hours.FSC 0 0
+0 0 0 0 0 0 2 2797 509068 EU-España EU.ESP-ES-ETRO PS 1994 1990 1 1x1 1
+1 0 0.5 1.5 FAD 13 FISH.HOUR 25.9 HOURS.SEA 13 Hours.STD 0 Hours.FAD 0
+Hours.FSC 0 0 0 0 0 0 0 0 3 2797 509069 EU-España EU.ESP-ES-ETRO PS 1994
+1990 1 1x1 1 1 2 2.5 1.5 FAD 13 FISH.HOUR 25.9 HOURS.SEA 13 Hours.STD 0
+Hours.FAD 0 Hours.FSC 0 0 0 0 0 0 0 0 4 2797 509070 EU-España
+EU.ESP-ES-ETRO PS 1994 1990 1 1x1 2 0 0 0.5 -0.5 FAD 13.1 FISH.HOUR 25.9
+HOURS.SEA 13.1 Hours.STD 0 Hours.FAD 0 Hours.FSC 0 0 0 0 0 0 0 0 5 2797
+509071 EU-España EU.ESP-ES-ETRO PS 1994 1990 1 1x1 2 0 1 1.5 -0.5 FAD
+26.1 FISH.HOUR 51.8 HOURS.SEA 26.1 Hours.STD 0 Hours.FAD 2.21 Hours.FSC
+0 0 0 0 0 0 0 0 6 2797 509072 EU-España EU.ESP-ES-ETRO PS 1994 1990 1
+1x1 2 0 2 2.5 -0.5 FAD 12.1 FISH.HOUR 24 HOURS.SEA 12.1 Hours.STD 0
+Hours.FAD 0 Hours.FSC 0 0 0 0 0 0 0 0 Effort: final data sample: Flag
+Gear time_start time_end AreaName School EffortUnits Effort Belize PS
+2009-08-01 2009-09-01 5402000 FS FISH.HOUR 36.50 Belize PS 2009-08-01
+2009-09-01 5402000 FS Hours.FSC 3.12 Belize PS 2009-08-01 2009-09-01
+5402000 FS HOURS.SEA 72.00 Belize PS 2009-08-01 2009-09-01 5402000 FS
+Hours.STD 37.10 Belize PS 2009-09-01 2009-10-01 5202006 LS FISH.HOUR
+12.10 # Catches
+RFMO_CE&lt;-read.csv(path_to_raw_dataset,stringsAsFactors = F)</p>
+<pre class="r"><code>RFMO_CE &lt;- read_excel(path_to_raw_dataset,
+                sheet = &quot;Data&quot;)
+
+RFMO_CE$FleetCode_short &lt;- sub(&quot;-.*&quot;, &quot;&quot;, RFMO_CE$FleetCode) # fleet code only what is after the &#39;-&#39;
+
+names(RFMO_CE)[names(RFMO_CE) == &#39;FleetCode_short&#39;] &lt;- &#39;FishingFleet&#39;
+RFMO_CE &lt;- RFMO_CE[, c(&quot;FishingFleet&quot;, setdiff(names(RFMO_CE), &quot;FishingFleet&quot;))] # oput flag in first position</code></pre>
+</div>
+<div id="if-we-want-in-the-output-dataset-the-column-fleetcode-instead-of-flag" class="section level1">
+<h1># If we want in the output dataset the column ‘FleetCode’ instead of
+‘flag’</h1>
+<p>if(keep_fleet_instead_of_flag==TRUE){ RFMO_CE$Flag&lt;-NULL
+names(RFMO_CE)[names(RFMO_CE) == ‘Fishingfleet’] &lt;- ‘Flag’ } #
+Efforts</p>
+<pre class="r"><code>last_column_not_catch_value=27
+RFMO_CE&lt;-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
+
+source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R&quot;)
+efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c(&quot;Eff1&quot;,&quot;Eff2&quot;,&quot;Eff3&quot;,&quot;Eff4&quot;,&quot;Eff5&quot;),c(&quot;Eff1Type&quot;,&quot;Eff2Type&quot;,&quot;Eff3Type&quot;,&quot;Eff4Type&quot;,&quot;Eff5Type&quot;))</code></pre>
+<p>School The format changed, the school is now in the FishMode
+column</p>
+<pre class="r"><code>efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT %&gt;% dplyr::mutate(FishMode = ifelse(FishMode == &quot;n/a&quot;, &quot;UNK&quot;, FishMode)) 
+efforts_pivot_ICCAT&lt;- efforts_pivot_ICCAT %&gt;% dplyr::rename(&quot;School&quot; = &quot;FishMode&quot;)
+colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
+source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R&quot;)
+efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT %&gt;% dplyr::rename(SquareTypeCode = GeoStrataCode) # to match definition in ICCAT_CE_effort_pivotDSD_to_harmonizedDSD
+efforts_pivot_ICCAT$Lat &lt;- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon &lt;- floor(abs(efforts_pivot_ICCAT$Lon))
+efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
+efforts$AreaName &lt;- as.character(as.integer(efforts$AreaName))
+colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
+efforts$source_authority&lt;-&quot;ICCAT&quot;
+efforts$time_start &lt;- as.Date(efforts$time_start)
 efforts$time_end &lt;- as.Date(efforts$time_end)
 dataset_temporal_extent &lt;- paste(
   paste0(format(min(efforts$time_start), &quot;%Y&quot;), &quot;-01-01&quot;),
   paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )
+efforts$geographic_identifier &lt;- format(as.integer(efforts$geographic_identifier), scientific = FALSE, trim = TRUE)</code></pre>
+<p>sorties same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
-output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts</code></pre>
 <hr />
@@ -589,9 +571,12 @@ source(&#39;local_map_codelists_no_DB.R&#39;)
 fact &lt;- &quot;effort&quot;
 mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv&quot;, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c(&quot;IATTC&quot;, &quot;CCSBT&quot;, &quot;WCPFC&quot;, &quot;ICCAT&quot;, &quot;IOTC&quot;))</code></pre>
 <pre><code>## 
-##  mapping dimension gear_type with code list mapping
-##  mapping dimension fishing_fleet with code list mapping
-##  mapping dimension fishing_mode with code list mapping
+##  mapping dimension gear_type with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_fleet with code list mapping</code></pre>
+<pre><code>## 
+##  mapping dimension fishing_mode with code list mapping</code></pre>
+<pre><code>## 
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
@@ -601,22 +586,14 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
-##   src_code  trg_code  src_codingsystem trg_codingsystem source_authority
-##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
-## 1 D.AT SEA  DAYS      effortunit_iccat effortunit_rfmos ICCAT           
-## 2 FISH.HOUR FHOURS    effortunit_iccat effortunit_rfmos ICCAT           
-## 3 HOURS.SEA HOURS     effortunit_iccat effortunit_rfmos ICCAT           
-## 4 Hours.FAD Hours.FAD effortunit_iccat effortunit_rfmos ICCAT           
-## 5 Hours.FSC Hours.FSC effortunit_iccat effortunit_rfmos ICCAT           
-## 6 Hours.STD Hours.STD effortunit_iccat effortunit_rfmos ICCAT</code></pre>
-<pre class="r"><code>print(head(mapping_codelist$not_mapped_total))</code></pre>
-<pre><code>##                Value source_authority     Dimension
-## 1             Belize            ICCAT fishing_fleet
-## 4348      Cape Verde            ICCAT fishing_fleet
-## 18458        Curaçao            ICCAT fishing_fleet
-## 51302  Côte d&#39;Ivoire            ICCAT fishing_fleet
-## 51990      EU.España            ICCAT fishing_fleet
-## 163227     EU.France            ICCAT fishing_fleet</code></pre>
+##   src_code  trg_code  src_codingsystem trg_codingsystem   source_authority
+##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
+## 1 FISH.HOUR FHOURS    effortunit_iccat effortunit_rfmos   ICCAT           
+## 2 HOURS.SEA HOURS     effortunit_iccat effortunit_rfmos   ICCAT           
+## 3 Hours.FAD Hours.FAD effortunit_iccat effortunit_rfmos   ICCAT           
+## 4 Hours.FSC Hours.FSC effortunit_iccat effortunit_rfmos   ICCAT           
+## 5 Hours.STD Hours.STD effortunit_iccat effortunit_rfmos   ICCAT           
+## 6 EU.ESP    EUESP     flag_iccat       fishingfleet_firms ICCAT</code></pre>
 </div>
 
 

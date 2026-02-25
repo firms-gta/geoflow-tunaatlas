@@ -1,11 +1,11 @@
-"source_authority","gear_type","fishing_fleet","fishing_mode","fishing_fleet_label","time_start","time_end","geographic_identifier","gridtype","measurement_value","measurement_unit","measurement_processing_level","measurement"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1988-03-01","1988-03-01",5100055,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1990-03-01","1990-03-01",5101051,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1990-03-01","1990-03-01",5103055,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1990-02-01","1990-02-01",5202053,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1990-01-01","1990-01-01",5203052,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1988-03-01","1988-03-01",5203055,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1987-02-01","1987-02-01",5203064,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1986-01-01","1986-01-01",5203066,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1989-02-01","1989-02-01",5204049,"1deg_x_1deg",0,"DAYS","unknown","effort"
-"IOTC","PS","EUESP","UNCL","EU (Spain)","1985-01-01","1985-01-01",5205066,"1deg_x_1deg",0,"DAYS","unknown","effort"
+source_authority,gear_type,fishing_fleet,fishing_mode,fishing_fleet_label,time_start,time_end,geographic_identifier,gridtype,measurement_value,measurement_unit,measurement_processing_level,measurement
+IOTC,PS,EUESP,UNCL,EU (Spain),1988-03-01,1988-03-31,5100055,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1990-03-01,1990-03-31,5101051,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1990-03-01,1990-03-31,5103055,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1990-02-01,1990-02-28,5202053,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1990-01-01,1990-01-31,5203052,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1988-03-01,1988-03-31,5203055,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1987-02-01,1987-02-28,5203064,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1986-01-01,1986-01-31,5203066,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1989-02-01,1989-02-28,5204049,1deg_x_1deg,0,DAYS,unknown,effort
+IOTC,PS,EUESP,UNCL,EU (Spain),1985-01-01,1985-01-31,5205066,1deg_x_1deg,0,DAYS,unknown,effort

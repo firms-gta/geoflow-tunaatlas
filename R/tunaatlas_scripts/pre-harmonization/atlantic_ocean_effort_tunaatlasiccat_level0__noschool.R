@@ -84,7 +84,38 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 keep_fleet_instead_of_flag=FALSE  
 
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
-ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
+ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID",
+                                                    "FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode",
+                                                    "QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode", 
+                                                    "SchoolTypeCode", "FlagName", "StatusCode"))
+
+# remove duplicated lines, as displayed in kilos and numbers 
+eff_cols <- c("Eff1","Eff1Type","Eff2","Eff2Type")
+species_cols <- ICCAT_CE_species_colnames
+
+key_cols <- setdiff(
+  colnames(t2ce),
+  c("StrataID", "CatchUnit", eff_cols, species_cols)
+)
+
+unit_priority <- function(x) {
+  dplyr::case_when(
+    x == "kg" ~ 1L,
+    x == "nr" ~ 2L,
+    TRUE      ~ 3L
+  )
+}
+
+t2ce <- t2ce %>%
+  dplyr::mutate(.unit_rank = unit_priority(CatchUnit)) %>%
+  dplyr::group_by(across(all_of(key_cols))) %>%
+  dplyr::arrange(.unit_rank, .by_group = TRUE) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(-.unit_rank)
+
+# remove data displayed annualy
+
 
 config$logger.info(paste0("BEGIN  function   \n"))
 
@@ -106,12 +137,16 @@ efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c
 efforts_pivot_ICCAT$School<-"UNK"
 
 # Flag
-efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
+efforts_pivot_ICCAT$FleetCode_short <- sub("-.*", "", efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the '-'
 
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode_short'] <- 'FishingFleet'
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT[, c("FishingFleet", setdiff(names(efforts_pivot_ICCAT), "FishingFleet"))] # put flag in first position
+
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
+efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType <- "C" #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","measurement_type")
@@ -131,7 +166,7 @@ entity$setTemporalExtent(dataset_temporal_extent)
 
 base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-# sorties same folder as path_to_raw_dataset 
+# output in same folder as path_to_raw_dataset 
 output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
 output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
 
