@@ -1,4 +1,121 @@
 Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+effort_iccat_level0__byschool,title:Monthly effort of tuna and tuna-like species in the Atlantic Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude (ICCAT level 0),"abstract:This dataset lists the monthly-spatially aggregated effort of tropical tuna species from the International Commission for the Conservation of Atlantic Tunas (ICCAT) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country, fishing mode (i.e. type of school used) and area (statistical squares of 1° longitude and latitude). It corresponds to the effort part of the ICCAT catch-and-effort (task2) dataset.
+
+This dataset was downloaded on the ICCAT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.",,"owner:info@iccat.int_
+pointOfContact:info@iccat.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:carlos.palma@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","publication:2020-11-11_
+access:2020-11-11",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@https://www.iccat.int/en/accesingdb.html_
+http:data[Source dataset]@https://drive.google.com/file/d/1FZNuW3GHVubaWWK7_pIhQJYBX2u2TLQF/view?usp=sharing_
+http:metadata[Source metadata]@https://www.iccat.int/en/accesingdb.html_
+http:codelists[Source codelists]@https://drive.google.com/file/d/1aeNrtEZjjah83wbBRHDNKANJkIaIF4-W/view?usp=share_link",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:t2ce_ETRO-PS1991-2023_bySchool_v1.xlsx,iccat_effort_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.effort_
+uploadType:dbtable_
+action:atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R[R harmonization script]@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R_
+action_option_source_authority_to_map:IOTC,ICCAT"
+effort_iccat_level0__noschool,"title:Monthly effort of tuna, tuna-like and shark species in the Atlantic Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by statistical squares of 1° or 5° longitude and latitude (ICCAT level 0)","abstract:This dataset lists the monthly-spatially aggregated effort of tuna, tuna-like and shark species from the International Commission for the Conservation of Atlantic Tunas (ICCAT) from %temporal_extent:start% to %temporal_extent:end%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country and area (mainly 1° or statistical squares of 5° longitude and latitude). It corresponds to the effort part of the ICCAT catch-and-effort (task2) dataset.
+
+This dataset was downloaded on the ICCAT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+
+The description below is extracted from the ICCAT web page where the dataset has been downloaded.
+
+Characteristics, specific issues and problems that need to be taken into account :
+
+
+These data are basically data obtained from sampling a portion of the individual fishing operations of a given fishery in a specified period of time. In its general form, task 2 catch-and-effort (T2CE) is defined as: “The complete species (tuna, tuna like species and sharks) catch composition (in weight <kg> or/and in number of fish) obtained by a given amount of effort (absolute value) in a given stratification or detail level (stratum)”. The stratification level defines the “specific form” of T2CE. The ICCAT's Standing Committee on Research and Statistics (SCRS) requires that T2CE data be submitted every year by fleet and gear, with at least the following time/area stratification level:
+
+Time: month
+Area: 1x1 degree squares (all surface gears); 5x5 degree squares (longline gears).
+
+Finer temporal or spatial strata can be used. In particular, a T2CE record can be as detailed as a daily fishing operation of a vessel (e.g.: longline set of individual vessels - any reference to a vessel is always removed in order to preserve confidentiality. In some cases, T2CE records are as aggregated as a month's catch composition for an entire country and gear in a large geographical zone (e.g.: 20x20 square); such records, however, do not conform to SCRS requirements.
+
+The species catch coverage (proportion of the overall Task I catch represented by T2CE) can range from a minimum of 5% to almost 100% depending on many factors. The stratification level currently available in the entire T2CE database (1950 to 2007) is very heterogeneous.
+
+Time stratification is usually required by month but a considerable portion of available T2CE is by quarter or year.
+
+Area stratification can go from 1x1 degree squares to large geographical regions (see square types in: http://www.iccat.int/Forms/CODES_SquareTypes.xls).
+
+In many datasets, there may be misreporting ofthe entire species composition (where by-catch species may be underrepresented) obtained by a given effort amount of fishing effort.
+
+Various datasets have already extrapolated (raised) species catches to the overall Task I catch, such that the original sampling coverage cannot be determined.
+
+In some datasets, the effort is “double counted”. This occurs when, for the same fishery, more than one dataset with partial species catch compositions (often stratified differently) is reported to ICCAT through separate data submissions.",,"owner:info@iccat.int_
+pointOfContact:info@iccat.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:carlos.palma@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","publication:2020-11-11_
+access:2020-11-11",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@https://www.iccat.int/en/accesingdb.html_
+http:data[Source dataset]@https://drive.google.com/file/d/1QsthMO7oSpfJNKUX9Cpa-HuDoKdxie2-/view?usp=sharing_
+http:metadata[Source metadata]@https://www.iccat.int/Data/t2ce-ENG.pdf_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1bgJl2LtjlK-8a7Vom4GG19nO6f24XaST",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:t2ce_noSchool.csv,iccat_effort_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.effort_
+uploadType:dbtable_
+action:atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R[R harmonization script]@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R_
+action_option_source_authority_to_map:IOTC,ICCAT"
+effort_iccat_level0__noschool,"title:Monthly effort of tuna, tuna-like and shark species in the Atlantic Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by statistical squares of 1° or 5° longitude and latitude (ICCAT level 0)","abstract:This dataset lists the monthly-spatially aggregated effort of tuna, tuna-like and shark species from the International Commission for the Conservation of Atlantic Tunas (ICCAT) from %temporal_extent:start% to %temporal_extent:end%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country and area (mainly 1° or statistical squares of 5° longitude and latitude). It corresponds to the effort part of the ICCAT catch-and-effort (task2) dataset.
+
+This dataset was downloaded on the ICCAT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+
+The description below is extracted from the ICCAT web page where the dataset has been downloaded.
+
+Characteristics, specific issues and problems that need to be taken into account :
+
+
+These data are basically data obtained from sampling a portion of the individual fishing operations of a given fishery in a specified period of time. In its general form, task 2 catch-and-effort (T2CE) is defined as: “The complete species (tuna, tuna like species and sharks) catch composition (in weight <kg> or/and in number of fish) obtained by a given amount of effort (absolute value) in a given stratification or detail level (stratum)”. The stratification level defines the “specific form” of T2CE. The ICCAT's Standing Committee on Research and Statistics (SCRS) requires that T2CE data be submitted every year by fleet and gear, with at least the following time/area stratification level:
+
+Time: month
+Area: 1x1 degree squares (all surface gears); 5x5 degree squares (longline gears).
+
+Finer temporal or spatial strata can be used. In particular, a T2CE record can be as detailed as a daily fishing operation of a vessel (e.g.: longline set of individual vessels - any reference to a vessel is always removed in order to preserve confidentiality. In some cases, T2CE records are as aggregated as a month's catch composition for an entire country and gear in a large geographical zone (e.g.: 20x20 square); such records, however, do not conform to SCRS requirements.
+
+The species catch coverage (proportion of the overall Task I catch represented by T2CE) can range from a minimum of 5% to almost 100% depending on many factors. The stratification level currently available in the entire T2CE database (1950 to 2007) is very heterogeneous.
+
+Time stratification is usually required by month but a considerable portion of available T2CE is by quarter or year.
+
+Area stratification can go from 1x1 degree squares to large geographical regions (see square types in: http://www.iccat.int/Forms/CODES_SquareTypes.xls).
+
+In many datasets, there may be misreporting ofthe entire species composition (where by-catch species may be underrepresented) obtained by a given effort amount of fishing effort.
+
+Various datasets have already extrapolated (raised) species catches to the overall Task I catch, such that the original sampling coverage cannot be determined.
+
+In some datasets, the effort is “double counted”. This occurs when, for the same fishery, more than one dataset with partial species catch compositions (often stratified differently) is reported to ICCAT through separate data submissions.",,"owner:info@iccat.int_
+pointOfContact:info@iccat.int_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:carlos.palma@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","publication:2020-11-11_
+access:2020-11-11",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@https://www.iccat.int/en/accesingdb.html_
+http:data[Source dataset]@https://drive.google.com/file/d/1QsthMO7oSpfJNKUX9Cpa-HuDoKdxie2-/view?usp=sharing_
+http:metadata[Source metadata]@https://www.iccat.int/Data/t2ce-ENG.pdf_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1bgJl2LtjlK-8a7Vom4GG19nO6f24XaST",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:./data/GTA_2026/t2ce_noSchool.csv,./data/GTA_2026/iccat_effort_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.effort_
+uploadType:dbtable_
+action:atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R[R harmonization script]@https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R_
+action_option_source_authority_to_map:IOTC,ICCAT"
 effort_iotc_level0,"title:Monthly effort of tuna, tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%) by longliners aggregated by statistical squares of 5° longitude and latitude (IOTC level 0)","abstract:This dataset lists the monthly-spatially aggregated effort of tuna, tuna-like and shark species from the Indian Ocean Tuna Commission (IOTC) by longliners from %temporal_extent:start% to %temporal_extent:start%. Species-specific effort are stratified by year, month, fishing gear, vessel flag reporting country,
  area (mainly statistical squares of 5° longitude and latitude). It corresponds to the effort part of the IOTC catch-and-effort (task2) dataset.
  

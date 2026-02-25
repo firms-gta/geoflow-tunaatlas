@@ -17,7 +17,7 @@
     "entities" : [
       {
       "handler": "csv",
-      "source": "config/geoflow_entities_tuna_datasets - Effort_data_2026_missing_two_iccat (1).csv"
+      "source": "config/geoflow_entities_tuna_datasets - Effort_data_2026.csv"
       }
     ],
     "contacts" : [
@@ -55,7 +55,7 @@
     {
       "id": "create_report_global_action",
       "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
-      "run": false,
+      "run": true,
       "options": {
       }
     }

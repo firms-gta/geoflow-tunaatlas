@@ -17,7 +17,7 @@
     "entities" : [
       {
         "handler": "csv",
-        "source": "config/entities_effort_2026_no_ICCAT.csv"
+        "source": "config/entities_effort_2026.csv"
       }
     ],
     "contacts" : [
