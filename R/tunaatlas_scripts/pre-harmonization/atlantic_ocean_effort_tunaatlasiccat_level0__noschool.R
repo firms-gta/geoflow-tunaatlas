@@ -89,6 +89,34 @@ ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID",
                                                     "QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode", 
                                                     "SchoolTypeCode", "FlagName", "StatusCode"))
 
+# remove duplicated lines, as displayed in kilos and numbers 
+eff_cols <- c("Eff1","Eff1Type","Eff2","Eff2Type")
+species_cols <- ICCAT_CE_species_colnames
+
+key_cols <- setdiff(
+  colnames(t2ce),
+  c("StrataID", "CatchUnit", eff_cols, species_cols)
+)
+
+unit_priority <- function(x) {
+  dplyr::case_when(
+    x == "kg" ~ 1L,
+    x == "nr" ~ 2L,
+    TRUE      ~ 3L
+  )
+}
+
+t2ce <- t2ce %>%
+  dplyr::mutate(.unit_rank = unit_priority(CatchUnit)) %>%
+  dplyr::group_by(across(all_of(key_cols))) %>%
+  dplyr::arrange(.unit_rank, .by_group = TRUE) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(-.unit_rank)
+
+# remove data displayed annualy
+
+
 config$logger.info(paste0("BEGIN  function   \n"))
 
 # data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
