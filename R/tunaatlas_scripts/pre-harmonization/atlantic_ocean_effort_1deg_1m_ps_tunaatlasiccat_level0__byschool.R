@@ -122,7 +122,7 @@ efforts$geographic_identifier <- format(as.integer(efforts$geographic_identifier
 #@geoflow -> export as csv
 base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-# sorties same folder as path_to_raw_dataset 
+# output in same folder as path_to_raw_dataset 
 output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
 output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
 
