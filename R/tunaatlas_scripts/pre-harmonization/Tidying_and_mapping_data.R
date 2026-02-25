@@ -89,6 +89,50 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   if (!grepl("nominal", harmonized)){
     
+    # ---------- Not displayed monthly (external CSV) ------------------------------
+    is_monthly_period <- function(time_start, time_end) {
+      # montly if :
+      # - time_start = first day month
+      # - time_end = dernier day same month mois
+      # - et time_end >= time_start
+      ts <- as.Date(time_start)
+      te <- as.Date(time_end)
+      
+      last_day <- as.Date(format(ts, "%Y-%m-01"))
+      last_day <- as.Date(format(last_day + 32, "%Y-%m-01")) - 1
+      
+      ok <- !is.na(ts) & !is.na(te) &
+        te >= ts &
+        format(ts, "%d") == "01" &
+        te == last_day
+      
+      ok
+    }
+    
+    stepLogger(level = 0, step = stepnumber, msg = "Check monthly periods and filter non-monthly rows")
+    stepnumber <- stepnumber + 1
+    
+    monthly_ok <- is_monthly_period(georef_dataset$time_start, georef_dataset$time_end)
+    
+    not_displayed_monthly <- georef_dataset[!monthly_ok | is.na(monthly_ok), , drop = FALSE]
+    
+    # Save for report
+    if (is.data.frame(not_displayed_monthly) && nrow(not_displayed_monthly) > 0) {
+      readr::write_csv(not_displayed_monthly, "data/not_displayed_monthly.csv")
+      
+      if (recap_each_step) {
+        CWP.dataset::function_recap_each_step(
+          "not_displayed_monthly",
+          georef_dataset[monthly_ok, , drop = FALSE],
+          "In this step, we detect rows that are not reported on a monthly time period (time_start/time_end not matching a full calendar month). These rows are excluded from the mapped dataset and saved in data/not_displayed_monthly.csv.",
+          "is_monthly_period"
+        )
+      }
+    }
+    
+    # Keep only monthly rows
+    georef_dataset <- georef_dataset[which(monthly_ok), , drop = FALSE]
+    
     # Curation absurd converted data ------------------------------------------
     stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
     stepnumber = stepnumber+1
@@ -224,14 +268,12 @@ Tidying_and_mapping_data = function(action, entity, config) {
       
     }
     
-    
-    
-    
     files_to_check <- c("data/not_conform_conversion_factors.csv",
                         "data/removed_irregular_areas.csv",
                         "data/areas_in_land.csv",
                         "data/outside_juridiction.csv",
-                        "data/not_mapped_total.csv")
+                        "data/not_mapped_total.csv",
+                        "data/not_displayed_monthly.csv")
     
     if(any(file.exists(files_to_check))) {
       parameter_directory <- getwd()
