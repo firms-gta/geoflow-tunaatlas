@@ -8,45 +8,46 @@ library(here)
 library(rmarkdown)
 
 # Fonction pour tronquer les fichiers CSV et XLSX
-truncate_files <- function(root_dir) {
-  # Fonction pour tronquer un fichier CSV
-  truncate_csv <- function(file_path) {
-    data <- read.csv(file_path)
-    if ("Record" %in% colnames(data)) {
-      data <- data %>% arrange(Record) %>% head(10)
-    } else {
-      data <- head(data, 10)
+
+copy_prehamo_data_files <- function(source_path) {
+  
+  destination_path <- "~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization"
+  
+  move_files <- function(file_path, truncate = FALSE) {
+    file_name <- fs::path_file(file_path)
+    trfmo <- stringr::str_match(file_path, "(iattc|iccat|ccsbt|wcpfc|iotc)")[,2]
+    type <- case_when(
+      stringr::str_detect(file_path, regex("effort", ignore_case = TRUE)) ~ "effort",
+      stringr::str_detect(file_path, regex("EF", ignore_case = TRUE)) ~ "effort",
+      stringr::str_detect(file_path, regex("nominal", ignore_case = TRUE)) ~ "nominal",
+      TRUE ~ "catch"
+    )
+    full_destination_path <- file.path(destination_path, trfmo, type, "data", file_name)
+    
+    if (!fs::dir_exists(dirname(full_destination_path))) {
+      fs::dir_create(dirname(full_destination_path), recurse = TRUE)
     }
-    write.csv(data, file_path, row.names = FALSE)
-    message(paste("Truncated CSV file:", file_path))
+    
+    if (truncate) {
+      # mapped.csv -> 5 lignes
+      x <- readr::read_csv(file_path, show_col_types = FALSE)
+      readr::write_csv(utils::head(x, 5), full_destination_path)
+      message("Copied ONLY 5 rows of: ", file_name, " -> ", full_destination_path)
+    } else {
+      fs::file_copy(file_path, full_destination_path, overwrite = TRUE)
+      message("Copied: ", file_name, " -> ", full_destination_path)
+    }
   }
   
-  # Fonction pour tronquer un fichier XLSX
-  truncate_xlsx <- function(file_path) {
-    sheets <- excel_sheets(file_path)
-    new_data <- lapply(sheets, function(sheet) {
-      data <- read_excel(file_path, sheet = sheet)
-      if ("Record" %in% colnames(data)) {
-        data <- data %>% arrange(Record) %>% head(10)
-      } else {
-        data <- head(data, 10)
-      }
-      data
-    })
-    names(new_data) <- sheets
-    writexl::write_xlsx(new_data, file_path)
-    message(paste("Truncated XLSX file:", file_path))
-  }
+  # # invalid -> complet
+  # invalid_files <- fs::dir_ls(path = source_path, recurse = TRUE, glob = "*invalid_data.csv")
+  # purrr::walk(invalid_files, ~ move_files(.x, truncate = FALSE)) on l'enleve on met pas sur github les invalid lines
   
-  # Liste de tous les fichiers CSV et XLSX dans le dossier et les sous-dossiers
-  csv_files <- dir_ls(path = root_dir, recurse = TRUE, glob = "*.csv")
-  xlsx_files <- dir_ls(path = root_dir, recurse = TRUE, glob = "*.xlsx")
+  # mapped -> 5 lignes
+  mapped_files <- fs::dir_ls(path = source_path, recurse = TRUE, glob = "*mapped.csv")
+  purrr::walk(mapped_files, ~ move_files(.x, truncate = TRUE))
   
-  # Appliquer la troncature aux fichiers CSV et XLSX
-  purrr::walk(csv_files, truncate_csv)
-  purrr::walk(xlsx_files, truncate_xlsx)
-  
-  message("All files have been truncated.")
+  invisible(list(mapped_files = mapped_files))
 }
 
 # Fonction principale pour réécrire les fichiers RMarkdown et générer les fichiers HTML
@@ -54,23 +55,7 @@ rewrite_functions_as_rmd <- function(source_path) {
   # Chemin du dossier de destination
   destination_path <- "~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization"
   
-  # Fonction pour déplacer les fichiers vers le dossier correspondant
-  move_files <- function(file_path) {
-    file_name <- path_file(file_path)
-    trfmo <- str_match(file_name, "(iattc|iccat|ccsbt|wcpfc|iotc)")[,2]
-    type <- if (str_detect(basename(file_name), "effort")) "effort" else if (str_detect(basename(file_name), "nominal")) "nominal" else "catch"
-    full_destination_path <- file.path(destination_path, trfmo, type, "data", file_name)
-    
-    if (!dir_exists(dirname(full_destination_path))) {
-      dir_create(dirname(full_destination_path))
-    }
-    
-    file_copy(file_path, full_destination_path, overwrite = TRUE)
-    message(paste("Moved:", file_name, "to", full_destination_path))
-  }
-  
-  invalid_files <- dir_ls(path = source_path, recurse = TRUE, glob = "*invalid_data.csv")
-  purrr::walk(invalid_files, move_files)
+  copy_prehamo_data_files(source_path)
   
   # Fonction pour mettre à jour les chemins dans les fichiers Rmd et ajouter le titre
   update_rmd_paths <- function(rmd_file) {
@@ -148,23 +133,34 @@ rewrite_functions_as_rmd <- function(source_path) {
       dir_create(new_data_path)
     }
 
-    copy_files <- function(file_path) {
-      if (str_detect(file_path, "\\.csv$")) {
-        data <- read.csv(file_path)
-        new_file_path <- file.path(new_data_path, path_file(file_path))
-        write.csv(data, new_file_path, row.names = FALSE)
-      } else if (str_detect(file_path, "\\.xlsx$")) {
-        sheets <- excel_sheets(file_path)
-        new_data <- lapply(sheets, function(sheet) {
-          read_excel(file_path, sheet = sheet)
-        })
-        names(new_data) <- sheets
-        new_file_path <- file.path(new_data_path, path_file(file_path))
+    copy_files <- function(file_path, n = 10) {
+      
+      head_order_record <- function(df, n) {
+        if ("Record" %in% names(df)) df <- dplyr::arrange(df, .data$Record)
+        dplyr::slice_head(df, n = n)
+      }
+      
+      new_file_path <- file.path(new_data_path, fs::path_file(file_path))
+      
+      if (stringr::str_detect(file_path, "\\.csv$")) {
+        
+        df <- readr::read_csv(file_path, show_col_types = FALSE)
+        df <- head_order_record(df, n = n)
+        readr::write_csv(df, new_file_path)
+        
+      } else if (stringr::str_detect(file_path, "\\.xlsx$")) {
+        
+        sheets <- readxl::excel_sheets(file_path)
+        new_data <- setNames(lapply(sheets, function(sheet) {
+          df <- readxl::read_excel(file_path, sheet = sheet)
+          head_order_record(df, n = n)
+        }), sheets)
+        
         writexl::write_xlsx(new_data, new_file_path)
       }
     }
     
-    purrr::walk(data_files, copy_files)
+    purrr::walk(data_files, ~ copy_files(.x, n = 10))
     
     writeLines(c(yaml_header, "", lines), new_rmd_path)
     message(paste("Updated and moved Rmd:", path_file(rmd_file)))
@@ -185,19 +181,10 @@ rewrite_functions_as_rmd <- function(source_path) {
   message("All operations completed.")
 }
 
-# Fonction pour exécuter rewrite_functions_as_rmd avec gestion des erreurs
-safe_rewrite_functions_as_rmd <- function(source_path) {
-  tryCatch({
-    rewrite_functions_as_rmd(source_path)
-  }, error = function(e) {
-    message(sprintf("An error occurred while processing '%s': %s", source_path, e$message))
-  })
-}
-
-
 # Fonction pour supprimer les fichiers spécifiques
 remove_specific_files <- function(root_dir) {
-  files_to_remove <- c("CWP_dataset.csv", "Dataset_harmonized.csv", "not_mapped_total.csv", "recap_mapping.csv", "local_map_codelists_no_DB.R", "not_displayed_monthly.csv")
+  files_to_remove <- c("CWP_dataset.csv", "Dataset_harmonized.csv", "not_mapped_total.csv", "recap_mapping.csv", "local_map_codelists_no_DB.R", "not_displayed_monthly.csv", "removed_irregular_areas.csv", 
+                       "areas_in_land.csv")
   
   # Rechercher les fichiers spécifiés dans le répertoire racine et ses sous-dossiers
   all_files <- dir_ls(path = root_dir, recurse = TRUE, type = "file")

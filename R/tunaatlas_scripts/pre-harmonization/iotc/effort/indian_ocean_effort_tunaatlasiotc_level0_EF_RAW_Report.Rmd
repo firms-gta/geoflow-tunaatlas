@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
 Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R, the documentation keeps the format of roxygen2 skeleton.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R, the documentation keeps the format of roxygen2 skeleton.
 
 A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
 The datasets are named after the historical name provided by tRFMOs while exporting and may change.
@@ -61,7 +61,6 @@ The formatting logic is implemented inline:
   library(dplyr)
   
   
-  
   opts <- options()
   options(encoding = "UTF-8")
   on.exit(options(opts), add = TRUE)
@@ -72,9 +71,13 @@ The formatting logic is implemented inline:
   # ---- format inline ----
   effort <- effort_raw %>%
     dplyr::mutate(
-      # dates
-      time_start = paste0(YEAR, "-", sprintf("%02d", MONTH_START), "-01"),
-      time_end   = paste0(YEAR, "-", sprintf("%02d", MONTH_END), "-01"),
+      time_start = as.Date(sprintf("%d-%02d-01", YEAR, MONTH_START)),
+      
+      time_end = as.Date(
+        sprintf("%d-%02d-01", YEAR, MONTH_END)
+      ) |>
+        (\(x) as.Date(format(x + 32, "%Y-%m-01")) - 1)()
+    ,
       
       # geography + gridtype
       geographic_identifier = as.character(FISHING_GROUND_CODE),

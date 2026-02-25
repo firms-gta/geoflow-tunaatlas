@@ -522,7 +522,7 @@ RFMO_CE&lt;-read.csv(path_to_raw_dataset,stringsAsFactors = F)</p>
 <pre class="r"><code>RFMO_CE &lt;- read_excel(path_to_raw_dataset,
                 sheet = &quot;Data&quot;)
 
-RFMO_CE$FleetCode_short &lt;- sub(&quot;-.*&quot;, &quot;&quot;, RFMO_CE$FleetCode)
+RFMO_CE$FleetCode_short &lt;- sub(&quot;-.*&quot;, &quot;&quot;, RFMO_CE$FleetCode) # fleet code only what is after the &#39;-&#39;
 
 names(RFMO_CE)[names(RFMO_CE) == &#39;FleetCode_short&#39;] &lt;- &#39;FishingFleet&#39;
 RFMO_CE &lt;- RFMO_CE[, c(&quot;FishingFleet&quot;, setdiff(names(RFMO_CE), &quot;FishingFleet&quot;))] # oput flag in first position</code></pre>
@@ -545,7 +545,8 @@ efforts_pivot_ICCAT&lt;- efforts_pivot_ICCAT %&gt;% dplyr::rename(&quot;School&q
 colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R&quot;)
 efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT %&gt;% dplyr::rename(SquareTypeCode = GeoStrataCode) # to match definition in ICCAT_CE_effort_pivotDSD_to_harmonizedDSD
-
+efforts_pivot_ICCAT$Lat &lt;- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon &lt;- floor(abs(efforts_pivot_ICCAT$Lon))
 efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$AreaName &lt;- as.character(as.integer(efforts$AreaName))
 colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;)
@@ -585,14 +586,14 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
-##   src_code  trg_code  src_codingsystem trg_codingsystem source_authority
-##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
-## 1 D.AT SEA  DAYS      effortunit_iccat effortunit_rfmos ICCAT           
-## 2 D.FISH    FDAYS     effortunit_iccat effortunit_rfmos ICCAT           
-## 3 D.FISH.G  D.FISH.G  effortunit_iccat effortunit_rfmos ICCAT           
-## 4 FISH.HOUR FHOURS    effortunit_iccat effortunit_rfmos ICCAT           
-## 5 HOURS.SEA HOURS     effortunit_iccat effortunit_rfmos ICCAT           
-## 6 Hours.FAD Hours.FAD effortunit_iccat effortunit_rfmos ICCAT</code></pre>
+##   src_code  trg_code  src_codingsystem trg_codingsystem   source_authority
+##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
+## 1 FISH.HOUR FHOURS    effortunit_iccat effortunit_rfmos   ICCAT           
+## 2 HOURS.SEA HOURS     effortunit_iccat effortunit_rfmos   ICCAT           
+## 3 Hours.FAD Hours.FAD effortunit_iccat effortunit_rfmos   ICCAT           
+## 4 Hours.FSC Hours.FSC effortunit_iccat effortunit_rfmos   ICCAT           
+## 5 Hours.STD Hours.STD effortunit_iccat effortunit_rfmos   ICCAT           
+## 6 EU.ESP    EUESP     flag_iccat       fishingfleet_firms ICCAT</code></pre>
 </div>
 
 

@@ -115,6 +115,35 @@ ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID",
                                                     "SchoolTypeCode", "FlagName", "StatusCode"))
 ````
 
+remove duplicated lines, as displayed in kilos and numbers 
+
+````{r}
+eff_cols <- c("Eff1","Eff1Type","Eff2","Eff2Type")
+species_cols <- ICCAT_CE_species_colnames
+
+key_cols <- setdiff(
+  colnames(t2ce),
+  c("StrataID", "CatchUnit", eff_cols, species_cols)
+)
+
+unit_priority <- function(x) {
+  dplyr::case_when(
+    x == "kg" ~ 1L,
+    x == "nr" ~ 2L,
+    TRUE      ~ 3L
+  )
+}
+
+t2ce <- t2ce %>%
+  dplyr::mutate(.unit_rank = unit_priority(CatchUnit)) %>%
+  dplyr::group_by(across(all_of(key_cols))) %>%
+  dplyr::arrange(.unit_rank, .by_group = TRUE) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(-.unit_rank)
+````
+
+remove data displayed annualy
 data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
 # Efforts
 # Reach the efforts pivot DSD using a function in ICCAT_functions.R
@@ -137,8 +166,10 @@ efforts_pivot_ICCAT$School<-"UNK"
 Flag
 
 ````{r}
-efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FlagCode'] <- 'FishingFleet'
+efforts_pivot_ICCAT$FleetCode_short <- sub("-.*", "", efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the '-'
+
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode_short'] <- 'FishingFleet'
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT[, c("FishingFleet", setdiff(names(efforts_pivot_ICCAT), "FishingFleet"))] # put flag in first position
 ````
 
 Reach the efforts harmonized DSD using a function in ICCAT_functions.R
@@ -146,6 +177,8 @@ Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 ````{r}
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
+efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType <- "C" #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","measurement_type")

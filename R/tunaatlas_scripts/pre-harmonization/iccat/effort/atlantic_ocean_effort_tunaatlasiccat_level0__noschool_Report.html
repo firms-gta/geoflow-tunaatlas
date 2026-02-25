@@ -531,8 +531,33 @@ ICCAT_CE_species_colnames&lt;-setdiff(colnames(t2ce),c(&quot;StrataID&quot;,&quo
                                                     &quot;FleetID&quot;,&quot;GearGrpCode&quot;,&quot;GearCode&quot;,&quot;FileTypeCode&quot;,&quot;YearC&quot;,&quot;TimePeriodID&quot;,&quot;SquareTypeCode&quot;,
                                                     &quot;QuadID&quot;,&quot;Lat&quot;,&quot;Lon&quot;,&quot;Eff1&quot;,&quot;Eff1Type&quot;,&quot;Eff2&quot;,&quot;Eff2Type&quot;,&quot;DSetTypeID&quot;,&quot;CatchUnit&quot;, &quot;FleetCode&quot;, &quot;FleetName&quot;, &quot;FlagID&quot;, &quot;FlagCode&quot;, 
                                                     &quot;SchoolTypeCode&quot;, &quot;FlagName&quot;, &quot;StatusCode&quot;))</code></pre>
-<p>data_pivot_ICCAT&lt;-left_join(t2ce,Flags,by=“FleetID”) # equivalent
-to “select FlagCode,FlagID,t2ce.* from t2ce, Flags where
+<p>remove duplicated lines, as displayed in kilos and numbers</p>
+<pre class="r"><code>eff_cols &lt;- c(&quot;Eff1&quot;,&quot;Eff1Type&quot;,&quot;Eff2&quot;,&quot;Eff2Type&quot;)
+species_cols &lt;- ICCAT_CE_species_colnames
+
+key_cols &lt;- setdiff(
+  colnames(t2ce),
+  c(&quot;StrataID&quot;, &quot;CatchUnit&quot;, eff_cols, species_cols)
+)
+
+unit_priority &lt;- function(x) {
+  dplyr::case_when(
+    x == &quot;kg&quot; ~ 1L,
+    x == &quot;nr&quot; ~ 2L,
+    TRUE      ~ 3L
+  )
+}
+
+t2ce &lt;- t2ce %&gt;%
+  dplyr::mutate(.unit_rank = unit_priority(CatchUnit)) %&gt;%
+  dplyr::group_by(across(all_of(key_cols))) %&gt;%
+  dplyr::arrange(.unit_rank, .by_group = TRUE) %&gt;%
+  dplyr::slice(1) %&gt;%
+  dplyr::ungroup() %&gt;%
+  dplyr::select(-.unit_rank)</code></pre>
+<p>remove data displayed annualy
+data_pivot_ICCAT&lt;-left_join(t2ce,Flags,by=“FleetID”) # equivalent to
+“select FlagCode,FlagID,t2ce.* from t2ce, Flags where
 t2ce.FleetID=Flags.FleetID” # Efforts # Reach the efforts pivot DSD
 using a function in ICCAT_functions.R # If we want in the output dataset
 the column ‘FleetCode’ instead of ‘flag’</p>
@@ -544,12 +569,16 @@ efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCA
 <p>School</p>
 <pre class="r"><code>efforts_pivot_ICCAT$School&lt;-&quot;UNK&quot;</code></pre>
 <p>Flag</p>
-<pre class="r"><code>efforts_pivot_ICCAT$Flag&lt;-efforts_pivot_ICCAT$FlagCode
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == &#39;FlagCode&#39;] &lt;- &#39;FishingFleet&#39;</code></pre>
+<pre class="r"><code>efforts_pivot_ICCAT$FleetCode_short &lt;- sub(&quot;-.*&quot;, &quot;&quot;, efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the &#39;-&#39;
+
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == &#39;FleetCode_short&#39;] &lt;- &#39;FishingFleet&#39;
+efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT[, c(&quot;FishingFleet&quot;, setdiff(names(efforts_pivot_ICCAT), &quot;FishingFleet&quot;))] # put flag in first position</code></pre>
 <p>Reach the efforts harmonized DSD using a function in
 ICCAT_functions.R</p>
 <pre class="r"><code>colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R&quot;)
+efforts_pivot_ICCAT$Lat &lt;- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon &lt;- floor(abs(efforts_pivot_ICCAT$Lon))
 efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType &lt;- &quot;C&quot; #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;,&quot;measurement_type&quot;)
@@ -588,14 +617,14 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
-##   src_code  trg_code src_codingsystem trg_codingsystem source_authority
-##   &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
-## 1 D.AT SEA  DAYS     effortunit_iccat effortunit_rfmos ICCAT           
-## 2 D.FISH    FDAYS    effortunit_iccat effortunit_rfmos ICCAT           
-## 3 D.FISH.G  D.FISH.G effortunit_iccat effortunit_rfmos ICCAT           
-## 4 FISH.HOUR FHOURS   effortunit_iccat effortunit_rfmos ICCAT           
-## 5 HOURS.SEA HOURS    effortunit_iccat effortunit_rfmos ICCAT           
-## 6 KM.SETS   KM.SETS  effortunit_iccat effortunit_rfmos ICCAT</code></pre>
+##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
+##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
+## 1 D.AT SEA DAYS     effortunit_iccat effortunit_rfmos   ICCAT           
+## 2 NO.BOATS BOATS    effortunit_iccat effortunit_rfmos   ICCAT           
+## 3 NO.TRAPS NO.TRAPS effortunit_iccat effortunit_rfmos   ICCAT           
+## 4 EU.ESP   EUESP    flag_iccat       fishingfleet_firms ICCAT           
+## 5 EU.FRA   EUFRA    flag_iccat       fishingfleet_firms ICCAT           
+## 6 YUG      YUG      flag_iccat       fishingfleet_firms ICCAT</code></pre>
 </div>
 
 

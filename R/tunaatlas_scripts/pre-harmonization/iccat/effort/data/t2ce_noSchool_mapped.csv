@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,measurement_type,source_authority,measurement,measurement_value
+AGO,03.9,2023-01-01,2023-01-31,5216010,UNK,DAYS,C,ICCAT,effort,24
+AGO,03.9,2023-01-01,2023-01-31,5216010,UNK,FDAYS,C,ICCAT,effort,1
+AGO,03.9,2023-01-01,2023-01-31,5216011,UNK,DAYS,C,ICCAT,effort,22
+AGO,03.9,2023-01-01,2023-01-31,5216011,UNK,FDAYS,C,ICCAT,effort,1
+AGO,03.9,2023-01-01,2023-01-31,5217011,UNK,DAYS,C,ICCAT,effort,22

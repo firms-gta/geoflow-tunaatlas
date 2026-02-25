@@ -562,15 +562,12 @@ fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
 fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 6 × 5
+<pre><code>## # A tibble: 3 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 Hooks    HOOKS    effortunit_iattc effortunit_rfmos   IATTC           
-## 2 BLZ      BLZ      flag_iattc       fishingfleet_firms IATTC           
-## 3 CHN      CHN      flag_iattc       fishingfleet_firms IATTC           
-## 4 ESP      EUESP    flag_iattc       fishingfleet_firms IATTC           
-## 5 JPN      JPN      flag_iattc       fishingfleet_firms IATTC           
-## 6 KOR      KOR      flag_iattc       fishingfleet_firms IATTC</code></pre>
+## 2 JPN      JPN      flag_iattc       fishingfleet_firms IATTC           
+## 3 LL       09.32    gear_iattc       isscfg_revision_1  IATTC</code></pre>
 </div>
 
 

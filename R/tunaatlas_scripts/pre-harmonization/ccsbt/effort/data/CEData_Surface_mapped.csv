@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+AUS,01.1,1975-12-01,1975-12-31,5237150,UNK,HRSRH,CCSBT,effort,unknown,17
+AUS,01.1,1978-01-01,1978-01-31,5238149,UNK,HRSRH,CCSBT,effort,unknown,12
+AUS,01.1,1981-11-01,1981-11-30,5236150,UNK,HRSRH,CCSBT,effort,unknown,157
+AUS,01.1,1981-11-01,1981-11-30,5236151,UNK,HRSRH,CCSBT,effort,unknown,150
+AUS,01.1,1981-11-01,1981-11-30,5236152,UNK,HRSRH,CCSBT,effort,unknown,43

@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+BMU,01.1,1975-01-01,1975-01-31,5301081,UNK,SETS,IATTC,effort,unknown,6
+BMU,01.1,1975-01-01,1975-01-31,5301082,UNK,SETS,IATTC,effort,unknown,3
+BMU,01.1,1975-01-01,1975-01-31,5301083,UNK,SETS,IATTC,effort,unknown,3
+BMU,01.1,1975-01-01,1975-01-31,5302081,UNK,SETS,IATTC,effort,unknown,3
+BMU,01.1,1975-01-01,1975-01-31,5302082,UNK,SETS,IATTC,effort,unknown,7

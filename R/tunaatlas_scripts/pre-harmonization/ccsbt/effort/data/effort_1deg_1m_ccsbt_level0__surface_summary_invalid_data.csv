@@ -1,11 +1,21 @@
-"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level","gridtype","Gear","issue"
-"AU","Pole and Line","1987-03-01","1987-03-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",71,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Pole and Line","1996-12-01","1996-12-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",22,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Pole and Line","1997-01-01","1997-01-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",62,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Pole and Line","1997-02-01","1997-02-28",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",52,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Pole and Line","1997-03-01","1997-03-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",35,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Purse Seine","1991-04-01","1991-04-30",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",7,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Purse Seine","1996-11-01","1996-11-30",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",184,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Purse Seine","1997-01-01","1997-01-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",197,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Purse Seine","1997-02-01","1997-02-28",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",190,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
-"AU","Purse Seine","1998-03-01","1998-03-31",NA,"UNK","NUMBER_OF_HOURS_SEARCHED",132,"CCSBT","effort","unknown",NA,NA,"removed_irregular_areas.csv"
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,measurement_value,source_authority,measurement,measurement_processing_level,gridtype,Gear,issue
+AU,Pole and Line,1987-03-01,1987-03-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,71,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Pole and Line,1996-12-01,1996-12-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,22,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Pole and Line,1997-01-01,1997-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,62,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Pole and Line,1997-02-01,1997-02-28,NA,UNK,NUMBER_OF_HOURS_SEARCHED,52,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Pole and Line,1997-03-01,1997-03-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,35,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1991-04-01,1991-04-30,NA,UNK,NUMBER_OF_HOURS_SEARCHED,7,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1996-11-01,1996-11-30,NA,UNK,NUMBER_OF_HOURS_SEARCHED,184,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1997-01-01,1997-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,197,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1997-02-01,1997-02-28,NA,UNK,NUMBER_OF_HOURS_SEARCHED,190,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1998-03-01,1998-03-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,132,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1999-03-01,1999-03-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,106,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,1999-05-01,1999-05-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,66,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2000-01-01,2000-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,36,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2000-04-01,2000-04-30,NA,UNK,NUMBER_OF_HOURS_SEARCHED,206,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2001-01-01,2001-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,72,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2002-01-01,2002-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,34,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2010-02-01,2010-02-28,NA,UNK,NUMBER_OF_HOURS_SEARCHED,66,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2023-01-01,2023-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,206,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2024-01-01,2024-01-31,NA,UNK,NUMBER_OF_HOURS_SEARCHED,252,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv
+AU,Purse Seine,2024-02-01,2024-02-29,NA,UNK,NUMBER_OF_HOURS_SEARCHED,145,CCSBT,effort,unknown,NA,NA,removed_irregular_areas.csv

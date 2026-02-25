@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,source_authority,measurement,measurement_value
+BLZ,01.1,1998-05-01,1998-05-31,5200000,UNK,FHOURS,ICCAT,effort,52.4
+BLZ,01.1,1998-05-01,1998-05-31,5200000,UNK,HOURS,ICCAT,effort,104.2
+BLZ,01.1,1998-05-01,1998-05-31,5200000,UNK,Hours.STD,ICCAT,effort,52.4
+BLZ,01.1,1998-05-01,1998-05-31,5200001,UNK,FHOURS,ICCAT,effort,183.2
+BLZ,01.1,1998-05-01,1998-05-31,5200001,UNK,HOURS,ICCAT,effort,364.6
