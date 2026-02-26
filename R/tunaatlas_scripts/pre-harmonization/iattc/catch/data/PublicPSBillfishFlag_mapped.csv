@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+COL,01.1,1993-01-01,1993-01-31,5310085,UNK,BLM,RC,TRUE,IATTC,catch,unknown,1
+COL,01.1,1993-01-01,1993-01-31,5311085,UNK,BIL,RC,TRUE,IATTC,catch,unknown,1
+COL,01.1,1993-01-01,1993-01-31,5312084,UNK,BIL,RC,TRUE,IATTC,catch,unknown,1
+COL,01.1,1993-02-01,1993-02-28,5314081,UNK,MLS,RC,TRUE,IATTC,catch,unknown,1
+COL,01.1,1993-02-01,1993-02-28,5315081,UNK,MLS,RC,TRUE,IATTC,catch,unknown,4

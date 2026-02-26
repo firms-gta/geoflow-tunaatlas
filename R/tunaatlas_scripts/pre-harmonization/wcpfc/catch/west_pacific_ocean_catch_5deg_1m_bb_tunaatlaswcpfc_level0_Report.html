@@ -583,7 +583,7 @@ if(!require(dplyr)){
     sep = &quot;/&quot;
   )
   catches$measurement_processing_level &lt;- &quot;unknown&quot; 
-  # sorties same folder as path_to_raw_dataset 
+  # output in same folder as path_to_raw_dataset 
   output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
   
   write.csv(catches, output_name_dataset, row.names = FALSE)
@@ -610,15 +610,14 @@ fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
 fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 6 × 5
+<pre><code>## # A tibble: 5 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 OTH      OTH      schooltype_wcpfc schooltype_rfmos   WCPFC           
 ## 2 ALL      NEI      flag_wcpfc       fishingfleet_firms WCPFC           
 ## 3 SKJ      SKJ      species_wcpfc    species_asfis      WCPFC           
 ## 4 YFT      YFT      species_wcpfc    species_asfis      WCPFC           
-## 5 OTH      MZZ      species_wcpfc    species_asfis      WCPFC           
-## 6 P        09.1     gear_wcpfc       isscfg_revision_1  WCPFC</code></pre>
+## 5 P        09.1     gear_wcpfc       isscfg_revision_1  WCPFC</code></pre>
 </div>
 
 

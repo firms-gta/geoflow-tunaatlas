@@ -627,7 +627,7 @@ dataset_temporal_extent &lt;- paste(
     paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
     sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
+<p>output in same folder as path_to_raw_dataset</p>
 <pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
 write.csv(catches, output_name_dataset, row.names = FALSE)
@@ -656,11 +656,11 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 OTH      OTH      schooltype_wcpfc schooltype_rfmos   WCPFC           
-## 2 AU       AUS      flag_wcpfc       fishingfleet_firms WCPFC           
-## 3 BZ       BLZ      flag_wcpfc       fishingfleet_firms WCPFC           
-## 4 CK       COK      flag_wcpfc       fishingfleet_firms WCPFC           
-## 5 CN       CHN      flag_wcpfc       fishingfleet_firms WCPFC           
-## 6 ES       EUESP    flag_wcpfc       fishingfleet_firms WCPFC</code></pre>
+## 2 JP       JPN      flag_wcpfc       fishingfleet_firms WCPFC           
+## 3 ALB      ALB      species_wcpfc    species_asfis      WCPFC           
+## 4 BET      BET      species_wcpfc    species_asfis      WCPFC           
+## 5 BLM      BLM      species_wcpfc    species_asfis      WCPFC           
+## 6 BUM      BUM      species_wcpfc    species_asfis      WCPFC</code></pre>
 </div>
 
 

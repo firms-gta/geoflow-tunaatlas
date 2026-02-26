@@ -166,7 +166,7 @@ dataset_temporal_extent <- paste(
 
 ````
 
-sorties same folder as path_to_raw_dataset 
+output in same folder as path_to_raw_dataset 
 
 ````{r}
 output_name_dataset <- "Dataset_harmonized.csv"

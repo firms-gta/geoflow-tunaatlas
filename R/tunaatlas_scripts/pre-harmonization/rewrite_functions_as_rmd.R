@@ -1,3 +1,45 @@
+# truncate_files <- function(root_dir) {
+#   # Fonction pour tronquer un fichier CSV
+#   truncate_csv <- function(file_path) {
+#     data <- read.csv(file_path)
+#     if ("Record" %in% colnames(data)) {
+#       data <- data %>% arrange(Record) %>% head(10)
+#     } else {
+#       data <- head(data, 10)
+#     }
+#     write.csv(data, file_path, row.names = FALSE)
+#     message(paste("Truncated CSV file:", file_path))
+#   }
+#   
+#   # Fonction pour tronquer un fichier XLSX
+#   truncate_xlsx <- function(file_path) {
+#     sheets <- excel_sheets(file_path)
+#     new_data <- lapply(sheets, function(sheet) {
+#       data <- read_excel(file_path, sheet = sheet)
+#       if ("Record" %in% colnames(data)) {
+#         data <- data %>% arrange(Record) %>% head(10)
+#       } else {
+#         data <- head(data, 10)
+#       }
+#       data
+#     })
+#     names(new_data) <- sheets
+#     writexl::write_xlsx(new_data, file_path)
+#     message(paste("Truncated XLSX file:", file_path))
+#   }
+#   
+#   # Liste de tous les fichiers CSV et XLSX dans le dossier et les sous-dossiers
+#   csv_files <- dir_ls(path = root_dir, recurse = TRUE, glob = "*.csv")
+#   xlsx_files <- dir_ls(path = root_dir, recurse = TRUE, glob = "*.xlsx")
+#   
+#   # Appliquer la troncature aux fichiers CSV et XLSX
+#   purrr::walk(csv_files, truncate_csv)
+#   purrr::walk(xlsx_files, truncate_xlsx)
+#   
+#   message("All files have been truncated.")
+# }
+
+
 # Chargement des bibliothèques nécessaires
 library(fs)
 library(dplyr)
@@ -6,6 +48,7 @@ library(writexl)
 library(purrr)
 library(here)
 library(rmarkdown)
+require(stringr)
 
 # Fonction pour tronquer les fichiers CSV et XLSX
 
@@ -17,9 +60,10 @@ copy_prehamo_data_files <- function(source_path) {
     file_name <- fs::path_file(file_path)
     trfmo <- stringr::str_match(file_path, "(iattc|iccat|ccsbt|wcpfc|iotc)")[,2]
     type <- case_when(
-      stringr::str_detect(file_path, regex("effort", ignore_case = TRUE)) ~ "effort",
-      stringr::str_detect(file_path, regex("EF", ignore_case = TRUE)) ~ "effort",
-      stringr::str_detect(file_path, regex("nominal", ignore_case = TRUE)) ~ "nominal",
+      stringr::str_detect(file_path, stringr::regex("effort", ignore_case = TRUE)) ~ "effort",
+      stringr::str_detect(file_path, stringr::regex("catch", ignore_case = TRUE)) ~ "catch",
+      stringr::str_detect(file_path, stringr::regex("nominal", ignore_case = TRUE)) ~ "nominal",
+      stringr::str_detect(file_path, stringr::regex("EF", ignore_case = TRUE)) ~ "effort",
       TRUE ~ "catch"
     )
     full_destination_path <- file.path(destination_path, trfmo, type, "data", file_name)
@@ -160,11 +204,10 @@ rewrite_functions_as_rmd <- function(source_path) {
       }
     }
     
-    purrr::walk(data_files, ~ copy_files(.x, n = 10))
+    purrr::walk(data_files, ~ copy_files(.x, n = 1000))
     
     writeLines(c(yaml_header, "", lines), new_rmd_path)
     message(paste("Updated and moved Rmd:", path_file(rmd_file)))
-    
     # Génération des fichiers HTML
     if (basename(new_rmd_path) != "data_cwp_format_Report.Rmd") {
       tryCatch({
@@ -174,6 +217,7 @@ rewrite_functions_as_rmd <- function(source_path) {
         message(paste("Error rendering:", new_rmd_path, ":", e$message))
       })
     }
+    purrr::walk(data_files, ~ copy_files(.x, n = 10))
   }
   
   rmd_files <- dir_ls(path = source_path, recurse = TRUE, glob = "*.Rmd")

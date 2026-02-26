@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+COL,01.1,1993-05-01,1993-05-31,5405077,UNK,OCS,RC,no,IATTC,catch,original_sample,3
+COL,01.1,1993-05-01,1993-05-31,5406084,UNK,OCS,RC,no,IATTC,catch,original_sample,3
+COL,01.1,1993-05-01,1993-05-31,5409086,UNK,SPN,RC,no,IATTC,catch,original_sample,3
+COL,01.1,1993-06-01,1993-06-30,5403077,UNK,FAL,RC,no,IATTC,catch,original_sample,11
+COL,01.1,1993-06-01,1993-06-30,5403078,UNK,FAL,RC,no,IATTC,catch,original_sample,47

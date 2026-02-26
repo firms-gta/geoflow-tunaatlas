@@ -578,7 +578,7 @@ dataset_temporal_extent &lt;- paste(
   paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
+<p>output in same folder as path_to_raw_dataset</p>
 <pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
 write.csv(catches, output_name_dataset, row.names = FALSE)
@@ -603,15 +603,13 @@ fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
 fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 6 × 5
+<pre><code>## # A tibble: 4 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 UNK      UNK      schooltype_ccsbt schooltype_rfmos   CCSBT           
-## 2 AU       AUS      flag_ccsbt       fishingfleet_firms CCSBT           
-## 3 JP       JPN      flag_ccsbt       fishingfleet_firms CCSBT           
-## 4 KR       KOR      flag_ccsbt       fishingfleet_firms CCSBT           
-## 5 NZ       NZL      flag_ccsbt       fishingfleet_firms CCSBT           
-## 6 TW       TWN      flag_ccsbt       fishingfleet_firms CCSBT</code></pre>
+## 2 JP       JPN      flag_ccsbt       fishingfleet_firms CCSBT           
+## 3 SBF      SBF      species_ccsbt    species_asfis      CCSBT           
+## 4 Longline 09.39    gear_ccsbt       isscfg_revision_1  CCSBT</code></pre>
 </div>
 
 

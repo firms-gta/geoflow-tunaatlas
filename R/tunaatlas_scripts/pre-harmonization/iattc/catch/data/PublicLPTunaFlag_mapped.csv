@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+MEX,09.1,1978-03-01,1978-03-31,5419112,UNK,SKJ,RC,TRUE,IATTC,catch,unknown,3.5
+MEX,09.1,1978-03-01,1978-03-31,5419112,UNK,YFT,RC,TRUE,IATTC,catch,unknown,5
+MEX,09.1,1978-03-01,1978-03-31,5421111,UNK,SKJ,RC,TRUE,IATTC,catch,unknown,0.5
+MEX,09.1,1978-03-01,1978-03-31,5421111,UNK,YFT,RC,TRUE,IATTC,catch,unknown,2
+MEX,09.1,1978-04-01,1978-04-30,5419107,UNK,SKJ,RC,TRUE,IATTC,catch,unknown,5

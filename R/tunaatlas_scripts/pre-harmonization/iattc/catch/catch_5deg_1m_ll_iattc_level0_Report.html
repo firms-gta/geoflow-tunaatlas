@@ -464,7 +464,7 @@ dataset at the beginning of the script in order to execute the
 harmonization process correctly. It is also possible to run the code
 chunk by chunk but be sure to be in the correct working directory (i.e.,
 the one of the <code>.Rmd</code>).</em></p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLTunaBillfishMt.csv&#39;)</code></pre>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLSharkMt.csv&#39;)</code></pre>
 <p>Convert a catch dataset into CWP format</p>
 <p>This function transforms a dataset containing catch information into
 the CWP (Coordinating Working Party) format.</p>
@@ -555,7 +555,7 @@ time_end measurement_unit measurement_value geographic_identifier <chr>
     sep = &quot;/&quot;
   )
   
-  # sorties same folder as path_to_raw_dataset 
+  # output in same folder as path_to_raw_dataset 
   output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
   
   write.csv(df, output_name_dataset, row.names = FALSE)
@@ -582,15 +582,14 @@ fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
 fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 6 × 5
+<pre><code>## # A tibble: 5 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 BLZ      BLZ      flag_iattc       fishingfleet_firms IATTC           
-## 2 CHN      CHN      flag_iattc       fishingfleet_firms IATTC           
-## 3 ESP      EUESP    flag_iattc       fishingfleet_firms IATTC           
-## 4 JPN      JPN      flag_iattc       fishingfleet_firms IATTC           
-## 5 KOR      KOR      flag_iattc       fishingfleet_firms IATTC           
-## 6 MEX      MEX      flag_iattc       fishingfleet_firms IATTC</code></pre>
+## 1 KOR      KOR      flag_iattc       fishingfleet_firms IATTC           
+## 2 MEX      MEX      flag_iattc       fishingfleet_firms IATTC           
+## 3 TWN      TWN      flag_iattc       fishingfleet_firms IATTC           
+## 4 SKH      SKH      species_iattc    species_asfis      IATTC           
+## 5 LL       09.32    gear_iattc       isscfg_revision_1  IATTC</code></pre>
 </div>
 
 

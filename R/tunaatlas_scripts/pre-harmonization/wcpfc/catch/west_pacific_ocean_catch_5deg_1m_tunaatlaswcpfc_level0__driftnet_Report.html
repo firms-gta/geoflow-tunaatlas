@@ -578,7 +578,7 @@ dataset_temporal_extent &lt;- paste(
   paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
+<p>output in same folder as path_to_raw_dataset</p>
 <pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
 write.csv(catches, output_name_dataset, row.names = FALSE)

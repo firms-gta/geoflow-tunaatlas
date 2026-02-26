@@ -524,7 +524,7 @@ dataset_temporal_extent &lt;- paste(
     paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
     sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
+<p>output in same folder as path_to_raw_dataset</p>
 <pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
 write.csv(catches, output_name_dataset, row.names = FALSE)
@@ -555,10 +555,10 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
 ## 1 COL      COL      flag_iattc       fishingfleet_firms IATTC           
 ## 2 ECU      ECU      flag_iattc       fishingfleet_firms IATTC           
-## 3 ESP      EUESP    flag_iattc       fishingfleet_firms IATTC           
-## 4 HND      HND      flag_iattc       fishingfleet_firms IATTC           
-## 5 MEX      MEX      flag_iattc       fishingfleet_firms IATTC           
-## 6 NIC      NIC      flag_iattc       fishingfleet_firms IATTC</code></pre>
+## 3 MEX      MEX      flag_iattc       fishingfleet_firms IATTC           
+## 4 OTR      NEI      flag_iattc       fishingfleet_firms IATTC           
+## 5 PAN      PAN      flag_iattc       fishingfleet_firms IATTC           
+## 6 USA      USA      flag_iattc       fishingfleet_firms IATTC</code></pre>
 </div>
 
 
