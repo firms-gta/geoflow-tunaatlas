@@ -52,9 +52,7 @@ require(stringr)
 
 # Fonction pour tronquer les fichiers CSV et XLSX
 
-copy_prehamo_data_files <- function(source_path) {
-  
-  destination_path <- "~/firms-gta/geoflow-tunaatlas/R/tunaatlas_scripts/pre-harmonization"
+copy_prehamo_data_files <- function(source_path, destination_path = here::here("R/tunaatlas_scripts/pre-harmonization")) {
   
   move_files <- function(file_path, truncate = FALSE) {
     file_name <- fs::path_file(file_path)
