@@ -1,5 +1,5 @@
 Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
-id:global_catch_ird_level2_1950_2023,title:Global monthly catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) IRD Level 2,"abstract: This dataset compiles monthly global catch data for tuna, tuna-like species and sharks from 1950 through 2023. Catches are stratified by:
+id:global_catch_ird_level0_1950_2024,title:Global monthly catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) IRD Level 2,"abstract: This dataset compiles monthly global catch data for tuna, tuna-like species and sharks from 1950 through 2023. Catches are stratified by:
   - month  
   - species  
   - gear_type ( reporting fishing_gear)  
@@ -41,7 +41,7 @@ principalInvestigator:ird@ird.fr_
 metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
 processor:FIRMS-Secretariat@fao.org,:emmanuel.blondel@fao.org,:julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2025-05-05_
 edition:2025-05-05",dataset,eng,"SRID=4326;POLYGON((-180 -90,-180 90,180 90,180 -90,-180 -90))",2025-05-05,"thumbnail:Map overview@https://github.com/eblondel/geoflow-tunaatlas/raw/master/assets/global_catch_1deg_1m_ps_bb_firms_level0.png_
-http:codelists[Source codelists]@https://drive.google.com/open?id=1Hi0oHdZjZWYwLnhdiq_Y-gvFzu6d32hH",,"statement:Data management workflow_
+",,"statement:Data management workflow_
 process:Public domain datasets from IOTC were collated through the RFMO website (www.iotc.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
 process:Public domain datasets from CCSBT were collated through the RFMO website (www.ccsbt.org). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
 process:Public domain datasets from ICCAT were collated through the RFMO website (www.iccat.int). Their structure (i.e. column organization and names) was harmonized and they were loaded in the Tuna atlas database._
