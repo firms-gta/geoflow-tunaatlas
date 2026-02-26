@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+NEI,07.2,1983-11-01,1983-11-30,6330165,OTH,ALB,RC,no,WCPFC,catch,raised,886
+NEI,07.2,1983-11-01,1983-11-30,6330165,OTH,ALB,RC,t,WCPFC,catch,raised,4.96
+NEI,07.2,1983-12-01,1983-12-31,6330165,OTH,ALB,RC,no,WCPFC,catch,raised,870
+NEI,07.2,1983-12-01,1983-12-31,6330165,OTH,ALB,RC,t,WCPFC,catch,raised,4.872
+NEI,07.2,1983-12-01,1983-12-31,6335165,OTH,ALB,RC,no,WCPFC,catch,raised,3822

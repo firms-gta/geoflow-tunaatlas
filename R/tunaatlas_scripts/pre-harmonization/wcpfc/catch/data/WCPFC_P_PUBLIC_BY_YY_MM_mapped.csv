@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+NEI,09.1,1950-04-01,1950-04-30,6125135,OTH,SKJ,RC,TRUE,WCPFC,catch,unknown,68.389
+NEI,09.1,1950-04-01,1950-04-30,6125135,OTH,YFT,RC,TRUE,WCPFC,catch,unknown,3.409
+NEI,09.1,1950-04-01,1950-04-30,6125140,OTH,SKJ,RC,TRUE,WCPFC,catch,unknown,87.805
+NEI,09.1,1950-04-01,1950-04-30,6125140,OTH,YFT,RC,TRUE,WCPFC,catch,unknown,9.637
+NEI,09.1,1950-04-01,1950-04-30,6130140,OTH,SKJ,RC,TRUE,WCPFC,catch,unknown,197.997

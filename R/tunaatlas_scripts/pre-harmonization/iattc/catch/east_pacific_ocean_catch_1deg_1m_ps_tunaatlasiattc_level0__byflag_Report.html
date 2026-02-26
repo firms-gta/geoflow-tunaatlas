@@ -528,7 +528,7 @@ dataset_temporal_extent &lt;- paste(
     paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
     sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
+<p>output in same folder as path_to_raw_dataset</p>
 <pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
 write.csv(catches, output_name_dataset, row.names = FALSE)
@@ -557,12 +557,12 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 BMU      BMU      flag_iattc       fishingfleet_firms IATTC           
-## 2 CAN      CAN      flag_iattc       fishingfleet_firms IATTC           
-## 3 COL      COL      flag_iattc       fishingfleet_firms IATTC           
-## 4 CRI      CRI      flag_iattc       fishingfleet_firms IATTC           
-## 5 CYM      CYM      flag_iattc       fishingfleet_firms IATTC           
-## 6 ECU      ECU      flag_iattc       fishingfleet_firms IATTC</code></pre>
+## 1 MEX      MEX      flag_iattc       fishingfleet_firms IATTC           
+## 2 USA      USA      flag_iattc       fishingfleet_firms IATTC           
+## 3 ALB      ALB      species_iattc    species_asfis      IATTC           
+## 4 BZX      BZX      species_iattc    species_asfis      IATTC           
+## 5 PBF      PBF      species_iattc    species_asfis      IATTC           
+## 6 SKJ      SKJ      species_iattc    species_asfis      IATTC</code></pre>
 </div>
 
 

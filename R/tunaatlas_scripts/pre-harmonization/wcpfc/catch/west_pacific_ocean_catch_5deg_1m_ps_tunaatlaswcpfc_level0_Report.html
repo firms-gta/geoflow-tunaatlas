@@ -575,7 +575,7 @@ dataset_temporal_extent &lt;- paste(
   paste0(format(max(catches$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
+<p>output in same folder as path_to_raw_dataset</p>
 <pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
 
 write.csv(catches, output_name_dataset, row.names = FALSE)
@@ -603,12 +603,12 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 AFAD     LS       schooltype_wcpfc schooltype_rfmos   WCPFC           
-## 2 DFAD     LS       schooltype_wcpfc schooltype_rfmos   WCPFC           
-## 3 LOG      LS       schooltype_wcpfc schooltype_rfmos   WCPFC           
-## 4 OTH      OTH      schooltype_wcpfc schooltype_rfmos   WCPFC           
-## 5 UNA      FS       schooltype_wcpfc schooltype_rfmos   WCPFC           
-## 6 ALL      NEI      flag_wcpfc       fishingfleet_firms WCPFC</code></pre>
+## 1 DFAD     LS       schooltype_wcpfc schooltype_rfmos   WCPFC           
+## 2 LOG      LS       schooltype_wcpfc schooltype_rfmos   WCPFC           
+## 3 OTH      OTH      schooltype_wcpfc schooltype_rfmos   WCPFC           
+## 4 UNA      FS       schooltype_wcpfc schooltype_rfmos   WCPFC           
+## 5 ALL      NEI      flag_wcpfc       fishingfleet_firms WCPFC           
+## 6 BET      BET      species_wcpfc    species_asfis      WCPFC</code></pre>
 </div>
 
 

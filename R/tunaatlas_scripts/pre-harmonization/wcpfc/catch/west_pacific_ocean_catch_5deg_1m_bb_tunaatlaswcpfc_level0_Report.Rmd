@@ -169,7 +169,7 @@ if(!require(dplyr)){
     sep = "/"
   )
   catches$measurement_processing_level <- "unknown" 
-  # sorties same folder as path_to_raw_dataset 
+  # output in same folder as path_to_raw_dataset 
   output_name_dataset <- "Dataset_harmonized.csv"
   
   write.csv(catches, output_name_dataset, row.names = FALSE)
