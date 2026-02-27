@@ -1,0 +1,5 @@
+deps <- renv::dependencies("R/tunaatlas_scripts/pre-harmonization/")
+packages <- unique(deps$Package)
+packages <- setdiff(packages, c("base", "utils", "tools", "stats", "graphics", "grDevices", "methods", "datasets"))
+packages <- c(packages, "remotes")
+renv::snapshot(packages = packages, prompt = FALSE, lockfile = "R/tunaatlas_scripts/pre-harmonization/renvminimalpreharmo.lock")
