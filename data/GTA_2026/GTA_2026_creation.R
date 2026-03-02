@@ -81,7 +81,7 @@ copy_all_nested_data_folders <- function(source_root, target_data_folder = here:
     file.copy(files_to_copy, target_data_folder, overwrite = TRUE, recursive = TRUE)
   }
 }
-
+# Wokflow for us to create datasets etc.. load data correct endroit, create report etc.;
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
 raw_nominal_catch <- executeWorkflow(here::here("config/Nominal_catch_2026.json"))
@@ -171,3 +171,113 @@ setwd("~/firms-gta/geoflow-tunaatlas")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
+
+
+
+
+# Loading DB or DB only (if user has access to DB), workflow for users only -------------------------------------------------------
+
+library(DBI)
+
+default_file <- ".env"
+
+if(file.exists(here::here("geoserver_sdi_lab.env"))){
+  default_file <- "geoserver_sdi_lab.env"
+} # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
+
+load_dot_env(file = here::here(default_file)) # 
+
+should_upload_to_db <- function(config) {
+  # 1) Vérifs "contexte" via variables d'env
+  drv  <- Sys.getenv("DB_DRV")
+  host <- Sys.getenv("DB_HOST")
+  port <- Sys.getenv("DB_PORT")
+  db   <- Sys.getenv("DB_NAME")
+  user <- Sys.getenv("DB_USER")
+  
+  ctx_ok <- identical(drv, "PostgreSQL") &&
+    identical(port, "5432") &&
+    identical(host, "db-tunaatlas.d4science.org") &&
+    db %in% c("tunaatlas_sandbox", "tunaatlas") &&
+    identical(user, "tunaatlas_u")
+  
+  if (!ctx_ok) return(FALSE)
+  
+  # 2) Vérif connexion réelle
+  con <- config$software$output$dbi
+  if (is.null(con)) return(FALSE)
+  
+  ok <- tryCatch({
+    DBI::dbIsValid(con) && DBI::dbGetQuery(con, "SELECT 1 AS ok")$ok[1] == 1
+  }, error = function(e) FALSE)
+  
+  ok
+}
+
+force_upload_to_db <- function(config, action_id = "load_dataset", value = TRUE) {
+  for (ei in seq_along(config$entities)) {
+    acts <- config$entities[[ei]]$actions
+    ids  <- vapply(acts, `[[`, character(1), "id")
+    sel  <- which(ids == action_id)
+    for (j in sel) {
+      config$entities[[ei]]$actions[[j]]$options$upload_to_db <- TRUE
+      config$entities[[ei]]$actions[[j]]$options$upload_to_db_public <- TRUE
+      config$entities[[ei]]$actions[[j]]$options$create_materialized_view <- TRUE
+    }
+  }
+  config
+}
+
+raw_nominal_catch <- executeWorkflow(
+  file = here::here("config/Nominal_catch_2026.json"),
+  dir  = ".",
+  on_initWorkflow = function(config, queue) {
+    
+    if (should_upload_to_db(config)) {
+      config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
+      force_upload_to_db(config, "load_dataset", TRUE)
+    } else {
+      config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
+    }
+    
+  }
+)
+
+
+raw_data_georef <- executeWorkflow(
+  file = here::here("config/All_raw_data_georef.json"),
+  dir  = ".",
+  on_initWorkflow = function(config, queue) {
+    
+    if (should_upload_to_db(config)) {
+      config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
+      force_upload_to_db(config, "load_dataset", TRUE)
+    } else {
+      config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
+    }
+    
+  }
+)
+
+raw_data_georef_effort <- executeWorkflow(
+  file = here::here("config/All_raw_data_georef_effort.json"),
+  dir  = ".",
+  on_initWorkflow = function(config, queue) {
+    
+    if (should_upload_to_db(config)) {
+      config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
+      force_upload_to_db(config, "load_dataset", TRUE)
+    } else {
+      config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
+    }
+    
+  }
+)
+
+config <- initWorkflow(here::here("config/All_raw_data_georef_effort.json"), handleMetadata = FALSE)
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+
+CWP.dataset::summarising_invalid_data(raw_nominal_catch, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+CWP.dataset::summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
+CWP.dataset::summarising_invalid_data(raw_data_georef_effort, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
