@@ -17,7 +17,7 @@
     "entities" : [
       {
         "handler": "csv",
-        "source": "config/geoflow_entities_tuna_global_datasets_ird_level2 - 2025_worfklow_catch_level2.csv"
+        "source": "config/geoflow_entities_tuna_global_datasets_ird_level2 - 2026_worfklow_catch_level2.csv"
       }
     ],
     "contacts" : [
@@ -27,11 +27,38 @@
       }
     ]
   },
-  "software": [
+    "software": [
+	{
+		"id": "my-database-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {}
+	}
   ],
   "actions": [
     
-    
+    {
+      "id": "load_dataset",
+      "script": "../R/tunaatlas_actions/load_dataset.R",
+      "run": true,
+      "options": {
+        "upload_to_db_public": false,
+        "upload_to_db": false,
+        "create_materialized_view" : false,
+        "add_sql_comments" : false,
+        "upload_to_googledrive" : false,
+        "save_local_path": "../../../../data/GTA_2026/dataoutputGTA/",
+        "save_local_overwrite": true
+      }
+    }
     
   ]
 }

@@ -152,21 +152,25 @@ tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global
 
 # Level 0 2026 ------------------------------------------------------------
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level0_local.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level0_local.json"))
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_0_catch_2026")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
 
+setwd("~/firms-gta/geoflow-tunaatlas")
+tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/create_nominal_dataset_2026.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
+tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "nominal_final")
 
-# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local.json")) # FROM DRIVE
-# tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
-# gc()
-# config <- initWorkflow(here::here("config/level_2_catch_2025.json"))
-# unlink(config$job, recursive = TRUE)
-# con <- config$software$output$dbi
-# gc()
-# require(CWP.dataset)
+
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+gc()
+config <- initWorkflow(here::here("config/catch_ird_level2_local.json"))
+unlink(config$job, recursive = TRUE)
+con <- config$software$output$dbi
+gc()
+require(CWP.dataset)
 setwd("~/firms-gta/geoflow-tunaatlas")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 

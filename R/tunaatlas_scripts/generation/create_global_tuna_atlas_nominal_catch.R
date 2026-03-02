@@ -22,7 +22,11 @@ function(action, entity, config){
   recap_each_step = if(!is.null(opts$recap_each_step)) opts$recap_each_step else TRUE #default FALSE
   SBF_data_rfmo_to_keep = if(!is.null(opts$SBF_data_rfmo_to_keep)) opts$SBF_data_rfmo_to_keep else "CCSBT"
   from_repo = if(!is.null(opts$from_repo)) opts$from_repo else FALSE
-  
+  opts$include_IOTC = if(!is.null(opts$include_IOTC)) opts$include_IOTC else TRUE
+  opts$include_IATTC = if(!is.null(opts$include_IATTC)) opts$include_IATTC else TRUE
+  opts$include_WCPFC = if(!is.null(opts$include_WCPFC)) opts$include_WCPFC else TRUE
+  opts$include_CCSBT = if(!is.null(opts$include_CCSBT)) opts$include_CCSBT else TRUE
+  opts$include_ICCAT = if(!is.null(opts$include_ICCAT)) opts$include_ICCAT else TRUE
   
   #packages
   if(!require(dplyr)){
