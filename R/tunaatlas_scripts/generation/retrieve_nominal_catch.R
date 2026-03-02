@@ -6,11 +6,12 @@ retrieve_nominal_catch <- function(entity, config, options){
 	dataset_files <- sapply(entity$data$source, function(x){ entity$getJobDataResource(config, x) })
 	dataset_files_nominal_catch <- dataset_files[regexpr("nominal", basename(dataset_files)) > 0]
 	
-	if(!options$include_IOTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("iotc",names(dataset_files_nominal_catch))>0]
-	if(!options$include_ICCAT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("iccat",names(dataset_files_nominal_catch))>0]
-	if(!options$include_WCPFC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("wcpfc",names(dataset_files_nominal_catch))>0]
-	if(!options$include_CCSBT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("ccsbt",names(dataset_files_nominal_catch))>0]
-	if(!options$include_IATTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("iattc",names(dataset_files_nominal_catch))>0]
+	if(!options$include_IOTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!regexpr("iotc",names(dataset_files_nominal_catch))<0]
+	if (!options$include_IOTC)  dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("iotc",  dataset_files_nominal_catch, ignore.case = TRUE)]
+	if (!options$include_ICCAT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("iccat", dataset_files_nominal_catch, ignore.case = TRUE)]
+	if (!options$include_WCPFC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("wcpfc", dataset_files_nominal_catch, ignore.case = TRUE)]
+	if (!options$include_CCSBT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("ccsbt", dataset_files_nominal_catch, ignore.case = TRUE)]
+	if (!options$include_IATTC) dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("iattc", dataset_files_nominal_catch, ignore.case = TRUE)]
 	
 	columns_to_keep=c("source_authority","species","gear_type", "fishing_mode","fishing_fleet","time_start","time_end","geographic_identifier",
 			  "measurement", "measurement_type","measurement_value","measurement_unit","measurement_processing_level")
