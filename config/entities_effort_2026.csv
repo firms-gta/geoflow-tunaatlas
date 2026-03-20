@@ -54,7 +54,7 @@ process:All the datasets were merged.",,"source:./data/GTA_2026/dataoutputprehar
 sourceType:other_
 action_option_recap_each_step:true_
 action_option_include_IATTC:true_
-action_option_include_ICCAT:false_
+action_option_include_ICCAT:true_
 action_option_include_IOTC:true_
 action_option_include_WCPFC:true_
 action_option_include_CCSBT:true_
