@@ -68,10 +68,10 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   
   #for level 2 - IRD
   source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-  source(file.path(url_scripts_create_own_tuna_atlas, "function_raising_georef_to_nominal.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas, "convert_number_to_nominal.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas, "function_raise_data.R")) #modified for geoflow
-  
+  source(here::here("R/tunaatlas_scripts/generation/function_raising_georef_to_nominal.R")) #modified for geoflow
+  source(here::here("R/tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
+  source(here::here("R/tunaatlas_scripts/generation/decrease_precision_of_nominal_with_georef.R")) #modified for geoflow
+  source(here::here("R/tunaatlas_scripts/generation/function_raise_data.R")) #modified for geoflow
   
   # For filtering/aggregating
   source(here::here("R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R"))
@@ -182,10 +182,14 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       dplyr::mutate(measurement_processing_level = dplyr::case_when(
         source_authority == "IATTC" & species %in% species_to_force ~ "original_sample",
         TRUE ~ measurement_processing_level
-      ))
+      )) %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "OTH", "UNK", fishing_mode))
     }
     georef_dataset <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) != "7") # removing 10 degrees
-    
+    georef_dataset <- georef_dataset %>%
+      dplyr::filter(
+        species != "UNK",
+        !(species == "SBF" & source_authority == "IOTC")
+      )
     if(recap_each_step){
       CWP.dataset::function_recap_each_step(
         "rawdata",
@@ -483,7 +487,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       georef_dataset,
       paste0(
         "Retrieving level 0 data on the basis of the following DOI: ",
-        opts$doi, " the key being: ", opts$key,". ", Description),
+        opts$doi, " the key being: ", opts$key,". "),
       "download_zenodo_csv"  ,
       list(opts$doi, opts$key), entity
     )
@@ -493,11 +497,15 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   
   # Filtering on complete year ----------------------------------------------
   if(DATASET_LEVEL == 2){
-    
-    if (file.exists("data/geographic_identifier_to_nominal.csv")) {
+    if (file.exists("data/geographic_identifier_to_nominal.csv") ) { # hotfix for upgrading_nominal_on_georef see upgrading_nominal_on_georef elsewhere 500
       geographic_identifier_to_nominal <- readr::read_csv("data/geographic_identifier_to_nominal.csv")
       class(geographic_identifier_to_nominal$code) <- "character"
+      geographic_identifier_to_nominal <- geographic_identifier_to_nominal%>% dplyr::distinct() %>% 
+        dplyr::filter(!(code =="5233022" & geographic_identifier_nom == "WCPFC")) %>% #some grids that are in both juridiction areas but as we keep data from 
+        dplyr::filter(!(code =="5304080" & geographic_identifier_nom == "WCPFC")) # and IIATTC in the overlapping we keep only the geographic_identifier from IOTC and IATTC
       
+    } else if(!opts$upgrading_nominal_on_georef){
+      warning("fastmode")
     } else {
       stop("Please provide a geographic identifier to nominal dataset")
     }
@@ -513,24 +521,27 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   
   
   
-  # ### Removing duplicated data 
-  # #issue(#48)
-  # if(opts$fact == "catch"){
-  #   georef_dataset <- georef_dataset %>%
-  #     dplyr::group_by(across(setdiff(colnames(.), c("measurement_value", "measurement_unit")))) %>%
-  #     dplyr::mutate(nb_units = n_distinct(measurement_unit)) %>%
-  #     dplyr::filter(!(measurement_unit == "no" & nb_units >= 2)) %>%
-  #     dplyr::select(-nb_units) %>%
-  #     dplyr::ungroup() %>%
-  #     dplyr::mutate(fishing_mode = ifelse(fishing_mode %in% c("OTH", "DEL"), "UNK", fishing_mode))
-  #   
-  #   CWP.dataset::function_recap_each_step(
-  #     paste0("Removing_duplicated_units"),
-  #     georef_dataset,
-  #     "As some data is in fact duplicated for catch, we check all the duplicated data and remove the data in number when same dimensions",
-  #     ""
-  #   )
-  # }
+  ### Removing duplicated data
+  #issue(#48)
+  if(opts$fact == "catch"){
+    if(opts$upgrading_nominal_on_georef){ #hotfix
+    config$logger.info(sprintf("Begin remove duplicated units %s", Sys.time()))  # Log after processing
+    
+    georef_dataset <- georef_dataset %>%
+      dplyr::group_by(across(setdiff(colnames(.), c("measurement_value", "measurement_unit")))) %>%
+      dplyr::mutate(nb_units = n_distinct(measurement_unit)) %>%
+      dplyr::filter(!(measurement_unit == "no" & nb_units >= 2)) %>%
+      dplyr::select(-nb_units) 
+
+    CWP.dataset::function_recap_each_step(
+      paste0("Removing_duplicated_units"),
+      georef_dataset,
+      "As some data is in fact duplicated for catch, we check all the duplicated data and remove the data in number when same dimensions",
+      ""
+    )
+    config$logger.info(sprintf("End remove duplicated units %s", Sys.time()))  # Log after processing
+    }
+  }
   
   # LEVEL 1 IRD ---------------------------------------------------
   if(DATASET_LEVEL >= 1){
@@ -577,11 +588,12 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     # IATTC: Keep data starting from 1957.
     # CCSBT: Keep all data, although years 2017 and 2020 have missing months, likely due to no fishing activity rather than missing data.
     
+    if(opts$upgrading_nominal_on_georef){#hotfix pour pas refaire cetete étape lors de lancement rapide, il devrait pas y avoir le if ça devrait tout le temps être comme aç  
     # Étape 1 : extraire les années complètes dans chaque dataset
     get_complete_years <- function(data, date_col_start = "time_start", date_col_end = "time_end") {
       data %>%
-        dplyr::select(.data[[date_col_start]],.data[[date_col_end]], source_authority) %>% 
-        dplyr::distinct() %>% 
+        dplyr::select(.data[[date_col_start]],.data[[date_col_end]], source_authority) %>%
+        dplyr::distinct() %>%
         dplyr::mutate(year = year(.data[[date_col_start]])) %>%
         dplyr::group_by(source_authority, year) %>%
         dplyr::summarise(
@@ -594,44 +606,50 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
           format(max_date, "%m-%d") == "12-31"
         )
     }
-    
+
+    config$logger.info(sprintf("Begin common years nom georef %s", Sys.time()))  # Log after processing
+    # qs::qsave(georef_dataset,"data/georef_dataset_test_debug.qs")
+    # qs::qsave(nominal_catch,"data/nominal_catch_test_debug.qs")
     # Appliquer aux deux datasets
-    complete_years_georef <- get_complete_years(georef_dataset)
-    complete_years_nominal <- get_complete_years(nominal_catch)
-    
+    complete_years_georef <- get_complete_years(georef_dataset %>% dplyr::ungroup())
+    complete_years_nominal <- get_complete_years(nominal_catch%>% dplyr::ungroup())
+
     # Intersection des années complètes
     common_complete_years <- inner_join(
       complete_years_georef,
       complete_years_nominal,
       by = c("source_authority", "year")
     )
-    
+
     # Pour chaque source_authority, garder la plus ancienne année commune complète
     threshold_years <- common_complete_years %>%
       dplyr::group_by(source_authority) %>%
       dplyr::summarise(min_complete_year = min(year), .groups = "drop")
-    
+
     # Filtrer les deux jeux de données à partir de cette année
-    georef_dataset <- georef_dataset %>%
+    georef_dataset <- georef_dataset %>% dplyr::ungroup() %>%
       dplyr::mutate(year = year(time_start)) %>%
       dplyr::left_join(threshold_years, by = "source_authority") %>%
       dplyr::filter(year >= min_complete_year) %>%
       dplyr::select(-year, -min_complete_year) %>% # et ajouter la colonne geographic_identifier_to_nominal
-      dplyr::left_join(geographic_identifier_to_nominal, by = c("geographic_identifier" = "code", "source_authority"))
-    
-    nominal_catch <- nominal_catch %>%
+      dplyr::left_join(geographic_identifier_to_nominal , by = c("geographic_identifier" = "code", "source_authority"))
+
+    nominal_catch <- nominal_catch %>% dplyr::ungroup() %>%
       dplyr::mutate(year = year(time_start)) %>%
       dplyr::left_join(threshold_years, by = "source_authority") %>%
       dplyr::filter(year >= min_complete_year) %>%
       dplyr::select(-min_complete_year)
-    
+
+    config$logger.info(sprintf("End common years nom georef %s", Sys.time()))  # Log after processing
+
     CWP.dataset::function_recap_each_step(
       paste0("Removing_data_with_no_nominal"),
       georef_dataset,
       "Since the nominal catch dataset does not cover every year, and the georeferenced data for the first years are not complete, raising would only apply to certain years and/or raising would be not accurate for first years. To avoid mixing raised and unraised data, we prefer to remove records for years that have no equivalent in the nominal dataset.",
       ""
     )
-    
+    config$logger.info(sprintf("End common years recap step %s", Sys.time()))  # Log after processing
+    } 
     config$logger.info("Level 1 start")
     # DATASET LEVEL 2 ---------------------------------------------------
     if(DATASET_LEVEL >= 2){ #with this condition code will be run to deal with dataset level 2
@@ -753,224 +771,229 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             } 
             
             
-            specify_nominal_with_georef <- function(nominal_df,
-                                                    georef_df,
-                                                    strata_cols   = c("species",
-                                                                      "source_authority",
-                                                                      "year",
-                                                                      "geographic_identifier_nom",
-                                                                      "measurement_unit"),
-                                                    step_order    = c("fishing_mode",
-                                                                      "gear_type",
-                                                                      "fishing_fleet")  ,
-                                                    unk_map       = list(fishing_fleet = "NEI",
-                                                                         gear_type     = "99.9",
-                                                                         fishing_mode  = "UNK"),
-                                                    mode        = opts$strong_weak_upgrade,
-                                                    logger        = message) {
-              ## add helper year column if needed
-              if (!"year" %in% names(nominal_df))
-                nominal_df <- nominal_df %>%
-                  mutate(year = lubridate::year(time_start))
-              if (!"year" %in% names(georef_df))
-                georef_df  <- georef_df  %>%
-                  mutate(year = lubridate::year(time_start))
-              
-              ## loop over the three dimensions
-              for (dim_col in step_order) {
-                
-                unk_code <- unk_map[[dim_col]]
-                dim_sym  <- ensym(dim_col)
-                
-                # -------- proportions from GEO -----------------------------
-                geo_props <- georef_df %>%
-                  # keep ALL codes, including the unknown one
-                  dplyr::group_by(dplyr::across(dplyr::all_of(c(strata_cols, dim_col)))) %>%
-                  dplyr::summarise(val = sum(measurement_value, na.rm = TRUE), .groups = "drop") %>%
-                  dplyr::group_by(dplyr::across(dplyr::all_of(strata_cols))) %>%
-                  dplyr::mutate(prop = val / sum(val, na.rm = TRUE), total = sum(val)) %>%
-                  dplyr::ungroup()
-                
-                
-                # -------- unknown rows from NOMINAL ------------------------
-                unknown_rows <- nominal_df %>%
-                  dplyr::filter(.data[[dim_col]] == unk_code)
-                
-                if (nrow(unknown_rows) == 0) next  # nothing to specify
-                
-                # join with props – keeps only strata where geo has detail
-                to_specify <- unknown_rows %>%
-                  dplyr::inner_join(geo_props, by = strata_cols, suffix = c("", "_geo"))
-                
-                if (nrow(to_specify) == 0) next  # no geo detail for these strata
-                
-                sum(to_specify$measurement_value)
-                if (mode == "weak"){
-                  
-                  prop_diff_de_un_diff <- to_specify %>% dplyr::filter(measurement_value > total)
-                  prop_diff_de_un_prop <- to_specify %>% dplyr::filter(measurement_value <= total)
-                  
-                  prop_diff_de_un_prop_specified <- prop_diff_de_un_prop %>%
-                    dplyr::mutate(measurement_value = measurement_value * prop,
-                                  !!dim_sym        := !!sym(paste0(dim_col, "_geo"))) %>%
-                    dplyr::select(-val, -prop, -ends_with("_geo"))
-                  
-                  # 1) turn it into val copy + compute leftover
-                  prop_diff_part <- prop_diff_de_un_diff %>%
-                    dplyr::ungroup() %>% 
-                    dplyr::mutate(
-                      total_nom         = measurement_value,               # original UNK
-                      measurement_value = val,                             # copy geo
-                      !!dim_sym         := .data[[paste0(dim_col, "_geo")]],  
-                      unknown_to_add    = total_nom - total                # leftover
-                    ) %>%
-                    dplyr::select(-val, -prop, -ends_with("_geo"))
-                  
-                  group_cols <- setdiff(
-                    names(prop_diff_part),
-                    c("measurement_value", dim_col)      # dims_cols = vecteur de noms à exclure
-                  )
-                  
-                  data_init <- prop_diff_part
-                  
-                  prop_diff_specified <- prop_diff_part%>% 
-                    
-                    # 2. Regrouper
-                    dplyr::group_by(across(all_of(group_cols))) %>% 
-                    
-                    # 3. Ajouter la ligne manquante par groupe
-                    dplyr::slice(1) %>%                    
-                    dplyr::mutate(measurement_value = unknown_to_add) %>% 
-                    dplyr::mutate(!!dim_col := unk_code) %>% 
-                    
-                    # 4. Sortir du group_by
-                    dplyr::ungroup() 
-                  prop_diff_specified_final <- rbind(prop_diff_specified, data_init)
-                  
-                  specified <- rbind(prop_diff_de_un_prop_specified%>%
-                                       dplyr::select(all_of(names(nominal_df))),
-                                     prop_diff_specified_final%>%
-                                       dplyr::select(all_of(names(nominal_df))))
-                  
-                } else {
-                  # compute new rows
-                  specified <- to_specify %>%
-                    dplyr::mutate(measurement_value = measurement_value * prop,
-                                  !!dim_sym        := !!sym(paste0(dim_col, "_geo"))) %>%
-                    dplyr::select(-val, -prop, -ends_with("_geo"))
-                  
-                }
-                # remove the old unknown rows and add specified ones
-                replaced_keys <- to_specify %>%
-                  dplyr::select(all_of(names(nominal_df))) %>%
-                  dplyr::distinct() 
-                
-                
-                nominal_df <- nominal_df %>%
-                  dplyr::anti_join(replaced_keys, by = setdiff(names(nominal_df),
-                                                               "measurement_value")) %>%
-                  dplyr::bind_rows(specified)
-                
-                # ------- log the volumes re-allocated ----------------------
-                raised_t  <- specified %>%
-                  dplyr::ungroup() %>% 
-                  dplyr::filter(measurement_unit %in% c("t", "MT", "MTNO")) %>%
-                  dplyr::summarise(sum_val = sum(measurement_value, na.rm = TRUE)) %>%
-                  dplyr::pull(sum_val)
-                raised_no <- specified %>%
-                  dplyr::ungroup() %>%
-                  dplyr::filter(measurement_unit %in% c("no", "NO", "NOMT")) %>%
-                  dplyr::summarise(sum_val = sum(measurement_value, na.rm = TRUE)) %>%
-                  dplyr::pull(sum_val)
-                
-                logger(sprintf("Specified %s — %.3f t, %.3f no",
-                               dim_col, raised_t, raised_no))
-              }
-              
-              nominal_df <- nominal_df %>% dplyr::ungroup() %>% dplyr::group_by(across(-measurement_value)) %>% 
-                dplyr::summarise(measurement_value = sum(measurement_value),
-                                 .groups = "drop")
-              
-              nominal_df
-            } # juste definition de la fonction, qui est longe, on l'utilise après dans le iterative
+            source(here::here("R/tunaatlas_scripts/generation/specify_nominal_with_georef.R"))
             
             strata_cols_updated <- c("gear_type", "species", "year", "source_authority",
                                      "fishing_fleet", "geographic_identifier_nom", "fishing_mode")
-              # on spécifie deux fois comme ça ça converge direct
+            config$logger.info(paste("Time before specifying nom:", Sys.time()))
+            # on spécifie deux fois comme ça ça converge direct
             step_order_updated <-  c("fishing_mode", "gear_type", "fishing_fleet")
             
             strata_cols_updated <- setdiff(strata_cols_updated, step_order_updated)
-              nominal_catch <- specify_nominal_with_georef(nominal_catch,
-                                                           georef_dataset,
-                                                           strata_cols   = strata_cols_updated ,
-                                                           step_order    =  step_order_updated,
-                                                           mode = "weak", # could be strong
-                                                           logger = function(msg) {
-                                                             cat("[Specify] ", msg, "\n")
-                                                           })
+              # nominal_catch <- specify_nominal_with_georef(nominal_catch,
+              #                                              georef_dataset,
+              #                                              strata_cols   = strata_cols_updated ,
+              #                                              step_order    =  step_order_updated,
+              #                                              mode = "weak", # could be strong
+              #                                              logger = function(msg) {
+              #                                                cat("[Specify] ", msg, "\n")
+              #                                              })
+              # # on spécifie deux fois comme ça ça converge direct
+              # nominal_catch <- specify_nominal_with_georef(nominal_catch,
+              #                                              georef_dataset,
+              #                                              strata_cols   = strata_cols_updated ,
+              #                                              step_order    =  step_order_updated,
+              #                                              mode = "weak", # could be strong
+              #                                              logger = function(msg) {
+              #                                                cat("[Specify] ", msg, "\n")
+              #                                              })
               
-              nominal_catch <- specify_nominal_with_georef(nominal_catch,
-                                                           georef_dataset,
-                                                           strata_cols   = strata_cols_updated ,
-                                                           step_order    =  step_order_updated,
-                                                           mode = "weak", # could be strong
-                                                           logger = function(msg) {
-                                                             cat("[Specify] ", msg, "\n")
-                                                           })
-            
+              config$logger.info(paste("Time after specifiying nom:", Sys.time()))
+# Decrease precision of nominal as sometimes (mainly for WCPFC) th --------
+
+              # for each year, checking all the values of all dimensions of georef and nominal, if some appears only in nominal, we convert it to NEI, UNK or 99.9 
+              # le probleme c'est par exemple si du georef a été mis en UNK mais correspond à un FF qui est dans nominal (ex JPN pour WCPFC, certaines captures en UNK et d'autres en JPN, 
+              # quand on fera le raising, ces UNK seront augmentées sur le UNK nominal et pas sur le JPN nominal mais je suis pas sûr qu'on puisse y faire grand chose'
+              # decrease_precision_of_nominal_with_georef <- nominal_catch
+              
+              
+              nominal_catch <- nominal_catch %>% dplyr::mutate(gear_type = ifelse(gear_type %in% c("10.9", "99.9", "99"), "99.9", gear_type))
+              decrease_precision_of_nominal_with_georef_tables <- decrease_precision_of_nominal_with_georef(nominal = nominal_catch, georef = georef_dataset)
+              
+              nominal_catch <- decrease_precision_of_nominal_with_georef_tables$data
+              summary_decrease_precision_and_not_allowed_nominal_or_georef_values <- decrease_precision_of_nominal_with_georef_tables$summary
+              saveRDS(summary_decrease_precision_and_not_allowed_nominal_or_georef_values, "data/recap_deteriorate_nominal.rds")
+              saveRDS(nominal_catch, "data/nominal_catch_deteriorated.rds")
+              
           }
           
-          if(is.null(opts$decrease_every_time)){
-            opts$decrease_every_time <- FALSE
+# We create the group of sharks for IATTC has there is no detail o -------- see ~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/analyse_BIL_Sharks.R for more details
+          
+          recode_group_species <- function(species, source_authority) {
+            out <- species
+            
+            idx <- source_authority == "IATTC" & species %in% c("BLR","BSH","CCL","FAL","MAK","OCS","SMA","SPL","SPN","SPZ","THR")
+            out[idx] <- "SKH"
+            
+            idx <- source_authority %in% c("IOTC", "ICCAT") & out %in% c("ALV","PTH","BTH","THR","SMA","LMA","MAK","POR","FAL","OCS","BSH","RSK","SKH")
+            out[idx] <- "SKH"
+            
+            idx <- source_authority %in% c("IOTC", "ICCAT") & out %in% c("SPL","SPK","SPZ","SPN","SPY")
+            out[idx] <- "SPY"
+            
+            idx <- source_authority %in% c("IOTC", "ICCAT") & out %in% c("BLM","BUM","BXQ","MLS","SFA","SAI","SSP","SPF","MSP","WHM","BIL")
+            out[idx] <- "BIL"
+            
+            idx <- source_authority %in% c("IOTC", "ICCAT") & out %in% c("FRI","BLT","FRZ")
+            out[idx] <- "FRZ"
+            
+            out
           }
+          
+          recode_fishing_mode <- function(fishing_mode, source_authority) {
+            out <- fishing_mode
+            
+            idx <- source_authority == "WCPFC" 
+            out[idx] <- "UNK"
+            
+            out
+          }
+          
+          georef_dataset$group_species_iattc_sharks <- recode_group_species(
+            georef_dataset$species,
+            georef_dataset$source_authority
+          )
+          nominal_catch$group_species_iattc_sharks <- recode_group_species(
+            nominal_catch$species,
+            nominal_catch$source_authority
+          )
+          
+          georef_dataset$fishing_mode_wcpfc_issue_unk_solved <- recode_fishing_mode(
+            georef_dataset$fishing_mode,
+            georef_dataset$source_authority
+          )
+          nominal_catch$fishing_mode_wcpfc_issue_unk_solved <- recode_fishing_mode(
+            nominal_catch$fishing_mode,
+            nominal_catch$source_authority
+          )
+          
+          georef_dataset <- georef_dataset %>% dplyr::mutate( group_gears = dplyr::if_else( gear_type %in% c("09.31","09.32"), "09.39", gear_type ) )
+          nominal_catch <- nominal_catch %>% dplyr::mutate( group_gears = dplyr::if_else( gear_type %in% c("09.31","09.32"), "09.39", gear_type ) )
+          
+          saveRDS(nominal_catch, "data/nominal_catch_for_raising.rds")
+          
+          #hotfix
+          if(is.null(opts$decrease_nei)){
+            opts$decrease_nei <- FALSE
+          }
+          
+          use_groups <- function(
+    dims,
+    shark_col = "group_species_iattc_sharks",
+    species_col = "species",
+    fishing_mode_col_solved = "fishing_mode_wcpfc_issue_unk_solved",
+    fishing_mode_col = "fishing_mode"
+          ) {
+            
+            dims2 <- unique(dims)
+            
+            # --- Species → shark group ---
+            if (species_col %in% dims2) {
+              dims2 <- c(shark_col, setdiff(dims2, species_col))
+            }
+            
+            # Always ensure shark group is present
+            dims2 <- unique(c(shark_col, dims2))
+            
+            
+            # --- Gear → gear group ---
+            if (fishing_mode_col %in% dims2) {
+              dims2 <- c(fishing_mode_col_solved, setdiff(dims2, fishing_mode_col))
+            }
+            
+            # Always ensure gear group is present
+            dims2 <- unique(c(fishing_mode_col_solved, dims2))
+            
+            return(dims2)
+          }
+          
+          opts$passes <- "max"
+          full_dims <- c("gear_type", "species", "year", "source_authority",
+                         "fishing_fleet", "geographic_identifier_nom", "fishing_mode")
+          
+          dim_sets_raw <- list(
+            full_dims,
+            setdiff(full_dims, "fishing_mode"),
+            c("group_gears",setdiff(full_dims, "gear_type")), # pas util
+            setdiff(full_dims, "geographic_identifier_nom"), # could be removed ? or not
+            setdiff(full_dims, c("gear_type")), # usefull for gear_type on 99.9, need to be kept
+            setdiff(full_dims, c("fishing_fleet")),
+            c("group_gears", setdiff(full_dims, c("fishing_mode", "gear_type", "geographic_identifier_nom"))), # on rajoute geographic_identifier_nom car prblm conversion données WCPFC marlins lately # pas utile
+            setdiff(full_dims, c("fishing_mode", "fishing_fleet", "geographic_identifier_nom")),
+            c("group_gears",setdiff(full_dims, c("gear_type", "fishing_fleet", "geographic_identifier_nom"))), # pas utile
+            setdiff(full_dims, c("gear_type", "fishing_fleet", "geographic_identifier_nom")),
+            c("group_gears",setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet", "geographic_identifier_nom"))), # mais celui là utile donc group_gears c'est intéressant au moins une fois
+            setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet", "geographic_identifier_nom"))
+            # setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet", "geographic_identifier_nom")) # la dernière is the same but do_not_raise_perfectly_compatible_but_unknown_data is to true
+            # on lenleve parce que ça cree vraiment beaucou de georefsup nom surtout bcp sur des especes majeures, 
+            # on rajotue donc la dernière mais en faisant augmenter juste les UNK 
+            # full_dims,
+            # full_dims # et on rajoute encore full dims mais avec la décraoissance si sup ? sauf si déjà sup ? non on enlève ça cré trop baisse on revient aux niveaux d'avant level 1
+          ) # attena
+          
+          dim_sets_raw <- lapply(dim_sets_raw, use_groups)
+          full_dims <- use_groups(full_dims)
+          
+          if(is.null(opts$passes)){
+            opts$passes <- 4
+          } else if(opts$passes == "max"){
+            opts$passes <- length(dim_sets_raw)
+          }
+          config$logger.info(
+            sprintf("passes to : %s", opts$passes)
+          )
+          
           iterative_raising <- function(fact               = "catch",
                                         georef_dataset,    # geo-referenced data.frame
                                         nominal_catch,     # nominal data.frame
                                         entity,            
-                                        passes            = 8L,   # 1–8
-                                        decrease_on_last  = TRUE,
+                                        passes            = 20L,   
+                                        decrease_on_last  = FALSE,
                                         recap_each_step   = TRUE,
                                         stepnumber        = 1, 
-                                        decrease_every_time = opts$decrease_every_time) {
+                                        decrease_nei = FALSE, 
+                                        dim_sets = list(c("gear_type", "species", "year", "source_authority",
+                                                          "fishing_fleet", "geographic_identifier_nom", "fishing_mode")), 
+                                        flag_for_measurement_processing_level = "raised", dataset_to_add_in_recap = NULL) {
             
             ## ----- 0. Dimension sets in fixed order -----
             full_dims <- c("gear_type", "species", "year", "source_authority",
                            "fishing_fleet", "geographic_identifier_nom", "fishing_mode")
+            full_dims <- use_groups(full_dims)
             
-            dim_sets <- list(
-              full_dims,
-              setdiff(full_dims, "fishing_mode"),
-              setdiff(full_dims, c("gear_type")),
-              setdiff(full_dims, c("fishing_fleet")),
-              setdiff(full_dims, c("fishing_mode", "gear_type")),
-              setdiff(full_dims, c("fishing_mode", "fishing_fleet")),
-              setdiff(full_dims, c("gear_type", "fishing_fleet")),
-              setdiff(full_dims, c("fishing_mode", "gear_type", "fishing_fleet"))
-            )
+            # Si passes est un seul nombre → on convertit en 1:passes
+            if (length(passes) == 1) {
+              passes_seq <- seq_len(max(0L, min(as.integer(passes), length(dim_sets))))
+            } else {
+              # Sinon on suppose que c'est une plage (ex: 2:20)
+              passes_seq <- passes
+            }
             
-            passes <- max(0L, min(as.integer(passes), length(dim_sets)))
-            if (passes == 0L) return(georef_dataset)     # nothing to do
-            
+            if (length(passes_seq) == 0) return(georef_dataset)
+            passes_seq <- passes_seq[passes_seq <= length(dim_sets)]
             ## ----- 1. Loop over passes -----
-            for (i in seq_len(passes)) {
+            for (i in passes_seq) {
               
               x_dims        <- dim_sets[[i]]
-              decrease_flag <- isTRUE(decrease_on_last) && i == passes | isTRUE(decrease_every_time)
-              
-              
-              strata_cols_updated <- x_dims
-              
-              x_dims        <- dim_sets[[i]]
+              decrease_flag <- isTRUE(decrease_on_last) && i == passes | isTRUE(decrease_nei)
               strata_cols_updated <- x_dims
               convert_number_to_nominal_output <- convert_number_to_nominal(georef_dataset, nominal_catch, strata = strata_cols_updated, 
-                                                                            raise_only_unmatched = FALSE) # raise only unmatched c'est savoir si on augmente juste les donnees en nombre qui ont pas d'équivalent en tonnes ou si on augemente tout
+                                                                            raise_only_unmatched = FALSE, 
+                                                                            flag_for_measurement_processing_level = flag_for_measurement_processing_level, 
+                                                                            dim_perfectly_compatible_data = full_dims)
+              # raise only unmatched c'est savoir si on augmente juste les donnees en nombre qui ont pas d'équivalent en tonnes ou si on augemente tout
               # on pourrait ajouter le fait que on regarde pour chaque strate celle qui a la plus grande empreinte spatiale et on choisit ça pour que ça soit plus fin
               # mais la question est donc qu'est ce que sont les données en nombre restantes? Celles sans équivalent en nominal ? 
               georef_dataset <- convert_number_to_nominal_output$georef_dataset
-              
+              nouvelles_strates <- convert_number_to_nominal_output$nouvelles_strates
+              rds_data <- if (is.null(dataset_to_add_in_recap)) {
+                georef_dataset
+              } else {
+                dplyr::bind_rows(dataset_to_add_in_recap, georef_dataset)
+              }
               CWP.dataset::function_recap_each_step(
                 paste0("Conv_NO_nominal", i),
-                georef_dataset,
+                rds_data =rds_data ,
                 paste0("The data that remains in Number of Fish, for which the entirety of the strata with the following dimensions:", toString(strata_cols_updated), 
                        "containing catch information in tons, is converted and raised using the nominal dataset ", opts$doinominal, ". The key identifier for this operation is: ", opts$keynominal,
                        ". This process relies on the fact that for a strata reported in both number and tons, the spatial footprint of the data in number is more often containing the spatial footprint of the data in tons.", 
@@ -1000,7 +1023,6 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
                 dplyr::group_by(unit_class) %>%
                 dplyr::summarise(total = sum(measurement_value, na.rm = TRUE),
                                  .groups = "drop")
-              
               ## 1.3 – perform the raising
               raise_out <- function_raise_data(
                 fact                              = fact,
@@ -1009,13 +1031,18 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
                 dataset_to_compute_rf             = georef_dataset,
                 nominal_dataset_df                = nominal_catch,
                 x_raising_dimensions              = x_dims,
-                decrease_when_rf_inferior_to_one  = decrease_flag,
+                decrease_when_rf_inferior_to_one  = decrease_flag, # de toute facon on ne decrease plus sur tout c'est pas bien quoi qu'il arrive pas contre on proopse de decrease les NEI correspondant au raise
                 raise_only_on_unk = TRUE, 
-                do_not_raise_perfectly_compatible_data = ifelse(identical(full_dims,x_dims), FALSE, TRUE), 
-                do_not_raise_any_unk = opts$do_not_raise_any_unk
+                do_not_raise_perfectly_compatible_but_unknown_data =FALSE, #, avatnt on avait "ifelse(identical(full_dims,x_dims)|i == passes , FALSE, TRUE)" mais finalemetn on autorise le raising vu que le but c'est de raise ce qui reste qui n'a aucune correspondance, # first time we allow the raising on all dim even if nei, 
+                # last passes as we want to upgrade the species even if a lot of UNK in the strata we also raise the compatible data (compatible means it is unk as wo only raise on onk data)
+                do_not_raise_any_unk = FALSE, # pareil avant on avait ça mais vu qu'on a réduit les truc à augmenter c'est pas grave maintentant ifelse(i == passes , FALSE, TRUE), 
+                flag_for_measurement_processing_level = flag_for_measurement_processing_level, 
+                dim_perfectly_compatible_data = full_dims
               )
               
-              georef_dataset <- raise_out$data_raised %>% dplyr::distinct()
+              georef_dataset <- raise_out$data_raised
+              df_rf <- raise_out$df_rf
+              saveRDS(df_rf, file.path("data",sprintf("%s_raising_factors.rds", i)))
               
               # ----- 1·4  totals AFTER the pass  -------------------------------
               tot_after <- georef_dataset %>%
@@ -1070,10 +1097,15 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
                     "No down-scaling was applied on this pass."
                   }
                 )
-                
+                rds_data <- if (is.null(dataset_to_add_in_recap)) {
+                  georef_dataset
+                } else {
+                  dplyr::bind_rows(dataset_to_add_in_recap, georef_dataset)
+                }
+                saveRDS(rds_data, file = "testbeforecrashifcrash.rds")
                 CWP.dataset::function_recap_each_step(
                   step_name   = paste0("RF_pass_", i),
-                  rds_data    = georef_dataset,
+                  rds_data = rds_data,
                   explanation = recap_msg,
                   functions   = "iterative_raising",
                   option_list = list(dimensions        = x_dims,
@@ -1092,20 +1124,56 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             georef_dataset
           }
           
-          
-          if(is.null(opts$passes)){
-            opts$passes <- 4
-          }
-          
-          
           georef_dataset <- iterative_raising(
             fact              = "catch",
             georef_dataset    = georef_dataset,
             nominal_catch     = nominal_catch,
             entity            = entity,
-            passes            = opts$passes,
-            decrease_on_last  = opts$decrease_when_rf_inferior_to_one
+            passes            = 1,
+            dim_sets = dim_sets_raw,
+            decrease_on_last = FALSE, 
+            decrease_nei = opts$decrease_nei, 
+            flag_for_measurement_processing_level = "raised_perfect_match"
+            # decrease_on_last  = opts$decrease_when_rf_inferior_to_one
           )
+          # georef_dataset$group_species_iattc_sharks <- recode_group_species(
+          #   georef_dataset$species,
+          #   georef_dataset$source_authority
+          # )
+          
+          georef_dataset_to_raise <- georef_dataset %>% dplyr::filter(measurement_processing_level != "raised_perfect_match")
+          
+          georef_dataset_already_perfectly_raised <-  georef_dataset %>% dplyr::filter(measurement_processing_level == "raised_perfect_match")
+          
+          georef_dataset_not_raised_groupped <- georef_dataset_already_perfectly_raised %>% dplyr::ungroup() %>% dplyr::mutate(year = as.character(lubridate::year(time_start)))%>% 
+            dplyr::group_by(across(setdiff(colnames(.), c("measurement_value", "measurement_unit"))))  %>% dplyr::summarise(measurement_value_georef_perfect = sum(measurement_value, na.rm = TRUE))
+          
+          nominal_catch_to_use_for_raising <- nominal_catch%>% 
+            dplyr::group_by(across(setdiff(colnames(.), c("measurement_value", "measurement_unit")))) %>% dplyr::summarise(sum_nom = sum(measurement_value)) %>% dplyr::mutate(year = as.character(year)) %>% 
+            dplyr::left_join(georef_dataset_not_raised_groupped, by = dplyr::setdiff(intersect(colnames(georef_dataset_not_raised_groupped), colnames(nominal_catch)), c("measurement_value", "measurement_unit"))) %>% # on join par tout car on doit garder species et species_shark etc
+            dplyr::mutate(measurement_value_georef_perfect = ifelse(is.na(measurement_value_georef_perfect), 0, measurement_value_georef_perfect)) %>% 
+            dplyr::mutate(measurement_value = sum_nom - measurement_value_georef_perfect) %>% 
+            dplyr::filter(measurement_value>=1 | is.na(measurement_value_georef_perfect)) %>% 
+            dplyr::select(-c(sum_nom, measurement_value_georef_perfect)) %>% 
+            dplyr::mutate(time_start = as.Date(sprintf("%s-01-01", year))) %>% dplyr::mutate(measurement_unit = "t")
+            
+          
+          saveRDS(object = nominal_catch_to_use_for_raising, "data/nominal_catch_to_use_for_raising.rds")
+
+          georef_dataset <- iterative_raising(
+            fact              = "catch",
+            georef_dataset    = georef_dataset_to_raise,
+            nominal_catch     = nominal_catch_to_use_for_raising,
+            entity            = entity,
+            dim_sets = dim_sets_raw,
+            decrease_nei = FALSE,
+            passes            = 2:opts$passes,
+            # decrease_on_last  = opts$decrease_when_rf_inferior_to_one, 
+            dataset_to_add_in_recap = georef_dataset_already_perfectly_raised, 
+            flag_for_measurement_processing_level = "raised_on_unk_data"
+          )
+          
+          georef_dataset <- rbind(georef_dataset_already_perfectly_raised, georef_dataset)
           
         }
     }
@@ -1174,7 +1242,6 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
           options_disaggregate_on_1deg_data_with_resolution_superior_to_1deg
         ), entity
       )
-      gc()
       
     }
     gc()
