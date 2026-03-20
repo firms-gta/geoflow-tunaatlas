@@ -164,7 +164,9 @@ tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global
 
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local.json")) # FROM DRIVE
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local_fast.json")) # FROM DRIVE
+#tobeaddedlaterindata,./data/GTA_2026/dataoutputpreharmo/catch_iotc_level0.csv and ./data/GTA_2026/dataoutputpreharmo/catch_iccat_level0.csv,
+tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2026")
 gc()
 config <- initWorkflow(here::here("config/catch_ird_level2_local.json"))
 unlink(config$job, recursive = TRUE)
@@ -172,12 +174,65 @@ con <- config$software$output$dbi
 gc()
 require(CWP.dataset)
 setwd("~/firms-gta/geoflow-tunaatlas")
+colnames_to_keep_report <- c("source_authority", "fishing_fleet_label",
+                             "fishing_mode_label", "geographic_identifier",
+                             "measurement_unit", "measurement_value", "gridtype",
+                             "species_label", "gear_type_label", "measurement_processing_level")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("IATTC"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("ICCAT"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("IOTC"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("WCPFC"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("CCSBT"))
 
+config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species_label = c("Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore", "Southern bluefin tuna", "Swordfish"))
+source(here::here("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/summarising_step2.R"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all"), nameoutput = "majortunas")
+no_sbf <- setdiff(unique((qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs"))$species), "SBF")
 
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                  config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, nameoutput = "withmeasurementprosslevel",
+                  source_authoritylist = c("all"))
 
+config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = no_sbf)
+source(here::here("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/summarising_step2.R"))
+summarising_step2(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                  config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                  source_authoritylist = c("all"), nameoutput = "noSBF")
+
+config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species_label = c("Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore", "Southern bluefin tuna", "Swordfish", 
+                                                                                                              "Tunas nei", "True tunas nei"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("all"), nameoutput = "majortunasandTUN")
+
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "middle",savestep = TRUE, usesave = TRUE, 
+                              source_authoritylist = c("all"))
+
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("CCSBT"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("WCPFC"))
+CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
+                              config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
+                              source_authoritylist = c("IATTC"))
 
 # Loading DB or DB only (if user has access to DB), workflow for users only -------------------------------------------------------
 
