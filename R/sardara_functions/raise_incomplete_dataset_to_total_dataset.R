@@ -76,5 +76,5 @@ raise_incomplete_dataset_to_total_dataset <- function (df_input_incomplete, df_i
   if(exists("nominal_inferior_to_georeferenced") && nrow(nominal_inferior_to_georeferenced) != 0){
   saveRDS(nominal_inferior_to_georeferenced, paste0("data/",gsub(Sys.time(),pattern = " ", replacement = "_"),"nominal_inferior_to_georeferenced.rds"))
   }
-  return(list(df = dataset_to_return, stats = stats))
+  return(list(df = dataset_to_return, stats = stats, df_input_incomplete = df_input_incomplete))
 }
