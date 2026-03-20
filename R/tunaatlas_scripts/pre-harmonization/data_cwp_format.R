@@ -42,7 +42,7 @@ function(action, entity, config){
 
   filename1 <- entity$data$source[[1]]
 # Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
-  filename2 <- entity$data$source[[2]]
+  # filename2 <- entity$data$source[[2]]
 # Historical name for the dataset at source  iccat_catch_code_lists.csv or iotc_catch_code_lists.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, entity$data$source[[1]])
 # Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
@@ -93,10 +93,10 @@ function(action, entity, config){
   
   write.csv(catches, output_name_dataset, row.names = FALSE)
   
-  file.rename(
-    from = entity$getJobDataResource(config, filename2),
-    to   = output_name_codelists
-  )
+  # file.rename(
+  #   from = entity$getJobDataResource(config, filename2),
+  #   to   = output_name_codelists
+  # )
   #----------------------------------------------------------------------------------------------------------------------------
   entity$addResource("source", output_name_dataset)
   entity$addResource("harmonized", output_name_dataset)
