@@ -7,8 +7,13 @@ library(renv)
 renv::restore()
 
 required_packages <- c(
-  "readr", "here", "dotenv", "DBI", "dplyr", "fs", "qs",
-  "lubridate", "futile.logger", "geoflow", "CWP.dataset", "RPostgreSQL"
+  "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
+  "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
+  "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
+  "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
+  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", "fs" ,
+  "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
+  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
 )
 
 install_and_load <- function(package) {
@@ -159,7 +164,7 @@ force_upload_to_db <- function(config, action_id = "load_dataset") {
       config$entities[[ei]]$actions[[j]]$options$upload_to_db_public <- TRUE
       config$entities[[ei]]$actions[[j]]$options$create_materialized_view <- TRUE
       config$entities[[ei]]$actions[[j]]$options$add_sql_comments <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$upload_to_googledrive <- TRUE
+      config$entities[[ei]]$actions[[j]]$options$upload_to_googledrive <- FALSE
     }
     
     # --- activer les actions liées DB ---
@@ -269,7 +274,7 @@ rewrite_functions_as_rmd(raw_data_georef_effort)
 # 5.3 Catch level 0
 # 5.4 Catch level 2
 
-setwd("~/firms-gta/geoflow-tunaatlas")
+setwd(here::here())
 
 # ---- 5.1 EFFORT -------------------------------------------------------------
 
