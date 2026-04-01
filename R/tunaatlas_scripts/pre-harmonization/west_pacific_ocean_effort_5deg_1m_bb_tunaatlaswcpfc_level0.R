@@ -126,7 +126,7 @@ function(action, entity, config){
   efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
   
   # School
-  efforts_pivot_WCPFC$School<-"UNK"
+  efforts_pivot_WCPFC$School<-"OTH"
   
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")

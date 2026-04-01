@@ -113,7 +113,7 @@ efforts <- DF %>%
       grepl("DFAD", EffortUnits) ~ "DFAD",
       grepl("AFAD", EffortUnits) ~ "AFAD",
       grepl("OTH", EffortUnits) ~ "OTH",
-      EffortUnits == "DAYS" ~ "ALL"
+      EffortUnits == "DAYS" ~ "OTH"
     ),
     EffortUnits = dplyr::if_else(EffortUnits == "DAYS", "DAYS", "SETS"),
     Flag = "ALL",

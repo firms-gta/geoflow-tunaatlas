@@ -144,7 +144,7 @@ function(action, entity, config){
   efforts_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
   
   # School
-  efforts_pivot_WCPFC$School<-"UNK"
+  efforts_pivot_WCPFC$School<-"OTH"
   
   ### Reach the efforts harmonized DSD using a function in WCPFC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
