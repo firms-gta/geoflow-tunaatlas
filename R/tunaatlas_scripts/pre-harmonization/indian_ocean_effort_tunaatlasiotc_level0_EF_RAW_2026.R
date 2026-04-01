@@ -41,6 +41,9 @@ function(action, entity, config){
   
   # ---- read raw ----
   effort_raw <- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
+  
+  effort_raw <- effort_raw %>% dplyr::mutate(GEAR_CODE = ifelse(is.na(GEAR_CODE), "UNCL", GEAR_CODE)) #some NAs replaced by UNCL which is coding for Other/Unk
+  
   config$logger.info(paste0("EF_RAW columns: ", paste(colnames(effort_raw), collapse = ", ")))
   config$logger.info(sprintf("Raw effort dimensions: %s rows", nrow(effort_raw)))
   
