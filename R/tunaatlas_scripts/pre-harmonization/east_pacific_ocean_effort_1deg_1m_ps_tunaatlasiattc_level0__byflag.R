@@ -58,6 +58,8 @@ colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 efforts$source_authority<-"IATTC"
 efforts$measurement <- "effort"
 efforts$measurement_processing_level <- "unknown" 
+efforts <- efforts %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "ALL", "OTH", fishing_mode))
+
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 efforts$time_start <- as.Date(efforts$time_start)

@@ -80,11 +80,7 @@ function(action, entity, config){
   options(encoding = "UTF-8")
   #----------------------------------------------------------------------------------------------------------------------------
   
-  ## Catches
-  catches<-read.csv(path_to_raw_dataset_catch, stringsAsFactors = F)
   efforts<-read.csv(path_to_raw_dataset_effort, stringsAsFactors = F)
-  # catches <- melt(catches, id.vars=c("Record","Spp","DTypeID"))  #@juldebar error with melt function from reshape package
-  # catches <-melt(as.data.table(catches),id.vars=c("Record","Spp","DTypeID"))
   efforts <- efforts %>% tidyr::gather(variable, value, -c("Record","Lat", "Lon", "Year", "Month", "FlagAbv"))
   # remove values=0
   
@@ -117,6 +113,8 @@ function(action, entity, config){
   colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
   efforts$source_authority<-"IATTC"
   efforts$measurement <- "effort"
+  efforts <- efforts %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "UNK", "OTH", fishing_mode))
+  
   #----------------------------------------------------------------------------------------------------------------------------
   #@eblondel additional formatting for next time support
   efforts$time_start <- as.Date(efforts$time_start)
