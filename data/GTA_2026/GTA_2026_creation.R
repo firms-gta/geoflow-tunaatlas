@@ -81,7 +81,7 @@ copy_all_nested_data_folders <- function(source_root, target_data_folder = here:
     file.copy(files_to_copy, target_data_folder, overwrite = TRUE, recursive = TRUE)
   }
 }
-# Wokflow for us to create datasets etc.. load data correct endroit, create report etc.;
+
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
 raw_nominal_catch <- executeWorkflow(here::here("config/Nominal_catch_2026.json"))
@@ -152,191 +152,22 @@ tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global
 
 # Level 0 2026 ------------------------------------------------------------
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level0_local.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level0_local.json")) # FROM DRIVE
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_0_catch_2026")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
 
-setwd("~/firms-gta/geoflow-tunaatlas")
-tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/create_nominal_dataset_2026.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
-tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "nominal_final")
 
-
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local.json")) # FROM DRIVE
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local_fast.json")) # FROM DRIVE
-#tobeaddedlaterindata,./data/GTA_2026/dataoutputpreharmo/catch_iotc_level0.csv and ./data/GTA_2026/dataoutputpreharmo/catch_iccat_level0.csv,
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2026")
-gc()
-config <- initWorkflow(here::here("config/catch_ird_level2_local.json"))
-unlink(config$job, recursive = TRUE)
-con <- config$software$output$dbi
-gc()
-require(CWP.dataset)
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local.json")) # FROM DRIVE
+# tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+# gc()
+# config <- initWorkflow(here::here("config/level_2_catch_2025.json"))
+# unlink(config$job, recursive = TRUE)
+# con <- config$software$output$dbi
+# gc()
+# require(CWP.dataset)
 setwd("~/firms-gta/geoflow-tunaatlas")
-colnames_to_keep_report <- c("source_authority", "fishing_fleet_label",
-                             "fishing_mode_label", "geographic_identifier",
-                             "measurement_unit", "measurement_value", "gridtype",
-                             "species_label", "gear_type_label", "measurement_processing_level")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("IATTC"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("ICCAT"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("IOTC"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("WCPFC"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("CCSBT"))
-
-config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species_label = c("Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore", "Southern bluefin tuna", "Swordfish"))
-source(here::here("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/summarising_step2.R"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("all"), nameoutput = "majortunas")
-no_sbf <- setdiff(unique((qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs"))$species), "SBF")
-
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                  config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, nameoutput = "withmeasurementprosslevel",
-                  source_authoritylist = c("all"))
-
-config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = no_sbf)
-source(here::here("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/summarising_step2.R"))
-summarising_step2(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                  config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                  source_authoritylist = c("all"), nameoutput = "noSBF")
-
-config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species_label = c("Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore", "Southern bluefin tuna", "Swordfish", 
-                                                                                                              "Tunas nei", "True tunas nei"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("all"), nameoutput = "majortunasandTUN")
-
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "middle",savestep = TRUE, usesave = TRUE, 
-                              source_authoritylist = c("all"))
-
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("CCSBT"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("WCPFC"))
-CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
-                              config  = config, sizepdf = "middle",savestep = FALSE, usesave = FALSE, 
-                              source_authoritylist = c("IATTC"))
-
-# Loading DB or DB only (if user has access to DB), workflow for users only -------------------------------------------------------
-
-library(DBI)
-
-default_file <- ".env"
-
-if(file.exists(here::here("geoserver_sdi_lab.env"))){
-  default_file <- "geoserver_sdi_lab.env"
-} # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
-
-load_dot_env(file = here::here(default_file)) # 
-
-should_upload_to_db <- function(config) {
-  # 1) Vérifs "contexte" via variables d'env
-  drv  <- Sys.getenv("DB_DRV")
-  host <- Sys.getenv("DB_HOST")
-  port <- Sys.getenv("DB_PORT")
-  db   <- Sys.getenv("DB_NAME")
-  user <- Sys.getenv("DB_USER")
-  
-  ctx_ok <- identical(drv, "PostgreSQL") &&
-    identical(port, "5432") &&
-    identical(host, "db-tunaatlas.d4science.org") &&
-    db %in% c("tunaatlas_sandbox", "tunaatlas") &&
-    identical(user, "tunaatlas_u")
-  
-  if (!ctx_ok) return(FALSE)
-  
-  # 2) Vérif connexion réelle
-  con <- config$software$output$dbi
-  if (is.null(con)) return(FALSE)
-  
-  ok <- tryCatch({
-    DBI::dbIsValid(con) && DBI::dbGetQuery(con, "SELECT 1 AS ok")$ok[1] == 1
-  }, error = function(e) FALSE)
-  
-  ok
-}
-
-force_upload_to_db <- function(config, action_id = "load_dataset", value = TRUE) {
-  for (ei in seq_along(config$entities)) {
-    acts <- config$entities[[ei]]$actions
-    ids  <- vapply(acts, `[[`, character(1), "id")
-    sel  <- which(ids == action_id)
-    for (j in sel) {
-      config$entities[[ei]]$actions[[j]]$options$upload_to_db <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$upload_to_db_public <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$create_materialized_view <- TRUE
-    }
-  }
-  config
-}
-
-raw_nominal_catch <- executeWorkflow(
-  file = here::here("config/Nominal_catch_2026.json"),
-  dir  = ".",
-  on_initWorkflow = function(config, queue) {
-    
-    if (should_upload_to_db(config)) {
-      config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
-      force_upload_to_db(config, "load_dataset", TRUE)
-    } else {
-      config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
-    }
-    
-  }
-)
-
-
-raw_data_georef <- executeWorkflow(
-  file = here::here("config/All_raw_data_georef.json"),
-  dir  = ".",
-  on_initWorkflow = function(config, queue) {
-    
-    if (should_upload_to_db(config)) {
-      config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
-      force_upload_to_db(config, "load_dataset", TRUE)
-    } else {
-      config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
-    }
-    
-  }
-)
-
-raw_data_georef_effort <- executeWorkflow(
-  file = here::here("config/All_raw_data_georef_effort.json"),
-  dir  = ".",
-  on_initWorkflow = function(config, queue) {
-    
-    if (should_upload_to_db(config)) {
-      config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
-      force_upload_to_db(config, "load_dataset", TRUE)
-    } else {
-      config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
-    }
-    
-  }
-)
-
-config <- initWorkflow(here::here("config/All_raw_data_georef_effort.json"), handleMetadata = FALSE)
-unlink(config$job, recursive = TRUE)
-con <- config$software$output$dbi
-
-CWP.dataset::summarising_invalid_data(raw_nominal_catch, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
-CWP.dataset::summarising_invalid_data(raw_data_georef, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
-CWP.dataset::summarising_invalid_data(raw_data_georef_effort, connectionDB = con, upload_DB = FALSE,upload_drive = FALSE)
