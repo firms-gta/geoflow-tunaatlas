@@ -48,7 +48,7 @@ function(action, entity, config){
       time_start = as.Date(paste(Year, Month, "01", sep = "-")),
       time_end = as.Date(time_start) + lubridate::days(lubridate::days_in_month(time_start) - 1),
       fishing_fleet = Flag,
-      fishing_mode = "UNK",
+      fishing_mode = "OTH",
       source_authority = "IATTC",
       gear_type = "LL" )%>% 
     dplyr::select(
