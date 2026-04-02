@@ -1,6 +1,6 @@
 fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
-COL,01.1,1993-01-01,1993-01-31,5310085,UNK,SETS,IATTC,effort,unknown,1
-COL,01.1,1993-01-01,1993-01-31,5310086,UNK,SETS,IATTC,effort,unknown,2
-COL,01.1,1993-01-01,1993-01-31,5311085,UNK,SETS,IATTC,effort,unknown,5
-COL,01.1,1993-01-01,1993-01-31,5312082,UNK,SETS,IATTC,effort,unknown,1
-COL,01.1,1993-01-01,1993-01-31,5312084,UNK,SETS,IATTC,effort,unknown,3
+COL,01.1,1993-01-01,1993-01-31,5310085,OTH,SETS,IATTC,effort,unknown,1
+COL,01.1,1993-01-01,1993-01-31,5310086,OTH,SETS,IATTC,effort,unknown,2
+COL,01.1,1993-01-01,1993-01-31,5311085,OTH,SETS,IATTC,effort,unknown,5
+COL,01.1,1993-01-01,1993-01-31,5312082,OTH,SETS,IATTC,effort,unknown,1
+COL,01.1,1993-01-01,1993-01-31,5312084,OTH,SETS,IATTC,effort,unknown,3

@@ -1,6 +1,6 @@
 fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
 NEI,01.1,1970-01-01,1970-01-31,6100135,LS,SETS,WCPFC,effort,unknown,103
-NEI,01.1,1970-01-01,1970-01-31,6100135,UNK,FDAYS,WCPFC,effort,unknown,101
+NEI,01.1,1970-01-01,1970-01-31,6100135,OTH,FDAYS,WCPFC,effort,unknown,101
 NEI,01.1,1970-01-01,1970-01-31,6105120,LS,SETS,WCPFC,effort,unknown,75
-NEI,01.1,1970-01-01,1970-01-31,6105120,UNK,FDAYS,WCPFC,effort,unknown,75
+NEI,01.1,1970-01-01,1970-01-31,6105120,OTH,FDAYS,WCPFC,effort,unknown,75
 NEI,01.1,1970-01-01,1970-01-31,6105125,LS,SETS,WCPFC,effort,unknown,76
