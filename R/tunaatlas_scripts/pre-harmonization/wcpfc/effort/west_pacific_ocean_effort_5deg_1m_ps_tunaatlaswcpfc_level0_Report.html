@@ -545,7 +545,7 @@ efforts &lt;- DF %&gt;%
       grepl(&quot;DFAD&quot;, EffortUnits) ~ &quot;DFAD&quot;,
       grepl(&quot;AFAD&quot;, EffortUnits) ~ &quot;AFAD&quot;,
       grepl(&quot;OTH&quot;, EffortUnits) ~ &quot;OTH&quot;,
-      EffortUnits == &quot;DAYS&quot; ~ &quot;ALL&quot;
+      EffortUnits == &quot;DAYS&quot; ~ &quot;OTH&quot;
     ),
     EffortUnits = dplyr::if_else(EffortUnits == &quot;DAYS&quot;, &quot;DAYS&quot;, &quot;SETS&quot;),
     Flag = &quot;ALL&quot;,
@@ -567,8 +567,8 @@ dataset_temporal_extent &lt;- paste(
   paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
-<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+<p>output in same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;WCPFC_S_PUBLIC_BY_YY_MM_harmonized.csv&#39;)
 
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts</code></pre>
@@ -587,9 +587,9 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;WCPFC_S_PUBLIC_BY_YY_MM_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;WCPFC_S_PUBLIC_BY_YY_MM_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;wcpfc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;WCPFC_S_PUBLIC_BY_YY_MM_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
@@ -597,10 +597,10 @@ fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
 ## 1 DAYS     FDAYS    effortunit_wcpfc effortunit_rfmos WCPFC           
 ## 2 SETS     SETS     effortunit_wcpfc effortunit_rfmos WCPFC           
-## 3 AFAD     LS       schooltype_wcpfc schooltype_rfmos WCPFC           
-## 4 DFAD     LS       schooltype_wcpfc schooltype_rfmos WCPFC           
-## 5 LOG      LS       schooltype_wcpfc schooltype_rfmos WCPFC           
-## 6 OTH      OTH      schooltype_wcpfc schooltype_rfmos WCPFC</code></pre>
+## 3 DFAD     LS       schooltype_wcpfc schooltype_rfmos WCPFC           
+## 4 LOG      LS       schooltype_wcpfc schooltype_rfmos WCPFC           
+## 5 OTH      OTH      schooltype_wcpfc schooltype_rfmos WCPFC           
+## 6 UNA      FS       schooltype_wcpfc schooltype_rfmos WCPFC</code></pre>
 </div>
 
 

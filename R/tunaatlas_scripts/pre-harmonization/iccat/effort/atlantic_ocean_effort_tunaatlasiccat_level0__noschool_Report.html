@@ -447,7 +447,7 @@ Dataset</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R</a>,
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_tunaatlasiccat_level0__noschool.R</a>,
 the documentation keeps the format of roxygen2 skeleton.</p>
 <p>A summary of the mapping process is provided. The path to the dataset
 is specified. You will find on this same repository on GitHub the first
@@ -517,11 +517,11 @@ EU.ESP EU.España 21 EU.ESP 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 CP EU.España CP Yugoslavia Fed. NCO EU.España CP EU.España CP Yugoslavia
 Fed. NCO Effort: final data sample: Flag Gear time_start time_end
 AreaName School EffortUnits Effort ARG LL 1967-02-01 1967-03-01 7330040
-ALL NO.HOOKS 13000 ARG LL 1967-03-01 1967-04-01 7330040 ALL NO.HOOKS
-67000 ARG LL 1967-04-01 1967-05-01 7330040 ALL NO.HOOKS 107000 ARG LL
-1967-05-01 1967-06-01 7330040 ALL NO.HOOKS 88000 ARG LL 1967-06-01
-1967-07-01 7330040 ALL NO.HOOKS 66000 ARG LL 1967-07-01 1967-08-01
-7330040 ALL NO.HOOKS 50000 # download database to get .mdb
+OTH NO.HOOKS 13000 ARG LL 1967-03-01 1967-04-01 7330040 OTH NO.HOOKS
+67000 ARG LL 1967-04-01 1967-05-01 7330040 OTH NO.HOOKS 107000 ARG LL
+1967-05-01 1967-06-01 7330040 OTH NO.HOOKS 88000 ARG LL 1967-06-01
+1967-07-01 7330040 OTH NO.HOOKS 66000 ARG LL 1967-07-01 1967-08-01
+7330040 OTH NO.HOOKS 50000 # download database to get .mdb
 ./R/tunaatlas_scripts/pre-harmonization/data_iccat_from_mdb.R Historical
 name for the dataset at source t2ce_noSchool.csv</p>
 <pre class="r"><code>keep_fleet_instead_of_flag=FALSE  
@@ -560,14 +560,75 @@ data_pivot_ICCAT&lt;-left_join(t2ce,Flags,by=“FleetID”) # equivalent to
 “select FlagCode,FlagID,t2ce.* from t2ce, Flags where
 t2ce.FleetID=Flags.FleetID” # Efforts # Reach the efforts pivot DSD
 using a function in ICCAT_functions.R # If we want in the output dataset
-the column ‘FleetCode’ instead of ‘flag’</p>
-<pre class="r"><code>source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R&quot;)
-efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCAT_CE_species_colnames)
-
-source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R&quot;)
-efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c(&quot;Eff1&quot;,&quot;Eff2&quot;),c(&quot;Eff1Type&quot;,&quot;Eff2Type&quot;))</code></pre>
+the column ‘FleetCode’ instead of ‘flag’ source(“<a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R</a>”)
+efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE
+= t2ce,ICCAT_CE_species_colnames)</p>
+<pre class="r"><code>efforts_pivot_ICCAT &lt;- t2ce %&gt;%
+  dplyr::select(
+    -dplyr::all_of(ICCAT_CE_species_colnames),
+    -CatchUnit
+  )</code></pre>
+<p>source(“<a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R</a>”)
+efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c(“Eff1”,“Eff2”),c(“Eff1Type”,“Eff2Type”))
+Keep all columns except the raw effort/unit columns, because these will
+be rebuilt in a long format</p>
+<pre class="r"><code>cols_to_keep &lt;- setdiff(
+  names(efforts_pivot_ICCAT),
+  c(&quot;Eff1&quot;, &quot;Eff2&quot;, &quot;Eff1Type&quot;, &quot;Eff2Type&quot;)
+)</code></pre>
+<p>Add an identifier for each original row, so we can track which
+Eff1/Eff2 pairs come from the same source row</p>
+<pre class="r"><code>tmp &lt;- efforts_pivot_ICCAT %&gt;%
+  dplyr::mutate(original_row_id = dplyr::row_number())</code></pre>
+<p>Convert Eff1 and Eff2 to numeric safely (important because some
+effort values may use commas instead of dots)</p>
+<pre class="r"><code>tmp &lt;- tmp %&gt;%
+  dplyr::mutate(
+    Eff1_num = suppressWarnings(as.numeric(gsub(&quot;,&quot;, &quot;.&quot;, Eff1))),
+    Eff2_num = suppressWarnings(as.numeric(gsub(&quot;,&quot;, &quot;.&quot;, Eff2)))
+  )</code></pre>
+<p>Build the Eff1 rows: these are always considered the primary effort
+rows</p>
+<pre class="r"><code>eff1_rows &lt;- tmp %&gt;%
+  dplyr::transmute(
+    dplyr::across(dplyr::all_of(cols_to_keep)),
+    original_row_id,
+    effort_source = &quot;Eff1&quot;,
+    Effort = Eff1_num,
+    EffortUnits = Eff1Type,
+    is_duplicate_strata = FALSE
+  ) %&gt;%
+  # Remove empty or zero Eff1 values
+  dplyr::filter(!is.na(Effort) &amp; Effort != 0)</code></pre>
+<p>Build the Eff2 rows: these may either replace missing Eff1, or become
+duplicated rows</p>
+<pre class="r"><code>eff2_rows &lt;- tmp %&gt;%
+  dplyr::transmute(
+    dplyr::across(dplyr::all_of(cols_to_keep)),
+    original_row_id,
+    Eff1_num,
+    effort_source = &quot;Eff2&quot;,
+    Effort = Eff2_num,
+    EffortUnits = Eff2Type
+  ) %&gt;%
+  # Remove empty or zero Eff2 values
+  dplyr::filter(!is.na(Effort) &amp; Effort != 0) %&gt;%
+  # If Eff1 existed and was non-zero, then Eff2 is an additional duplicated row
+  # If Eff1 was missing or zero, then Eff2 replaces Eff1 and is not a duplicate
+  dplyr::mutate(
+    is_duplicate_strata = !is.na(Eff1_num) &amp; Eff1_num != 0
+  ) %&gt;%
+  dplyr::select(-Eff1_num)%&gt;% dplyr::mutate(EffortUnits = as.character(EffortUnits))</code></pre>
+<p>Combine both sets of rows into one long dataset</p>
+<pre class="r"><code>efforts_pivot_ICCAT &lt;- dplyr::bind_rows(eff1_rows, eff2_rows) %&gt;%
+  dplyr::select(
+    original_row_id,
+    effort_source,
+    is_duplicate_strata,
+    dplyr::everything()
+  )</code></pre>
 <p>School</p>
-<pre class="r"><code>efforts_pivot_ICCAT$School&lt;-&quot;UNK&quot;</code></pre>
+<pre class="r"><code>efforts_pivot_ICCAT$School&lt;-&quot;OTH&quot;</code></pre>
 <p>Flag</p>
 <pre class="r"><code>efforts_pivot_ICCAT$FleetCode_short &lt;- sub(&quot;-.*&quot;, &quot;&quot;, efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the &#39;-&#39;
 
@@ -578,11 +639,13 @@ ICCAT_functions.R</p>
 <pre class="r"><code>colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R&quot;)
 efforts_pivot_ICCAT$Lat &lt;- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
-efforts_pivot_ICCAT$Lon &lt;- floor(abs(efforts_pivot_ICCAT$Lon))
-efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
+efforts_pivot_ICCAT$Lon &lt;- floor(abs(efforts_pivot_ICCAT$Lon))</code></pre>
+<p>handling duplicated stratas</p>
+<pre class="r"><code>efforts&lt;-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType &lt;- &quot;C&quot; #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)&lt;-c(&quot;fishing_fleet&quot;,&quot;gear_type&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;geographic_identifier&quot;,&quot;fishing_mode&quot;,&quot;measurement_unit&quot;,&quot;measurement_value&quot;,&quot;measurement_type&quot;)
 efforts$source_authority&lt;-&quot;ICCAT&quot;
+efforts &lt;- efforts %&gt;% dplyr::mutate(fishing_mode = ifelse(fishing_mode == &quot;UNK&quot;, &quot;OTH&quot;, fishing_mode))
 
 efforts$time_start &lt;- as.Date(efforts$time_start)
 efforts$time_end &lt;- as.Date(efforts$time_end)
@@ -591,8 +654,8 @@ dataset_temporal_extent &lt;- paste(
   paste0(format(max(efforts$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
-<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+<p>output in same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_noSchool_harmonized.csv&#39;)
 
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts</code></pre>
@@ -611,20 +674,20 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_noSchool_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_noSchool_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_noSchool_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
-##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
-##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 D.AT SEA DAYS     effortunit_iccat effortunit_rfmos   ICCAT           
-## 2 NO.BOATS BOATS    effortunit_iccat effortunit_rfmos   ICCAT           
-## 3 NO.TRAPS NO.TRAPS effortunit_iccat effortunit_rfmos   ICCAT           
-## 4 EU.ESP   EUESP    flag_iccat       fishingfleet_firms ICCAT           
-## 5 EU.FRA   EUFRA    flag_iccat       fishingfleet_firms ICCAT           
-## 6 YUG      YUG      flag_iccat       fishingfleet_firms ICCAT</code></pre>
+##   src_code trg_code src_codingsystem trg_codingsystem source_authority
+##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
+## 1 D.AT SEA DAYS     effortunit_iccat effortunit_rfmos ICCAT           
+## 2 NO.BOATS BOATS    effortunit_iccat effortunit_rfmos ICCAT           
+## 3 NO.HOOKS HOOKS    effortunit_iccat effortunit_rfmos ICCAT           
+## 4 NO.TRAPS NO.TRAPS effortunit_iccat effortunit_rfmos ICCAT           
+## 5 TRAP D   TRAP D   effortunit_iccat effortunit_rfmos ICCAT           
+## 6 OTH      OTH      schooltype_iccat schooltype_rfmos ICCAT</code></pre>
 </div>
 
 

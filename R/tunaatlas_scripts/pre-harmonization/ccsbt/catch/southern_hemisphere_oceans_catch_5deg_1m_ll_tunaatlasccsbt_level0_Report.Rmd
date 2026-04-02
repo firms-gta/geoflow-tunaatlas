@@ -210,7 +210,7 @@ dataset_temporal_extent <- paste(
 output in same folder as path_to_raw_dataset 
 
 ````{r}
-output_name_dataset <- "Dataset_harmonized.csv"
+output_name_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'catch', 'data', 'CEData_Longline_harmonized.csv')
 
 write.csv(catches, output_name_dataset, row.names = FALSE)
 georef_dataset <- catches
@@ -229,9 +229,9 @@ mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.git
 
 ````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
-fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
-fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
-fwrite(georef_dataset, 'CWP_dataset.csv')
+data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'catch', 'data', 'CEData_Longline_recap_mapping.csv'))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'catch', 'data', 'CEData_Longline_not_mapped_total.csv'))
+data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'catch', 'data', 'CEData_Longline_CWP_dataset.csv'))
 ````
 
 Display the first few rows of the mapping summaries

@@ -121,7 +121,7 @@ Historical name for the dataset at source  WCPFC_L_PUBLIC_BY_FLAG_MON.csv
   #---------------------------------------
   DF$cwp_grid=NULL # remove column cwp_grid
   colnames(DF)<-toupper(colnames(DF))
-  if(any(DF$FLAG_CODE == "")) DF[DF$FLAG_CODE == "",]$FLAG_CODE <- "UNK"
+  DF$FLAG_CODE[is.na(DF$FLAG_CODE) | DF$FLAG_CODE == ""] <- "UNK"
   # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
   # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
   DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
@@ -168,7 +168,7 @@ Historical name for the dataset at source  WCPFC_L_PUBLIC_BY_FLAG_MON.csv
   efforts_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
   
   # School
-  efforts_pivot_WCPFC$School<-"UNK"
+  efforts_pivot_WCPFC$School<-"OTH"
   
   ### Reach the efforts harmonized DSD using a function in WCPFC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
@@ -215,8 +215,8 @@ Historical name for the dataset at source  WCPFC_L_PUBLIC_BY_FLAG_MON.csv
     sep = "/"
   )
   efforts$measurement_processing_level <- "unknown" 
-  # sorties same folder as path_to_raw_dataset 
-  output_name_dataset <- "Dataset_harmonized.csv"
+  # output in same folder as path_to_raw_dataset 
+  output_name_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'data', 'WCPFC_L_PUBLIC_BY_YY_MM_FLAG_harmonized.csv')
   
   write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset <- efforts
@@ -237,9 +237,9 @@ mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.git
 
 ````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
-fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
-fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
-fwrite(georef_dataset, 'CWP_dataset.csv')
+data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'data', 'WCPFC_L_PUBLIC_BY_YY_MM_FLAG_recap_mapping.csv'))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'data', 'WCPFC_L_PUBLIC_BY_YY_MM_FLAG_not_mapped_total.csv'))
+data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'data', 'WCPFC_L_PUBLIC_BY_YY_MM_FLAG_CWP_dataset.csv'))
 ````
 
 Display the first few rows of the mapping summaries

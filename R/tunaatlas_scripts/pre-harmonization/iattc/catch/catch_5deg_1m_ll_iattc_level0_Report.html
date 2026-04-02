@@ -464,7 +464,7 @@ dataset at the beginning of the script in order to execute the
 harmonization process correctly. It is also possible to run the code
 chunk by chunk but be sure to be in the correct working directory (i.e.,
 the one of the <code>.Rmd</code>).</em></p>
-<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLSharkMt.csv&#39;)</code></pre>
+<pre class="r"><code>path_to_raw_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLTunaBillfishMt.csv&#39;)</code></pre>
 <p>Convert a catch dataset into CWP format</p>
 <p>This function transforms a dataset containing catch information into
 the CWP (Coordinating Working Party) format.</p>
@@ -539,13 +539,11 @@ time_end measurement_unit measurement_value geographic_identifier <chr>
   df &lt;- cwp_grid_from_latlon(df, colname_latitude = &quot;LatC5&quot;, colname_longitude = &quot;LonC5&quot;, colname_squaresize = &quot;Square_size&quot;)
   df &lt;- df %&gt;% dplyr::select(-c(Square_size, LatC5, LonC5)) %&gt;% dplyr::filter(measurement_value != 0)
   
-  if (stringr::str_detect(path_to_raw_dataset, &quot;shark&quot;)) {
-    df$measurement_processing_level &lt;- &quot;original_sample&quot;
-  } else {
-    df$measurement_processing_level &lt;- &quot;unknown&quot;
-  }
+  shark_list &lt;- c(&quot;BSH&quot;,&quot;CCL&quot;,&quot;FAL&quot;,&quot;MAK&quot;,&quot;OCS&quot;,&quot;RSK&quot;,&quot;SKH&quot;,&quot;SMA&quot;,&quot;SPN&quot;,&quot;THR&quot;)
   
-  
+  df &lt;- df %&gt;%
+    dplyr::mutate(measurement_processing_level = ifelse(species%in%shark_list, &quot;original_sample&quot;, &quot;unknown&quot;)) # only sharks are in original sample
+     
   
   df$time_start &lt;- as.Date(df$time_start)
   df$time_end &lt;- as.Date(df$time_end)
@@ -556,7 +554,7 @@ time_end measurement_unit measurement_value geographic_identifier <chr>
   )
   
   # output in same folder as path_to_raw_dataset 
-  output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+  output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLTunaBillfishMt_harmonized.csv&#39;)
   
   write.csv(df, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- df
@@ -577,19 +575,20 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLTunaBillfishMt_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLTunaBillfishMt_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;catch&#39;, &#39;data&#39;, &#39;PublicLLTunaBillfishMt_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 5 × 5
+<pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 KOR      KOR      flag_iattc       fishingfleet_firms IATTC           
-## 2 MEX      MEX      flag_iattc       fishingfleet_firms IATTC           
-## 3 TWN      TWN      flag_iattc       fishingfleet_firms IATTC           
-## 4 SKH      SKH      species_iattc    species_asfis      IATTC           
-## 5 LL       09.32    gear_iattc       isscfg_revision_1  IATTC</code></pre>
+## 1 JPN      JPN      flag_iattc       fishingfleet_firms IATTC           
+## 2 ALB      ALB      species_iattc    species_asfis      IATTC           
+## 3 BET      BET      species_iattc    species_asfis      IATTC           
+## 4 BIL      BIL      species_iattc    species_asfis      IATTC           
+## 5 BLM      BLM      species_iattc    species_asfis      IATTC           
+## 6 BUM      BUM      species_iattc    species_asfis      IATTC</code></pre>
 </div>
 
 

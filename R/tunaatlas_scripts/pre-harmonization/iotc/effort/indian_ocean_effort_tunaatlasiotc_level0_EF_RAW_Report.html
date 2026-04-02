@@ -447,7 +447,7 @@ formatting)</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R</a>,
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_effort_tunaatlasiotc_level0_EF_RAW_2026.R</a>,
 the documentation keeps the format of roxygen2 skeleton.</p>
 <p>A summary of the mapping process is provided. The path to the dataset
 is specified. You will find on this same repository on GitHub the first
@@ -490,6 +490,9 @@ Grasset, IRD </p>
   
   # ---- read raw ----
   effort_raw &lt;- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
+  
+  effort_raw &lt;- effort_raw %&gt;% dplyr::mutate(GEAR_CODE = ifelse(is.na(GEAR_CODE), &quot;UNCL&quot;, GEAR_CODE)) #some NAs replaced by UNCL which is coding for Other/Unk
+  
   
   # ---- format inline ----
   effort &lt;- effort_raw %&gt;%
@@ -540,7 +543,6 @@ Grasset, IRD </p>
       fishing_mode = as.character(fishing_mode),
       measurement_unit = as.character(measurement_unit)
     ) %&gt;%
-    # minimal mode normalization (inline) — si tu as déjà norm_mode() ailleurs, remplace par ça
     dplyr::mutate(
       fishing_mode = trimws(fishing_mode),
       fishing_mode = ifelse(fishing_mode == &quot;&quot;, NA_character_, fishing_mode)
@@ -556,8 +558,8 @@ effort$measurement &lt;- &quot;effort&quot;
     sep = &quot;/&quot;
   )
   
-  # sorties same folder as path_to_raw_dataset 
-  output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+  # output in same folder as path_to_raw_dataset 
+  output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iotc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;EF_RAW_harmonized.csv&#39;)
   
   write.csv(effort, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- effort</code></pre>
@@ -576,18 +578,20 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iotc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;EF_RAW_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iotc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;EF_RAW_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iotc&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;EF_RAW_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
-<pre><code>## # A tibble: 4 × 5
-##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
-##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 DAYS     DAYS     effortunit_iotc  effortunit_rfmos   IOTC            
-## 2 UNCL     UNK      schooltype_iotc  schooltype_rfmos   IOTC            
-## 3 AUS      AUS      flag_iotc        fishingfleet_firms IOTC            
-## 4 PS       01.1     gear_iotc        isscfg_revision_1  IOTC</code></pre>
+<pre><code>## # A tibble: 6 × 5
+##   src_code trg_code src_codingsystem trg_codingsystem source_authority
+##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
+## 1 DAYS     DAYS     effortunit_iotc  effortunit_rfmos IOTC            
+## 2 FDAYS    FDAYS    effortunit_iotc  effortunit_rfmos IOTC            
+## 3 FHOURS   FHOURS   effortunit_iotc  effortunit_rfmos IOTC            
+## 4 HOURS    HOURS    effortunit_iotc  effortunit_rfmos IOTC            
+## 5 HRSRH    HRSRH    effortunit_iotc  effortunit_rfmos IOTC            
+## 6 SETS     SETS     effortunit_iotc  effortunit_rfmos IOTC</code></pre>
 </div>
 
 

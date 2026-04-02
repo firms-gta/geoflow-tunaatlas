@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This R Markdown document is designed to transform data that is not in CWP format into CWP format.
 Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R, the documentation keeps the format of roxygen2 skeleton.
+This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R, the documentation keeps the format of roxygen2 skeleton.
 
 A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
 The datasets are named after the historical name provided by tRFMOs while exporting and may change.
@@ -124,7 +124,7 @@ School
 The format changed, the school is now in the FishMode column
 
 ````{r}
-efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::mutate(FishMode = ifelse(FishMode == "n/a", "UNK", FishMode)) 
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::mutate(FishMode = ifelse(FishMode == "n/a", "OTH", FishMode)) 
 efforts_pivot_ICCAT<- efforts_pivot_ICCAT %>% dplyr::rename("School" = "FishMode")
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
@@ -146,10 +146,10 @@ efforts$geographic_identifier <- format(as.integer(efforts$geographic_identifier
 
 ````
 
-sorties same folder as path_to_raw_dataset 
+output in same folder as path_to_raw_dataset 
 
 ````{r}
-output_name_dataset <- "Dataset_harmonized.csv"
+output_name_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'effort', 'data', 't2ce_ETRO-PS1991-2024_bySchool_v1_harmonized.csv')
 
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset <- efforts
@@ -169,9 +169,9 @@ mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.git
 
 ````{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
-fwrite(mapping_codelist$recap_mapping, 'recap_mapping.csv')
-fwrite(mapping_codelist$not_mapped_total, 'not_mapped_total.csv')
-fwrite(georef_dataset, 'CWP_dataset.csv')
+data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'effort', 'data', 't2ce_ETRO-PS1991-2024_bySchool_v1_recap_mapping.csv'))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'effort', 'data', 't2ce_ETRO-PS1991-2024_bySchool_v1_not_mapped_total.csv'))
+data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'effort', 'data', 't2ce_ETRO-PS1991-2024_bySchool_v1_CWP_dataset.csv'))
 ````
 
 Display the first few rows of the mapping summaries

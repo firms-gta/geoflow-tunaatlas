@@ -144,6 +144,47 @@ rewrite_functions_as_rmd <- function(source_path) {
     data_files <- data_files[!str_detect(data_files, "recap_mapping")]
     data_files <- data_files[!str_detect(data_files, "areas_in_land")]
     data_files <- data_files[!str_detect(data_files, "not_displayed_monthly")]
+    base_name <- tools::file_path_sans_ext(path_file(data_files[1]))
+    harmonized_path <- paste0(
+      "here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", base_name, "_harmonized.csv')"
+    )
+    
+    recap_mapping_path <- paste0(
+      "here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", base_name, "_recap_mapping.csv')"
+    )
+    
+    not_mapped_total_path <- paste0(
+      "here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", base_name, "_not_mapped_total.csv')"
+    )
+    
+    cwp_dataset_path <- paste0(
+      "here::here('R/tunaatlas_scripts/pre-harmonization', '", trfmo, "', '", type, "', 'data', '", base_name, "_CWP_dataset.csv')"
+    )
+    
+    lines <- gsub(
+      "output_name_dataset <-.*",
+      paste0("output_name_dataset <- ", harmonized_path),
+      lines
+    )
+    
+    lines <- gsub(
+      "fwrite\\(mapping_codelist\\$recap_mapping,.*",
+      paste0("data.table::fwrite(mapping_codelist$recap_mapping, ", recap_mapping_path, ")"),
+      lines
+    )
+    
+    lines <- gsub(
+      "fwrite\\(mapping_codelist\\$not_mapped_total,.*",
+      paste0("data.table::fwrite(mapping_codelist$not_mapped_total, ", not_mapped_total_path, ")"),
+      lines
+    )
+    
+    lines <- gsub(
+      "fwrite\\(georef_dataset,.*",
+      paste0("data.table::fwrite(georef_dataset, ", cwp_dataset_path, ")"),
+      lines
+    )
+    
     if (!is.na(trfmo) && type == "nominal" && trfmo == "wcpfc") {
       lines <- gsub("path_to_raw_dataset <-.*", "path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPFC_2025-11-27.csv') \n path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'data', 'XLS_WCPO_2025-11-27.csv')", lines)
     } else {

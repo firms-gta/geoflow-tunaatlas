@@ -447,7 +447,7 @@ operation mode effort datasets</h1>
 <p>This R Markdown document is designed to transform data that is not in
 CWP format into CWP format. Initially, it changes the format of the
 data; subsequently, it maps the data to adhere to CWP standards. This
-markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/feature/update-ICCAT-efforts-dataset/no-ref/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R</a>,
+markdown is automatically created from the function: <a href="https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R" class="uri">https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/atlantic_ocean_effort_1deg_1m_ps_tunaatlasiccat_level0__byschool.R</a>,
 the documentation keeps the format of roxygen2 skeleton.</p>
 <p>A summary of the mapping process is provided. The path to the dataset
 is specified. You will find on this same repository on GitHub the first
@@ -540,7 +540,7 @@ source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/maste
 efforts_pivot_ICCAT&lt;-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c(&quot;Eff1&quot;,&quot;Eff2&quot;,&quot;Eff3&quot;,&quot;Eff4&quot;,&quot;Eff5&quot;),c(&quot;Eff1Type&quot;,&quot;Eff2Type&quot;,&quot;Eff3Type&quot;,&quot;Eff4Type&quot;,&quot;Eff5Type&quot;))</code></pre>
 <p>School The format changed, the school is now in the FishMode
 column</p>
-<pre class="r"><code>efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT %&gt;% dplyr::mutate(FishMode = ifelse(FishMode == &quot;n/a&quot;, &quot;UNK&quot;, FishMode)) 
+<pre class="r"><code>efforts_pivot_ICCAT &lt;- efforts_pivot_ICCAT %&gt;% dplyr::mutate(FishMode = ifelse(FishMode == &quot;n/a&quot;, &quot;OTH&quot;, FishMode)) 
 efforts_pivot_ICCAT&lt;- efforts_pivot_ICCAT %&gt;% dplyr::rename(&quot;School&quot; = &quot;FishMode&quot;)
 colToKeep_efforts &lt;- c(&quot;FishingFleet&quot;,&quot;Gear&quot;,&quot;time_start&quot;,&quot;time_end&quot;,&quot;AreaName&quot;,&quot;School&quot;,&quot;EffortUnits&quot;,&quot;Effort&quot;)
 source(&quot;https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R&quot;)
@@ -559,8 +559,8 @@ dataset_temporal_extent &lt;- paste(
   sep = &quot;/&quot;
 )
 efforts$geographic_identifier &lt;- format(as.integer(efforts$geographic_identifier), scientific = FALSE, trim = TRUE)</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
-<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+<p>output in same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_ETRO-PS1991-2024_bySchool_v1_harmonized.csv&#39;)
 
 write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts</code></pre>
@@ -580,20 +580,20 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_ETRO-PS1991-2024_bySchool_v1_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_ETRO-PS1991-2024_bySchool_v1_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iccat&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;t2ce_ETRO-PS1991-2024_bySchool_v1_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
-##   src_code  trg_code  src_codingsystem trg_codingsystem   source_authority
-##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 FISH.HOUR FHOURS    effortunit_iccat effortunit_rfmos   ICCAT           
-## 2 HOURS.SEA HOURS     effortunit_iccat effortunit_rfmos   ICCAT           
-## 3 Hours.FAD Hours.FAD effortunit_iccat effortunit_rfmos   ICCAT           
-## 4 Hours.FSC Hours.FSC effortunit_iccat effortunit_rfmos   ICCAT           
-## 5 Hours.STD Hours.STD effortunit_iccat effortunit_rfmos   ICCAT           
-## 6 EU.ESP    EUESP     flag_iccat       fishingfleet_firms ICCAT</code></pre>
+##   src_code  trg_code  src_codingsystem trg_codingsystem source_authority
+##   &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
+## 1 FISH.HOUR FHOURS    effortunit_iccat effortunit_rfmos ICCAT           
+## 2 HOURS.SEA HOURS     effortunit_iccat effortunit_rfmos ICCAT           
+## 3 Hours.FAD Hours.FAD effortunit_iccat effortunit_rfmos ICCAT           
+## 4 Hours.FSC Hours.FSC effortunit_iccat effortunit_rfmos ICCAT           
+## 5 Hours.STD Hours.STD effortunit_iccat effortunit_rfmos ICCAT           
+## 6 FAD       LS        schooltype_iccat schooltype_rfmos ICCAT</code></pre>
 </div>
 
 

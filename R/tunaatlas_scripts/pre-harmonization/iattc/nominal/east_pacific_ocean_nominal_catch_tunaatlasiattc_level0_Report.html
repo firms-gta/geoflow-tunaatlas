@@ -569,8 +569,8 @@ dataset_temporal_extent &lt;- paste(
   paste0(format(max(NC$time_end), &quot;%Y&quot;), &quot;-12-31&quot;),
   sep = &quot;/&quot;
 )</code></pre>
-<p>sorties same folder as path_to_raw_dataset</p>
-<pre class="r"><code>output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+<p>output in same folder as path_to_raw_dataset</p>
+<pre class="r"><code>output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;CatchByFlagGear1918-2024_harmonized.csv&#39;)
 
 write.csv(NC, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- NC</code></pre>
@@ -590,20 +590,20 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension fishing_mode with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;CatchByFlagGear1918-2024_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;CatchByFlagGear1918-2024_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;iattc&#39;, &#39;nominal&#39;, &#39;data&#39;, &#39;CatchByFlagGear1918-2024_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 6 × 5
 ##   src_code trg_code src_codingsystem trg_codingsystem   source_authority
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;              &lt;chr&gt;           
-## 1 BLZ      BLZ      flag_iattc       fishingfleet_firms IATTC           
-## 2 BMU      BMU      flag_iattc       fishingfleet_firms IATTC           
-## 3 CAN      CAN      flag_iattc       fishingfleet_firms IATTC           
-## 4 CHL      CHL      flag_iattc       fishingfleet_firms IATTC           
-## 5 CHN      CHN      flag_iattc       fishingfleet_firms IATTC           
-## 6 COL      COL      flag_iattc       fishingfleet_firms IATTC</code></pre>
+## 1 CAN      CAN      flag_iattc       fishingfleet_firms IATTC           
+## 2 CHL      CHL      flag_iattc       fishingfleet_firms IATTC           
+## 3 COL      COL      flag_iattc       fishingfleet_firms IATTC           
+## 4 ECU      ECU      flag_iattc       fishingfleet_firms IATTC           
+## 5 JPN      JPN      flag_iattc       fishingfleet_firms IATTC           
+## 6 MEX      MEX      flag_iattc       fishingfleet_firms IATTC</code></pre>
 </div>
 
 

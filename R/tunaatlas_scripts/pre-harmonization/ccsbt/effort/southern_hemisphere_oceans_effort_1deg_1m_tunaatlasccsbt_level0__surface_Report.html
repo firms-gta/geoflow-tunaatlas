@@ -595,8 +595,8 @@ BB 1976-10-01 1976-11-01 6336150 ALL HRSRH 29</p>
     sep = &quot;/&quot;
   )
   efforts$measurement_processing_level &lt;- &quot;unknown&quot; 
-  # sorties same folder as path_to_raw_dataset 
-  output_name_dataset &lt;- &quot;Dataset_harmonized.csv&quot;
+  # output in same folder as path_to_raw_dataset 
+  output_name_dataset &lt;- here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;CEData_Surface_harmonized.csv&#39;)
   
   write.csv(efforts, output_name_dataset, row.names = FALSE)
 georef_dataset &lt;- efforts
@@ -617,9 +617,9 @@ mapping_codelist &lt;- map_codelists_no_DB(fact, mapping_dataset = &quot;https:/
 ##  mapping dimension measurement_unit with code list mapping</code></pre>
 <p>@ Handle unmapped values and save the results</p>
 <pre class="r"><code>georef_dataset &lt;- mapping_codelist$dataset_mapped %&gt;% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == &#39;UNK&#39;, &#39;NEI&#39;, fishing_fleet), gear_type = ifelse(gear_type == &#39;UNK&#39;, &#39;99.9&#39;, gear_type))
-fwrite(mapping_codelist$recap_mapping, &#39;recap_mapping.csv&#39;)
-fwrite(mapping_codelist$not_mapped_total, &#39;not_mapped_total.csv&#39;)
-fwrite(georef_dataset, &#39;CWP_dataset.csv&#39;)</code></pre>
+data.table::fwrite(mapping_codelist$recap_mapping, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;CEData_Surface_recap_mapping.csv&#39;))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;CEData_Surface_not_mapped_total.csv&#39;))
+data.table::fwrite(georef_dataset, here::here(&#39;R/tunaatlas_scripts/pre-harmonization&#39;, &#39;ccsbt&#39;, &#39;effort&#39;, &#39;data&#39;, &#39;CEData_Surface_CWP_dataset.csv&#39;))</code></pre>
 <p>Display the first few rows of the mapping summaries</p>
 <pre class="r"><code>print(head(mapping_codelist$recap_mapping))</code></pre>
 <pre><code>## # A tibble: 5 × 5
