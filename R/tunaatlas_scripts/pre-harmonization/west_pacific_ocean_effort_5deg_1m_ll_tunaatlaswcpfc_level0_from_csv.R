@@ -97,7 +97,7 @@ function(action, entity, config){
   #---------------------------------------
   DF$cwp_grid=NULL # remove column cwp_grid
   colnames(DF)<-toupper(colnames(DF))
-  if(any(DF$FLAG_CODE == "")) DF[DF$FLAG_CODE == "",]$FLAG_CODE <- "UNK"
+  DF$FLAG_CODE[is.na(DF$FLAG_CODE) | DF$FLAG_CODE == ""] <- "UNK"
   # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
   # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
   DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))

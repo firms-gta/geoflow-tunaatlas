@@ -191,7 +191,7 @@ eff2_rows <- tmp %>%
   dplyr::mutate(
     is_duplicate_strata = !is.na(Eff1_num) & Eff1_num != 0
   ) %>%
-  dplyr::select(-Eff1_num)
+  dplyr::select(-Eff1_num)%>% dplyr::mutate(EffortUnits = as.character(EffortUnits))
 
 # Combine both sets of rows into one long dataset
 efforts_pivot_ICCAT <- dplyr::bind_rows(eff1_rows, eff2_rows) %>%

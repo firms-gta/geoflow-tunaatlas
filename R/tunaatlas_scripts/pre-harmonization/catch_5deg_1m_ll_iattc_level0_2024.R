@@ -82,12 +82,11 @@ function(action, entity, config){
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
   df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
   
-  if (stringr::str_detect(path_to_raw_dataset, "shark")) {
-    df$measurement_processing_level <- "original_sample"
-  } else {
-    df$measurement_processing_level <- "unknown"
-  }
+  shark_list <- c("BSH","CCL","FAL","MAK","OCS","RSK","SKH","SMA","SPN","THR")
   
+  df <- df %>%
+    dplyr::mutate(measurement_processing_level = ifelse(species%in%shark_list, "original_sample", "unknown")) # only sharks are in original sample
+     
   
   df$time_start <- as.Date(df$time_start)
   df$time_end <- as.Date(df$time_end)
