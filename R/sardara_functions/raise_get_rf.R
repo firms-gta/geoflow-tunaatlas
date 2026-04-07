@@ -11,19 +11,25 @@ raise_get_rf <- function (df_input_incomplete, df_input_total, x_raising_dimensi
       0) {
     stop("one of the dataframes as input does not have the dimensions set in the dimensions to consider for the raising")
   }
-  DFPartialInfo_ByEachRaisingDimension <- group_by_(df_input_incomplete, 
-                                                    .dots = x_raising_dimensions) %>% summarise(measurement_value = sum(measurement_value))
-  DFTotalInfo_ByEachRaisingDimension <- group_by_(df_input_total, 
-                                                  .dots = x_raising_dimensions) %>% summarise(measurement_value = sum(measurement_value))
-  DFPartialInfo_rf <- merge(DFPartialInfo_ByEachRaisingDimension, 
-                            DFTotalInfo_ByEachRaisingDimension, by = x_raising_dimensions, 
-                            all = TRUE)
-  colnames(DFPartialInfo_rf)[which(colnames(DFPartialInfo_rf) == 
-                                     "measurement_value.x")] <- "sum_value_df_input_incomplete"
-  colnames(DFPartialInfo_rf)[which(colnames(DFPartialInfo_rf) == 
-                                     "measurement_value.y")] <- "sum_value_df_input_total"
-  DFPartialInfo_rf$rf <- DFPartialInfo_rf$sum_value_df_input_total/DFPartialInfo_rf$sum_value_df_input_incomplete
-  cat(paste0("raise_get_rf file output DFPartialInfo_rf has", 
-             nrow(DFPartialInfo_rf), "rows \n"))
-  return(DFPartialInfo_rf)
+  
+  partial <- df_input_incomplete %>%
+    dplyr::group_by(across(all_of(x_raising_dimensions))) %>%
+    dplyr::summarise(
+      sum_value_df_input_incomplete = sum(measurement_value, na.rm = TRUE),
+      .groups = "drop"
+    )
+  
+  total <- df_input_total %>%
+    dplyr::group_by(across(all_of(x_raising_dimensions))) %>%
+    dplyr::summarise(
+      sum_value_df_input_total = sum(measurement_value, na.rm = TRUE),
+      .groups = "drop"
+    )
+  
+  DFPartialInfo_rf <- full_join(partial, total, by = x_raising_dimensions) %>%
+    dplyr::mutate(
+      rf = sum_value_df_input_total / sum_value_df_input_incomplete
+    )
+  
+  DFPartialInfo_rf
 }
