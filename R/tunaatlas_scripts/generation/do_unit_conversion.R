@@ -40,8 +40,21 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     df_conversion_factor <- df_conversion_factor %>% dplyr::rename(conversion_factor = measurement_value)
   }
   
-  df_conversion_factor <- df_conversion_factor %>% dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t")~ "t", measurement_unit %in% c("NO", "no")~"no", TRUE ~ measurement_unit)) %>% 
-    dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t")~ "t", unit_target %in% c("NO", "no")~"no", TRUE ~ unit_target)) 
+  df_conversion_factor <- df_conversion_factor %>%
+    dplyr::mutate(
+      measurement_unit = dplyr::case_when(
+        measurement_unit %in% c("MT", "t") ~ "t",
+        measurement_unit %in% c("NO", "no") ~ "no",
+        TRUE ~ as.character(measurement_unit)
+      )
+    ) %>%
+    dplyr::mutate(
+      unit_target = dplyr::case_when(
+        unit_target %in% c("MT", "t") ~ "t",
+        unit_target %in% c("NO", "no") ~ "no",
+        TRUE ~ as.character(unit_target)
+      )
+    )
   
   
   if (!mapping_map_code_lists){
