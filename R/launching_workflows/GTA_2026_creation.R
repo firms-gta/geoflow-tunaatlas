@@ -34,7 +34,12 @@ default_file <- ".env"
 if (file.exists(here::here("geoserver_sdi_lab.env"))) { # Julien si tu veux tester sur une BD il faut juste un .env  
   default_file <- "geoserver_sdi_lab.env"
 }
-load_dot_env(file = here::here(default_file))
+
+tryCatch(
+  load_dot_env(file = here::here(default_file)),
+  error = function(e) "No .env"
+)
+
 
 source(here::here("R/running_time_of_workflow.R"))
 source(here::here("R/executeAndRename.R"))

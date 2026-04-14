@@ -73,4 +73,27 @@ message("Step 3/3 - Running copy_prehamo_data_files()...")
 replace_preharmo_files_from_gta_2026_folder(gta_dir =dst_data_dir , preharmo_dir = here::here("R/tunaatlas_scripts/pre-harmonization"),
                                             dry_run=FALSE)
 
+message("Loading latex for pdf report (slower step)")
+
+options(tinytex.tlmgr.path = NULL)
+
+tinytex::install_tinytex(
+  bundle = "TinyTeX-1",
+  version = "2026.03",
+  force = TRUE
+)
+tinytex::tinytex_root()
+tinytex::is_tinytex()
+tinytex::tlmgr("--version")
+tinytex::tlmgr_install("lmodern")
+tinytex::tlmgr(c(
+  "option",
+  "repository",
+  "https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2025/tlnet-final"
+))
+tinytex::tlmgr("--verify-repo=none update --self")
+tinytex::tlmgr_install(c("multirow"))
+
+
+
 message("✅ Bootstrap finished successfully.")
