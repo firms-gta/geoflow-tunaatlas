@@ -1,8 +1,8 @@
 # =============================================================================
 # 0. ENVIRONNEMENT / PACKAGES
 # =============================================================================
+source('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R')
 require(here)
-# source(here::here('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R'))
 library(renv)
 renv::restore()
 
