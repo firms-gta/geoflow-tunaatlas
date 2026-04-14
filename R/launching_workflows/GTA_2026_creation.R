@@ -2,7 +2,7 @@
 # 0. ENVIRONNEMENT / PACKAGES
 # =============================================================================
 require(here)
-source(here::here('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R'))
+# source(here::here('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R'))
 library(renv)
 renv::restore()
 
@@ -13,7 +13,7 @@ required_packages <- c(
   "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
   "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", "fs" ,
   "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
+  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table", "geoflow"
 )
 
 install_and_load <- function(package) {
@@ -127,7 +127,7 @@ preharmo_check <- check_files_from_json(preharmo_json_files)
 # 3. UTILITAIRES DB / WORKFLOW
 # =============================================================================
 
-should_upload_to_db <- function(config) {
+should_upload_to_db <- function(config) { #
   drv  <- Sys.getenv("DB_DRV")
   host <- Sys.getenv("DB_HOST")
   port <- Sys.getenv("DB_PORT")
@@ -239,7 +239,7 @@ raw_nominal_catch <- execute_workflow_maybe_upload(
 )
 
 running_time_of_workflow(raw_nominal_catch)
-summarise_invalid(raw_nominal_catch, con_preharmo)
+summarise_invalid(raw_nominal_catch, con_preharmo) # find report in the correspoding job
 
 # ---- 4.2 GEOREFERENCED CATCH ------------------------------------------------
 
@@ -248,6 +248,7 @@ raw_data_georef <- execute_workflow_maybe_upload(
   rename_suffix = "_raw_data_georef_final"
 )
 
+running_time_of_workflow(raw_data_georef)
 summarise_invalid(raw_data_georef, con_preharmo)
 
 # ---- 4.3 GEOREFERENCED EFFORT -----------------------------------------------
@@ -257,6 +258,7 @@ raw_data_georef_effort <- execute_workflow_maybe_upload(
   rename_suffix = "_raw_data_georef_effort_final"
 )
 
+running_time_of_workflow(raw_data_georef)
 summarise_invalid(raw_data_georef_effort, con_preharmo)
 
 # ---- 4.4 DOC QA PRE-HARMO ---------------------------------------------------
@@ -311,6 +313,29 @@ CWP.dataset::summarising_step(
   source_authoritylist = c("all")
 )
 
+
+# Intercaler le process mapping georef to nominal -------------------------
+
+res_map <- propose_georef_to_nominal_mappings_clean(
+  georef = georef_dataset,
+  nominal = nominal_catch,
+  id_cols = c("source_authority", "group_species_iattc_sharks", "year"),
+  candidate_cols_order = c("fishing_mode_wcpfc_issue_unk_solved", "gear_type", "geographic_identifier_nom", "fishing_fleet")
+)
+
+# Level 1 to be added -----------------------------------------------------------------
+
+tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
+  file = here::here("config/catch_ird_level1_local.json"),
+  rename_suffix = "level_2_catch_2026"
+)
+
+gc()
+
+config_level1 <- initWorkflow(here::here("config/catch_ird_level1_local.json"))
+unlink(config_level1$job, recursive = TRUE)
+con_level1 <- config_level1$software$output$dbi
+
 # ---- 5.4 CATCH LEVEL 2 ------------------------------------------------------
 
 tunaatlas_level2_catch_path <- execute_workflow_maybe_upload(
@@ -324,6 +349,7 @@ config_level2 <- initWorkflow(here::here("config/catch_ird_level2_local.json"))
 unlink(config_level2$job, recursive = TRUE)
 con_level2 <- config_level2$software$output$dbi
 
+
 # =============================================================================
 # 6. RAPPORTS / SUMMARISING
 # =============================================================================
@@ -335,7 +361,66 @@ con_level2 <- config_level2$software$output$dbi
 #   "measurement_processing_level"
 # )
 # 
-for (sa in c("all", "IATTC", "ICCAT", "IOTC", "WCPFC", "CCSBT")) {
+
+for (sa in c("all")) {
+  CWP.dataset::summarising_step(
+    main_dir = tunaatlas_level2_catch_path,
+    connectionDB = con_level2,
+    config = config_level2,
+    sizepdf = "short",
+    savestep = FALSE,
+    usesave = FALSE,
+    source_authoritylist = sa
+    # ,
+    # parameter_colnames_to_keep_fact = colnames_to_keep_report
+  )
+}
+
+source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/plot_diffs_from_nominal_files.R")
+
+comparisons <- c(
+  "sums_species.csv" = "~/firms-gta/geoflow-tunaatlas/data/nominal_recap_species.csv",
+  "sums_source_auth.csv" = "~/firms-gta/geoflow-tunaatlas/data/nominal_recap_source_authority.csv",
+  "sums.csv" = "~/firms-gta/geoflow-tunaatlas/data/nominal_sums.csv"
+)
+
+res <- plot_diffs_from_nominal_files(
+  main_dir = paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird_level2_1950_2024/Markdown"), #bof mais pas miexu pour le moment
+  comparison_files = comparisons,
+  value_col = "sum_t",
+  filter_list = list(
+    sums_species = c("YFT", "SKJ", "BET", "SWO", "ALB", "SBF"),
+    sums_source_auth = NULL,
+    sums = NULL
+  )
+)
+
+
+ggplot2::ggsave(
+  filename = file.path(
+    "data",
+    "plot_georef_vs_nominal_evolution.png"
+  ),
+  plot = res$plot,
+  width = 16,
+  height = 12,
+  dpi = 300
+)
+
+source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/check_georef_vs_nominal_entity.R")
+
+file_path <- list(paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird_level2_1950_2024")) #bof mais pas miexu pour le moment, 
+
+results <- lapply(file_path, run_analysis)
+
+
+# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+#   list(species_label = c(
+#     "Skipjack tuna"
+#   ), fishing_fleet_label = "Maldives")
+
+
+for (sa in c( "ICCAT","IATTC", "IOTC", "WCPFC", "CCSBT")) {
   CWP.dataset::summarising_step(
     main_dir = tunaatlas_level2_catch_path,
     connectionDB = con_level2,
@@ -353,43 +438,42 @@ for (sa in c("all", "IATTC", "ICCAT", "IOTC", "WCPFC", "CCSBT")) {
 # # 7. RAPPORTS SPÉCIFIQUES
 # # =============================================================================
 # 
-# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-#   list(species_label = c(
-#     "Yellowfin tuna", "Skipjack tuna", "Bigeye tuna",
-#     "Albacore", "Southern bluefin tuna", "Swordfish"
-#   ))
-# 
-# CWP.dataset::summarising_step(
-#   main_dir = tunaatlas_level2_catch_path,
-#   connectionDB = con_level2,
-#   config = config_level2,
-#   sizepdf = "short",
-#   savestep = FALSE,
-#   usesave = FALSE,
-#   source_authoritylist = "all",
-#   nameoutput = "majortunas",
-#   parameter_colnames_to_keep_fact = colnames_to_keep_report
-# )
-# 
-# no_sbf <- setdiff(
-#   unique(qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs")$species),
-#   "SBF"
-# )
-# 
-# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-#   list(species = no_sbf)
-# 
-# CWP.dataset::summarising_step(
-#   main_dir = tunaatlas_level2_catch_path,
-#   connectionDB = con_level2,
-#   config = config_level2,
-#   sizepdf = "short",
-#   savestep = FALSE,
-#   usesave = FALSE,
-#   source_authoritylist = "all",
-#   nameoutput = "noSBF",
-#   parameter_colnames_to_keep_fact = colnames_to_keep_report
-# )
+config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+  list(species_label = c(
+    "Swordfish"), source_authority = c("WCPFC")
+  )
+
+CWP.dataset::summarising_step(
+  main_dir = tunaatlas_level2_catch_path,
+  connectionDB = con_level2,
+  config = config_level2,
+  sizepdf = "short",
+  savestep = FALSE,
+  usesave = FALSE,
+  source_authoritylist = "all",
+  nameoutput = "swo_wcpfc"
+  # parameter_colnames_to_keep_fact = colnames_to_keep_report
+)
+
+no_sbf <- setdiff(
+  unique(qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs")$species),
+  "SBF"
+)
+
+config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+  list(species = no_sbf)
+
+CWP.dataset::summarising_step(
+  main_dir = tunaatlas_level2_catch_path,
+  connectionDB = con_level2,
+  config = config_level2,
+  sizepdf = "short",
+  savestep = FALSE,
+  usesave = FALSE,
+  source_authoritylist = "all",
+  nameoutput = "noSBF",
+  parameter_colnames_to_keep_fact = colnames_to_keep_report
+)
 # 
 # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
 #   list(species_label = c(
@@ -460,3 +544,20 @@ for (sa in c("all", "IATTC", "ICCAT", "IOTC", "WCPFC", "CCSBT")) {
 #   height = 12,
 #   dpi = 300
 # )
+
+
+config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+  list(species_label = c(
+    "Silky shark"
+  ), source_authority = c("IATTC"))
+
+CWP.dataset::summarising_step(
+  main_dir = tunaatlas_level2_catch_path,
+  connectionDB = con_level2,
+  config = config_level2,
+  sizepdf = "short",
+  savestep = FALSE,
+  usesave = FALSE,
+  source_authoritylist = "all",
+  nameoutput = "SilkyIATTConlynoSKH"
+)
