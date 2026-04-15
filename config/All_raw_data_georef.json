@@ -17,7 +17,7 @@
     "entities": [
       {
         "handler": "csv",
-        "source": "config/geoflow_entities_tuna_datasets - Georef_data_2026_noIOTC_ICCAT_oneline.csv"
+        "source": "config/geoflow_entities_tuna_datasets - Georef_data_2026.csv"
       }
     ],
     "contacts" : []

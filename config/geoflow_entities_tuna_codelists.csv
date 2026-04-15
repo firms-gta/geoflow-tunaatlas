@@ -1,0 +1,631 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Format,Relation,Rights,Provenance,Data
+id:fishingfleet_firms,title:Fishing fleet,"abstract:A group of fishing vessels authorized to operate in a t-RFMO convention area / area of competence, and whose fishing operations and catches of tuna and tuna-like species are responsibility of, and accounted for by a political entity or sub-entity recognized by the corresponding t-RFMO. To be noted that the actual occurrences of the Fishing fleet concept do not necessarily refer or correspond to a recognized country (e.g.: EUR - European Union, FRAT – French territories), nor to a distinct member / contracting party / cooperating, non-contracting party of a t-RFMO (e.g.: EU,ESP - EU (Spain), TWN – Chinese Taipei / Taiwan province of China – for some t-RFMOs). The proposed list of fishing fleet codes also includes a generic reference that applies to fishing operations and catches from unidentified sources (e.g.: NEI - not elsewhere identified).
+",,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process:The code list was prepared by the five t-RFMOs, in collaboration with FAO and the CWP adhoc reference harmonization task group, and made available through the repository https://github.com/fdiwg/fdi-codelists ._
+process:The code list was integrated into the Tuna atlas database.","source:cl_fishing_fleet.csv@https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_fleet.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishingfleet_firms_
+uploadType:dbtable"
+id:isscfg_revision_1,title:International Standard Classification of Fishing Gears (ISSCFG Rev.1),"abstract:The International Standard Statistical Classification of Fishing Gear (ISSCFG) was originally adopted during the 10th Session of the CWP (Madrid, 22-29 July 1980). The revised Classification - ISSCFG Revision 1 (Annex M II) - has been endorsed and adopted for CWP Member's implementation by the CWP at its 25th Session (Rome, 23-26 February 2016).
+",,"owner:FAO-HQ@fao.org,luca.garibaldi@fao.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CWP-Secretariat@fao.org_
+principalInvestigator:stefania.savore@fao.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@https://www.fao.org/cwp-on-fishery-statistics/handbook/capture-fisheries-statistics/fishing-gear-classification,,"statement:Data management workflow_
+process: The code list was downloaded at https://www.fao.org/3/bt988e/bt988e.pdf_
+process: The code list was transformed in CSV format, and made available through the repository https://github.com/fdiwg/fdi-codelists _
+process: The code list was integrated into the Tuna atlas database.","source:cl_isscfg_gear.csv@https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cwp/cl_isscfg_gear.csv_
+sourceType:csv_
+uploadSource:gear_type.isscfg_revision_1_
+uploadType:dbtable"
+id:species_asfis,title:ASFIS List of Species for Fishery Statistics Purposes,"abstract:""The FAO Fisheries and Aquaculture Statistics and Information Branch (FIAS) collates world capture and aquaculture production statistics at either the species, genus, family or higher taxonomic levels in 2 269 statistical categories (2015 data) referred to as species items.
+
+ASFIS list of species includes 13 417 species items selected according to their interest or relation to fisheries and aquaculture. For each species item stored in a record, codes (ISSCAAP group, taxonomic and 3-alpha) and taxonomic information (scientific name, author(s), family, and higher taxonomic classification) are provided. An English name is available for most of the records, and about one third of them have also a French and Spanish name. Information is also provided about the availability of fishery production statistics on the species item in the FAO databases.""
+",,"owner:FAO-HQ@fao.org,luca.garibaldi@fao.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CWP-Secretariat@fao.org_
+principalInvestigator:stefania.savore@fao.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@http://www.fao.org/fishery/collection/asfis/en,,"statement:Data management workflow_
+process: The code list was downloaded on the -- at this url: http://www.fao.org/fishery/static/ASFIS/ASFIS_sp.zip reached through this web page: http://www.fao.org/fishery/collection/asfis/en_
+process: The code list was transformed in CSV format, and made available through the repository https://github.com/fdiwg/fdi-codelists ._
+process: The code list was integrated into the Tuna atlas database.","source:cl_asfis_species.csv@https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv_
+sourceType:csv_
+uploadSource:species.species_asfis_
+uploadType:dbtable"
+id:cwp_grid,title:Areal grid system recommended by the Coordinating Working Party on Fishery Statistics (CWP).,"abstract:Recognizing the need for areal breakdown, the CWP has suggested that a graticule-based system could be used throughout the globe and has recommended that the quadrangles (also called rectangles or squares) be coded and identified according to the following standard rules:
+a) the identification of the latitude should be given before that of the longitude;
+b) each quadrangle (rectangle) should be identified by its graticule-based boundaries as defined by the latitude and the longitude meeting in its corner nearest to the point where the Equator is crossed by the Greenwich Meridian;
+c) the foregoing data on latitude and longitude should be preceded by (i) the first digit identifying the size of the quadrangle and then by (ii) a second digit indicating the quadrant of the globe in which the quadrangle is located.
+More detail here: https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133
+",,"owner:FAO-HQ@fao.org_
+metadata:emmanuel.blondel@fao.org_
+pointOfContact:CWP-Secretariat@fao.org_
+principalInvestigator:CWP-Secretariat@fao.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org",,codelist,eng,,,,http:website[Source website]@https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133,,"statement:Data management workflow_
+process: The areal grid was built following the CWP recommendations available here https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133 ._
+process: The code list was integrated into the Tuna atlas database.
+","source:cl_areal_grid.zip@https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip_
+sourceType:csv_
+uploadSource:area.cwp_grid_
+uploadType:dbtable"
+id:cwp_grid_erased,title:Areal grid system recommended by the Coordinating Working Party on Fishery Statistics (CWP). Erased by coastline.,"abstract:Recognizing the need for areal breakdown, the CWP has suggested that a graticule-based system could be used throughout the globe and has recommended that the quadrangles (also called rectangles or squares) be coded and identified according to the following standard rules:
+a) the identification of the latitude should be given before that of the longitude;
+b) each quadrangle (rectangle) should be identified by its graticule-based boundaries as defined by the latitude and the longitude meeting in its corner nearest to the point where the Equator is crossed by the Greenwich Meridian;
+c) the foregoing data on latitude and longitude should be preceded by (i) the first digit identifying the size of the quadrangle and then by (ii) a second digit indicating the quadrant of the globe in which the quadrangle is located.
+More detail here: https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133
+",,"owner:FAO-HQ@fao.org_
+metadata:emmanuel.blondel@fao.org_
+pointOfContact:CWP-Secretariat@fao.org_
+principalInvestigator:CWP-Secretariat@fao.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org",,codelist,eng,,,,http:website[Source website]@https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133,,"statement:Data management workflow_
+process: The areal grid was built following the CWP recommendations available here https://www.fao.org/cwp-on-fishery-statistics/handbook/general-concepts/main-water-areas/fr/#c737133 ._
+process: The code list was integrated into the Tuna atlas database.
+","source:cl_areal_grid_erased.zip@https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid_erased.zip_
+sourceType:csv_
+uploadSource:area.cwp_grid_erased_
+uploadType:dbtable"
+id:areas_conversion_factors_numtoweight_ird,Conversion factors areas (conversion from number to weight) used in the IRD Tuna Atlas,"abstract:Areas used for the conversion of catches from number of fishes harvested to weigth. These areas are known to have quite distinct average weights.
+For additional information, see: http://mdst-macroes.ird.fr/documentation/databases/Sardara/docSardara/doc_processes/Weight_computation_manu.odt",,"owner:ird@ird.fr,paul.taconet@ird.fr;alain.fonteneau@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list was integrated into the Tuna atlas database","source:areas_conversion_factors_numtoweight_ird.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/ird/areas_conversion_factors_numtoweigth_ird.csv_
+sourceType:csv_
+uploadSource:area.areas_conversion_factors_numtoweight_ird_
+uploadType:dbtable"
+id:IOTC_areas,Indian Ocean Main Areas defined by the Indian Ocean Tuna Commission (IOTC),"abstract:Reference codes modelling the two main areas in which the Indian Ocean is split, i.e., western and eastern Indian Ocean. The geographic boundaries of the Convention Area, including its sub-areas, sampling areas, stock areas, and management areas as currently defined for each species, are available as layers for analysis and visualization. These layers are exported in geopackage and shapefile formats, making them easily accessible through GIS tools, including free and open-source software such as QGIS.
+",,"owner:IOTC-Secretariat@iotc.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:IOTC-Secretariat@iotc.org_
+principalInvestigator:IOTC-Secretariat@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The geographic layer was downloaded from the IOTC reference data repository._
+process: The layer describes the two main areas in which the Indian Ocean is split, namely the western and eastern Indian Ocean._
+process: The layer was integrated into the Tuna atlas database
+","source:IO_MAIN_AREAS_1.0.0_SHP.zip@https://data.iotc.org/reference/latest/domain/admin/shapefiles/IO_MAIN_AREAS_1.0.0_SHP.zip_
+sourceType:shapefile_
+uploadSource:area.IOTC_areas_
+uploadType:dbtable"
+id:ICCAT_subareas,ICCAT GIS subareas and geographic layers of the Convention Area,"abstract:The International Commission for the Conservation of Atlantic Tunas is responsible for the conservation of tunas and tuna-like species in the Atlantic Ocean and adjacent seas. To support this mission, ICCAT employs a Geographic Information System (GIS) to collect, store, analyze, and visualize geographic data related to these species. This system enhances the understanding of the distribution, habitat, and migratory patterns of tunas and other highly migratory species in the Atlantic, enabling more informed decision-making for the management and conservation of marine resources.
+",,"owner:ICCAT-Secretariat@iccat.int_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:ICCAT-Secretariat@iccat.int_
+principalInvestigator:ICCAT-Secretariat@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The geographic layer was downloaded from the ICCAT GIS repository._
+process: The layer contains the spatial definitions used by ICCAT for the Convention Area and related subareas used for analysis and visualization._
+process: Licensing and terms of use follow CC BY-NC-SA 4.0 IGO._
+process: The layer was integrated into the Tuna atlas database
+","source:ICCAT_gis.rar@https://www.iccat.int/Documents/Gis/ICCAT_gis.rar_
+sourceType:shapefile_
+uploadSource:area.ICCAT_subareas_
+uploadType:dbtable
+featureType:iccat_subareas"
+id:catchtype_ccsbt,Code list for types of catch used by CCSBT,"abstract:Code list for types of catches used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). Presently, the CCSBT does not have any catch type code list, since the public datasets do not contain a catch type stratification. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list was constitued. _
+process: The code list was integrated into the Tuna atlas database
+","source:cl_catchtype_ccsbt.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchtype_ccsbt.csv_
+sourceType:csv_
+uploadSource:measurement_type.catchtype_ccsbt_
+uploadType:dbtable"
+id:catchtype_iattc,Code list for types of catch used by IATTC,"abstract:Code list for types of catches used by the Inter-American Tropical Tuna Commission (IATTC). Presently, the IATTC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list was constitued. _
+process: The code list was integrated into the Tuna atlas database
+","source:cl_catchtype_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchtype_iattc.csv_
+sourceType:csv_
+uploadSource:measurement_type.catchtype_iattc_
+uploadType:dbtable"
+id:catchtype_iccat,Code list for types of catch used by ICCAT,"abstract:Code list for types of catches used by the International Commission for the Conservation of Atlantic Tunas (ICCAT). This code list was built using as input the ICCAT nominal catch (task 1) dataset.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The ICCAT nominal catch (task) public domain datasets was downloaded._
+process: The codes and labels used for types of catch in this dataset were identified. A code list for types of catch was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_catchtype_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchtype_iccat.csv_
+sourceType:csv_
+uploadSource:measurement_type.catchtype_iccat_
+uploadType:dbtable"
+id:catchtype_iotc,Code list for types of catch used by IOTC,"abstract:Code list for types of catches used by the Indian Ocean Tuna Commission (IOTC). Presently, the IOTC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list was constitued. _
+process: The code list was integrated into the Tuna atlas database
+","source:cl_catchtype_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchtype_iotc.csv_
+sourceType:csv_
+uploadSource:measurement_type.catchtype_iotc_
+uploadType:dbtable"
+id:catchtype_tunaatlas,Code list for types of catch used in the IRD Tuna Atlas,"abstract:Code list for types of catch used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code lists used by the five tuna RFMOs for types of catch were collated._
+process: Based on these code lists, a single code list gathering all the types of catch used by the tuna RFMOs was created._
+process: The code list was integrated into the Tuna atlas database.","source:cl_catchtype.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchtype.csv_
+sourceType:csv_
+uploadSource:measurement_type.catchtype_tunaatlas_
+uploadType:dbtable"
+id:catchtype_wcpfc,Code list for types of catch used by WCPFC,"abstract:Code list for types of catches used by the Western and Central Pacific Fisheries Commission (WCPFC). Presently, WCPFC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data  within the Sardara database.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list was constitued. _
+process: The code list was integrated into the Tuna atlas database
+","source:cl_catchtype_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchtype_wcpfc.csv_
+sourceType:csv_
+uploadSource:measurement_type.catchtype_wcpfc_
+uploadType:dbtable"
+id:catchunit_rfmos,Code list for units of catch used in the IRD Tuna Atlas,"abstract:Code list for units of catches used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code lists used by the five tuna RFMOs for units of catch were collated._
+process: Based on these code lists, a single code list gathering the unique combination of the units of catch used by the tuna RFMOs was created._
+process: The code list was integrated into the Tuna atlas database.","source:cl_catchunit_rfmos.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_catchunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.catchunit_rfmos_
+uploadType:dbtable"
+id:effortunit_ccsbt,Code list for units of fishing effort used by CCSBT,"abstract:Code list for units of fishing effort used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). This code list was built using as input various CCSBT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The CCSBT public domain datasets were collated._
+process: The codes and labels used for units of efforts in these datasets were identified. A code list for units of efforts was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_effortunit_ccsbt.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_effortunit_ccsbt.csv_
+sourceType:csv_
+uploadSource:measurement_unit.effortunit_ccsbt_
+uploadType:dbtable"
+id:effortunit_iattc,Code list for units of fishing effort used by IATTC,"abstract:Code list for units of fishing effort used by the Inter-American Tropical Tuna Commission (IATTC). This code list was built using as input various IATTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IATTC public domain datasets were collated._
+process: The codes and labels used for units of efforts in these datasets were identified. A code list for units of efforts was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_effortunit_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_effortunit_iattc.csv_
+sourceType:csv_
+uploadSource:measurement_unit.effortunit_iattc_
+uploadType:dbtable"
+id:effortunit_iccat,Code list for units of fishing effort used by ICCAT,"abstract:Code list for units of fishing effort used by the International Commission for the Conservation of Atlantic Tunas (ICCAT). This code list was built using as input both the code list available in the ICCAT website and the ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@https://www.iccat.int/en/Stat_Codes.htm,,"statement:Data management workflow_
+process: The code list of units of efforts released by ICCAT and available in the ICCAT website at this url: https://www.iccat.int/en/Stat_Codes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for units of efforts used in the ICCAT public domain datasets, the latter were collated._
+process: The codes and labels used for species in these datasets were identified. A code list for species was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_effortunit_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_effortunit_iccat.csv_
+sourceType:csv_
+uploadSource:measurement_unit.effortunit_iccat_
+uploadType:dbtable"
+id:effortunit_iotc,Code list for units of fishing effort used by IOTC,"abstract:Code list for units of fishing effort used by the Indian Ocean Tuna Commission (IOTC). This code list was built using as input various IOTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IOTC public domain datasets were collated._
+process: The codes and labels used for units of efforts in these datasets were identified. A code list for units of efforts was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_effortunit_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_effortunit_iotc.csv_
+sourceType:csv_
+uploadSource:measurement_unit.effortunit_iotc_
+uploadType:dbtable"
+id:effortunit_rfmos,Code list for units of fishing effort used in the IRD Tuna Atlas,"abstract:Code list for units of fishing effort used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas. This code list is the unique combination of the codes of units of fishing effort coming from the 5 tuna RFMOs (one single code was kept for each unit of fishing effort to create this code list).
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: All the codes of units of fishing effort coming from the  tuna RFMOs were collated._
+process: The unique combination of these codes was manually extracted, i.e. one single code was kept for each unit of fishing effort. _
+process: The resulting CSV file was integrated into the Tuna atlas database.","source:cl_effortunit_rfmos.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_effortunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.effortunit_rfmos_
+uploadType:dbtable"
+id:effortunit_wcpfc,Code list for units of fishing effort used in by WCPFC,"abstract:Code list for units of fishing effort used by the Western and Central Pacific Fisheries Commission (WCPFC). This code list was built using as input various WCPFC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The WCPFC public domain datasets were collated._
+process: The codes and labels used for units of efforts in these datasets were identified. A code list for units of efforts was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_effortunit_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_effortunit_wcpfc.csv_
+sourceType:csv_
+uploadSource:measurement_unit.effortunit_wcpfc_
+uploadType:dbtable"
+id:flag_ccsbt,Code list for flags used by CCSBT,"abstract:Code list for flags used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). This code list was built using as input various CCSBT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@https://www.ccsbt.org/en/content/sbt-data,,"statement:Data management workflow_
+process: The CCSBT public domain datasets were collated._
+process: The codes and labels used for flags in these datasets were identified. A code list for flags was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_flag_ccsbt.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_flag_ccsbt.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.flag_ccsbt_
+uploadType:dbtable"
+id:flag_iattc,Code list for flags used by IATTC,"abstract:Code list for flags used by the Inter-American Tropical Tuna Commission (IATTC). This code list was downloaded in the the IATTC website.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@http://www.iattc.org/Standard-Codes/StdFlgCodes1.htm,,"statement:Data management workflow_
+process: The code list of flags released by IATTC and available in the IATTC website at this url: http://www.iattc.org/Standard-Codes/StdFlgCodes.htm was downloaded._
+process: The code list was integrated into the Tuna atlas database
+","source:cl_flag_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_flag_iattc.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.flag_iattc_
+uploadType:dbtable"
+id:flag_iccat,Code list for flags used by ICCAT in catch-and_effort (task2) datasets,"abstract:Code list for flags used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) in the catch-and-effort (task 2) datasets. This code list was built using as input both the code list available in the ICCAT website and the ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@https://www.iccat.int/en/Stat_Codes.htm,,"statement:Data management workflow_
+process: The code list of flags released by ICCAT and available in the ICCAT website at this url: https://www.iccat.int/en/Stat_Codes.htm was downloaded._
+process: The ICCAT public domain catch-and-effort (task) was downloaded._
+process: The codes and labels used for flags in these datasets were identified. A code list for flags was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_flag_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_flag_iccat.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.flag_iccat_
+uploadType:dbtable"
+id:flag_iccat_from_ncandcas,Code list for flags used by ICCAT in catch-and_effort by fishing mode (task2 catch/effort by operation mode) and nominal catch (task1) datasets,"abstract:Code list for flags used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) in the nominal catch (task 1), catch-at-size and catch-and-effort (task2) by fishing mode datasets. This code list was built using as input both the code list available in the ICCAT website and the ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list of flags released by ICCAT and available in the ICCAT website at this url: https://www.iccat.int/en/Stat_Codes.htm was downloaded._
+process: The ICCAT public domain datasets (nominal catch and catch-and-effort by fishing mode) were downloaded._
+process: The codes and labels used for flags in these datasets were identified. A code list for flags was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_flag_iccat_from_ncandcas.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_flag_iccat_from_ncandcas.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.flag_iccat_from_ncandcas_
+uploadType:dbtable"
+id:flag_iotc,Code list for flags used by IOTC,"abstract:Code list for flags used by the Indian Ocean Tuna Commission (IOTC). This code list was built using as input various IOTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IOTC public domain datasets were collated._
+process: The codes and labels used for flags in these datasets were identified. A code list for flags was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_flag_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_flag_iotc.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.flag_iotc_
+uploadType:dbtable"
+id:flag_wcpfc,Code list for flags used by WCPFC,"abstract:Code list for flags used by the Western and Central Pacific Fisheries Commission (WCPFC). This code list was built using as input various WCPFC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The WCPFC public domain datasets were collated._
+process: The codes and labels used for flags in these datasets were identified. A code list for flags was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_flag_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_flag_wcpfc.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.flag_wcpfc_
+uploadType:dbtable"
+id:gear_ccsbt,Code list for fising gears used by CCSBT,"abstract:Code list for units of efforts used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). This code list was built using as input various CCSBT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The CCSBT public domain datasets were collated._
+process: The codes and labels used for fising gears in these datasets were identified. A code list for gear was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_gear_type_ccsbt.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_gear_type_ccsbt.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_ccsbt_
+uploadType:dbtable"
+id:gear_iattc,Code list for fishing gears used by IATTC,"abstract:Code list for gears used by the Inter-American Tropical Tuna Commission (IATTC). This code list was built using as input both the code list available in the IATTC website and the IATTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list of fishing gears released by IATTC and available in the IATTC website at this url: http://www.iattc.org/Standard-Codes/StdGearCodes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for fishing gears used in the IATTC public domain datasets, the latter were collated._
+process: The codes and labels used for fishing gears in these datasets were identified. A code list for gear was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_gear_type_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_gear_type_iattc.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_iattc_
+uploadType:dbtable"
+id:gear_iccat,Code list for gears used by ICCAT,"abstract:Code list for gears used by the International Commission for the Conservation of Atlantic Tunas (ICCAT). This code list was built using as input both the code list available in the ICCAT website and the ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list of gears released by ICCAT and available in the ICCAT website at this url: https://www.iccat.int/en/Stat_Codes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for gears used in the ICCAT public domain datasets, the latter were collated._
+process: The codes and labels used for gears in these datasets were identified. A code list for gears was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_gear_type_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_gear_type_iccat.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_iccat_
+uploadType:dbtable"
+id:gear_iotc,Code list for gears used by IOTC,"abstract:Code list for gears used by the Indian Ocean Tuna Commission (IOTC). This code list was built using as input various IOTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IOTC public domain datasets were collated._
+process: The codes and labels used for gears in these datasets were identified. A code list for gear was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_gear_type_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_gear_type_iotc.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_iotc_
+uploadType:dbtable"
+id:gear_wcpfc,Code list for fishing gears used by WCPFC,"abstract:Code list for fishing gears used by the Western and Central Pacific Fisheries Commission (WCPFC). This code list was built using as input various WCPFC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The WCPFC public domain datasets were collated._
+process: The codes and labels used for fishing gears in these datasets were identified. A code list for gear was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_gear_type_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_gear_type_wcpfc.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_wcpfc_
+uploadType:dbtable"
+id:geargroup_iattc,Codes used for groups of gears in IATTC,"abstract:Code list for groups of gears used by the Inter-American Tropical Tuna Commission (IATTC). This code list was built using as input both the code list available in the IATTC website and the IATTC public domain datasets. Since IATTC does not use groups of gears, the code list used for groups of gears is the same as the one used for gears.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list of fishing gears released by IATTC and available in the IATTC website at this url: http://www.iattc.org/Standard-Codes/StdGearCodes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for fishing gears used in the IATTC public domain datasets, the latter were collated._
+process: The codes and labels used for fishing gears in these datasets were identified. A code list for gears was reconstitued. Since IATTC does not use groups of gears, the code list used for groups of gears is the same as the one used for gears._
+process: The code list was integrated into the Tuna atlas database","source:cl_geargroup_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_geargroup_iattc.csv_
+sourceType:csv_
+uploadSource:gear_type.geargroup_iattc_
+uploadType:dbtable"
+id:geargroup_iccat,Codes used for groups of gears in ICCAT,"abstract:Code list for groups of gears used by the International Commission for the Conservation of Atlantic Tunas (ICCAT). This code list was built using as input both the code list available in the ICCAT website and the ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list of gears released by ICCAT and available in the ICCAT website at this url: https://www.iccat.int/en/Stat_Codes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for groups of gears used in the ICCAT public domain datasets, the latter were collated._
+process: The codes and labels used for groups of gears in these datasets were identified. A code list for groups of gears was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_geargroup_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_geargroup_iccat.csv_
+sourceType:csv_
+uploadSource:gear_type.geargroup_iccat_
+uploadType:dbtable"
+id:geargroup_iotc,Codes used for groups of gears in IOTC,"abstract:Code list for groups of gears used by the Indian Ocean Tuna Commission (IOTC). This code list was built using as input various IOTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IOTC public domain datasets were collated._
+process: The codes and labels used for groups of gears in these datasets were identified. A code list for gear was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_geargroup_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_geargroup_iotc.csv_
+sourceType:csv_
+uploadSource:gear_type.geargroup_iotc_
+uploadType:dbtable"
+id:geargroup_tunaatlas,Code list for groups of gears used in the IRD Tuna Atlas,"abstract:Code list for groups of gears used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The groups of gears were determined._
+process: The code list was integrated into the Tuna atlas database.
+","source:cl_geargroup.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_geargroup.csv_
+sourceType:csv_
+uploadSource:gear_type.geargroup_tunaatlas_
+uploadType:dbtable"
+id:geargroup_wcpfc,Codes used for groups of gears in WCPFC,"abstract:Code list for groups of gears used by the Western and Central Pacific Fisheries Commission (WCPFC). This code list was built using as input WCPFC public domain datasets. Since WCPFC does not use groups of gears, the code list used for groups of gears is the same as the one used for gears.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The WCPFC public domain datasets were collated._
+process: The codes and labels used for fishing gears in these datasets were identified. A code list for gears was reconstitued. Since WCPFC does not use groups of gears, the code list used for groups of gears is the same as the one used for gears._
+process: The code list was integrated into the Tuna atlas database.","source:cl_geargroup_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_geargroup_wcpfc.csv_
+sourceType:csv_
+uploadSource:gear_type.geargroup_wcpfc_
+uploadType:dbtable"
+id:schooltype_ccsbt,Code list for types of schools used by CCSBT,"abstract:Code list for types of schools used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). This code list was built using as input various CCSBT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The CCSBT public domain datasets were collated._
+process: The codes and labels used for types of schools in these datasets were identified. A code list for types of schools was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_fishing_mode_ccsbt.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_fishing_mode_ccsbt.csv_
+sourceType:csv_
+uploadSource:fishing_mode.schooltype_ccsbt_
+uploadType:dbtable"
+id:schooltype_iattc,Code list for types of schools used by IATTC,"abstract:Code list for types of schools used by the Inter-American Tropical Tuna Commission (IATTC). This code list was built using as input various IATTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IATTC public domain catch-and-effort were downloaded._
+process: The codes and labels used for types of schools in these datasets were identified. A code list for types of school was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_fishing_mode_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_fishing_mode_iattc.csv_
+sourceType:csv_
+uploadSource:fishing_mode.schooltype_iattc_
+uploadType:dbtable"
+id:schooltype_iccat,Code list for types of schools used by ICCAT,"abstract:Code list for types of schools used by the International Commission for the Conservation of Atlantic Tunas (ICCAT). This code list was built using as input various ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The ICCAT public domain catch-and-effort by fishing mode (Task II catch/effort by operation mode [Fad/Free school] (only tropicals)) was downloaded._
+process: The codes and labels used for types of schools in these datasets were identified. A code list for types of school was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_fishing_mode_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_fishing_mode_iccat.csv_
+sourceType:csv_
+uploadSource:fishing_mode.schooltype_iccat_
+uploadType:dbtable"
+id:schooltype_iotc,Code list for types of schools used by IOTC,"abstract:Code list for types of schools used by the Indian Ocean Tuna Commission (IOTC). This code list was built using as input various IOTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IOTC public domain datasets were collated._
+process: The codes and labels used for types of schools in these datasets were identified. A code list for types of schools was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_fishing_mode_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_fishing_mode_iotc.csv_
+sourceType:csv_
+uploadSource:fishing_mode.schooltype_iotc_
+uploadType:dbtable"
+id:schooltype_rfmos,Code list for types of schools used in the IRD Tuna Atlas,"abstract:Code list for types of schools used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code lists used by the five tuna RFMOs for types of schools were collated._
+process: Based on these code lists, a single code list gathering all the types of schools used by the tuna RFMOs was created._
+process: The code list was integrated into the Tuna atlas database.","source:cl_fishing_mode.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_fishing_mode.csv_
+sourceType:csv_
+uploadSource:fishing_mode.schooltype_rfmos_
+uploadType:dbtable"
+id:schooltype_wcpfc,Code list for types of schools used by WCPFC,"abstract:Code list for units of efforts used by the Western and Central Pacific Fisheries Commission (WCPFC). This code list was built using as input various WCPFC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@https://www.wcpfc.int/doc/purse-seine-data-grouped-5x5-and-month,,"statement:Data management workflow_
+process: The WCPFC public domain datasets were collated._
+process: The codes and labels used for types of schools in these datasets were identified. A code list for types of schools was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_fishing_mode_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_fishing_mode_wcpfc.csv_
+sourceType:csv_
+uploadSource:fishing_mode.schooltype_wcpfc_
+uploadType:dbtable"
+id:sex_rfmos,Codes used for sex of the fishes used in the IRD Tuna Atlas,"abstract:Code list for sex of the fishes used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code lists (if any) used by the five tuna RFMOs for sex of the fishes were collated. This dimension is used in the catch-at-size datasets._
+process: Based on these code lists, a single code list gathering the unique combination of the sex of the fishes used by the tuna RFMOs was created._
+process: The code list was integrated into the Tuna atlas database.","source:cl_sex_rfmos.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_sex_rfmos.csv_
+sourceType:csv_
+uploadSource:sex.sex_rfmos_
+uploadType:dbtable"
+id:source_authority,Code list for RFMOs names used in the IRD Tuna Atlas,"abstract:Code list for tuna Regional Fisheries Management Organisations used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The code list was created on the Tuna atlas database.","source:cl_source_authority.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_source_authority.csv_
+sourceType:csv_
+uploadSource:source.source_authority_
+uploadType:dbtable"
+id:species_ccsbt,Code list for species used by CCSBT,"abstract:Code list for species used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). This code list was built using as input various CCSBT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:CMillar@ccsbt.org_
+principalInvestigator:CMillar@ccsbt.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The CCSBT public domain datasets were collated._
+process: The codes and labels used for species in these datasets were identified. A code list for species was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_species_ccsbt.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_species_ccsbt.csv_
+sourceType:csv_
+uploadSource:species.species_ccsbt_
+uploadType:dbtable"
+id:species_iattc,Code list for species used by IATTC,"abstract:Code list for species used by the Inter-American Tropical Tuna Commission (IATTC). This code list was built using as input both the code list available in the IATTC website and the IATTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@http://www.iattc.org/Standard-Codes/StdSpeciesCodes1.htm,,"statement:Data management workflow_
+process: The code list of species released by IATTC and available in the IATTC website at this url: http://www.iattc.org/Standard-Codes/StdSpeciesCodes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for species used in the IATTC public domain datasets, the latter were collated._
+process: The codes and labels used for species in these datasets were identified. A code list for species was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_species_iattc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_species_iattc.csv_
+sourceType:csv_
+uploadSource:species.species_iattc_
+uploadType:dbtable"
+id:species_iccat,Code list for species used by ICCAT,"abstract:Code list for species used by the International Commission for the Conservation of Atlantic Tunas (ICCAT). This code list was built using as input both the code list available in the ICCAT website and the ICCAT public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;carlos.palma@iccat.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:info@iccat.int_
+principalInvestigator:carlos.palma@iccat.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,http:website[Source website]@https://www.iccat.int/en/Stat_Codes.htm,,"statement:Data management workflow_
+process: The code list of species released by ICCAT and available in the ICCAT website at this url: https://www.iccat.int/en/Stat_Codes.htm was downloaded._
+process: Since the codes in this code list does not englobe all the codes for species used in the ICCAT public domain datasets, the latter were collated._
+process: The codes and labels used for species in these datasets were identified. A code list for species was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_species_iccat.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_species_iccat.csv_
+sourceType:csv_
+uploadSource:species.species_iccat_
+uploadType:dbtable"
+id:species_iotc,Code list for species used by IOTC,"abstract:Code list for species used by the Indian Ocean Tuna Commission (IOTC). This code list was built using as input various IOTC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:secretariat@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The IOTC public domain datasets were collated._
+process: The codes and labels used for species in these datasets were identified. A code list for species was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_species_iotc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_species_iotc.csv_
+sourceType:csv_
+uploadSource:species.species_iotc_
+uploadType:dbtable"
+id:species_wcpfc,Code list for species used by WCPFC,"abstract:Code list for species used by the Western and Central Pacific Fisheries Commission (WCPFC). This code list was built using as input various WCPFC public domain datasets.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:wcpfc@wcpfc.int_
+principalInvestigator:PeterW@spc.int_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The WCPFC public domain datasets were collated._
+process: The codes and labels used for species in these datasets were identified. A code list for species was reconstitued._
+process: The code list was integrated into the Tuna atlas database","source:cl_species_wcpfc.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_species_wcpfc.csv_
+sourceType:csv_
+uploadSource:species.species_wcpfc_
+uploadType:dbtable"
+id:speciesgroup_tunaatlas,Code list for groups of species oriented for tuna fisheries used in the IRD Tuna Atlas,"abstract:Code list for groups of species oriented for tuna fisheries used in the French National Research Institute for Sustainable Development (IRD) global Tuna Atlas. This code list encompasses all the main groups of species for tuna fisheries.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr;emmanuel.chassot@ird.fr;evgeny.romanov@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,,,,,"statement:Data management workflow_
+process: The groups of species were determined._
+process: The code list was integrated into the Tuna atlas database.
+","source:cl_speciesgroup.csv@https://github.com/fdiwg/fdi-codelists/raw/main/global/firms/gta/cl_speciesgroup.csv_
+sourceType:csv_
+uploadSource:species.speciesgroup_tunaatlas_
+uploadType:dbtable"
