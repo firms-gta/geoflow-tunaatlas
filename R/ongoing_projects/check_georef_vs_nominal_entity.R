@@ -529,28 +529,52 @@ plot_georef_vs_nominal_evolution <- function(res) {
   patchwork::wrap_plots(plots, ncol = 2)
 }
 
-file_path <- "~/firms-gta/geoflow-tunaatlas/jobs/20260320105550/entities/global_catch_ird_level2_1950_2024_decrease_nei"
-res <- check_georef_vs_nominal_entity(
-  file_path,
-  steps_to_run = 1:33, use_cache = TRUE
-)
-# qs::qsave(res, "res.qs")
+# file_path <- list("~/firms-gta/geoflow-tunaatlas/jobs/20260407191950level_2_catch_2026/entities/global_catch_ird_level2_1950_2024", 
+#                   "~/firms-gta/geoflow-tunaatlas/jobs/20260407191950level_2_catch_2026/entities/global_catch_ird_level2_1950_2024_decrease_nei/")
+
+run_analysis <- function(file_path) {
+  
+  message("Processing: ", file_path)
+  
+  res <- check_georef_vs_nominal_entity(
+    file_path,
+    steps_to_run = 1:40,
+    use_cache = TRUE
+  )
+  
+  georef_sup_nom_analysis_folder <- file.path(file_path, "georef_sup_nom_analysis")
+  dir.create(georef_sup_nom_analysis_folder, recursive = TRUE, showWarnings = FALSE)
+  
+  qs::qsave(
+    res,
+    file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.qs")
+  )
+  
+  p <- plot_georef_vs_nominal_evolution(res)
+  
+  ggplot2::ggsave(
+    filename = file.path(
+      georef_sup_nom_analysis_folder,
+      "plot_georef_vs_nominal_evolution.png"
+    ),
+    plot = p,
+    width = 16,
+    height = 12,
+    dpi = 300
+  )
+  
+  return(invisible(res))
+}
+
+# results <- lapply(file_path, run_analysis)
+
+# a <- qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260407191950level_2_catch_2026/entities/global_catch_ird_level2_1950_2024_decrease_nei/georef_sup_nom_analysis/globaldataframesrecap.qs")
 # 
-
-georef_sup_nom_analysis_folder <- file.path(file_path, "georef_sup_nom_analysis/")
-dir.create(georef_sup_nom_analysis_folder, recursive = TRUE, showWarnings = FALSE)
-
-qs::qsave(res, file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.qs"))
-
-p <- plot_georef_vs_nominal_evolution(res)
-
-ggplot2::ggsave(
-  filename = file.path(georef_sup_nom_analysis_folder, "plot_georef_vs_nominal_evolution.png"),
-  plot = p,
-  width = 16,
-  height = 12,
-  dpi = 300
-)
+# first_conv <- a$all_species$source_authority_species_year_fishing_fleet_strata %>% dplyr::filter(step_rank == 2)
+# raising <- a$all_species$source_authority_species_year_fishing_fleet_strata %>% dplyr::filter(step_rank == 3)
+# 
+# t <- raising %>% 
+#   dplyr::anti_join(first_conv, by = c("source_authority", "group_species_iattc_sharks", "year", "fishing_fleet"))
 
 # readr::write_csv(res$all_species$source_authority_species_year_strata, "source_authority_species_year_strata.csv")
 # readr::write_csv(res$all_species$source_authority_species_year_fishing_fleet, "source_authority_species_year_fishing_fleet.csv")

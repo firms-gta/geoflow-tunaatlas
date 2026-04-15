@@ -142,8 +142,8 @@ compare_species_fleet_drop <- function(
 }
 
 drop_compare <- compare_species_fleet_drop(
-  data1 = iotc_nom,
-  data2 = iotc,
+  data1 = georef %>% dplyr::filter(source_authority == "IOTC"),
+  data2 = nominal_catch%>% dplyr::filter(source_authority == "IOTC"),
   name1 = "nominal",
   name2 = "georef",
   species_col = "species",
@@ -160,8 +160,8 @@ drop_compare <- compare_species_fleet_drop(
 drop_compare
 
 drop_compare <- compare_species_fleet_drop(
-  data1 = iccat_nom,
-  data2 = iccat,
+  data1 = georef %>% dplyr::filter(source_authority == "ICCAT"),
+  data2 = iccat %>% dplyr::filter(source_authority == "ICCAT"),
   name1 = "nominal",
   name2 = "georef",
   species_col = "species",
