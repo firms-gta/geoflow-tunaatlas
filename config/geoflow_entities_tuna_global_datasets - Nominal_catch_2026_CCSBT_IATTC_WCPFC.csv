@@ -1,4 +1,36 @@
 Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+id:nominal_catch_iotc_level0,title:Annual catch of tuna tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by FAO zone (IOTC level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Indian Ocean Tuna Commission (IOTC) from %temporal_extent:start% to %temporal_extent:start%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country and area (FAO areas). It corresponds to the IOTC nominal catch (task1) dataset.
+
+This dataset was downloaded on the IOTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+
+The description below is extracted from the IOTC web page where the dataset has been downloaded.
+
+Characteristics, specific issues and problems that need to be taken into account :
+
+Nominal catch datasets for stock assessments should be accessed through the dedicated meeting page for the IOTC working party.
+
+This table lists annual catches for each IOTC statistical area, by species and fishing gear made by vessels flying the flag of the reporting country in live weight equivalent. These data are aggregated by calendar year for tuna and tuna-like species and non-target species (by-catch). The data set extends back to the 1950’s when industrial longlining started in the Indian Ocean. The data are in the public domain. Nominal catches are available in spreadsheet format (Microsoft excel) both for IOTC species and sharks. Please, refer to the worksheet NOTES within the downloadable spreadsheet if you want to use this dataset.
+
+Note that the catch estimates in this data file differ from the ‘best scientific estimates’ of nominal catch used for stock assessment purposes and published on the dedicated meeting pages for each IOTC Working Party. The best scientific estimates disaggregates catches recorded under species or gear aggregates recorded in the IOTC database reported by countries, which are then assigned by species or gear when the Secretariat has access to alternate sources of information such as statistical publications, fishery bulletins or other information. For this reason, catches by individual species or gear published on the IOTC meeting pages may differ from the nominal catches available from the data file available here.
+
+Nominal catch by species and gear, by vessel flag reporting country for 1950-2016, last updated 03-11-2017. Catches for 2016 are preliminary""",,"owner:fabio.fiorellato@iotc.org_
+pointOfContact:fabio.fiorellato@iotc.org_
+publisher:FIRMS-Secretariat@fao.org_
+dsd:fabio.fiorellato@iotc.org_
+principalInvestigator:fabio.fiorellato@iotc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-10_
+access:2020-11-10",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@http://iotc.org/data/datasets_
+http:data[Source data]@https://drive.google.com/file/d/1hNoe9MOAn-IkIZH3cikzXmMZZLsklaE4/view?usp=sharing_
+http:metadata[Source metadata]@http://iotc.org/documents/nominal-catch-species-and-gear-vessel-flag-reporting-country",,"statement:Data management workflow_
+process:Data submission[""The dataset was submitted by IOTC to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/iotc_nominal_catch_firms_level0_2026-04-13.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:data_cwp_format.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
 id:nominal_catch_iattc_level0,title:Annual catch of tuna and tuna-like species in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) (IATTC level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of tuna and tuna-like species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country. It corresponds to the IATTC nominal catch (task1) dataset.
 
 This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""",,"owner:nvogel@iattc.org_
@@ -88,38 +120,6 @@ sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
 action:southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R"
-id:nominal_catch_iotc_level0,title:Annual catch of tuna tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by FAO zone (IOTC level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Indian Ocean Tuna Commission (IOTC) from %temporal_extent:start% to %temporal_extent:start%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country and area (FAO areas). It corresponds to the IOTC nominal catch (task1) dataset.
-
-This dataset was downloaded on the IOTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
-
-The description below is extracted from the IOTC web page where the dataset has been downloaded.
-
-Characteristics, specific issues and problems that need to be taken into account :
-
-Nominal catch datasets for stock assessments should be accessed through the dedicated meeting page for the IOTC working party.
-
-This table lists annual catches for each IOTC statistical area, by species and fishing gear made by vessels flying the flag of the reporting country in live weight equivalent. These data are aggregated by calendar year for tuna and tuna-like species and non-target species (by-catch). The data set extends back to the 1950’s when industrial longlining started in the Indian Ocean. The data are in the public domain. Nominal catches are available in spreadsheet format (Microsoft excel) both for IOTC species and sharks. Please, refer to the worksheet NOTES within the downloadable spreadsheet if you want to use this dataset.
-
-Note that the catch estimates in this data file differ from the ‘best scientific estimates’ of nominal catch used for stock assessment purposes and published on the dedicated meeting pages for each IOTC Working Party. The best scientific estimates disaggregates catches recorded under species or gear aggregates recorded in the IOTC database reported by countries, which are then assigned by species or gear when the Secretariat has access to alternate sources of information such as statistical publications, fishery bulletins or other information. For this reason, catches by individual species or gear published on the IOTC meeting pages may differ from the nominal catches available from the data file available here.
-
-Nominal catch by species and gear, by vessel flag reporting country for 1950-2016, last updated 03-11-2017. Catches for 2016 are preliminary""",,"owner:fabio.fiorellato@iotc.org_
-pointOfContact:fabio.fiorellato@iotc.org_
-publisher:FIRMS-Secretariat@fao.org_
-dsd:fabio.fiorellato@iotc.org_
-principalInvestigator:fabio.fiorellato@iotc.org_
-metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
-processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-11-10_
-access:2020-11-10",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@http://iotc.org/data/datasets_
-http:data[Source data]@https://drive.google.com/file/d/1hNoe9MOAn-IkIZH3cikzXmMZZLsklaE4/view?usp=sharing_
-http:metadata[Source metadata]@http://iotc.org/documents/nominal-catch-species-and-gear-vessel-flag-reporting-country",,"statement:Data management workflow_
-process:Data submission[""The dataset was submitted by IOTC to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
-process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
-process:Data export[""The dataset was exported in CSV format.""]_
-process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/iotc_nominal_catch_firms_level0.csv_
-sourceType:other_
-uploadSource:fact_tables.catch_
-uploadType:dbtable_
-action:data_cwp_format.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
 id:nominal_catch_iccat_level0,title:Annual catch of tuna tuna-like and shark species in the Atlantic Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by FAO zone (ICCAT level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the International Commission for the Conservation of Atlantic Tunas (ICCAT) from %temporal_extent:start% to %temporal_extent:start%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country and area (FAO areas). It corresponds to the ICCAT nominal catch (task1) dataset.
 
 This dataset was downloaded on the ICCAT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
@@ -143,7 +143,7 @@ http:metadata[Source metadata]@http://ICCAT.org/documents/nominal-catch-species-
 process:Data submission[""The dataset was submitted by ICCAT to the FIRMS Secretariat, according to the CWP Reference Harmonization digital implementation guidelines (standard data exchange format)""]_
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
-process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/iccat.csv_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/iccat_nominal_catch_firms_level0_20260408.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
