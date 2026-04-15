@@ -10,7 +10,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
   }
   
   #list of dataset files (from entity data sources)
-  dataset_files <- sapply(entity$data$source[2:length(entity$data$source)], function(x){ entity$getJobDataResource(config, x) })
+  dataset_files <- sapply(entity$data$source[1:length(entity$data$source)], function(x){ entity$getJobDataResource(config, x) })
   dataset_files <- sapply(
     entity$data$source[2:length(entity$data$source)],
     function(x) {
