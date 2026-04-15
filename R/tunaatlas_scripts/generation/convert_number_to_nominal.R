@@ -112,8 +112,14 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
       
       global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% left_join(georef_dataset_tons_groupped, by =strata) %>% 
         dplyr::mutate(measurement_value.y = ifelse(is.na(measurement_value.y), 0, measurement_value.y)) %>% 
-        dplyr::mutate(measurement_value_decreased_with_tons = measurement_value.x - measurement_value.y) %>% 
-        dplyr::filter(measurement_value_decreased_with_tons > 0 ) %>% 
+        dplyr::mutate(measurement_value_decreased_with_tons = measurement_value.x - measurement_value.y)
+      
+      to_high_in_georef <-  global_nominal_catch_firms_level0%>% 
+        dplyr::filter(measurement_value_decreased_with_tons < 0 )
+      saveRDS(to_high_in_georef, file.path("data",paste0(Sys.time(),"data_to_high_in_georef_for_increasing.rds")))
+      
+      global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0%>% 
+        dplyr::filter(measurement_value_decreased_with_tons >= 0 ) %>% 
         dplyr::mutate(measurement_value = measurement_value_decreased_with_tons) %>% 
         dplyr::select(-c(measurement_value.x, measurement_value.y))
       
@@ -128,7 +134,7 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
   }
   
   global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% dplyr::select(c(strata, "measurement_value")) %>% 
-    dplyr::group_by(across(-measurement_value)) %>% dplyr::summarise(measurement_value = sum(measurement_value))
+    dplyr::group_by(across(-measurement_value)) %>% dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE))
   
   georef_and_nominal_augmentation <- georef_dataset_number %>%
     dplyr::left_join(global_nominal_catch_firms_level0, by = strata) %>%
