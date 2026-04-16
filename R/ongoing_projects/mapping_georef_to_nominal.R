@@ -370,7 +370,7 @@ is_candidate_acceptable <- function(df, allow_generic_fallback = FALSE) {
   # - exact match: OK
   # - same family but different: OK
   # - nominal = 99.9: only allowed in fallback pass
-  # - different family: rejected
+  # - different family: not rejected
   # ============================================================
   if ("gear_type_georef" %in% names(df) && "gear_type_nominal" %in% names(df)) {
     
@@ -390,7 +390,7 @@ is_candidate_acceptable <- function(df, allow_generic_fallback = FALSE) {
       !nominal_generic &
       prefix_georef != prefix_nominal
     
-    ok[different_other_family] <- FALSE
+    ok[different_other_family] <- TRUE #could be, do not know FALSE
     
     if (!allow_generic_fallback) {
       ok[!same & nominal_generic] <- FALSE
@@ -619,9 +619,9 @@ propose_georef_to_nominal_mappings_clean <- function(
     # - Exception: if nominal = NEI → no penalty (neutral fallback)
     #
     # Examples:
-    # AT vs AT   → +200
-    # AT vs NEI  → 0
-    # AT vs IOTC → -1000
+    # MEX vs MEX   → +200
+    # MEX vs NEI  → 0
+    # MEX vs KOR → -1000
     # NEI vs NEI → +200
     # ============================================================
     
@@ -706,7 +706,7 @@ propose_georef_to_nominal_mappings_clean <- function(
         !df$fishing_mode_wcpfc_issue_unk_solved_nominal %in% generic_mode
       
       score[same] <- score[same] + 100
-      score[diff] <- score[diff] - 200
+      score[diff] <- score[diff] - 100 #better change this than change family of gear type
     }
     
     # ============================================================
@@ -729,9 +729,10 @@ propose_georef_to_nominal_mappings_clean <- function(
         NA_real_
       )
       
-      score <- score + ifelse(!is.na(ratio) & ratio <= 1, 10, 0)
-      score <- score - ifelse(!is.na(ratio) & ratio > 1, 50, 0)
-      score <- score - ifelse(!is.na(ratio) & ratio > 1.2, 100, 0)
+      score <- score + ifelse(!is.na(ratio) & ratio <= 1, 20, 0)
+      score <- score - ifelse(!is.na(ratio) & ratio > 1, -200, 0)
+      score <- score - ifelse(!is.na(ratio) & ratio > 1.2, -150, 0)
+      score <- score - ifelse(!is.na(ratio) & ratio > 2, -400, 0)
       
       # tiny penalty to avoid ties between equal candidates
       score <- score - ratio / 10000

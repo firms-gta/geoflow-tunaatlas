@@ -820,8 +820,8 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             idx <- source_authority == "IOTC" & out %in% c("10.9", "99.9", "99", "08.9", "08.4", "06.9")
             out[idx] <- "99.9"
             
-            # idx <- source_authority == "IOTC" & out %in% c("09.2") & fishing_fleet == "MDV"
-            # out[idx] <- "09.1"
+            idx <- out %in% c("10.9") 
+            out[idx] <- "99.9"
             
             out
           } # a voir si on garde ca ou plutot le mapping

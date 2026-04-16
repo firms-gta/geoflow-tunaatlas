@@ -132,6 +132,40 @@ preharmo_check <- check_files_from_json(preharmo_json_files)
 # 3. UTILITAIRES DB / WORKFLOW
 # =============================================================================
 
+remove_dbi_software <- function(file) {
+  wf <- jsonlite::fromJSON(file, simplifyVector = FALSE)
+  
+  if (!is.null(wf$software)) {
+    wf$software <- Filter(function(x) {
+      id <- if (is.null(x$id)) "" else x$id
+      !(
+        identical(x$software_type, "dbi") ||
+          grepl("database", id, ignore.case = TRUE)
+      )
+    }, wf$software)
+  }
+  
+  if (!is.null(wf$actions)) {
+    for (i in seq_along(wf$actions)) {
+      if (!is.null(wf$actions[[i]]$options)) {
+        wf$actions[[i]]$options$upload_to_db <- FALSE
+        wf$actions[[i]]$options$upload_to_db_public <- FALSE
+        wf$actions[[i]]$options$create_materialized_view <- FALSE
+        wf$actions[[i]]$options$add_sql_comments <- FALSE
+      }
+    }
+  }
+  
+  original_dir  <- dirname(file)
+  original_name <- tools::file_path_sans_ext(basename(file))
+  out_file <- file.path(original_dir, paste0(original_name, "_nodb.json"))
+  
+  jsonlite::write_json(wf, out_file, pretty = TRUE, auto_unbox = TRUE)
+  out_file
+}
+
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
 should_upload_to_db <- function(config) { #
   drv  <- Sys.getenv("DB_DRV")
   host <- Sys.getenv("DB_HOST")
@@ -191,19 +225,45 @@ force_upload_to_db <- function(config, action_id = "load_dataset") {
 }
 
 execute_workflow_maybe_upload <- function(file, dir = ".", rename_suffix = NULL) {
+  
+  # --------------------------------------------------
+  # 1. Test initWorkflow normal
+  # --------------------------------------------------
+  config_test <- try(
+    initWorkflow(file, handleMetadata = FALSE),
+    silent = TRUE
+  )
+  
+  use_file <- file
+  
+  if (inherits(config_test, "try-error")) {
+    message("initWorkflow failed -> retrying WITHOUT DBI software")
+    
+    use_file <- remove_dbi_software(file)
+  } else {
+    # cleanup si succès
+    unlink(config_test$job, recursive = TRUE)
+  }
+  
+  # --------------------------------------------------
+  # 2. Exécution réelle
+  # --------------------------------------------------
   out <- executeWorkflow(
-    file = file,
+    file = use_file,
     dir  = dir,
     on_initWorkflow = function(config, queue) {
       if (should_upload_to_db(config)) {
-        config$logger.info("DB reachable + context OK -> upload_to_db=TRUE for load_dataset")
+        config$logger.info("DB reachable -> enabling upload")
         force_upload_to_db(config, "load_dataset")
       } else {
-        config$logger.info("DB not reachable or context not OK -> upload_to_db unchanged")
+        config$logger.info("DB not reachable -> upload disabled")
       }
     }
   )
   
+  # --------------------------------------------------
+  # 3. rename optionnel
+  # --------------------------------------------------
   if (!is.null(rename_suffix)) {
     out <- executeAndRename(out, rename_suffix)
   }
@@ -287,6 +347,34 @@ rewrite_functions_as_rmd(raw_nominal_catch)
 rewrite_functions_as_rmd(raw_data_georef)
 rewrite_functions_as_rmd(raw_data_georef_effort)
 
+init_workflow_maybe_without_dbi <- function(file) {
+  tryCatch(
+    initWorkflow(file),
+    error = function(e) {
+      message("initWorkflow failed, retry without DBI: ", e$message)
+      
+      wf <- jsonlite::fromJSON(file, simplifyVector = FALSE)
+      
+      if (!is.null(wf$software)) {
+        wf$software <- Filter(function(x) {
+          id <- if (is.null(x$id)) "" else x$id
+          !(identical(x$software_type, "dbi") ||
+              grepl("database", id, ignore.case = TRUE))
+        }, wf$software)
+      }
+      
+      file_nodb <- file.path(
+        dirname(file),
+        paste0(tools::file_path_sans_ext(basename(file)), "_nodb.json")
+      )
+      
+      jsonlite::write_json(wf, file_nodb, pretty = TRUE, auto_unbox = TRUE)
+      
+      initWorkflow(file_nodb)
+    }
+  )
+}
+
 # =============================================================================
 # 5. CRÉATION DES DATASETS HARMONISÉS
 # =============================================================================
@@ -318,9 +406,16 @@ tunaatlas_level0_catch_path <- execute_workflow_maybe_upload(
   rename_suffix = "level_0_catch_2026"
 )
 
-config_level0 <- initWorkflow(here::here("config/catch_ird_level0_local.json"))
+gc()
+
+config_level0 <- init_workflow_maybe_without_dbi(
+  here::here("config/catch_ird_level2_local.json")
+)
+
 unlink(config_level0$job, recursive = TRUE)
+
 con_level0 <- config_level0$software$output$dbi
+if (is.null(con_level0)) con_level0 <- NULL
 
 setwd(here::here())
 CWP.dataset::summarising_step(
@@ -351,9 +446,14 @@ tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
 
 gc()
 
-config_level1 <- initWorkflow(here::here("config/catch_ird_level1_local.json"))
+config_level1 <- init_workflow_maybe_without_dbi(
+  here::here("config/catch_ird_level1_local.json")
+)
+
 unlink(config_level1$job, recursive = TRUE)
+
 con_level1 <- config_level1$software$output$dbi
+if (is.null(con_level1)) con_level1 <- NULL
 
 # ---- 5.4 CATCH LEVEL 2 ------------------------------------------------------
 
@@ -364,9 +464,14 @@ tunaatlas_level2_catch_path <- execute_workflow_maybe_upload(
 
 gc()
 
-config_level2 <- initWorkflow(here::here("config/catch_ird_level2_local.json"))
+config_level2 <- init_workflow_maybe_without_dbi(
+  here::here("config/catch_ird_level2_local.json")
+)
+
 unlink(config_level2$job, recursive = TRUE)
+
 con_level2 <- config_level2$software$output$dbi
+if (is.null(con_level2)) con_level2 <- NULL
 
 
 # =============================================================================
