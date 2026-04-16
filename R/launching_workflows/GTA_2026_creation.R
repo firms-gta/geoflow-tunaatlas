@@ -1,7 +1,7 @@
 # =============================================================================
 # 0. ENVIRONNEMENT / PACKAGES
 # =============================================================================
-source('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R')
+# source('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R')
 require(here)
 library(renv)
 renv::restore()
@@ -226,6 +226,19 @@ summarise_invalid <- function(path, con) {
   )
 }
 
+
+
+# Code list mapping et areas ----------------------------------------------
+# db_model <- execute_workflow_maybe_upload(here("config/tunaatlas_qa_dbmodel+codelists.json"), plus utilise car jarrive pas a télécharger et dezipper le .rar sur l'infrastructure
+#                                           rename_suffix = "db_model_codelists")
+# running_time_of_workflow(db_model)
+# 
+# # Second step is the loading of the mappings (around 1.2 minutes)
+# mappings <- executeWorkflow(here("config/tunaatlas_qa_mappings.json")) # pas sur que ça soit encore utile c'est plus vraiment utilisé dans la preharmo
+# mappings <- executeAndRename(mappings, "_mappings")
+# running_time_of_workflow(mappings)
+
+
 # =============================================================================
 # 4. PRÉ-HARMONISATION
 # =============================================================================
@@ -244,6 +257,7 @@ raw_nominal_catch <- execute_workflow_maybe_upload(
 )
 
 running_time_of_workflow(raw_nominal_catch)
+# source(here::here("R/tunaatlas_scripts/pre-harmonization/downloading_tinytex.R")) #long use only if you want to print reports
 summarise_invalid(raw_nominal_catch, con_preharmo) # find report in the correspoding job
 
 # ---- 4.2 GEOREFERENCED CATCH ------------------------------------------------
@@ -308,6 +322,7 @@ config_level0 <- initWorkflow(here::here("config/catch_ird_level0_local.json"))
 unlink(config_level0$job, recursive = TRUE)
 con_level0 <- config_level0$software$output$dbi
 
+setwd(here::here())
 CWP.dataset::summarising_step(
   main_dir = tunaatlas_level0_catch_path,
   connectionDB = con_level0,
@@ -317,7 +332,6 @@ CWP.dataset::summarising_step(
   usesave = FALSE,
   source_authoritylist = c("all")
 )
-
 
 # Intercaler le process mapping georef to nominal -------------------------
 
@@ -417,7 +431,6 @@ source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/check_georef_vs_nominal
 file_path <- list(paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird_level2_1950_2024")) #bof mais pas miexu pour le moment, 
 
 results <- lapply(file_path, run_analysis)
-
 
 # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
 #   list(species_label = c(
