@@ -500,12 +500,12 @@ for (sa in c("all")) {
   )
 }
 
-source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/plot_diffs_from_nominal_files.R")
+source(here::here("R/ongoing_projects/plot_diffs_from_nominal_files.R"))
 
 comparisons <- c(
-  "sums_species.csv" = "~/firms-gta/geoflow-tunaatlas/data/nominal_recap_species.csv",
-  "sums_source_auth.csv" = "~/firms-gta/geoflow-tunaatlas/data/nominal_recap_source_authority.csv",
-  "sums.csv" = "~/firms-gta/geoflow-tunaatlas/data/nominal_sums.csv"
+  "sums_species.csv" = here::here(paste0(tunaatlas_nominal_path,"/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums_species.csv")),
+  "sums_source_auth.csv" = here::here(paste0(tunaatlas_nominal_path,"/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums_source_auth.csv")),
+  "sums.csv" = here::here(paste0(tunaatlas_nominal_path,"/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums.csv"))
 )
 
 res <- plot_diffs_from_nominal_files(
@@ -531,7 +531,7 @@ ggplot2::ggsave(
   dpi = 300
 )
 
-source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/check_georef_vs_nominal_entity.R")
+source(here::here("R/ongoing_projects/check_georef_vs_nominal_entity.R"))
 
 file_path <- list(paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird_level2_1950_2024")) #bof mais pas miexu pour le moment, 
 
@@ -543,66 +543,28 @@ results <- lapply(file_path, run_analysis)
 #   ), fishing_fleet_label = "Maldives")
 
 
-for (sa in c( "ICCAT","IATTC", "IOTC", "WCPFC", "CCSBT")) {
-  CWP.dataset::summarising_step(
-    main_dir = tunaatlas_level2_catch_path,
-    connectionDB = con_level2,
-    config = config_level2,
-    sizepdf = "short",
-    savestep = FALSE,
-    usesave = FALSE,
-    source_authoritylist = sa
-    # ,
-    # parameter_colnames_to_keep_fact = colnames_to_keep_report
-  )
-}
-
-# # =============================================================================
-# # 7. RAPPORTS SPÉCIFIQUES
-# # =============================================================================
+# for (sa in c( "ICCAT","IATTC", "IOTC", "WCPFC", "CCSBT")) {
+#   CWP.dataset::summarising_step(
+#     main_dir = tunaatlas_level2_catch_path,
+#     connectionDB = con_level2,
+#     config = config_level2,
+#     sizepdf = "short",
+#     savestep = FALSE,
+#     usesave = FALSE,
+#     source_authoritylist = sa
+#     # ,
+#     # parameter_colnames_to_keep_fact = colnames_to_keep_report
+#   )
+# }
 # 
-config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-  list(species_label = c(
-    "Swordfish"), source_authority = c("WCPFC")
-  )
-
-CWP.dataset::summarising_step(
-  main_dir = tunaatlas_level2_catch_path,
-  connectionDB = con_level2,
-  config = config_level2,
-  sizepdf = "short",
-  savestep = FALSE,
-  usesave = FALSE,
-  source_authoritylist = "all",
-  nameoutput = "swo_wcpfc"
-  # parameter_colnames_to_keep_fact = colnames_to_keep_report
-)
-
-no_sbf <- setdiff(
-  unique(qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs")$species),
-  "SBF"
-)
-
-config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-  list(species = no_sbf)
-
-CWP.dataset::summarising_step(
-  main_dir = tunaatlas_level2_catch_path,
-  connectionDB = con_level2,
-  config = config_level2,
-  sizepdf = "short",
-  savestep = FALSE,
-  usesave = FALSE,
-  source_authoritylist = "all",
-  nameoutput = "noSBF",
-  parameter_colnames_to_keep_fact = colnames_to_keep_report
-)
-# 
+# # # =============================================================================
+# # # 7. RAPPORTS SPÉCIFIQUES
+# # # =============================================================================
+# # 
 # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
 #   list(species_label = c(
-#     "Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore",
-#     "Southern bluefin tuna", "Swordfish", "Tunas nei", "True tunas nei"
-#   ))
+#     "Swordfish"), source_authority = c("WCPFC")
+#   )
 # 
 # CWP.dataset::summarising_step(
 #   main_dir = tunaatlas_level2_catch_path,
@@ -612,75 +574,113 @@ CWP.dataset::summarising_step(
 #   savestep = FALSE,
 #   usesave = FALSE,
 #   source_authoritylist = "all",
-#   nameoutput = "majortunasandTUN",
+#   nameoutput = "swo_wcpfc"
+#   # parameter_colnames_to_keep_fact = colnames_to_keep_report
+# )
+# 
+# no_sbf <- setdiff(
+#   unique(qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs")$species),
+#   "SBF"
+# )
+# 
+# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+#   list(species = no_sbf)
+# 
+# CWP.dataset::summarising_step(
+#   main_dir = tunaatlas_level2_catch_path,
+#   connectionDB = con_level2,
+#   config = config_level2,
+#   sizepdf = "short",
+#   savestep = FALSE,
+#   usesave = FALSE,
+#   source_authoritylist = "all",
+#   nameoutput = "noSBF",
 #   parameter_colnames_to_keep_fact = colnames_to_keep_report
 # )
+# # 
+# # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+# #   list(species_label = c(
+# #     "Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore",
+# #     "Southern bluefin tuna", "Swordfish", "Tunas nei", "True tunas nei"
+# #   ))
+# # 
+# # CWP.dataset::summarising_step(
+# #   main_dir = tunaatlas_level2_catch_path,
+# #   connectionDB = con_level2,
+# #   config = config_level2,
+# #   sizepdf = "short",
+# #   savestep = FALSE,
+# #   usesave = FALSE,
+# #   source_authoritylist = "all",
+# #   nameoutput = "majortunasandTUN",
+# #   parameter_colnames_to_keep_fact = colnames_to_keep_report
+# # )
+# # 
+# # for (sa in c("all","IOTC", "ICCAT", "CCSBT", "WCPFC", "IATTC")) {
+# #   CWP.dataset::summarising_step(
+# #     main_dir = tunaatlas_level2_catch_path,
+# #     connectionDB = con_level2,
+# #     config = config_level2,
+# #     sizepdf = "middle",
+# #     savestep = identical(sa, "all"),
+# #     usesave = identical(sa, "all"),
+# #     source_authoritylist = sa
+# #   )
+# # }
+# # 
+# # 
+# # # Ongoing, process fisheries data by species for checks -------------------
+# # 
+# # for (entity_dir in entity_dirs) {
+# #   entity_name <- basename(entity_dir)
+# #   setwd(here::here(entity_dir))
+# #   sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
+# #   details <- file.info(sub_list_dir_2)
+# #   details <- details[with(details, order(as.POSIXct(mtime))), ]
+# #   sub_list_dir_2 <- rownames(details)
+# #   flog.info("Processed sub_list_dir_2")
+# #   sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+# #   a <- CWP.dataset::process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
+# #   combined_df <- create_combined_dataframe(a)
+# #   qflextable(combined_df)
+# #   # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
+# #   qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
+# # }
+# # 
+# # source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/check_georef_vs_nominal_entity.R")
+# # res <- check_georef_vs_nominal_entity(
+# #   "~/firms-gta/geoflow-tunaatlas/jobs/20260318080723level_2_catch_2026/entities/global_catch_ird_level2_1950_2024",
+# #   steps_to_run = 1:33
+# # )
+# # 
+# # georef_sup_nom_analysis_folder <- file.path(tunaatlas_level2_catch_path, "georef_sup_nom_analysis/")
+# # dir.create(georef_sup_nom_analysis_folder)
+# # 
+# # qs::qsave(res, file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.qs"))
+# # 
+# # p <- plot_georef_vs_nominal_evolution(res)
+# # 
+# # ggplot2::ggsave(
+# #   filename = file.path(georef_sup_nom_analysis_folder, "plot_georef_vs_nominal_evolution.png"),
+# #   plot = p,
+# #   width = 16,
+# #   height = 12,
+# #   dpi = 300
+# # )
 # 
-# for (sa in c("all","IOTC", "ICCAT", "CCSBT", "WCPFC", "IATTC")) {
-#   CWP.dataset::summarising_step(
-#     main_dir = tunaatlas_level2_catch_path,
-#     connectionDB = con_level2,
-#     config = config_level2,
-#     sizepdf = "middle",
-#     savestep = identical(sa, "all"),
-#     usesave = identical(sa, "all"),
-#     source_authoritylist = sa
-#   )
-# }
 # 
+# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
+#   list(species_label = c(
+#     "Silky shark"
+#   ), source_authority = c("IATTC"))
 # 
-# # Ongoing, process fisheries data by species for checks -------------------
-# 
-# for (entity_dir in entity_dirs) {
-#   entity_name <- basename(entity_dir)
-#   setwd(here::here(entity_dir))
-#   sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
-#   details <- file.info(sub_list_dir_2)
-#   details <- details[with(details, order(as.POSIXct(mtime))), ]
-#   sub_list_dir_2 <- rownames(details)
-#   flog.info("Processed sub_list_dir_2")
-#   sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
-#   a <- CWP.dataset::process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
-#   combined_df <- create_combined_dataframe(a)
-#   qflextable(combined_df)
-#   # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
-#   qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
-# }
-# 
-# source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/check_georef_vs_nominal_entity.R")
-# res <- check_georef_vs_nominal_entity(
-#   "~/firms-gta/geoflow-tunaatlas/jobs/20260318080723level_2_catch_2026/entities/global_catch_ird_level2_1950_2024",
-#   steps_to_run = 1:33
+# CWP.dataset::summarising_step(
+#   main_dir = tunaatlas_level2_catch_path,
+#   connectionDB = con_level2,
+#   config = config_level2,
+#   sizepdf = "short",
+#   savestep = FALSE,
+#   usesave = FALSE,
+#   source_authoritylist = "all",
+#   nameoutput = "SilkyIATTConlynoSKH"
 # )
-# 
-# georef_sup_nom_analysis_folder <- file.path(tunaatlas_level2_catch_path, "georef_sup_nom_analysis/")
-# dir.create(georef_sup_nom_analysis_folder)
-# 
-# qs::qsave(res, file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.qs"))
-# 
-# p <- plot_georef_vs_nominal_evolution(res)
-# 
-# ggplot2::ggsave(
-#   filename = file.path(georef_sup_nom_analysis_folder, "plot_georef_vs_nominal_evolution.png"),
-#   plot = p,
-#   width = 16,
-#   height = 12,
-#   dpi = 300
-# )
-
-
-config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-  list(species_label = c(
-    "Silky shark"
-  ), source_authority = c("IATTC"))
-
-CWP.dataset::summarising_step(
-  main_dir = tunaatlas_level2_catch_path,
-  connectionDB = con_level2,
-  config = config_level2,
-  sizepdf = "short",
-  savestep = FALSE,
-  usesave = FALSE,
-  source_authoritylist = "all",
-  nameoutput = "SilkyIATTConlynoSKH"
-)
