@@ -27,7 +27,22 @@
       }
     ]
   },
-  "software": [],
+  "software": [
+	{
+		"id": "my-database-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {}
+	}
+  ],
   "actions": [
     {
       "id": "Tidying_and_mapping_data",
