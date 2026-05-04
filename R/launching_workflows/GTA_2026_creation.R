@@ -286,7 +286,33 @@ summarise_invalid <- function(path, con) {
   )
 }
 
-
+init_workflow_maybe_without_dbi <- function(file) {
+  tryCatch(
+    initWorkflow(file),
+    error = function(e) {
+      message("initWorkflow failed, retry without DBI: ", e$message)
+      
+      wf <- jsonlite::fromJSON(file, simplifyVector = FALSE)
+      
+      if (!is.null(wf$software)) {
+        wf$software <- Filter(function(x) {
+          id <- if (is.null(x$id)) "" else x$id
+          !(identical(x$software_type, "dbi") ||
+              grepl("database", id, ignore.case = TRUE))
+        }, wf$software)
+      }
+      
+      file_nodb <- file.path(
+        dirname(file),
+        paste0(tools::file_path_sans_ext(basename(file)), "_nodb.json")
+      )
+      
+      jsonlite::write_json(wf, file_nodb, pretty = TRUE, auto_unbox = TRUE)
+      
+      initWorkflow(file_nodb)
+    }
+  )
+}
 
 # Code list mapping et areas ----------------------------------------------
 # db_model <- execute_workflow_maybe_upload(here("config/tunaatlas_qa_dbmodel+codelists.json"), plus utilise car jarrive pas a télécharger et dezipper le .rar sur l'infrastructure
@@ -328,7 +354,7 @@ raw_data_georef <- execute_workflow_maybe_upload(
 )
 
 running_time_of_workflow(raw_data_georef)
-summarise_invalid(raw_data_georef, con_preharmo)
+summarise_invalid(raw_data_georef, NULL)
 
 # ---- 4.3 GEOREFERENCED EFFORT -----------------------------------------------
 
@@ -346,34 +372,6 @@ source(here::here("R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rm
 rewrite_functions_as_rmd(raw_nominal_catch)
 rewrite_functions_as_rmd(raw_data_georef)
 rewrite_functions_as_rmd(raw_data_georef_effort)
-
-init_workflow_maybe_without_dbi <- function(file) {
-  tryCatch(
-    initWorkflow(file),
-    error = function(e) {
-      message("initWorkflow failed, retry without DBI: ", e$message)
-      
-      wf <- jsonlite::fromJSON(file, simplifyVector = FALSE)
-      
-      if (!is.null(wf$software)) {
-        wf$software <- Filter(function(x) {
-          id <- if (is.null(x$id)) "" else x$id
-          !(identical(x$software_type, "dbi") ||
-              grepl("database", id, ignore.case = TRUE))
-        }, wf$software)
-      }
-      
-      file_nodb <- file.path(
-        dirname(file),
-        paste0(tools::file_path_sans_ext(basename(file)), "_nodb.json")
-      )
-      
-      jsonlite::write_json(wf, file_nodb, pretty = TRUE, auto_unbox = TRUE)
-      
-      initWorkflow(file_nodb)
-    }
-  )
-}
 
 # =============================================================================
 # 5. CRÉATION DES DATASETS HARMONISÉS
@@ -409,7 +407,7 @@ tunaatlas_level0_catch_path <- execute_workflow_maybe_upload(
 gc()
 
 config_level0 <- init_workflow_maybe_without_dbi(
-  here::here("config/catch_ird_level2_local.json")
+  here::here("config/catch_ird_level0_local.json")
 )
 
 unlink(config_level0$job, recursive = TRUE)
@@ -430,18 +428,18 @@ CWP.dataset::summarising_step(
 
 # Intercaler le process mapping georef to nominal -------------------------
 
-res_map <- propose_georef_to_nominal_mappings_clean(
-  georef = georef_dataset,
-  nominal = nominal_catch,
-  id_cols = c("source_authority", "group_species_iattc_sharks", "year"),
-  candidate_cols_order = c("fishing_mode_wcpfc_issue_unk_solved", "gear_type", "geographic_identifier_nom", "fishing_fleet")
-)
+# res_map <- propose_georef_to_nominal_mappings_clean(
+#   georef = georef_dataset,
+#   nominal = nominal_catch,
+#   id_cols = c("source_authority", "group_species_iattc_sharks", "year"),
+#   candidate_cols_order = c("fishing_mode_wcpfc_issue_unk_solved", "gear_type", "geographic_identifier_nom", "fishing_fleet")
+# )
 
 # Level 1 to be added -----------------------------------------------------------------
 
 tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
   file = here::here("config/catch_ird_level1_local.json"),
-  rename_suffix = "level_2_catch_2026"
+  rename_suffix = "level_1_catch_2026"
 )
 
 gc()
@@ -454,6 +452,53 @@ unlink(config_level1$job, recursive = TRUE)
 
 con_level1 <- config_level1$software$output$dbi
 if (is.null(con_level1)) con_level1 <- NULL
+
+setwd(here::here())
+CWP.dataset::summarising_step(
+  main_dir = tunaatlas_level1_catch_path,
+  connectionDB = con_level1,
+  config = config_level1,
+  sizepdf = "short",
+  savestep = FALSE,
+  usesave = FALSE,
+  source_authoritylist = c("all")
+)
+
+
+# to do with 
+# list(
+#   fact = "catch",
+#   doilevel0 = "10.5281/zenodo.11460074",
+#   keylevel0 = "global_catch_firms_level0_harmonized.csv",
+#   forceuseofdoi = FALSE,
+#   recap_each_step = TRUE,
+#   
+#   unit_conversion_convert = TRUE,
+#   unit_conversion_csv_conversion_factor_url_iotc = NULL,
+#   unit_conversion_csv_conversion_factor_url_other = NULL,
+#   unit_conversion_codelist_geoidentifiers_conversion_factors =
+#     "areas_conversion_factors_numtoweight_ird",
+#   
+#   aggregate_on_5deg_data_with_resolution_inferior_to_5deg = FALSE,
+#   resolution_filter = NULL,
+#   filtering = NULL,
+#   gear_filter = NULL
+# )
+# tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
+#   file = here::here("config/catch_ird_level1_local.json"),
+#   rename_suffix = "level_2_catch_2026"
+# )
+# 
+# gc()
+# 
+# config_level1 <- init_workflow_maybe_without_dbi(
+#   here::here("config/catch_ird_level1_local.json")
+# )
+# 
+# unlink(config_level1$job, recursive = TRUE)
+# 
+# con_level1 <- config_level1$software$output$dbi
+# if (is.null(con_level1)) con_level1 <- NULL
 
 # ---- 5.4 CATCH LEVEL 2 ------------------------------------------------------
 
@@ -541,7 +586,7 @@ results <- lapply(file_path, run_analysis)
 #   list(species_label = c(
 #     "Skipjack tuna"
 #   ), fishing_fleet_label = "Maldives")
-
+  
 
 # for (sa in c( "ICCAT","IATTC", "IOTC", "WCPFC", "CCSBT")) {
 #   CWP.dataset::summarising_step(
