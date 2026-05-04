@@ -541,7 +541,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   }
   
   # LEVEL 1 IRD ---------------------------------------------------
-  if(DATASET_LEVEL >= 1){
+  if(DATASET_LEVEL >= 2){
     
     config$logger.info(
       "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
@@ -812,7 +812,10 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
               
           }
           
-# We create the group of sharks for IATTC has there is no detail o -------- see ~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/analyse_BIL_Sharks.R for more details
+# We create the group of sharks for IATTC has there is no detail o -------- see R/ongoing_projects/analyse_BIL_Sharks.R for more details
+          # Hardcoded ffrom data review detected by humans
+          # En cas de non mapping, on regarde les strates ou il n'y pas dambiguite car par exemple un gear existe uniquement en georef et on fait un choix facile pour cette strate
+          # (exemple mettre en 99.9), et on le code a la main. Pour le reste, on a le score qui calcule une probabilite de mapping avec une autre strate
           
           recode_gears <- function(gear_type, source_authority) {
             out <- gear_type
@@ -962,6 +965,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
                          "fishing_fleet", "geographic_identifier_nom", "fishing_mode")
           
           # a verif si group gears est vraiment utile il a pas tant lair
+          # l'iterative est plus utile parce que on remape la donnee
           dim_sets_raw <- list( # avec le cahngement majeur de gestion des inconnus georef/nom seuls les deux premières étapes sont utiles/utilisees
             full_dims,
             setdiff(full_dims, "fishing_mode"),

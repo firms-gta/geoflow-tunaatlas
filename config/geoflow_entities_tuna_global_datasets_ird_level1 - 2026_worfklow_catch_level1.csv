@@ -1,0 +1,39 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+id:global_catch_ird_level1_1950_2024,title:Global monthly catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) IRD Level 2,"abstract: This dataset compiles monthly global catch data for tuna, tuna-like species and sharks from 1950 through 2024. Catches are stratified by:
+  - month  
+  - species  
+  - gear_type ( reporting fishing_gear)  
+  - fishing_fleet (reporting country)  
+  - fishing_mode (type of school used)  
+  - geographic_identifier (1deg or 5deg grid cell)  
+  - measurement_unit i.e. unit of catch (weight or number)  
+  - measurement (catch)  
+  - measurement_type (landings or retained catches)  
+  - measurement_processing_level (original samples or processed data)  
+  - a label column is added for each field (e.g. fishing_mode, species, gear_type, etc.) to provide clear descriptive metadata  
+
+IRD Level 1 denotes the series of processing steps applied by the French National Research Institute for Sustainable Development (IRD) to generate this dataset from the primary RFMO catch-and-effort data. This dataset is based on IRD level 0 which is highly close to FIRMS level 0 and use IRD converion factors as well as IOTC ones to convert number data to tons. As those conversion factors only exists for a reduce set of species, the final level 1 only contains those species i.e major tunas and swordfish.
+
+This work aims not only to provide a biomass dataset for scientific purposes but also to identify and address data inconsistencies, improving the overall process. All code, materials, and packages used are available on the GitHub repository, firms-gta/geoflow-tunaatlas, along with detailed documentation on the impact of each specific treatment.
+Warning: This dataset is designed to enhance the understanding of fish counts at level 0. It is not suitable for accurately georeferencing data by country or fishing fleet and should not be used for studies on fishing zone legality or quota management. While it offers a georeferenced footprint of captures to reflect reported biomass more closely, significant uncertainty remains regarding the precise locations of the catches._  ",,"owner:FAO-HQ@fao.org_
+custodian:FAO-HQ@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+publisher:FIRMS-Secretariat@fao.org_
+Data structure:FIRMS-Secretariat@fao.org_
+principalInvestigator:ird@ird.fr_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
+processor:FIRMS-Secretariat@fao.org,:emmanuel.blondel@fao.org,:julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2025-05-05_
+edition:2025-05-05",dataset,eng,"SRID=4326;POLYGON((-180 -90,-180 90,180 90,180 -90,-180 -90))",2025-05-05,"thumbnail:Map overview@https://github.com/eblondel/geoflow-tunaatlas/raw/master/assets/global_catch_1deg_1m_ps_bb_firms_level0.png_
+",,"statement:Data management workflow_
+process:""Level 0 IRD data from a precedent workflow is harvested and the data in numbers is converted to tons using conversion factors.""_",,"source:./data/GTA_2026/dataoutputGTA/global_catch_ird_level0_1950_2024.csv,./data/GTA_2026/IOTC_conv_fact_mapped.csv,./data/GTA_2026/fact_conv_ird_complete_01_May_2026.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+featureType:catch_
+action:create_global_tuna_atlas_dataset.R[R generation script]@./R/tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_level1_v2025.R_
+action_option_fact:catch_
+action_option_keylevel0:global_catch_ird_level0_1950_2024.csv_
+action_option_dataset_level:1_
+action_option_unit_conversion_convert:true_
+action_option_geom_table:area.grid_area_labels_
+action_option_recap_each_step:true"
