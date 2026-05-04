@@ -1,5 +1,5 @@
 # Définition du dossier de téléchargement
-download_folder <- here::here("~/firms-gta/geoflow-tunaatlas/data")
+download_folder <- here::here("~/firms-gta/geoflow-tunaatlas/data/GTA_2026")
 if (!dir.exists(download_folder)) {
   dir.create(download_folder, recursive = TRUE)
 }

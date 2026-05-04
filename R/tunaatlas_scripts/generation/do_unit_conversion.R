@@ -1,8 +1,8 @@
 do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE, converting_dataset_mapped  = TRUE){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/extract_dataset.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/convert_units.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/list_metadata_datasets.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/map_codelist.R")
+  source(here::here("R/sardara_functions/extract_dataset.R"))
+  source(here::here("R/tunaatlas_scripts/generation/convert_units.R"))
+  source(here::here("R/sardara_functions/list_metadata_datasets.R"))
+  source(here::here("R/sardara_functions/map_codelist.R"))
   con <- config$software$output$dbi
   
   if(is.data.frame(unit_conversion_csv_conversion_factor_url)){
