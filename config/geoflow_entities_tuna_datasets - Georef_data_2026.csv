@@ -19,7 +19,7 @@ process:Data submission[""The dataset was submitted by ICCAT to the FIRMS Secret
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the current Tuna Atlas database model. However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/iccat_catch_all_1m_firms_level0_20260408.csv_
+source:./data/GTA_2026/iccat_catch_all_1m_firms_level0_20260422.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
