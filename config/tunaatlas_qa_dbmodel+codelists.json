@@ -16,8 +16,8 @@
   "metadata": {
     "entities": [
 		{
-		  "handler": "gsheet",
-		  "source": "https://docs.google.com/spreadsheets/d/12zi49c5wd9Nc7N1anv3lCM4f66L-5x3-Xsh6ZGGc-ns/edit?gid=543137458#gid=543137458"
+		  "handler": "csv",
+		  "source": "config/geoflow_entities_tuna_codelists.csv"
 		}
 	],
     "contacts" : [
@@ -43,14 +43,18 @@
 		"properties" : {
 			"user_readonly": "{{DB_USER_READONLY}}",
 			"onstart_r": {
-				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/deploy_database_model.R",
+				"script": "../R/tunaatlas_scripts/deploy_database_model.R",
+				"fun": "deploy_database_model"
+			},
+     "onstart_r": {
+				"script": "../R/tunaatlas_scripts/download_iccat_gpkg.R",
 				"fun": "deploy_database_model"
 			}
 		},
 		"properties" : {
 			"user_readonly": "{{DB_USER_READONLY}}",
 			"onend_r": {
-				"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/create_grid_views.R",
+				"script": "../R/tunaatlas_scripts/create_grid_views.R",
 				"fun": "deploy_database_model"
 			}
 		}
@@ -69,22 +73,14 @@
 		},
 		"properties" : {
 		}
-	},
-	{
-		"id": "googledrive",
-		"type": "input",
-		"software_type": "googledrive",
-		"parameters": {
-			"email": "{{GMAIL_USER}}",
-			"token": "{{GMAIL_TOKEN}}"
-		},
-		"properties" : {}
 	}
   ],
   "actions": [
 	{
 		"id": "load_codelist",
-		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_actions/load_codelist.R",
-		"run": true}
+		"script": "../R/tunaatlas_actions/load_codelist.R",
+		"run": true
+	  
+	}
   ]
 }
