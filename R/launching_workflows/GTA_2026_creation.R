@@ -333,7 +333,20 @@ init_workflow_maybe_without_dbi <- function(file) {
 # 4.3 Georeferenced effort
 # 4.4 Génération des Rmd
 
-con_preharmo <- get_workflow_con("config/All_raw_data_georef_effort.json")
+get_workflow_con <- function(config_file) {
+  config <- try(
+    initWorkflow(here::here(config_file), handleMetadata = FALSE),
+    silent = TRUE
+  )
+  
+  if (inherits(config, "try-error")) {
+    message("DB unavailable: returning NULL connection")
+    return(NULL)
+  }
+  
+  on.exit(unlink(config$job, recursive = TRUE), add = TRUE)
+  config$software$output$dbi %||% NULL
+}
 
 # ---- 4.1 NOMINAL ------------------------------------------------------------
 
