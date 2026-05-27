@@ -74,8 +74,8 @@ extract_sources_from_csv <- function(files) {
 }
 
 get_entity_csv_from_json <- function(json_file) {
-  config <- initWorkflow(here::here(json_file), handleMetadata = FALSE)
-  unlink(config$job, recursive = TRUE)
+  config <- jsonlite::fromJSON(here::here(json_file), simplifyVector = FALSE)
+  
   unique(vapply(
     Filter(function(x) identical(x$handler, "csv"), config$metadata$entities),
     function(x) x$source,
