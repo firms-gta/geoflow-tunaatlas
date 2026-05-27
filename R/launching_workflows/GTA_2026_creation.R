@@ -376,14 +376,17 @@ raw_data_georef_effort <- execute_workflow_maybe_upload(
   rename_suffix = "_raw_data_georef_effort_final"
 )
 
-running_time_of_workflow(raw_data_georef)
+running_time_of_workflow(raw_data_georef_effort)
 summarise_invalid(raw_data_georef_effort, con_preharmo)
 
 # ---- 4.4 DOC QA PRE-HARMO ---------------------------------------------------
 
 source(here::here("R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R"))
+dir.create(file.path(raw_nominal_catch, "/data")) #patch
 rewrite_functions_as_rmd(raw_nominal_catch)
+dir.create(file.path(raw_data_georef, "/data")) #patch
 rewrite_functions_as_rmd(raw_data_georef)
+dir.create(file.path(raw_data_georef_effort, "/data")) #patch
 rewrite_functions_as_rmd(raw_data_georef_effort)
 
 # =============================================================================
