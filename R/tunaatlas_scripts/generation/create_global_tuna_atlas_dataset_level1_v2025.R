@@ -285,7 +285,7 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
         "only if the conversion factor fully matches the stratum. "
       )
     )
-    
+  }
     config$logger.info("End IRD upgraded unit conversion")
     
   #   # Final cleanup ---------------------------------------------------------- useless 

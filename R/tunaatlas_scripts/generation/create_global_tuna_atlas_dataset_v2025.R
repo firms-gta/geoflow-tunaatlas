@@ -184,10 +184,15 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
       )) %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "OTH", "UNK", fishing_mode))
     georef_dataset <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) != "7") # removing 10 degrees
     georef_dataset <- georef_dataset %>%
-      dplyr::filter(
-        species != "UNK",
-        !(species == "SBF" & source_authority == "IOTC")
-      )
+      {
+        if ("species" %in% names(.)) {
+          dplyr::filter(
+            .,
+            species != "UNK",
+            !(species == "SBF" & source_authority == "IOTC")
+          )
+        } else .
+      }
     }
     if(recap_each_step){
       CWP.dataset::function_recap_each_step(
