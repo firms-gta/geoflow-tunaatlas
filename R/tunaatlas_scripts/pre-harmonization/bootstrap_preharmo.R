@@ -84,15 +84,19 @@ dir.create(dst_data_parent, recursive = TRUE, showWarnings = FALSE)
 
 # ---- Confirmation ----
 args <- commandArgs(trailingOnly = TRUE)
-force_overwrite <- "--force" %in% args
 
-if (interactive()) {
+force_overwrite <- isTRUE(getOption("gta.force_overwrite", FALSE)) ||
+  "--force" %in% args
+
+if (force_overwrite) {
+  message("Force overwrite enabled: skipping interactive confirmation.")
+} else if (interactive()) {
   confirm_overwrite_gta_cache(
     src_data_dir = src_data_dir,
     dst_data_dir = dst_data_dir,
     interactive_only = FALSE
   )
-} else if (!force_overwrite) {
+} else {
   stop(
     "This script will overwrite data in:\n  ", dst_data_dir, "\n",
     "using the cache located at:\n  ", src_data_dir, "\n\n",
