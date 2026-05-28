@@ -67,7 +67,7 @@ confirm_overwrite_gta_cache <- function(
   invisible(TRUE)
 }
 
-src_data_dir <- path.expand("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_pre_harmo_tRFMOs/GTA_2026")
+src_data_dir <- path.expand("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_pre_harmo_tRFMOs/All_raw_data_GTA_2026/")
 dst_data_parent <- file.path(repo_root, "data")
 dst_data_dir <- file.path(dst_data_parent, "GTA_2026")
 
