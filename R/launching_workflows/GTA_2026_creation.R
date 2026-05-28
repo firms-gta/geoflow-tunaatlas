@@ -598,6 +598,8 @@ file_path <- list(paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird
 
 results <- lapply(file_path, run_analysis)
 
+saveRDS(results,"data/check_georef_vs_nominal_entity.rds")
+
 # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
 #   list(species_label = c(
 #     "Skipjack tuna"
