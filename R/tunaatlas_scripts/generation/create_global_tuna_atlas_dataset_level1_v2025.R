@@ -213,7 +213,7 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
       dplyr::select(dplyr::all_of(original_cols))
     iotc_only_number_converted <- iotc_only_number %>%
       dplyr::inner_join(
-        IOTC_conv_fact_mapped %>%dplyr::select(-conversion_factor) %>% 
+        IOTC_conv_fact_mapped%>% 
           dplyr::rename(conversion_factor = measurement_value) %>% 
           dplyr::select(-measurement_unit)  %>% 
           dplyr::mutate(year = as.character(year)) %>% dplyr::mutate(conversion_factor = as.numeric(conversion_factor)) ,
