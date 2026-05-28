@@ -357,7 +357,7 @@ raw_nominal_catch <- execute_workflow_maybe_upload(
 
 running_time_of_workflow(raw_nominal_catch)
 # source(here::here("R/tunaatlas_scripts/pre-harmonization/downloading_tinytex.R")) #long use only if you want to print reports
-summarise_invalid(raw_nominal_catch, con_preharmo) # find report in the correspoding job
+summarise_invalid(raw_nominal_catch, NULL) # find report in the correspoding job
 
 # ---- 4.2 GEOREFERENCED CATCH ------------------------------------------------
 
@@ -377,7 +377,7 @@ raw_data_georef_effort <- execute_workflow_maybe_upload(
 )
 
 running_time_of_workflow(raw_data_georef_effort)
-summarise_invalid(raw_data_georef_effort, con_preharmo)
+summarise_invalid(raw_data_georef_effort, NULL)
 
 # ---- 4.4 DOC QA PRE-HARMO ---------------------------------------------------
 
@@ -586,7 +586,7 @@ ggplot2::ggsave(
     "data",
     "plot_georef_vs_nominal_evolution.png"
   ),
-  plot = res$plot,
+  plot = res$diff_plots$sums,
   width = 16,
   height = 12,
   dpi = 300
@@ -602,7 +602,7 @@ results <- lapply(file_path, run_analysis)
 #   list(species_label = c(
 #     "Skipjack tuna"
 #   ), fishing_fleet_label = "Maldives")
-  
+
 
 # for (sa in c( "ICCAT","IATTC", "IOTC", "WCPFC", "CCSBT")) {
 #   CWP.dataset::summarising_step(
