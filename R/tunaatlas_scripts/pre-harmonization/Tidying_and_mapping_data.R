@@ -28,16 +28,13 @@ Tidying_and_mapping_data = function(action, entity, config) {
     config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
   }
   
-  # Define the base URL for scripts
-  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/"
-  
   # Source scripts from URLs
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists.R"))
   
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
   
