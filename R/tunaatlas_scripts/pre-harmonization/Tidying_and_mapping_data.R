@@ -342,7 +342,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
 	Codes used by the tuna RFMOs in their respective datasets were mapped with global code lists for
 	gear (ISSCFG), flag (ISO3 countries codes), and species (ASFIS). Some codes could not be mapped
 	to standard code lists, for some tRFMOs own-defined codes that usually are aggregation of existing
-	codes (e.g. flag ’IDPH’ standing for Indonesia and Philippines within WCPFC or the species “Otun”
+	codes (e.g. flag 'IDPH' standing for Indonesia and Philippines within WCPFC or the species 'Otun'
 	standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For
 	species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
 	and groups of gears.",
