@@ -357,7 +357,7 @@ raw_nominal_catch <- execute_workflow_maybe_upload(
 
 running_time_of_workflow(raw_nominal_catch)
 # source(here::here("R/tunaatlas_scripts/pre-harmonization/downloading_tinytex.R")) #long use only if you want to print reports
-summarise_invalid(raw_nominal_catch, NULL) # find report in the correspoding job
+# summarise_invalid(raw_nominal_catch, NULL) # find report in the correspoding job #those can be run if needed but all data is available in the All_invalid_data.qs file in each job
 
 # ---- 4.2 GEOREFERENCED CATCH ------------------------------------------------
 
@@ -367,7 +367,7 @@ raw_data_georef <- execute_workflow_maybe_upload(
 )
 
 running_time_of_workflow(raw_data_georef)
-summarise_invalid(raw_data_georef, NULL)
+# summarise_invalid(raw_data_georef, NULL)  #those can be run if needed but all data is available in the All_invalid_data.qs file in each job
 
 # ---- 4.3 GEOREFERENCED EFFORT -----------------------------------------------
 
@@ -377,17 +377,18 @@ raw_data_georef_effort <- execute_workflow_maybe_upload(
 )
 
 running_time_of_workflow(raw_data_georef_effort)
-summarise_invalid(raw_data_georef_effort, NULL)
+# summarise_invalid(raw_data_georef_effort, NULL)  #those can be run if needed but all data is available in the All_invalid_data.qs file in each job
 
-# ---- 4.4 DOC QA PRE-HARMO ---------------------------------------------------
+# ---- 4.4 DOC QA PRE-HARMO --------------------------------------------------- this can be ran as well to rewrite the rmd to push on github if any
+# change has been done in the pre-harmonisation functions. If no changes this is not usefull, it is then removed in default mode in docker build 
 
-source(here::here("R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R"))
-dir.create(file.path(raw_nominal_catch, "/data")) #patch
-rewrite_functions_as_rmd(raw_nominal_catch)
-dir.create(file.path(raw_data_georef, "/data")) #patch
-rewrite_functions_as_rmd(raw_data_georef)
-dir.create(file.path(raw_data_georef_effort, "/data")) #patch
-rewrite_functions_as_rmd(raw_data_georef_effort)
+# source(here::here("R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R"))
+# dir.create(file.path(raw_nominal_catch, "/data")) #patch
+# rewrite_functions_as_rmd(raw_nominal_catch)
+# dir.create(file.path(raw_data_georef, "/data")) #patch
+# rewrite_functions_as_rmd(raw_data_georef)
+# dir.create(file.path(raw_data_georef_effort, "/data")) #patch
+# rewrite_functions_as_rmd(raw_data_georef_effort)
 
 # =============================================================================
 # 5. CRÉATION DES DATASETS HARMONISÉS
