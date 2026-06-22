@@ -1,124 +1,92 @@
 # =============================================================================
-# 0. ENVIRONNEMENT / PACKAGES
+# GTA 2026 WORKFLOW RUNNER
 # =============================================================================
-source('R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R')
+#
+# Purpose
+# -------
+# This script runs the main Global Tuna Atlas 2026 processing chain:
+#   1. Pre-harmonisation of nominal catch, georeferenced catch, and effort data.
+#   2. Generation of harmonised effort, nominal catch, and catch Levels 0, 1, 2.
+#   3. Production of short QA summaries and comparison plots.
+#
+# Main design choices
+# -------------------
+# - Database upload is enabled only when the expected production/sandbox database
+#   context is detected and the DBI connection is valid.
+# - If the database is unavailable, workflows are retried after removing DBI
+#   software blocks from the JSON configuration.
+# - Repeated Level 0 / Level 1 / Level 2 summary code is factorised to avoid
+#   maintaining the same logic several times.
+# - Optional analyses are grouped at the end so that the main workflow remains
+#   easy to read and modify.
+#
+# =============================================================================
+
+
+# =============================================================================
+# 0. BOOTSTRAP AND PACKAGE INITIALISATION
+# =============================================================================
+
+# Load the pre-harmonisation bootstrap script first because it may define
+# project-specific functions, options, paths, or geoflow-related helpers required
+# by the rest of the workflow.
+source("R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R")
+
+# Load here before using project-relative paths.
 require(here)
+
+# Restore the renv environment to make sure the package versions used by this
+# workflow match the versions recorded in renv.lock.
 library(renv)
 renv::restore()
 
+# Keep the complete package list in one place. This makes Docker/debug runs easier
+# because missing dependencies are detected at the beginning of the script rather
+# than halfway through a long workflow.
 required_packages <- c(
-  "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
-  "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
-  "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
-  "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
-  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", "fs" ,
-  "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table", "geoflow"
+  "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix",
+  "janitor", "dotenv", "data.table", "here", "xfun", "RPostgreSQL",
+  "RPostgres", "DBI", "rpostgis", "terra", "sf", "RSQLite", "webshot",
+  "usethis", "ows4R", "sp", "flextable", "dplyr", "stringr", "tibble",
+  "bookdown", "knitr", "purrr", "readxl", "odbc", "rlang", "kableExtra",
+  "tidyr", "ggplot2", "fs", "stats", "RColorBrewer", "cowplot", "tmap",
+  "curl", "officer", "gdata", "R3port", "reshape2", "tools", "plogr",
+  "futile.logger", "lubridate", "geoflow"
 )
 
-install_and_load <- function(package) {
+# Load one package and fail early if it cannot be loaded. The function name keeps
+# the historical behaviour, but no installation is attempted here: renv should be
+# responsible for dependency restoration.
+load_required_package <- function(package) {
   if (!require(package, character.only = TRUE)) {
-    library(package, character.only = TRUE)
+    stop("Package could not be loaded: ", package, call. = FALSE)
   }
 }
 
-invisible(lapply(required_packages, install_and_load))
+invisible(lapply(unique(required_packages), load_required_package))
 
-# presence_absence_flagging <- readr::read_csv(here::here("Species_Presence___Absence.csv")) # ca c'est pour specifier a la fin la donnee qui est presente dans un seul ocean
 
 # =============================================================================
-# 1. VARIABLES D'ENV / PATCH / SCRIPTS UTILES
+# 1. ENVIRONMENT VARIABLES, PROJECT HELPERS, AND GEOFLOW PATCHES
 # =============================================================================
 
-default_file <- ".env"
-if (file.exists(here::here("geoserver_sdi_lab.env"))) { # Julien si tu veux tester sur une BD il faut juste un .env  
-  default_file <- "geoserver_sdi_lab.env"
+# Prefer the local SDI lab environment file when it exists. This lets Julien or
+# other users test against a specific database without modifying the script.
+default_env_file <- ".env"
+if (file.exists(here::here("geoserver_sdi_lab.env"))) {
+  default_env_file <- "geoserver_sdi_lab.env"
 }
 
+# Load environment variables when available. A missing .env file should not stop
+# local non-DB runs, because the workflow can still be executed without upload.
 tryCatch(
-  load_dot_env(file = here::here(default_file)),
-  error = function(e) "No .env"
+  dotenv::load_dot_env(file = here::here(default_env_file)),
+  error = function(e) message("No environment file loaded: ", e$message)
 )
 
-
+# Helper scripts used for timing and post-run job renaming.
 source(here::here("R/running_time_of_workflow.R"))
 source(here::here("R/executeAndRename.R"))
-
-patch_geoflow_getJobDataResource <- function() {
-  gen <- geoflow::geoflow_entity
-  gen$set(
-    "public", "getJobDataResource",
-    overwrite = TRUE,
-    value = function(config, path) {
-      path <- gsub("\\\\", "/", path)
-      file.path(getwd(), "data", basename(path))
-    }
-  )
-  invisible(TRUE)
-}
-patch_geoflow_getJobDataResource()
-
-# =============================================================================
-# 2. CHECK DES DONNÉES REQUISES À PARTIR DES 3 JSON DE PRÉ-HARMONISATION
-# =============================================================================
-
-extract_sources_from_csv <- function(files) {
-  unique(unlist(lapply(files, function(f) {
-    txt <- readLines(f, warn = FALSE)
-    src <- grep("source:", txt, value = TRUE)
-    unlist(strsplit(sub(".*source:", "", src), ","))
-  }))) |>
-    trimws() |>
-    sub("^\\./data/", "", x = _) |>
-    sub("_$", "", x = _)
-}
-
-get_entity_csv_from_json <- function(json_file) {
-  config <- jsonlite::fromJSON(here::here(json_file), simplifyVector = FALSE)
-  
-  unique(vapply(
-    Filter(function(x) identical(x$handler, "csv"), config$metadata$entities),
-    function(x) x$source,
-    character(1)
-  ))
-}
-
-check_files_from_json <- function(json_files, data_dir = "data", max_age_days = 365) {
-  csv_files <- unique(unlist(lapply(json_files, get_entity_csv_from_json)))
-  files_detected <- extract_sources_from_csv(csv_files)
-  paths <- file.path(data_dir, files_detected)
-  
-  exists <- file.exists(paths)
-  missing <- files_detected[!exists]
-  
-  if (length(missing)) {
-    message("Missing files:")
-    print(missing)
-  } else {
-    message("No missing files, workflow can be run")
-  }
-  
-  existing_paths <- paths[exists]
-  if (length(existing_paths)) {
-    info <- file.info(existing_paths)
-    ages <- as.numeric(Sys.Date() - as.Date(info$mtime))
-    old_idx <- ages > max_age_days
-    
-    if (any(old_idx)) {
-      warning(
-        "Files older than ", max_age_days, " days:\n",
-        paste0(basename(existing_paths[old_idx]), " (", as.Date(info$mtime[old_idx]), ")",
-               collapse = "\n")
-      )
-    }
-  }
-  
-  invisible(list(
-    csv_files = csv_files,
-    files_detected = files_detected,
-    missing = missing
-  ))
-}
 
 preharmo_json_files <- c(
   "config/Nominal_catch_2026.json",
@@ -126,452 +94,238 @@ preharmo_json_files <- c(
   "config/All_raw_data_georef_effort.json"
 )
 
-preharmo_check <- check_files_from_json(preharmo_json_files)
+preharmo_check <- check_files_from_json(preharmo_json_files) # Checking the json files for nominal, level 0, 1 and 2
+
+source(here::here("R/launching_workflows/workflow_helpers.R"))
 
 # =============================================================================
-# 3. UTILITAIRES DB / WORKFLOW
+# 4. OPTIONAL DATABASE MODEL AND MAPPING WORKFLOWS
 # =============================================================================
-
-remove_dbi_software <- function(file) {
-  wf <- jsonlite::fromJSON(file, simplifyVector = FALSE)
-  
-  if (!is.null(wf$software)) {
-    wf$software <- Filter(function(x) {
-      id <- if (is.null(x$id)) "" else x$id
-      !(
-        identical(x$software_type, "dbi") ||
-          grepl("database", id, ignore.case = TRUE)
-      )
-    }, wf$software)
-  }
-  
-  if (!is.null(wf$actions)) {
-    for (i in seq_along(wf$actions)) {
-      if (!is.null(wf$actions[[i]]$options)) {
-        wf$actions[[i]]$options$upload_to_db <- FALSE
-        wf$actions[[i]]$options$upload_to_db_public <- FALSE
-        wf$actions[[i]]$options$create_materialized_view <- FALSE
-        wf$actions[[i]]$options$add_sql_comments <- FALSE
-      }
-    }
-  }
-  
-  original_dir  <- dirname(file)
-  original_name <- tools::file_path_sans_ext(basename(file))
-  out_file <- file.path(original_dir, paste0(original_name, "_nodb.json"))
-  
-  jsonlite::write_json(wf, out_file, pretty = TRUE, auto_unbox = TRUE)
-  out_file
-}
-
-`%||%` <- function(x, y) if (is.null(x)) y else x
-
-should_upload_to_db <- function(config) { #
-  drv  <- Sys.getenv("DB_DRV")
-  host <- Sys.getenv("DB_HOST")
-  port <- Sys.getenv("DB_PORT")
-  db   <- Sys.getenv("DB_NAME")
-  user <- Sys.getenv("DB_USER")
-  
-  ctx_ok <- identical(drv, "PostgreSQL") &&
-    identical(port, "5432") &&
-    identical(host, "db-tunaatlas.d4science.org") &&
-    db %in% c("tunaatlas_sandbox", "tunaatlas") &&
-    identical(user, "tunaatlas_u")
-  
-  if (!ctx_ok) return(FALSE)
-  
-  con <- config$software$output$dbi
-  if (is.null(con)) return(FALSE)
-  
-  tryCatch(
-    DBI::dbIsValid(con) && DBI::dbGetQuery(con, "SELECT 1 AS ok")$ok[1] == 1,
-    error = function(e) FALSE
-  )
-}
-
-force_upload_to_db <- function(config, action_id = "load_dataset") {
-  for (ei in seq_along(config$entities)) {
-    
-    acts <- config$entities[[ei]]$actions
-    ids  <- vapply(acts, `[[`, character(1), "id")
-    
-    # --- load_dataset ---
-    sel <- which(ids == action_id)
-    for (j in sel) {
-      config$entities[[ei]]$actions[[j]]$options$upload_to_db <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$upload_to_db_public <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$create_materialized_view <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$add_sql_comments <- TRUE
-      config$entities[[ei]]$actions[[j]]$options$upload_to_googledrive <- FALSE
-    }
-    
-    # --- activer les actions liées DB ---
-    ids_to_enable <- c(
-      "enrich_metadata",
-      "enrich_for_db_services",
-      "load_metadata",
-      "geometa-create-iso-19115",
-      "geometa-create-iso-19110"
-    )
-    
-    sel2 <- which(ids %in% ids_to_enable)
-    for (j in sel2) {
-      config$entities[[ei]]$actions[[j]]$run <- TRUE
-    }
-  }
-  
-  config
-}
-
-execute_workflow_maybe_upload <- function(file, dir = ".", rename_suffix = NULL) {
-  
-  # --------------------------------------------------
-  # 1. Test initWorkflow normal
-  # --------------------------------------------------
-  config_test <- try(
-    initWorkflow(file, handleMetadata = FALSE),
-    silent = TRUE
-  )
-  
-  use_file <- file
-  
-  if (inherits(config_test, "try-error")) {
-    message("initWorkflow failed -> retrying WITHOUT DBI software")
-    
-    use_file <- remove_dbi_software(file)
-  } else {
-    # cleanup si succès
-    unlink(config_test$job, recursive = TRUE)
-  }
-  
-  # --------------------------------------------------
-  # 2. Exécution réelle
-  # --------------------------------------------------
-  out <- executeWorkflow(
-    file = use_file,
-    dir  = dir,
-    on_initWorkflow = function(config, queue) {
-      if (should_upload_to_db(config)) {
-        config$logger.info("DB reachable -> enabling upload")
-        force_upload_to_db(config, "load_dataset")
-      } else {
-        config$logger.info("DB not reachable -> upload disabled")
-      }
-    }
-  )
-  
-  # --------------------------------------------------
-  # 3. rename optionnel
-  # --------------------------------------------------
-  if (!is.null(rename_suffix)) {
-    out <- executeAndRename(out, rename_suffix)
-  }
-  
-  out
-}
-
-get_workflow_con <- function(config_file) {
-  config <- initWorkflow(here::here(config_file), handleMetadata = FALSE)
-  unlink(config$job, recursive = TRUE)
-  config$software$output$dbi
-}
-
-summarise_invalid <- function(path, con) {
-  CWP.dataset::summarising_invalid_data(
-    path,
-    connectionDB = con,
-    upload_DB = FALSE,
-    upload_drive = FALSE
-  )
-}
-
-init_workflow_maybe_without_dbi <- function(file) {
-  tryCatch(
-    initWorkflow(file),
-    error = function(e) {
-      message("initWorkflow failed, retry without DBI: ", e$message)
-      
-      wf <- jsonlite::fromJSON(file, simplifyVector = FALSE)
-      
-      if (!is.null(wf$software)) {
-        wf$software <- Filter(function(x) {
-          id <- if (is.null(x$id)) "" else x$id
-          !(identical(x$software_type, "dbi") ||
-              grepl("database", id, ignore.case = TRUE))
-        }, wf$software)
-      }
-      
-      file_nodb <- file.path(
-        dirname(file),
-        paste0(tools::file_path_sans_ext(basename(file)), "_nodb.json")
-      )
-      
-      jsonlite::write_json(wf, file_nodb, pretty = TRUE, auto_unbox = TRUE)
-      
-      initWorkflow(file_nodb)
-    }
-  )
-}
-
-# Code list mapping et areas ----------------------------------------------
-# db_model <- execute_workflow_maybe_upload(here("config/tunaatlas_qa_dbmodel+codelists.json"), plus utilise car jarrive pas a télécharger et dezipper le .rar sur l'infrastructure
-#                                           rename_suffix = "db_model_codelists")
+#
+# These workflows are kept commented because they are not part of the standard
+# 2026 run, as the worflow now use directly the github. They can be re-enabled when code lists, DB model resources, or mapping
+# tables need to be refreshed in the DB.
+#
+# db_model <- execute_workflow_maybe_upload(
+#   file = here::here("config/tunaatlas_qa_dbmodel+codelists.json"),
+#   rename_suffix = "db_model_codelists"
+# )
 # running_time_of_workflow(db_model)
-# 
-# # Second step is the loading of the mappings (around 1.2 minutes)
-# mappings <- executeWorkflow(here("config/tunaatlas_qa_mappings.json")) # pas sur que ça soit encore utile c'est plus vraiment utilisé dans la preharmo
+#
+# mappings <- executeWorkflow(here::here("config/tunaatlas_qa_mappings.json"))
 # mappings <- executeAndRename(mappings, "_mappings")
 # running_time_of_workflow(mappings)
 
 
 # =============================================================================
-# 4. PRÉ-HARMONISATION
+# 5. PRE-HARMONISATION WORKFLOWS
 # =============================================================================
-# 4.1 Nominal
-# 4.2 Georeferenced catch
-# 4.3 Georeferenced effort
-# 4.4 Génération des Rmd
 
-get_workflow_con <- function(config_file) {
-  config <- try(
-    initWorkflow(here::here(config_file), handleMetadata = FALSE),
-    silent = TRUE
-  )
-  
-  if (inherits(config, "try-error")) {
-    message("DB unavailable: returning NULL connection")
-    return(NULL)
-  }
-  
-  on.exit(unlink(config$job, recursive = TRUE), add = TRUE)
-  config$software$output$dbi %||% NULL
-}
-
-# ---- 4.1 NOMINAL ------------------------------------------------------------
-
+# -----------------------------------------------------------------------------
+# 5.1 Nominal catch pre-harmonisation
+# -----------------------------------------------------------------------------
+# Produces the raw nominal catch dataset after source-specific pre-harmonisation.
+# This output is later used to generate the harmonised nominal and Level 0 catch
+# datasets.
 raw_nominal_catch <- execute_workflow_maybe_upload(
   file = here::here("config/Nominal_catch_2026.json"),
   rename_suffix = "_raw_nominal_catch_2026_final"
 )
-
 running_time_of_workflow(raw_nominal_catch)
-# source(here::here("R/tunaatlas_scripts/pre-harmonization/downloading_tinytex.R")) #long use only if you want to print reports
-# summarise_invalid(raw_nominal_catch, NULL) # find report in the correspoding job #those can be run if needed but all data is available in the All_invalid_data.qs file in each job
 
-# ---- 4.2 GEOREFERENCED CATCH ------------------------------------------------
+# Optional invalid-data report. The invalid records are also available in each
+# job's All_invalid_data.qs file, so this does not need to be run systematically.
+# summarise_invalid(raw_nominal_catch)
 
+
+# -----------------------------------------------------------------------------
+# 5.2 Georeferenced catch pre-harmonisation
+# -----------------------------------------------------------------------------
+# Produces the harmonised raw georeferenced catch inputs used for Level 1 and
+# Level 2 processing.
 raw_data_georef <- execute_workflow_maybe_upload(
   file = here::here("config/All_raw_data_georef.json"),
   rename_suffix = "_raw_data_georef_final"
 )
-
 running_time_of_workflow(raw_data_georef)
-# summarise_invalid(raw_data_georef, NULL)  #those can be run if needed but all data is available in the All_invalid_data.qs file in each job
 
-# ---- 4.3 GEOREFERENCED EFFORT -----------------------------------------------
+# summarise_invalid(raw_data_georef)
 
+
+# -----------------------------------------------------------------------------
+# 5.3 Georeferenced effort pre-harmonisation
+# -----------------------------------------------------------------------------
+# Produces the harmonised raw effort inputs. This is kept separate from catch
+# because effort has its own source structure and checks.
 raw_data_georef_effort <- execute_workflow_maybe_upload(
   file = here::here("config/All_raw_data_georef_effort.json"),
   rename_suffix = "_raw_data_georef_effort_final"
 )
-
 running_time_of_workflow(raw_data_georef_effort)
-# summarise_invalid(raw_data_georef_effort, NULL)  #those can be run if needed but all data is available in the All_invalid_data.qs file in each job
 
-# ---- 4.4 DOC QA PRE-HARMO --------------------------------------------------- this can be ran as well to rewrite the rmd to push on github if any
-# change has been done in the pre-harmonisation functions. If no changes this is not usefull, it is then removed in default mode in docker build 
+# summarise_invalid(raw_data_georef_effort)
 
+
+# -----------------------------------------------------------------------------
+# 5.4 Optional QA documentation generation for pre-harmonisation functions
+# -----------------------------------------------------------------------------
+# Re-enable this block only when pre-harmonisation functions have changed and the
+# corresponding Rmd documentation needs to be regenerated and pushed to GitHub.
+#
 # source(here::here("R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R"))
-# dir.create(file.path(raw_nominal_catch, "/data")) #patch
+# dir.create(file.path(raw_nominal_catch, "data"), showWarnings = FALSE, recursive = TRUE)
 # rewrite_functions_as_rmd(raw_nominal_catch)
-# dir.create(file.path(raw_data_georef, "/data")) #patch
+# dir.create(file.path(raw_data_georef, "data"), showWarnings = FALSE, recursive = TRUE)
 # rewrite_functions_as_rmd(raw_data_georef)
-# dir.create(file.path(raw_data_georef_effort, "/data")) #patch
+# dir.create(file.path(raw_data_georef_effort, "data"), showWarnings = FALSE, recursive = TRUE)
 # rewrite_functions_as_rmd(raw_data_georef_effort)
 
-# =============================================================================
-# 5. CRÉATION DES DATASETS HARMONISÉS
-# =============================================================================
-# 5.1 Effort
-# 5.2 Nominal
-# 5.3 Catch level 0
-# 5.4 Catch level 2
 
+# =============================================================================
+# 6. HARMONISED DATASET GENERATION
+# =============================================================================
+
+# Make sure the working directory is the project root before launching workflows
+# that rely on relative paths inside JSON configuration files.
 setwd(here::here())
 
-# ---- 5.1 EFFORT -------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# 6.1 Effort dataset
+# -----------------------------------------------------------------------------
+# Generates the final harmonised effort dataset after pre-harmonisation.
 tunaatlas_effort_path <- execute_workflow_maybe_upload(
   file = here::here("config/create_effort_dataset_2026.json"),
   rename_suffix = "new_efforts_final"
 )
 
-# ---- 5.2 NOMINAL ------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# 6.2 Nominal catch dataset
+# -----------------------------------------------------------------------------
+# Generates the final harmonised nominal catch dataset. This dataset is used as a
+# key reference for later comparisons with Level 2 raised georeferenced catches.
 tunaatlas_nominal_path <- execute_workflow_maybe_upload(
   file = here::here("config/create_nominal_dataset_2026.json"),
   rename_suffix = "nominal_final"
 )
 
-# ---- 5.3 CATCH LEVEL 0 ------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# 6.3 Catch Level 0
+# -----------------------------------------------------------------------------
+# Level 0 is the harmonised nominal catch product following the GTA data model.
 tunaatlas_level0_catch_path <- execute_workflow_maybe_upload(
   file = here::here("config/catch_ird_level0_local.json"),
   rename_suffix = "level_0_catch_2026"
 )
 
-gc()
-
-config_level0 <- init_workflow_maybe_without_dbi(
-  here::here("config/catch_ird_level0_local.json")
+run_step_summary(
+  workflow_file = "config/catch_ird_level0_local.json",
+  workflow_output = tunaatlas_level0_catch_path,
+  source_authority = "all"
 )
 
-unlink(config_level0$job, recursive = TRUE)
 
-con_level0 <- config_level0$software$output$dbi
-if (is.null(con_level0)) con_level0 <- NULL
-
-setwd(here::here())
-CWP.dataset::summarising_step(
-  main_dir = tunaatlas_level0_catch_path,
-  connectionDB = con_level0,
-  config = config_level0,
-  sizepdf = "short",
-  savestep = FALSE,
-  usesave = FALSE,
-  source_authoritylist = c("all")
-)
-
-# Intercaler le process mapping georef to nominal -------------------------
-
+# -----------------------------------------------------------------------------
+# 6.4 Optional mapping between georeferenced and nominal strata
+# -----------------------------------------------------------------------------
+# This block is currently kept as a reminder for future development. It should be
+# re-enabled only when the georef-to-nominal mapping proposal is needed between
+# Level 0 and Level 1 / Level 2 processing.
+#
 # res_map <- propose_georef_to_nominal_mappings_clean(
 #   georef = georef_dataset,
 #   nominal = nominal_catch,
 #   id_cols = c("source_authority", "group_species_iattc_sharks", "year"),
-#   candidate_cols_order = c("fishing_mode_wcpfc_issue_unk_solved", "gear_type", "geographic_identifier_nom", "fishing_fleet")
+#   candidate_cols_order = c(
+#     "fishing_mode_wcpfc_issue_unk_solved",
+#     "gear_type",
+#     "geographic_identifier_nom",
+#     "fishing_fleet"
+#   )
 # )
 
-# Level 1 to be added -----------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# 6.5 Catch Level 1
+# -----------------------------------------------------------------------------
+# Level 1 corresponds to georeferenced catch data with standardised units and GTA
+# harmonisation rules applied.
 tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
   file = here::here("config/catch_ird_level1_local.json"),
   rename_suffix = "level_1_catch_2026"
 )
 
-gc()
-
-config_level1 <- init_workflow_maybe_without_dbi(
-  here::here("config/catch_ird_level1_local.json")
-)
-
-unlink(config_level1$job, recursive = TRUE)
-
-con_level1 <- config_level1$software$output$dbi
-if (is.null(con_level1)) con_level1 <- NULL
-
-setwd(here::here())
-CWP.dataset::summarising_step(
-  main_dir = tunaatlas_level1_catch_path,
-  connectionDB = con_level1,
-  config = config_level1,
-  sizepdf = "short",
-  savestep = FALSE,
-  usesave = FALSE,
-  source_authoritylist = c("all")
+run_step_summary(
+  workflow_file = "config/catch_ird_level1_local.json",
+  workflow_output = tunaatlas_level1_catch_path,
+  source_authority = "all"
 )
 
 
-# to do with 
-# list(
-#   fact = "catch",
-#   doilevel0 = "10.5281/zenodo.11460074",
-#   keylevel0 = "global_catch_firms_level0_harmonized.csv",
-#   forceuseofdoi = FALSE,
-#   recap_each_step = TRUE,
-#   
-#   unit_conversion_convert = TRUE,
-#   unit_conversion_csv_conversion_factor_url_iotc = NULL,
-#   unit_conversion_csv_conversion_factor_url_other = NULL,
-#   unit_conversion_codelist_geoidentifiers_conversion_factors =
-#     "areas_conversion_factors_numtoweight_ird",
-#   
-#   aggregate_on_5deg_data_with_resolution_inferior_to_5deg = FALSE,
-#   resolution_filter = NULL,
-#   filtering = NULL,
-#   gear_filter = NULL
-# )
-# tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
-#   file = here::here("config/catch_ird_level1_local.json"),
-#   rename_suffix = "level_2_catch_2026"
-# )
-# 
-# gc()
-# 
-# config_level1 <- init_workflow_maybe_without_dbi(
-#   here::here("config/catch_ird_level1_local.json")
-# )
-# 
-# unlink(config_level1$job, recursive = TRUE)
-# 
-# con_level1 <- config_level1$software$output$dbi
-# if (is.null(con_level1)) con_level1 <- NULL
-
-# ---- 5.4 CATCH LEVEL 2 ------------------------------------------------------
-
+# -----------------------------------------------------------------------------
+# 6.6 Catch Level 2
+# -----------------------------------------------------------------------------
+# Level 2 corresponds to georeferenced catch raised against nominal catches. This
+# is the main product used for georef-versus-nominal consistency checks.
 tunaatlas_level2_catch_path <- execute_workflow_maybe_upload(
   file = here::here("config/catch_ird_level2_local.json"),
   rename_suffix = "level_2_catch_2026"
 )
 
-gc()
-
-config_level2 <- init_workflow_maybe_without_dbi(
-  here::here("config/catch_ird_level2_local.json")
+run_step_summary(
+  workflow_file = "config/catch_ird_level2_local.json",
+  workflow_output = tunaatlas_level2_catch_path,
+  source_authority = "all"
 )
 
-unlink(config_level2$job, recursive = TRUE)
-
-con_level2 <- config_level2$software$output$dbi
-if (is.null(con_level2)) con_level2 <- NULL
-
 
 # =============================================================================
-# 6. RAPPORTS / SUMMARISING
+# 7. QUALITY CONTROL AND COMPARISON REPORTS
 # =============================================================================
 
+# Columns that may be useful when generating detailed reports. Keep this list
+# close to the reporting section so that it can be re-enabled without searching
+# through the whole script.
 # colnames_to_keep_report <- c(
 #   "source_authority", "fishing_fleet_label", "fishing_mode_label",
 #   "geographic_identifier", "measurement_unit", "measurement_value",
 #   "gridtype", "species_label", "gear_type_label",
 #   "measurement_processing_level"
 # )
-# 
 
-for (sa in c("all")) {
-  CWP.dataset::summarising_step(
-    main_dir = tunaatlas_level2_catch_path,
-    connectionDB = con_level2,
-    config = config_level2,
-    sizepdf = "short",
-    savestep = FALSE,
-    usesave = FALSE,
-    source_authoritylist = sa
-    # ,
-    # parameter_colnames_to_keep_fact = colnames_to_keep_report
-  )
-}
-
+# Plot differences between the nominal reference files and the Level 2 output.
+# This helps identify species or authorities where the raised georeferenced data
+# diverges from nominal totals.
 source(here::here("R/ongoing_projects/plot_diffs_from_nominal_files.R"))
 
 comparisons <- c(
-  "sums_species.csv" = here::here(paste0(tunaatlas_nominal_path,"/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums_species.csv")),
-  "sums_source_auth.csv" = here::here(paste0(tunaatlas_nominal_path,"/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums_source_auth.csv")),
-  "sums.csv" = here::here(paste0(tunaatlas_nominal_path,"/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums.csv"))
+  "sums_species.csv" = here::here(
+    paste0(
+      tunaatlas_nominal_path,
+      "/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums_species.csv"
+    )
+  ),
+  "sums_source_auth.csv" = here::here(
+    paste0(
+      tunaatlas_nominal_path,
+      "/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums_source_auth.csv"
+    )
+  ),
+  "sums.csv" = here::here(
+    paste0(
+      tunaatlas_nominal_path,
+      "/entities/global_nominal_catch_firms_level0_2026/Markdown/Filtering_SBF_data/sums.csv"
+    )
+  )
 )
 
 res <- plot_diffs_from_nominal_files(
-  main_dir = paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird_level2_1950_2024/Markdown"), #bof mais pas miexu pour le moment
+  main_dir = paste0(
+    tunaatlas_level2_catch_path,
+    "/entities/global_catch_ird_level2_1950_2024/Markdown"
+  ),
   comparison_files = comparisons,
   value_col = "sum_t",
   filter_list = list(
@@ -581,166 +335,85 @@ res <- plot_diffs_from_nominal_files(
   )
 )
 
-
+# Save the global evolution plot in data/ so it can be reused outside the job
+# folder, for instance in reports, emails, or GitHub issues.
 ggplot2::ggsave(
-  filename = file.path(
-    "data",
-    "plot_georef_vs_nominal_evolution.png"
-  ),
+  filename = file.path("data", "plot_georef_vs_nominal_evolution.png"),
   plot = res$diff_plots$sums,
   width = 16,
   height = 12,
   dpi = 300
 )
 
+# Run the entity-level georef-versus-nominal analysis and save the RDS output for
+# later inspection. This is useful when the plot reveals unexpected differences.
 source(here::here("R/ongoing_projects/check_georef_vs_nominal_entity.R"))
 
-file_path <- list(paste0(tunaatlas_level2_catch_path,"/entities/global_catch_ird_level2_1950_2024")) #bof mais pas miexu pour le moment, 
+level2_entity_paths <- list(
+  paste0(tunaatlas_level2_catch_path, "/entities/global_catch_ird_level2_1950_2024")
+)
 
-results <- lapply(file_path, run_analysis)
-
-saveRDS(results,"data/check_georef_vs_nominal_entity.rds")
-
-# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-#   list(species_label = c(
-#     "Skipjack tuna"
-#   ), fishing_fleet_label = "Maldives")
+results <- lapply(level2_entity_paths, run_analysis)
+saveRDS(results, "data/check_georef_vs_nominal_entity.rds")
 
 
-# for (sa in c( "ICCAT","IATTC", "IOTC", "WCPFC", "CCSBT")) {
-#   CWP.dataset::summarising_step(
-#     main_dir = tunaatlas_level2_catch_path,
-#     connectionDB = con_level2,
-#     config = config_level2,
-#     sizepdf = "short",
-#     savestep = FALSE,
-#     usesave = FALSE,
-#     source_authoritylist = sa
-#     # ,
-#     # parameter_colnames_to_keep_fact = colnames_to_keep_report
+# =============================================================================
+# 8. OPTIONAL TARGETED REPORTS AND DEBUGGING BLOCKS
+# =============================================================================
+#
+# The blocks below are examples of targeted summaries that can be re-enabled when
+# investigating a specific species, source authority, or filtering issue. They are
+# intentionally kept commented so that the default run remains lightweight.
+
+# -----------------------------------------------------------------------------
+# 8.1 Summary by source authority
+# -----------------------------------------------------------------------------
+# for (source_authority in c("ICCAT", "IATTC", "IOTC", "WCPFC", "CCSBT")) {
+#   run_step_summary(
+#     workflow_file = "config/catch_ird_level2_local.json",
+#     workflow_output = tunaatlas_level2_catch_path,
+#     source_authority = source_authority
 #   )
 # }
-# 
-# # # =============================================================================
-# # # 7. RAPPORTS SPÉCIFIQUES
-# # # =============================================================================
-# # 
+
+
+# -----------------------------------------------------------------------------
+# 8.2 Targeted Swordfish / WCPFC report
+# -----------------------------------------------------------------------------
+# config_level2 <- init_workflow_maybe_without_dbi(
+#   here::here("config/catch_ird_level2_local.json")
+# )
+# on.exit(unlink(config_level2$job, recursive = TRUE), add = TRUE)
+#
 # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-#   list(species_label = c(
-#     "Swordfish"), source_authority = c("WCPFC")
-#   )
-# 
+#   list(species_label = c("Swordfish"), source_authority = c("WCPFC"))
+#
 # CWP.dataset::summarising_step(
 #   main_dir = tunaatlas_level2_catch_path,
-#   connectionDB = con_level2,
+#   connectionDB = config_level2$software$output$dbi %||% NULL,
 #   config = config_level2,
 #   sizepdf = "short",
 #   savestep = FALSE,
 #   usesave = FALSE,
 #   source_authoritylist = "all",
 #   nameoutput = "swo_wcpfc"
-#   # parameter_colnames_to_keep_fact = colnames_to_keep_report
 # )
-# 
-# no_sbf <- setdiff(
-#   unique(qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs")$species),
-#   "SBF"
+
+
+# -----------------------------------------------------------------------------
+# 8.3 Targeted Silky shark / IATTC report
+# -----------------------------------------------------------------------------
+# config_level2 <- init_workflow_maybe_without_dbi(
+#   here::here("config/catch_ird_level2_local.json")
 # )
-# 
+# on.exit(unlink(config_level2$job, recursive = TRUE), add = TRUE)
+#
 # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-#   list(species = no_sbf)
-# 
+#   list(species_label = c("Silky shark"), source_authority = c("IATTC"))
+#
 # CWP.dataset::summarising_step(
 #   main_dir = tunaatlas_level2_catch_path,
-#   connectionDB = con_level2,
-#   config = config_level2,
-#   sizepdf = "short",
-#   savestep = FALSE,
-#   usesave = FALSE,
-#   source_authoritylist = "all",
-#   nameoutput = "noSBF",
-#   parameter_colnames_to_keep_fact = colnames_to_keep_report
-# )
-# # 
-# # config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-# #   list(species_label = c(
-# #     "Yellowfin tuna", "Skipjack tuna", "Bigeye tuna", "Albacore",
-# #     "Southern bluefin tuna", "Swordfish", "Tunas nei", "True tunas nei"
-# #   ))
-# # 
-# # CWP.dataset::summarising_step(
-# #   main_dir = tunaatlas_level2_catch_path,
-# #   connectionDB = con_level2,
-# #   config = config_level2,
-# #   sizepdf = "short",
-# #   savestep = FALSE,
-# #   usesave = FALSE,
-# #   source_authoritylist = "all",
-# #   nameoutput = "majortunasandTUN",
-# #   parameter_colnames_to_keep_fact = colnames_to_keep_report
-# # )
-# # 
-# # for (sa in c("all","IOTC", "ICCAT", "CCSBT", "WCPFC", "IATTC")) {
-# #   CWP.dataset::summarising_step(
-# #     main_dir = tunaatlas_level2_catch_path,
-# #     connectionDB = con_level2,
-# #     config = config_level2,
-# #     sizepdf = "middle",
-# #     savestep = identical(sa, "all"),
-# #     usesave = identical(sa, "all"),
-# #     source_authoritylist = sa
-# #   )
-# # }
-# # 
-# # 
-# # # Ongoing, process fisheries data by species for checks -------------------
-# # 
-# # for (entity_dir in entity_dirs) {
-# #   entity_name <- basename(entity_dir)
-# #   setwd(here::here(entity_dir))
-# #   sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
-# #   details <- file.info(sub_list_dir_2)
-# #   details <- details[with(details, order(as.POSIXct(mtime))), ]
-# #   sub_list_dir_2 <- rownames(details)
-# #   flog.info("Processed sub_list_dir_2")
-# #   sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
-# #   a <- CWP.dataset::process_fisheries_data_by_species(sub_list_dir_3, "catch", specieslist)
-# #   combined_df <- create_combined_dataframe(a)
-# #   qflextable(combined_df)
-# #   # View(combined_df %>% dplyr::select(c(Conversion_factors_kg, Species, Step, Percentage_of_nominal, Step_number)))
-# #   qs::qsave(x = list(combined_df, a), file = paste0(entity_name,"tablespecies_recap.qs"))
-# # }
-# # 
-# # source("~/firms-gta/geoflow-tunaatlas/R/ongoing_projects/check_georef_vs_nominal_entity.R")
-# # res <- check_georef_vs_nominal_entity(
-# #   "~/firms-gta/geoflow-tunaatlas/jobs/20260318080723level_2_catch_2026/entities/global_catch_ird_level2_1950_2024",
-# #   steps_to_run = 1:33
-# # )
-# # 
-# # georef_sup_nom_analysis_folder <- file.path(tunaatlas_level2_catch_path, "georef_sup_nom_analysis/")
-# # dir.create(georef_sup_nom_analysis_folder)
-# # 
-# # qs::qsave(res, file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.qs"))
-# # 
-# # p <- plot_georef_vs_nominal_evolution(res)
-# # 
-# # ggplot2::ggsave(
-# #   filename = file.path(georef_sup_nom_analysis_folder, "plot_georef_vs_nominal_evolution.png"),
-# #   plot = p,
-# #   width = 16,
-# #   height = 12,
-# #   dpi = 300
-# # )
-# 
-# 
-# config_level2$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <-
-#   list(species_label = c(
-#     "Silky shark"
-#   ), source_authority = c("IATTC"))
-# 
-# CWP.dataset::summarising_step(
-#   main_dir = tunaatlas_level2_catch_path,
-#   connectionDB = con_level2,
+#   connectionDB = config_level2$software$output$dbi %||% NULL,
 #   config = config_level2,
 #   sizepdf = "short",
 #   savestep = FALSE,
@@ -748,3 +421,20 @@ saveRDS(results,"data/check_georef_vs_nominal_entity.rds")
 #   source_authoritylist = "all",
 #   nameoutput = "SilkyIATTConlynoSKH"
 # )
+
+
+# =============================================================================
+# 9. NOTES FOR FUTURE RESTRUCTURING
+# =============================================================================
+#
+# Suggested next step if the script keeps growing:
+#   - Move package/environment setup to R/workflow_setup.R.
+#   - Move DB/geoflow helpers to R/workflow_helpers.R.
+#   - Move summary/reporting helpers to R/workflow_reporting.R.
+#   - Keep this file as a short orchestration script containing only the ordered
+#     execution of workflows.
+#
+# This would make the main script much shorter and would simplify testing of the
+# helper functions independently from the full GTA workflow.
+#
+# =============================================================================
