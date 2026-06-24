@@ -174,7 +174,6 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         
                         # The effort is expressed here in terms of number of sets. This means in the case of the EPO that the effort given in some datasets may correspond to a part of the total effort allocated to a stratum since it is the observed effort, i.e. for which there was an observer on board the purse seine vessel. From my point of view, (1) the unique and homogeneous effort would be that of tropical tunas and (2) to standardize the set of catches per stratum, it is necessary to calculate a ratio of shark catches per set (observed) and swordfish catches per set (observed) and then multiply them by the effort carried over for tropical tunas since this is considered to be the effort of the fishery (which targets tunas). The raising factor is tuna effort/billfish effort and tuna effort/shark effort.
                         
-                        
                         columns_to_keep_effort=c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value", "measurement") # no measurement type or measurement_processing_level for efforts
                         
                         # Get metadata of Catch datasets (for tuna, billfish and shark, and stratified by fishingfleet and then by type of school)
@@ -221,6 +220,18 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           df_catch_tuna_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_tuna_catch]), guess_max = 0))
                           df_catch_tuna_flag <- df_catch_tuna_flag[,columns_to_keep]
                           class(df_catch_tuna_flag$measurement_value) <- "numeric"
+                          
+                          # Extract IATTC 5deg LL catch for tuna and billfish
+                          df_catch_tuna_billfish_5deg <- as.data.frame(readr::read_csv(
+                            file.path(
+                              "data",
+                              basename(dataset_files)[basename(names(dataset_files)) == catch_5deg_1m_ll_iattc_level0__tuna_billfish]
+                            ),
+                            guess_max = 0
+                          ))
+                          
+                          df_catch_tuna_billfish_5deg <- df_catch_tuna_billfish_5deg[, columns_to_keep]
+                          class(df_catch_tuna_billfish_5deg$measurement_value) <- "numeric"
                           
                           
                           # Extract billfish and shark catch.
@@ -346,7 +357,14 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                                        dimension_missing_df1="fishing_mode",
                                                                        dimension_missing_df2="fishing_fleet")$df
                             
-                            
+                            iattc_data <- rbind(
+                              iattc_data,
+                              df_catch_billfish,
+                              df_catch_shark,
+                              df_catch_tuna,
+                              df_catch_tuna_billfish_5deg,
+                              df_catch_shark_5deg_flag
+                            )
                             
                             
                           } else {
@@ -355,15 +373,14 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                               df_catch_billfish <- df_catch_billfish_flag
                               df_catch_shark <- df_catch_shark_flag
                               df_catch_tuna <- df_catch_tuna_flag
-                              data_5deg <- df_catch_shark_5deg_flag
-                              iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna, data_5deg)
+                              iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna, df_catch_shark_5deg_flag, df_catch_tuna_billfish_5deg)
                               
                             } else if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishing_mode'){
                               df_catch_billfish <- df_catch_billfish_settype
                               df_catch_shark <- df_catch_shark_settype
                               df_catch_tuna <- df_catch_tuna_settype
                               
-                              iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna)
+                              iattc_data <- rbind(iattc_data, df_catch_billfish, df_catch_shark, df_catch_tuna, df_catch_shark_5deg_flag, df_catch_tuna_billfish_5deg)
                               
                             }
                           }
