@@ -1,0 +1,66 @@
+# =============================================================================
+# Dockerfile.reporting
+# =============================================================================
+#
+# Purpose
+# -------
+# Reporting image for GTA PDF / RMarkdown / bookdown outputs.
+#
+# This image extends the workflow image by adding:
+#   - Pandoc
+#   - LaTeX packages
+#   - fonts commonly needed for PDF reports
+#
+# It should be used only when reports are needed, because the LaTeX stack can
+# significantly increase image size.
+#
+# Build example:
+#
+#   docker build \
+#     -f Dockerfile.workflow \
+#     -t gta-workflow:latest \
+#     .
+#
+#   docker build \
+#     -f Dockerfile.reporting \
+#     --build-arg BASE_IMAGE=gta-workflow:latest \
+#     -t gta-reporting:latest \
+#     .
+#
+# Run reports example:
+#
+#   docker run \
+#     -v /home/bastien/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+#     -e GTA_STEPS=reports \
+#     gta-reporting
+#
+# =============================================================================
+
+ARG BASE_IMAGE=gta-workflow:latest
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="Grasset Bastien <bastien.grasset@ird.fr>"
+
+USER root
+
+# Add reporting dependencies only in this image.
+#
+# texlive-latex-extra is large but useful for many RMarkdown/bookdown reports.
+# If image size becomes too high, this can be reduced later once the exact LaTeX
+# packages needed by the reports are known.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pandoc \
+    pandoc-citeproc \
+    texlive-latex-base \
+    texlive-latex-recommended \
+    texlive-latex-extra \
+    texlive-fonts-recommended \
+    texlive-fonts-extra \
+    lmodern \
+ && rm -rf /var/lib/apt/lists/*
+
+USER rstudio
+
+WORKDIR ${PROJECT_DIR}
+
+CMD ["Rscript", "R/launching_workflows/run_gta_2026_workflow_cli.R"]
