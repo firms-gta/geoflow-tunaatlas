@@ -52,9 +52,9 @@
 #  ALL    L 2000-01-01 2000-02-01  6100145    ALL      HHOOKS  867903
 
 function(action, entity, config){
-  source("./R/sardara_functions/harmo_time_2.R")
-  source("./R/sardara_functions/harmo_spatial_3.R")
-  source("./R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_3.R"))
+  source(here::here("./R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
   #packages
   
     

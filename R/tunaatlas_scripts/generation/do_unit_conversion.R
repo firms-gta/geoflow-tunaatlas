@@ -65,7 +65,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     mapping_dataset<-data.frame(source_authority,db_mapping_dataset_name)
     df_mapping_final_this_dimension<-NULL
     for (j in 1:nrow(mapping_dataset)){ 
-      source("./R/sardara_functions/extract_dataset.R")
+      source(here::here("./R/sardara_functions/extract_dataset.R"))
       df_mapping<-extract_dataset(con,list_metadata_datasets(con,identifier=mapping_dataset$db_mapping_dataset_name[j]))  # Extract the code list mapping dataset from the DB
       df_mapping$source_authority<-as.character(mapping_dataset$source_authority[j])  # Add the dimension "source_authority" to the mapping dataset. That dimension is not included in the code list mapping datasets. However, it is necessary to map the code list.
       df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)

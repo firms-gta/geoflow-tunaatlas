@@ -1,6 +1,6 @@
 harmo_time_2 = function (df_input, colname_year, colname_month) 
 {
-  source("./R/sardara_functions/format_time_db_format.R")
+  source(here::here("./R/sardara_functions/format_time_db_format.R"))
   colnames(df_input)[which(colnames(df_input) == colname_year)] <- "Year"
   colnames(df_input)[which(colnames(df_input) == colname_month)] <- "MonthStart"
   df_input$Period <- 1

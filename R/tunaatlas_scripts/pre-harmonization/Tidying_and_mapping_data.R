@@ -372,8 +372,22 @@ Tidying_and_mapping_data = function(action, entity, config) {
     stepnumber = stepnumber +1
     #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
     
-    url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
-    species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo) %>% dplyr::distinct()
+    mapping_file <- here::here(
+      "data",
+      "codelist_mapping_source_authority_species.csv"
+    )
+    
+    if (!file.exists(mapping_file)) {
+      utils::download.file(
+        "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
+        mapping_file,
+        mode = "wb"
+      )
+    }
+    
+    species_to_be_kept_by_rfmo_in_level0 <-
+      readr::read_csv(mapping_file) %>%
+      dplyr::distinct()
     georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, 
                                                            by = c("species" = "species", "source_authority" = "source_authority"))
     
@@ -383,7 +397,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
         georef_dataset,
         paste0(
           "Filtering species on the base of the file ",
-          url_mapping_asfis_rfmo,
+          "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
           " to keep only the species under mandate of tRFMOs. This file contains " ,
           as.character(length(nrow(
             species_to_be_kept_by_rfmo_in_level0

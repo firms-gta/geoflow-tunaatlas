@@ -1,7 +1,7 @@
 ICCAT_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_ICCAT, colToKeep_captures) 
 {
-  source("./R/sardara_functions/harmo_time_1.R")  
-  source("./R/sardara_functions/harmo_spatial_1.R")  
+  source(here::here("./R/sardara_functions/harmo_time_1.R"))  
+  source(here::here("./R/sardara_functions/harmo_spatial_1.R"))  
   catches_pivot_ICCAT$RFMO <- "ICCAT"
   if(!(require(dplyr))){ 
     install.packages(dplyr) 

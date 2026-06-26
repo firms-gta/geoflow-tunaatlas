@@ -1,7 +1,8 @@
 ICCAT_CE_effort_pivotDSD_to_harmonizedDSD = function (efforts_pivot_ICCAT, colToKeep_efforts) 
 {
-  source("./R/sardara_functions/harmo_spatial_1.R")
-  source("./R/sardara_functions/harmo_time_1.R")  
+  message("working dir up to here")
+  source(here::here("R/sardara_functions/harmo_spatial_1.R"))
+  source(here::here("R/sardara_functions/harmo_time_1.R"))
   if(!(require(dplyr))){ 
     install.packages(dplyr) 
     (require(dplyr))} 

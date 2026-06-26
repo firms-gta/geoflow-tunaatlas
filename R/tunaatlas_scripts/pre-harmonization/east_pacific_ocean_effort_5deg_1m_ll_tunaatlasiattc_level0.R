@@ -107,7 +107,7 @@ function(action, entity, config){
   # Reach the catches harmonized DSD using a function in IATTC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName", "School","EffortUnits","Effort")
   
-  source("./R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+  source(here::here("./R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
   efforts<-IATTC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts,colToKeep_efforts)
   
   colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")

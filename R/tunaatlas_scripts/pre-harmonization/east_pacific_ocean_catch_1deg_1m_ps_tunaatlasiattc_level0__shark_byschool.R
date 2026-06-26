@@ -28,7 +28,7 @@
 # '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
 
 function(action, entity, config){
-  source("./R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType_Shark.R")
+  source(here::here("./R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType_Shark.R"))
 #packages
 
   if(!require(data.table)){
@@ -63,7 +63,7 @@ catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType_Shark(path_to_raw_dat
 catches_pivot_IATTC$NumSets<-NULL
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("./R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source(here::here("./R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R"))
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")

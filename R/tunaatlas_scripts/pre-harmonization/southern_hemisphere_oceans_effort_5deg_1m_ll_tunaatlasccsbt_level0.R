@@ -23,9 +23,9 @@
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 function(action, entity, config){
-  source("./R/sardara_functions/harmo_time_2.R")
-  source("./R/sardara_functions/harmo_spatial_5.R")
-  source("./R/sardara_functions/format_time_db_format.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_5.R"))
+  source(here::here("./R/sardara_functions/format_time_db_format.R"))
   
   if(!require(readxl)){
     install.packages("readxl")

@@ -52,7 +52,7 @@
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     SKJ       ALL         MT 336.61
 #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     YFT       ALL         MT  11.34
 function(action, entity, config){
-  source("./R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+  source(here::here("./R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R"))
 #packages 
 
   

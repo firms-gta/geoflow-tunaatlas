@@ -366,7 +366,7 @@ source("~/firms-gta/geoflow-tunaatlas/comp_paul_new.R")
 results <- CWP.dataset::compare_georef_nominal(georeferenced, global_nominal_catch_firms_level0, connectionDB = con)
 saveRDS(results, "data/resultsonallthegeorefsuptonom.rds")
 ## Netcdf creation (24h for level 2). This step is to create a netcdf file of the created data. It takes a very long time but creates a very light and comprehensive dataset
-source("./R/tunaatlas_actions/convert_to_netcdf.R")
+source(here::here("./R/tunaatlas_actions/convert_to_netcdf.R"))
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 wd <- getwd()
 # tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
@@ -386,7 +386,7 @@ for (entitynumber in 1:length(config$metadata$content$entities)){
 
 setwd(wd)
 
-source("./R/tunaatlas_actions/process_entities_for_DOI.R")
+source(here::here("./R/tunaatlas_actions/process_entities_for_DOI.R"))
 process_entities_for_DOI(tunaatlas_qa_global_datasets_catch_path, "~/firms-gta/geoflow-tunaatlas/jobs/processed_entities_for_DOI")
 
 # Pakcages for markdown

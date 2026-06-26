@@ -2,7 +2,7 @@ harmo_spatial_4 = function (df_input, colname_latitude, colname_longitude, colna
           ColCodeSquareSize) 
 {
   # function to create CWP grid from lat long provided by IATTC.
-  source("./R/sardara_functions/harmo_spatial_1.R")
+  source(here::here("./R/sardara_functions/harmo_spatial_1.R"))
   indice.quad.4 <- which(df_input[, colname_longitude] > -180 & df_input[, colname_longitude] < 0 & df_input[, colname_latitude] > 0 & df_input[, colname_latitude] < 90)
   indice.quad.3 <- which(df_input[, colname_longitude] > -180 & df_input[, colname_longitude] < 0 & df_input[, colname_latitude] > -90 & df_input[, colname_latitude] < 0)
   indice.quad.2 <- which(df_input[, colname_longitude] > 0 & df_input[, colname_longitude] < 180 & df_input[, colname_latitude] > -90 & df_input[, colname_latitude] < 0)

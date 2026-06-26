@@ -23,8 +23,8 @@
 #'
 
 function(action, entity, config){
-  source("./R/sardara_functions/harmo_time_2.R")
-  source("./R/sardara_functions/harmo_spatial_3.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_3.R"))
   
   
 

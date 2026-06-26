@@ -85,13 +85,13 @@ function(action, entity, config){
   
   ##Efforts
   
-  source("./R/sardara_functions/FUN_efforts_IOTC_CE.R")
+  source(here::here("./R/sardara_functions/FUN_efforts_IOTC_CE.R"))
   efforts_pivot_IOTC<-FUN_efforts_IOTC_CE(path_to_raw_dataset,12)
 efforts_pivot_IOTC$CatchUnits<-NULL
 efforts_pivot_IOTC$Source<-NULL
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("./R/sardara_functions/IOTC_CE_effort_pivotDSD_to_harmonizedDSD.R")
+source(here::here("./R/sardara_functions/IOTC_CE_effort_pivotDSD_to_harmonizedDSD.R"))
 efforts<-IOTC_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_IOTC,colToKeep_efforts)
 
 
@@ -99,7 +99,7 @@ colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 efforts$source_authority<-"IOTC"
 efforts$measurement <- "efforts"
 
-# source("./R/sardara_functions/split_measurement_multimonth_if_needed.R")
+# source(here::here("./R/sardara_functions/split_measurement_multimonth_if_needed.R"))
 # efforts <- split_measurement_multimonth_if_needed(efforts)
 
 #----------------------------------------------------------------------------------------------------------------------------

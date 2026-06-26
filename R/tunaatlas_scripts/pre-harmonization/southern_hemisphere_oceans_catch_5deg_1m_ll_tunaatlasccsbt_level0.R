@@ -41,9 +41,9 @@
   #   AU   LL 1987-07-01 1987-08-01  6325150    ALL     SBF       ALL         NO     1
   #   AU   LL 1987-09-01 1987-10-01  6330150    ALL     SBF       ALL         NO    14
 function(action, entity, config){
-  source("./R/sardara_functions/harmo_time_2.R")
-  source("./R/sardara_functions/harmo_spatial_5.R")
-  source("./R/sardara_functions/format_time_db_format.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_5.R"))
+  source(here::here("./R/sardara_functions/format_time_db_format.R"))
   #packages
 
 

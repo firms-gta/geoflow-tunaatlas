@@ -61,13 +61,13 @@ options(encoding = "UTF-8")
  
 ## Catches
 
-source("./R/sardara_functions/FUN_catches_IOTC_CE.R")
+source(here::here("./R/sardara_functions/FUN_catches_IOTC_CE.R"))
 ### Reach the catches pivot DSD using a function stored in IOTC_functions.R
 catches_pivot_IOTC<-FUN_catches_IOTC_CE(path_to_raw_dataset,last_column_not_catch_value=11,"CoastalLongline")
 
 ### Reach the catches harmonized DSD using a function in IOTC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("./R/sardara_functions/IOTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source(here::here("./R/sardara_functions/IOTC_CE_catches_pivotDSD_to_harmonizedDSD.R"))
 catches<-IOTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IOTC,colToKeep_captures)
 
 colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")

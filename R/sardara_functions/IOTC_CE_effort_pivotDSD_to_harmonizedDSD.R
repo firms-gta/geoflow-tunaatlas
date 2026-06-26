@@ -37,7 +37,7 @@ IOTC_CE_effort_pivotDSD_to_harmonizedDSD <- function(efforts_pivot_IOTC, colToKe
     dplyr::ungroup()
   
   if (!exists("harmo_spatial_2")) {
-    source("./R/sardara_functions/harmo_spatial_2.R")
+    source(here::here("./R/sardara_functions/harmo_spatial_2.R"))
   }
   efforts_pivot_IOTC <- harmo_spatial_2(efforts_pivot_IOTC, "AreaName")
   
