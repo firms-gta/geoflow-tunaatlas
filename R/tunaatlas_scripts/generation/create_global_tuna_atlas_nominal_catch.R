@@ -48,7 +48,7 @@ function(action, entity, config){
   con <- config$software$output$dbi
   
   #scripts
-  url_scripts_create_own_tuna_atlas <- "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation"
+  url_scripts_create_own_tuna_atlas <- here::here("./R/tunaatlas_scripts/generation")
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
   
   # For final processing
