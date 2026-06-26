@@ -504,12 +504,13 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       file = here::here("config/catch_ird_level0_local.json"),
       rename_suffix = "level_0_catch_2026"
     )
-    
+    if (run_step("summaries")) {
     run_step_summary(
       workflow_file = "config/catch_ird_level0_local.json",
       workflow_output = tunaatlas_level0_catch_path,
       source_authority = "all"
     )
+    }
   }
   
   if (run_step("level1")) {
@@ -517,12 +518,14 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       file = here::here("config/catch_ird_level1_local.json"),
       rename_suffix = "level_1_catch_2026"
     )
-    
+    if (run_step("summaries")) {
+      
     run_step_summary(
       workflow_file = "config/catch_ird_level1_local.json",
       workflow_output = tunaatlas_level1_catch_path,
       source_authority = "all"
     )
+    }
   }
   
   if (run_step("level2")) {
@@ -530,12 +533,14 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       file = here::here("config/catch_ird_level2_local.json"),
       rename_suffix = "level_2_catch_2026"
     )
-    
+    if (run_step("summaries")) {
+      
     run_step_summary(
       workflow_file = "config/catch_ird_level2_local.json",
       workflow_output = tunaatlas_level2_catch_path,
       source_authority = "all"
     )
+    }
   }
   
   # ---------------------------------------------------------------------------
