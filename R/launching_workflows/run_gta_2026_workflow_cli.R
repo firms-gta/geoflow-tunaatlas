@@ -12,6 +12,7 @@
 #    The host directory is mounted directly where the workflow expects it:
 #
 #   mkdir -p /home/grasset/gta_output/jobs
+#   chmod -R u+rwX /home/grasset/gta_output/jobs
 #
 #   docker run --rm \
 #     -v /home/grasset/data/GTA_2026:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
@@ -30,7 +31,9 @@
 #
 #   mkdir -p /home/grasset/gta_runtime_data
 #   mkdir -p /home/grasset/gta_output/jobs
-#
+#   chmod -R u+rwX /home/grasset/gta_output/jobs
+#   chmod -R u+rwX /home/grasset/gta_runtime_data
+# 
 #   docker run --rm \
 #     -v /home/grasset/Downloads/all_raw_data_GTA.zip:/data/GTA_2026.zip:ro \
 #     -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
