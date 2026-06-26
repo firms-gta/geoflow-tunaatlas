@@ -120,7 +120,7 @@ efforts_pivot_WCPFC[index.nr,"CatchUnits"]<- "no"
 # School
 efforts_pivot_WCPFC$School<-"OTH"
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
 efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
 
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")

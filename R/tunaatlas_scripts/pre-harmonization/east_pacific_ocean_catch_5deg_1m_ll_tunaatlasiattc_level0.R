@@ -124,7 +124,7 @@ colnames(catches)[colnames(catches)=="Flag"] <- "FishingFleet"
 
 # Reach the catches harmonized DSD using a function in IATTC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches,colToKeep_captures)
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")

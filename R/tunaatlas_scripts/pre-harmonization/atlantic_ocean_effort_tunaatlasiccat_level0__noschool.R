@@ -127,7 +127,7 @@ config$logger.info(paste0("BEGIN  function   \n"))
 
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
 
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R")
+# source("./R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R")
 # efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCAT_CE_species_colnames)
 
 efforts_pivot_ICCAT <- t2ce %>%
@@ -136,7 +136,7 @@ efforts_pivot_ICCAT <- t2ce %>%
     -CatchUnit
   )
 
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
+# source("./R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 # efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
 
 # Keep all columns except the raw effort/unit columns,
@@ -213,7 +213,7 @@ efforts_pivot_ICCAT <- efforts_pivot_ICCAT[, c("FishingFleet", setdiff(names(eff
 
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
 efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
 

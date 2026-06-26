@@ -42,7 +42,7 @@
 function(action, entity, config){
   
   #deprecated use of https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/indian_ocean_cwp.R 
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
+  source("./R/sardara_functions/format_time_db_format.R")
 #packages
 if(!require(dplyr)){
   install.packages("dplyr")

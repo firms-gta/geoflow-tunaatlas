@@ -66,21 +66,20 @@ WORKDIR ${PROJECT_DIR}
 #   - full LaTeX stack
 #   - RStudio Server
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    sudo \
     git \
     curl \
     wget \
     unzip \
     dos2unix \
     cmake \
-    make \
-    g++ \
     pkg-config \
     protobuf-compiler \
     gdal-bin \
     udunits-bin \
     redland-utils \
     libssl-dev \
-    libcurl4-openssl-dev \
+    libcurl4-gnutls-dev \
     libxml2-dev \
     libudunits2-dev \
     libproj-dev \
@@ -123,10 +122,32 @@ RUN Rscript -e "install.packages(c('remotes','jsonlite'), repos='https://cloud.r
  && Rscript -e "ver <- jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version; remotes::install_version('renv', version = ver, upgrade = 'never', repos = 'https://cloud.r-project.org')" \
  && Rscript -e "renv::restore(prompt = FALSE)"
 
-RUN chown -R rstudio:rstudio ${PROJECT_DIR} ${RENV_PATHS_ROOT} /data
+RUN chown -R rstudio:rstudio ${PROJECT_DIR} /data
+
+# Temporary local override for testing local files.
+# Build from repository root:
+#   docker build -f docker/Dockerfile.workflow -t gta-workflow:latest .
+COPY . ${PROJECT_DIR}
+
+RUN chown -R rstudio:rstudio ${PROJECT_DIR} /data
+
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+ENV FDI_MAPPINGS_CACHE_DIR=/opt/fdi-mappings-cache
+ENV FDI_MAPPINGS_REF="a0b80ba8bc67536b1ba178b04fa3d03011a2f6eb"
+
+# Still root here
+RUN mkdir -p "$FDI_MAPPINGS_CACHE_DIR" && \
+    chown -R rstudio:rstudio "$FDI_MAPPINGS_CACHE_DIR"
 
 USER rstudio
 
 WORKDIR ${PROJECT_DIR}
+
+RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
+ | xargs -0 perl -CSD -pi -e "s/[‘’]/'/g; s/[“”]/'/g; s/°/ degrees /g; s/–/-/g; s/—/-/g; s/…/.../g"
+
+RUN Rscript -e "source('./R/docker_creation/cache_fdi_mappings.R'); cache_fdi_mappings(mapping_cache_dir = Sys.getenv('FDI_MAPPINGS_CACHE_DIR'), fdi_mappings_ref = Sys.getenv('FDI_MAPPINGS_REF'))"
 
 CMD ["Rscript", "R/launching_workflows/run_gta_2026_workflow_cli.R"]

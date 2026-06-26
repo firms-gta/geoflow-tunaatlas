@@ -20,12 +20,7 @@
         "source": "config/geoflow_entities_tuna_global_datasets_ird_level1 - 2026_worfklow_catch_level1.csv"
       }
     ],
-    "contacts": [
-      {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-      }
-    ]
+    "contacts": []
   },
   "software": [],
   "actions": [

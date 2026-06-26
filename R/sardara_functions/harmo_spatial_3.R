@@ -1,7 +1,7 @@
 harmo_spatial_3 = function (df_input, colname_latitude, colname_longitude, SquareSize, 
           CodeSquareSize) 
 {
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_1.R")
+  source("./R/sardara_functions/harmo_spatial_1.R")
   df_input$Lon_W_or_E <- substr(df_input[, colname_longitude], nchar(df_input[, colname_longitude]), nchar(df_input[, colname_longitude]))
   df_input$Lat_N_or_S <- substr(df_input[, colname_latitude], nchar(df_input[, colname_latitude]), nchar(df_input[, colname_latitude]))
   df_input[, colname_longitude] <- sub("W", "", df_input[, colname_longitude])

@@ -17,7 +17,7 @@ if (action_to_do=="disaggregate"){
 
 
 config$logger.info("BEGIN spatial_curation_downgrade_resolution() function")
-source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
+source(here::here("./R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R"))
 georef_dataset<-spatial_curation_downgrade_resolution(con,georef_dataset,resolution,remove)
 config$logger.info("END spatial_curation_downgrade_resolution() function")
 georef_dataset<-georef_dataset$df

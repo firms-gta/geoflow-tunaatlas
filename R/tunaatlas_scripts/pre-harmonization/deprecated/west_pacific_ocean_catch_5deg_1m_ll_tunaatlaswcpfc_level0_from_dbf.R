@@ -66,7 +66,7 @@ options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
 
 ## Catches
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_WCPFC_CE_allButPurseSeine.R")
+source("./R/sardara_functions/FUN_catches_WCPFC_CE_allButPurseSeine.R")
 ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
 catches_pivot_WCPFC<-FUN_catches_WCPFC_CE_allButPurseSeine (path_to_raw_dataset)
 catches_pivot_WCPFC$Gear<-"L"
@@ -101,7 +101,7 @@ catches_pivot_WCPFC$School<-"UNK"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 
 colnames(catches)<-c("fishingfleet","gear","time_start","time_end","geographic_identifier","schooltype","species","catchtype","unit","value")

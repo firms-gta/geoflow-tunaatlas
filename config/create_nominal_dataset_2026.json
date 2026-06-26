@@ -20,12 +20,7 @@
         "source": "config/geoflow_entities_tuna_global_datasets_ird_level2 - 2026_worfklow_nominal.csv"
       }
     ],
-    "contacts" : [
-      {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-      }
-    ]
+    "contacts" : []
   },
   "software": [
 	{
@@ -61,7 +56,7 @@
     },
     {
       "id": "enrich_metadata",
-      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/enrich_metadata.R",
+      "script": "./master/tunaatlas_actions/enrich_metadata.R",
       "run": false
     },
     {
@@ -71,7 +66,7 @@
     },
     {
       "id": "load_metadata",
-      "script": "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/tunaatlas_actions/load_metadata.R",
+      "script": "./master/tunaatlas_actions/load_metadata.R",
       "run": false
     },
     {

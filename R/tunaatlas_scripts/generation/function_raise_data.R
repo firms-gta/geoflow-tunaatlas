@@ -22,7 +22,7 @@ function_raise_data<-function(fact,source_authority_filter = c("IOTC", "CCSBT", 
   
   nominal_dataset_df<-nominal_dataset_df[which(nominal_dataset_df$source_authority %in% source_authority_filter),]
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/raise_get_rf.R")
+  source("./R/sardara_functions/raise_get_rf.R")
   
   unk_dim <- setdiff(dim_perfectly_compatible_data, x_raising_dimensions)
   

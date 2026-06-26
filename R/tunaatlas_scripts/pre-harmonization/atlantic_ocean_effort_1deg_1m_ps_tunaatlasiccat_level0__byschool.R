@@ -89,7 +89,7 @@ RFMO_CE <- RFMO_CE[, c("FishingFleet", setdiff(names(RFMO_CE), "FishingFleet"))]
 last_column_not_catch_value=27
 RFMO_CE<-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
+source("./R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
 efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c("Eff1","Eff2","Eff3","Eff4","Eff5"),c("Eff1Type","Eff2Type","Eff3Type","Eff4Type","Eff5Type"))
 
 # School
@@ -98,7 +98,7 @@ efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c("Eff1","Eff
 efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::mutate(FishMode = ifelse(FishMode == "n/a", "OTH", FishMode)) 
 efforts_pivot_ICCAT<- efforts_pivot_ICCAT %>% dplyr::rename("School" = "FishMode")
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
 efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::rename(SquareTypeCode = GeoStrataCode) # to match definition in ICCAT_CE_effort_pivotDSD_to_harmonizedDSD
 efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
 efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))

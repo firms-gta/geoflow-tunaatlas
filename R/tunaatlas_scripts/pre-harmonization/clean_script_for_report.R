@@ -1,9 +1,9 @@
 #' Clean and Prepare Script for Reporting
 #'
 #' This function takes a path to a script and performs a series of cleaning operations to prepare it for reporting.
-#' The script is fetched remotely, cleaned of certain elements, and transformed to meet specific requirements.
+#' The script is fetched remotely or read locally, cleaned of certain elements, and transformed to meet specific requirements.
 #'
-#' @param script_path The URL path to the script that needs to be cleaned.
+#' @param script_path The URL or local path to the script that needs to be cleaned.
 #'
 #' @details The cleaning process includes:
 #' - Removing function definitions and their opening braces.
@@ -26,27 +26,106 @@
 #' @import httr
 clean_script <- function(script_path) {
   require(httr)
-  # uncomment thos lines to create the Global action for geoflow to be done
-  response <- GET(script_path)
-  content_lines <- readLines(textConnection(content(response, "text")))
+  require(stringr)
+  
+  resolve_local_script_path <- function(script_path) {
+    
+    # First try the path exactly as provided.
+    if (file.exists(script_path)) {
+      return(normalizePath(script_path, mustWork = TRUE))
+    }
+    
+    # Then try relative to the project directory.
+    project_dir <- Sys.getenv(
+      "PROJECT_DIR",
+      unset = "/home/rstudio/geoflow-tunaatlas"
+    )
+    
+    script_path_clean <- sub("^\\./", "", script_path)
+    
+    candidate_paths <- c(
+      file.path(project_dir, script_path_clean),
+      file.path("/home/rstudio/geoflow-tunaatlas", script_path_clean)
+    )
+    
+    if (requireNamespace("here", quietly = TRUE)) {
+      candidate_paths <- c(
+        candidate_paths,
+        file.path(here::here(), script_path_clean)
+      )
+    }
+    
+    existing_candidate <- candidate_paths[file.exists(candidate_paths)][1]
+    
+    if (!is.na(existing_candidate)) {
+      return(normalizePath(existing_candidate, mustWork = TRUE))
+    }
+    
+    stop(
+      "script_path is neither a valid URL nor an existing local file.\n",
+      "Original script_path: ", script_path, "\n",
+      "Tried:\n  - ", paste(candidate_paths, collapse = "\n  - "),
+      call. = FALSE
+    )
+  }
+  
+  if (grepl("^https?://", script_path)) {
+    message("Reading remote script: ", script_path)
+    
+    response <- httr::GET(script_path)
+    httr::stop_for_status(response)
+    
+    content_lines <- readLines(
+      textConnection(httr::content(response, "text", encoding = "UTF-8")),
+      warn = FALSE
+    )
+    
+  } else {
+    local_script_path <- resolve_local_script_path(script_path)
+    
+    message("Reading local script: ", local_script_path)
+    
+    content_lines <- readLines(
+      local_script_path,
+      warn = FALSE,
+      encoding = "UTF-8"
+    )
+  }
+  
   # Remove function definitions and the opening braces following them
   lines <- str_remove_all(content_lines, "^function.*\\{")
   
   # Reverse the array to handle the closing brace
   lines_reversed <- rev(lines)
+  
   # Remove the first occurrence of the closing brace
-  lines_reversed[which(str_detect(lines_reversed, "\\}"))[1]] <- str_remove(lines_reversed[which(str_detect(lines_reversed, "\\}"))[1]], "\\}")
+  closing_brace_index <- which(str_detect(lines_reversed, "\\}"))[1]
+  
+  if (!is.na(closing_brace_index)) {
+    lines_reversed[closing_brace_index] <- str_remove(
+      lines_reversed[closing_brace_index],
+      "\\}"
+    )
+  }
+  
   # Restore the original order of lines
   lines <- rev(lines_reversed)
   
   # Replace 'output_name_dataset' assignments with a specific fixed string
-  lines <- str_replace_all(lines, "output_name_dataset\\s*<-.*", 'output_name_dataset <- "Dataset_harmonized.csv"')
+  lines <- str_replace_all(
+    lines,
+    "output_name_dataset\\s*<-.*",
+    'output_name_dataset <- "Dataset_harmonized.csv"'
+  )
   
   # Remove lines containing only dashes
   lines <- lines[!str_detect(lines, "^#\\-+$")]
   
   # Remove lines containing specific keywords
-  lines <- lines[!str_detect(lines, "entity|action|config|codelists|@geoflow|@eblondel|current|code_lists")]
+  lines <- lines[!str_detect(
+    lines,
+    "entity|action|config|codelists|@geoflow|@eblondel|current|code_lists"
+  )]
   
   # Update write.csv lines and add a line for georef_dataset assignment
   for (i in seq_along(lines)) {
@@ -55,29 +134,27 @@ clean_script <- function(script_path) {
       georef_line <- sprintf("georef_dataset <- %s", dataset_name)
       lines <- append(lines, georef_line, after = i)
     }
-  }  
+  }
   
-  
-  if(grepl("effort",  script_path)){
-    line_mapping = 'mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))'
-    line_fact <- 'fact <- "effort"' 
-  } else { 
+  if (grepl("effort", script_path)) {
+    line_mapping <- 'mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))'
+    line_fact <- 'fact <- "effort"'
+  } else {
     line_fact <- 'fact <- "catch"'
-    line_mapping = 'mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))'
-    }
+    line_mapping <- 'mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))'
+  }
   
   lines_add <- ''
   
-  if(sum(grepl("path_to_raw_dataset_catch",  as.character(lines)))>0){
-    lines_add <- c(lines_add, 'path_to_raw_dataset_catch <- ') 
-    lines_add <- c(lines_add, 'path_to_raw_dataset_effort <- ') 
+  if (sum(grepl("path_to_raw_dataset_catch", as.character(lines))) > 0) {
+    lines_add <- c(lines_add, 'path_to_raw_dataset_catch <- ')
+    lines_add <- c(lines_add, 'path_to_raw_dataset_effort <- ')
     
-  } else if(sum(grepl("path_to_raw_dataset",  lines))) {
-    lines_add <- c(lines_add, 'path_to_raw_dataset <- ') 
+  } else if (sum(grepl("path_to_raw_dataset", lines)) > 0) {
+    lines_add <- c(lines_add, 'path_to_raw_dataset <- ')
   }
   
-  # Add extra lines for data processing 
-  
+  # Add extra lines for data processing
   intro_lines <- c(
     "#'# Introduction",
     "#'",
@@ -106,9 +183,11 @@ clean_script <- function(script_path) {
   
   extra_lines <- c(
     "#'@ Load pre-harmonization scripts and apply mappings",
-    
-    "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
-    "source('local_map_codelists_no_DB.R')",
+    "source(file.path(Sys.getenv('PROJECT_DIR', '/home/rstudio/geoflow-tunaatlas'), 'R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))",
+    # avant c'etait ca , les deux sont interessants, a savoirle deuxieme poru que les gens puissent le run eu meme et le premier pour que ca soit dans le docker
+    # cloisonne dinternet
+    # "download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')",
+    # "source('local_map_codelists_no_DB.R')",
     line_fact,
     line_mapping,
     "#'@ Handle unmapped values and save the results",
@@ -121,8 +200,6 @@ clean_script <- function(script_path) {
   )
   
   lines <- c(intro_lines, setup_lines, lines_add, lines, extra_lines)
-  
-  
   
   return(lines)
 }

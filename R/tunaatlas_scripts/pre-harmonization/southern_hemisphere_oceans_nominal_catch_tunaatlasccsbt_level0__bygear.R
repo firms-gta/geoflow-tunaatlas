@@ -51,7 +51,7 @@
 # 6                t        3928.10401            CCSBT
 
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
+  source("./R/sardara_functions/format_time_db_format.R")
   #packages
   
   

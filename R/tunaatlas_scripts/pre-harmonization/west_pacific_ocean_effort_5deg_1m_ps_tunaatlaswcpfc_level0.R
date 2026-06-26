@@ -92,7 +92,7 @@ options(encoding = "UTF-8")
 DF <- read.csv(path_to_raw_dataset)
 colnames(DF) <- toupper(colnames(DF))
 DF <- as.data.frame(DF)
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
+source("./R/sardara_functions/harmo_spatial_3.R")
 DF <- harmo_spatial_3(DF, 
                                        "LAT5", "LON5", 5, 6)  %>% dplyr::select(-CWP_GRID)
 

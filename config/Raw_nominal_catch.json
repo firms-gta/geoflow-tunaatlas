@@ -20,12 +20,7 @@
         "source": "https://docs.google.com/spreadsheets/d/13SJB2PYkCCdrzw8HNJMPFg0yXs0OSYY2mUOAl5dagUc/edit?gid=186137991#gid=186137991"
       }
     ],
-    "contacts" : [
-      {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-      }
-    ]
+    "contacts" : []
   },
   "software": [
     {

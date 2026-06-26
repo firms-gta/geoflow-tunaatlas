@@ -35,4 +35,4 @@ process:Data upload[""The CSV file was integrated into the Tuna Atlas database."
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"
+action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@./R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"

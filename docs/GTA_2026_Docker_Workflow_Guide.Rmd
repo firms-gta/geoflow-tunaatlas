@@ -1,0 +1,454 @@
+---
+title: "GTA 2026 Docker workflow guide"
+author: "Global Tuna Atlas"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# Purpose
+
+This document gives a clean operational guide for running the **GTA 2026 workflow** in Docker.
+
+The workflow can be launched from:
+
+- an already extracted `GTA_2026` data folder;
+- a mounted `.zip` archive;
+- a direct archive URL, if the image/run command is allowed to access the internet.
+
+The recommended production logic is:
+
+1. build the Docker image with all R/system dependencies;
+2. mount the input data and the `jobs/` output folder at runtime;
+3. run only the selected workflow steps through `GTA_STEPS`;
+4. keep all outputs outside the container through Docker volumes.
+
+# Build the workflow image
+
+Run this from the root of the `geoflow-tunaatlas` repository.
+
+```bash
+cd ~/geoflow-tunaatlas
+
+docker build \
+  -f docker/Dockerfile.workflow \
+  -t gta-workflow:latest \
+  .
+```
+
+Optional: rebuild without cache when Docker seems to reuse an old version.
+
+```bash
+cd ~/geoflow-tunaatlas
+
+docker build --no-cache \
+  -f docker/Dockerfile.workflow \
+  -t gta-workflow:latest \
+  .
+```
+
+Check that the image exists.
+
+```bash
+docker images | grep gta
+```
+
+# Runtime folders
+
+The examples below use these host folders:
+
+```bash
+mkdir -p /home/grasset/gta_output/jobs
+mkdir -p /home/grasset/gta_runtime_data
+```
+
+Recommended host paths:
+
+| Purpose | Host path | Container path |
+|---|---|---|
+| Extracted raw GTA data | `/home/grasset/Downloads/all_raw_data_GTA` | `/home/rstudio/geoflow-tunaatlas/data/GTA_2026` |
+| Runtime data folder | `/home/grasset/gta_runtime_data` | `/home/rstudio/geoflow-tunaatlas/data` |
+| Workflow outputs | `/home/grasset/gta_output/jobs` | `/home/rstudio/geoflow-tunaatlas/jobs` |
+
+The `jobs/` volume is important: without it, outputs created inside the container disappear when `--rm` removes the container.
+
+# Check the extracted data folder before launching
+
+Use this when running from an already extracted directory.
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  gta-workflow:latest \
+  bash -lc '
+    DATA_DIR=/home/rstudio/geoflow-tunaatlas/data/GTA_2026
+    REQUIRED_FILE=iotc_nominal_catch_firms_level0_2026-04-13.csv
+
+    echo "Content of GTA_2026:"
+    ls -lh "$DATA_DIR" | head -40
+
+    echo ""
+    echo "Checking required file:"
+    test -f "$DATA_DIR/$REQUIRED_FILE" \
+      && echo "OK: $DATA_DIR/$REQUIRED_FILE exists" \
+      || echo "ERROR: required file not found at expected level"
+  '
+```
+
+If the check fails, the mounted folder is probably one level too high or one level too low.
+
+# Run pre-harmonisation from an extracted folder
+
+Use this when `all_raw_data_GTA` is already extracted on the host.
+
+```bash
+mkdir -p /home/grasset/gta_output/jobs
+
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=rawdata \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+This runs the three pre-harmonisation workflows:
+
+- nominal catch;
+- georeferenced catch;
+- georeferenced effort.
+
+The outputs are written under:
+
+```bash
+/home/grasset/gta_output/jobs
+```
+
+List the latest job folders:
+
+```bash
+find /home/grasset/gta_output/jobs -maxdepth 1 -type d | sort | tail -20
+```
+
+# Run pre-harmonisation from a mounted ZIP archive
+
+Use this when the raw data are available as a local `.zip`.
+
+```bash
+mkdir -p /home/grasset/gta_runtime_data
+mkdir -p /home/grasset/gta_output/jobs
+
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA.zip:/data/GTA_2026.zip \
+  -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=rawdata \
+  -e GTA_DATA_SOURCE=volume_zip \
+  -e GTA_DATA_PATH=/data/GTA_2026.zip \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+The archive is extracted inside:
+
+```bash
+/home/rstudio/geoflow-tunaatlas/data/GTA_2026
+```
+
+which corresponds to this host folder:
+
+```bash
+/home/grasset/gta_runtime_data/GTA_2026
+```
+
+# Run Level 0 and Level 1 after pre-harmonisation
+
+## Standard case
+
+Use this when the pre-harmonisation part has already been run and the workflow configuration can find the pre-harmonised outputs through the mounted `jobs/` folder.
+
+This skips `rawdata` and starts directly from the harmonised downstream steps needed for Level 0 and Level 1.
+
+```bash
+mkdir -p /home/grasset/gta_output/jobs
+
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=nominal,level0,level1 \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+Why `nominal,level0,level1` and not only `level0,level1`?
+
+- `level0` depends on the harmonised nominal catch dataset.
+- `level1` depends on the harmonised georeferenced catch inputs.
+- If the nominal dataset was already created in a previous run and your JSON files already point to it, you can try only `level0,level1`.
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=level0,level1 \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+## Explicit R call with known pre-harmonisation job paths
+
+Use this version when you want a fully explicit run from R.
+
+Replace the three `jobs/...` paths with the actual job folders produced by the pre-harmonisation run.
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  gta-workflow:latest \
+  Rscript -e "
+    data_dir <- '/home/rstudio/geoflow-tunaatlas/data/GTA_2026'
+
+    source('R/launching_workflows/GTA_2026_creation.R')
+
+    run_gta_workflow(
+      steps_to_run = c('nominal', 'level0', 'level1'),
+      data_source = 'volume_dir',
+      data_path = data_dir,
+      bootstrap_restore_renv = FALSE,
+      existing_paths = list(
+        raw_nominal_catch = 'jobs/PASTE_RAW_NOMINAL_JOB_HERE',
+        raw_data_georef = 'jobs/PASTE_RAW_GEOREF_CATCH_JOB_HERE',
+        raw_data_georef_effort = 'jobs/PASTE_RAW_GEOREF_EFFORT_JOB_HERE'
+      )
+    )
+  "
+```
+
+Important note: this explicit `existing_paths` block is useful only if the workflow code or JSON configuration actually uses these paths for downstream workflows. If the JSON files already contain fixed or auto-detected job paths, keep the simpler `GTA_STEPS=nominal,level0,level1` example.
+
+# Run Level 0, Level 1, and Level 2 after pre-harmonisation
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=nominal,level0,level1,level2 \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+# Run invalid-data summaries during pre-harmonisation
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=rawdata \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -e GTA_SUMMARISE_INVALID_RAW=true \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+# Run with no internet access
+
+This is useful to check that the image does not download code or mapping files during execution.
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=rawdata \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  gta-workflow:latest
+```
+
+If this fails because a mapping file is downloaded from GitHub, move the dependency to the Docker build stage. For example, clone or archive `fdi-mappings` during image build and use a local path through an environment variable such as:
+
+```bash
+FDIWG_MAPPINGS_DIR=/opt/fdi-mappings
+```
+
+# Quick debugging commands
+
+Check what the container sees:
+
+```bash
+docker run --rm --network none \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  gta-workflow:latest \
+  bash -lc '
+    pwd
+    ls -lh /home/rstudio/geoflow-tunaatlas/data/GTA_2026 | head
+    test -f /home/rstudio/geoflow-tunaatlas/data/GTA_2026/iotc_nominal_catch_firms_level0_2026-04-13.csv \
+      && echo "Data mount OK" \
+      || echo "Data mount ERROR"
+  '
+```
+
+Check that the image contains the expected workflow script:
+
+```bash
+docker run --rm gta-workflow:latest \
+  grep -n "run_gta_workflow" R/launching_workflows/GTA_2026_creation.R | head
+```
+
+Check the wrapper entrypoint:
+
+```bash
+docker run --rm gta-workflow:latest \
+  grep -n "source" R/launching_workflows/run_gta_2026_workflow_cli.R
+```
+
+# Recommended conventions
+
+Use these values consistently:
+
+| Variable | Recommended value |
+|---|---|
+| `GTA_STEPS` | `rawdata`, `nominal,level0,level1`, `nominal,level0,level1,level2` |
+| `GTA_DATA_SOURCE` | `volume_dir` for extracted data, `volume_zip` for a ZIP archive |
+| `GTA_DATA_PATH` | container-side path to the mounted data folder or archive |
+| `GTA_BOOTSTRAP_RESTORE_RENV` | `false` inside the production Docker image |
+| `GTA_SUMMARISE_INVALID_RAW` | `true` only when invalid-data summaries are needed |
+
+# Notes for future improvement
+
+The current workflow already supports selected steps through `GTA_STEPS`, and the main R function accepts an `existing_paths` list. A useful future improvement is to make the Docker CLI wrapper read existing job paths from environment variables, for example:
+
+```bash
+GTA_RAW_NOMINAL_CATCH=jobs/...
+GTA_RAW_DATA_GEOREF=jobs/...
+GTA_RAW_DATA_GEOREF_EFFORT=jobs/...
+GTA_TUNAATLAS_NOMINAL=jobs/...
+GTA_TUNAATLAS_LEVEL0_CATCH=jobs/...
+GTA_TUNAATLAS_LEVEL1_CATCH=jobs/...
+GTA_TUNAATLAS_LEVEL2_CATCH=jobs/...
+```
+
+This would make partial reruns and reporting runs easier to launch from Docker without writing a custom `Rscript -e` command.
+
+# Build Docker images
+
+This section gives the build commands for the two Docker images used in the GTA 2026 workflow.
+
+## Build the workflow image
+
+The workflow image is the main image used to run the data production steps: raw pre-harmonisation, nominal, Level 0, Level 1, and Level 2.
+
+Run this command from the root of the `geoflow-tunaatlas` repository:
+
+```bash
+cd ~/geoflow-tunaatlas
+
+docker build \
+  -f docker/Dockerfile.workflow \
+  -t gta-workflow:latest \
+  .
+```
+
+If you need to force a full rebuild without Docker cache:
+
+```bash
+cd ~/geoflow-tunaatlas
+
+docker build --no-cache \
+  -f docker/Dockerfile.workflow \
+  -t gta-workflow:latest \
+  .
+```
+
+After the build, check that the image exists:
+
+```bash
+docker images | grep gta-workflow
+```
+
+## Build the reporting image
+
+The reporting image is built on top of the workflow image and adds reporting-specific dependencies such as Pandoc/LaTeX tools.
+
+Build `gta-workflow:latest` first, then run:
+
+```bash
+cd ~/geoflow-tunaatlas
+
+docker build \
+  -f docker/Dockerfile.reporting \
+  --build-arg BASE_IMAGE=gta-workflow:latest \
+  -t gta-reporting:latest \
+  .
+```
+
+After the build, check that both images exist:
+
+```bash
+docker images | grep gta
+```
+
+# Run the reporting image
+
+Use `gta-reporting:latest` when you want to rerun summaries or reports from existing workflow outputs.
+
+## Run summary reports from existing Level 0, Level 1, and Level 2 jobs
+
+Replace the `jobs/...` values with the real job folders produced by the previous workflow run.
+
+```bash
+mkdir -p /home/grasset/gta_output/jobs
+mkdir -p /home/grasset/gta_runtime_data
+
+docker run --rm --network none \
+  -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=summaries \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  -e GTA_TUNAATLAS_LEVEL0_CATCH="jobs/PASTE_LEVEL0_JOB_HERE" \
+  -e GTA_TUNAATLAS_LEVEL1_CATCH="jobs/PASTE_LEVEL1_JOB_HERE" \
+  -e GTA_TUNAATLAS_LEVEL2_CATCH="jobs/PASTE_LEVEL2_JOB_HERE" \
+  gta-reporting:latest
+```
+
+## Run comparison reports from existing nominal and Level 2 jobs
+
+Replace the `jobs/...` values with the real job folders produced by the previous workflow run.
+
+```bash
+mkdir -p /home/grasset/gta_output/jobs
+mkdir -p /home/grasset/gta_runtime_data
+
+docker run --rm --network none \
+  -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
+  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+  -e GTA_STEPS=reports \
+  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+  -e GTA_TUNAATLAS_NOMINAL="jobs/PASTE_NOMINAL_JOB_HERE" \
+  -e GTA_TUNAATLAS_LEVEL2_CATCH="jobs/PASTE_LEVEL2_JOB_HERE" \
+  gta-reporting:latest
+```
+
+Important: the two examples above assume that the CLI wrapper reads the `GTA_TUNAATLAS_*` environment variables and passes them to `existing_paths`. If this has not been implemented yet, use the explicit `Rscript -e` pattern shown earlier in this document, or run summaries/reports in the same execution where the upstream job paths are still available.

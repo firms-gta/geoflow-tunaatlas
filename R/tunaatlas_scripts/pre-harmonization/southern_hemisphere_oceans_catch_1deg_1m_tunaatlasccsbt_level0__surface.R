@@ -43,9 +43,9 @@
   #   AU   BB 1976-12-01 1977-01-01  6334134    ALL     SBT       ALL         MT  56.5
   #   AU   BB 1976-12-01 1977-01-01  6334135    ALL     SBT       ALL         MT  37.0
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_5.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
+  source("./R/sardara_functions/harmo_time_2.R")
+  source("./R/sardara_functions/harmo_spatial_5.R")
+  source("./R/sardara_functions/format_time_db_format.R")
   #packages
 
   

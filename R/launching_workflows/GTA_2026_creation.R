@@ -74,6 +74,82 @@ download_gta_data_from_doi <- function(doi, dst_data_dir) {
   )
 }
 
+flatten_single_root_dir <- function(path) {
+  entries <- list.files(
+    path,
+    all.files = FALSE,
+    no.. = TRUE,
+    full.names = TRUE
+  )
+  
+  if (length(entries) == 1 && dir.exists(entries[1])) {
+    root_dir <- entries[1]
+    
+    message("Flattening archive root directory: ", basename(root_dir))
+    
+    inner_entries <- list.files(
+      root_dir,
+      all.files = TRUE,
+      no.. = TRUE,
+      full.names = TRUE
+    )
+    
+    for (entry in inner_entries) {
+      target <- file.path(path, basename(entry))
+      
+      if (!file.rename(entry, target)) {
+        if (dir.exists(entry)) {
+          dir.create(target, recursive = TRUE, showWarnings = FALSE)
+          file.copy(
+            from = list.files(entry, all.files = TRUE, no.. = TRUE, full.names = TRUE),
+            to = target,
+            recursive = TRUE,
+            overwrite = TRUE
+          )
+          unlink(entry, recursive = TRUE, force = TRUE)
+        } else {
+          file.copy(entry, target, overwrite = TRUE)
+          unlink(entry, force = TRUE)
+        }
+      }
+    }
+    
+    unlink(root_dir, recursive = TRUE, force = TRUE)
+  }
+  
+  invisible(path)
+}
+
+extract_gta_archive <- function(archive, dst_data_dir) {
+  if (!file.exists(archive)) {
+    stop("Archive not found: ", archive, call. = FALSE)
+  }
+  
+  message("Cleaning data directory: ", dst_data_dir)
+  unlink(dst_data_dir, recursive = TRUE, force = TRUE)
+  dir.create(dst_data_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  message("Extracting archive: ", archive)
+  
+  status <- system2(
+    command = "unzip",
+    args = c("-q", "-o", archive, "-d", dst_data_dir)
+  )
+  
+  if (!identical(status, 0L)) {
+    stop("Archive extraction failed: ", archive, call. = FALSE)
+  }
+  
+  flatten_single_root_dir(dst_data_dir)
+  
+  top_files <- list.files(dst_data_dir, recursive = FALSE, all.files = FALSE)
+  
+  message("Top-level files/directories after extraction: ", length(top_files))
+  message("Data directory ready: ", dst_data_dir)
+  
+  invisible(dst_data_dir)
+}
+
 prepare_gta_data_source <- function(data_source = "auto",
                                     data_path = NULL,
                                     doi = NULL,
@@ -102,18 +178,10 @@ prepare_gta_data_source <- function(data_source = "auto",
     if (file.exists("/data/GTA_2026.zip")) {
       message("Using mounted GTA zip file: /data/GTA_2026.zip")
       
-      dir.create(dst_data_dir, recursive = TRUE, showWarnings = FALSE)
-      existing_files <- list.files(dst_data_dir, all.files = FALSE, no.. = TRUE)
-      
-      if (length(existing_files) == 0) {
-        message("Unzipping /data/GTA_2026.zip into: ", dst_data_dir)
-        utils::unzip("/data/GTA_2026.zip", exdir = dst_data_dir)
-      } else {
-        message(
-          "Destination data directory is not empty. Skipping unzip to avoid ",
-          "duplicating or overwriting existing files: ", dst_data_dir
-        )
-      }
+      extract_gta_archive(
+        archive = "/data/GTA_2026.zip",
+        dst_data_dir = dst_data_dir
+      )
       
       return(normalizePath(dst_data_dir, mustWork = TRUE))
     }
@@ -146,6 +214,21 @@ prepare_gta_data_source <- function(data_source = "auto",
     }
     
     message("Using explicit GTA data directory: ", data_path)
+    
+    required_test_file <- file.path(
+      data_path,
+      "iotc_nominal_catch_firms_level0_2026-04-13.csv"
+    )
+    
+    if (!file.exists(required_test_file)) {
+      stop(
+        "The GTA data directory exists, but the expected files are not at the top level.\n",
+        "Missing test file: ", required_test_file, "\n",
+        "Check that data_path points directly to the folder containing the raw files.",
+        call. = FALSE
+      )
+    }
+    
     return(normalizePath(data_path, mustWork = TRUE))
   }
   
@@ -155,23 +238,10 @@ prepare_gta_data_source <- function(data_source = "auto",
       stop("data_path is required when data_source = 'volume_zip'.", call. = FALSE)
     }
     
-    if (!file.exists(data_path)) {
-      stop("Mounted GTA zip file not found: ", data_path, call. = FALSE)
-    }
-    
-    dir.create(dst_data_dir, recursive = TRUE, showWarnings = FALSE)
-    existing_files <- list.files(dst_data_dir, all.files = FALSE, no.. = TRUE)
-    
-    if (length(existing_files) == 0) {
-      message("Unzipping explicit GTA zip file: ", data_path)
-      message("Destination: ", dst_data_dir)
-      utils::unzip(data_path, exdir = dst_data_dir)
-    } else {
-      message(
-        "Destination data directory is not empty. Skipping unzip to avoid ",
-        "duplicating or overwriting existing files: ", dst_data_dir
-      )
-    }
+    extract_gta_archive(
+      archive = data_path,
+      dst_data_dir = dst_data_dir
+    )
     
     return(normalizePath(dst_data_dir, mustWork = TRUE))
   }
@@ -259,6 +329,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # back to the Blue-Cloud cache path.
   options(
     gta.src_data_dir = gta_data_dir,
+    gta_data_dir = gta_data_dir,
     gta.bootstrap_restore_renv = bootstrap_restore_renv
   )
   
@@ -340,6 +411,19 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # Pre-harmonisation workflows
   # ---------------------------------------------------------------------------
   
+  if (run_any_step(c("rawdata", "raw_effort"))) {
+    raw_data_georef_effort <- execute_workflow_maybe_upload(
+      file = here::here("config/All_raw_data_georef_effort.json"),
+      rename_suffix = "_raw_data_georef_effort_final"
+    )
+    
+    running_time_of_workflow(raw_data_georef_effort)
+    
+    if (summarise_invalid_raw) {
+      summarise_invalid(raw_data_georef_effort)
+    }
+  }
+  
   if (run_any_step(c("rawdata", "raw_nominal"))) {
     raw_nominal_catch <- execute_workflow_maybe_upload(
       file = here::here("config/Nominal_catch_2026.json"),
@@ -363,19 +447,6 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     
     if (summarise_invalid_raw) {
       summarise_invalid(raw_data_georef)
-    }
-  }
-  
-  if (run_any_step(c("rawdata", "raw_effort"))) {
-    raw_data_georef_effort <- execute_workflow_maybe_upload(
-      file = here::here("config/All_raw_data_georef_effort.json"),
-      rename_suffix = "_raw_data_georef_effort_final"
-    )
-    
-    running_time_of_workflow(raw_data_georef_effort)
-    
-    if (summarise_invalid_raw) {
-      summarise_invalid(raw_data_georef_effort)
     }
   }
   

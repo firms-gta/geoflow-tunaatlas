@@ -60,7 +60,7 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
 # } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
-# load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/cwp_grids.R")
+# load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")# source("./cwp_grids.R")
 
 running_time_of_workflow <- function(folder){
   # Get the last modified times of the files

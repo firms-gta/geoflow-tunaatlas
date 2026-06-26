@@ -120,7 +120,7 @@ catches_pivot_WCPFC[index.kg,"CatchUnits"]<- "t"
 index.nr <- which( catches_pivot_WCPFC[,"CatchUnits"] == "N" )
 catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")

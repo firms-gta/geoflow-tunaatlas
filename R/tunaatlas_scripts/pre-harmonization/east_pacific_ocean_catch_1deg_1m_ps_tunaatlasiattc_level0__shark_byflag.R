@@ -58,12 +58,12 @@ options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------
 
 ## Catches
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType_Shark.R")
+source("./R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType_Shark.R")
 catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType_Shark(path_to_raw_dataset,"Flag","PS")
 catches_pivot_IATTC$NumSets<-NULL
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")

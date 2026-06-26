@@ -78,7 +78,7 @@ keep_fleet_instead_of_flag=FALSE
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 
 ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_ICCAT_CE.R")
+source("./R/sardara_functions/FUN_catches_ICCAT_CE.R")
 
 config$logger.info(paste0("BEGIN  function   \n"))
 catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(RFMO_CE=t2ce,
@@ -131,7 +131,7 @@ if(keep_fleet_instead_of_flag==TRUE){
   
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
   
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source("./R/sardara_functions/ICCAT_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-ICCAT_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_ICCAT=catches_pivot_ICCAT,
                                                     colToKeep_captures=colToKeep_captures)
 

@@ -35,9 +35,9 @@
 #' 
 
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_5.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
+  source("./R/sardara_functions/harmo_spatial_5.R")
+  source("./R/sardara_functions/harmo_time_2.R")
+  source("./R/sardara_functions/format_time_db_format.R")
   
   if(!(require(dplyr))){ 
     install.packages(dplyr) 
