@@ -51,9 +51,6 @@ ENV GTA_BOOTSTRAP_RESTORE_RENV=false
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
-ENV FDI_MAPPINGS_CACHE_DIR=/opt/fdi-mappings-cache
-ENV FDI_MAPPINGS_REF="a0b80ba8bc67536b1ba178b04fa3d03011a2f6eb"
-
 # -----------------------------------------------------------------------------
 # Create runtime user.
 # -----------------------------------------------------------------------------
@@ -176,6 +173,9 @@ RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
 # -----------------------------------------------------------------------------
 # Download and cache FDI mappings.
 # -----------------------------------------------------------------------------
+
+ENV FDI_MAPPINGS_CACHE_DIR=/opt/fdi-mappings-cache
+ENV FDI_MAPPINGS_REF="98491a38c5f85628e90cae63d740c23a2460aed6"
 
 RUN Rscript -e "source('./R/docker_creation/cache_fdi_mappings.R'); cache_fdi_mappings(mapping_cache_dir = Sys.getenv('FDI_MAPPINGS_CACHE_DIR'), fdi_mappings_ref = Sys.getenv('FDI_MAPPINGS_REF'))"
 
