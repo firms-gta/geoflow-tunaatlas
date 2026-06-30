@@ -8,28 +8,24 @@
 #
 # This image contains:
 #   - R 4.2.3
-#   - system libraries required by spatial/database/R packages
-#   - the geoflow-tunaatlas repository
-#   - the renv-restored R environment
+#   - System libraries required by GTA
+#   - The geoflow-tunaatlas source code
+#   - A restored renv project library
 #
-# It does NOT contain:
-#   - GTA raw data
-#   - LaTeX / full PDF reporting stack
-#   - RStudio Server
+# Faster local build
+# ------------------
+# To avoid downloading all R packages again during the build, run locally:
 #
-# Data should be provided at runtime with a Docker volume:
+#   Rscript -e "renv::isolate()"
 #
-#   docker run \
-#     -v /home/bastien/data/GTA_2026:/data/GTA_2026 \
-#     -e GTA_STEPS=rawdata,level1 \
-#     gta-workflow
+# This copies the current renv environment into:
 #
-# Or with a mounted zip:
+#   renv/library
 #
-#   docker run \
-#     -v /home/bastien/GTA_2026.zip:/data/GTA_2026.zip \
-#     -e GTA_STEPS=rawdata \
-#     gta-workflow
+# Then make sure renv/library is NOT excluded in .dockerignore.
+# Docker will copy the isolated library directly into the image.
+#
+# This is convenient for local builds, but less clean for CI or public builds.
 #
 # =============================================================================
 
@@ -38,33 +34,38 @@ FROM ${BASE_IMAGE}
 
 LABEL maintainer="Grasset Bastien <bastien.grasset@ird.fr>"
 
-ARG GITHUB_BRANCH=master
+# -----------------------------------------------------------------------------
+# Project configuration
+# -----------------------------------------------------------------------------
 
 ENV PROJECT_DIR=/home/rstudio/geoflow-tunaatlas
-ENV RENV_PATHS_ROOT=/opt/renv
-ENV RENV_PATHS_CACHE=/opt/renv/cache
+
 ENV RENV_CONFIG_CACHE_SYMLINKS=FALSE
 
-# Default workflow parameters used by the CLI wrapper.
 ENV GTA_STEPS=rawdata
 ENV GTA_DATA_SOURCE=auto
 ENV GTA_SUMMARISE_INVALID_RAW=false
 ENV GTA_STOP_ON_MISSING_INPUTS=true
 ENV GTA_BOOTSTRAP_RESTORE_RENV=false
 
-# Create the rstudio user even without using rocker/rstudio.
-# This keeps paths consistent with existing scripts and volumes.
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+ENV FDI_MAPPINGS_CACHE_DIR=/opt/fdi-mappings-cache
+ENV FDI_MAPPINGS_REF="a0b80ba8bc67536b1ba178b04fa3d03011a2f6eb"
+
+# -----------------------------------------------------------------------------
+# Create runtime user.
+# -----------------------------------------------------------------------------
+
 RUN id -u rstudio >/dev/null 2>&1 || useradd -m -s /bin/bash rstudio
 
 WORKDIR ${PROJECT_DIR}
 
-# System dependencies required for geospatial, database, XML, NetCDF, and
-# miscellaneous R packages used by the GTA workflow.
-#
-# Deliberately excluded here:
-#   - texlive-*
-#   - full LaTeX stack
-#   - RStudio Server
+# -----------------------------------------------------------------------------
+# Install system dependencies required by the GTA workflow.
+# -----------------------------------------------------------------------------
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     git \
@@ -103,50 +104,78 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfribidi-dev \
  && rm -rf /var/lib/apt/lists/*
 
+# -----------------------------------------------------------------------------
+# Create directories used by the workflow.
+# -----------------------------------------------------------------------------
+
 RUN mkdir -p \
     ${PROJECT_DIR} \
-    ${RENV_PATHS_CACHE} \
+    ${RENV_PATHS_ROOT} \
     /data \
- && chown -R rstudio:rstudio /home/rstudio ${RENV_PATHS_ROOT} /data
+    ${FDI_MAPPINGS_CACHE_DIR} \
+ && chown -R rstudio:rstudio \
+    /home/rstudio \
+    ${RENV_PATHS_ROOT} \
+    /data \
+    ${FDI_MAPPINGS_CACHE_DIR}
 
-RUN git clone --branch ${GITHUB_BRANCH} --depth 1 \
-    https://github.com/firms-gta/geoflow-tunaatlas.git \
-    ${PROJECT_DIR}
+# -----------------------------------------------------------------------------
+# Copy renv metadata and optional isolated local library.
+#
+# For faster local builds, run before docker build:
+#
+#   Rscript -e "renv::restore(prompt = FALSE)"
+#   Rscript -e "renv::isolate()"
+#
+# If renv/library is present, it is copied into the image and used as the first
+# source of installed packages. renv::restore() will then only download/install
+# what is still missing or out of sync with renv.lock.
+# -----------------------------------------------------------------------------
 
-WORKDIR ${PROJECT_DIR}
+COPY --chown=rstudio:rstudio renv.lock ${PROJECT_DIR}/renv.lock
+COPY --chown=rstudio:rstudio renv/ ${PROJECT_DIR}/renv/
 
-# Install the renv version recorded in renv.lock, then restore the project
-# library at image build time. This makes runtime execution much faster and more
-# reproducible.
+# -----------------------------------------------------------------------------
+# Install renv, check the copied library, complete missing packages, then isolate.
+# -----------------------------------------------------------------------------
+
 RUN Rscript -e "install.packages(c('remotes','jsonlite'), repos='https://cloud.r-project.org')" \
- && Rscript -e "ver <- jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version; remotes::install_version('renv', version = ver, upgrade = 'never', repos = 'https://cloud.r-project.org')" \
- && Rscript -e "renv::restore(prompt = FALSE)"
+ && Rscript -e "ver <- jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version; remotes::install_version('renv', version = ver, upgrade='never', repos='https://cloud.r-project.org')" \
+ && Rscript -e "source('renv/activate.R'); print(.libPaths()); renv::status()" \
+ && Rscript -e "source('renv/activate.R'); renv::restore(prompt = FALSE)" \
+ && Rscript -e "source('renv/activate.R'); renv::repair()" \
+ && Rscript -e "source('renv/activate.R'); renv::isolate()"
 
-RUN chown -R rstudio:rstudio ${PROJECT_DIR} /data
 
-# Temporary local override for testing local files.
-# Build from repository root:
-#   docker build -f docker/Dockerfile.workflow -t gta-workflow:latest .
-COPY . ${PROJECT_DIR}
+# -----------------------------------------------------------------------------
+# Copy the complete project source code.
+#
+# This is done after renv::restore() so changes in R scripts do not invalidate
+# the package installation layer when renv.lock is unchanged.
+# -----------------------------------------------------------------------------
 
-RUN chown -R rstudio:rstudio ${PROJECT_DIR} /data
+# Copier only the script for if data has been copied from renv/ folder
+COPY --chown=rstudio:rstudio R/docker_creation/testing_loading_of_all_packages.R /tmp/testing_loading_of_all_packages.R
 
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
+RUN Rscript -e "source('${PROJECT_DIR}/renv/activate.R'); source('/tmp/testing_loading_of_all_packages.R')"
 
-ENV FDI_MAPPINGS_CACHE_DIR=/opt/fdi-mappings-cache
-ENV FDI_MAPPINGS_REF="a0b80ba8bc67536b1ba178b04fa3d03011a2f6eb"
-
-# Still root here
-RUN mkdir -p "$FDI_MAPPINGS_CACHE_DIR" && \
-    chown -R rstudio:rstudio "$FDI_MAPPINGS_CACHE_DIR"
+# Copy all the project
+COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
 
 USER rstudio
 
 WORKDIR ${PROJECT_DIR}
 
+# -----------------------------------------------------------------------------
+# Replace a few problematic Unicode characters.
+# -----------------------------------------------------------------------------
+
 RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
  | xargs -0 perl -CSD -pi -e "s/[‘’]/'/g; s/[“”]/'/g; s/°/ degrees /g; s/–/-/g; s/—/-/g; s/…/.../g"
+
+# -----------------------------------------------------------------------------
+# Download and cache FDI mappings.
+# -----------------------------------------------------------------------------
 
 RUN Rscript -e "source('./R/docker_creation/cache_fdi_mappings.R'); cache_fdi_mappings(mapping_cache_dir = Sys.getenv('FDI_MAPPINGS_CACHE_DIR'), fdi_mappings_ref = Sys.getenv('FDI_MAPPINGS_REF'))"
 

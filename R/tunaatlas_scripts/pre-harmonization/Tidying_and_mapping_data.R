@@ -132,10 +132,10 @@ Tidying_and_mapping_data = function(action, entity, config) {
     # Keep only monthly rows
     georef_dataset <- georef_dataset[which(monthly_ok), , drop = FALSE]
     
-    # Curation absurd converted data ------------------------------------------
+    # Curation absurd converted data ------------------------------------------ not really usefull anymore
     stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
     stepnumber = stepnumber+1
-    
+    if(file.exists(here::here("data/max_conversion_factor.csv"))){
     curation_absurd_converted_data_list <-
       curation_absurd_converted_data(georef_dataset = georef_dataset,
                                      max_conversion_factor = here::here("data/max_conversion_factor.csv"))
@@ -159,6 +159,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       )
       readr::write_csv(not_conform_conversion_factors, "data/not_conform_conversion_factors.csv")
       
+    }
     }
     
     #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------

@@ -4,11 +4,11 @@ curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor
     max_conversion_factor <-
       read.csv(max_conversion_factor)
   }
-
+  require(dplyr)
   colnames_georef_dataset_groupping <- setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit"))
   
-  strata_nomt <- georef_dataset %>% filter(measurement_unit %in% c("NOMT"))
-  strata_mtno <- georef_dataset %>% filter(measurement_unit %in% c("MTNO"))
+  strata_nomt <- georef_dataset %>% dplyr::filter(measurement_unit %in% c("NOMT"))
+  strata_mtno <- georef_dataset %>% dplyr::filter(measurement_unit %in% c("MTNO"))
   strata_converted_level0 <-  rbind(strata_nomt, strata_mtno) %>% ungroup() %>% dplyr::select(-c(measurement_value)) %>% dplyr::distinct()
   if(nrow(strata_converted_level0)==0){
     return(list(georef_dataset = georef_dataset, conversion_factor_not_to_keep = georef_dataset[0, ]   ))
@@ -31,8 +31,8 @@ curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor
     dplyr::mutate(conversion_factor = MT/NO) %>% 
     dplyr::distinct()
   
-  conversion_factor_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter((conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
-  conversion_factor_not_to_keep <- conversion_factor_level0 %>% left_join(max_conversion_factor, by = "species") %>% filter(!(conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
+  conversion_factor_to_keep <- conversion_factor_level0 %>% dplyr::left_join(max_conversion_factor, by = "species") %>% dplyr::filter((conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
+  conversion_factor_not_to_keep <- conversion_factor_level0 %>% dplyr::left_join(max_conversion_factor, by = "species") %>% dplyr::filter(!(conversion_factor < max_weight | conversion_factor > min_weight | is.na(max_weight) | is.na(min_weight)))
   
   
   georef_dataset_without_nomt <- georef_dataset %>% dplyr::filter(measurement_unit %in% c("t", "no","MTNO"))
