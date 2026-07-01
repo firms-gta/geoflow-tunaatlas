@@ -32,7 +32,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   # Définition du fichier local
   # Définition du fichier local
-  csv_file <- here::here("data/cl_areal_grid.csv")
+  csv_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
   
   # Initialisation
   db_working <- FALSE
@@ -69,7 +69,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   }
   
   cwp_grid <- cwp_grid %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/identification_data_on_land_cwp.R")
+  source(here::here("./R/tunaatlas_scripts/generation/identification_data_on_land_cwp.R"))
   cat("Reallocating data that are in land areas")
   
   cat("Executing spatial_curation_intersect_areas")
@@ -115,7 +115,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   if (action_on_mislocated=="reallocate"){   # We reallocate data that is mislocated (they will be equally distributed on areas with same reallocation_dimensions (month|year|gear|flag|species|schooltype).
     cat("Reallocating data that are in land areas...\n")
-    source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_function_reallocate_data.R")
+    source(here::here("./R/tunaatlas_scripts/generation/spatial_curation_function_reallocate_data.R"))
     
     catch_curate_data_mislocated<-spatial_curation_function_reallocate_data(df_input = georef_dataset,
                                                                             dimension_reallocation = "geographic_identifier",

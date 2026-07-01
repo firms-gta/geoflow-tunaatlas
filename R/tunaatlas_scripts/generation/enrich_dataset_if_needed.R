@@ -36,6 +36,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     message("No valid database connection.")
     if (!file.exists(fallback_file)) {
       if (!is.null(download_url)) {
+        dir.create(dirname(fallback_file), recursive = TRUE, showWarnings = FALSE)
         message("Downloading from ", download_url)
         utils::download.file(download_url, fallback_file, mode = "wb")
       } else {
@@ -56,6 +57,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     }
     if (!file.exists(fallback_file)) {
       if (!is.null(download_url)) {
+        dir.create(dirname(fallback_file), recursive = TRUE, showWarnings = FALSE)
         message("Downloading from ", download_url)
         utils::download.file(download_url, fallback_file, mode = "wb")
         if (grepl("\\.zip$", fallback_file)) {
@@ -118,16 +120,27 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   )
   
   cl_measurement_type <- {
-    
     catch_file <- here::here("data/cl_catch_concepts.csv")
     effort_file <- here::here("data/cl_measurement_types_effort.csv")
+    
+    dir.create(here::here("data"), recursive = TRUE, showWarnings = FALSE)
+    
     if (!file.exists(catch_file)) {
-      utils::download.file("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cwp/cl_catch_concepts.csv", catch_file, mode = "wb")
+      utils::download.file(
+        "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cwp/cl_catch_concepts.csv",
+        catch_file,
+        mode = "wb"
+      )
     }
-    # to be fixed here 
+    
     if (!file.exists(effort_file)) {
-      utils::download.file("https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_types_effort.csv", effort_file, mode = "wb")
+      utils::download.file(
+        "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_types_effort.csv",
+        effort_file,
+        mode = "wb"
+      )
     }
+    
     dplyr::bind_rows(
       readr::read_csv(catch_file) %>% janitor::clean_names() %>% dplyr::select(code, label),
       readr::read_csv(effort_file) %>% janitor::clean_names() %>% dplyr::select(code, label)
@@ -152,14 +165,59 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_fleet.csv"
   )
   
+  get_local_or_download <- function(file_name, url, data_dir = here::here("data"), package = "CWP.dataset") {
+    data_file <- file.path(data_dir, file_name)
+    
+    # 1. Prefer local data/ cache
+    if (file.exists(data_file)) {
+      return(data_file)
+    }
+    
+    # 2. Try package extdata, if available
+    package_file <- system.file("extdata", file_name, package = package)
+    
+    if (!identical(package_file, "") && file.exists(package_file)) {
+      message("Using package extdata file: ", package_file)
+      return(package_file)
+    }
+    
+    # 3. Download to data/
+    dir.create(data_dir, recursive = TRUE, showWarnings = FALSE)
+    
+    message("Downloading missing file to data/: ", url)
+    utils::download.file(url, data_file, mode = "wb")
+    
+    if (!file.exists(data_file)) {
+      stop("Download failed for: ", url)
+    }
+    
+    data_file
+  }
+  
+  # Measurement unit labels
   # Measurement unit labels
   measurement_unit_label <- {
-    files <- c("cl_effortunit_wcpfc.csv", "cl_effortunit_ccsbt.csv", "cl_effortunit_iattc.csv", "cl_effortunit_iccat.csv", "cl_effortunit_iotc.csv", "cl_catchunit_rfmos.csv")
-               
+    files <- c(
+      "cl_effortunit_wcpfc.csv",
+      "cl_effortunit_ccsbt.csv",
+      "cl_effortunit_iattc.csv",
+      "cl_effortunit_iccat.csv",
+      "cl_effortunit_iotc.csv",
+      "cl_catchunit_rfmos.csv"
+    )
+    
     base_url <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/"
+    
     files %>%
       lapply(function(file) {
-        readr::read_csv(paste0(base_url, file), show_col_types = FALSE) %>%
+        local_file <- get_local_or_download(
+          file_name = file,
+          url = paste0(base_url, file),
+          data_dir = here::here("data"),
+          package = "CWP.dataset"
+        )
+        
+        readr::read_csv(local_file, show_col_types = FALSE) %>%
           dplyr::select(code, label) %>%
           dplyr::mutate(source_authority = dplyr::case_when(
             stringr::str_detect(file, "ccsbt") ~ "CCSBT",

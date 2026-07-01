@@ -440,7 +440,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   ## 1) Extract dataset in the appropriate structure
   
   con <- config$software$output$dbi
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/getSQLSardaraQueries.R")
+  source(here::here("./R/sardara_functions/getSQLSardaraQueries.R"))
   
   dataset_metadata<-dbGetQuery(con,paste0("SELECT * FROM metadata.metadata where identifier='",dataset_pid, "'"))
   query_netCDF<-getSQLSardaraQueries(con,dataset_metadata)$query_NetCDF

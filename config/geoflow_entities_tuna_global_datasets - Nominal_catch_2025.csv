@@ -30,7 +30,7 @@ process:Data upload[""The CSV file was integrated into the Tuna Atlas database."
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:data_cwp_format.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
+action:data_cwp_format.R@./tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
 id:nominal_catch_iattc_level0,title:Annual catch of tuna and tuna-like species in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) (IATTC level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of tuna and tuna-like species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country. It corresponds to the IATTC nominal catch (task1) dataset.
 
 This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""",,"owner:nvogel@iattc.org_
@@ -52,7 +52,7 @@ source:CatchByFlagGear1918-2023.csv,iattc_nominal_catch_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:east_pacific_ocean_nominal_catch_tunaatlasiattc_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/east_pacific_ocean_nominal_catch_tunaatlasiattc_level0.R"
+action:east_pacific_ocean_nominal_catch_tunaatlasiattc_level0.R@./tunaatlas_scripts/pre-harmonization/east_pacific_ocean_nominal_catch_tunaatlasiattc_level0.R"
 nominal_catch_wcpfc_level0,"title:Annual catch of tuna, tuna-like and shark species in the West Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) (WCPFC level 0)","abstract:This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Western and Central Pacific Fisheries Commission (WCPFC) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country. It corresponds to the catch part of the WCPFC nominal catch (task1) dataset.
  
 This dataset was downloaded on the WCPFC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
@@ -90,7 +90,7 @@ source:XLS_WCPFC.csv,XLS_WCPO.csv,wcpfc_nominal_catch_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"
+action:west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R@./tunaatlas_scripts/pre-harmonization/west_pacific_ocean_nominal_catch_tunaatlaswcpfc_level0.R"
 id:nominal_catch_ccsbt_level0__bygear,title:Annual catch of Southern Bluefin Tuna in the Southern hemisphere oceans (%temporal_extent:start% - %temporal_extent:end%) (CCSBT level 0),"abstract:""This dataset lists the annually-spatially aggregated catch of Southern Bluefin Tuna (SBT) from the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year and fishing gear. It corresponds to the CCSBT nominal catch (task1) dataset.
  
 This dataset was downloaded on the CCSBT website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
@@ -122,7 +122,7 @@ source:CCSBT_Global_Catch.xlsx,ccsbt_nominal_catch_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R"
+action:southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R@./tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_nominal_catch_tunaatlasccsbt_level0__bygear.R"
 id:nominal_catch_iotc_level0,"title:Annual catch of tuna, tuna-like and shark species in the Indian Ocean (%temporal_extent:start% - %temporal_extent:end%) aggregated by FAO zone (IOTC level 0)","abstract:This dataset lists the annually-spatially aggregated catch of tuna, tuna-like and shark species from the Indian Ocean Tuna Commission (IOTC) from %temporal_extent:start% to %temporal_extent:start%. Species-specific catches are stratified by year, fishing gear, vessel flag reporting country and area (FAO areas). It corresponds to the IOTC nominal catch (task1) dataset.
  
 This dataset was downloaded on the IOTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
@@ -155,4 +155,4 @@ source:iotc_nominal_catch_firms_level0_2025-04-01.csv,iotc_catch_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
-action:data_cwp_format.R@https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/tunaatlas_scripts/pre-harmonization/data_cwp_format.R"
+action:data_cwp_format.R@./tunaatlas_scripts/pre-harmonization/data_cwp_format.R"

@@ -129,7 +129,7 @@ function(action, entity, config){
   efforts_pivot_WCPFC$School<-"OTH"
   
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+  source(here::here("./R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
   
   efforts<-WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_WCPFC,colToKeep_efforts)
   

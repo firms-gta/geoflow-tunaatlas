@@ -132,13 +132,13 @@ Tidying_and_mapping_data = function(action, entity, config) {
     # Keep only monthly rows
     georef_dataset <- georef_dataset[which(monthly_ok), , drop = FALSE]
     
-    # Curation absurd converted data ------------------------------------------
+    # Curation absurd converted data ------------------------------------------ not really usefull anymore
     stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
     stepnumber = stepnumber+1
-    
+    if(file.exists(here::here("data/max_conversion_factor.csv"))){
     curation_absurd_converted_data_list <-
       curation_absurd_converted_data(georef_dataset = georef_dataset,
-                                     max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/max_conversion_factor.csv")
+                                     max_conversion_factor = here::here("data/max_conversion_factor.csv"))
     
     georef_dataset <- curation_absurd_converted_data_list$georef_dataset
     
@@ -159,6 +159,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       )
       readr::write_csv(not_conform_conversion_factors, "data/not_conform_conversion_factors.csv")
       
+    }
     }
     
     #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
@@ -372,8 +373,22 @@ Tidying_and_mapping_data = function(action, entity, config) {
     stepnumber = stepnumber +1
     #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
     
-    url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
-    species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo) %>% dplyr::distinct()
+    mapping_file <- here::here(
+      "data",
+      "codelist_mapping_source_authority_species.csv"
+    )
+    
+    if (!file.exists(mapping_file)) {
+      utils::download.file(
+        "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
+        mapping_file,
+        mode = "wb"
+      )
+    }
+    
+    species_to_be_kept_by_rfmo_in_level0 <-
+      readr::read_csv(mapping_file) %>%
+      dplyr::distinct()
     georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, 
                                                            by = c("species" = "species", "source_authority" = "source_authority"))
     
@@ -383,7 +398,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
         georef_dataset,
         paste0(
           "Filtering species on the base of the file ",
-          url_mapping_asfis_rfmo,
+          "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
           " to keep only the species under mandate of tRFMOs. This file contains " ,
           as.character(length(nrow(
             species_to_be_kept_by_rfmo_in_level0

@@ -62,11 +62,11 @@ if(!require(dplyr)){
 ##Efforts
 
 # Reach the efforts pivot DSD using a function in IATTC_functions.R
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_IATTC_CE_allbutLLTunaBillfish.R")
+  source(here::here("./R/sardara_functions/FUN_efforts_IATTC_CE_allbutLLTunaBillfish.R"))
   efforts_pivot_IATTC <-FUN_efforts_IATTC_CE_allbutLLTunaBillfish(path_to_raw_dataset,"NumSets","Flag","LP")
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+source(here::here("./R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
 efforts<-IATTC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_IATTC,colToKeep_efforts)
 
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")

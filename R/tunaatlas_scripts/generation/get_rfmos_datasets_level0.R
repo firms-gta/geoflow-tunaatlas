@@ -128,7 +128,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                             # cl_id <- googledrive::drive_get(cl_filename)$id
                             # googledrive::drive_download(googledrive::as_id(cl_id), cl_filename, overwrite = TRUE)
                             # flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat <- as.data.frame(readr::read_csv(cl_filename, guess_max = 0))
-                            # source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/map_codelist.R")
+                            # source("./map_codelist.R")
                             # iccat_ce_WithSchooltypeInfo <- map_codelist(iccat_ce_WithSchooltypeInfo, flag_mapping_flag_iccat_from_ncandcas_to_flag_iccat, "fishingfleet")[[1]]
 
                             strata_in_withoutschooltype_and_not_in_withshooltype <- dplyr::anti_join (iccat_data, iccat_ce_WithSchooltypeInfo, by=setdiff(columns_to_keep,c("value","schooltype")))

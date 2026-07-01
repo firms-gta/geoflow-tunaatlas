@@ -63,7 +63,7 @@ function(action, entity, config){
       measurement_value = Hooks
     )
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R")
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R"))
   
   df$Square_size <- 5 # 5-degree squares
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")

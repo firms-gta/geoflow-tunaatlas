@@ -20,12 +20,7 @@
 		  "source": "config/geoflow_entities_tuna_codelists.csv"
 		}
 	],
-    "contacts" : [
-		{
-		  "handler": "gsheet",
-		  "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-		}
-	]
+    "contacts" : []
   },
   "software": [
 	{

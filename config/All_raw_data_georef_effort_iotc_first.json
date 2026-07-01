@@ -21,12 +21,7 @@
       "source": "config/geoflow_entities_tuna_datasets - Effort_data_2026_missing_two_iccat.csv"
       }
     ],
-    "contacts" : [
-      {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-      }
-    ]
+    "contacts" : []
   },
   "software": [],
   "actions": [

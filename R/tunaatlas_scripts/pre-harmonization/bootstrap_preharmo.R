@@ -50,7 +50,7 @@ force_overwrite <- isTRUE(getOption("gta.force_overwrite", FALSE)) ||
 # disabled with options(gta.bootstrap_restore_renv = FALSE).
 restore_renv <- isTRUE(getOption("gta.bootstrap_restore_renv", TRUE))
 
-src_data_dir <- getOption("gta.src_data_dir")
+src_data_dir <- getOption("gta.src_data_dir", getOption("gta_data_dir"))
 
 if (is.null(src_data_dir)) {
   src_data_dir <- path.expand(

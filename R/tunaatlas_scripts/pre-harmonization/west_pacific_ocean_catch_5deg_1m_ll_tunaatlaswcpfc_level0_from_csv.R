@@ -43,8 +43,8 @@
 # 1984  1  40S 170W    704     ALB  3850         NO    ALL        DAYS    D
 # 1984  1  40S 175W     88     ALB   966         NO    ALL        DAYS    D
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_3.R"))
 #packages
 
   

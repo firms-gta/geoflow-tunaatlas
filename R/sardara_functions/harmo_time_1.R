@@ -1,6 +1,6 @@
 harmo_time_1 = function (df_input, colname_year, colname_timeperiod) 
 {
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
+  source(here::here("R/sardara_functions/format_time_db_format.R"))
   df_input[, "MonthStart"] <- NA
   index1to12 <- which(df_input[, colname_timeperiod] >= 1 & 
                         df_input[, colname_timeperiod] <= 12)

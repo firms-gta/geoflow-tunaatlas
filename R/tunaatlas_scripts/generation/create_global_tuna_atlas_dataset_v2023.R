@@ -52,7 +52,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     # source(file.path(url_scripts_create_own_tuna_atlas, "get_rfmos_datasets_level0.R")) #modified for geoflow
     source(here::here("./R/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists.R") #modified for geoflow
+    source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists.R")) #modified for geoflow
     source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
     
     #for filtering if needed
@@ -77,7 +77,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     
     
     # For filtering/aggregating
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
+    source(here::here("./R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R"))
     
     #stepLog
     stepLogger = function(level, step, msg){
