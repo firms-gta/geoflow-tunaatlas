@@ -73,6 +73,18 @@
 #     -e GTA_DATA_SOURCE=volume_zip \
 #     -e GTA_DATA_PATH=/data/GTA_2026.zip \
 #     gta-workflow:latest
+
+# Run summaries for with volume and jobs
+# docker run --rm --network none \
+# -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
+# -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+# -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
+# -e GTA_STEPS=summaries \
+# -e GTA_DATA_SOURCE=volume_dir \
+# -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+# -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+# -e GTA_TUNAATLAS_LEVEL0_CATCH="jobs/20260630200458level_0_catch_2026" \
+# gta-reporting:latest
 #
 #
 # 5) Run from a Zenodo archive URL.

@@ -49,15 +49,20 @@ summarise_invalid_raw <- FALSE
 stop_on_missing_inputs <- TRUE
 bootstrap_restore_renv <- TRUE
 
+env_or_null <- function(x) {
+  value <- Sys.getenv(x, unset = "")
+  if (identical(value, "")) NULL else value
+}
+
 existing_paths <- list(
-  raw_nominal_catch = NULL,
-  raw_data_georef = NULL,
-  raw_data_georef_effort = NULL,
-  tunaatlas_effort = NULL,
-  tunaatlas_nominal = NULL,
-  tunaatlas_level0_catch = NULL,
-  tunaatlas_level1_catch = NULL,
-  tunaatlas_level2_catch = NULL
+  raw_nominal_catch = env_or_null("GTA_RAW_NOMINAL_CATCH"),
+  raw_data_georef = env_or_null("GTA_RAW_DATA_GEOREF"),
+  raw_data_georef_effort = env_or_null("GTA_RAW_DATA_GEOREF_EFFORT"),
+  tunaatlas_effort = env_or_null("GTA_TUNAATLAS_EFFORT"),
+  tunaatlas_nominal = env_or_null("GTA_TUNAATLAS_NOMINAL"),
+  tunaatlas_level0_catch = env_or_null("GTA_TUNAATLAS_LEVEL0_CATCH"),
+  tunaatlas_level1_catch = env_or_null("GTA_TUNAATLAS_LEVEL1_CATCH"),
+  tunaatlas_level2_catch = env_or_null("GTA_TUNAATLAS_LEVEL2_CATCH")
 )
 
 
@@ -292,6 +297,19 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   )
   
   existing_paths <- utils::modifyList(default_existing_paths, existing_paths)
+  env_existing_paths <- list(
+    raw_nominal_catch = env_or_null("GTA_RAW_NOMINAL_CATCH"),
+    raw_data_georef = env_or_null("GTA_RAW_DATA_GEOREF"),
+    raw_data_georef_effort = env_or_null("GTA_RAW_DATA_GEOREF_EFFORT"),
+    tunaatlas_effort = env_or_null("GTA_TUNAATLAS_EFFORT"),
+    tunaatlas_nominal = env_or_null("GTA_TUNAATLAS_NOMINAL"),
+    tunaatlas_level0_catch = env_or_null("GTA_TUNAATLAS_LEVEL0_CATCH"),
+    tunaatlas_level1_catch = env_or_null("GTA_TUNAATLAS_LEVEL1_CATCH"),
+    tunaatlas_level2_catch = env_or_null("GTA_TUNAATLAS_LEVEL2_CATCH")
+  )
+  
+  env_existing_paths <- env_existing_paths[!vapply(env_existing_paths, is.null, logical(1))]
+  existing_paths <- utils::modifyList(existing_paths, env_existing_paths)
   
   get_existing_or_stop <- function(object_name, existing_path, step_name) {
     if (exists(object_name, inherits = FALSE)) {
@@ -302,12 +320,14 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       return(existing_path)
     }
     
-    stop(
+    warning(
       "Missing path for step '", step_name, "'.\n",
       "Either run the upstream workflow in the same execution, or provide the ",
       "corresponding existing path in `existing_paths`.",
       call. = FALSE
     )
+    
+    return(NULL)
   }
   
   # ---------------------------------------------------------------------------
@@ -505,11 +525,13 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       rename_suffix = "level_0_catch_2026"
     )
     if (run_step("summaries")) {
+      if (!is.null(tunaatlas_level0_catch_path)) {
     run_step_summary(
       workflow_file = "config/catch_ird_level0_local.json",
       workflow_output = tunaatlas_level0_catch_path,
       source_authority = "all"
     )
+      }
     }
   }
   
@@ -519,28 +541,33 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       rename_suffix = "level_1_catch_2026"
     )
     if (run_step("summaries")) {
-      
+      if (!is.null(tunaatlas_level1_catch_path)) {
     run_step_summary(
       workflow_file = "config/catch_ird_level1_local.json",
       workflow_output = tunaatlas_level1_catch_path,
       source_authority = "all"
     )
+      }
     }
   }
   
   if (run_step("level2")) {
+      
     tunaatlas_level2_catch_path <- execute_workflow_maybe_upload(
       file = here::here("config/catch_ird_level2_local.json"),
       rename_suffix = "level_2_catch_2026"
     )
     if (run_step("summaries")) {
-      
+      if (!is.null(tunaatlas_level2_catch_path)) {
+        
     run_step_summary(
       workflow_file = "config/catch_ird_level2_local.json",
       workflow_output = tunaatlas_level2_catch_path,
       source_authority = "all"
     )
+      }
     }
+
   }
   
   # ---------------------------------------------------------------------------
@@ -565,24 +592,30 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       existing_paths$tunaatlas_level2_catch,
       "summaries / level2"
     )
-    
+    if (!is.null(tunaatlas_level0_catch_path)) {
+      
     run_step_summary(
       workflow_file = "config/catch_ird_level0_local.json",
       workflow_output = tunaatlas_level0_catch_path,
       source_authority = "all"
     )
-    
+    }
+    if (!is.null(tunaatlas_level1_catch_path)) {
+      
     run_step_summary(
       workflow_file = "config/catch_ird_level1_local.json",
       workflow_output = tunaatlas_level1_catch_path,
       source_authority = "all"
     )
-    
+    }
+    if (!is.null(tunaatlas_level2_catch_path)) {
+      
     run_step_summary(
       workflow_file = "config/catch_ird_level2_local.json",
       workflow_output = tunaatlas_level2_catch_path,
       source_authority = "all"
     )
+    }
   }
   
   # ---------------------------------------------------------------------------

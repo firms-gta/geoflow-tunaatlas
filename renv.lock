@@ -25,7 +25,7 @@
       "RemoteRepo": "CWP.dataset",
       "RemoteUsername": "bastienird",
       "RemoteRef": "HEAD",
-      "RemoteSha": "3ffe04912f9faa767c89805996dedd1d27804004",
+      "RemoteSha": "7989ee8c6479a642966d9ba5caf44654ab9d38d4",
       "Requirements": [
         "DBI",
         "DT",
@@ -65,7 +65,7 @@
         "xts",
         "yaml"
       ],
-      "Hash": "1632cb428bb30d89221b9cafd7183d3e"
+      "Hash": "e83436423f9f166de4137e0b86e41417"
     },
     "DBI": {
       "Package": "DBI",
@@ -5291,6 +5291,16 @@
         "utils"
       ],
       "Hash": "1025130715cc1db0fc7e02d46c995402"
+    },
+    "yyjsonr": {
+      "Package": "yyjsonr",
+      "Version": "0.1.22",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "3357f163d656fe066b23b04c0ebf53b5"
     },
     "zen4R": {
       "Package": "zen4R",
