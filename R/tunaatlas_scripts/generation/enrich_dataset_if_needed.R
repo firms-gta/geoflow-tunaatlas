@@ -245,9 +245,19 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     utils::download.file(zip_url, zip_path, mode = "wb")
     utils::unzip(zip_path, exdir = here::here("data"))
   }
-  shapefile.fix <- sf::st_read(cwp_grid_file) %>%
-    sf::st_as_sf(wkt = "geom_wkt", crs = 4326) %>%
-    dplyr::rename(cwp_code = CWP_CODE, geom = geom_wkt)
+  
+  shapefile.fix <- readr::read_csv(
+    cwp_grid_file,
+    show_col_types = FALSE
+  ) %>%
+    dplyr::rename(
+      cwp_code = CWP_CODE,
+      geom = geom_wkt
+    ) %>%
+    sf::st_as_sf(
+      wkt = "geom",
+      crs = 4326
+    )
   
   # Start enrichment
   enriched_data <- data
@@ -296,7 +306,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
       dplyr::select(-measurement_unit_label_specific, -measurement_unit_label_global)
   }
   
-
+  
   # Enrich measurement_type_label if missing
   
   if (!"measurement_type_label" %in% names(enriched_data)) {
@@ -311,7 +321,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
       dplyr::left_join(cl_measurement %>% dplyr::select(code, measurement_label = label), 
                        by = c("measurement" = "code"))
   }
-
+  
   # Enrich measurement_processing_level_label if missing
   if (!"measurement_processing_level_label" %in% names(enriched_data)) {
     enriched_data <- enriched_data %>%
