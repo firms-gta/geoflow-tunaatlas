@@ -1,0 +1,39 @@
+services:
+  gta-workflow:
+    image: ${GTA_IMAGE:-gta-workflow:latest}
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.workflow
+    user: "${GTA_UID:-1000}:${GTA_GID:-1000}"
+    environment:
+      GTA_STEPS: ${GTA_STEPS:-rawdata}
+      GTA_DATA_SOURCE: ${GTA_DATA_SOURCE:-volume_dir}
+      GTA_DATA_PATH: ${GTA_DATA_PATH:-/data/GTA_2026}
+      GTA_DOI: ${GTA_DOI:-}
+      GTA_DOI_FILE: ${GTA_DOI_FILE:-}
+      GTA_SUMMARISE_INVALID_RAW: ${GTA_SUMMARISE_INVALID_RAW:-false}
+      GTA_STOP_ON_MISSING_INPUTS: ${GTA_STOP_ON_MISSING_INPUTS:-true}
+      GTA_BOOTSTRAP_RESTORE_RENV: "false"
+      GTA_DOWNLOAD_CACHE_DIR: /cache/downloads
+      GTA_RAW_NOMINAL_CATCH: ${GTA_RAW_NOMINAL_CATCH:-}
+      GTA_RAW_DATA_GEOREF: ${GTA_RAW_DATA_GEOREF:-}
+      GTA_RAW_DATA_GEOREF_EFFORT: ${GTA_RAW_DATA_GEOREF_EFFORT:-}
+      GTA_TUNAATLAS_EFFORT: ${GTA_TUNAATLAS_EFFORT:-}
+      GTA_TUNAATLAS_NOMINAL: ${GTA_TUNAATLAS_NOMINAL:-}
+      GTA_TUNAATLAS_LEVEL0_CATCH: ${GTA_TUNAATLAS_LEVEL0_CATCH:-}
+      GTA_TUNAATLAS_LEVEL1_CATCH: ${GTA_TUNAATLAS_LEVEL1_CATCH:-}
+      GTA_TUNAATLAS_LEVEL2_CATCH: ${GTA_TUNAATLAS_LEVEL2_CATCH:-}
+    volumes:
+      - type: bind
+        source: ${GTA_INPUT_DIR:-./runtime/input}
+        target: /data/GTA_2026
+        read_only: true
+      - type: bind
+        source: ${GTA_EXTRACTED_DIR:-./runtime/extracted}
+        target: /home/rstudio/geoflow-tunaatlas/data/GTA_2026
+      - type: bind
+        source: ${GTA_JOBS_DIR:-./runtime/jobs}
+        target: /home/rstudio/geoflow-tunaatlas/jobs
+      - type: bind
+        source: ${GTA_CACHE_DIR:-./runtime/cache}
+        target: /cache

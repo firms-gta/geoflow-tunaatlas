@@ -1,0 +1,42 @@
+name: Workflow launcher checks
+
+on:
+  pull_request:
+    paths:
+      - "R/launching_workflows/**"
+      - "docker/Dockerfile.workflow"
+      - "tests/smoke_test_launcher.R"
+      - ".github/workflows/workflow-launcher-checks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  launcher-smoke-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up R 4.2.3
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "4.2.3"
+          use-public-rspm: true
+
+      - name: Parse launcher scripts
+        shell: Rscript {0}
+        run: |
+          parse("R/launching_workflows/GTA_2026_creation.R")
+          parse("R/launching_workflows/run_gta_2026_workflow_cli.R")
+
+      - name: Run launcher smoke tests
+        run: Rscript tests/smoke_test_launcher.R
+
+      - name: Check Dockerfile runtime paths
+        run: |
+          grep -q 'ENV RENV_PATHS_ROOT=' docker/Dockerfile.workflow
+          grep -q 'ENV GTA_DOWNLOAD_CACHE_DIR=/cache/downloads' docker/Dockerfile.workflow
+          grep -q 'VOLUME \["/data", "/home/rstudio/geoflow-tunaatlas/jobs", "/cache"\]' docker/Dockerfile.workflow
