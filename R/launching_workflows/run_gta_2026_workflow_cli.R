@@ -192,6 +192,6 @@ run_gta_workflow(
   stop_on_missing_inputs = parse_bool_env("GTA_STOP_ON_MISSING_INPUTS", TRUE),
   data_source = Sys.getenv("GTA_DATA_SOURCE", unset = "auto"),
   data_path = parse_nullable_env("GTA_DATA_PATH"),
-  doi = parse_nullable_env("GTA_DOI"),
+  doi_file = parse_nullable_env("GTA_DOI_FILE"),
   bootstrap_restore_renv = parse_bool_env("GTA_BOOTSTRAP_RESTORE_RENV", TRUE)
 )
