@@ -27,31 +27,84 @@
 
 
 # =============================================================================
-# 0. DEFAULT USER PARAMETERS
+# 0. ENVIRONMENT HELPERS
 # =============================================================================
-
-steps_to_run <- c(
-  # "all",
-  "rawdata"
-  # "effort",
-  # "nominal",
-  # "level0",
-  # "level1",
-  # "level2",
-  # "reports"
-)
-
-data_source <- "auto"
-data_path <- NULL
-doi <- NULL
-
-summarise_invalid_raw <- FALSE
-stop_on_missing_inputs <- TRUE
-bootstrap_restore_renv <- TRUE
 
 env_or_null <- function(x) {
   value <- Sys.getenv(x, unset = "")
   if (identical(value, "")) NULL else value
+}
+
+env_or_default <- function(x, default) {
+  value <- Sys.getenv(x, unset = "")
+  if (identical(value, "")) default else value
+}
+
+env_flag <- function(x, default = FALSE) {
+  value <- tolower(Sys.getenv(x, unset = ""))
+  
+  if (identical(value, "")) {
+    return(default)
+  }
+  
+  value %in% c("true", "1", "yes", "y")
+}
+
+
+# =============================================================================
+# 1. DEFAULT USER PARAMETERS
+# =============================================================================
+
+steps_to_run <- strsplit(
+  env_or_default("GTA_STEPS", "rawdata"),
+  ",",
+  fixed = TRUE
+)[[1]]
+
+steps_to_run <- trimws(steps_to_run)
+
+data_source <- env_or_default(
+  "GTA_DATA_SOURCE",
+  "auto"
+)
+
+data_path <- env_or_null("GTA_DATA_PATH")
+doi <- env_or_null("GTA_DOI")
+doi_file <- env_or_null("GTA_DOI_FILE")
+
+summarise_invalid_raw <- env_flag(
+  "GTA_SUMMARISE_INVALID_RAW",
+  default = FALSE
+)
+
+stop_on_missing_inputs <- env_flag(
+  "GTA_STOP_ON_MISSING_INPUTS",
+  default = TRUE
+)
+
+bootstrap_restore_renv <- env_flag(
+  "GTA_BOOTSTRAP_RESTORE_RENV",
+  default = TRUE
+)
+
+env_or_null <- function(x) {
+  value <- Sys.getenv(x, unset = "")
+  if (identical(value, "")) NULL else value
+}
+
+env_or_default <- function(x, default) {
+  value <- Sys.getenv(x, unset = "")
+  if (identical(value, "")) default else value
+}
+
+env_flag <- function(x, default = FALSE) {
+  value <- tolower(Sys.getenv(x, unset = ""))
+  
+  if (identical(value, "")) {
+    return(default)
+  }
+  
+  value %in% c("true", "1", "yes", "y")
 }
 
 existing_paths <- list(
@@ -70,13 +123,233 @@ existing_paths <- list(
 # 1. DATA SOURCE PREPARATION
 # =============================================================================
 
-download_gta_data_from_doi <- function(doi, dst_data_dir) {
-  stop(
-    "DOI download is not implemented yet.\n",
-    "Requested DOI: ", doi, "\n",
-    "Expected destination: ", dst_data_dir,
-    call. = FALSE
+download_gta_data_from_doi <- function(
+    doi,
+    dst_data_dir,
+    doi_file = NULL,
+    cache_dir = "/cache"
+) {
+  
+  if (is.null(doi) || !nzchar(doi)) {
+    stop("A DOI must be provided.", call. = FALSE)
+  }
+  
+  if (!requireNamespace("jsonlite", quietly = TRUE)) {
+    stop(
+      "Package 'jsonlite' is required for Zenodo downloads.",
+      call. = FALSE
+    )
+  }
+  
+  if (!requireNamespace("curl", quietly = TRUE)) {
+    stop(
+      "Package 'curl' is required for Zenodo downloads.",
+      call. = FALSE
+    )
+  }
+  
+  dir.create(
+    dst_data_dir,
+    recursive = TRUE,
+    showWarnings = FALSE
   )
+  
+  dir.create(
+    cache_dir,
+    recursive = TRUE,
+    showWarnings = FALSE
+  )
+  
+  # Accepts:
+  # - 10.5281/zenodo.20834708
+  # - https://doi.org/10.5281/zenodo.20834708
+  # - 20834708
+  record_id <- sub("^.*zenodo\\.", "", doi)
+  record_id <- sub("[/?#].*$", "", record_id)
+  
+  if (!grepl("^[0-9]+$", record_id)) {
+    stop(
+      "Could not extract the Zenodo record ID from DOI: ",
+      doi,
+      call. = FALSE
+    )
+  }
+  
+  api_url <- paste0(
+    "https://zenodo.org/api/records/",
+    record_id
+  )
+  
+  message("Reading Zenodo metadata for record: ", record_id)
+  
+  metadata_raw <- tryCatch(
+    curl::curl_fetch_memory(api_url)$content,
+    error = function(e) {
+      stop(
+        "Could not retrieve Zenodo metadata: ",
+        conditionMessage(e),
+        call. = FALSE
+      )
+    }
+  )
+  
+  metadata <- jsonlite::fromJSON(
+    rawToChar(metadata_raw),
+    simplifyVector = FALSE
+  )
+  
+  files <- metadata$files
+  
+  if (is.null(files) || length(files) == 0L) {
+    stop(
+      "No files found in Zenodo record ",
+      record_id,
+      ".",
+      call. = FALSE
+    )
+  }
+  
+  file_names <- vapply(
+    files,
+    function(file) {
+      if (!is.null(file$key)) {
+        file$key
+      } else if (!is.null(file$filename)) {
+        file$filename
+      } else {
+        NA_character_
+      }
+    },
+    character(1)
+  )
+  
+  if (is.null(doi_file) || !nzchar(doi_file)) {
+    
+    if (length(files) != 1L) {
+      stop(
+        "The Zenodo record contains multiple files.\n",
+        "Set GTA_DOI_FILE to one of:\n  - ",
+        paste(file_names, collapse = "\n  - "),
+        call. = FALSE
+      )
+    }
+    
+    selected_index <- 1L
+    
+  } else {
+    
+    selected_index <- match(doi_file, file_names)
+    
+    if (is.na(selected_index)) {
+      stop(
+        "Requested DOI file not found: ",
+        doi_file,
+        "\nAvailable files:\n  - ",
+        paste(file_names, collapse = "\n  - "),
+        call. = FALSE
+      )
+    }
+  }
+  
+  selected_file <- files[[selected_index]]
+  selected_name <- file_names[[selected_index]]
+  
+  download_url <- selected_file$links$download
+  
+  if (is.null(download_url)) {
+    download_url <- selected_file$links$self
+  }
+  
+  if (is.null(download_url) || !nzchar(download_url)) {
+    stop(
+      "No download URL found for Zenodo file: ",
+      selected_name,
+      call. = FALSE
+    )
+  }
+  
+  cached_file <- file.path(
+    cache_dir,
+    selected_name
+  )
+  
+  if (
+    file.exists(cached_file) &&
+    !is.na(file.info(cached_file)$size) &&
+    file.info(cached_file)$size > 0
+  ) {
+    message("Using cached Zenodo file: ", cached_file)
+    
+  } else {
+    
+    message("Downloading Zenodo file: ", selected_name)
+    message("Cache destination: ", cached_file)
+    
+    tryCatch(
+      curl::curl_download(
+        url = download_url,
+        destfile = cached_file,
+        quiet = FALSE,
+        mode = "wb"
+      ),
+      error = function(e) {
+        unlink(cached_file, force = TRUE)
+        
+        stop(
+          "Zenodo download failed: ",
+          conditionMessage(e),
+          call. = FALSE
+        )
+      }
+    )
+  }
+  
+  if (
+    !file.exists(cached_file) ||
+    is.na(file.info(cached_file)$size) ||
+    file.info(cached_file)$size == 0
+  ) {
+    stop(
+      "Downloaded file is missing or empty: ",
+      cached_file,
+      call. = FALSE
+    )
+  }
+  
+  extension <- tolower(tools::file_ext(cached_file))
+  
+  if (identical(extension, "zip")) {
+    
+    extract_gta_archive(
+      archive = cached_file,
+      dst_data_dir = dst_data_dir
+    )
+    
+  } else {
+    
+    destination_file <- file.path(
+      dst_data_dir,
+      basename(cached_file)
+    )
+    
+    copied <- file.copy(
+      from = cached_file,
+      to = destination_file,
+      overwrite = TRUE
+    )
+    
+    if (!copied) {
+      stop(
+        "Could not copy the downloaded file to: ",
+        destination_file,
+        call. = FALSE
+      )
+    }
+    
+    message("Downloaded file ready: ", destination_file)
+  }
+  
+  invisible(dst_data_dir)
 }
 
 flatten_single_root_dir <- function(path) {
@@ -158,6 +431,7 @@ extract_gta_archive <- function(archive, dst_data_dir) {
 prepare_gta_data_source <- function(data_source = "auto",
                                     data_path = NULL,
                                     doi = NULL,
+                                    doi_file = NULL,
                                     dst_data_dir = NULL) {
   
   if (!requireNamespace("here", quietly = TRUE)) {
@@ -194,7 +468,11 @@ prepare_gta_data_source <- function(data_source = "auto",
     if (!is.null(doi)) {
       message("No mounted GTA data found. Downloading data from DOI: ", doi)
       dir.create(dst_data_dir, recursive = TRUE, showWarnings = FALSE)
-      download_gta_data_from_doi(doi = doi, dst_data_dir = dst_data_dir)
+      download_gta_data_from_doi(
+        doi = doi,
+        doi_file = doi_file,
+        dst_data_dir = dst_data_dir
+      )
       return(normalizePath(dst_data_dir, mustWork = TRUE))
     }
     
@@ -257,8 +535,18 @@ prepare_gta_data_source <- function(data_source = "auto",
       stop("doi is required when data_source = 'doi'.", call. = FALSE)
     }
     
-    dir.create(dst_data_dir, recursive = TRUE, showWarnings = FALSE)
-    download_gta_data_from_doi(doi = doi, dst_data_dir = dst_data_dir)
+    dir.create(
+      dst_data_dir,
+      recursive = TRUE,
+      showWarnings = FALSE
+    )
+    
+    download_gta_data_from_doi(
+      doi = doi,
+      doi_file = doi_file,
+      dst_data_dir = dst_data_dir
+    )
+    
     return(normalizePath(dst_data_dir, mustWork = TRUE))
   }
 }
