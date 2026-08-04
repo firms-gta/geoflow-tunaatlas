@@ -273,6 +273,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
                              stop_on_missing_inputs = TRUE,
                              data_source = "auto",
                              data_path = NULL,
+                             doi_file = NULL,
                              doi = NULL,
                              bootstrap_restore_renv = TRUE,
                              existing_paths = list()) {
@@ -341,6 +342,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     data_source = data_source,
     data_path = data_path,
     doi = doi,
+    doi_file = doi_file,
     dst_data_dir = here::here("data", "GTA_2026")
   )
   
@@ -720,6 +722,7 @@ if (sys.nframe() == 0) {
     data_source = data_source,
     data_path = data_path,
     doi = doi,
+    doi_file = doi_file,
     bootstrap_restore_renv = bootstrap_restore_renv,
     existing_paths = existing_paths
   )
