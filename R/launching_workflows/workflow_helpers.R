@@ -278,7 +278,7 @@ summarise_invalid <- function(path, con = NULL) {
 run_step_summary <- function(workflow_file,
                              workflow_output,
                              source_authority = "all",
-                             sizepdf = "short",
+                             sizepdf = "middle",
                              savestep = FALSE,
                              usesave = FALSE,
                              nameoutput = NULL,
