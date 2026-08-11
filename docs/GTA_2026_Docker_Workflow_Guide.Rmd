@@ -89,8 +89,8 @@ The `jobs/` volume is important: without it, outputs created inside the containe
 Use this when running from an already extracted directory.
 
 ```bash
-docker run --rm --network none \
-  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+docker run --rm \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026:ro \
   gta-workflow:latest \
   bash -lc '
     DATA_DIR=/home/rstudio/geoflow-tunaatlas/data/GTA_2026
@@ -116,8 +116,8 @@ Use this when `all_raw_data_GTA` is already extracted on the host.
 ```bash
 mkdir -p /home/grasset/gta_output/jobs
 
-docker run --rm --network none \
-  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+docker run --rm \
+  -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026:ro \
   -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
   -e GTA_STEPS=rawdata \
   -e GTA_DATA_SOURCE=volume_dir \
@@ -146,7 +146,7 @@ find /home/grasset/gta_output/jobs -maxdepth 1 -type d | sort | tail -20
 
 # Run pre-harmonisation from a mounted ZIP archive
 
-Use this when the raw data are available as a local `.zip`.
+Use this when the raw data are available as a local `.zip`. Network none is to ensure no connection to internet and then no other things that the one in the docker.
 
 ```bash
 mkdir -p /home/grasset/gta_runtime_data
@@ -186,7 +186,7 @@ This skips `rawdata` and starts directly from the harmonised downstream steps ne
 ```bash
 mkdir -p /home/grasset/gta_output/jobs
 
-docker run --rm --network none \
+docker run --rm \
   -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
   -e GTA_STEPS=nominal,level0,level1 \
@@ -203,7 +203,7 @@ Why `nominal,level0,level1` and not only `level0,level1`?
 - If the nominal dataset was already created in a previous run and your JSON files already point to it, you can try only `level0,level1`.
 
 ```bash
-docker run --rm --network none \
+docker run --rm \
   -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
   -e GTA_STEPS=level0,level1 \
@@ -220,7 +220,7 @@ Use this version when you want a fully explicit run from R.
 Replace the three `jobs/...` paths with the actual job folders produced by the pre-harmonisation run.
 
 ```bash
-docker run --rm --network none \
+docker run --rm \
   -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
   gta-workflow:latest \
@@ -248,7 +248,7 @@ Important note: this explicit `existing_paths` block is useful only if the workf
 # Run Level 0, Level 1, and Level 2 after pre-harmonisation
 
 ```bash
-docker run --rm --network none \
+docker run --rm \
   -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
   -e GTA_STEPS=nominal,level0,level1,level2 \
@@ -261,7 +261,7 @@ docker run --rm --network none \
 # Run invalid-data summaries during pre-harmonisation
 
 ```bash
-docker run --rm --network none \
+docker run --rm \
   -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
   -e GTA_STEPS=rawdata \
@@ -298,7 +298,7 @@ FDIWG_MAPPINGS_DIR=/opt/fdi-mappings
 Check what the container sees:
 
 ```bash
-docker run --rm --network none \
+docker run --rm \
   -v /home/grasset/Downloads/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   gta-workflow:latest \
   bash -lc '
@@ -351,104 +351,3 @@ GTA_TUNAATLAS_LEVEL2_CATCH=jobs/...
 ```
 
 This would make partial reruns and reporting runs easier to launch from Docker without writing a custom `Rscript -e` command.
-
-# Build Docker images
-
-This section gives the build commands for the two Docker images used in the GTA 2026 workflow.
-
-## Build the workflow image
-
-The workflow image is the main image used to run the data production steps: raw pre-harmonisation, nominal, Level 0, Level 1, and Level 2.
-
-Run this command from the root of the `geoflow-tunaatlas` repository:
-
-```bash
-cd ~/geoflow-tunaatlas
-
-docker build \
-  -f docker/Dockerfile.workflow \
-  -t gta-workflow:latest \
-  .
-```
-
-If you need to force a full rebuild without Docker cache:
-
-```bash
-cd ~/geoflow-tunaatlas
-
-docker build --no-cache \
-  -f docker/Dockerfile.workflow \
-  -t gta-workflow:latest \
-  .
-```
-
-After the build, check that the image exists:
-
-```bash
-docker images | grep gta-workflow
-```
-
-## Build the reporting image
-
-The reporting image is built on top of the workflow image and adds reporting-specific dependencies such as Pandoc/LaTeX tools.
-
-Build `gta-workflow:latest` first, then run:
-
-```bash
-cd ~/geoflow-tunaatlas
-
-docker build \
-  -f docker/Dockerfile.reporting \
-  --build-arg BASE_IMAGE=gta-workflow:latest \
-  -t gta-reporting:latest \
-  .
-```
-
-After the build, check that both images exist:
-
-```bash
-docker images | grep gta
-```
-
-# Run the reporting image
-
-Use `gta-reporting:latest` when you want to rerun summaries or reports from existing workflow outputs.
-
-## Run summary reports from existing Level 0, Level 1, and Level 2 jobs
-
-Replace the `jobs/...` values with the real job folders produced by the previous workflow run.
-
-```bash
-mkdir -p /home/grasset/gta_output/jobs
-mkdir -p /home/grasset/gta_runtime_data
-
-docker run --rm --network none \
-  -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
-  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
-  -e GTA_STEPS=summaries \
-  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
-  -e GTA_TUNAATLAS_LEVEL0_CATCH="jobs/PASTE_LEVEL0_JOB_HERE" \
-  -e GTA_TUNAATLAS_LEVEL1_CATCH="jobs/PASTE_LEVEL1_JOB_HERE" \
-  -e GTA_TUNAATLAS_LEVEL2_CATCH="jobs/PASTE_LEVEL2_JOB_HERE" \
-  gta-reporting:latest
-```
-
-## Run comparison reports from existing nominal and Level 2 jobs
-
-Replace the `jobs/...` values with the real job folders produced by the previous workflow run.
-
-```bash
-mkdir -p /home/grasset/gta_output/jobs
-mkdir -p /home/grasset/gta_runtime_data
-
-docker run --rm --network none \
-  -v /home/grasset/gta_runtime_data:/home/rstudio/geoflow-tunaatlas/data \
-  -v /home/grasset/gta_output/jobs:/home/rstudio/geoflow-tunaatlas/jobs \
-  -e GTA_STEPS=reports \
-  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
-  -e GTA_TUNAATLAS_NOMINAL="jobs/PASTE_NOMINAL_JOB_HERE" \
-  -e GTA_TUNAATLAS_LEVEL2_CATCH="jobs/PASTE_LEVEL2_JOB_HERE" \
-  gta-reporting:latest
-```
-
-Important: the two examples above assume that the CLI wrapper reads the `GTA_TUNAATLAS_*` environment variables and passes them to `existing_paths`. If this has not been implemented yet, use the explicit `Rscript -e` pattern shown earlier in this document, or run summaries/reports in the same execution where the upstream job paths are still available.
