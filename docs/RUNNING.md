@@ -304,36 +304,28 @@ QA generation.
 For example, to regenerate summaries from existing Level 0, Level 1 and
 Level 2 jobs:
 
-``` bash
-mkdir -p runtime/extracted/dataoutputpreharmo runtime/jobs runtime/cache
+```bash
+mkdir -p \
+  runtime/extracted/dataoutputpreharmo \
+  runtime/jobs \
+  runtime/cache \
+  runtime/cwp-summary-figures/Summary
+
 sudo chown -R "$(id -u):$(id -g)" runtime
 chmod -R u+rwX runtime
-
-for JOB in \
-  20260824153806level_0_catch_2026 \
-  20260824170000level_1_catch_2026 \
-  20260824190000level_2_catch_2026
-do
-  find "runtime/jobs/$JOB" \
-    -type f \
-    -name "tableau_recapbookdowntest.Rmd" \
-    -print0 |
-  while IFS= read -r -d '' RMD; do
-    mkdir -p "$(dirname "$RMD")/Figures/Summary"
-  done
-done
 
 docker run --rm --network none \
   --user "$(id -u):$(id -g)" \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
   -v "$PWD/runtime/cache":/cache \
+  -v "$PWD/runtime/cwp-summary-figures":/home/rstudio/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset/rmd/Figures \
   -e GTA_STEPS=summaries \
   -e GTA_DATA_SOURCE=volume_dir \
   -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
-  -e GTA_TUNAATLAS_LEVEL0_CATCH=jobs/20260824153806level_0_catch_2026 \
-  -e GTA_TUNAATLAS_LEVEL1_CATCH=jobs/20260824170000level_1_catch_2026 \
-  -e GTA_TUNAATLAS_LEVEL2_CATCH=jobs/20260824190000level_2_catch_2026 \
+  -e GTA_TUNAATLAS_LEVEL0_CATCH=jobs/LEVEL0_JOB \
+  -e GTA_TUNAATLAS_LEVEL1_CATCH=jobs/LEVEL1_JOB \
+  -e GTA_TUNAATLAS_LEVEL2_CATCH=jobs/LEVEL2_JOB \
   -e GTA_BOOTSTRAP_RESTORE_RENV=false \
   ghcr.io/firms-gta/gta-reporting:2d93b5a
 ```
