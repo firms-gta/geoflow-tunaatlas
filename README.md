@@ -2,38 +2,63 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11563961.svg)](https://doi.org/10.5281/zenodo.11563961)
 
-This repository contains the reproducible R and geoflow processing chain used
-to prepare, harmonise, validate, summarise, and publish Global Tuna Atlas catch
-and fishing-effort datasets.
+This repository contains the reproducible R and `geoflow` processing workflow used to prepare, harmonise, validate and publish Global Tuna Atlas catch and fishing-effort datasets.
 
-The 2026 launcher supports full runs and selected workflow stages, local files
-or a Zenodo DOI as input, persistent runtime volumes, database-free execution,
-and separate Docker images for data production and report generation.
+The workflow processes data from the five tuna Regional Fisheries Management Organisations (tRFMOs) and produces harmonised nominal catch, georeferenced catch, fishing-effort and Level 0–2 catch products.
 
-## Start here
+## Documentation
 
-- [Technical architecture](docs/TECHNICAL_WORKFLOW.md)
-- [Runtime parameters, data inputs, and persistent volumes](docs/RUNTIME_DATA_AND_VOLUMES.md)
-- [Local and SSP Cloud deployment](docs/DEPLOYMENT.md)
-- [Validation plan and test record](docs/VALIDATION.md)
-- [Detailed Docker runbook](docs/GTA_2026_Docker_Workflow_Guide.Rmd)
+* [Workflow architecture](docs/WORKFLOW.md) — processing stages, configurations and dependencies
+* [Running the workflow](docs/RUNNING.md) — Docker, input data, volumes, runtime parameters and examples
+* [Validation](docs/VALIDATION.md) — technical and scientific validation procedures
+
+## Pre-built Docker images
+
+Pre-built Docker images are available from the GitHub Container Registry (GHCR):
+
+| Image                              | Purpose                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| `ghcr.io/firms-gta/gta-workflow`   | Complete runtime environment for the GTA processing workflow             |
+| `ghcr.io/firms-gta/tunaatlas-data` | GTA input-data image used for reproducible or self-contained deployments |
+
+Images are tagged with the corresponding source revision. For reproducible runs, prefer an immutable version or commit tag rather than `latest`.
+
+For example:
+
+```bash
+docker pull ghcr.io/firms-gta/gta-workflow:2d93b5a
+docker pull ghcr.io/firms-gta/tunaatlas-data:9e9e214
+```
+
+The workflow image can therefore be used directly without rebuilding the R environment locally.
+
+To inspect the available image versions, see the repository packages on GitHub Container Registry.
 
 ## Quick start
 
-Build the workflow image from the repository root:
+Pull the workflow image:
 
 ```bash
-docker build \
-  -f docker/Dockerfile.workflow \
-  -t gta-workflow:latest \
-  .
+docker pull ghcr.io/firms-gta/gta-workflow:2d93b5a
 ```
 
-Run the three pre-harmonisation workflows from a local directory:
+Optionally create a shorter local tag:
 
 ```bash
-mkdir -p "$PWD/runtime/jobs" "$PWD/runtime/cache" "$PWD/runtime/extracted"
+docker tag \
+  ghcr.io/firms-gta/gta-workflow:2d93b5a \
+  gta-workflow:latest
+```
 
+Prepare persistent runtime directories:
+
+```bash
+mkdir -p runtime/extracted runtime/jobs runtime/cache
+```
+
+Run the pre-harmonisation workflows from a local raw-data directory:
+
+```bash
 docker run --rm --network none \
   --user "$(id -u):$(id -g)" \
   -v /absolute/path/to/all_raw_data_GTA:/data/GTA_2026:ro \
@@ -43,83 +68,91 @@ docker run --rm --network none \
   -e GTA_STEPS=rawdata \
   -e GTA_DATA_SOURCE=volume_dir \
   -e GTA_DATA_PATH=/data/GTA_2026 \
-  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
-  gta-workflow:latest
+  ghcr.io/firms-gta/gta-workflow:2d93b5a
 ```
 
-Run the same stage directly from the Zenodo record containing
-`all_raw_data_GTA.zip`:
+Alternatively, the image can be built locally when developing or modifying the workflow:
 
 ```bash
-docker run --rm \
-  -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
-  -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
-  -v "$PWD/runtime/cache":/cache \
-  -e GTA_STEPS=rawdata \
-  -e GTA_DATA_SOURCE=doi \
-  -e GTA_DOI=10.5281/zenodo.20834708 \
-  -e GTA_BOOTSTRAP_RESTORE_RENV=false \
-  gta-workflow:latest
+docker build \
+  -f docker/Dockerfile.workflow \
+  -t gta-workflow:latest \
+  .
 ```
 
-The DOI scenario requires network access for the first run. Later runs reuse
-the verified archive stored in the mounted `/cache` volume.
+See [Running the workflow](docs/RUNNING.md) for other input methods, including Zenodo DOI, local archives and persistent volumes.
 
-## Main workflow stages
+## Workflow stages
 
-| Value for `GTA_STEPS` | Result |
-|---|---|
-| `rawdata` | Raw nominal catch, georeferenced catch, and georeferenced effort pre-harmonisation |
-| `raw_nominal`, `raw_georef`, `raw_effort` | One pre-harmonisation branch only |
-| `effort` | Harmonised effort dataset |
-| `nominal` | Harmonised nominal catch dataset |
-| `level0`, `level1`, `level2` | Selected catch processing level |
-| `summaries` | Summary regeneration from current or existing job paths |
-| `reports` | Level 2 versus nominal comparison outputs |
-| `qa_rmd` | Pre-harmonisation QA documentation regeneration |
-| `all` | All production stages |
+The workflow can run the complete processing chain or selected stages through `GTA_STEPS`.
 
-Comma-separated values are accepted, for example
-`GTA_STEPS=nominal,level0,level1`.
+| `GTA_STEPS`   | Purpose                                                                     |
+| ------------- | --------------------------------------------------------------------------- |
+| `rawdata`     | Run nominal catch, georeferenced catch and fishing-effort pre-harmonisation |
+| `raw_nominal` | Run nominal catch pre-harmonisation only                                    |
+| `raw_georef`  | Run georeferenced catch pre-harmonisation only                              |
+| `raw_effort`  | Run fishing-effort pre-harmonisation only                                   |
+| `nominal`     | Produce the harmonised nominal catch dataset                                |
+| `effort`      | Produce the harmonised fishing-effort dataset                               |
+| `level0`      | Produce the Level 0 catch dataset                                           |
+| `level1`      | Produce the Level 1 catch dataset                                           |
+| `level2`      | Produce the Level 2 catch dataset                                           |
+| `summaries`   | Regenerate dataset summaries                                                |
+| `reports`     | Generate Level 2 versus nominal comparison outputs                          |
+| `qa_rmd`      | Regenerate pre-harmonisation QA documentation                               |
+| `all`         | Run all production stages                                                   |
 
-## Docker images
+Several stages can be selected with a comma-separated value:
 
-| Image | Dockerfile | Intended use |
-|---|---|---|
-| `gta-workflow` | `docker/Dockerfile.workflow` | Data checks and scientific processing |
-| `gta-reporting` | `docker/Dockerfile.reporting` | Summaries, R Markdown, bookdown, and PDF reports |
+```bash
+-e GTA_STEPS=nominal,level0,level1,level2
+```
 
-The reporting image extends the workflow image. Raw data are not embedded in
-either image; they are supplied at runtime through a DOI or a mounted path.
+See [Workflow architecture](docs/WORKFLOW.md) for details on dependencies and the corresponding `geoflow` configurations.
+
+## Repository structure
+
+```text
+geoflow-tunaatlas/
+├── R/                  # workflow and processing code
+├── config/             # geoflow workflow configurations
+├── data/               # static reference data
+├── docker/             # Docker images and entry points
+├── docs/               # project documentation
+├── reports/            # report sources
+├── tests/              # launcher and workflow checks
+├── compose.workflow.yml
+└── renv.lock
+```
+
+Runtime raw data and generated jobs are not part of the repository and should be mounted externally.
+
+## Reproducibility
+
+The workflow is designed to keep the scientific environment and runtime data separate:
+
+* R dependencies are pinned with `renv.lock`;
+* the Docker image pins the R runtime and external mapping dependencies;
+* raw datasets are supplied at runtime rather than embedded in the image;
+* downloaded archives, working data and generated jobs use separate persistent paths;
+* database publication is optional and requires a validated database connection.
+
+For an auditable production run, retain the repository commit SHA, Docker image tag or digest, input DOI or checksum, runtime parameters and generated job directories.
 
 ## Tests
 
-The launcher checks parse both entry scripts, verify DOI parsing and archive
-selection, and confirm the documented persistent runtime paths:
+Run the launcher smoke tests with:
 
 ```bash
 Rscript tests/smoke_test_launcher.R
 ```
 
-The same checks run through
-`.github/workflows/workflow-launcher-checks.yml` on relevant pull requests and
-can also be started manually.
+The same checks are run by GitHub Actions on relevant repository changes.
 
-## Reproducibility and publication
-
-- R package versions are pinned in `renv.lock`.
-- The FDI mappings revision is pinned in `docker/Dockerfile.workflow`.
-- Database publication is enabled only after the expected database context and
-  connection have both been validated.
-- Without a valid database connection, processing continues with a temporary
-  database-free workflow configuration.
-- Inputs, source code, job outputs, and download caches use separate paths.
-
-Do not commit `.env` files, database passwords, access tokens, downloaded raw
-data, or generated job directories.
+Scientific and runtime acceptance procedures are documented in [Validation](docs/VALIDATION.md).
 
 ## Licence and citation
 
-Reuse the software and datasets in accordance with the repository licence and
-the licence attached to each published dataset. Cite the corresponding dataset
-DOI rather than treating the repository DOI as a substitute for a data citation.
+Reuse the software and datasets according to the repository licence and the licence associated with each published dataset.
+
+When using Global Tuna Atlas data, cite the DOI corresponding to the dataset release rather than using the repository DOI as a substitute for the dataset citation.
