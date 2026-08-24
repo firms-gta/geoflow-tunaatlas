@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Docker Engine with BuildKit and Docker Compose v2 for local runs;
-- enough disk space for the R image, raw inputs, and job outputs;
+- enough disk space for the R image, raw inputs, and job outputs; --> at least 10GB
 - a writable results path;
 - network access only when building the image or acquiring a DOI for the first
   time;

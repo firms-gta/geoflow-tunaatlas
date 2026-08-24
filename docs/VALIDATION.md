@@ -1,102 +1,369 @@
-# Validation plan and test record
+# Global Tuna Atlas validation
 
-## Acceptance principle
+This document defines the minimum technical and scientific checks required to validate a Global Tuna Atlas workflow run.
 
-A scenario is accepted only when the command exits successfully, expected job
-files are present on persistent storage, logs contain no unhandled error, and a
-representative scientific output passes the checks already defined by its
-geoflow configuration.
+For workflow architecture, see [WORKFLOW.md](WORKFLOW.md).
 
-Static review alone does not validate a multi-hour scientific run. This document
-separates checks performed on the repository from runtime acceptance checks that
-must be executed on a Docker host or SSP Cloud with the real input package.
+For Docker commands and runtime execution, see [RUNNING.md](RUNNING.md).
 
-## Repository checks
+## 1. Validation principles
 
-| Check | Expected result | Current record |
-|---|---|---|
-| R launcher interface | Main and CLI scripts parse; smoke tests pass | Automated by `workflow-launcher-checks.yml`; run locally with `Rscript tests/smoke_test_launcher.R` |
-| DOI identification | DOI, Zenodo URL, and numeric ID resolve to the same record | Covered by launcher smoke tests |
-| DOI archive choice | `all_raw_data_GTA.zip` is selected by default | Covered by launcher smoke tests |
-| DOI metadata | Record `20834708` exposes `all_raw_data_GTA.zip` | Confirmed against the Zenodo API during documentation audit on 2026-07-21 |
-| Docker runtime paths | Input, job, and cache paths are distinct | Checked by CI grep assertions and documented volume table |
-| YAML syntax | Compose and Kubernetes templates parse | Checked during documentation audit on 2026-07-21 |
-| Shell entry point | Bash syntax is valid | Checked with `bash -n` during documentation audit on 2026-07-21 |
-| Documentation links | New repository-local documentation links resolve | Checked during documentation audit on 2026-07-21 |
+A workflow run should be considered valid only when:
 
-## Runtime scenario matrix
+* the selected workflow stages complete without unhandled errors;
+* the expected job directories and outputs are created;
+* required source authorities and time ranges are present;
+* measurement units and processing levels match the expected product;
+* dataset totals and record counts are consistent with the approved reference release or documented scientific expectations;
+* invalid-record summaries and comparison outputs have been reviewed;
+* any accepted deviation is documented.
 
-Complete the final three columns for the image release being delivered.
+Technical success alone is not sufficient for scientific validation.
 
-| ID | Scenario | Expected evidence | Environment | Result | Date/log reference |
-|---|---|---|---|---|---|
-| W01 | Build `gta-workflow` from a clean checkout | Image built; package-loading smoke test succeeds | Local/CI | Pending execution | |
-| W02 | Build `gta-reporting` from W01 | Image built; Pandoc and LaTeX commands available | Local/CI | Pending execution | |
-| W03 | `volume_dir` plus `GTA_STEPS=raw_nominal` | One raw nominal job and timing log | Local | Pending execution | |
-| W04 | `volume_dir` plus `GTA_STEPS=raw_georef` | One raw georeferenced catch job | Local | Pending execution | |
-| W05 | `volume_dir` plus `GTA_STEPS=raw_effort` | One raw effort job | Local | Pending execution | |
-| W06 | `volume_zip` plus `GTA_STEPS=rawdata` | Archive extracted; three raw jobs persisted | Local | Pending execution | |
-| W07 | DOI `20834708` plus `GTA_STEPS=rawdata` | Archive downloaded, checksum verified, three jobs persisted | Networked Docker host | Pending execution | |
-| W08 | Repeat W07 with populated cache | Cached archive reused; no full re-download | Networked Docker host | Pending execution | |
-| W09 | `nominal,level0,level1,level2` | Four product jobs created; configured checks succeed | Server-sized host | Pending execution | |
-| W10 | `summaries` with existing paths | Available Level 0/1/2 summaries regenerated | Reporting image | Pending execution | |
-| W11 | `reports` with nominal and Level 2 paths | Comparison PNG and RDS outputs created | Reporting image | Pending execution | |
-| W12 | Database unavailable | Processing continues with database publication disabled | Local | Pending execution | |
-| W13 | Valid GTA sandbox database | Upload enabled only after context and test-query validation | Authorised server | Pending execution | |
-| W14 | Kubernetes Job from supplied template | Job completes; outputs persist in PVC | SSP Cloud | Pending execution | |
-| W15 | Kubernetes partial relaunch | New Job reuses existing PVC jobs and cache | SSP Cloud | Pending execution | |
+Likewise, scientific output should not be accepted when the runtime environment or input provenance cannot be reproduced.
 
-## Commands for the acceptance run
+## 2. Automated repository checks
 
-Use the exact commands in `GTA_2026_Docker_Workflow_Guide.Rmd`. Save logs instead
-of relying on terminal history:
+The repository includes lightweight checks intended to detect launcher and configuration problems before running expensive workflows.
+
+Run:
 
 ```bash
-docker run --name gta-validation-W03 ... 2>&1 | tee validation-W03.log
-docker inspect gta-validation-W03 > validation-W03-container.json
-docker rm gta-validation-W03
+Rscript tests/smoke_test_launcher.R
 ```
 
-For Kubernetes:
+These checks cover the launcher interface and basic runtime assumptions, including:
+
+* parsing of the main launcher scripts;
+* workflow-stage selection;
+* DOI parsing and archive selection;
+* expected runtime paths;
+* basic input-resolution behaviour.
+
+Relevant checks are also executed through GitHub Actions.
+
+Automated smoke tests do not replace a full production run.
+
+## 3. Docker image validation
+
+Before using a new workflow release for production, verify that the Docker images can be retrieved and started.
+
+For a tagged release:
 
 ```bash
-kubectl logs job/gta-workflow > validation-W14.log
-kubectl get job gta-workflow -o yaml > validation-W14-job.yaml
+docker pull ghcr.io/firms-gta/gta-workflow:2d93b5a
+docker pull ghcr.io/firms-gta/gta-reporting:2d93b5a
 ```
 
-## Scientific validation minimum
+Check that both images are available locally:
 
-For every product-producing scenario:
+```bash
+docker images | grep -E 'gta-workflow|gta-reporting'
+```
 
-1. confirm that all expected source authorities are present;
-2. confirm that the expected year range is present;
-3. confirm that measurement units and processing levels match the target
-   product;
-4. compare record count and total measurements against the approved reference;
-5. inspect invalid-record summaries;
-6. inspect Level 2 versus nominal differences before publication;
-7. record any accepted deviation and its scientific justification.
+When validating locally built images instead, build them using the commands documented in [RUNNING.md](RUNNING.md).
 
-Thresholds must come from the approved reference release or domain decision;
-they must not be invented by the deployment layer.
+For reproducible validation, record the exact image tag or immutable digest.
 
-## Release record
+## 4. Input validation
 
-Attach the following to a completed release:
+Before running long processing stages, confirm that the selected input package is complete.
 
-- repository commit SHA;
-- image tags and digests;
-- `renv.lock` hash;
-- `FDI_MAPPINGS_REF` value;
-- DOI and selected Zenodo filename, or local-input checksum;
-- completed W01-W15 matrix for applicable scenarios;
-- logs and job-file inventory;
-- known deviations and approval decision.
+For a local directory, a simple container-level inspection can be performed with:
 
-## Current limitation
+```bash
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v /absolute/path/to/all_raw_data_GTA:/data/GTA_2026:ro \
+  ghcr.io/firms-gta/gta-workflow:2d93b5a \
+  bash -lc '
+    echo "Input directory:"
+    ls -lah /data/GTA_2026 | head -50
+  '
+```
 
-The documentation workspace used for this update does not provide R or Docker,
-and it has no authenticated SSP Cloud namespace. Consequently, repository and
-metadata checks were performed here, while image builds and scientific runtime
-scenarios remain deliberately marked pending. The included CI workflow and
-runtime matrix make those checks reproducible on the intended infrastructure.
+The workflow launcher also performs mandatory input checks before expensive pre-harmonisation stages.
+
+Validation should confirm:
+
+* expected source files are present;
+* files are mounted at the expected directory level;
+* the intended source-data release is being used;
+* stale or unexpected source files are investigated before production.
+
+For DOI-based runs, record:
+
+* Zenodo DOI;
+* selected archive name;
+* published checksum when available.
+
+## 5. Runtime validation
+
+A runtime scenario is accepted when:
+
+1. the command exits successfully;
+2. expected job directories are created;
+3. logs contain no unhandled error;
+4. expected dataset files are present;
+5. the corresponding scientific checks are completed.
+
+A useful minimum runtime matrix is:
+
+| Scenario      | Expected result                                   |
+| ------------- | ------------------------------------------------- |
+| `raw_nominal` | Raw nominal catch job created                     |
+| `raw_georef`  | Raw georeferenced catch job created               |
+| `raw_effort`  | Raw fishing-effort job created                    |
+| `rawdata`     | All three pre-harmonisation jobs created          |
+| `nominal`     | Harmonised nominal dataset created                |
+| `effort`      | Harmonised effort dataset created                 |
+| `level0`      | Catch Level 0 dataset created                     |
+| `level1`      | Catch Level 1 dataset created                     |
+| `level2`      | Catch Level 2 dataset created                     |
+| `summaries`   | Summary outputs regenerated                       |
+| `reports`     | Level 2 versus nominal comparison outputs created |
+| `qa_rmd`      | Pre-harmonisation QA documentation regenerated    |
+
+Not every release needs to rerun every scenario independently if the full production chain already provides equivalent evidence.
+
+## 6. Save execution logs
+
+Validation runs should preserve their logs.
+
+For example:
+
+```bash
+mkdir -p validation
+```
+
+Then run the selected workflow while recording stdout and stderr:
+
+```bash
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v /absolute/path/to/all_raw_data_GTA:/data/GTA_2026:ro \
+  -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/runtime/cache":/cache \
+  -e GTA_STEPS=rawdata \
+  -e GTA_DATA_SOURCE=volume_dir \
+  -e GTA_DATA_PATH=/data/GTA_2026 \
+  ghcr.io/firms-gta/gta-workflow:2d93b5a \
+  2>&1 | tee validation/rawdata.log
+```
+
+For long-running production runs, also retain the exact command or environment file used.
+
+## 7. Scientific validation minimum
+
+Every product-producing workflow should be checked at the scientific level.
+
+At minimum, validate:
+
+### Source authorities
+
+Confirm that all expected source authorities are present.
+
+Unexpected missing or additional authorities should be investigated.
+
+### Temporal coverage
+
+Confirm that the expected year range is present.
+
+Check for:
+
+* missing years;
+* unexpected future years;
+* unexpected truncation of recent years.
+
+### Measurement units
+
+Confirm that units correspond to the intended processing level.
+
+In particular, check transitions between number-based and weight-based measurements where applicable.
+
+### Processing level
+
+Confirm that output records contain the expected processing level and associated metadata.
+
+### Record counts
+
+Compare the number of records with:
+
+* the previous approved release;
+* a known reference run;
+* or documented expected changes.
+
+Large changes should be explainable.
+
+### Measurement totals
+
+Compare total catch or effort measurements against the previous approved reference.
+
+Differences should be decomposed by relevant dimensions such as:
+
+* source authority;
+* species;
+* fishing fleet;
+* gear type;
+* year;
+* measurement unit.
+
+Thresholds must come from scientific expectations or an approved reference release.
+
+The deployment layer should not invent arbitrary acceptance thresholds.
+
+## 8. Pre-harmonisation QA
+
+The three raw branches should be reviewed before accepting downstream products.
+
+Check:
+
+* records rejected by input-validation rules;
+* records with missing mandatory dimensions;
+* unexpected species or gear mappings;
+* temporal anomalies;
+* invalid spatial information;
+* unusually large changes compared with the previous release.
+
+When available, use the outputs generated by:
+
+```text
+GTA_STEPS=qa_rmd
+```
+
+and the invalid-record summaries produced by the workflow.
+
+Any unexplained increase in invalid records should be investigated before continuing to publication.
+
+## 9. Level 0 validation
+
+For Level 0, confirm that:
+
+* expected georeferenced source authorities are present;
+* harmonisation has not unexpectedly removed valid source records;
+* spatial and temporal dimensions are preserved;
+* measurement units correspond to the expected source-level representation;
+* totals remain consistent with the pre-harmonised georeferenced input, apart from documented harmonisation effects.
+
+## 10. Level 1 validation
+
+For Level 1, confirm that:
+
+* measurement-unit transformations were applied as expected;
+* conversion factors are available for the records requiring conversion;
+* records are not silently dropped because of missing conversion metadata;
+* totals before and after conversion are scientifically plausible;
+* conversion-related differences can be explained by species, gear, year and source authority.
+
+The Level 1 validation should explicitly quantify the impact of unit conversion.
+
+## 11. Level 2 validation
+
+Level 2 requires particular attention because it raises georeferenced catch against nominal catch.
+
+Validate:
+
+* presence of the expected nominal reference;
+* presence of all expected Level 1 dimensions;
+* raising factors and their applicable groups;
+* records with no valid raising reference;
+* differences between Level 2 and nominal catch.
+
+The final Level 2 output should be compared with the harmonised nominal dataset before publication.
+
+## 12. Level 2 versus nominal comparison
+
+Generate the comparison outputs using the reporting workflow described in [RUNNING.md](RUNNING.md).
+
+The comparison should be reviewed at several aggregation levels.
+
+At minimum:
+
+* global total;
+* year;
+* source authority;
+* species;
+* fishing fleet when relevant;
+* major gear groups when relevant.
+
+The objective is not necessarily exact equality at every aggregation level.
+
+The objective is to identify unexplained discrepancies between:
+
+* nominal declarations;
+* georeferenced Level 2 catch;
+* expected effects of the raising procedure.
+
+Large discrepancies should be traced back to the relevant source authority, species, fleet, gear or period.
+
+## 13. Fishing-effort validation
+
+The fishing-effort product should be validated separately from catch.
+
+Check:
+
+* expected source authorities;
+* year range;
+* effort units;
+* georeferenced coverage;
+* missing or invalid effort measurements;
+* major differences relative to the previous approved release.
+
+Catch-based validation thresholds should not automatically be reused for effort.
+
+## 14. Database publication validation
+
+Database publication is optional and should be validated separately from scientific processing.
+
+Before publication, confirm:
+
+* the intended database environment;
+* valid connection parameters;
+* successful connection test;
+* expected destination schema and tables;
+* publication is not accidentally targeting another environment.
+
+When the database is unavailable, the workflow should continue without publication if the selected scientific stages do not require database access.
+
+A successful database upload does not replace scientific dataset validation.
+
+## 15. Reproducibility record
+
+For each validated production release, retain:
+
+* repository commit SHA;
+* Docker image tag or digest;
+* `renv.lock` version or hash;
+* pinned external mappings revision;
+* input DOI and archive name, or local-input checksum;
+* selected `GTA_STEPS`;
+* relevant runtime environment variables;
+* job directories;
+* execution logs;
+* validation outputs;
+* known deviations and their justification.
+
+This information should be sufficient to identify the exact code, environment, inputs and outputs associated with the release.
+
+## 16. Release checklist
+
+Before publication, confirm:
+
+* [ ] repository smoke tests pass;
+* [ ] Docker image version is recorded;
+* [ ] input-data release is recorded;
+* [ ] required pre-harmonisation jobs completed successfully;
+* [ ] nominal dataset validated;
+* [ ] effort dataset validated when applicable;
+* [ ] Level 0 validated;
+* [ ] Level 1 conversion effects reviewed;
+* [ ] Level 2 raising reviewed;
+* [ ] invalid-record summaries reviewed;
+* [ ] Level 2 versus nominal comparison reviewed;
+* [ ] unexpected differences documented;
+* [ ] execution logs retained;
+* [ ] database destination validated before publication;
+* [ ] final release metadata recorded.
+
+A release should not be considered validated solely because the workflow completed without an error.
