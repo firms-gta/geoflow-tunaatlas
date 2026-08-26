@@ -134,23 +134,33 @@ in the image.
 Replace `/absolute/path/to/all_raw_data_GTA` with the directory
 containing the GTA source files.
 
-``` bash
-mkdir -p runtime/extracted/dataoutputpreharmo runtime/jobs runtime/cache
+In `volume_dir` mode, the source directory is also used as the working
+data directory. The workflow must therefore have read and write access
+to this directory.
+
+```bash
+mkdir -p runtime/jobs runtime/cache
+
 sudo chown -R "$(id -u):$(id -g)" runtime
 chmod -R u+rwX runtime
 
+chmod -R u+rwX /absolute/path/to/all_raw_data_GTA
+
 docker run --rm --network none \
   --user "$(id -u):$(id -g)" \
-  -v /absolute/path/to/all_raw_data_GTA:/data/GTA_2026:ro \
-  -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+  -v /absolute/path/to/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
   -v "$PWD/runtime/cache":/cache \
   -e GTA_STEPS=rawdata \
   -e GTA_DATA_SOURCE=volume_dir \
-  -e GTA_DATA_PATH=/data/GTA_2026 \
+  -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -e GTA_BOOTSTRAP_RESTORE_RENV=false \
   ghcr.io/firms-gta/gta-workflow:2d93b5a
 ```
+
+The workflow reads the GTA source files and writes generated/intermediate
+data to the same mounted directory. For this reason, the data directory
+must not be mounted read-only (`:ro`).
 
 This runs the three pre-harmonisation workflows:
 
