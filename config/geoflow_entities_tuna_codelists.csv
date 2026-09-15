@@ -87,25 +87,10 @@ processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr
 process: The geographic layer was downloaded from the IOTC reference data repository._
 process: The layer describes the two main areas in which the Indian Ocean is split, namely the western and eastern Indian Ocean._
 process: The layer was integrated into the Tuna atlas database
-","source:IO_MAIN_AREAS_1.0.0_SHP.zip@https://data.iotc.org/reference/latest/domain/admin/shapefiles/IO_MAIN_AREAS_1.0.0_SHP.zip_
-sourceType:shapefile_
+","source:IO_MAIN_AREAS_1.0.0_SHP.zip@https://data.iotc.org/reference/latest/domain/admin/shapefiles/IO_MAIN_AREAS_SHP.zip_
+sourceType:shp_
 uploadSource:area.IOTC_areas_
 uploadType:dbtable"
-id:ICCAT_subareas,ICCAT GIS subareas and geographic layers of the Convention Area,"abstract:The International Commission for the Conservation of Atlantic Tunas is responsible for the conservation of tunas and tuna-like species in the Atlantic Ocean and adjacent seas. To support this mission, ICCAT employs a Geographic Information System (GIS) to collect, store, analyze, and visualize geographic data related to these species. This system enhances the understanding of the distribution, habitat, and migratory patterns of tunas and other highly migratory species in the Atlantic, enabling more informed decision-making for the management and conservation of marine resources.
-",,"owner:ICCAT-Secretariat@iccat.int_
-metadata:FIRMS-Secretariat@fao.org_
-pointOfContact:ICCAT-Secretariat@iccat.int_
-principalInvestigator:ICCAT-Secretariat@iccat.int_
-processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,2025-05-05,,,,"statement:Data management workflow_
-process: The geographic layer was downloaded from the ICCAT GIS repository._
-process: The layer contains the spatial definitions used by ICCAT for the Convention Area and related subareas used for analysis and visualization._
-process: Licensing and terms of use follow CC BY-NC-SA 4.0 IGO._
-process: The layer was integrated into the Tuna atlas database
-","source:ICCAT_gis.rar@https://www.iccat.int/Documents/Gis/ICCAT_gis.rar_
-sourceType:shapefile_
-uploadSource:area.ICCAT_subareas_
-uploadType:dbtable_
-featureType:iccat_subareas"
 id:catchtype_ccsbt,Code list for types of catch used by CCSBT,"abstract:Code list for types of catches used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT). Presently, the CCSBT does not have any catch type code list, since the public datasets do not contain a catch type stratification. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database.
 ",,"owner:ird@ird.fr,paul.taconet@ird.fr;CMillar@ccsbt.org_
 metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
