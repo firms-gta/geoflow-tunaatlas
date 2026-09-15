@@ -122,6 +122,15 @@ function(action,entity, config){
   PK_metadata<-as.integer(PK_metadata$max[1])
   config$logger.info(sprintf("Retrieving internal metadata ID from DB: %s", PK_metadata))
   
+  if (nrow(MapFinal) == 0) {
+    stop(
+      "Mapping is empty after matching source/target codelists. ",
+      "Check that src_code/trg_code exist in the corresponding DB codelists."
+    )
+  }
+  
+  MapFinal$id_metadata <- PK_metadata
+  
   MapFinal$id_metadata<-PK_metadata
   
   # Insert mapping into mapping table
