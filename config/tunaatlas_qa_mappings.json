@@ -15,12 +15,8 @@
   "mode": "entity",
   "metadata": {
     "entities": {
-      "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1xzXgIxjQm81Fg7PCgtdiwhkB9sgtPKk-NByQDRtAGrE/edit?usp=sharing"
-    },
-    "contacts" : {
-      "handler": "gsheet",
-      "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
+      "handler": "csv",
+      "source": "config/geoflow_entities_tuna_mappings.csv"
     }
   },
   "software": [
@@ -53,22 +49,12 @@
 		},
 		"properties" : {
 		}
-	},
-	{
-		"id": "googledrive",
-		"type": "input",
-		"software_type": "googledrive",
-		"parameters": {
-			"email": "{{GMAIL_USER}}",
-			"token": "{{GMAIL_TOKEN}}"
-		},
-		"properties" : {}
 	}
   ],
   "actions": [
 	{
 		"id": "load_mapping",
-		"script": "https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_actions/load_mapping.R",
+		"script": "../R/tunaatlas_actions/load_mapping.R",
 		"run": true
 		
 	}
