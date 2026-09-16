@@ -38,14 +38,14 @@ function(action, entity, config){
   
   require(dplyr)
   catches <- readr::read_csv(entity$getJobDataResource(config, entity$data$source[[1]]), guess_max = 0)
-# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
-
+  # Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
+  
   filename1 <- entity$data$source[[1]]
-# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
+  # Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
   # filename2 <- entity$data$source[[2]]
-# Historical name for the dataset at source  iccat_catch_code_lists.csv or iotc_catch_code_lists.csv
+  # Historical name for the dataset at source  iccat_catch_code_lists.csv or iotc_catch_code_lists.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, entity$data$source[[1]])
-# Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
+  # Historical name for the dataset at source  iccat_catch_all_1m_firms_level0_20230405.csv or iotc_catch_all_1m_firms_level0.csv
   config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
   opts <- options()
   options(encoding = "UTF-8")
@@ -53,7 +53,7 @@ function(action, entity, config){
   
   ## Catches
   if("fishingfleet" %in%colnames(catches)){
-  catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
+    catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
   }
   
   if(!"measurement_processing_level" %in% colnames(catches)){
@@ -93,15 +93,35 @@ function(action, entity, config){
   
   write.csv(catches, output_name_dataset, row.names = FALSE)
   
-  # file.rename(
-  #   from = entity$getJobDataResource(config, filename2),
-  #   to   = output_name_codelists
-  # )
+  #----------------------------------------------------------------------------------------------------------------------------
+  # Generate a default codelists file: one row per dimension used in the
+  # harmonized dataset, with 'code_list_identifier' defaulting to the same
+  # value as 'dimension'. This ensures a codelists resource always exists,
+  # even when no source codelists file was provided upstream (filename2).
+  # Note: 'geographic_identifier' is reported under the dimension name 'area'.
+  
+  codelists_dimensions <- c(
+    "area",
+    "measurement_type",
+    "measurement_unit",
+    "fishing_fleet",
+    "gear_type",
+    "fishing_mode",
+    "species",
+    "source_authority"
+  )
+  
+  codelists_df <- data.frame(
+    dimension = codelists_dimensions,
+    code_list_identifier = codelists_dimensions,
+    stringsAsFactors = FALSE
+  )
+  
+  write.csv(codelists_df, output_name_codelists, row.names = FALSE)
   #----------------------------------------------------------------------------------------------------------------------------
   entity$addResource("source", output_name_dataset)
   entity$addResource("harmonized", output_name_dataset)
   entity$addResource("codelists", output_name_codelists)
   
   
-}  
-
+}
