@@ -379,13 +379,23 @@ load_dataset <- function(action,entity, config){
         df_to_load<-merge(df_to_load,df_inputFromDB,by.x="geographic_identifier",by.y="code",all.x=TRUE)
         df_to_load<-as.data.frame(df_to_load)
         
-        # upload the new wkt to the db
-        CodesToLoad<-unique(df_to_load[index.na,"geographic_identifier"])
+        # Upload only actual WKT geometries to the DB
+        CodesToLoad <- unique(df_to_load[index.na, "geographic_identifier"])
         
-        sql4 <- paste0("COPY  area.area_wkt (code) FROM STDIN NULL 'NA' ")
-        postgresqlpqExec(con, sql4)
-        postgresqlCopyInDataframe(con, data.frame(CodesToLoad))
-        rs <- postgresqlgetResult(con)
+        CodesToLoad <- CodesToLoad[
+          grepl(
+            "^(POINT|LINESTRING|POLYGON|MULTIPOINT|MULTILINESTRING|MULTIPOLYGON|GEOMETRYCOLLECTION)\\s*\\(",
+            CodesToLoad,
+            ignore.case = TRUE
+          )
+        ]
+        
+        if (length(CodesToLoad) > 0) {
+          sql4 <- paste0("COPY area.area_wkt (code) FROM STDIN NULL 'NA' ")
+          postgresqlpqExec(con, sql4)
+          postgresqlCopyInDataframe(con, data.frame(CodesToLoad))
+          rs <- postgresqlgetResult(con)
+        }
         
         #if codes were missing in db, re-run the function that does the merging
         
