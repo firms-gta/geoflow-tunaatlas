@@ -35,8 +35,10 @@ services:
       
   rstudio:
     build:
-      context: .
-      dockerfile: Dockerfile.rstudio
+      context: ..
+      dockerfile: compose/Dockerfile.rstudio
+      args:
+        BASE_IMAGE: gta-workflow:geoflow-1.3.0
     image: gta-workflow-rstudio:local
     ports:
       - "127.0.0.1:8787:8787"
@@ -116,9 +118,9 @@ services:
 
   workflow:
     build:
-      context: .
-      dockerfile: Dockerfile.workflow
-    image: gta-workflow-workflow:local
+      context: ..
+      dockerfile: compose/Dockerfile.workflow
+    image: gta-workflow:geoflow-1.3.0
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
