@@ -67,7 +67,7 @@ services:
       - ../R:/home/rstudio/geoflow-tunaatlas/R
       - ../config:/home/rstudio/geoflow-tunaatlas/config
       - ../data:/home/rstudio/geoflow-tunaatlas/data
-      - ../docker_local.env:/home/rstudio/geoflow-tunaatlas/docker_local.env:ro
+      - ../docker_local.env.compose:/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro
       - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro
       - ../compose:/home/rstudio/geoflow-tunaatlas/compose
       - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
