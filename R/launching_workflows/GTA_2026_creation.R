@@ -50,7 +50,6 @@ env_flag <- function(x, default = FALSE) {
   value %in% c("true", "1", "yes", "y")
 }
 
-
 # =============================================================================
 # 1. DEFAULT USER PARAMETERS
 # =============================================================================
@@ -115,7 +114,8 @@ existing_paths <- list(
   tunaatlas_nominal = env_or_null("GTA_TUNAATLAS_NOMINAL"),
   tunaatlas_level0_catch = env_or_null("GTA_TUNAATLAS_LEVEL0_CATCH"),
   tunaatlas_level1_catch = env_or_null("GTA_TUNAATLAS_LEVEL1_CATCH"),
-  tunaatlas_level2_catch = env_or_null("GTA_TUNAATLAS_LEVEL2_CATCH")
+  tunaatlas_level2_catch = env_or_null("GTA_TUNAATLAS_LEVEL2_CATCH"),
+  tunaatlas_services = env_or_null("GTA_TUNAATLAS_SERVICES")
 )
 
 
@@ -575,6 +575,8 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   }
   
   default_existing_paths <- list(
+    tunaatlas_qa_dbmodel = NULL,
+    tunaatlas_qa_mappings = NULL,
     raw_nominal_catch = NULL,
     raw_data_georef = NULL,
     raw_data_georef_effort = NULL,
@@ -582,11 +584,14 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     tunaatlas_nominal = NULL,
     tunaatlas_level0_catch = NULL,
     tunaatlas_level1_catch = NULL,
-    tunaatlas_level2_catch = NULL
+    tunaatlas_level2_catch = NULL,
+    tunaatlas_services = NULL
   )
   
   existing_paths <- utils::modifyList(default_existing_paths, existing_paths)
   env_existing_paths <- list(
+    tunaatlas_qa_dbmodel = env_or_null("GTA_TUNAATLAS_QA_DBMODEL"),
+    tunaatlas_qa_mappings = env_or_null("GTA_TUNAATLAS_QA_MAPPINGS"),
     raw_nominal_catch = env_or_null("GTA_RAW_NOMINAL_CATCH"),
     raw_data_georef = env_or_null("GTA_RAW_DATA_GEOREF"),
     raw_data_georef_effort = env_or_null("GTA_RAW_DATA_GEOREF_EFFORT"),
@@ -594,7 +599,8 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     tunaatlas_nominal = env_or_null("GTA_TUNAATLAS_NOMINAL"),
     tunaatlas_level0_catch = env_or_null("GTA_TUNAATLAS_LEVEL0_CATCH"),
     tunaatlas_level1_catch = env_or_null("GTA_TUNAATLAS_LEVEL1_CATCH"),
-    tunaatlas_level2_catch = env_or_null("GTA_TUNAATLAS_LEVEL2_CATCH")
+    tunaatlas_level2_catch = env_or_null("GTA_TUNAATLAS_LEVEL2_CATCH"),
+    tunaatlas_services = env_or_null("GTA_TUNAATLAS_SERVICES")
   )
   
   env_existing_paths <- env_existing_paths[!vapply(env_existing_paths, is.null, logical(1))]
@@ -670,15 +676,16 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   
   invisible(lapply(unique(required_packages), load_required_package))
   
-  default_env_file <- ".env"
-  if (file.exists(here::here("geoserver_sdi_lab.env"))) {
-    default_env_file <- "geoserver_sdi_lab.env"
-  }
+  docker_env_file <- "docker_local.env"
   
-  tryCatch(
-    dotenv::load_dot_env(file = here::here(default_env_file)),
-    error = function(e) message("No environment file loaded: ", e$message)
-  )
+  if (file.exists(here::here(docker_env_file))) {
+    tryCatch(
+      dotenv::load_dot_env(file = here::here(docker_env_file)),
+      error = function(e) message("No environment file loaded: ", e$message)
+    )
+  } else {
+    message("No '", docker_env_file, "' found, skipping DB-specific env file.")
+  }
   
   source(here::here("R/running_time_of_workflow.R"))
   source(here::here("R/executeAndRename.R"))
@@ -720,18 +727,23 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # ---------------------------------------------------------------------------
   # Pre-harmonisation workflows
   # ---------------------------------------------------------------------------
-  
-  if (run_any_step(c("rawdata", "raw_effort"))) {
-    raw_data_georef_effort <- execute_workflow_maybe_upload(
-      file = here::here("config/All_raw_data_georef_effort.json"),
-      rename_suffix = "_raw_data_georef_effort_final"
+  if (run_any_step(c("DB"))) {
+    
+    tunaatlas_qa_dbmodel_path <- execute_workflow_maybe_upload(
+      file = here::here("config/tunaatlas_qa_dbmodel+codelists.json"),
+      requires_db = TRUE,
+      rename_suffix = "_qa_dbmodel_codelists_final"
     )
     
-    running_time_of_workflow(raw_data_georef_effort)
+    running_time_of_workflow(tunaatlas_qa_dbmodel_path)
     
-    if (summarise_invalid_raw) {
-      summarise_invalid(raw_data_georef_effort)
-    }
+    tunaatlas_qa_mappings_path <- execute_workflow_maybe_upload(
+      file = here::here("config/tunaatlas_qa_mappings.json"),
+      requires_db = TRUE,
+      rename_suffix = "_qa_mappings_final"
+    )
+    
+    running_time_of_workflow(tunaatlas_qa_mappings_path)
   }
   
   if (run_any_step(c("rawdata", "raw_nominal"))) {
@@ -744,6 +756,19 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     
     if (summarise_invalid_raw) {
       summarise_invalid(raw_nominal_catch)
+    }
+  }
+  
+  if (run_any_step(c("rawdata", "raw_effort"))) {
+    raw_data_georef_effort <- execute_workflow_maybe_upload(
+      file = here::here("config/All_raw_data_georef_effort.json"),
+      rename_suffix = "_raw_data_georef_effort_final"
+    )
+    
+    running_time_of_workflow(raw_data_georef_effort)
+    
+    if (summarise_invalid_raw) {
+      summarise_invalid(raw_data_georef_effort)
     }
   }
   
@@ -980,8 +1005,37 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     saveRDS(results, "data/check_georef_vs_nominal_entity.rds")
   }
   
+
+  # OGC Services ------------------------------------------------------------
+
+  if (run_any_step(c("services"))) {
+    if(file.exists(here::here("zenodo_secrets.env"))){
+      
+      tryCatch(
+        dotenv::load_dot_env(file = here::here("zenodo_secrets.env")),
+        error = function(e) message("No environment file loaded: ", e$message)
+      )
+    }
+    source(here::here("R/tunaatlas_actions/ensure_geoserver_ready.R"))
+    ensure_geoserver_ready()
+    tunaatlas_services <- execute_workflow_maybe_upload(
+      file = here::here("config/tunaatlas_qa_services.json"),
+      requires_db = TRUE,
+      rename_suffix = "_qa_services"
+    )
+    
+    running_time_of_workflow(tunaatlas_services)
+  }
+  
+
+  # Paths -------------------------------------------------------------------
+
+  
+  
   output_paths <- list(
     gta_data_dir = gta_data_dir,
+    tunaatlas_qa_dbmodel = if (exists("tunaatlas_qa_dbmodel_path", inherits = FALSE)) tunaatlas_qa_dbmodel_path else NULL,
+    tunaatlas_qa_mappings = if (exists("tunaatlas_qa_mappings_path", inherits = FALSE)) tunaatlas_qa_mappings_path else NULL,
     raw_nominal_catch = if (exists("raw_nominal_catch", inherits = FALSE)) raw_nominal_catch else NULL,
     raw_data_georef = if (exists("raw_data_georef", inherits = FALSE)) raw_data_georef else NULL,
     raw_data_georef_effort = if (exists("raw_data_georef_effort", inherits = FALSE)) raw_data_georef_effort else NULL,
@@ -989,7 +1043,8 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     tunaatlas_nominal = if (exists("tunaatlas_nominal_path", inherits = FALSE)) tunaatlas_nominal_path else NULL,
     tunaatlas_level0_catch = if (exists("tunaatlas_level0_catch_path", inherits = FALSE)) tunaatlas_level0_catch_path else NULL,
     tunaatlas_level1_catch = if (exists("tunaatlas_level1_catch_path", inherits = FALSE)) tunaatlas_level1_catch_path else NULL,
-    tunaatlas_level2_catch = if (exists("tunaatlas_level2_catch_path", inherits = FALSE)) tunaatlas_level2_catch_path else NULL
+    tunaatlas_level2_catch = if (exists("tunaatlas_level2_catch_path", inherits = FALSE)) tunaatlas_level2_catch_path else NULL,
+    tunaatlas_services = if (exists("tunaatlas_services", inherits = FALSE)) tunaatlas_services else NULL
   )
   
   message("Selected GTA workflow steps completed: ", paste(steps_to_run, collapse = ", "))
