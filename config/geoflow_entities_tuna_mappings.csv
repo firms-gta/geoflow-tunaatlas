@@ -1,0 +1,439 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Format,Provenance,Data
+id:codelist_mapping_schooltype_iccat_schooltype_rfmos,title:Code list mapping: types of schools used by ICCAT to types of schools used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for types of schools used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes for types of schools used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_schooltype_iccat_schooltype_rfmos.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_schooltype_iccat_schooltype_rfmos.csv_
+sourceType:csv_
+uploadSource:fishing_mode.fishing_mode_mapping_
+uploadType:dbtable"
+id:codelist_mapping_schooltype_iotc_schooltype_rfmos,title:Code list mapping: types of schools used by IOTC to types of schools used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for types of schools used by the Indian Ocean Tuna Commission (IOTC) and codes for types of schools used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_schooltype_iotc_schooltype_rfmos.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_schooltype_iotc_schooltype_rfmos.csv_
+sourceType:csv_
+uploadSource:fishing_mode.fishing_mode_mapping_
+uploadType:dbtable"
+id:codelist_mapping_schooltype_wcpfc_schooltype_rfmos,title:Code list mapping: types of schools used by WCPFC to types of schools used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for types of schools used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes for types of schools used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_schooltype_wcpfc_schooltype_rfmos.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_schooltype_wcpfc_schooltype_rfmos.csv_
+sourceType:csv_
+uploadSource:fishing_mode.fishing_mode_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_asfis_speciesgroup_tunaatlas,title:Code list mapping: ASFIS  to groups of species used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for species used in the ASFIS List of Species for Fishery Statistics Purposes and the codes for groups of species used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_asfis_speciesgroup_tunaatlas.csv@./data/fdi-mappings/global/firms/gta/codelist_mapping_species_asfis_speciesgroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_ccsbt_species_asfis,title:Code list mapping: species used by CCSBT to the ASFIS codes,abstract:Mapping (i.e. correspondance) between codes for species used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and the 3-alpha codes of the ASFIS List of Species for Fishery Statistics Purposes. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_ccsbt_species_asfis.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_species_ccsbt_species_asfis.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_ccsbt_speciesgroup_tunaatlas,title:Code list mapping: species used by CCSBT to groups of species used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for species used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and codes for groups of species used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_ccsbt_speciesgroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_species_ccsbt_speciesgroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_iattc_species_asfis,title:Code list mapping: species used by IATTC to the ASFIS codes,abstract:Mapping (i.e. correspondance) between codes for species used by the Inter-American Tropical Tuna Commission (IATTC) and the 3-alpha codes of the ASFIS List of Species for Fishery Statistics Purposes. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_iattc_species_asfis.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_species_iattc_species_asfis.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_iattc_speciesgroup_tunaatlas,title:Code list mapping: species used by IATTC to groups of species used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for species used by the Inter-American Tropical Tuna Commission (IATTC) and codes for groups of species used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_iattc_speciesgroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_species_iattc_speciesgroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_iccat_species_asfis,title:Code list mapping: species used by ICCAT to the ASFIS codes,abstract:Mapping (i.e. correspondance) between codes for species used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and the 3-alpha codes of the ASFIS List of Species for Fishery Statistics Purposes. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_iccat_species_asfis.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_species_iccat_species_asfis.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_iccat_speciesgroup_tunaatlas,title:Code list mapping: species used by ICCAT to groups of species used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for species used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes for groups of species used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_iccat_speciesgroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_species_iccat_speciesgroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_iotc_species_asfis,title:Code list mapping: species used by IOTC to the ASFIS codes,abstract:Mapping (i.e. correspondance) between codes for species used by the Indian Ocean Tuna Commission (IOTC) and the 3-alpha codes of the ASFIS List of Species for Fishery Statistics Purposes. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_iotc_species_asfis.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_species_iotc_species_asfis.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_iotc_speciesgroup_tunaatlas,title:Code list mapping: species used by IOTC to groups of species used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for species used by the Indian Ocean Tuna Commission (IOTC) and codes for groups of species used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_iotc_speciesgroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_species_iotc_speciesgroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_wcpfc_speciesgroup_tunaatlas,title:Code list mapping: species used by WCPFC to groups of species used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for species used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes for groups of species used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_wcpfc_speciesgroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_species_wcpfc_speciesgroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_species_wcpfc_species_asfis,title:Code list mapping: species used by WCPFC to the ASFIS codes,abstract:Mapping (i.e. correspondance) between codes for species used by the Western and Central Pacific Fisheries Commission (WCPFC) and the 3-alpha codes of the ASFIS List of Species for Fishery Statistics Purposes. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_species_wcpfc_species_asfis.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_species_wcpfc_species_asfis.csv_
+sourceType:csv_
+uploadSource:species.species_mapping_
+uploadType:dbtable"
+id:codelist_mapping_catchtype_ccsbt_catchtype_tunaatlas,title:Code list mapping: types of catch used by CCSBT to types of catch used in the IRD Tuna Atlas,"abstract:Mapping (i.e. correspondance) between codes for types of catch used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and codes for types of catch used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. Presently, the CCSBT does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database. This mapping was realized by IRD.",,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_catchtype_ccsbt_catchtype_tunaatlas.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_catchtype_ccsbt_catchtype_tunaatlas.csv_
+sourceType:csv_
+uploadSource:measurement_type.measurement_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_catchtype_iattc_catchtype_tunaatlas,title:Code list mapping: types of catch used by IATTC to types of catch used in the IRD Tuna Atlas,"abstract:Mapping (i.e. correspondance) between codes for types of catch used by the Inter-American Tropical Tuna Commission (IATTC) and codes for types of catch used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. Presently, the IATTC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database. This mapping was realized by IRD.",,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_catchtype_iattc_catchtype_tunaatlas.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_catchtype_iattc_catchtype_tunaatlas.csv_
+sourceType:csv_
+uploadSource:measurement_type.measurement_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_catchtype_iccat_catchtype_tunaatlas,title:Code list mapping: types of catch used by ICCAT to types of catch used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for types of catch used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes for types of catch used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_catchtype_iccat_catchtype_tunaatlas.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_catchtype_iccat_catchtype_tunaatlas.csv_
+sourceType:csv_
+uploadSource:measurement_type.measurement_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_catchtype_iotc_catchtype_tunaatlas,title:Code list mapping: types of catch used by IOTC to types of catch used in the IRD Tuna Atlas,"abstract:Mapping (i.e. correspondance) between codes for types of catch used by the Indian Ocean Tuna Commission (IOTC) and codes for types of catch used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. Presently, the IOTC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database. This mapping was realized by IRD.",,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_catchtype_iotc_catchtype_tunaatlas.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_catchtype_iotc_catchtype_tunaatlas.csv_
+sourceType:csv_
+uploadSource:measurement_type.measurement_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_catchtype_wcpfc_catchtype_tunaatlas,title:Code list mapping: types of catch used by WCPFC to types of catch used in the IRD Tuna Atlas,"abstract:Mapping (i.e. correspondance) between codes for types of catch used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes for types of catch used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. Presently, the WCPFC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data within the Sardara database. This mapping was realized by IRD.",,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_catchtype_wcpfc_catchtype_tunaatlas.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_catchtype_wcpfc_catchtype_tunaatlas.csv_
+sourceType:csv_
+uploadSource:measurement_type.measurement_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_effortunit_ccsbt_effortunit_rfmos,title:Code list mapping: units of fishing effort used by CCSBT to units of fishing effort used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for units of fishing effort used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and codes for units of fishing effort used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_effortunit_ccsbt_effortunit_rfmos.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_effortunit_ccsbt_effortunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.measurement_unit_mapping_
+uploadType:dbtable"
+id:codelist_mapping_effortunit_iattc_effortunit_rfmos,title:Code list mapping: units of fishing effort used by IATTC to units of fishing effort used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for units of fishing effort used by the Inter-American Tropical Tuna Commission (IATTC) and codes for units of fishing effort used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_effortunit_iattc_effortunit_rfmos.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_effortunit_iattc_effortunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.measurement_unit_mapping_
+uploadType:dbtable"
+id:codelist_mapping_effortunit_iccat_effortunit_rfmos,title:Code list mapping: units of fishing effort used by ICCAT to units of fishing effort used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for units of fishing effort used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes for units of fishing effort used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_effortunit_iccat_effortunit_rfmos.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_effortunit_iccat_effortunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.measurement_unit_mapping_
+uploadType:dbtable"
+id:codelist_mapping_effortunit_iotc_effortunit_rfmos,title:Code list mapping: units of fishing effort used by IOTC to units of fishing effort used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for units of fishing effort used by the Indian Ocean Tuna Commission (IOTC) and codes for units of fishing effort used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_effortunit_iotc_effortunit_rfmos.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_effortunit_iotc_effortunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.measurement_unit_mapping_
+uploadType:dbtable"
+id:codelist_mapping_effortunit_wcpfc_effortunit_rfmos,title:Code list mapping: units of fishing effort used by WCPFC to units of fishing effort used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for units of fishing effort used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes for units of fishing effort used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_effortunit_wcpfc_effortunit_rfmos.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_effortunit_wcpfc_effortunit_rfmos.csv_
+sourceType:csv_
+uploadSource:measurement_unit.measurement_unit_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_ccsbt_fishingfleet_firms,title:Code list mapping: flags used by CCSBT to FIRMS fishing fleet codes,abstract:Mapping (i.e. correspondance) between codes for flags used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and the FIRMS fishing fleet codes.,,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor: FIRMS-Secretariat@fao.org,FIRMS-Secretariat@fao.org",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_ccsbt_fishingfleet_firms.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_flag_ccsbt_fishingfleet_firms.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_iattc_fishingfleet_firms,title:Code list mapping: flags used by IATTC to FIRMS fishing fleet codes,abstract:Mapping (i.e. correspondance) between codes for flags used by the Inter-American Tropical Tuna Commission (IATTC) and the FIRMS fishing fleet codes.,,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor: FIRMS-Secretariat@fao.org,FIRMS-Secretariat@fao.org",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_iattc_fishingfleet_firms.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_flag_iattc_fishingfleet_firms.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_iccat_fishingfleet_firms,title:Code list mapping: flags used by ICCAT task2 datasets to FIRMS fishing fleet codes,abstract:Mapping (i.e. correspondance) between codes for flags used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) catch-and-efforts (task 2) datasets and the FIRMS fishing fleet codes.,,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor: FIRMS-Secretariat@fao.org,FIRMS-Secretariat@fao.org",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_iccat_fishingfleet_firms.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_flag_iccat_fishingfleet_firms.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_iccat_from_ncandcas_fishingfleet_firms,"title:Code list mapping: codes for flags used by ICCAT nominal catch, catch-at-size and catch-and-effort by operation mode datasets to FIRMS fishing fleet codes","abstract:Mapping (i.e. correspondance) between codes for flags used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) nominal catch (task 1), catch-at-size and catch-and-effort by operation mode (task 2 by opeation mode) datasets and the FIRMS fishing fleet codes.",,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor: FIRMS-Secretariat@fao.org,FIRMS-Secretariat@fao.org",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_iccat_from_ncandcas_fishingfleet_firms.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_flag_iccat_from_ncandcas_fishingfleet_firms.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_iccat_from_ncandcas_flag_iccat,"title:Code list mapping: codes for flags used by ICCAT nominal catch, catch-at-size and catch-and-effort by operation mode datasets to codes for flags used by ICCAT catch-and-effort standard datasets","abstract:Mapping (i.e. correspondance) between codes for flags used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) nominal catch (task 1), catch-at-size and catch-and-effort by operation mode (task 2 by operation mode) datasets and codes for flags used in ICCAT task2 datasets. This mapping was realized by IRD.",,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_flag_iccat_from_ncandcas_flag_iccat.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_iotc_fishingfleet_firms,title:Code list mapping: flags used by IOTC to FIRMS fishing fleet codes,abstract:Mapping (i.e. correspondance) between codes for flags used by the Indian Ocean Tuna Commission (IOTC) and the FIRMS fishing fleet codes.,,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor: FIRMS-Secretariat@fao.org,FIRMS-Secretariat@fao.org",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_iotc_fishingfleet_firms.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_flag_iotc_fishingfleet_firms.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_flag_wcpfc_fishingfleet_firms,title:Code list mapping: flags used by WCPFC to FIRMS fishing fleet codes,abstract:Mapping (i.e. correspondance) between codes for flags used by the Western and Central Pacific Fisheries Commission (WCPFC) and the FIRMS fishing fleet codes.,,"owner:FIRMS-Secretariat@fao.org_
+metadata:FIRMS-Secretariat@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+principalInvestigator:FIRMS-Secretariat@fao.org_
+processor: FIRMS-Secretariat@fao.org,FIRMS-Secretariat@fao.org",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_flag_wcpfc_fishingfleet_firms.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_flag_wcpfc_fishingfleet_firms.csv_
+sourceType:csv_
+uploadSource:fishing_fleet.fishing_fleet_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_ccsbt_geargroup_tunaatlas,title:Code list mapping: gears used by CCSBT to groups of gears used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for gears used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and codes for groups of gears used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_ccsbt_geargroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_gear_ccsbt_geargroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_ccsbt_isscfg_revision_1,title:Code list mapping: gears used by CCSBT to the ISSCFG codes,abstract:Mapping (i.e. correspondance) between codes for gears used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and codes of the International Standard Statistical Classification of Fishing Gear (ISSCFG). This mapping was realized by the CCSBT in collaboration with IRD and the Food and Agriculture Organization of the United Nations in the frame of the Coordinating Working Party on Fishery Statistics (CWP) activities.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_ccsbt_isscfg_revision_1.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_gear_ccsbt_isscfg_revision_1.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iattc_geargroup_iattc,title:Code list mapping: gears used by IATTC to groups of gears used by IATTC,abstract:Mapping (i.e. correspondance) between codes for gears used by the Inter-American Tropical Tuna Commission (IATTC) and codes for groups of gears used by IATTC.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iattc_geargroup_iattc.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_gear_iattc_geargroup_iattc.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iattc_geargroup_tunaatlas,title:Code list mapping: gears used by IATTC to groups of gears used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for gears used by the Inter-American Tropical Tuna Commission (IATTC) and codes for groups of gears used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iattc_geargroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_gear_iattc_geargroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iattc_isscfg_revision_1,title:Code list mapping: gears used by IATTC to the ISSCFG codes,abstract:Mapping (i.e. correspondance) between codes for gears used by the Inter-American Tropical Tuna Commission (IATTC) and codes of the International Standard Statistical Classification of Fishing Gear (ISSCFG). This mapping was realized by the CCSBT in collaboration with IRD and the Food and Agriculture Organization of the United Nations in the frame of the Coordinating Working Party on Fishery Statistics (CWP) activities.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iattc_isscfg_revision_1.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_gear_iattc_isscfg_revision_1.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iccat_geargroup_iccat,title:Code list mapping: gears used by ICCAT to groups of gears used by ICCAT,abstract:Mapping (i.e. correspondance) between codes for gears used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes for groups of gears used by ICCAT.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iccat_geargroup_iccat.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_gear_iccat_geargroup_iccat.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iccat_geargroup_tunaatlas,title:Code list mapping: gears used by ICCAT to groups of gears used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for gears used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes for groups of gears used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iccat_geargroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_gear_iccat_geargroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iccat_isscfg_revision_1,title:Code list mapping: gears used by ICCAT to the ISSCFG codes,abstract:Mapping (i.e. correspondance) between codes for gears used by the International Commission for the Conservation of Atlantic Tunas (ICCAT) and codes of the International Standard Statistical Classification of Fishing Gear (ISSCFG). This mapping was realized by the CCSBT in collaboration with IRD and the Food and Agriculture Organization of the United Nations in the frame of the Coordinating Working Party on Fishery Statistics (CWP) activities.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iccat_isscfg_revision_1.csv@./data/fdi-mappings/regional-to-global/ICCAT/codelist_mapping_gear_iccat_isscfg_revision_1.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iotc_geargroup_iotc,title:Code list mapping: gears used by IOTC to groups of gears used by IOTC,abstract:Mapping (i.e. correspondance) between codes for gears used by the Indian Ocean Tuna Commission (IOTC) and codes for groups of gears used by IOTC.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iotc_geargroup_iotc.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_gear_iotc_geargroup_iotc.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iotc_geargroup_tunaatlas,title:Code list mapping: gears used by IOTC to groups of gears used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for gears used by the Indian Ocean Tuna Commission (IOTC) and codes for groups of gears used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iotc_geargroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_gear_iotc_geargroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_iotc_isscfg_revision_1,title:Code list mapping: gears used by IOTC to the ISSCFG codes,abstract:Mapping (i.e. correspondance) between codes for gears used by the Indian Ocean Tuna Commission (IOTC) and codes of the International Standard Statistical Classification of Fishing Gear (ISSCFG). This mapping was realized by the CCSBT in collaboration with IRD and the Food and Agriculture Organization of the United Nations in the frame of the Coordinating Working Party on Fishery Statistics (CWP) activities.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_iotc_isscfg_revision_1.csv@./data/fdi-mappings/regional-to-global/IOTC/codelist_mapping_gear_iotc_isscfg_revision_1.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_wcpfc_geargroup_tunaatlas,title:Code list mapping: gears used by WCPFC to groups of gears used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for gears used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes for groups of gears used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_wcpfc_geargroup_tunaatlas.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_gear_wcpfc_geargroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_wcpfc_geargroup_wcpfc,title:Code list mapping: gears used by WCPFC to groups of gears used by WCPFC,abstract:Mapping (i.e. correspondance) between codes for gears used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes for groups of gears used by WCPFC.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_wcpfc_geargroup_wcpfc.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_gear_wcpfc_geargroup_wcpfc.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_gear_wcpfc_isscfg_revision_1,title:Code list mapping: gears used by WCPFC to the ISSCFG codes,abstract:Mapping (i.e. correspondance) between codes for gears used by the Western and Central Pacific Fisheries Commission (WCPFC) and codes of the International Standard Statistical Classification of Fishing Gear (ISSCFG). This mapping was realized by the CCSBT in collaboration with IRD and the Food and Agriculture Organization of the United Nations in the frame of the Coordinating Working Party on Fishery Statistics (CWP) activities.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_gear_wcpfc_isscfg_revision_1.csv@./data/fdi-mappings/regional-to-global/WCPFC/codelist_mapping_gear_wcpfc_isscfg_revision_1.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_isscfg_revision_1_geargroup_tunaatlas,title:Code list mapping: gears used in the ISSCFG to groups of gears used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between the codes of the International Standard Statistical Classification of Fishing Gear (ISSCFG) and the codes for groups of gears used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_isscfg_revision_1_geargroup_tunaatlas.csv@./data/fdi-mappings/global/firms/gta/codelist_mapping_isscfg_revision_1_geargroup_tunaatlas.csv_
+sourceType:csv_
+uploadSource:gear_type.gear_type_mapping_
+uploadType:dbtable"
+id:codelist_mapping_schooltype_ccsbt_schooltype_rfmos,title:Code list mapping: types of schools used by CCSBT to types of schools used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for types of schools used by the Commission for the Conservation of Southern Bluefin Tuna (CCSBT) and codes for types of schools used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_schooltype_ccsbt_schooltype_rfmos.csv@./data/fdi-mappings/regional-to-global/CCSBT/codelist_mapping_schooltype_ccsbt_schooltype_rfmos.csv_
+sourceType:csv_
+uploadSource:fishing_mode.fishing_mode_mapping_
+uploadType:dbtable"
+id:codelist_mapping_schooltype_iattc_schooltype_rfmos,title:Code list mapping: types of schools used by IATTC to types of schools used in the IRD Tuna Atlas,abstract:Mapping (i.e. correspondance) between codes for types of schools used by the Inter-American Tropical Tuna Commission (IATTC) and codes for types of schools used in the French National Research Institute for Sustainable Development (IRD) Tuna Atlas. This mapping was realized by IRD.,,"owner:ird@ird.fr_
+metadata:julien.barde@ird.fr,paul.taconet@ird.fr_
+pointOfContact:julien.barde@ird.fr_
+processor: paul.taconet@ird.fr,paul.taconet@ird.fr",,dataset,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: Codes from source and target code lists were matched._
+process: The resulting CSV file of mapping was integrated into the Tuna atlas database.","source:codelist_mapping_schooltype_iattc_schooltype_rfmos.csv@./data/fdi-mappings/regional-to-global/IATTC/codelist_mapping_schooltype_iattc_schooltype_rfmos.csv_
+sourceType:csv_
+uploadSource:fishing_mode.fishing_mode_mapping_
+uploadType:dbtable"
