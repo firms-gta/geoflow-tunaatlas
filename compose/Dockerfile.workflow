@@ -2,13 +2,9 @@ ARG BASE_IMAGE=ghcr.io/firms-gta/gta-workflow:2d93b5a
 FROM ${BASE_IMAGE}
 
 USER root
-ENV S6_VERSION=v2.1.0.2 \
-    RSTUDIO_VERSION=latest \
-    DEFAULT_USER=rstudio \
-    PANDOC_VERSION=default \
-    PATH=/usr/lib/rstudio-server/bin:$PATH
-RUN /rocker_scripts/install_rstudio.sh && /rocker_scripts/install_pandoc.sh
+WORKDIR /home/rstudio/geoflow-tunaatlas
 
+# geoflow 1.3.0 : lignes identiques à ton dernier build, pour réutiliser le cache
 # Docker (évite ~6 min de compilation si ce build est allé au bout)
 WORKDIR /home/rstudio/geoflow-tunaatlas
 USER root
@@ -36,6 +32,4 @@ RUN cd /home/rstudio/geoflow-tunaatlas \
  && Rscript /opt/patches/patch-geoflow-src-entities.R \
  && grep -q "keep source attribute" renv/library/R-4.2/x86_64-pc-linux-gnu/geoflow/metadata/entity/entity_handler_dbi_df.R
 
-ENTRYPOINT []
-CMD ["/init"]
-EXPOSE 8787
+# Pas de ENTRYPOINT / CMD / EXPOSE : on garde ceux de l'image de base.

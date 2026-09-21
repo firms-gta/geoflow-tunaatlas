@@ -38,7 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile.rstudio
       args:
-        BASE_IMAGE: ghcr.io/firms-gta/gta-workflow:2d93b5a   # le tag vérifié à l'étape 1
+        BASE_IMAGE: ghcr.io/firms-gta/gta-workflow:2d93b5a
     image: gta-workflow-rstudio:local
     ports:
       - "127.0.0.1:8787:8787"
@@ -114,10 +114,15 @@ services:
       postgres:
         condition: service_started
       elasticsearch:
-        condition: service_healthy   # <- attend qu'ES soit vraiment prêt
+        condition: service_healthy   # <- attend qu'ES soit prêt
 
   workflow:
-    image: gta-workflow:geosapi-0.8-1
+    build:
+      context: .
+      dockerfile: Dockerfile.workflow
+      args:
+        BASE_IMAGE: ghcr.io/firms-gta/gta-workflow:2d93b5a   
+    image: gta-workflow-workflow:local
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
