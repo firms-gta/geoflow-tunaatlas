@@ -76,7 +76,7 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
     dataset_disaggregated <- rbind(dataset_to_aggregate, dataset_to_disaggregate)
     gc()
   } else {
-    config$logger.info("No areas to project data to disaggregate so returning initial input")
+    log_info("No areas to project data to disaggregate so returning initial input")
     return(df_input)}
   if (!is.null(dataset_to_disaggregate)) {
     sum_fact_to_reallocate <- dataset_to_disaggregate %>% 
@@ -99,10 +99,10 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
   
   # georef_dataset<-function_spatial_curation_upgrade_Bastien(con,georef_dataset = georef_dataset,resolution,remove)
   gc()
-  config$logger.info("END rtunaatlas::spatial_curation_downgrade_resolution() function")
+  log_info("END rtunaatlas::spatial_curation_downgrade_resolution() function")
   georef_dataset<-georef_dataset$df
   
-  config$logger.info(sprintf("Disaggregating / Removing data that are defined on quadrants or areas superior to [%s]° quadrant resolution OK", resolution))
+  log_info(sprintf("Disaggregating / Removing data that are defined on quadrants or areas superior to [%s]° quadrant resolution OK", resolution))
   
   return(list(dataset=georef_dataset,lineage=lineage,description=description, stats_reallocated_data = stats_reallocated_data))
   

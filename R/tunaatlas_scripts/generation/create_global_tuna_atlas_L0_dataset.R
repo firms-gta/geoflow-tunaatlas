@@ -75,10 +75,10 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 	#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		#### 1) Retrieve tuna RFMOs data from Tuna atlas DB at level 0. Level 0 is the merging of the tRFMOs primary datasets, with the more complete possible value of georef_dataset per stratum (i.e. duplicated or splitted strata among the datasets are dealt specifically -> this is the case for ICCAT and IATTC)  ####
-		config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
+		log_info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
 
 		#-------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
+		log_info("LEVEL 0 => STEP 1/8: Retrieve georeferenced catch or effort (+ processings for ICCAT and IATTC) AND NOMINAL CATCH if asked")
 		#-------------------------------------------------------------------------------------------------------------------------------------
 		dataset <- do.call("rbind", lapply(c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"), get_rfmos_datasets_level0, entity, config, opts))
 		dataset$time_start<-substr(as.character(dataset$time_start), 1, 10)
@@ -88,56 +88,56 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 		rm(dataset)
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 2/8: Map code lists ")
+		log_info("LEVEL 0 => STEP 2/8: Map code lists ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (!is.null(opts$mapping_map_code_lists)) if(opts$mapping_map_code_lists){
 		  
-		  config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
+		  log_info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
 		  mapping_csv_mapping_datasets_url <- entity$getJobDataResource(config, entity$data$source[[1]])
 		  mapping_dataset <- read.csv(mapping_csv_mapping_datasets_url, stringsAsFactors = F,colClasses = "character")
 		  mapping_keep_src_code <- FALSE
 		  if(!is.null(opts$mapping_keep_src_code)) mapping_keep_src_code = opts$mapping_keep_src_code
 		  
-		  config$logger.info("Mapping code lists of georeferenced datasets...")
+		  log_info("Mapping code lists of georeferenced datasets...")
 		  georef_dataset <- map_codelists(con, "catch", mapping_dataset, georef_dataset, mapping_keep_src_code)
-		  config$logger.info("Mapping code lists of georeferenced datasets OK")
+		  log_info("Mapping code lists of georeferenced datasets OK")
 		   
 
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) ")
+		log_info("LEVEL 0 => STEP 3/8: Apply filters on fishing gears if needed (Filter data by groups of gears) ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (!is.null(opts$gear_filter)){
 			gear_filter<-unlist(strsplit(opts$gear_filter, split=","))
-			config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
+			log_info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
 			georef_dataset<-georef_dataset %>% dplyr::filter(gear %in% gear_filter)
-			config$logger.info("Filtering gears OK")
-			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			log_info("Filtering gears OK")
+			log_info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			
 		}
 		
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 4/8: Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs? ")
+		log_info("LEVEL 0 => STEP 4/8: Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs? ")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (fact=="catch" && opts$include_CCSBT && !is.null(opts$SBF_data_rfmo_to_keep)){
-			config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+			log_info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
 			if (opts$SBF_data_rfmo_to_keep=="CCSBT"){
 			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
 			} else {
 			  georef_dataset <- georef_dataset[ which(!(georef_dataset$species %in% "SBF" & georef_dataset$source_authority == "CCSBT")), ]
 			}
-			config$logger.info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
-			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			log_info(paste0("Keeping only data from ",opts$SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK"))
+			log_info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 6/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
+		log_info("LEVEL 0 => STEP 6/8: Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5° resolution quadrants)")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if(!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
 		 
-			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
+			log_info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant...")
 			georef_dataset<-rtunaatlas::spatial_curation_upgrade_resolution(con, georef_dataset, 5)
 			georef_dataset<-georef_dataset$df
 		
@@ -150,18 +150,18 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- Data that were provided at resolutions inferior to 5° x 5°  were aggregated to the corresponding 5° x 5°  quadrant.")
 
 			
-			config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
-			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			log_info("Aggregating data that are defined on quadrants or areas inferior to 5° quadrant resolution to corresponding 5° quadrant OK")
+			log_info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			
 		}
 
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
-		config$logger.info("LEVEL 0 => STEP 7/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
+		log_info("LEVEL 0 => STEP 7/8: Overlapping zone (IATTC/WCPFC): keep data from IATTC or WCPFC?")
 		#-----------------------------------------------------------------------------------------------------------------------------------------------------------
 		if (opts$include_IATTC && opts$include_WCPFC && !is.null(opts$overlapping_zone_iattc_wcpfc_data_to_keep)) {
 		 
 			overlapping_zone_iattc_wcpfc_data_to_keep <- opts$overlapping_zone_iattc_wcpfc_data_to_keep
-			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
+			log_info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone..."))
 			# query the database to get the codes of IATTC and WCPFC overlapping areas (stored under the view area.iattc_wcpfc_overlapping_cwp_areas)
 			query_areas_overlapping_zone_iattc_wcpfc <- "SELECT codesource_area from
 			(WITH iattc_area_of_competence AS (
@@ -202,16 +202,16 @@ DATA_LEVEL <- unlist(strsplit(entity$identifiers[["id"]], "_level"))[2]
 			# entity$provenance$processes <- c(entity$provenance$processes, overlap_step)	
 			# entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", "- In the IATTC/WCPFC overlapping area of competence, only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," were kept\n")
 
-			config$logger.info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
-			config$logger.info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
+			log_info(paste0("Keeping only data from ",overlapping_zone_iattc_wcpfc_data_to_keep," in the IATTC/WCPFC overlapping zone OK"))
+			log_info(sprintf("Gridded catch dataset has [%s] lines", nrow(georef_dataset)))	
 			
 		}
 		
 
 
-config$logger.info("-----------------------------------------------------------------------------------------------------")
-config$logger.info("ALL LEVELS (FINAL STEP): restructuring dataset before LOADING (in DRIVE / POSTGIS....)")
-config$logger.info("-----------------------------------------------------------------------------------------------------")
+log_info("-----------------------------------------------------------------------------------------------------")
+log_info("ALL LEVELS (FINAL STEP): restructuring dataset before LOADING (in DRIVE / POSTGIS....)")
+log_info("-----------------------------------------------------------------------------------------------------")
 
 
 dataset<-georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset),"value")) %>% dplyr::summarise(value=sum(value))
@@ -228,11 +228,11 @@ entity$setTemporalExtent(dataset_temporal_extent)
 df_codelists <- NULL
 cl_relations <- entity$relations[sapply(entity$relations, function(x){x$name=="codelists"})]
 if(length(cl_relations)>0){
-	config$logger.info("Appending codelists to global dataset generation action output")
+	log_info("Appending codelists to global dataset generation action output")
 	googledrive_baseurl <- "https://drive.google.com/open?id="
     if(startsWith(cl_relations[[1]]$link, googledrive_baseurl)){
 		#managing download through google drive
-		config$logger.info("Downloading file using Google Drive R interface")
+		log_info("Downloading file using Google Drive R interface")
 		drive_id <- unlist(strsplit(cl_relations[[1]]$link, "id="))[2]
 		drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
 		googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_codelists.csv")))
@@ -267,7 +267,7 @@ entity$addResource("codelists", output_name_codelists)
 entity$addResource("geom_table", opts$geom_table)
 
 #### END
-config$logger.info("-----------------------------------------------------------------------------------------------------")
-config$logger.info("End: Your tuna atlas dataset has been created!")
-config$logger.info("-----------------------------------------------------------------------------------------------------")
+log_info("-----------------------------------------------------------------------------------------------------")
+log_info("End: Your tuna atlas dataset has been created!")
+log_info("-----------------------------------------------------------------------------------------------------")
 }

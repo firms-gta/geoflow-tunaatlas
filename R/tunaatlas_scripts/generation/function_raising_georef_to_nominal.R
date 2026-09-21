@@ -16,7 +16,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
   
   
   cat("Raising georeferenced dataset to nominal dataset\n")
-  config$logger.info("Creating function function_raise_data")
+  log_info("Creating function function_raise_data")
   
   # We have to separate the WCPFC and CCSBT from the other rfmos, because WCPFC and CCSBT georef catches do not have fishing_fleet dimension available (hence we cannot use the fishing_fleet dimension for the raising)
   
@@ -24,31 +24,31 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     # @juldebar =>  check if gear codes are correct
     gears_PS_LL<-dbGetQuery(con,"SELECT distinct(src_code) FROM gear_type.gear_type_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
-    # config$logger.info("Now filtering gear codes with those returned by SLQ query",  gears_PS_LL)
+    # log_info("Now filtering gear codes with those returned by SLQ query",  gears_PS_LL)
     
     dataset_not_PS_LL<-dataset_to_raise %>% dplyr::filter(!(gear_type %in% gears_PS_LL))
     dataset_to_raise<-dataset_to_raise %>% dplyr::filter(gear_type %in% gears_PS_LL)
     
-    config$logger.info(paste0("Since option raising_raise_only_for_PS_LL==TRUE, kept rows number is  ",nrow(dataset_to_raise)," and number of removed rows is ",nrow(dataset_not_PS_LL),"\n"))
+    log_info(paste0("Since option raising_raise_only_for_PS_LL==TRUE, kept rows number is  ",nrow(dataset_to_raise)," and number of removed rows is ",nrow(dataset_not_PS_LL),"\n"))
     
   }
   #@juldebar this condition has to be checked
-  config$logger.info(paste0(" checking include_CCSBT and  include_WCPFC options \n"))
+  log_info(paste0(" checking include_CCSBT and  include_WCPFC options \n"))
   if ( include_CCSBT==TRUE | include_WCPFC==TRUE ) {
     
     #@juldebar what if  include_CCSBT==FASLE and include_WCPFC==TRUE and raising_do_not_raise_wcfpc_data==TRUE ?
     if (raising_do_not_raise_wcfpc_data==TRUE){
-      config$logger.info(paste0(" raising_do_not_raise_wcfpc_data is SET to TRUE \n"))
+      log_info(paste0(" raising_do_not_raise_wcfpc_data is SET to TRUE \n"))
       source_authority_filter=c("CCSBT")
     } else {	
-      config$logger.info(paste0(" raising_do_not_raise_wcfpc_data is SET to FALSE \n"))
+      log_info(paste0(" raising_do_not_raise_wcfpc_data is SET to FALSE \n"))
       source_authority_filter=c("WCPFC","CCSBT")
     }
     
     cat(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"fishing_fleet"),collapse = ","),"\n"))
-    config$logger.info(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"fishing_fleet"),collapse = ","),"\n"))
+    log_info(paste0("Raising georeferenced dataset of CCBST and WCPFC - if included in the Tuna Atlas - by ",paste(setdiff(x_raising_dimensions,"fishing_fleet"),collapse = ","),"\n"))
     
-    config$logger.info(paste0("Executing function function_raise_data for CCSBT and WCPFC options \n"))
+    log_info(paste0("Executing function function_raise_data for CCSBT and WCPFC options \n"))
     # class(dataset_to_compute_rf$measurement_value) <- "numeric"
     data_WCPFC_CCSBT_raised<-function_raise_data(fact=fact,
                                                  source_authority_filter = source_authority_filter,
@@ -57,21 +57,21 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                                  nominal_dataset_df = nominal_dataset_df,
                                                  x_raising_dimensions = setdiff(x_raising_dimensions,"fishing_fleet"))
     
-    config$logger.info(paste0("Total catch after raising before further filters is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
+    log_info(paste0("Total catch after raising before further filters is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
     
     
     
     if (raising_do_not_raise_wcfpc_data==TRUE){
       
       data_WCPFC_CCSBT_raised<-rbind(dataset_to_raise %>% filter(source_authority=="WCPFC"),data_WCPFC_CCSBT_raised)
-      config$logger.info(paste0("Since option raising_do_not_raise_wcfpc_data==TRUE, kept rows number is  ",nrow(data_WCPFC_CCSBT_raised),"  \n"))
-      config$logger.info(paste0("Total catch after raising before raising_do_not_raise_wcfpc_data==TRUE filter is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
+      log_info(paste0("Since option raising_do_not_raise_wcfpc_data==TRUE, kept rows number is  ",nrow(data_WCPFC_CCSBT_raised),"  \n"))
+      log_info(paste0("Total catch after raising before raising_do_not_raise_wcfpc_data==TRUE filter is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
       
       
     } else {
       
-      config$logger.info(paste0("Since option raising_do_not_raise_wcfpc_data==FALSE, kept rows number is  ",nrow(data_WCPFC_CCSBT_raised),"  \n"))
-      config$logger.info(paste0("Total catch after raising before raising_do_not_raise_wcfpc_data==FALSE filter is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
+      log_info(paste0("Since option raising_do_not_raise_wcfpc_data==FALSE, kept rows number is  ",nrow(data_WCPFC_CCSBT_raised),"  \n"))
+      log_info(paste0("Total catch after raising before raising_do_not_raise_wcfpc_data==FALSE filter is ",sum(data_WCPFC_CCSBT_raised$measurement_value),"  \n"))
       
       
     }
@@ -79,18 +79,18 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
     
     data_WCPFC_CCSBT_raised<-NULL
     
-    config$logger.info(paste0(" data_WCPFC_CCSBT_raised is set to NULL \n"))
+    log_info(paste0(" data_WCPFC_CCSBT_raised is set to NULL \n"))
     
   }
   
-  config$logger.info(paste0(" checking include_IOTC and  include_ICCAT and  include_IATTC options \n"))
+  log_info(paste0(" checking include_IOTC and  include_ICCAT and  include_IATTC options \n"))
   if ( include_IOTC==TRUE | include_ICCAT==TRUE | include_IATTC==TRUE ) {
     
     cat(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
-    config$logger.info(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
-    config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC before raising  is ",sum(dataset_to_raise$measurement_value),"  \n"))
+    log_info(paste0("Raising georeferenced dataset of IOTC, ICCAT and IATTC - if included in the Tuna Atlas - by ",paste(x_raising_dimensions,collapse = ","),"\n"))
+    log_info(paste0("Total catch for IOTC / ICCAT / IATTC before raising  is ",sum(dataset_to_raise$measurement_value),"  \n"))
     
-    config$logger.info(paste0("Executing function function_raise_data for include_IOTC and  include_ICCAT and  include_IATTC option \n"))
+    log_info(paste0("Executing function function_raise_data for include_IOTC and  include_ICCAT and  include_IATTC option \n"))
     data_IOTC_ICCAT_IATTC_raised<-function_raise_data(fact,
                                                       source_authority_filter = c("IOTC","ICCAT","IATTC"),
                                                       dataset_to_raise = dataset_to_raise,
@@ -98,23 +98,23 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
                                                       nominal_dataset_df = nominal_dataset_df,
                                                       x_raising_dimensions = x_raising_dimensions)
     
-    config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC after raising before further filters is ",sum(data_IOTC_ICCAT_IATTC_raised$measurement_value),"  \n"))
+    log_info(paste0("Total catch for IOTC / ICCAT / IATTC after raising before further filters is ",sum(data_IOTC_ICCAT_IATTC_raised$measurement_value),"  \n"))
     
     
   } else {
     
     data_IOTC_ICCAT_IATTC_raised<-NULL
-    config$logger.info(paste0(" data_IOTC_ICCAT_IATTC_raised is set to NULL \n"))
+    log_info(paste0(" data_IOTC_ICCAT_IATTC_raised is set to NULL \n"))
     
   }
   
   if (raising_raise_only_for_PS_LL==TRUE){
     georef_dataset<-rbind(dataset_not_PS_LL,data_WCPFC_CCSBT_raised,data_IOTC_ICCAT_IATTC_raised)
-    config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC after raising with option raising_raise_only_for_PS_LL==TRUE (data kept only for PS and LL) is ",sum(georef_dataset$measurement_value),"  \n"))
+    log_info(paste0("Total catch for IOTC / ICCAT / IATTC after raising with option raising_raise_only_for_PS_LL==TRUE (data kept only for PS and LL) is ",sum(georef_dataset$measurement_value),"  \n"))
     
   } else {
     georef_dataset<-rbind(data_WCPFC_CCSBT_raised,data_IOTC_ICCAT_IATTC_raised)
-    config$logger.info(paste0("Total catch for IOTC / ICCAT / IATTC after raising with option raising_raise_only_for_PS_LL== FALSE is ",sum(georef_dataset$measurement_value),"  \n"))
+    log_info(paste0("Total catch for IOTC / ICCAT / IATTC after raising with option raising_raise_only_for_PS_LL== FALSE is ",sum(georef_dataset$measurement_value),"  \n"))
   }
   
   rm(data_WCPFC_CCSBT_raised)
@@ -127,7 +127,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
   
   
   #cat("Raising georeferenced dataset to nominal dataset OK\n")
-  config$logger.info("Raising georeferenced dataset to nominal dataset OK")
+  log_info("Raising georeferenced dataset to nominal dataset OK")
   
   return(list(dataset=georef_dataset,lineage=lineage,description=description,supplemental_information=supplemental_information))
 }

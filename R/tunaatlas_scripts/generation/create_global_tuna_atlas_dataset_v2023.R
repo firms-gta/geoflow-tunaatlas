@@ -81,7 +81,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     
     #stepLog
     stepLogger = function(level, step, msg){
-      config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
+      log_info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
     }
     
     # Saving options in a csv file and creating a new variable for each options
@@ -136,7 +136,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     
       if(DATASET_LEVEL == 0 | from_rawdata){
       ## INITIALISATION OF MULTIPLES DATASET---------------------------------------------------
-      config$logger.info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
+      log_info("Begin: Retrieving primary datasets from Tuna atlas DB... ")
       
       stepLogger(level = 0, step = stepnumber, msg = "Retrieve georeferenced catch or effort (+ processings for IATTC) AND NOMINAL CATCH if asked")
       stepnumber = stepnumber+1
@@ -194,7 +194,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
         
         # check if not all the source_authority columns have the same maximum year of declaration
         if (length(unique(max_years$max_time_start)) > 1) {
-          config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
+          log_info("Careful, not all the source_authority has the same maximum year of declaration")
           
           # get the minimum time_start of all the maximum time_start of each source_authority
           min_time_start <- min(max_years$max_time_start)
@@ -247,7 +247,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             
             # check if not all the source_authority columns have the same maximum year of declaration
             if (length(unique(max_years$max_time_start)) > 1) {
-              config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
+              log_info("Careful, not all the source_authority has the same maximum year of declaration")
               
               # get the minimum time_start of all the maximum time_start of each source_authority
               min_time_start <- min(max_years$max_time_start)
@@ -304,7 +304,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             
             # check if not all the source_authority columns have the same maximum year of declaration
             if (length(unique(max_years$max_time_start)) > 1) {
-              config$logger.info("Careful, not all the source_authority has the same maximum year of declaration")
+              log_info("Careful, not all the source_authority has the same maximum year of declaration")
               
               # get the minimum time_start of all the maximum time_start of each source_authority
               min_time_start <- min(max_years$max_time_start)
@@ -371,7 +371,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           if(rfmo_main[[1]]=="CCSBT"){
             opts[[opts_key]] <- "CCSBT"
           } else {
-            config$logger.info(paste0("Please provide a source authority to keep for overlapping zone ", opts_key))
+            log_info(paste0("Please provide a source authority to keep for overlapping zone ", opts_key))
             return()
           }
         }
@@ -438,7 +438,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       
       # Loop over each zone and handle overlap using the defined configuration
       for (zone_key in names(zones_config)) {
-        config$logger.info(paste0("Processing zone: ", zone_key))  # Log before processing
+        log_info(paste0("Processing zone: ", zone_key))  # Log before processing
         
         # It's a good practice to use tryCatch to understand if errors in handle_overlap are stopping the loop
         tryCatch({
@@ -447,7 +447,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           message(paste0("Error encountered: ", e))  # Print errors to the console
         })
         
-        config$logger.info(paste0("Finished processing zone: ", zone_key))  # Log after processing
+        log_info(paste0("Finished processing zone: ", zone_key))  # Log after processing
       }
     } else {
       ## RETRIEVING DATA FROM DOI ---------------------------------------------------
@@ -519,7 +519,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     # LEVEL 1 IRD ---------------------------------------------------
     if(DATASET_LEVEL >= 1){
       
-      config$logger.info(
+      log_info(
         "Extract and load FIRMS Level 0 nominal catch data input (required if raising process is asked) "
       )
       if(file.exists(file.path("data", opts$keynominal)) && !opts$forceuseofdoi){
@@ -634,7 +634,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       #   dplyr::inner_join(georef_sup_nom_init_species_year, by = c("year", "source_authority")) %>% dplyr::group_by(species.x, year) %>% dplyr::mutate(sumx = sum(measurement_value))
       
       #with this condition code will be run to deal with dataset level 1 and above
-      config$logger.info("Level 1 start")
+      log_info("Level 1 start")
 
       if (!is.null(opts$unit_conversion_convert)) if (opts$unit_conversion_convert) {
         
@@ -864,10 +864,10 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           stepLogger(level = 2, step = stepnumber, "Raise IRD gridded Level 1 (1 or 5 deg) input with FIRMS Level O total (nominal) catch dataset")
           stepnumber <<- stepnumber + 1
           
-          config$logger.info("Start raising process")
+          log_info("Start raising process")
           
           if (opts$fact == "catch") {
-            config$logger.info("Fact=catch !")
+            log_info("Fact=catch !")
             dataset_to_compute_rf = georef_dataset
             # year is used as a dimension to match the conversion factors dimension 
             if (is.null(opts$x_raising_dimensions)) {
@@ -947,7 +947,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
           class(dataset_to_compute_rf$measurement_value) <- "numeric"
           
           
-          config$logger.info("Executing function function_raising_georef_to_nominal")
+          log_info("Executing function function_raising_georef_to_nominal")
           
           if (fact=="catch"){
             raising_dimensions=c(x_raising_dimensions,"measurement_unit")
@@ -1111,7 +1111,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     }
       
       if (opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg %in% c("disaggregate", "remove")) {
-        config$logger.info(
+        log_info(
           "BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
         )
         
@@ -1127,7 +1127,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             action_to_do =
               opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
           )
-        config$logger.info(
+        log_info(
           "END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
         )
         
@@ -1144,7 +1144,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       }
       
       if (opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg %in% c("disaggregate", "remove")) {
-        config$logger.info(
+        log_info(
           "STEP 5/5: BEGIN function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
         )
         georef_dataset <-
@@ -1159,7 +1159,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
             action_to_do =
               opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
           )
-        config$logger.info(
+        log_info(
           "STEP 5/5: END function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg() function"
         )
         
@@ -1185,7 +1185,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     if (!is.null(opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg)) if (opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg) {
       stepLogger(level = 0, step = stepnumber, msg = "Spatial Aggregation of data (5deg resolution datasets only: Aggregate data on 5o resolution quadrants)")
       stepnumber = stepnumber+1
-      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5o quadrant resolution to corresponding 5o quadrant...")
+      log_info("Aggregating data that are defined on quadrants or areas inferior to 5o quadrant resolution to corresponding 5o quadrant...")
       
       one_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
       five_degree <- georef_dataset %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
@@ -1197,7 +1197,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       
       georef_dataset <- as.data.frame(base::rbind(one_degree_aggregated, five_degree))
       
-      config$logger.info("Aggregating data that are defined on quadrants or areas inferior to 5o quadrant resolution to corresponding 5o quadrant OK")
+      log_info("Aggregating data that are defined on quadrants or areas inferior to 5o quadrant resolution to corresponding 5o quadrant OK")
       
       if(recap_each_step){
         names_list_aggregation <-
@@ -1218,7 +1218,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     }
     
     # FILTERING SPATIAL RESOLUTION ---------------------------------------------------
-    config$logger.info("Grid spatial resolution filter")
+    log_info("Grid spatial resolution filter")
     if (!is.null(opts$resolution_filter)) {
       
       filtering_resolution_filter <- function(datatable, first_digit) {
@@ -1239,7 +1239,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       }
     }
     
-    config$logger.info("Apply filters if filter needed (Filter data by groups of everything) ")
+    log_info("Apply filters if filter needed (Filter data by groups of everything) ")
     # FILTERING OTHER RESOLUTION ---------------------------------------------------
     
     parameter_filtering = if (!is.null(opts$filtering)) opts$filtering else list(species = NULL, fishing_fleet = NULL) # if nothing provided filtering is null so we provided first dimension with no filtering
@@ -1257,9 +1257,9 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
       
       if (!is.null(opts$gear_filter)){
         gear_filter<-unlist(strsplit(opts$gear_filter, split=","))
-        config$logger.info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
+        log_info(sprintf("Filtering by gear(s) [%s]", paste(gear_filter, collapse=",")))	
         georef_dataset<-georef_dataset %>% dplyr::filter(gear_type %in% gear_filter)
-        config$logger.info("Filtering gears OK")
+        log_info("Filtering gears OK")
       }
       
       if(recap_each_step){
@@ -1277,7 +1277,7 @@ create_global_tuna_atlas_dataset_v2023 <- function(action, entity, config) {
     process_and_aggregate_dataset(georef_dataset, entity, config, opts, 
                                   columns_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode",
                                                       "time_start", "time_end", "year", "month", "quarter", "geographic_identifier", "measurement_unit", "measurement_value", "measurement_type", "measurement_processing_level") ) 
-    config$logger.info("End: Your tuna atlas dataset has been created!")
+    log_info("End: Your tuna atlas dataset has been created!")
     
     # Clean up
     rm(georef_dataset)

@@ -33,7 +33,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       #For IOTC, only data reading
                       iotc_data <- NULL
                       if(options$include_IOTC){
-                        config$logger.info(sprintf("Get %s data", rfmo))
+                        log_info(sprintf("Get %s data", rfmo))
                         dataset_files_iotc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                               regexpr("iotc", names(dataset_files)) > 0]))
                         iotc_data <- do.call("rbind", lapply(dataset_files_iotc, readr::read_csv, guess_max = 0))
@@ -51,7 +51,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       #For WCPFC, only data reading
                       wcpfc_data <- NULL
                       if(options$include_WCPFC){
-                        config$logger.info(sprintf("Get %s data", rfmo))
+                        log_info(sprintf("Get %s data", rfmo))
                         dataset_files_wcpfc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("wcpfc", names(dataset_files)) > 0]))
                         wcpfc_data <- do.call("rbind", lapply(dataset_files_wcpfc, readr::read_csv, guess_max = 0))
@@ -70,7 +70,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       #For CCSBT, only data reading
                       ccsbt_data <- NULL
                       if(options$include_CCSBT){
-                        config$logger.info(sprintf("Get %s data", rfmo))
+                        log_info(sprintf("Get %s data", rfmo))
                         dataset_files_ccsbt <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("ccsbt", names(dataset_files)) > 0]))
                         ccsbt_data <- do.call("rbind", lapply(dataset_files_ccsbt, readr::read_csv, guess_max = 0))
@@ -89,7 +89,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                       iccat_data <- NULL
                       if(options$include_ICCAT){
                         if(variable == "catch"){
-                        config$logger.info(sprintf("Get %s data", rfmo))
+                        log_info(sprintf("Get %s data", rfmo))
                         dataset_files_iccat <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                regexpr("byschool", names(dataset_files)) < 0 &
                                                                regexpr("iccat", names(dataset_files)) > 0]))
@@ -114,7 +114,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
 
                           # Deal with special case of ICCAT PS
                           # if (options$iccat_ps_include_type_of_school){
-                            config$logger.info("Option 'iccat_ps_include_type_of_school' is TRUE. Include Type of school...")
+                            log_info("Option 'iccat_ps_include_type_of_school' is TRUE. Include Type of school...")
                             dataset_iccat_byschool_file <- dataset_files[regexpr("nominal", names(dataset_files)) < 0 &
                                                                            regexpr("byschool", names(dataset_files)) > 0 &
                                                                            regexpr("iccat", names(dataset_files)) > 0]
@@ -200,7 +200,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                         #for catch fact
                         if(variable == "catch") {
                           
-                          config$logger.info(sprintf("Get %s data", rfmo))
+                          log_info(sprintf("Get %s data", rfmo))
                           dataset_files_iattc <- file.path("data",basename(dataset_files[regexpr("nominal", names(dataset_files)) < 0 & 
                                                                                            regexpr("ps", names(dataset_files)) < 0 & 
                                                                                            regexpr("5deg", names(dataset_files)) < 0 & 
@@ -214,7 +214,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           iattc_data <- iattc_data[, columns_to_keep]
                           
                           
-                          config$logger.info(sprintf("Case %s data", variable))
+                          log_info(sprintf("Case %s data", variable))
                           
                           # Extract tuna catch
                           df_catch_tuna_flag <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_PSFlag_tuna_catch]), guess_max = 0))
@@ -244,7 +244,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                                        dataset_file_billfish_or_shark_effort,
                                                                        raising_dimensions){
                               
-                              config$logger.info(sprintf("Catch file which will be raised to efffort: %s ", dataset_file_billfish_or_shark_catch))
+                              log_info(sprintf("Catch file which will be raised to efffort: %s ", dataset_file_billfish_or_shark_catch))
                               
                               
                               billfish_or_shark_catch <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_billfish_or_shark_catch]), guess_max = 0))
@@ -387,7 +387,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                           
                           
                         }else if (variable=="effort"){
-                          config$logger.info(sprintf("Case %s data", variable))
+                          log_info(sprintf("Case %s data", variable))
                           
                           dataset_file_effort_flag <- switch(options$iattc_ps_effort_to_extract,
                                                              "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
