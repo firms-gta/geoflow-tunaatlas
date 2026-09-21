@@ -50,8 +50,12 @@ RUN Rscript -e "install.packages(c('remotes','jsonlite'), repos='https://cloud.r
  && Rscript -e "source('renv/activate.R'); renv::repair()" \
  && Rscript -e "source('renv/activate.R'); renv::isolate()"
 
-# --- Patchs (versionnés dans docker/patches/) --------------------------------
-COPY docker/patches/ /opt/patches/
+# --- Patchs geoflow --------------------------------
+COPY compose/patches/patch-geometa.R \
+     compose/patches/patch-geoflow-entities.R \
+     compose/patches/patch-geoflow-src-entities.R \
+     compose/patches/patch-geoflow-zenodo-size.R \
+     /opt/patches/
 RUN chmod 644 /opt/patches/*.R
 
 # Les patchs modifient les fichiers de geoflow dans renv/library ; chaque vérification fait échouer le build
