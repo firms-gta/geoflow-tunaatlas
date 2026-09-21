@@ -33,7 +33,7 @@ function(action, entity, config){
   filename2 <- entity$data$source[[2]] # structure / codelists
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
   
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   
   opts <- options()
   options(encoding = "UTF-8")
@@ -41,8 +41,8 @@ function(action, entity, config){
   
   # ---- read raw ----
   capt_raw <- read.csv(path_to_raw_dataset, stringsAsFactors = FALSE)
-  config$logger.info(paste0("EF_RAW columns: ", paste(colnames(capt_raw), collapse = ", ")))
-  config$logger.info(sprintf("Raw effort dimensions: %s rows", nrow(capt_raw)))
+  log_info(paste0("EF_RAW columns: ", paste(colnames(capt_raw), collapse = ", ")))
+  log_info(sprintf("Raw effort dimensions: %s rows", nrow(capt_raw)))
 
 capt <- capt_raw %>%
   dplyr::mutate(

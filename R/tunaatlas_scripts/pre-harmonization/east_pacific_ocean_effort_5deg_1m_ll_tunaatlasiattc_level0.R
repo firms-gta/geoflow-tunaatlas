@@ -75,7 +75,7 @@ function(action, entity, config){
 # Historical name for the dataset at source  iattc_effort_code_lists.csv
   path_to_raw_dataset_catch <- entity$getJobDataResource(config, filename_catch)
   path_to_raw_dataset_effort <- entity$getJobDataResource(config, filename_effort)
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   opts <- options()
   options(encoding = "UTF-8")
   #----------------------------------------------------------------------------------------------------------------------------

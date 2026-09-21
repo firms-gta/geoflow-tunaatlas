@@ -84,7 +84,7 @@ if(!require(dplyr)){
   filename2 <- entity$data$source[[2]] #structure
   # Historical name for the dataset at source  wcpfc_catch_code_lists.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   opts <- options()
   options(encoding = "UTF-8")
   #----------------------------------------------------------------------------------------------------------------------------

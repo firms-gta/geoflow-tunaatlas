@@ -72,7 +72,7 @@ filename2 <- entity$data$source[[2]] #WCPO data
 filename3 <- entity$data$source[[3]] #structure
 path_to_raw_dataset1 <- entity$getJobDataResource(config, filename1) #WCPFC data
 path_to_raw_dataset2 <- entity$getJobDataResource(config, filename2) #WCPO data
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+
 opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------

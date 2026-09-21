@@ -25,7 +25,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   # Define step logger function
   stepLogger <- function(level, step, msg) {
-    config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
+    log_info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
   }
   
   # Source scripts from URLs
@@ -297,10 +297,10 @@ Tidying_and_mapping_data = function(action, entity, config) {
   if(any(unique(georef_dataset$source_authority)%in%source_authority_to_map)){
     stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
     stepnumber = stepnumber+1
-    config$logger.info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
+    log_info("Reading the CSV containing the dimensions to map + the names of the code list mapping datasets. Code list mapping datasets must be available in the database.")
     # mapping_csv_mapping_datasets_url <- "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv"
     # mapping_dataset <-read.csv(mapping_csv_mapping_datasets_url,stringsAsFactors = F,colClasses = "character")
-    config$logger.info("Mapping code lists of georeferenced datasets...")
+    log_info("Mapping code lists of georeferenced datasets...")
     # mapping_codelist <-map_codelists(con, opts$fact, mapping_dataset = mapping_dataset,dataset_to_map = georef_dataset, mapping_keep_src_code,summary_mapping = TRUE,source_authority_to_map = source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     mapping_codelist <-map_codelists_no_DB(opts$fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", 
                                            dataset_to_map = georef_dataset, 
@@ -320,7 +320,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       
     }
     
-    config$logger.info("Mapping code lists of datasets OK")
+    log_info("Mapping code lists of datasets OK")
     
     
     if(recap_each_step){
@@ -332,7 +332,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       readr::write_csv(not_mapped_total,"data/not_mapped_total.csv")
       readr::write_csv(recap_mapping,"data/recap_mapping.csv")
       
-      config$logger.info("Saving recap of mapping ok")
+      log_info("Saving recap of mapping ok")
       
       CWP.dataset::function_recap_each_step(
         "mapping_codelist",
@@ -426,7 +426,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     georef_dataset %>% group_by(.dots = setdiff(colnames(georef_dataset), "measurement_value")) %>% dplyr::summarise(measurement_value =
                                                                                                                        sum(measurement_value))
   
-  config$logger.info("LEVEL %s => STEP aggregated")
+  log_info("LEVEL %s => STEP aggregated")
   
   dataset <- data.frame(dataset)
   
@@ -439,24 +439,24 @@ Tidying_and_mapping_data = function(action, entity, config) {
     paste0(format(max(dataset$time_end), "%Y"), "-12-31"),
     sep = "/"
   )
-  config$logger.info("temporal extent")
+  log_info("temporal extent")
   
   entity$setTemporalExtent(dataset_temporal_extent)
   
-  config$logger.info("seting temporal extend")
+  log_info("seting temporal extend")
   
   #@geoflow -> export as csv
   
   
-  config$logger.info(output_name_dataset_mapped)
+  log_info(output_name_dataset_mapped)
   
   write.csv(dataset, output_name_dataset_mapped, row.names = FALSE)
   
-  config$logger.info("writted")
+  log_info("writted")
   
   entity$addResource("mapped", output_name_dataset_mapped)
   
-  config$logger.info("addingressource")
+  log_info("addingressource")
   gc()
   
 }

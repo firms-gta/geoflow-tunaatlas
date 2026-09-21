@@ -33,7 +33,7 @@ function(action, entity, config){
   filename2 <- entity$data$source[[2]] # structure / codelists
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
   
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   
   opts <- options()
   options(encoding = "UTF-8")
@@ -44,8 +44,8 @@ function(action, entity, config){
   
   effort_raw <- effort_raw %>% dplyr::mutate(GEAR_CODE = ifelse(is.na(GEAR_CODE), "UNCL", GEAR_CODE)) #some NAs replaced by UNCL which is coding for Other/Unk
   
-  config$logger.info(paste0("EF_RAW columns: ", paste(colnames(effort_raw), collapse = ", ")))
-  config$logger.info(sprintf("Raw effort dimensions: %s rows", nrow(effort_raw)))
+  log_info(paste0("EF_RAW columns: ", paste(colnames(effort_raw), collapse = ", ")))
+  log_info(sprintf("Raw effort dimensions: %s rows", nrow(effort_raw)))
   
   # ---- format inline ----
   effort <- effort_raw %>%
