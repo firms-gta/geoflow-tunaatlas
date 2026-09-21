@@ -1,0 +1,149 @@
+services:
+
+  postgres:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_DB: gta
+      POSTGRES_USER: gta
+      POSTGRES_PASSWORD: gta
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "5430:5432"
+
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.28.5
+    ports:
+      - "8080:8080"
+    volumes:
+      - geoserver_data:/opt/geoserver_data
+
+  elasticsearch:
+    image: elasticsearch:8.19.3
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      
+  rstudio:
+    build:
+      context: .
+      dockerfile: Dockerfile.rstudio
+      args:
+        BASE_IMAGE: ghcr.io/firms-gta/gta-workflow:2d93b5a   # le tag vérifié à l'étape 1
+    image: gta-workflow-rstudio:local
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      PASSWORD: test
+      USERID: 1000
+      GROUPID: 1000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: gta
+      DB_USER: gta
+      DB_PASSWORD: gta
+      GEOSERVER_URL: http://geoserver:8080/geoserver
+      GEOSERVER_USER: admin
+      GEOSERVER_PASSWORD: geoserver
+      GEOSERVER_WORKSPACE: tunaatlas
+      GEOSERVER_STORE: tunaatlas
+      GEONETWORK_URL: http://geonetwork:8080/geonetwork
+      GEONETWORK_USER: admin
+      GEONETWORK_PASSWORD: admin
+      GEONETWORK_VERSION: "4.4"
+      GTA_STEPS: services
+      GTA_DATA_SOURCE: volume_dir
+      GTA_DATA_PATH: /home/rstudio/geoflow-tunaatlas/data/GTA_2026
+      GTA_SUMMARISE_INVALID_RAW: "false"
+      GTA_BOOTSTRAP_RESTORE_RENV: "false"
+    volumes:
+      - ../R:/home/rstudio/geoflow-tunaatlas/R
+      - ../config:/home/rstudio/geoflow-tunaatlas/config
+      - ../data:/home/rstudio/geoflow-tunaatlas/data
+      - ../docker_local.env:/home/rstudio/geoflow-tunaatlas/docker_local.env:ro
+      - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro
+      - ../compose:/home/rstudio/geoflow-tunaatlas/compose
+      - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
+      - ../runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
+      - ../runtime/cache:/cache
+    depends_on:
+      - postgres
+      - geoserver
+      - geonetwork
+
+  geonetwork:
+    image: geonetwork:4.4.12
+    environment:
+      DATA_DIR: /catalogue-data
+
+      ES_HOST: elasticsearch
+      ES_PROTOCOL: http
+      ES_PORT: 9200
+      
+      GN_CONFIG_PROPERTIES: >-
+        -Dgeonetwork.dir=/catalogue-data
+        -Dgeonetwork.formatter.dir=/catalogue-data/data/formatter
+        -Dgeonetwork.schema.dir=/opt/geonetwork/WEB-INF/data/config/schema_plugins
+        -Dgeonetwork.indexConfig.dir=/opt/geonetwork/WEB-INF/data/config/index
+        -Des.host=elasticsearch
+        -Des.port=9200
+        -Des.protocol=http
+        -Des.url=http://elasticsearch:9200
+
+      GEONETWORK_DB_TYPE: postgres
+      GEONETWORK_DB_HOST: postgres
+      GEONETWORK_DB_PORT: 5432
+      GEONETWORK_DB_NAME: geonetwork
+      GEONETWORK_DB_USERNAME: gta
+      GEONETWORK_DB_PASSWORD: gta
+
+    volumes:
+      - geonetwork_data:/catalogue-data
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy   # <- attend qu'ES soit vraiment prêt
+
+  workflow:
+    image: gta-workflow:geosapi-0.8-1
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: gta
+      DB_USER: gta
+      DB_PASSWORD: gta
+
+      GEOSERVER_URL: http://geoserver:8080/geoserver
+      GEOSERVER_USER: admin
+      GEOSERVER_PASSWORD: geoserver
+      GEOSERVER_WORKSPACE: tunaatlas
+      GEOSERVER_STORE: tunaatlas
+
+      GEONETWORK_URL: http://geonetwork:8080/geonetwork
+      GEONETWORK_USER: admin
+      GEONETWORK_PASSWORD: admin
+      GEONETWORK_VERSION: "4.4"
+
+    depends_on:
+      - postgres
+      - geoserver
+      - geonetwork
+
+
+volumes:
+  postgres_data:
+  geoserver_data:
+  elasticsearch_data:
+  geonetwork_data:
