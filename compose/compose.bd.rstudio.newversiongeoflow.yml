@@ -37,8 +37,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.rstudio
-      args:
-        BASE_IMAGE: ghcr.io/firms-gta/gta-workflow:2d93b5a
     image: gta-workflow-rstudio:local
     ports:
       - "127.0.0.1:8787:8787"
@@ -120,8 +118,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.workflow
-      args:
-        BASE_IMAGE: ghcr.io/firms-gta/gta-workflow:2d93b5a   
     image: gta-workflow-workflow:local
     environment:
       DB_HOST: postgres
