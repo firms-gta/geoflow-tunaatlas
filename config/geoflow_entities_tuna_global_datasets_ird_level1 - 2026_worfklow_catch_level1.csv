@@ -1,5 +1,5 @@
 Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
-id:global_catch_ird_level1_1950_2024,title:Global monthly catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) IRD Level 2,"abstract: This dataset compiles monthly global catch data for tuna, tuna-like species and sharks from 1950 through 2024. Catches are stratified by:
+id:global_catch_ird_level1_1950_2024,title:Global monthly catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) IRD level 1,"abstract: This dataset compiles monthly global catch data for tuna, tuna-like species and sharks from 1950 through 2024. Catches are stratified by:
   - month  
   - species  
   - gear_type ( reporting fishing_gear)  
@@ -25,7 +25,7 @@ metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
 processor:FIRMS-Secretariat@fao.org,:emmanuel.blondel@fao.org,:julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2025-05-05_
 edition:2025-05-05",dataset,eng,"SRID=4326;POLYGON((-180 -90,-180 90,180 90,180 -90,-180 -90))",2025-05-05,"thumbnail:Map overview@https://github.com/eblondel/geoflow-tunaatlas/raw/master/assets/global_catch_1deg_1m_ps_bb_firms_level0.png_
 ",,"statement:Data management workflow_
-process:""Level 0 IRD data from a precedent workflow is harvested and the data in numbers is converted to tons using conversion factors.""_",,"source:./data/GTA_2026/dataoutputGTA/global_catch_ird_level0_1950_2024.csv,./data/GTA_2026/IOTC_conv_fact_mapped.csv,./data/GTA_2026/fact_conv_ird_complete_01_May_2026.csv_
+process:""Level 0 IRD data from a precedent workflow is harvested and the data in numbers is converted to tons using conversion factors.""_",,"source:./data/GTA_2026/dataoutputGTA/global_catch_ird_level0_1950_2024.csv,./data/GTA_2026/IOTC_conv_fact_mapped.csv,./data/GTA_2026/fact_conv_ird_complete_01_May_2026.csv,./data/GTA_2026/global_catch_ird_codelists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
