@@ -18,7 +18,7 @@
 
 cache_fdi_mappings <- function(
     mapping_cache_dir = Sys.getenv("FDI_MAPPINGS_CACHE_DIR", "data/fdi-mappings-cache"),
-    fdi_mappings_ref = "main",
+    fdi_mappings_ref = "c74ff137ebd28b0367172a8a73821a0d6dada65f",
     mapping_dataset = NULL
 ) {
   source(here::here("R/tunaatlas_scripts/pre-harmonization/get_cached_file.R"))
