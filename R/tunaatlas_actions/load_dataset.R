@@ -24,7 +24,6 @@ load_dataset <- function(action,entity, config){
     require(readr)
   }
   
-  
   #control to check that everything is ok on mappings side, if not we stop the workflow until mappings are fixed/updated
   if(dir.exists("errors_mappings")){
     errMsg <- "Hum, It seems they are still missing codelist mappings! Cannot proceed with loading datasets. Aborting workflow..."
@@ -51,8 +50,7 @@ load_dataset <- function(action,entity, config){
   
   #enrich entity with id_version
   # @juldebar temporary patch to fix errors with the line below
-  #id_version <- paste0(dataset_pid, "_", gsub("-","_", format(entity$temporal_extent$start, "%Y-%m-%d")),"_", gsub("-","_", format(entity$temporal_extent$end, "%Y-%m-%d")), "_", format(Sys.Date(),"%Y"))
-  id_version <- dataset_pid
+  id_version <- paste0(dataset_pid, "_", gsub("-","_", format(entity$temporal_extent$start, "%Y-%m-%d")),"_", gsub("-","_", format(entity$temporal_extent$end, "%Y-%m-%d")), "_", format(Sys.Date(),"%Y"))
   entity$setIdentifier("id_version", id_version)
   entity$enrichWithMetadata()
   #----------------------------------------------------------------------------------------------------------------------------
@@ -100,7 +98,7 @@ load_dataset <- function(action,entity, config){
     dir.create(dirname(save_local_path), recursive = TRUE, showWarnings = FALSE)
     
     if (!save_local_overwrite && file.exists(save_local_path)) {
-      config$logger.info(sprintf("File already exists and overwrite is FALSE: %s", save_local_path))
+      log_info(sprintf("File already exists and overwrite is FALSE: %s", save_local_path))
       return(NULL)
     }
     
@@ -111,7 +109,7 @@ load_dataset <- function(action,entity, config){
     )
     if (!ok) stop(sprintf("Failed to copy file to: %s", save_local_path))
     
-    config$logger.info(sprintf(
+    log_info(sprintf(
       "Saved final dataset locally: %s",
       save_local_path
     ))
@@ -125,7 +123,7 @@ load_dataset <- function(action,entity, config){
   #-------------------------------------------------------------------------------------------------------------------------
   #upload to DB public schema
   if(upload_to_db_public && !is.null(entity$resources$public)){
-    dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public, col_types = list(measurement_unit = col_character())))
+    dfenriched_to_load <- as.data.frame(readr::read_csv(entity$resources$public, col_types = list(measurement_unit = col_character(), geographic_identifier = col_character())))
     class(dfenriched_to_load$year) = "integer"
     class(dfenriched_to_load$month) = "integer"
     class(dfenriched_to_load$quarter) = "integer"
@@ -150,8 +148,8 @@ load_dataset <- function(action,entity, config){
     #read sources
     df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
     df_codelists <- as.data.frame(readr::read_csv(path_to_codelists, guess_max=0))
-    config$logger.info(sprintf("Dataset '%s' will be loaded in table '%s'",dataset_pid, table_name))
-    config$logger.info(sprintf("Load dataset from jobdir file '%s'", path_to_dataset))
+    log_info(sprintf("Dataset '%s' will be loaded in table '%s'",dataset_pid, table_name))
+    log_info(sprintf("Load dataset from jobdir file '%s'", path_to_dataset))
     
     ### METADATA => replace / set InputMetadataset with geoflow current entity
     #------------------------------------------------------------------------------------------------------------------------
@@ -159,7 +157,7 @@ load_dataset <- function(action,entity, config){
     geoflow_df <- entity$asDataFrame()
     
     #build legacy metadata Tuna atlas metadata data.frame representation
-    config$logger.info("Preparing legacy Tuna atlas metadata entry")
+    log_info("Preparing legacy Tuna atlas metadata entry")
     InputMetadataset <- data.frame(
       identifier = entity$identifiers[["id"]],		
       persistent_identifier = entity$identifiers[["id"]],
@@ -426,12 +424,12 @@ load_dataset <- function(action,entity, config){
     
     
     if(nrow(dataset_metadata)==0){
-      config$logger.info(sprintf("Loading metadata for dataset '%s'", dataset_pid))
+      log_info(sprintf("Loading metadata for dataset '%s'", dataset_pid))
       rs<-FUNUploadDatasetToTableInDB(con,InputMetadataset,"metadata.metadata")
-      config$logger.info(sprintf("Metadata loaded for dataset '%s'", dataset_pid))
+      log_info(sprintf("Metadata loaded for dataset '%s'", dataset_pid))
     }else{
-      config$logger.info(sprintf("Metadata already existing in DB for dataset '%s'. Skipping metadata insert...", dataset_pid))
-      config$logger.info("Removing already existing data to prevent duplicates loading of updated dataset")
+      log_info(sprintf("Metadata already existing in DB for dataset '%s'. Skipping metadata insert...", dataset_pid))
+      log_info("Removing already existing data to prevent duplicates loading of updated dataset")
       query_removing_existing_data <- paste0("DELETE FROM " , InputMetadataset$database_table_name, " WHERE id_metadata = ",as.integer(dataset_metadata$id_metadata))
       dataset_metadata <- dbSendQuery(con, query_removing_existing_data)
       
@@ -465,16 +463,16 @@ load_dataset <- function(action,entity, config){
     ## Update some metadata elements
     # first drop materialized view
     if(go_view){
-      config$logger.info(sprintf("Droping materialized view '%s'", dataset_pid))
+      log_info(sprintf("Droping materialized view '%s'", dataset_pid))
       dataset_drop_view_sql <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name,";"))
-      config$logger.info(sprintf("SQL: %s", dataset_drop_view_sql))
+      log_info(sprintf("SQL: %s", dataset_drop_view_sql))
       dbSendQuery(con, dataset_drop_view_sql)
     }
     # sql_query_dataset_extraction
     sql_query_dataset_extraction<-getSQLSardaraQueries(con,InputMetadataset)
-    config$logger.info(sprintf("Update metadata sql_query_dataset_extraction' field for '%s'",dataset_pid))
+    log_info(sprintf("Update metadata sql_query_dataset_extraction' field for '%s'",dataset_pid))
     dataset_update_meta_sql <- paste0("UPDATE metadata.metadata SET sql_query_dataset_extraction='",gsub("'","''",sql_query_dataset_extraction$query_CSV_with_labels),"' WHERE identifier='",InputMetadataset$identifier,"'")
-    config$logger.info(sprintf("SQL: %s", dataset_update_meta_sql))
+    log_info(sprintf("SQL: %s", dataset_update_meta_sql))
     dbSendQuery(con, dataset_update_meta_sql)
     
     # spatial coverage
@@ -503,7 +501,7 @@ load_dataset <- function(action,entity, config){
   # Create the materialized view without the labels (to get the labels, replace sql_query_dataset_extraction$query_CSV by sql_query_dataset_extraction$query_CSV_with_labels)
   if(go_view){
     
-    config$logger.info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
+    log_info(sprintf("Creating materialized view '%s' (with codes and labels)",paste0(schema_name_for_view,".",database_view_name)))
     # Check if schema exists
     list_of_schemas <- dbGetQuery(con,"select schema_name from information_schema.schemata")$schema_name
     # Get schema name where to store the materialized view
@@ -511,32 +509,32 @@ load_dataset <- function(action,entity, config){
     # Create the schema if it does not exist
     #TODO --> IF fact_tables is used now, then this piece of of code is probably useless and we can remove it
     if (!(schema_name_for_view %in% list_of_schemas)){
-      config$logger.info(sprintf("Schema '%s' doesn't exist. Creating it...", schema_name_for_view))
+      log_info(sprintf("Schema '%s' doesn't exist. Creating it...", schema_name_for_view))
       schema_create_sql <- paste0("CREATE SCHEMA ",schema_name_for_view,"; GRANT USAGE ON SCHEMA ",schema_name_for_view," TO ",user_postgres,";ALTER DEFAULT PRIVILEGES IN SCHEMA ",schema_name_for_view," GRANT SELECT ON TABLES TO ",user_postgres,";")
-      config$logger.info(sprintf("SQL: %s", schema_create_sql))
+      log_info(sprintf("SQL: %s", schema_create_sql))
       dbSendQuery(con,schema_create_sql)
     }
     
-    config$logger.info(sprintf("Dropping materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+    log_info(sprintf("Dropping materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
     sql_drop_materialized_view <- paste0("DROP MATERIALIZED VIEW IF EXISTS ",paste0(schema_name_for_view,".",database_view_name),";")
-    config$logger.info(sprintf("SQL: %s", sql_drop_materialized_view))
+    log_info(sprintf("SQL: %s", sql_drop_materialized_view))
     dbSendQuery(con, sql_drop_materialized_view)
     
-    config$logger.info(sprintf("Creating materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+    log_info(sprintf("Creating materialized view '%s'", paste0(schema_name_for_view,".",database_view_name)))
     sql_create_materialized_view <- paste0("CREATE MATERIALIZED VIEW ",paste0(schema_name_for_view,".",database_view_name)," AS ",sql_query_dataset_extraction$query_CSV,";")
-    config$logger.info(sprintf("SQL: %s", sql_create_materialized_view))
+    log_info(sprintf("SQL: %s", sql_create_materialized_view))
     dbSendQuery(con, sql_create_materialized_view)
     
     #create indexes for main columns
     if(index_materialized_view){
-      config$logger.info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
+      log_info(sprintf("Creating indexes for view '%s'", paste0(schema_name_for_view,".",database_view_name)))
       this_view <- dbGetQuery(con,paste0("SELECT * FROM ",paste0(schema_name_for_view,".",database_view_name)," LIMIT 1;"))
       column_names <- colnames(this_view)
       time_dimensions <- c("time_start", "time_end", "year", "quarter", "month")
       columns_to_index <- c(column_names[column_names %in% dimensions], time_dimensions)
       for(column_name in columns_to_index){
         create_index_sql <- sprintf("CREATE INDEX %s_%s_idx  ON %s.%s (%s);", database_view_name, column_name, schema_name_for_view, database_view_name, column_name)
-        config$logger.info(sprintf("SQL: %s", create_index_sql))
+        log_info(sprintf("SQL: %s", create_index_sql))
         dbSendQuery(con, create_index_sql)
       }
     }
@@ -554,7 +552,7 @@ load_dataset <- function(action,entity, config){
         for(i in 1:length(column_names)){
           member <- ft$getMemberById(column_names[i])
           if(!is.null(member)){
-            config$logger.info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
+            log_info(sprintf("Adding column definition from dictionary for column '%s'", column_names[i]))
             new_comment <- paste0("COMMENT ON COLUMN ",paste0(schema_name_for_view,".",database_view_name,".", column_names[i]),"  IS '",member$def,"';")
             column_comments <- paste0(column_comments,new_comment)
           }else{
@@ -617,7 +615,7 @@ load_dataset <- function(action,entity, config){
     entity$data$access <- "googledrive"
     
     #DATA
-    config$logger.info("Upload dataset (CSV) to Google Drive")
+    log_info("Upload dataset (CSV) to Google Drive")
     # folder_datasets_id <- drive_get("~/geoflow_tunaatlas/data/outputs/datasets")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
     #standard harmonized dataset
     folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
@@ -631,7 +629,7 @@ load_dataset <- function(action,entity, config){
     }
     
     #VIEWS
-    config$logger.info("Upload SQL queries (view/data) to Google Drive")
+    log_info("Upload SQL queries (view/data) to Google Drive")
     # folder_views_id <- drive_get("~/geoflow_tunaatlas/data/outputs/views")$id #googledrive 1.0.0 doesn't work for that.. needs the github fix
     folder_views_id <- "1Rm8TJsUM0DQo1c91LXS5kCzaTLt8__bS"
     
@@ -639,7 +637,7 @@ load_dataset <- function(action,entity, config){
     if(upload_to_db){
       
       #store SQL files on job dir google drive
-      config$logger.info("Write SQL queries (view/data) to job directory")
+      log_info("Write SQL queries (view/data) to job directory")
       sql_data <- sql_query_dataset_extraction$query_CSV_with_labels
       file_sql_data <- paste0(entity$identifiers[["id"]],"_data.sql")
       writeLines(sql_data, file.path("data", file_sql_data))
