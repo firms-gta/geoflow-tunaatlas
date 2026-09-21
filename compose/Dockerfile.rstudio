@@ -1,41 +1,9 @@
-ARG BASE_IMAGE=ghcr.io/firms-gta/gta-workflow:2d93b5a
+ARG BASE_IMAGE=gta-workflow:geoflow-1.3.0
 FROM ${BASE_IMAGE}
-
 USER root
-ENV S6_VERSION=v2.1.0.2 \
-    RSTUDIO_VERSION=latest \
-    DEFAULT_USER=rstudio \
-    PANDOC_VERSION=default \
-    PATH=/usr/lib/rstudio-server/bin:$PATH
+ENV S6_VERSION=v2.1.0.2 RSTUDIO_VERSION=latest DEFAULT_USER=rstudio \
+    PANDOC_VERSION=default PATH=/usr/lib/rstudio-server/bin:$PATH
 RUN /rocker_scripts/install_rstudio.sh && /rocker_scripts/install_pandoc.sh
-
-# Docker (évite ~6 min de compilation si ce build est allé au bout)
-WORKDIR /home/rstudio/geoflow-tunaatlas
-USER root
-RUN Rscript -e 'renv::install("geoflow@1.3.0")' \
- && cd renv/library/R-4.2/x86_64-pc-linux-gnu \
- && chown -R rstudio:rstudio geoflow geometa geonapi geonode4R lifecycle ows4R pkgload ps Rcpp rdtools vctrs xfun
-
-# Patchs : écrase /opt/patches/patch-geometa.R (l'ancienne version, non idempotente)
-COPY patches/ /opt/patches/
-RUN chmod 644 /opt/patches/*.R
-
-# Patch des entités sur geoflow 1.3.0, avec des vérifications qui font échouer le build si quelque chose cloche
-RUN cd /home/rstudio/geoflow-tunaatlas \
- && Rscript /opt/patches/patch-geoflow-entities.R \
- && test "$(grep -c 'PATCH:' renv/library/R-4.2/x86_64-pc-linux-gnu/geoflow/metadata/entity/entity_handler_dbi_df.R)" -ge 1 \
- && Rscript -e 'for (i in 1:2) source("/opt/patches/patch-geometa.R"); invisible(geometa::GMLUnitDefinition$buildFrom("m"))' \
- && Rscript -e 'stopifnot(as.character(packageVersion("geoflow")) == "1.3.0")'
-
-RUN cd /home/rstudio/geoflow-tunaatlas \
- && Rscript /opt/patches/patch-geoflow-zenodo-size.R \
- && grep -q "size = 100L" renv/library/R-4.2/x86_64-pc-linux-gnu/geoflow/actions/zen4R_deposit_record.R
- 
- 
-RUN cd /home/rstudio/geoflow-tunaatlas \
- && Rscript /opt/patches/patch-geoflow-src-entities.R \
- && grep -q "keep source attribute" renv/library/R-4.2/x86_64-pc-linux-gnu/geoflow/metadata/entity/entity_handler_dbi_df.R
-
 ENTRYPOINT []
 CMD ["/init"]
 EXPOSE 8787
