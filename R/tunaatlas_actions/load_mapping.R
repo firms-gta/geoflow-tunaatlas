@@ -28,8 +28,8 @@ function(action,entity, config){
   table_name <- entity$data$uploadSource[[1]]
   dimension_name <- sub('\\..*', '', table_name)
   
-  config$logger.info(sprintf("Load mapping '%s' as table '%s'",codelist_pid, table_name))
-  config$logger.info(sprintf("Load mapping from jobdir file '%s'", path_to_dataset))
+  log_info(sprintf("Load mapping '%s' as table '%s'",codelist_pid, table_name))
+  log_info(sprintf("Load mapping from jobdir file '%s'", path_to_dataset))
   df_to_load <- as.data.frame(readr::read_csv(path_to_dataset, guess_max=0))
   # df_to_load<read.csv(strsplit(x=CFG$src_entities$Data[1],split = "@")[[1]][2])
   
@@ -83,7 +83,7 @@ function(action,entity, config){
   #get geoflow entity data.frame representation
   geoflow_df <- entity$asDataFrame()
   #build legacy metadata Tuna atlas metadata data.frame representation
-  config$logger.info("Preparing legacy Tuna atlas metadata entry")
+  log_info("Preparing legacy Tuna atlas metadata entry")
   InputMetadataset <- data.frame(
     identifier = entity$identifiers[["id"]],
     persistent_identifier = entity$identifiers[["id"]],
@@ -110,7 +110,7 @@ function(action,entity, config){
   InputMetadataset[is.na(InputMetadataset)] <- "NA"
   # Add metadata in metadata tables
   #code inherited from rtunaatlas::FUNUploadDatasetToTableInDB
-  config$logger.info("Loading codelist metadata entry into DB")
+  log_info("Loading codelist metadata entry into DB")
   sql4 <- paste0("COPY  metadata.metadata (", paste0(names(InputMetadataset), collapse = ", "), ") FROM STDIN NULL 'NA' ")
   postgresqlpqExec(con, sql4)
   postgresqlCopyInDataframe(con, InputMetadataset)
@@ -120,7 +120,7 @@ function(action,entity, config){
   sql<- "SELECT max(id_metadata) FROM metadata.metadata"
   PK_metadata <- dbGetQuery(con, sql)
   PK_metadata<-as.integer(PK_metadata$max[1])
-  config$logger.info(sprintf("Retrieving internal metadata ID from DB: %s", PK_metadata))
+  log_info(sprintf("Retrieving internal metadata ID from DB: %s", PK_metadata))
   
   if (nrow(MapFinal) == 0) {
     stop(
