@@ -51,8 +51,6 @@ ENV GTA_BOOTSTRAP_RESTORE_RENV=false
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
-ENV FDI_MAPPINGS_CACHE_DIR=/opt/fdi-mappings-cache
-
 # -----------------------------------------------------------------------------
 # Create runtime user.
 # -----------------------------------------------------------------------------
@@ -106,17 +104,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # -----------------------------------------------------------------------------
 # Create directories used by the workflow.
 # -----------------------------------------------------------------------------
-
-RUN mkdir -p \
-    ${PROJECT_DIR} \
-    ${RENV_PATHS_ROOT} \
-    /data \
-    ${FDI_MAPPINGS_CACHE_DIR} \
- && chown -R rstudio:rstudio \
-    /home/rstudio \
-    ${RENV_PATHS_ROOT} \
-    /data \
-    ${FDI_MAPPINGS_CACHE_DIR}
 
 # -----------------------------------------------------------------------------
 # Copy renv metadata and optional isolated local library.
@@ -176,8 +163,47 @@ RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
 # Download and cache FDI mappings.
 # -----------------------------------------------------------------------------
 
-ENV FDI_MAPPINGS_REF="98491a38c5f85628e90cae63d740c23a2460aed6"
+ENV FDI_CODELISTS_REF="b02ecc63edcf820f1719c0fc3200b5b177518bc4"
+ENV FDI_CODELISTS_DIR=${PROJECT_DIR}/data/fdi-codelists
 
-RUN Rscript -e "source('./R/docker_creation/cache_fdi_mappings.R'); cache_fdi_mappings(mapping_cache_dir = Sys.getenv('FDI_MAPPINGS_CACHE_DIR'), fdi_mappings_ref = Sys.getenv('FDI_MAPPINGS_REF'))"
+ENV FDI_MAPPINGS_REF="c74ff137ebd28b0367172a8a73821a0d6"
+ENV FDI_MAPPINGS_DIR=${PROJECT_DIR}/data/fdi-mappings
+
+RUN git clone https://github.com/fdiwg/fdi-codelists.git ${FDI_CODELISTS_DIR} \
+ && cd ${FDI_CODELISTS_DIR} \
+ && git checkout ${FDI_CODELISTS_REF} \
+ && rm -rf .git
+
+RUN git clone https://github.com/fdiwg/fdi-mappings.git ${FDI_MAPPINGS_DIR} \
+ && cd ${FDI_MAPPINGS_DIR} \
+ && git checkout ${FDI_MAPPINGS_REF} \
+ && rm -rf .git
+
+# ------------------------------------------------------------------
+# Provenance / versions of resources included in the image
+# ------------------------------------------------------------------
+
+RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
+{
+  "project": {
+    "repository": "https://github.com/firms-gta/geoflow-tunaatlas"
+  },
+  "resources": {
+    "fdi-codelists": {
+      "repository": "https://github.com/fdiwg/fdi-codelists",
+      "commit": "${FDI_CODELISTS_REF}"
+    },
+    "fdi-mappings": {
+      "repository": "https://github.com/fdiwg/fdi-mappings",
+      "commit": "${FDI_MAPPINGS_REF}"
+    },
+    {
+  "build": {
+    "docker_base_image": "rocker/r-ver:4.2.3"
+  }
+}
+  }
+}
+EOF
 
 CMD ["Rscript", "R/launching_workflows/run_gta_2026_workflow_cli.R"]

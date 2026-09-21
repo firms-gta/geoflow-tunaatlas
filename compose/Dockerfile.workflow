@@ -39,16 +39,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev libharfbuzz-dev libfribidi-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# --- Restauration renv (couche lente, en cache tant que renv.lock ne change pas)
 COPY --chown=rstudio:rstudio renv.lock ${PROJECT_DIR}/renv.lock
 COPY --chown=rstudio:rstudio renv/ ${PROJECT_DIR}/renv/
 
-RUN Rscript -e "install.packages(c('remotes','jsonlite'), repos='https://cloud.r-project.org')" \
- && Rscript -e "ver <- jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version; remotes::install_version('renv', version = ver, upgrade='never', repos='https://cloud.r-project.org')" \
- && Rscript -e "source('renv/activate.R'); print(.libPaths()); renv::status()" \
- && Rscript -e "source('renv/activate.R'); renv::restore(prompt = FALSE)" \
- && Rscript -e "source('renv/activate.R'); renv::repair()" \
- && Rscript -e "source('renv/activate.R'); renv::isolate()"
+RUN Rscript -e "install.packages(c('remotes','jsonlite'), repos='https://cloud.r-project.org')"
+
+RUN Rscript -e "ver <- jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version; remotes::install_version('renv', version = ver, upgrade='never', repos='https://cloud.r-project.org')"
+
+RUN Rscript -e "source('renv/activate.R'); print(.libPaths()); renv::status()"
+
+RUN Rscript -e "source('renv/activate.R'); renv::restore(prompt = FALSE)"
+
+# Isolate pour avoir les packages accessibles et on vide le cache pour que ça prenne moins de place
+RUN Rscript -e "source('renv/activate.R'); renv::isolate()" \
+ && Rscript -e "cat(renv::paths\$cache(), \"\n\")" > /tmp/renv_cache_path.txt \
+ && rm -rf "$(cat /tmp/renv_cache_path.txt)" \
+ && rm -f /tmp/renv_cache_path.txt 
+ 
 
 # --- Patchs geoflow --------------------------------
 COPY compose/patches/patch-geometa.R \
