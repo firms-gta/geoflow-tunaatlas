@@ -676,7 +676,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   
   invisible(lapply(unique(required_packages), load_required_package))
   
-  docker_env_file <- "docker_local.env"
+  docker_env_file <- "docker_local.env.compose"
   
   if (file.exists(here::here(docker_env_file))) {
     tryCatch(
