@@ -1,6 +1,11 @@
 {
-  "id": "tuna-atlas",
   "profile": {
+	"id": "tunaatlas-qa",
+	"mode": "entity",
+	    "environment": {
+  		"file": "docker_local.env",
+  		"hide_env_vars": ["DB_USER", "DB_PASSWORD", "TOKEN"]
+  	},
 	"project": "FIRMS Tuna Atlas",
 	"organization": "FIRMS Tuna Atlas",
 	"logos": [
