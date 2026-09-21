@@ -1,9 +1,9 @@
 {
   "profile": {
-    "id": "tuna-atlas-catch",
+    "id": "tuna-atlas-catch-level0",
     "mode": "entity",
   	"environment": {
-  		"file": "docker_local.env",
+  		"file": "docker_local.env.compose",
   		"hide_env_vars": ["USER", "PASSWORD", "TOKEN"]
   	},
     "project": "FIRMS Tuna Atlas",

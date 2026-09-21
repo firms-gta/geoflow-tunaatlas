@@ -3,7 +3,7 @@
 	"id": "tunaatlas-qa",
 	"mode": "entity",
 	    "environment": {
-  		"file": "docker_local.env",
+  		"file": "docker_local.env.compose",
   		"hide_env_vars": ["DB_USER", "DB_PASSWORD", "TOKEN"]
   	},
 	"project": "FIRMS Tuna Atlas",

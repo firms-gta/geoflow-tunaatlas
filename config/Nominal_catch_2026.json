@@ -1,9 +1,9 @@
 {
   "profile": {
-    "id": "tuna-atlas-datasets-iattc",
+    "id": "tuna-atlas-raw-nominal-catch",
     "mode": "entity",
   	"environment": {
-  		"file": "docker_local.env",
+  		"file": "docker_local.env.compose",
   		"hide_env_vars": ["USER", "PASSWORD", "TOKEN"]
   	},
     "project": "FIRMS Tuna Atlas",
@@ -21,7 +21,7 @@
     "entities": [
       {
         "handler": "csv",
-        "source": "config/geoflow_entities_tuna_global_datasets - Nominal_catch_2026_CCSBT_IATTC_WCPFC.csv"
+        "source": "config/geoflow_entities_tuna_global_datasets - Raw_Nominal_catch_2026.csv"
       }
     ],
     "contacts" : []
