@@ -5,7 +5,7 @@ enrich_metadata <- function(action,entity, config){
 	#this action now relies on the PUBLIC schema dataset (materialized view is optional)
 
 	#subjects
-	config$logger.info("Enrich entity with subjects")
+	log_info("Enrich entity with subjects")
 	dictionary <- config$getDictionary()
 	if(!is.null(dictionary)){
 		ft <- dictionary$getFeatureTypeById(entity$data$featureType)
@@ -26,7 +26,7 @@ enrich_metadata <- function(action,entity, config){
 				
 				reg <- dictionary$getRegisterById(member$registerId)
 				if(!is.null(reg)){
-					config$logger.info(sprintf("Enrich entity with subject for column '%s' - using register data", colname))	
+					log_info(sprintf("Enrich entity with subject for column '%s' - using register data", colname))	
 					values <- reg$data[reg$data$code %in% values,]
 					subject <- geoflow_subject$new()
 					subject$setName(member$name)
@@ -51,7 +51,7 @@ enrich_metadata <- function(action,entity, config){
 					}
 				}
 			}else{
-				config$logger.info(sprintf("Enrich entity with subject for column '%s' - with codes only", colname))
+				log_info(sprintf("Enrich entity with subject for column '%s' - with codes only", colname))
 				subject <- geoflow_subject$new()
 				subject$setName(colname)
 				for(value in values){ subject$addKeyword(value)}

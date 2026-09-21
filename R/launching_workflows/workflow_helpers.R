@@ -200,27 +200,49 @@ force_upload_to_db <- function(config, action_id = "load_dataset") {
 # file and retry without database software blocks.
 init_workflow_maybe_without_dbi <- function(file, handle_metadata = TRUE) {
   tryCatch(
-    initWorkflow(file, handleMetadata = handle_metadata),
+    initWorkflow(file, handleMetadata = handle_metadata, dir = here::here()),
     error = function(e) {
       message("initWorkflow failed. Retrying without DBI software: ", e$message)
-      initWorkflow(remove_dbi_software(file), handleMetadata = handle_metadata)
+      initWorkflow(remove_dbi_software(file), handleMetadata = handle_metadata, dir = here::here())
     }
   )
+}
+log_info <- function(msg, ..., config = NULL) {
+  msg <- if (...length() > 0) sprintf(msg, ...) else msg
+  if (!is.null(config) && is.function(config$logger.info)) {
+    config$logger.info(msg)                    # ancien geoflow
+  } else if (!is.null(config) && !is.null(config$logger) && is.function(config$logger$INFO)) {
+    config$logger$INFO("%s", msg)              # geoflow 1.x
+  } else {
+    message("[INFO] ", msg)
+  }
 }
 
 # Execute a workflow and optionally rename the output job folder. Upload is
 # activated dynamically only when the database context is explicitly validated.
-execute_workflow_maybe_upload <- function(file, dir = ".", rename_suffix = NULL) {
-  config_test <- try(
-    initWorkflow(file, handleMetadata = FALSE),
-    silent = TRUE
+execute_workflow_maybe_upload <- function(
+    file,
+    dir = here::here(),
+    rename_suffix = NULL,
+    requires_db = FALSE
+) {
+  config_test <- initWorkflow(
+    file,dir = dir,
+    handleMetadata = FALSE
   )
   
   workflow_file <- file
   
   if (inherits(config_test, "try-error")) {
+    
+    if (requires_db) {
+      message("Database unavailable: skipping workflow.")
+      return(NULL)
+    }
+    
     message("initWorkflow failed. Retrying execution without DBI software.")
     workflow_file <- remove_dbi_software(file)
+    
   } else {
     unlink(config_test$job, recursive = TRUE)
   }
@@ -230,10 +252,14 @@ execute_workflow_maybe_upload <- function(file, dir = ".", rename_suffix = NULL)
     dir = dir,
     on_initWorkflow = function(config, queue) {
       if (should_upload_to_db(config)) {
-        config$logger.info("Database reachable and context validated: enabling upload.")
+        log_info(
+          "Database reachable and context validated: enabling upload."
+        )
         force_upload_to_db(config, "load_dataset")
       } else {
-        config$logger.info("Database unavailable or context not validated: upload disabled.")
+        log_info(
+          "Database unavailable or context not validated: upload disabled."
+        )
       }
     }
   )
@@ -249,7 +275,7 @@ execute_workflow_maybe_upload <- function(file, dir = ".", rename_suffix = NULL)
 # the workflow cannot be initialised with DBI, which lets summaries run without DB.
 get_workflow_con <- function(config_file) {
   config <- try(
-    initWorkflow(here::here(config_file), handleMetadata = FALSE),
+    initWorkflow(here::here(config_file), handleMetadata = FALSE, dir = here::here()),
     silent = TRUE
   )
   
