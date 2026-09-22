@@ -1,4 +1,75 @@
+name: gta
+
+x-gta-env: &gta-env
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_NAME: gta
+  DB_USER: gta
+  DB_PASSWORD: gta
+  GEOSERVER_URL: http://geoserver:8080/geoserver
+  GEOSERVER_USER: admin
+  GEOSERVER_PASSWORD: geoserver
+  GEOSERVER_WORKSPACE: tunaatlas
+  GEOSERVER_STORE: tunaatlas
+  GEONETWORK_URL: http://geonetwork:8080/geonetwork
+  GEONETWORK_USER: admin
+  GEONETWORK_PASSWORD: admin
+  GEONETWORK_VERSION: "4.4"
+  GTA_STEPS: ${GTA_STEPS:-services}
+  GTA_DATA_SOURCE: volume_dir
+  GTA_DATA_PATH: /home/rstudio/geoflow-tunaatlas/data/GTA_2026
+  GTA_SUMMARISE_INVALID_RAW: "false"
+  GTA_BOOTSTRAP_RESTORE_RENV: "false"
+
+x-gta-volumes: &gta-volumes
+  - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
+  - ../runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
+  - ../runtime/cache:/cache
+  - ../docker_local.env.compose:/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro
+  - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro
+
 services:
+
+  workflow:
+    build:
+      context: ..
+      dockerfile: compose/Dockerfile.workflow
+    image: ${GTA_IMAGE:-gta-workflow:geoflow-1.3.0}
+    environment: *gta-env
+    volumes: *gta-volumes
+    depends_on:
+      - postgres
+      - geoserver
+      - geonetwork
+
+  rstudio:
+    build:
+      context: ..
+      dockerfile: compose/Dockerfile.rstudio
+      args:
+        BASE_IMAGE: ${GTA_IMAGE:-gta-workflow:geoflow-1.3.0}
+    image: gta-workflow-rstudio:local
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      <<: *gta-env
+      PASSWORD: test
+      USERID: 1000
+      GROUPID: 1000
+    volumes:
+      - ../R:/home/rstudio/geoflow-tunaatlas/R
+      - ../config:/home/rstudio/geoflow-tunaatlas/config
+      - ../data:/home/rstudio/geoflow-tunaatlas/data
+      - ../compose:/home/rstudio/geoflow-tunaatlas/compose
+      - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
+      - ../runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
+      - ../runtime/cache:/cache
+      - ../docker_local.env.compose:/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro
+      - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro
+    depends_on:
+      - postgres
+      - geoserver
+      - geonetwork
 
   postgres:
     image: postgis/postgis:16-3.5
@@ -32,63 +103,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
-      
-  rstudio:
-    build:
-      context: ..
-      dockerfile: compose/Dockerfile.rstudio
-      args:
-        BASE_IMAGE: gta-workflow:geoflow-1.3.0
-    image: gta-workflow-rstudio:local
-    ports:
-      - "127.0.0.1:8787:8787"
-    environment:
-      PASSWORD: test
-      USERID: 1000
-      GROUPID: 1000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: gta
-      DB_USER: gta
-      DB_PASSWORD: gta
-      GEOSERVER_URL: http://geoserver:8080/geoserver
-      GEOSERVER_USER: admin
-      GEOSERVER_PASSWORD: geoserver
-      GEOSERVER_WORKSPACE: tunaatlas
-      GEOSERVER_STORE: tunaatlas
-      GEONETWORK_URL: http://geonetwork:8080/geonetwork
-      GEONETWORK_USER: admin
-      GEONETWORK_PASSWORD: admin
-      GEONETWORK_VERSION: "4.4"
-      GTA_STEPS: services
-      GTA_DATA_SOURCE: volume_dir
-      GTA_DATA_PATH: /home/rstudio/geoflow-tunaatlas/data/GTA_2026
-      GTA_SUMMARISE_INVALID_RAW: "false"
-      GTA_BOOTSTRAP_RESTORE_RENV: "false"
-    volumes:
-      - ../R:/home/rstudio/geoflow-tunaatlas/R
-      - ../config:/home/rstudio/geoflow-tunaatlas/config
-      - ../data:/home/rstudio/geoflow-tunaatlas/data
-      - ../docker_local.env.compose:/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro
-      - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro
-      - ../compose:/home/rstudio/geoflow-tunaatlas/compose
-      - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
-      - ../runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
-      - ../runtime/cache:/cache
-    depends_on:
-      - postgres
-      - geoserver
-      - geonetwork
 
   geonetwork:
     image: geonetwork:4.4.12
     environment:
       DATA_DIR: /catalogue-data
-
       ES_HOST: elasticsearch
       ES_PROTOCOL: http
       ES_PORT: 9200
-      
       GN_CONFIG_PROPERTIES: >-
         -Dgeonetwork.dir=/catalogue-data
         -Dgeonetwork.formatter.dir=/catalogue-data/data/formatter
@@ -98,14 +120,12 @@ services:
         -Des.port=9200
         -Des.protocol=http
         -Des.url=http://elasticsearch:9200
-
       GEONETWORK_DB_TYPE: postgres
       GEONETWORK_DB_HOST: postgres
       GEONETWORK_DB_PORT: 5432
       GEONETWORK_DB_NAME: geonetwork
       GEONETWORK_DB_USERNAME: gta
       GEONETWORK_DB_PASSWORD: gta
-
     volumes:
       - geonetwork_data:/catalogue-data
     ports:
@@ -114,36 +134,7 @@ services:
       postgres:
         condition: service_started
       elasticsearch:
-        condition: service_healthy   # <- attend qu'ES soit prêt
-
-  workflow:
-    build:
-      context: ..
-      dockerfile: compose/Dockerfile.workflow
-    image: gta-workflow:geoflow-1.3.0
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: gta
-      DB_USER: gta
-      DB_PASSWORD: gta
-
-      GEOSERVER_URL: http://geoserver:8080/geoserver
-      GEOSERVER_USER: admin
-      GEOSERVER_PASSWORD: geoserver
-      GEOSERVER_WORKSPACE: tunaatlas
-      GEOSERVER_STORE: tunaatlas
-
-      GEONETWORK_URL: http://geonetwork:8080/geonetwork
-      GEONETWORK_USER: admin
-      GEONETWORK_PASSWORD: admin
-      GEONETWORK_VERSION: "4.4"
-
-    depends_on:
-      - postgres
-      - geoserver
-      - geonetwork
-
+        condition: service_healthy
 
 volumes:
   postgres_data:
