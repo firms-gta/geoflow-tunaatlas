@@ -56,6 +56,19 @@ RUN Rscript -e "source('renv/activate.R'); renv::isolate()" \
  && rm -rf "$(cat /tmp/renv_cache_path.txt)" \
  && rm -f /tmp/renv_cache_path.txt 
  
+# geoflow 1.3.0 : register_vocabularies() (.onLoad) utilise readr::write_lines()
+# (vroom) pour réécrire le thésaurus GEMET décompressé (~400k lignes).
+# vroom_write_() segfault de façon reproductible sur ce fichier (bug vroom/readr,
+# non encore signalé côté mainteneurs). Contournement : writeLines() (base R)
+# fait le même travail sans passer par vroom.
+RUN mkdir -p /tmp/geoflow-src && cd /tmp/geoflow-src \
+ && curl -sO https://cran.r-project.org/src/contrib/Archive/geoflow/geoflow_1.3.0.tar.gz \
+ && tar xzf geoflow_1.3.0.tar.gz \
+ && sed -i "s/readr::write_lines(readLines(gz_file, warn = F), file = trg_file)/writeLines(readLines(gz_file, warn = F), con = trg_file)/" geoflow/R/geoflow_vocabulary.R \
+ && grep -q "writeLines(readLines(gz_file" geoflow/R/geoflow_vocabulary.R \
+ && R CMD INSTALL --library=${PROJECT_DIR}/renv/library/R-4.2/x86_64-pc-linux-gnu geoflow \
+ && cd / && rm -rf /tmp/geoflow-src
+ 
 
 # --- Patchs geoflow --------------------------------
 COPY compose/patches/patch-geometa.R \
@@ -102,12 +115,17 @@ ENV FDI_MAPPINGS_REPO="https://github.com/fdiwg/fdi-mappings.git"
 ENV FDI_MAPPINGS_REF="c74ff137ebd28b0367172a8a73821a0d6"
 ENV FDI_MAPPINGS_DIR=${PROJECT_DIR}/data/fdi-mappings
 
+USER root
+RUN mkdir -p ${FDI_CODELISTS_DIR} ${FDI_MAPPINGS_DIR} \
+ && chown -R rstudio:rstudio /home/rstudio/geoflow-tunaatlas/data
+
 RUN git clone ${FDI_CODELISTS_REPO} ${FDI_CODELISTS_DIR} \
  && cd ${FDI_CODELISTS_DIR} && git checkout ${FDI_CODELISTS_REF} && rm -rf .git
 
 RUN git clone ${FDI_MAPPINGS_REPO} ${FDI_MAPPINGS_DIR} \
  && cd ${FDI_MAPPINGS_DIR} && git checkout ${FDI_MAPPINGS_REF} && rm -rf .git
 
+USER root
 # --- Provenance (JSON corrigé : celui de ton fichier avait des accolades en trop)
 RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
 {
@@ -130,5 +148,10 @@ RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
   }
 }
 EOF
+
+RUN chown rstudio:rstudio ${PROJECT_DIR} ${PROJECT_DIR}/RESOURCE_VERSIONS.json
+
+
+USER rstudio
 
 CMD ["Rscript", "R/launching_workflows/run_gta_2026_workflow_cli.R"]
