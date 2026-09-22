@@ -374,11 +374,18 @@ Tidying_and_mapping_data = function(action, entity, config) {
     #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
     
     mapping_file <- here::here(
-      "data",
+      "data", "fdi-mappings", "cross-term",
       "codelist_mapping_source_authority_species.csv"
     )
     
     if (!file.exists(mapping_file)) {
+      
+      dir.create(
+        dirname(mapping_file),
+        recursive = TRUE,
+        showWarnings = FALSE
+      )
+      
       utils::download.file(
         "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
         mapping_file,

@@ -34,7 +34,7 @@ process:Public domain datasets from ICCAT were collated through the RFMO website
 process:Public domain datasets from IATTC were collated through the RFMO website (www.iattc.org) and harmonized._
 process:Public domain datasets from WCPFC were collated through the RFMO website (www.wcpfc.int) and harmonized._
 process:Public domain datasets from CCSBT were collated through the RFMO website (www.ccsbt.org) and harmonized._
-process:Merging of RFMO datasets into a unified global dataset while preserving spatial resolution and removing duplicated strata in overlapping convention areas._",,"source:./data/GTA_2026/dataoutputpreharmo/nominal_catch_ccsbt_level0__bygear.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iattc_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iccat_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iotc_level0.csv,./data/GTA_2026/global_nominal_catch_codelists.csv_
+process:Merging of RFMO datasets into a unified global dataset while preserving spatial resolution and removing duplicated strata in overlapping convention areas._",,"source:./data/GTA_2026/dataoutputpreharmo/nominal_catch_ccsbt_level0__bygear.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iattc_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iccat_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iotc_level0.csv,./data/global_nominal_catch_codelists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_

@@ -29,7 +29,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/EF_RAW.csv,./data/GTA_2026/iotc_effort_code_lists.csv_
+source:./data/GTA_2026/EF_RAW.csv,./data/iotc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -76,7 +76,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/t2ce_noSchool.csv,./data/GTA_2026/iccat_effort_code_lists.csv_
+source:./data/GTA_2026/t2ce_noSchool.csv,./data/iccat_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -99,7 +99,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/t2ce_ETRO-PS1991-2024_bySchool_v1.xlsx,./data/GTA_2026/iccat_effort_code_lists.csv_
+source:./data/GTA_2026/t2ce_ETRO-PS1991-2024_bySchool_v1.xlsx,./data/iccat_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -136,7 +136,7 @@ process:Data conversion[""The source MS Excel (xlsx) dataset was manually conver
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/CEData_Longline.xlsx,./data/GTA_2026/ccsbt_effort_code_lists.csv_
+source:./data/GTA_2026/CEData_Longline.xlsx,./data/ccsbt_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -173,7 +173,7 @@ process:Data conversion[""The source MS Excel (xlsx) dataset was manually conver
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/CEData_Surface.xlsx,./data/GTA_2026/ccsbt_effort_code_lists.csv_
+source:./data/GTA_2026/CEData_Surface.xlsx,./data/ccsbt_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -200,7 +200,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/PublicLLTunaBillfishMt.csv,./data/GTA_2026/iattc_effort_code_lists.csv_
+source:./data/GTA_2026/PublicLLTunaBillfishMt.csv,./data/iattc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -228,7 +228,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/PublicLLSharkMt.csv,./data/GTA_2026/iattc_effort_code_lists.csv_
+source:./data/GTA_2026/PublicLLSharkMt.csv,./data/iattc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -263,7 +263,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/PublicPSTunaFlag.csv,./data/GTA_2026/iattc_effort_code_lists.csv_
+source:./data/GTA_2026/PublicPSTunaFlag.csv,./data/iattc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -298,7 +298,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/PublicPSBillfishFlag.csv,./data/GTA_2026/iattc_effort_code_lists.csv_
+source:./data/GTA_2026/PublicPSBillfishFlag.csv,./data/iattc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -333,7 +333,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/PublicPSSharkFlag.csv,./data/GTA_2026/iattc_effort_code_lists.csv_
+source:./data/GTA_2026/PublicPSSharkFlag.csv,./data/iattc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -363,7 +363,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/WCPFC_S_PUBLIC_BY_YY_MM.csv,./data/GTA_2026/wcpfc_effort_code_lists.csv_
+source:./data/GTA_2026/WCPFC_S_PUBLIC_BY_YY_MM.csv,./data/wcpfc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -392,7 +392,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/WCPFC_G_PUBLIC_BY_YR_MON.csv,./data/GTA_2026/wcpfc_effort_code_lists.csv_
+source:./data/GTA_2026/WCPFC_G_PUBLIC_BY_YR_MON.csv,./data/wcpfc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -420,7 +420,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/WCPFC_P_PUBLIC_BY_YY_MM.csv,./data/GTA_2026/wcpfc_effort_code_lists.csv_
+source:./data/GTA_2026/WCPFC_P_PUBLIC_BY_YY_MM.csv,./data/wcpfc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
@@ -449,7 +449,7 @@ process:Data download[""The dataset was downloaded on the %dates:key:access:valu
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
 process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
-source:./data/GTA_2026/WCPFC_L_PUBLIC_BY_YY_MM_FLAG.csv,./data/GTA_2026/wcpfc_effort_code_lists.csv_
+source:./data/GTA_2026/WCPFC_L_PUBLIC_BY_YY_MM_FLAG.csv,./data/wcpfc_effort_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
