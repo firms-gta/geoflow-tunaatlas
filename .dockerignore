@@ -18,8 +18,12 @@ Markdown/
 report/
 _book/
 _bookdown_files/
+runtime/
 
 *.tar.gz
 *.gpkg
 level0.csv
 *.env
+
+data/fdi-codelists/
+data/fdi-mappings/
