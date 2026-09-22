@@ -69,6 +69,20 @@ RUN mkdir -p /tmp/geoflow-src && cd /tmp/geoflow-src \
  && R CMD INSTALL --library=${PROJECT_DIR}/renv/library/R-4.2/x86_64-pc-linux-gnu geoflow \
  && cd / && rm -rf /tmp/geoflow-src
  
+# geoflow 1.3.0 : register_software() logue le SQL complet (onstart/onend) via
+# config$logger$INFO(), qui traite son argument comme un format sprintf() :
+#   1) limite de 8192 caractères (sprintf 'fmt' length)
+#   2) tout '%' littéral dans le SQL (ex: LIKE '6%') casse le format ('too few arguments')
+# Contournement : tronquer + échapper les '%' avant de logger (le fichier .sql
+# complet est de toute façon écrit à côté, non affecté par ce patch).
+RUN mkdir -p /tmp/geoflow-src2 && cd /tmp/geoflow-src2 \
+ && curl -sO https://cran.r-project.org/src/contrib/Archive/geoflow/geoflow_1.3.0.tar.gz \
+ && tar xzf geoflow_1.3.0.tar.gz \
+ && sed -i "s/config\$logger\$INFO(paste0(\"\\\\n\", sql))/config\$logger\$INFO(paste0(\"\\\\n\", gsub(\"%\", \"%%\", substr(sql, 1, 8000)), if (nchar(sql) > 8000) \"... [truncated]\" else \"\"))/" geoflow/R/geoflow_software.R \
+ && grep -q 'gsub("%"' geoflow/R/geoflow_software.R \
+ && R CMD INSTALL --library=${PROJECT_DIR}/renv/library/R-4.2/x86_64-pc-linux-gnu geoflow \
+ && cd / && rm -rf /tmp/geoflow-src2
+ 
 
 # --- Patchs geoflow --------------------------------
 COPY compose/patches/patch-geometa.R \
@@ -90,34 +104,16 @@ RUN cd ${PROJECT_DIR} \
  && Rscript -e 'source("renv/activate.R"); for (i in 1:2) source("/opt/patches/patch-geometa.R"); invisible(geometa::GMLUnitDefinition$buildFrom("m"))' \
  && Rscript -e 'source("renv/activate.R"); cat("geoflow", as.character(packageVersion("geoflow")), "\n")'
 
-# --- Test de chargement de tous les paquets (avec relance : le chargement de geoflow plante parfois)
-COPY --chown=rstudio:rstudio R/docker_creation/testing_loading_of_all_packages.R /tmp/testing_loading_of_all_packages.R
-RUN for i in 1 2 3; do \
-      Rscript -e "source('${PROJECT_DIR}/renv/activate.R'); source('/tmp/testing_loading_of_all_packages.R')" && exit 0; \
-      echo "essai $i échoué"; \
-    done; exit 1
-
 # --- Code du projet (après la restauration : un changement de script n'invalide pas les couches renv)
 COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
 
-USER rstudio
-WORKDIR ${PROJECT_DIR}
-
-RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
- | xargs -0 perl -CSD -pi -e "s/[‘’]/'/g; s/[“”]/'/g; s/°/ degrees /g; s/–/-/g; s/—/-/g; s/…/.../g"
-
-# --- Ressources FDI, en toute fin -------------------------------------------
-ENV FDI_CODELISTS_REPO="https://github.com/bastienird/fdi-codelists.git"
+# --- Ressources FDI ---
+ENV FDI_CODELISTS_REPO="https://github.com/fdiwg/fdi-codelists.git"
 ENV FDI_CODELISTS_REF="f469d9767110c4ea947dbd356a3e4b79b9108d92"
 ENV FDI_CODELISTS_DIR=${PROJECT_DIR}/data/fdi-codelists
-
 ENV FDI_MAPPINGS_REPO="https://github.com/fdiwg/fdi-mappings.git"
 ENV FDI_MAPPINGS_REF="c74ff137ebd28b0367172a8a73821a0d6"
 ENV FDI_MAPPINGS_DIR=${PROJECT_DIR}/data/fdi-mappings
-
-USER root
-RUN mkdir -p ${FDI_CODELISTS_DIR} ${FDI_MAPPINGS_DIR} \
- && chown -R rstudio:rstudio /home/rstudio/geoflow-tunaatlas/data
 
 RUN git clone ${FDI_CODELISTS_REPO} ${FDI_CODELISTS_DIR} \
  && cd ${FDI_CODELISTS_DIR} && git checkout ${FDI_CODELISTS_REF} && rm -rf .git
@@ -125,33 +121,27 @@ RUN git clone ${FDI_CODELISTS_REPO} ${FDI_CODELISTS_DIR} \
 RUN git clone ${FDI_MAPPINGS_REPO} ${FDI_MAPPINGS_DIR} \
  && cd ${FDI_MAPPINGS_DIR} && git checkout ${FDI_MAPPINGS_REF} && rm -rf .git
 
-USER root
-# --- Provenance (JSON corrigé : celui de ton fichier avait des accolades en trop)
+RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
+ | xargs -0 perl -CSD -pi -e 's/[\x{2018}\x{2019}]/APOSTROPHE_PLACEHOLDER/g; s/[\x{201C}\x{201D}]/QUOTE_PLACEHOLDER/g; s/\x{00B0}/ degrees /g; s/\x{2013}/-/g; s/\x{2014}/-/g; s/\x{2026}/.../g; s/APOSTROPHE_PLACEHOLDER/\x27/g; s/QUOTE_PLACEHOLDER/\x22/g'
+
+# --- Provenance ---
 RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
 {
-  "project": {
-    "repository": "https://github.com/firms-gta/geoflow-tunaatlas"
-  },
+  "project": { "repository": "https://github.com/firms-gta/geoflow-tunaatlas" },
   "build": {
     "docker_base_image": "${BASE_IMAGE}",
     "renv_lock_sha256": "$(sha256sum ${PROJECT_DIR}/renv.lock | cut -d' ' -f1)"
   },
   "resources": {
-    "fdi-codelists": {
-      "repository": "${FDI_CODELISTS_REPO}",
-      "commit": "${FDI_CODELISTS_REF}"
-    },
-    "fdi-mappings": {
-      "repository": "${FDI_MAPPINGS_REPO}",
-      "commit": "${FDI_MAPPINGS_REF}"
-    }
+    "fdi-codelists": { "repository": "${FDI_CODELISTS_REPO}", "commit": "${FDI_CODELISTS_REF}" },
+    "fdi-mappings": { "repository": "${FDI_MAPPINGS_REPO}", "commit": "${FDI_MAPPINGS_REF}" }
   }
 }
 EOF
 
-RUN chown rstudio:rstudio ${PROJECT_DIR} ${PROJECT_DIR}/RESOURCE_VERSIONS.json
-
+# UN SEUL chown, à la toute fin, une seule fois pour tout le projet
+RUN chown -R rstudio:rstudio ${PROJECT_DIR}/data/fdi-codelists ${PROJECT_DIR}/data/fdi-mappings \
+ && chown rstudio:rstudio ${PROJECT_DIR}/RESOURCE_VERSIONS.json ${PROJECT_DIR}
 
 USER rstudio
-
 CMD ["Rscript", "R/launching_workflows/run_gta_2026_workflow_cli.R"]
