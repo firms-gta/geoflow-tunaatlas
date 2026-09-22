@@ -1,24 +1,8 @@
-#' Cache FDI Mapping Files Locally
-#'
-#' This function downloads the FDI mapping index and all mapping CSV files
-#' referenced by this index into a local cache directory. It is intended to be
-#' run once before offline execution, for example during a Docker image build.
-#'
-#' @param mapping_cache_dir Local directory where mapping files are cached.
-#'        Defaults to the `FDI_MAPPINGS_CACHE_DIR` environment variable, or
-#'        `"data/fdi-mappings-cache"` if the variable is not set.
-#' @param fdi_mappings_ref Git reference used for the `fdiwg/fdi-mappings`
-#'        repository. Can be `"main"`, a branch name, a tag, or a commit hash.
-#' @param mapping_dataset URL of the global mapping index. If `NULL`, the URL
-#'        is built from `fdi_mappings_ref`.
-#'
-#' @return Invisibly returns the mapping index data frame.
-#'
-#' @export
-
 cache_fdi_mappings <- function(
-    mapping_cache_dir = Sys.getenv("FDI_MAPPINGS_CACHE_DIR", "data/fdi-mappings-cache"),
+    mapping_cache_dir = Sys.getenv("FDI_MAPPINGS_CACHE_DIR", "data/fdi-mappings"),
+    codelist_cache_dir = Sys.getenv("FDI_CODELISTS_CACHE_DIR", "data/fdi-codelists"),
     fdi_mappings_ref = "c74ff137ebd28b0367172a8a73821a0d6dada65f",
+    fdi_codelists_ref = "f469d9767110c4ea947dbd356a3e4b79b9108d92",
     mapping_dataset = NULL
 ) {
   source(here::here("R/tunaatlas_scripts/pre-harmonization/get_cached_file.R"))
@@ -93,7 +77,7 @@ cache_fdi_mappings <- function(
   # Cache additional FDI / CWP / GTA codelists required by enrich_dataset_if_needed()
   # -------------------------------------------------------------------------
   
-  data_cache_dir <- here::here("data")
+  data_cache_dir <- here::here(codelist_cache_dir)
   dir.create(data_cache_dir, recursive = TRUE, showWarnings = FALSE)
   
   cache_raw_file <- function(url, local_path, mode = "wb") {
@@ -109,79 +93,54 @@ cache_fdi_mappings <- function(
     invisible(local_path)
   }
   
+  codelists_base_url <- paste0(
+    "https://raw.githubusercontent.com/fdiwg/fdi-codelists/",
+    fdi_codelists_ref, "/"
+  )
+  
   codelist_files <- list(
-    # Species labels
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv",
-      local = here::here("data/cl_asfis_species.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/cl_asfis_species.csv"),
+         local = here::here(codelist_cache_dir, "cl_asfis_species.csv")),
     
-    # Measurement processing level
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_processing_level.csv",
-      local = here::here("data/cl_measurement_processing_level.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/fdi/cl_measurement_processing_level.csv"),
+         local = here::here(codelist_cache_dir, "cl_measurement_processing_level.csv")),
     
-    # Measurement
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement.csv",
-      local = here::here("data/cl_measurement.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/fdi/cl_measurement.csv"),
+         local = here::here(codelist_cache_dir, "cl_measurement.csv")),
     
-    # Fishing mode
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_mode.csv",
-      local = here::here("data/cl_fishing_mode.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_fishing_mode.csv"),
+         local = here::here(codelist_cache_dir, "cl_fishing_mode.csv")),
     
-    # Measurement type labels
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cwp/cl_catch_concepts.csv",
-      local = here::here("data/cl_catch_concepts.csv")
-    ),
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_types_effort.csv",
-      local = here::here("data/cl_measurement_types_effort.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/cwp/cl_catch_concepts.csv"),
+         local = here::here(codelist_cache_dir, "cl_catch_concepts.csv")),
     
-    # Gear labels
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv",
-      local = here::here("data/cl_isscfg_pilot_gear.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/fdi/cl_measurement_types_effort.csv"),
+         local = here::here(codelist_cache_dir, "cl_measurement_types_effort.csv")),
     
-    # Fishing fleet labels
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_isscfg_pilot_gear.csv"),
+         local = here::here(codelist_cache_dir, "cl_isscfg_pilot_gear.csv")),
+    
     # Important: local filename expected by enrich_dataset_if_needed() is cl_fishingfleet_firms.csv
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_fleet.csv",
-      local = here::here("data/cl_fishingfleet_firms.csv")
-    ),
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_fishing_fleet.csv"),
+         local = here::here(codelist_cache_dir, "cl_fishingfleet_firms.csv")),
     
-    # Measurement unit labels
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_effortunit_wcpfc.csv",
-      local = here::here("data/cl_effortunit_wcpfc.csv")
-    ),
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_effortunit_ccsbt.csv",
-      local = here::here("data/cl_effortunit_ccsbt.csv")
-    ),
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_effortunit_iattc.csv",
-      local = here::here("data/cl_effortunit_iattc.csv")
-    ),
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_effortunit_iccat.csv",
-      local = here::here("data/cl_effortunit_iccat.csv")
-    ),
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_effortunit_iotc.csv",
-      local = here::here("data/cl_effortunit_iotc.csv")
-    ),
-    list(
-      url = "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_catchunit_rfmos.csv",
-      local = here::here("data/cl_catchunit_rfmos.csv")
-    )
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_effortunit_wcpfc.csv"),
+         local = here::here(codelist_cache_dir, "cl_effortunit_wcpfc.csv")),
+    
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_effortunit_ccsbt.csv"),
+         local = here::here(codelist_cache_dir, "cl_effortunit_ccsbt.csv")),
+    
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_effortunit_iattc.csv"),
+         local = here::here(codelist_cache_dir, "cl_effortunit_iattc.csv")),
+    
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_effortunit_iccat.csv"),
+         local = here::here(codelist_cache_dir, "cl_effortunit_iccat.csv")),
+    
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_effortunit_iotc.csv"),
+         local = here::here(codelist_cache_dir, "cl_effortunit_iotc.csv")),
+    
+    list(url = paste0(codelists_base_url, "global/firms/gta/cl_catchunit_rfmos.csv"),
+         local = here::here(codelist_cache_dir, "cl_catchunit_rfmos.csv"))
   )
   
   for (x in codelist_files) {
@@ -189,15 +148,15 @@ cache_fdi_mappings <- function(
   }
   
   # CWP grid
-  cwp_grid_file <- here::here("data/cl_areal_grid.csv")
+  cwp_grid_file <- here::here(codelist_cache_dir, "cl_areal_grid.csv")
   if (!file.exists(cwp_grid_file)) {
-    zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
-    zip_path <- here::here("data/cwp_grid.zip")
+    zip_url <- paste0(codelists_base_url, "global/cwp/cl_areal_grid.zip")
+    zip_path <- here::here(codelist_cache_dir, "cwp_grid.zip")
     
     cache_raw_file(zip_url, zip_path)
     
-    message("Unzipping CWP grid into data/")
-    utils::unzip(zip_path, exdir = here::here("data"))
+    message("Unzipping CWP grid into ", codelist_cache_dir)
+    utils::unzip(zip_path, exdir = here::here(codelist_cache_dir))
   }
   
   cache_raw_file(
@@ -206,10 +165,7 @@ cache_fdi_mappings <- function(
       fdi_mappings_ref,
       "/cross-term/codelist_mapping_source_authority_species.csv"
     ),
-    local = here::here(
-      "data",
-      "codelist_mapping_source_authority_species.csv"
-    )
+    local = here::here(codelist_cache_dir, "codelist_mapping_source_authority_species.csv")
   )
   
   invisible(mapping_index)
