@@ -41,7 +41,7 @@ map_codelists_no_DB <- function(
     mapping_keep_src_code = FALSE,
     summary_mapping = FALSE,
     source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"),
-    mapping_cache_dir = Sys.getenv("FDI_MAPPINGS_CACHE_DIR", "data/fdi-mappings-cache"),
+    mapping_cache_dir = Sys.getenv("FDI_MAPPINGS_CACHE_DIR", here::here("data/fdi-mappings")),
     allow_download = TRUE,
     fdi_mappings_ref = "main"
 ) {
