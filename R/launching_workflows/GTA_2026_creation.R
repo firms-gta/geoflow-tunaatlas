@@ -1017,6 +1017,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       )
     }
     source(here::here("R/tunaatlas_actions/ensure_geoserver_ready.R"))
+    source(here::here("compose/patches/patch-zen4r-upload-error.R"))
     ensure_geoserver_ready()
     tunaatlas_services <- execute_workflow_maybe_upload(
       file = here::here("config/tunaatlas_qa_services.json"),
