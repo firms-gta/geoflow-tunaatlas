@@ -146,14 +146,6 @@ remove_dbi_software <- function(file) {
 # connection is valid. This prevents accidental upload to another database or
 # failed upload attempts when the local environment variables are incomplete.
 should_upload_to_db <- function(config) {
-  expected_context <- identical(Sys.getenv("DB_DRV"), "PostgreSQL") &&
-    identical(Sys.getenv("DB_PORT"), "5432") &&
-    identical(Sys.getenv("DB_HOST"), "db-tunaatlas.d4science.org") &&
-    Sys.getenv("DB_NAME") %in% c("tunaatlas_sandbox", "tunaatlas") &&
-    identical(Sys.getenv("DB_USER"), "tunaatlas_u")
-  
-  if (!expected_context) return(FALSE)
-  
   con <- config$software$output$dbi
   if (is.null(con)) return(FALSE)
   
