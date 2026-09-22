@@ -104,11 +104,8 @@ RUN cd ${PROJECT_DIR} \
  && Rscript -e 'source("renv/activate.R"); for (i in 1:2) source("/opt/patches/patch-geometa.R"); invisible(geometa::GMLUnitDefinition$buildFrom("m"))' \
  && Rscript -e 'source("renv/activate.R"); cat("geoflow", as.character(packageVersion("geoflow")), "\n")'
 
-# --- Code du projet (après la restauration : un changement de script n'invalide pas les couches renv)
-COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
-
 # --- Ressources FDI ---
-ENV FDI_CODELISTS_REPO="https://github.com/fdiwg/fdi-codelists.git"
+ENV FDI_CODELISTS_REPO="https://github.com/bastienird/fdi-codelists.git"
 ENV FDI_CODELISTS_REF="f469d9767110c4ea947dbd356a3e4b79b9108d92"
 ENV FDI_CODELISTS_DIR=${PROJECT_DIR}/data/fdi-codelists
 ENV FDI_MAPPINGS_REPO="https://github.com/fdiwg/fdi-mappings.git"
@@ -120,6 +117,9 @@ RUN git clone ${FDI_CODELISTS_REPO} ${FDI_CODELISTS_DIR} \
 
 RUN git clone ${FDI_MAPPINGS_REPO} ${FDI_MAPPINGS_DIR} \
  && cd ${FDI_MAPPINGS_DIR} && git checkout ${FDI_MAPPINGS_REF} && rm -rf .git
+ 
+# --- Code du projet (après la restauration : un changement de script n'invalide pas les couches renv)
+COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
 
 RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
  | xargs -0 perl -CSD -pi -e 's/[\x{2018}\x{2019}]/APOSTROPHE_PLACEHOLDER/g; s/[\x{201C}\x{201D}]/QUOTE_PLACEHOLDER/g; s/\x{00B0}/ degrees /g; s/\x{2013}/-/g; s/\x{2014}/-/g; s/\x{2026}/.../g; s/APOSTROPHE_PLACEHOLDER/\x27/g; s/QUOTE_PLACEHOLDER/\x22/g'
