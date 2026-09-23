@@ -1,11 +1,14 @@
 name: gta
 
-x-gta-env: &gta-env
+x-db-env: &db-env
   DB_HOST: postgres
   DB_PORT: 5432
   DB_NAME: gta
   DB_USER: gta
   DB_PASSWORD: gta
+
+x-gta-env: &gta-env
+  <<: *db-env
   GEOSERVER_URL: http://geoserver:8080/geoserver
   GEOSERVER_USER: admin
   GEOSERVER_PASSWORD: geoserver
@@ -29,7 +32,6 @@ x-gta-volumes: &gta-volumes
   - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env
 
 services:
-
   workflow:
     build:
       context: ..
@@ -38,9 +40,12 @@ services:
     environment: *gta-env
     volumes: *gta-volumes
     depends_on:
-      - postgres
-      - geoserver
-      - geonetwork
+      postgres:
+        condition: service_healthy
+      geoserver:
+        condition: service_healthy
+      geonetwork:
+        condition: service_healthy
 
   rstudio:
     build:
@@ -81,6 +86,23 @@ services:
       - ./init-db:/docker-entrypoint-initdb.d
     ports:
       - "5430:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gta -d gta"]
+      interval: 5s
+      retries: 20
+
+  shiny:
+    image: ghcr.io/firms-gta/tunaatlas_pie_map_shiny:${SHINY_TAG:-latest}
+    environment:
+      <<: *db-env
+      DB_USER: gta_reader        
+      DB_PASSWORD: ${SHINY_DB_PASSWORD:-gta_reader}
+    ports:
+      - "127.0.0.1:3838:3838"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: ["app"]
 
   geoserver:
     image: docker.osgeo.org/geoserver:2.28.5
@@ -88,6 +110,11 @@ services:
       - "8080:8080"
     volumes:
       - geoserver_data:/opt/geoserver_data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/geoserver/web/ || exit 1"]
+      interval: 10s
+      retries: 30
+      start_period: 30s
 
   elasticsearch:
     image: elasticsearch:8.19.3
@@ -129,6 +156,11 @@ services:
       - geonetwork_data:/catalogue-data
     ports:
       - "8081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -H 'Accept: application/json' http://localhost:8080/geonetwork/srv/api/site || exit 1"]
+      interval: 10s
+      retries: 30
+      start_period: 60s
     depends_on:
       postgres:
         condition: service_started
