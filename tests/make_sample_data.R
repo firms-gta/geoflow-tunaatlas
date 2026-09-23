@@ -26,9 +26,14 @@ head_file <- function(f, out) {
 
 files <- list.files(src, recursive = FALSE, full.names = TRUE)
 for (f in files) {
-  out <- file.path(dst, substring(f, nchar(src) + 2))
-  dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
-  head_file(f, out)
+  out <- file.path(dst, basename(f))
+  if (dir.exists(f)) {
+    dir.create(out, recursive = TRUE, showWarnings = FALSE)   # dossier vide, sans contenu, necessite de relancer workflow depuis rawdata
+    file.create(file.path(out, ".gitkeep"))
+  } else {
+    dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
+    head_file(f, out)
+  }
 }
 
 message("Taille totale : ",

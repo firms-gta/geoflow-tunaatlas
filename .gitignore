@@ -29,3 +29,9 @@ iattc_analysis
 Analysis_markdown/*.pdf
 Analysis_markdown/Figures/
 *.qsAnalysis_markdown/
+
+tests/sample_data/$*code_lists*
+tests/sample_data/dataoutputpreharmo/*
+tests/sample_data/dataoutputGTA/*
+!tests/sample_data/dataoutputpreharmo/.gitkeep
+!tests/sample_data/dataoutputGTA/.gitkeep
