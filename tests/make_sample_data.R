@@ -1,29 +1,42 @@
 # tests/make_sample_data.R
 # Usage : Rscript tests/make_sample_data.R [n_lignes]
 args <- commandArgs(trailingOnly = TRUE)
-n    <- if (length(args)) as.integer(args[1]) else 5
+n    <- if (length(args)) as.integer(args[1]) else 20 
 
 src <-  here::here("runtime/extracted/all_raw_data_GTA")
 dst <- here::here("tests/sample_data")
 
 unlink(dst, recursive = TRUE)
 
+set.seed(42)  #: même échantillon à chaque exécution
+
+pick <- function(x_len, n) sort(sample(seq_len(x_len), min(n, x_len)))
+
 head_file <- function(f, out) {
   ext <- tolower(tools::file_ext(f))
+  
   if (ext %in% c("csv", "txt", "tsv")) {
-    # lecture brute : garde séparateur, encodage et guillemets tels quels
-    here::here(writeLines(readLines(f, n = n + 1, warn = FALSE, encoding = "bytes"), out, useBytes = TRUE))
-  } else if (ext %in% c("xlsx", "xls")) {
+    lines  <- readLines(f, warn = FALSE, encoding = "bytes")
+    header <- lines[1]
+    body   <- lines[-1]
+    body   <- body[trimws(body) != ""]
+    writeLines(c(header, body[pick(length(body), n)]), out, useBytes = TRUE)
+    
+  } else if (ext == "xlsx") {
     sheets <- readxl::excel_sheets(f)
-    l <- lapply(sheets, function(s) readxl::read_excel(f, sheet = s, n_max = n))
+    l <- lapply(sheets, function(s) {
+      d <- readxl::read_excel(f, sheet = s)
+      d <- d[rowSums(!is.na(d)) > 0, ]
+      d[pick(nrow(d), n), ]
+    })
     names(l) <- sheets
-    writexl::write_xlsx(l, sub("\\.xls$", ".xlsx", out))
+    writexl::write_xlsx(l, out)
+    
   } else {
-    message("Format non géré, copié tel quel : ", f)
+    message("Copié tel quel : ", f)
     file.copy(f, out)
   }
 }
-
 files <- list.files(src, recursive = FALSE, full.names = TRUE)
 for (f in files) {
   out <- file.path(dst, basename(f))
@@ -35,6 +48,5 @@ for (f in files) {
     head_file(f, out)
   }
 }
-
 message("Taille totale : ",
         round(sum(file.size(list.files(dst, recursive = TRUE, full.names = TRUE))) / 1e6, 2), " Mo")

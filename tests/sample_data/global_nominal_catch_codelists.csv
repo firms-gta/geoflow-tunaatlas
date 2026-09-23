@@ -4,3 +4,6 @@ source_authority,source_authority
 species,species_asfis
 gear_type,isscfg_revision_1
 fishing_mode,schooltype_rfmos
+fishing_fleet,fishingfleet_firms
+measurement_type,catchtype_tunaatlas
+measurement_unit,catchunit_rfmos
