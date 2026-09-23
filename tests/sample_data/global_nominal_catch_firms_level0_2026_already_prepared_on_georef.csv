@@ -1,0 +1,6 @@
+source_authority,species,gear_type,fishing_mode,fishing_fleet,time_start,time_end,geographic_identifier,measurement,measurement_type,measurement_unit,measurement_processing_level,measurement_value,year,month,quarter,group_species_iattc_sharks,group_gears
+CCSBT,SBF,01.1,UNK,AUS,1975-01-01,1975-12-31,IOTC,catch,NC,TRUE,unknown,2667.23704076498,1975,12,4,SBF,01.1
+CCSBT,SBF,01.1,UNK,AUS,1975-01-01,1975-12-31,WCPFC,catch,NC,TRUE,unknown,6165.76295923505,1975,12,4,SBF,01.1
+CCSBT,SBF,99.9,UNK,AUS,1976-01-01,1976-12-31,IOTC,catch,NC,TRUE,unknown,3037.3046225863,1976,12,4,SBF,99.9
+CCSBT,SBF,99.9,UNK,AUS,1976-01-01,1976-12-31,WCPFC,catch,NC,TRUE,unknown,117.724985371562,1976,12,4,SBF,99.9
+CCSBT,SBF,99.9,UNK,AUS,1977-01-01,1977-12-31,IOTC,catch,NC,TRUE,unknown,932.203019550546,1977,12,4,SBF,99.9

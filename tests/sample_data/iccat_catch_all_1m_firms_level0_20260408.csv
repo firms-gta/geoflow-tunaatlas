@@ -1,0 +1,6 @@
+"fishing_fleet","time_start","time_end","geographic_identifier","gear_type","fishing_mode","species","measurement","measurement_type","measurement_value","measurement_unit","measurement_status","source_authority"
+"AGO",1978-01-01,1978-01-31,"6215010","09.1","UNK","BON","catch","RC",1,"t","raised","ICCAT"
+"AGO",1978-01-01,1978-01-31,"6210010","09.1","UNK","LTA","catch","RC",1,"t","raised","ICCAT"
+"AGO",1978-01-01,1978-01-31,"6210010","09.1","UNK","SKJ","catch","RC",436,"t","raised","ICCAT"
+"AGO",1978-01-01,1978-01-31,"6215010","09.1","UNK","SKJ","catch","RC",348,"t","raised","ICCAT"
+"AGO",1978-01-01,1978-01-31,"6210010","09.1","UNK","YFT","catch","RC",824,"t","raised","ICCAT"

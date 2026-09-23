@@ -1,0 +1,6 @@
+"fishing_fleet","time_start","time_end","geographic_identifier","gear_type","fishing_mode","species","measurement","measurement_type","measurement_value","measurement_unit","measurement_obs","source_authority"
+"ARE","1950-01-01","1950-12-31","IOTC_WEST","07.9","UNK","COM","catch","NL",603.475952148438,"t","unknown","IOTC"
+"ARE","1950-01-01","1950-12-31","IOTC_WEST","07.9","UNK","LOT","catch","NL",517.271179199219,"t","unknown","IOTC"
+"ARE","1950-01-01","1950-12-31","IOTC_WEST","09.5","UNK","COM","catch","NL",96.5240478515625,"t","unknown","IOTC"
+"ARE","1950-01-01","1950-12-31","IOTC_WEST","09.5","UNK","LOT","catch","NL",82.7288208007812,"t","unknown","IOTC"
+"ARE","1951-01-01","1951-12-31","IOTC_WEST","07.9","UNK","COM","catch","NL",603.475952148438,"t","unknown","IOTC"

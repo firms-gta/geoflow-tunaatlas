@@ -1,0 +1,6 @@
+species,gear_type,source_authority,geographic_identifier,conversion_factor,time_start,time_end,unit,unit_target
+SBF,09.1,CCSBT,1,0.06,1956-01-01,1956-12-31,NO,MT
+SBF,09.1,CCSBT,1,0.06,1957-01-01,1957-12-31,NO,MT
+SBF,09.1,CCSBT,1,0.06,1958-01-01,1958-12-31,NO,MT
+SBF,09.1,CCSBT,1,0.06,1959-01-01,1959-12-31,NO,MT
+SBF,09.1,CCSBT,1,0.06,1960-01-01,1960-12-31,NO,MT

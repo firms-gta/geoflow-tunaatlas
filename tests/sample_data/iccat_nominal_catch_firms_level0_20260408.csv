@@ -1,0 +1,6 @@
+"fishing_fleet","time_start","time_end","geographic_identifier","gear_type","fishing_mode","species","measurement","measurement_type","measurement_value","measurement_unit","measurement_status","source_authority"
+"ABW",1974-01-01,1974-12-31,"AT-NW","99.9","UNK","SFA","catch","NC",10,"t","unknown","ICCAT"
+"ABW",1975-01-01,1975-12-31,"AT-NW","99.9","UNK","SFA","catch","NC",10,"t","unknown","ICCAT"
+"ABW",1976-01-01,1976-12-31,"AT-NW","99.9","UNK","SFA","catch","NC",20,"t","unknown","ICCAT"
+"ABW",1977-01-01,1977-12-31,"AT-NW","99.9","UNK","SFA","catch","NC",20,"t","unknown","ICCAT"
+"ABW",1978-01-01,1978-12-31,"AT-NW","99.9","UNK","SFA","catch","NC",30,"t","unknown","ICCAT"

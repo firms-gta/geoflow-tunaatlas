@@ -1,0 +1,6 @@
+FeatureType,MemberCode,MemberName,MemberType,MinOccurs,MaxOccurs,Definition,DefinitionSource,MeasurementUnit,RegisterId,RegisterScript
+catch,area,Area,attribute,0,Inf,"Spatial area (zone) where the fact has taken place. The data in Sardara are mainly defined on the following areas:
+- Nominal catch are mostly defined on the areas of competence of the RFMOs. For some RFMOs, the spatial stratification can be thinner: IOTC gives nominal catch at the FAO areas scale and ICCAT gives it at the sampling area scale
+- Georeferenced catch and effort and catch-at-size are mostly defined on 1° or 5° square resolution. In some cases irregular areas are also used (e.g. in IOTC). This may happen when the reporting country/institution does not provide the data at 1°/5° resolution",,,,
+catch,geographic_identifier,Geographic identifier,attribute,0,Inf,Unique identifier of the spatial area (zone) where the fact has taken place.,,,,
+catch,time,Time,attribute,0,Inf,"Dating of the fact. In Sardara, the dating is provided as two columns: time_start gives the first date of availability of the measure (included) and time_end gives the last date of availability of the measure (not included). The data in Sardara are mainly defined over the following time steps:

@@ -1,0 +1,6 @@
+source_authority,fishing_fleet,time_start,time_end,geographic_identifier,gear_type,species,fishing_mode,measurement,measurement_type,measurement_unit,measurement_processing_level,measurement_value
+ICCAT,ABW,1970-01-01,1970-12-31,AT-NW,99.9,WAH,UNK,catch,NC,TRUE,unknown,100
+ICCAT,ABW,1971-01-01,1971-12-31,AT-NW,99.9,WAH,UNK,catch,NC,TRUE,unknown,100
+ICCAT,ABW,1972-01-01,1972-12-31,AT-NW,99.9,WAH,UNK,catch,NC,TRUE,unknown,100
+ICCAT,ABW,1973-01-01,1973-12-31,AT-NW,99.9,WAH,UNK,catch,NC,TRUE,unknown,100
+ICCAT,ABW,1974-01-01,1974-12-31,AT-NW,99.9,SAI,UNK,catch,NC,TRUE,unknown,10

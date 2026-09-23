@@ -1,0 +1,6 @@
+"fishing_fleet","time_start","time_end","geographic_identifier","gear_type","fishing_mode","species","measurement","measurement_type","measurement_value","measurement_unit","measurement_obs","source_authority"
+"AUS","1992-02-01","1992-02-29","6230130","01.1","FS","ALB","catch","NC",1,"t","raised","IOTC"
+"AUS","1992-02-01","1992-02-29","6230130","01.1","FS","SKJ","catch","NC",192,"t","raised","IOTC"
+"AUS","1992-02-01","1992-02-29","6230130","09.2","UNK","ALB","catch","NC",3.3,"t","raised","IOTC"
+"AUS","1992-02-01","1992-02-29","6235140","09.32","UNK","YFT","catch","NC",3,"no","raised","IOTC"
+"AUS","1992-02-01","1992-02-29","6235140","09.32","UNK","YFT","catch","NC",0.055,"t","raised","IOTC"
