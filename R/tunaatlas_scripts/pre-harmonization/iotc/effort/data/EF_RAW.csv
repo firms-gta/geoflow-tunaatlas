@@ -1,11 +1,21 @@
-YEAR,QUARTER,MONTH_START,MONTH_END,FISHING_GROUND_CODE,FISHING_GROUND,FLEET_CODE,FLEET,FISHERY_TYPE_CODE,FISHERY_TYPE,FISHERY_GROUP_CODE,FISHERY_GROUP,FISHERY_CODE,FISHERY,GEAR_CODE,GEAR,SCHOOL_TYPE_CODE,EFFORT,EFFORT_UNIT_CODE
-1996,Q1,3,3,5225113,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
-2007,Q1,2,2,5232129,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
-2001,Q1,3,3,5232129,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,4,DAYS
-1999,Q1,3,3,5232129,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,5,DAYS
-2009,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,23,DAYS
-2006,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,3,DAYS
-1996,Q1,2,2,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
-2002,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,2,DAYS
-2001,Q1,3,3,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,1,DAYS
-2003,Q1,1,1,5232130,NA,AUS,Australia,IND,Industrial fisheries,PS,Purse seine,PSOT,Purse seine | Other,PS,Purse seine,UNCL,2,DAYS
+"YEAR","QUARTER","MONTH_START","MONTH_END","FISHING_GROUND_CODE","FISHING_GROUND","FLEET_CODE","FLEET","FISHERY_TYPE_CODE","FISHERY_TYPE","FISHERY_GROUP_CODE","FISHERY_GROUP","FISHERY_CODE","FISHERY","GEAR_CODE","GEAR","SCHOOL_TYPE_CODE","EFFORT","EFFORT_UNIT_CODE"
+1999,"Q2",4,4,"5209043",NA,"EUESP","EU (Spain)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",24,"HOURS"
+1994,"Q2",6,6,"5209043",NA,"EUFRA","EU (France)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",24,"HOURS"
+1983,"Q4",12,12,"5205065",NA,"EUFRA","EU (France)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",12.4,"STDHR"
+2007,"Q2",5,5,"5205045",NA,"EUMYT","EU (France,Mayotte)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",11.9,"FHOURS"
+2009,"Q2",6,6,"5207073",NA,"EUMYT","EU (France,Mayotte)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",11.7,"STDHR"
+2010,"Q1",2,2,"5100055",NA,"SYC","Seychelles","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",14.1,"STDHR"
+2015,"Q4",12,12,"5200061",NA,"SYC","Seychelles","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",24.2,"FHOURS"
+2019,"Q4",12,12,"5207051",NA,"SYC","Seychelles","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",0.33,"FDAYS"
+1987,"Q1",3,3,"5204068",NA,"SUN","Soviet Union","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",5,"FDAYS"
+1985,"Q2",6,6,"5204047",NA,"NEIPS","NEI (other)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",13,"FHOURS"
+2008,"Q4",11,11,"5206052",NA,"NEIPS","NEI (other)","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","PS","Purse seine","UNCL",14.5,"STDHR"
+2023,"Q1",1,1,"5103065",NA,"SYC","Seychelles","IND","Industrial fisheries","PS","Purse seine","PSLS","Purse seine | LS","PS","Purse seine","LS",3,"SETS"
+2020,"Q3",7,7,"5102058",NA,"SYC","Seychelles","IND","Industrial fisheries","PS","Purse seine","PSLS","Purse seine | LS","PS","Purse seine","LS",1.02,"FDAYS"
+2022,"Q2",5,5,"5102087",NA,"LKA","Sri Lanka","IND","Industrial fisheries","PS","Purse seine","PSOT","Purse seine | Other","RNOF","Ringnet (offshore)","UNCL",1,"TRIPS"
+2024,"Q1",2,2,"5203057",NA,"SYC","Seychelles","IND","Industrial fisheries","LL","Longline","LLF","Longline | Fresh","FLL","Longline (fresh)","UNCL",33700,"HOOKS"
+2006,"Q4",12,12,"6205060",NA,"JPN","Japan","IND","Industrial fisheries","LL","Longline","LLD","Longline | Deep-freezing","LL","Longline (deep-freezing)","UNCL",18873,"HOOKS"
+2020,"Q4",10,10,"6235100",NA,"JPN","Japan","IND","Industrial fisheries","LL","Longline","LLD","Longline | Deep-freezing","LL","Longline (deep-freezing)","UNCL",107452,"HOOKS"
+2019,"Q2",5,5,"5202074",NA,"MDV","Maldives","ART","Artisanal fisheries","LI","Line","LIC","Line | Coastal longline","LLCO","Coastal longline","UNCL",18560,"HOOKS"
+2016,"Q2",5,5,"5116087",NA,"LKA","Sri Lanka","IND","Industrial fisheries","GN","Gillnet","GN","Gillnet","GIOF","Gillnet (offshore)","UNCL",7,"TRIPS"
+2023,"Q3",7,7,"5204077",NA,"LKA","Sri Lanka","IND","Industrial fisheries","GN","Gillnet","GN","Gillnet","GIOF","Gillnet (offshore)","UNCL",11,"TRIPS"
