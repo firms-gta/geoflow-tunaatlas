@@ -112,7 +112,7 @@ http:codelists[Source codelists]@https://drive.google.com/open?id=1dyK5MMqijpt7Z
 process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%. The file named ‘XLS_WCPFC.xlsx’ was retained.""]_
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
-process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/XLS_WCPFC_2025-11-27.csv,./data/XLS_WCPO_2025-11-27.csv,./data/wcpfc_nominal_catch_code_lists.csv_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/XLS_WCPFC_2025-11-27.csv,./data/GTA_2026/XLS_WCPO_2025-11-27.csv,./data/wcpfc_nominal_catch_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
