@@ -1,0 +1,141 @@
+{
+  "id": "tuna-atlas-services",
+  "profile": {
+    "project": "FIRMS Tuna Atlas",
+    "organization": "FIRMS Tuna Atlas",
+    "logos": [
+      "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+      "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+      "http://www.umr-marbec.fr/images/logo-ird-en.png"
+    ]
+  },
+  "options": {
+    "line_separator": "_\n"
+  },
+  "mode": "entity",
+  "metadata": {
+    "entities": {
+      "handler": "dbi",
+      "source": "SELECT * FROM metadata.metadata_dcmi"
+    },
+    "contacts": {}
+  },
+  "software": [
+    {
+      "id": "my-zenodo",
+      "type": "output",
+      "software_type": "zenodo",
+      "parameters": {
+        "url": "https://sandbox.zenodo.org/api",
+        "token": "{{ ZENODO_SANDBOX_TOKEN }}",
+        "logger": "INFO"
+      },
+      "properties": {
+        "clean": {
+          "run": false
+        }
+      }
+    },
+    {
+      "id": "my-geonetwork",
+      "type": "output",
+      "software_type": "geonetwork",
+      "parameters": {
+        "url": "{{GEONETWORK_URL}}",
+        "user": "{{GEONETWORK_USER}}",
+        "pwd": "{{GEONETWORK_PASSWORD}}",
+        "version": "{{GEONETWORK_VERSION}}",
+        "logger": "DEBUG"
+      }
+    },
+    {
+      "id": "my-geoserver",
+      "type": "output",
+      "software_type": "geoserver",
+      "parameters": {
+        "url": "{{GEOSERVER_URL}}",
+        "user": "{{GEOSERVER_USER}}",
+        "pwd": "{{GEOSERVER_PASSWORD}}",
+        "logger": "DEBUG"
+      },
+      "properties": {
+        "workspace": "{{GEOSERVER_WORKSPACE}}",
+        "store": "{{GEOSERVER_STORE}}"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "geometa-create-iso-19115",
+      "run": true,
+      "options": {
+        "logo": true,
+        "doi": true,
+        "doi_thumbnail": false,
+        "addfeatures": false,
+        "upload_to_db": false,
+        "upload_to_db_public": false,
+        "create_materialized_view": false,
+        "add_sql_comments": false
+      }
+    },
+    {
+      "id": "geometa-create-iso-19110",
+      "run": true,
+      "options": {
+        "exclude_attributes": [
+          "time_start",
+          "time_end",
+          "id_area",
+          "longitude",
+          "latitude"
+        ],
+        "exclude_attributes_not_in_dictionary": false,
+        "exclude_values_for_attributes": [
+          "geographic_identifier",
+          "time_start",
+          "time_end",
+          "catchtype"
+        ],
+        "extra_attributes": "aggregation_method",
+        "upload_to_db": false,
+        "upload_to_db_public": false,
+        "create_materialized_view": false,
+        "add_sql_comments": false
+      }
+    },
+    {
+      "id": "geonapi-publish-iso-19139",
+      "run": true
+    },
+    {
+      "id": "geosapi-publish-ogc-services",
+      "run": true,
+      "options": {
+        "createWorkspace": true,
+        "createStore": true,
+        "upload_to_db": false,
+        "upload_to_db_public": false,
+        "create_materialized_view": false,
+        "add_sql_comments": false
+      }
+    },
+    {
+      "id": "zen4R-deposit-record",
+      "run": false,
+      "options": {
+        "update_files": true,
+        "depositWithFiles": true,
+        "communities": "",
+        "deleteOldFiles": false,
+        "update_metadata": true,
+        "strategy": "newversion",
+        "publish": false,
+        "upload_to_db": false,
+        "upload_to_db_public": false,
+        "create_materialized_view": false,
+        "add_sql_comments": false
+      }
+    }
+  ]
+}
