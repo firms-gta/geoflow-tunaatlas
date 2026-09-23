@@ -12,7 +12,7 @@ head_file <- function(f, out) {
   ext <- tolower(tools::file_ext(f))
   if (ext %in% c("csv", "txt", "tsv")) {
     # lecture brute : garde séparateur, encodage et guillemets tels quels
-    writeLines(readLines(f, n = n + 1, warn = FALSE, encoding = "bytes"), out, useBytes = TRUE)
+    here::here(writeLines(readLines(f, n = n + 1, warn = FALSE, encoding = "bytes"), out, useBytes = TRUE))
   } else if (ext %in% c("xlsx", "xls")) {
     sheets <- readxl::excel_sheets(f)
     l <- lapply(sheets, function(s) readxl::read_excel(f, sheet = s, n_max = n))
