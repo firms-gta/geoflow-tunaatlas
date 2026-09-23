@@ -358,10 +358,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
     
   }
   
-  #Filter on species under mandate for FIRMS level 0
-  #-------------------------------------------------------------------------------------------------
-  stepLogger(level = 0, step = stepnumber, msg = "Filter on species under mandate for FIRMS level 0")
-  stepnumber = stepnumber+1
   
   # Temporary patch for ASFIS RMJ --> RMM
   if(fact == "catch"){
@@ -421,7 +417,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   # Adding measurement column for CWP standards ----------------------------
   
-  georef_dataset$measurement <- as.character(opts$fact)
+  georef_dataset$measurement <- rep(as.character(opts$fact), nrow(georef_dataset))
   
   # Final tidying -----------------------------------------------------------
   
