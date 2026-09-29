@@ -1,7 +1,8 @@
 # =============================================================================
-# docker/Dockerfile.workflow
+# compose/Dockerfile.workflow
 # Image GTA : R 4.2.3 + renv.lock restauré + geoflow patché + codelists FDI
-# Contexte de build : racine du dépôt  ->  docker build -f docker/Dockerfile.workflow .
+# Contexte de build : racine du dépôt  ->  docker build -f compose/Dockerfile.workflow .
+# Utilisée par la CI (test_whole_compose.yml) et par les deux fichiers compose.
 # =============================================================================
 
 ARG BASE_IMAGE=rocker/r-ver:4.2.3
@@ -103,6 +104,25 @@ RUN cd ${PROJECT_DIR} \
  && grep -q "size = 100L" $L/actions/zen4R_deposit_record.R \
  && Rscript -e 'source("renv/activate.R"); for (i in 1:2) source("/opt/patches/patch-geometa.R"); invisible(geometa::GMLUnitDefinition$buildFrom("m"))' \
  && Rscript -e 'source("renv/activate.R"); cat("geoflow", as.character(packageVersion("geoflow")), "\n")'
+
+# --- Patchs repris de l'ancienne image gta-workflow:geoflow-1.3.0 -----------
+# (auparavant appliqués par un Dockerfile séparé "FROM gta-workflow:2d93b5a")
+#  1. patch-geoflow-zenodo.R : upload_type = "dataset" sur le dépôt Zenodo vide
+#     (zen4R récent ne l'initialise plus). Sa 1re partie (addRelatedIdentifier)
+#     est déjà corrigée dans geoflow 1.3.0 et reste sans effet.
+#  2. Faute de frappe "PostreSQL" dans geosapi_publish_ogc_services.R : le driver
+#     DBI "PostgreSQL" n'était pas reconnu comme PostGIS et la création du
+#     datastore GeoServer faisait stop().
+#  (patch-geometa.R agit en mémoire : il est chargé à chaque session par .Rprofile)
+COPY compose/patches/patch-geoflow-zenodo.R /opt/patches/
+RUN chmod 644 /opt/patches/patch-geoflow-zenodo.R \
+ && cd ${PROJECT_DIR} \
+ && Rscript -e "source('renv/activate.R'); source('/opt/patches/patch-geoflow-zenodo.R')" \
+ && L=renv/library/R-4.2/x86_64-pc-linux-gnu/geoflow \
+ && grep -q "PATCH: set Zenodo upload_type" $L/actions/zen4R_deposit_record.R \
+ && sed -i 's/c("Postgres","PostreSQL")/c("Postgres","PostgreSQL")/g' $L/actions/geosapi_publish_ogc_services.R \
+ && grep -q 'c("Postgres","PostgreSQL")' $L/actions/geosapi_publish_ogc_services.R \
+ && ! grep -q 'PostreSQL' $L/actions/geosapi_publish_ogc_services.R
 
 # --- Ressources FDI ---
 ENV FDI_CODELISTS_REPO="https://github.com/bastienird/fdi-codelists.git"

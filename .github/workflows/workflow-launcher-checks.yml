@@ -5,6 +5,7 @@ on:
     paths:
       - "R/launching_workflows/**"
       - "compose/Dockerfile.workflow"
+      - ".Rprofile"
       - "tests/smoke_test_launcher.R"
       - ".github/workflows/workflow-launcher-checks.yml"
   workflow_dispatch:
@@ -35,8 +36,13 @@ jobs:
       - name: Run launcher smoke tests
         run: Rscript tests/smoke_test_launcher.R
 
-      - name: Check Dockerfile runtime paths
+      - name: Check workflow Dockerfile
         run: |
-          grep -q 'ENV RENV_PATHS_ROOT=' docker/Dockerfile.workflow
-          grep -q 'ENV GTA_DOWNLOAD_CACHE_DIR=/cache/downloads' docker/Dockerfile.workflow
-          grep -q 'VOLUME \["/data", "/home/rstudio/geoflow-tunaatlas/jobs", "/cache"\]' docker/Dockerfile.workflow
+          F=compose/Dockerfile.workflow
+          grep -q 'ENV PROJECT_DIR=/home/rstudio/geoflow-tunaatlas' "$F"
+          # patches geoflow 1.3.0 indispensables à la publication (GeoServer, Zenodo)
+          grep -qF 's/c("Postgres","PostreSQL")/c("Postgres","PostgreSQL")/g' "$F"
+          grep -q 'patch-geoflow-zenodo.R' "$F"
+          grep -q 'patch-geoflow-zenodo-size' "$F"
+          # le correctif geometa doit être rechargé à chaque session
+          grep -q 'compose/patches/patch-geometa.R' .Rprofile
