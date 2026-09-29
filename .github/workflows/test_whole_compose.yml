@@ -1,0 +1,41 @@
+    env:
+      GTA_IMAGE: gta-workflow:ci-${{ github.sha }}
+      COMPOSE_FILE: compose/compose.bd.rstudio.newversiongeoflow.yml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build de l'image depuis le commit
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: compose/Dockerfile.workflow
+          tags: ${{ env.GTA_IMAGE }}
+          load: true                 # rend l'image dispo localement pour compose
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Préparer le runner
+        run: |
+          mkdir -p runtime/jobs runtime/cache
+          echo "ZENODO_TOKEN=${{ secrets.ZENODO_SANDBOX_TOKEN }}" > zenodo_secrets.env
+          cp docker_local.env.ci docker_local.env.compose
+
+      - name: Lancer le workflow
+        run: |
+          docker compose -f compose/compose.ci.yml run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$PWD/R":/home/rstudio/geoflow-tunaatlas/R \
+            -v "$PWD/config":/home/rstudio/geoflow-tunaatlas/config \
+            -v "$PWD/docker_local.env.compose":/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro \
+            -v "$PWD/tests/sample_data":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+            -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+            -v "$PWD/zenodo_secrets.env":/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro \
+            -v "$PWD/runtime/cache":/cache \
+            -e GTA_STEPS=DB,rawdata,nominal,level0,services \
+            -e GTA_DATA_SOURCE=volume_dir \
+            -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
+            -e GTA_SUMMARISE_INVALID_RAW=false \
+            -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+            workflow \
+            Rscript R/launching_workflows/run_gta_2026_workflow_cli.R
