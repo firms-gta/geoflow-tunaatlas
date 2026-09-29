@@ -53,7 +53,9 @@ jobs:
 
       - name: Lancer le workflow
         run: |
-          docker compose -f compose/compose.ci.yml run --rm \
+          docker compose \
+            -f compose/compose.bd.rstudio.newversiongeoflow.yml \
+            -f compose/compose.ci.yml \
             --user "$(id -u):$(id -g)" \
             -v "$PWD/R":/home/rstudio/geoflow-tunaatlas/R \
             -v "$PWD/config":/home/rstudio/geoflow-tunaatlas/config \
@@ -69,3 +71,12 @@ jobs:
             -e GTA_BOOTSTRAP_RESTORE_RENV=false \
             workflow \
             Rscript R/launching_workflows/run_gta_2026_workflow_cli.R
+            
+            
+      - name: Logs en cas d'échec
+        if: failure()
+        run: |
+          docker compose \
+            -f compose/compose.bd.rstudio.newversiongeoflow.yml \
+            -f compose/compose.ci.yml \
+            logs
