@@ -12,9 +12,11 @@ NAME=gta-workflow-run
 COMPOSE=(docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml)
 [[ -n "${CI:-}" ]] && COMPOSE+=(-f compose/compose.ci.yml)
 
+RUN_USER="${GTA_RUN_USER:-$(id -u):$(id -g)}"
+
 run_once() {
   "${COMPOSE[@]}" run --rm --name "$NAME" \
-    --user "$(id -u):$(id -g)" \
+    --user "$RUN_USER" \
     -v "$PWD/R":/home/rstudio/geoflow-tunaatlas/R \
     -v "$PWD/config":/home/rstudio/geoflow-tunaatlas/config \
     -v "$PWD/docker_local.env.compose":/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro \

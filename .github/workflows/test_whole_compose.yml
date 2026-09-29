@@ -10,10 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GTA_IMAGE: gta-workflow:ci-${{ github.sha }}
-      COMPOSE_FILE: compose/compose.bd.rstudio.newversiongeoflow.yml
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Cache applicatif
         uses: actions/cache@v4
         with:
@@ -22,7 +21,7 @@ jobs:
           restore-keys: |
             gta-cache-${{ github.ref_name }}-
             gta-cache-
-            
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Build de l'image depuis le commit
@@ -48,16 +47,18 @@ jobs:
           DB_PASSWORD=gta
           DB_USER_READONLY=gta
           GTA_DB_UPLOAD=true
-          RUN_ZENODO_T_F=true
+          RUN_ZENODO_T_F=false
           EOF
+          # le conteneur tourne en 1000:1000 (rstudio), le runner en 1001
+          sudo chown -R 1000:1000 runtime tests/sample_data
 
       - name: Lancer le workflow
         timeout-minutes: 90
         env:
+          GTA_RUN_USER: "1000:1000"
           GTA_STEPS: DB,rawdata,nominal,level0,services
         run: ./compose/run_workflow_retry.sh
-            
-            
+
       - name: Logs en cas d'échec
         if: failure()
         run: |
@@ -65,3 +66,7 @@ jobs:
             -f compose/compose.bd.rstudio.newversiongeoflow.yml \
             -f compose/compose.ci.yml \
             logs
+
+      - name: Rendre le cache au runner
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" runtime
