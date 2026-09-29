@@ -6,6 +6,7 @@ x-db-env: &db-env
   DB_NAME: gta
   DB_USER: gta
   DB_PASSWORD: gta
+  DB_USER_READONLY: gta_reader
 
 x-gta-env: &gta-env
   <<: *db-env
