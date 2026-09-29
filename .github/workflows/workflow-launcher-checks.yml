@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "R/launching_workflows/**"
-      - "docker/Dockerfile.workflow"
+      - "compose/Dockerfile.workflow"
       - "tests/smoke_test_launcher.R"
       - ".github/workflows/workflow-launcher-checks.yml"
   workflow_dispatch:

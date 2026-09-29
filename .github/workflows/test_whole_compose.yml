@@ -92,7 +92,7 @@ jobs:
       - name: Push de l'image testée sur GHCR
         if: success() && github.event_name == 'push'
         run: |
-          REPO=ghcr.io/firms-gta/gta-workflow
+          REPO=ghcr.io/firms-gta/geoflow-tunaatlas
           SHA=sha-${GITHUB_SHA::7}
 
           if [[ "$GITHUB_REF_NAME" == "master" ]]; then

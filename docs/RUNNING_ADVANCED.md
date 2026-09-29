@@ -314,7 +314,7 @@ From the repository root:
 
 ```bash
 docker build \
-  -f docker/Dockerfile.workflow \
+  -f compose/Dockerfile.workflow \
   -t gta-workflow:latest \
   .
 ```

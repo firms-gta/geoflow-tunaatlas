@@ -74,7 +74,7 @@ Compose forwards all documented existing-job path variables.
 
 ```bash
 docker build \
-  -f docker/Dockerfile.workflow \
+  -f compose/Dockerfile.workflow \
   -t gta-workflow:latest \
   .
 
