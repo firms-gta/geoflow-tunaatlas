@@ -51,6 +51,7 @@ jobs:
           EOF
           # le conteneur tourne en 1000:1000 (rstudio), le runner en 1001
           sudo chown -R 1000:1000 runtime tests/sample_data
+          sudo chown -R 1000:1000 runtime tests/sample_data R config
 
       - name: Lancer le workflow
         timeout-minutes: 90
