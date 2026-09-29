@@ -1,0 +1,11 @@
+services:
+  workflow:
+    image: ghcr.io/firms-gta/gta-workflow:geoflow-1.3.0
+    environment:
+      GTA_STEPS: DB,rawdata,level0,effort,nominal,level1,level2
+    volumes:
+      - ../tests/sample_data:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
+
+  elasticsearch:
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
