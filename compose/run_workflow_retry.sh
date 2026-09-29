@@ -1,37 +1,98 @@
 #!/usr/bin/env bash
+# =============================================================================
 # compose/run_workflow_retry.sh
-# Lance le workflow GTA et le relance si R reste bloqué sur "recursive gc invocation".
-# Usage : ./compose/run_workflow_retry.sh   (depuis n'importe quel dossier)
+#
+# Lance le workflow GTA dans la stack Docker Compose (Postgres, GeoServer,
+# GeoNetwork) et le relance si R reste bloqué sur "recursive gc invocation".
+#
+# Par défaut : run de TEST sur l'échantillon tests/sample_data.
+# Pour le workflow complet sur les vraies données : compose/run_full_workflow.sh
+#
+# Usage (depuis n'importe quel dossier) :
+#   ./compose/run_workflow_retry.sh
+#   GTA_STEPS=rawdata,nominal ./compose/run_workflow_retry.sh
+#   GTA_DATA_DIR=/chemin/vers/donnees ./compose/run_workflow_retry.sh
+#
+# Variables (toutes facultatives) :
+#   GTA_DATA_DIR         dossier de données sur l'hôte     (défaut : tests/sample_data)
+#   GTA_STEPS            étapes du workflow                (défaut : DB,rawdata,nominal,level0,services)
+#   GTA_COMPOSE_PROJECT  nom de projet compose, pour isoler la stack (conteneurs + volumes)
+#   GTA_RUN_USER         uid:gid du conteneur              (défaut : utilisateur courant ; CI : 1000:1000)
+#   GTA_MOUNT_CODE       true : monte R/ et config/ du dépôt ; false : code de l'image (défaut : true)
+#   GTA_MAX_ATTEMPTS     nombre de tentatives en cas de blocage GC   (défaut : 3)
+#   GTA_GC_TIMEOUT       secondes sans ligne normale après un message GC avant d'abandonner (défaut : 60)
+# =============================================================================
 set -uo pipefail
-cd "$(dirname "$0")/.."   # racine du repo
+cd "$(dirname "$0")/.."   # racine du dépôt
 
-MAX_ATTEMPTS=3
-GC_TIMEOUT=60             # secondes sans ligne normale après un message GC
-NAME=gta-workflow-run
+DATA_DIR="${GTA_DATA_DIR:-tests/sample_data}"
+STEPS="${GTA_STEPS:-DB,rawdata,nominal,level0,services}"
+PROJECT="${GTA_COMPOSE_PROJECT:-}"
+RUN_USER="${GTA_RUN_USER:-$(id -u):$(id -g)}"
+MOUNT_CODE="${GTA_MOUNT_CODE:-true}"
+MAX_ATTEMPTS="${GTA_MAX_ATTEMPTS:-3}"
+GC_TIMEOUT="${GTA_GC_TIMEOUT:-60}"
 
-COMPOSE=(docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml)
+NAME="${PROJECT:-gta}-workflow-run"
+CONTAINER_ROOT=/home/rstudio/geoflow-tunaatlas
+CONTAINER_DATA="$CONTAINER_ROOT/data/GTA_2026"
+
+# --- Chemins absolus (docker n'accepte que des chemins absolus pour -v) ------
+case "$DATA_DIR" in
+  /*) ;;
+  *)  DATA_DIR="$PWD/$DATA_DIR" ;;
+esac
+
+if [[ ! -d "$DATA_DIR" ]] || [[ -z "$(ls -A "$DATA_DIR" 2>/dev/null)" ]]; then
+  echo ">>> Dossier de données absent ou vide : $DATA_DIR" >&2
+  exit 2
+fi
+
+# --- Commande compose ----------------------------------------------------------
+COMPOSE=(docker compose)
+[[ -n "$PROJECT" ]] && COMPOSE+=(-p "$PROJECT")
+COMPOSE+=(-f compose/compose.bd.rstudio.newversiongeoflow.yml)
 [[ -n "${CI:-}" ]] && COMPOSE+=(-f compose/compose.ci.yml)
 
-RUN_USER="${GTA_RUN_USER:-$(id -u):$(id -g)}"
+CODE_MOUNTS=()
+if [[ "$MOUNT_CODE" == "true" ]]; then
+  CODE_MOUNTS=(
+    -v "$PWD/R":"$CONTAINER_ROOT/R"
+    -v "$PWD/config":"$CONTAINER_ROOT/config"
+  )
+fi
+
+# --- Préparation de l'hôte -----------------------------------------------------
+mkdir -p runtime/jobs runtime/cache
+# Dossiers de sortie que le workflow écrit DANS le dossier de données
+mkdir -p "$DATA_DIR/dataoutputpreharmo" "$DATA_DIR/dataoutputGTA"
+# Sans ces fichiers, docker créerait un dossier à leur place
+[[ -e zenodo_secrets.env ]] || touch zenodo_secrets.env
+[[ -e docker_local.env.compose ]] || { echo ">>> docker_local.env.compose manquant" >&2; exit 2; }
+
+echo ">>> Données : $DATA_DIR"
+echo ">>> Étapes  : $STEPS"
+echo ">>> Projet  : ${PROJECT:-(défaut)} | utilisateur : $RUN_USER | code monté : $MOUNT_CODE"
 
 run_once() {
   "${COMPOSE[@]}" run --rm --name "$NAME" \
     --user "$RUN_USER" \
-    -v "$PWD/R":/home/rstudio/geoflow-tunaatlas/R \
-    -v "$PWD/config":/home/rstudio/geoflow-tunaatlas/config \
-    -v "$PWD/docker_local.env.compose":/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro \
-    -v "$PWD/tests/sample_data":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
-    -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
-    -v "$PWD/zenodo_secrets.env":/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro \
+    ${CODE_MOUNTS[@]+"${CODE_MOUNTS[@]}"} \
+    -v "$PWD/docker_local.env.compose":"$CONTAINER_ROOT/docker_local.env.compose:ro" \
+    -v "$DATA_DIR":"$CONTAINER_DATA" \
+    -v "$PWD/runtime/jobs":"$CONTAINER_ROOT/jobs" \
+    -v "$PWD/zenodo_secrets.env":"$CONTAINER_ROOT/zenodo_secrets.env:ro" \
     -v "$PWD/runtime/cache":/cache \
-    -e GTA_STEPS="${GTA_STEPS:-DB,rawdata,nominal,level0,services}" \
+    -e GTA_STEPS="$STEPS" \
     -e GTA_DATA_SOURCE=volume_dir \
-    -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
-    -e GTA_SUMMARISE_INVALID_RAW=false \
+    -e GTA_DATA_PATH="$CONTAINER_DATA" \
+    -e GTA_SUMMARISE_INVALID_RAW="${GTA_SUMMARISE_INVALID_RAW:-false}" \
     -e GTA_BOOTSTRAP_RESTORE_RENV=false \
     workflow \
     Rscript R/launching_workflows/run_gta_2026_workflow_cli.R 2>&1 |
   {
+    # Un message GC isolé n'est pas bloquant : on ne tue le conteneur que si
+    # aucune ligne normale n'a suivi pendant GC_TIMEOUT secondes.
     gc_since=""
     while true; do
       if IFS= read -r -t 5 line; then
@@ -54,8 +115,7 @@ run_once() {
   }
 }
 
-mkdir -p runtime/jobs runtime/cache
-[[ -e zenodo_secrets.env ]] || touch zenodo_secrets.env
+docker rm -f "$NAME" >/dev/null 2>&1   # reste éventuel d'un run interrompu
 
 for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
   echo ">>> Tentative $attempt/$MAX_ATTEMPTS"
