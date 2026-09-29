@@ -361,9 +361,17 @@ config/
 ├── catch_ird_level1_local.json
 └── catch_ird_level2_local.json
 
+compose/
+├── Dockerfile.workflow                         # workflow image (used by the CI and both Compose files)
+├── Dockerfile.rstudio
+├── compose.bd.rstudio.newversiongeoflow.yml    # full stack: workflow + PostGIS + GeoServer + GeoNetwork
+├── compose.ci.yml                              # CI override
+├── patches/                                    # geoflow / geometa / zen4R patches
+├── run_workflow_retry.sh                       # test run on tests/sample_data
+└── run_full_workflow.sh                        # complete run on the real data
+
 docker/
-├── Dockerfile.workflow
-└── Dockerfile.reporting
+└── Dockerfile.reporting                        # and other auxiliary images
 ```
 
 The R launcher orchestrates execution, while the `geoflow` configurations remain the source of truth for the scientific processing definitions.
@@ -372,4 +380,6 @@ The R launcher orchestrates execution, while the `geoflow` configurations remain
 
 * [README](../README.md) — project overview and quick start
 * [RUNNING.md](RUNNING.md) — Docker images, input data, runtime parameters and execution examples
+* [COMPOSE_STACK.md](COMPOSE_STACK.md) — full stack with database and publication services
+* [CI.md](CI.md) — automated tests and published images
 * [VALIDATION.md](VALIDATION.md) — technical and scientific validation

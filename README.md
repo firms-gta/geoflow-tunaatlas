@@ -10,6 +10,9 @@ The workflow processes data from the five tuna Regional Fisheries Management Org
 
 * [Running the workflow](docs/RUNNING.md) — quick start, input data and standard runs
 * [Advanced execution](docs/RUNNING_ADVANCED.md) — partial runs, runtime parameters, existing jobs, reporting and local builds
+* [Workflow-only Docker Compose](docs/DOCKER_COMPOSE.md) — `compose.workflow.yml`, processing without publication services
+* [Full Compose stack](docs/COMPOSE_STACK.md) — workflow + PostGIS + GeoServer + GeoNetwork + Zenodo, test and full-run scripts
+* [Continuous integration](docs/CI.md) — automated tests, sample data, published images
 * [Workflow architecture](docs/WORKFLOW.md) — processing stages, configurations and dependencies
 * [Validation](docs/VALIDATION.md) — technical and scientific validation procedures
 
@@ -17,10 +20,11 @@ The workflow processes data from the five tuna Regional Fisheries Management Org
 
 Pre-built Docker images are available from the GitHub Container Registry (GHCR):
 
-| Image                              | Purpose                                             |
-| ---------------------------------- | --------------------------------------------------- |
-| `ghcr.io/firms-gta/gta-workflow`   | GTA scientific data-processing workflow             |
-| `ghcr.io/firms-gta/tunaatlas-data` | GTA input-data image for self-contained deployments |
+| Image                                  | Purpose                                             |
+| -------------------------------------- | --------------------------------------------------- |
+| `ghcr.io/firms-gta/geoflow-tunaatlas`  | Workflow image built and tested by the CI on each push (`latest`, `sha-<commit>`; `-dev` suffix outside `master`) — see [CI](docs/CI.md) |
+| `ghcr.io/firms-gta/gta-workflow`       | GTA scientific data-processing workflow (earlier release tags, e.g. `2d93b5a`) |
+| `ghcr.io/firms-gta/tunaatlas-data`     | GTA input-data image for self-contained deployments |
 
 For reproducible runs, use an immutable version or commit tag rather than `latest`.
 
@@ -62,17 +66,30 @@ For local data directories, ZIP archives, alternative input datasets and other s
 
 For partial runs, reuse of existing jobs, reporting and other advanced options, see [Advanced execution](docs/RUNNING_ADVANCED.md).
 
+### Full stack with publication services
+
+To run the workflow together with the PostGIS database, GeoServer, GeoNetwork and Zenodo publication:
+
+```bash
+./compose/run_workflow_retry.sh    # test run on tests/sample_data (same as the CI)
+./compose/run_full_workflow.sh     # complete workflow on runtime/extracted/all_raw_data_GTA
+```
+
+See [Full Compose stack](docs/COMPOSE_STACK.md) before a full run, in particular for the Zenodo target.
+
 ## Repository structure
 
 ```text 
 geoflow-tunaatlas/
 ├── R/                  # workflow and processing code
+├── compose/            # workflow Dockerfile, full Compose stack, geoflow patches, launch scripts
 ├── config/             # geoflow workflow configurations
 ├── data/               # static reference data
-├── docker/             # Docker images and entry points
+├── docker/             # additional Docker images (reporting, NetCDF, …)
 ├── docs/               # project documentation
 ├── reports/            # report sources
-├── tests/              # launcher and workflow checks
+├── tests/              # launcher checks and sample input data
+├── compose.workflow.yml  # workflow-only Compose file
 └── renv.lock
 ```
 
@@ -95,6 +112,12 @@ Run the launcher smoke tests with:
 
 ```bash
 Rscript tests/smoke_test_launcher.R
+```
+
+Run the end-to-end test of the full stack on the sample data (the same test runs on GitHub Actions, see [CI](docs/CI.md)):
+
+```bash
+./compose/run_workflow_retry.sh
 ```
 
 Scientific and runtime acceptance procedures are documented in [Validation](docs/VALIDATION.md).

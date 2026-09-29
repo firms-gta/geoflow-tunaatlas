@@ -8,6 +8,10 @@ For the equivalent explicit `docker run` commands, see [RUNNING.md](RUNNING.md).
 
 For the workflow architecture and processing stages, see [WORKFLOW.md](WORKFLOW.md).
 
+> `compose.workflow.yml` runs the workflow container **alone**. To run it
+> together with the PostGIS database, GeoServer, GeoNetwork and Zenodo
+> publication, use the full stack described in [COMPOSE_STACK.md](COMPOSE_STACK.md).
+
 ## 1. How the Compose configuration works
 
 The repository contains:
