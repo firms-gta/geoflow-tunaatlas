@@ -66,7 +66,8 @@ jobs:
         timeout-minutes: 90
         env:
           GTA_RUN_USER: "1000:1000"
-          GTA_STEPS: DB,rawdata,nominal,level0,services
+          GTA_STEPS: DB,rawdata,nominal,effort,level0,services
+          GTA_MOUNT_CODE: "false"
         run: ./compose/run_workflow_retry.sh
 
       - name: Logs en cas d'échec

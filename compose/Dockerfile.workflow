@@ -141,8 +141,7 @@ RUN git clone ${FDI_MAPPINGS_REPO} ${FDI_MAPPINGS_DIR} \
 # --- Code du projet (après la restauration : un changement de script n'invalide pas les couches renv)
 COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
 
-RUN find ${PROJECT_DIR}/R -name "*.R" -print0 \
- | xargs -0 perl -CSD -pi -e 's/[\x{2018}\x{2019}]/APOSTROPHE_PLACEHOLDER/g; s/[\x{201C}\x{201D}]/QUOTE_PLACEHOLDER/g; s/\x{00B0}/ degrees /g; s/\x{2013}/-/g; s/\x{2014}/-/g; s/\x{2026}/.../g; s/APOSTROPHE_PLACEHOLDER/\x27/g; s/QUOTE_PLACEHOLDER/\x22/g'
+RUN cd ${PROJECT_DIR} && Rscript -e 'for (d in c("R/launching_workflows","R/tunaatlas_actions","R/tunaatlas_scripts/generation")) for (f in list.files(d, pattern="[.]R$", recursive=TRUE, full.names=TRUE)) parse(f)'
 
 # --- Provenance ---
 RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
