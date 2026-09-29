@@ -1,3 +1,10 @@
+#' NOTE : contournement d'un bug de geoflow 1.3.0 (geosapi_publish_ogc_services.R) :
+#' le driver DBI "PostgreSQL" n'est pas reconnu (faute de frappe "PostreSQL"),
+#' si bien que geoflow échoue (stop()) en créant le datastore PostGIS.
+#' En créant workspace et datastore à l'avance, geoflow les trouve existants
+#' et saute ce code. Le bug est corrigé par un sed dans compose/Dockerfile.workflow :
+#' cette fonction pourra être retirée une fois vérifié que geoflow crée
+#' lui-même le datastore sur une stack vierge.
 #' Ensure GeoServer workspace and datastore exist before running the workflow
 #'
 #' Idempotent bootstrap: creates the GeoServer workspace and PostGIS datastore
