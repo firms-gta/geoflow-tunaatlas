@@ -1016,6 +1016,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
         error = function(e) message("No environment file loaded: ", e$message)
       )
     }
+    dotenv::load_dot_env(here::here("docker_local.env.compose"))
     source(here::here("R/tunaatlas_actions/ensure_geoserver_ready.R"))
     source(here::here("compose/patches/patch-zen4r-upload-error.R"))
     ensure_geoserver_ready()
