@@ -30,6 +30,9 @@ jobs:
           context: .
           file: compose/Dockerfile.workflow
           tags: ${{ env.GTA_IMAGE }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -74,3 +77,29 @@ jobs:
       - name: Rendre le cache au runner
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" runtime
+        
+      - name: Login GHCR
+        if: success() && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push de l'image testée sur GHCR
+        if: success() && github.event_name == 'push'
+        run: |
+          REPO=ghcr.io/firms-gta/gta-workflow
+          SHA=sha-${GITHUB_SHA::7}
+
+          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+            TAGS=("latest" "$SHA")
+          else
+            BRANCH=$(echo "$GITHUB_REF_NAME" | tr '/' '-')
+            TAGS=("${BRANCH}-dev" "${SHA}-dev")
+          fi
+
+          for t in "${TAGS[@]}"; do
+            docker tag "$GTA_IMAGE" "$REPO:$t"
+            docker push "$REPO:$t"
+          done
