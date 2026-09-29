@@ -2,7 +2,7 @@ name: CI GTA workflow
 
 on:
   push:
-    branches: [master, feature/mapping-codelists-cloned-in-docker-image]
+    branches: [master, feature/mapping-codelist-cloned-in-docker-image]
   workflow_dispatch:
 
 jobs:
