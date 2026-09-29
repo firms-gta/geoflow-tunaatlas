@@ -8,6 +8,9 @@ on:
 jobs:
   gta-workflow:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       GTA_IMAGE: gta-workflow:ci-${{ github.sha }}
     steps:
