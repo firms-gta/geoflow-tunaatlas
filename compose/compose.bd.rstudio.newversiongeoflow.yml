@@ -7,6 +7,7 @@ x-db-env: &db-env
   DB_USER: gta
   DB_PASSWORD: gta
   DB_USER_READONLY: gta_reader
+  DB_PASSWORD_READONLY: ${SHINY_DB_PASSWORD:-gta_reader}
 
 x-gta-env: &gta-env
   <<: *db-env
@@ -99,7 +100,8 @@ services:
     image: ghcr.io/firms-gta/tunaatlas_pie_map_shiny:${SHINY_TAG:-latest}
     environment:
       <<: *db-env
-      DB_USER: gta_reader        
+      # l'application se connecte avec DB_USER_READONLY (gta_reader) et DB_PASSWORD
+      DB_USER: gta_reader
       DB_PASSWORD: ${SHINY_DB_PASSWORD:-gta_reader}
     ports:
       - "127.0.0.1:${GTA_SHINY_PORT:-13838}:3838"
