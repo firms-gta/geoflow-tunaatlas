@@ -16,6 +16,28 @@ deploy_database_model <- function(config, software, software_config){
 	outsql <- paste(outsql, '-- Preliminary step: grant select on all objects of the DB to the user with select privileges', sep = "\n")
 	outsql <- paste(outsql, '-- create extension postgis', sep = "\n")
 	outsql <- paste(outsql, paste0("CREATE EXTENSION IF NOT EXISTS postgis ;"), sep = "\n")
+
+	# Read-only user (e.g. used by the Shiny app): created here if it does not exist yet,
+	# so that a freshly deployed database is directly usable. Nothing is done when the
+	# read-only user is the write user itself, and an existing role is never modified.
+	# Its password comes from DB_PASSWORD_READONLY (default: the user name).
+	db_write <- software_config$parameters$user
+	if(!is.null(db_read) && nzchar(db_read) && !identical(db_read, db_write)){
+		db_read_password <- Sys.getenv("DB_PASSWORD_READONLY", unset = db_read)
+		if(!nzchar(db_read_password)) db_read_password <- db_read
+		sql_quote <- function(x) gsub("'", "''", x, fixed = TRUE)
+		outsql <- paste(outsql, '-- create the read-only user if needed', sep = "\n")
+		outsql <- paste(outsql, paste0(
+			"DO $gta_reader$ BEGIN\n",
+			"  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '", sql_quote(db_read), "') THEN\n",
+			"    CREATE ROLE \"", db_read, "\" LOGIN PASSWORD '", sql_quote(db_read_password), "';\n",
+			"  END IF;\n",
+			"END $gta_reader$;"), sep = "\n")
+		outsql <- paste(outsql, paste0("GRANT CONNECT ON DATABASE \"", db_name, "\" TO \"", db_read, "\";"), sep = "\n")
+		outsql <- paste(outsql, paste0("GRANT USAGE ON SCHEMA public TO \"", db_read, "\";"), sep = "\n")
+		outsql <- paste(outsql, paste0("GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"", db_read, "\";"), sep = "\n")
+		outsql <- paste(outsql, paste0("alter default privileges grant usage on schemas to \"", db_read, "\";"), sep = "\n")
+	}
 	outsql <- paste(outsql, paste0("alter default privileges grant select on tables to \"",db_read,"\";"), sep = "\n")
 	outsql <- paste0(outsql, "\n");
 
