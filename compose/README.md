@@ -19,8 +19,8 @@ git clone https://github.com/firms-gta/geoflow-tunaatlas.git
 cd geoflow-tunaatlas
 git checkout feature/mapping-codelist-cloned-in-docker-image
 
-docker pull ghcr.io/firms-gta/gta-workflow:sha-30576d6-dev
-export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:sha-30576d6-dev
+docker pull ghcr.io/firms-gta/gta-workflow:sha-af1c837-dev
+export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:sha-af1c837-dev
 ```
 
 Images are built and tested by the CI, then published in
