@@ -107,3 +107,16 @@ jobs:
             docker tag "$GTA_IMAGE" "$REPO:$t"
             docker push "$REPO:$t"
           done
+          
+      - name: Build et push de l'image RStudio
+        if: success() && github.event_name == 'push'
+        run: |
+          REPO=ghcr.io/firms-gta/gta-workflow
+          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+            BASE=$REPO:sha-${GITHUB_SHA::7}
+          else
+            BASE=$REPO:sha-${GITHUB_SHA::7}-dev
+          fi
+          docker buildx build -f compose/Dockerfile.rstudio \
+            --build-arg BASE_IMAGE="$BASE" \
+            -t "$BASE-rstudio" --push .
