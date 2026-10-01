@@ -119,8 +119,19 @@ RStudio runs in the same environment as the workflow (same R, packages, patched
 geoflow), with the database, GeoServer and GeoNetwork next to it. Use it to
 explore, debug or run steps by hand.
 
-Start it (the first time takes a few minutes: RStudio Server is installed on top
-of the workflow image):
+Start it with the image published by the CI (workflow image + RStudio Server):
+
+```bash
+docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml pull rstudio
+docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --no-build rstudio
+```
+
+`--no-build` makes sure the published image is used: if it is missing, the
+command stops instead of building. To use another tag, set
+`GTA_RSTUDIO_IMAGE=ghcr.io/firms-gta/gta-workflow:sha-<commit>-dev-rstudio`.
+
+To build it locally instead (after changing `Dockerfile.rstudio`), on top of
+`GTA_IMAGE`:
 
 ```bash
 docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --build rstudio
