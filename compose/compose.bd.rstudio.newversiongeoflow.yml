@@ -38,6 +38,9 @@ services:
       context: ..
       dockerfile: compose/Dockerfile.workflow
     image: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:sha-420350c-dev}
+    # Profil : "docker compose up" ne lance pas le workflow. Il ne démarre que
+    # nommément ("docker compose run workflow", ce que font les scripts).
+    profiles: ["workflow"]
     environment: *gta-env
     volumes: *gta-volumes
     depends_on:
