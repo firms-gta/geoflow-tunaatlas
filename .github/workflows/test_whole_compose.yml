@@ -55,7 +55,8 @@ jobs:
           DB_NAME=gta
           DB_USER=gta
           DB_PASSWORD=gta
-          DB_USER_READONLY=gta
+          DB_USER_READONLY=gta_reader
+          DB_PASSWORD_READONLY=gta_reader
           GTA_DB_UPLOAD=true
           RUN_ZENODO_T_F=true
           EOF
