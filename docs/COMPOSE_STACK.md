@@ -194,8 +194,8 @@ you changed it (e.g. `5430` for `gta`, `5431` for `gta-test`).
 ### RStudio and the Shiny app
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d rstudio        # http://127.0.0.1:8787
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app up -d shiny   # http://127.0.0.1:3838
+docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d rstudio        # http://127.0.0.1:18787
+docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app up -d shiny   # http://127.0.0.1:13838
 ```
 
 The Shiny app connects with a read-only user (`gta_reader`); create it in the
