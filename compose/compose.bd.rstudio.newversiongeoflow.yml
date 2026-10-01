@@ -54,7 +54,7 @@ services:
       context: ..
       dockerfile: compose/Dockerfile.rstudio
       args:
-        BASE_IMAGE: ${GTA_IMAGE:-gta-workflow:geoflow-1.3.0}
+        BASE_IMAGE: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:sha-420350c-dev}
     ports:
       - "127.0.0.1:${GTA_RSTUDIO_PORT:-18787}:8787"
     environment:
