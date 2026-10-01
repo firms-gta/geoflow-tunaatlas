@@ -37,7 +37,7 @@ services:
     build:
       context: ..
       dockerfile: compose/Dockerfile.workflow
-    image: ${GTA_IMAGE:-gta-workflow:geoflow-1.3.0}
+    image: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:sha-420350c-dev}
     environment: *gta-env
     volumes: *gta-volumes
     depends_on:
