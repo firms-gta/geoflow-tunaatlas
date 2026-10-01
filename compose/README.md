@@ -32,8 +32,8 @@ Images are built and tested by the CI, then published in
 | `<branch-name>-dev` | latest tested image of that branch (moves on each push) |
 | `sha-<commit>` / `latest` | images built from `master` |
 
-Prefer a `sha-…` tag for reproducible runs. Without `GTA_IMAGE`, Compose builds
-the image locally from `compose/Dockerfile.workflow`.
+Prefer a `sha-…` tag for reproducible runs. Without `GTA_IMAGE`, Compose uses
+the published image set as default in the compose file.
 
 ## 2. Run the test
 
@@ -90,6 +90,16 @@ Default steps: `DB,rawdata,effort,nominal,level0,level1,level2,services`.
 | Database | `localhost:15430`, database `gta`, user `gta` / `gta` |
 | GeoServer | <http://localhost:18080/geoserver> (`admin` / `geoserver`) — *Layer Preview* to check layers |
 | GeoNetwork | <http://localhost:18081/geonetwork> (`admin` / `admin`) |
+
+Start the services without running the workflow (database, GeoServer,
+GeoNetwork, RStudio):
+
+```bash
+docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --no-build
+```
+
+The workflow itself only runs through the scripts (`docker compose run workflow`):
+it has the Compose profile `workflow`, so a plain `up` never launches it.
 
 Stop everything:
 
@@ -169,8 +179,6 @@ Good to know:
 - If the session freezes on `*** recursive gc invocation`, restart R
   (*Session → Restart R*) and run again: there is no automatic restart in
   RStudio.
-- After changing `GTA_IMAGE`, keep `--build` so RStudio is rebuilt on the new
-  image.
 - The port only listens on `127.0.0.1`. On a remote server, use an SSH tunnel:
   `ssh -L 18787:localhost:18787 <server>`.
 - Stop RStudio alone with
@@ -180,27 +188,39 @@ Good to know:
 
 The visualisation app ([tunaatlas_pie_map_shiny](https://github.com/firms-gta/tunaatlas_pie_map_shiny))
 is part of the stack, as the optional service `shiny` (Compose profile `app`).
-It reads the `gta` database with the read-only user `gta_reader`.
 
-Run the workflow first (step 3), so that the database contains the datasets.
-Then start the app:
+Run the workflow first (step 2 or 3), so that the database contains the
+datasets. Then start the app:
 
 ```bash
 docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app up -d shiny
 ```
 
-Open <http://127.0.0.1:13838>. Follow the app logs with:
+Open <http://127.0.0.1:13838>. In the app, choose the database source, select
+the database **`gta`** in *Choose database*, then click *Connect*.
 
-```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app logs -f shiny
-```
+How the app connects (set by the compose file, nothing to configure):
 
-The connection settings are set by the compose file (`DB_HOST=postgres`,
-`DB_NAME=gta`, `DB_USER=gta_reader`): nothing to configure. Choose the app
-version with `SHINY_TAG` (default `latest`).
+| Setting | Value |
+| --- | --- |
+| host / port | `postgres` / `5432` (`DB_HOST`, `DB_PORT`) |
+| user | `gta_reader`, read-only (`DB_USER_READONLY`) |
+| password | `gta_reader` by default (`SHINY_DB_PASSWORD`) |
+| database | chosen in the app (`gta`) |
 
-Stop the app alone with
-`docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app stop shiny`.
+The user `gta_reader` is created by the workflow itself, in the `DB` step
+(`deploy_database_model.R`), together with its read access to everything the
+workflow loads. Name and password come from `DB_USER_READONLY` and
+`DB_PASSWORD_READONLY` in `docker_local.env.compose`; `SHINY_DB_PASSWORD` must
+be the same password (default for both: `gta_reader`).
+
+| Message in the app | Fix |
+| --- | --- |
+| `password authentication failed for user "gta_reader"` | The database was deployed before the user existed, or with another password. Run the `DB` step again (it redeploys the database), then the steps that load the datasets. |
+| `database "tunaatlas_sandbox" does not exist` | Select `gta` in *Choose database*. |
+
+Follow the logs with `… --profile app logs -f shiny`; stop the app alone with
+`… --profile app stop shiny`.
 
 ---
 
@@ -211,7 +231,7 @@ defaults.
 
 | Variable | Default (test / full) | Purpose |
 | --- | --- | --- |
-| `GTA_IMAGE` | `gta-workflow:geoflow-1.3.0` | Workflow image to run |
+| `GTA_IMAGE` | the published image set in the compose file | Workflow image to run |
 | `GTA_DATA_DIR` | `tests/sample_data` / `runtime/extracted/all_raw_data_GTA` | Raw data folder on your machine |
 | `GTA_STEPS` | see above | Steps to run, e.g. `GTA_STEPS=services` (order does not matter) |
 | `GTA_MOUNT_CODE` | `true` | `true`: use `R/` and `config/` of your checkout (no rebuild needed after a code change). `false`: use the code inside the image (what the CI tests) |
@@ -228,8 +248,16 @@ GTA_COMPOSE_PROJECT=gta-test ./compose/run_workflow_retry.sh   # do not touch yo
 ```
 
 A separate project (`gta-test`) uses the same host ports: stop one stack before
-starting the other, or give it other ports (see [Ports](#ports)). Remove it with
-its volumes:
+starting the other, or give it its own ports to run both side by side (no extra
+compose file needed, see [Ports](#ports)):
+
+```bash
+GTA_COMPOSE_PROJECT=gta-test \
+GTA_PG_PORT=25430 GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 \
+./compose/run_workflow_retry.sh
+```
+
+Remove it with its volumes:
 
 ```bash
 docker compose -p gta-test -f compose/compose.bd.rstudio.newversiongeoflow.yml down -v
@@ -280,7 +308,7 @@ If a port is already taken, `docker compose` stops with
 | `Dockerfile.rstudio` | Builds a second image: the workflow image + RStudio Server, so RStudio has exactly the workflow environment |
 | `run_workflow_retry.sh` | Test run; restarts R if it hangs |
 | `run_full_workflow.sh` | Same script with full-run defaults |
-| `init-db/` | On the first start of PostGIS: creates the GeoNetwork database and the read-only user `gta_reader` |
+| `init-db/` | SQL run when the PostGIS volume is created: creates the GeoNetwork database |
 | `patches/` | Fixes for geoflow 1.3.0, geometa and zen4R |
 
 | Service | Host port (default) | Role |
@@ -299,7 +327,8 @@ Tables, layers and records live in Docker volumes and persist between runs.
 ### Configuration files
 
 - `docker_local.env.compose` (in the repository): database connection used by
-  the geoflow configurations (`DB_HOST=postgres`, `DB_NAME=gta`, …). geoflow
+  the geoflow configurations (`DB_HOST=postgres`, `DB_NAME=gta`, …) and the
+  read-only user created by the `DB` step (`DB_USER_READONLY`, `DB_PASSWORD_READONLY`). geoflow
   unloads these variables at the end of each workflow, so R code running between
   two workflows must reload them if it needs them.
 - `zenodo_secrets.env` (not committed, `*.env` is ignored): `ZENODO_URL` and
