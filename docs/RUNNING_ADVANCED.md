@@ -2,7 +2,7 @@
 
 This document describes advanced execution options for the Global Tuna Atlas (GTA) workflow, including partial runs, runtime configuration, reuse of existing jobs, reporting and local Docker builds.
 
-For a standard production run, see [RUNNING.md](RUNNING.md).
+For a standard production run, see [RUNNING.md](RUNNING.md). To run with the database and publication services, see [compose/README.md](../compose/README.md).
 
 For the processing architecture and scientific workflow stages, see [WORKFLOW.md](WORKFLOW.md).
 
@@ -27,6 +27,11 @@ docker pull ghcr.io/firms-gta/gta-reporting:2d93b5a
 ```
 
 The two images should use the same version tag.
+
+The CI also publishes `gta-workflow` on every push (`sha-<commit>` from `master`,
+`sha-<commit>-dev` from feature branches, see [CI.md](CI.md)). The reporting
+image is not built by the CI: build it locally from the matching workflow image
+(§11).
 
 ---
 

@@ -363,6 +363,7 @@ config/
 
 compose/
 ├── Dockerfile.workflow                         # workflow image (used by the CI and both Compose files)
+├── README.md                                   # how to run the full stack
 ├── Dockerfile.rstudio
 ├── compose.bd.rstudio.newversiongeoflow.yml    # full stack: workflow + PostGIS + GeoServer + GeoNetwork
 ├── compose.ci.yml                              # CI override
@@ -380,6 +381,6 @@ The R launcher orchestrates execution, while the `geoflow` configurations remain
 
 * [README](../README.md) — project overview and quick start
 * [RUNNING.md](RUNNING.md) — Docker images, input data, runtime parameters and execution examples
-* [COMPOSE_STACK.md](COMPOSE_STACK.md) — full stack with database and publication services
+* [compose/README.md](../compose/README.md) — full stack with database and publication services
 * [CI.md](CI.md) — automated tests and published images
 * [VALIDATION.md](VALIDATION.md) — technical and scientific validation

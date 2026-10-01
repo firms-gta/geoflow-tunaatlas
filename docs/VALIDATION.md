@@ -42,7 +42,18 @@ These checks cover the launcher interface and basic runtime assumptions, includi
 
 Relevant checks are also executed through GitHub Actions.
 
-Automated smoke tests do not replace a full production run.
+An end-to-end test runs the whole stack (database, pre-harmonisation, nominal,
+effort, Level 0 and publication to GeoServer, GeoNetwork and sandbox Zenodo) on
+the small sample in `tests/sample_data`:
+
+```bash
+./compose/run_workflow_retry.sh
+```
+
+It runs on every push through GitHub Actions, on the image built from the
+commit (see [CI.md](CI.md)).
+
+Automated tests on the sample data do not replace a full production run.
 
 ## 3. Docker image validation
 
@@ -61,7 +72,7 @@ Check that both images are available locally:
 docker images | grep -E 'gta-workflow|gta-reporting'
 ```
 
-When validating locally built images instead, build them using the commands documented in [RUNNING.md](RUNNING.md).
+When validating locally built images instead, build them using the commands documented in [RUNNING_ADVANCED.md](RUNNING_ADVANCED.md#11-build-the-images-locally).
 
 For reproducible validation, record the exact image tag or immutable digest.
 
