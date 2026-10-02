@@ -109,7 +109,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    profiles: ["app"]
 
   geoserver:
     image: docker.osgeo.org/geoserver:2.28.5
