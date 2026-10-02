@@ -91,10 +91,11 @@
 			"pwd": "{{GEOSERVER_PASSWORD}}",
 			"logger": "DEBUG"
 		},
-		"properties" : {
-			"workspace": "{{GEOSERVER_WORKSPACE}}",
-			"store": "{{GEOSERVER_STORE}}"
-		}
+    "properties" : {
+        "workspace": "{{GEOSERVER_WORKSPACE}}",
+        "store": "{{GEOSERVER_STORE}}",
+        "publicUrl": "{{GEOSERVER_PUBLIC_URL}}"
+    }
 	}
   ],
   "actions": [

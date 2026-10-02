@@ -12,6 +12,7 @@ x-db-env: &db-env
 x-gta-env: &gta-env
   <<: *db-env
   GEOSERVER_URL: http://geoserver:8080/geoserver
+  GEOSERVER_PUBLIC_URL: http://localhost:${GTA_GEOSERVER_PORT:-18080}/geoserver
   GEOSERVER_USER: admin
   GEOSERVER_PASSWORD: geoserver
   GEOSERVER_WORKSPACE: tunaatlas
