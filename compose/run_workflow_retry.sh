@@ -18,7 +18,8 @@
 #   GTA_STEPS            étapes du workflow                (défaut : DB,rawdata,nominal,level0,services)
 #   GTA_COMPOSE_PROJECT  nom de projet compose, pour isoler la stack (conteneurs + volumes)
 #   GTA_RUN_USER         uid:gid du conteneur              (défaut : utilisateur courant ; CI : 1000:1000)
-#   GTA_MOUNT_CODE       true : monte R/ et config/ du dépôt ; false : code de l'image (défaut : true)
+#   GTA_MOUNT_CODE       false : code de l'image ; true : monte R/ et config/ du dépôt,
+#                        pour tester une modification sans reconstruire l'image (défaut : false)
 #   GTA_MAX_ATTEMPTS     nombre de tentatives en cas de blocage GC   (défaut : 3)
 #   GTA_GC_TIMEOUT       secondes sans ligne normale après un message GC avant d'abandonner (défaut : 60)
 # =============================================================================
@@ -29,13 +30,36 @@ DATA_DIR="${GTA_DATA_DIR:-tests/sample_data}"
 STEPS="${GTA_STEPS:-DB,rawdata,nominal,level0,services}"
 PROJECT="${GTA_COMPOSE_PROJECT:-}"
 RUN_USER="${GTA_RUN_USER:-$(id -u):$(id -g)}"
-MOUNT_CODE="${GTA_MOUNT_CODE:-true}"
+MOUNT_CODE="${GTA_MOUNT_CODE:-false}"
 MAX_ATTEMPTS="${GTA_MAX_ATTEMPTS:-3}"
 GC_TIMEOUT="${GTA_GC_TIMEOUT:-60}"
 
 NAME="${PROJECT:-gta}-workflow-run"
 CONTAINER_ROOT=/home/rstudio/geoflow-tunaatlas
 CONTAINER_DATA="$CONTAINER_ROOT/data/GTA_2026"
+
+# --- Fichiers manquants : on les prend dans l'image ---------------------------
+# Permet de lancer la stack sans cloner le dépôt, en n'ayant copié que le
+# dossier compose/ (voir compose/README.md, "Without cloning the repository").
+COMPOSE_FILE_PATH=compose/compose.bd.rstudio.newversiongeoflow.yml
+IMAGE="${GTA_IMAGE:-$(sed -n 's/.*image: \${GTA_IMAGE:-\([^}]*\)}.*/\1/p' "$COMPOSE_FILE_PATH" | head -1)}"
+
+copy_from_image() {   # copy_from_image <chemin relatif à la racine du dépôt>
+  echo ">>> $1 absent : copie depuis l'image $IMAGE"
+  docker run --rm --entrypoint tar "$IMAGE" -C "$CONTAINER_ROOT" -c "$1" | tar -x \
+    || { echo ">>> Impossible de copier $1 depuis l'image $IMAGE" >&2; exit 2; }
+}
+
+[[ -e docker_local.env.compose ]] || copy_from_image docker_local.env.compose
+if [[ -z "${GTA_DATA_DIR:-}" && ! -d tests/sample_data ]]; then
+  copy_from_image tests/sample_data
+fi
+
+# Code : celui de l'image par défaut ; celui du dépôt avec GTA_MOUNT_CODE=true.
+if [[ "$MOUNT_CODE" == "true" && ! ( -d R && -d config ) ]]; then
+  echo ">>> GTA_MOUNT_CODE=true mais R/ ou config/ est absent" >&2
+  exit 2
+fi
 
 # --- Chemins absolus (docker n'accepte que des chemins absolus pour -v) ------
 case "$DATA_DIR" in

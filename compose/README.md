@@ -35,6 +35,34 @@ Images are built and tested by the CI, then published in
 Prefer a `sha-…` tag for reproducible runs. Without `GTA_IMAGE`, Compose uses
 the published image set as default in the compose file.
 
+### Without cloning the repository
+
+You only need the `compose/` folder. The image contains it, so you can copy it
+out of the image instead of cloning:
+
+```bash
+mkdir gta && cd gta
+
+export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:<tag>
+docker pull $GTA_IMAGE
+
+docker run --rm --entrypoint tar $GTA_IMAGE \
+  -C /home/rstudio/geoflow-tunaatlas -c compose | tar -x
+```
+
+Then follow this guide from section 2, running the commands from `gta/`
+instead of the repository root.
+
+- `compose/` holds the compose file, the two launch scripts and the database
+  init scripts. Nothing else is needed: the workflow uses the code of the
+  image, and the script copies `docker_local.env.compose` and the sample data
+  out of the image the first time it runs.
+- The files are those of the commit the image was built from. Keep `GTA_IMAGE`
+  set to the same tag, so that the scripts and the image match.
+- Requires an image built after this section was added.
+- RStudio (section 6) mounts `R/` and `config/` from the host: clone the
+  repository to use it.
+
 ## 2. Run the test
 
 ```bash
@@ -234,7 +262,7 @@ defaults.
 | `GTA_IMAGE` | the published image set in the compose file | Workflow image to run |
 | `GTA_DATA_DIR` | `tests/sample_data` / `runtime/extracted/all_raw_data_GTA` | Raw data folder on your machine |
 | `GTA_STEPS` | see above | Steps to run, e.g. `GTA_STEPS=services` (order does not matter) |
-| `GTA_MOUNT_CODE` | `true` | `true`: use `R/` and `config/` of your checkout (no rebuild needed after a code change). `false`: use the code inside the image (what the CI tests) |
+| `GTA_MOUNT_CODE` | `false` | `false`: use the code inside the image (what the CI tests). `true`: use `R/` and `config/` of your checkout, to try a code change without rebuilding the image |
 | `GTA_COMPOSE_PROJECT` | *(none)* | Separate stack with its own containers and volumes, e.g. `gta-test` |
 | `GTA_RUN_USER` | your `uid:gid` | User inside the container (use `1000:1000` if your uid is not 1000) |
 | `GTA_GC_TIMEOUT` | `60` / `300` | Seconds to wait before restarting R when it hangs (see Troubleshooting) |
