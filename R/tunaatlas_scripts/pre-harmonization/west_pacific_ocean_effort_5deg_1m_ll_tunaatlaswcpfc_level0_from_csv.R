@@ -23,8 +23,8 @@
 #'
 
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_3.R"))
   
   
 
@@ -97,7 +97,7 @@ function(action, entity, config){
   #---------------------------------------
   DF$cwp_grid=NULL # remove column cwp_grid
   colnames(DF)<-toupper(colnames(DF))
-  if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+  DF$FLAG_CODE[is.na(DF$FLAG_CODE) | DF$FLAG_CODE == ""] <- "UNK"
   # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
   # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
   DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
@@ -144,7 +144,7 @@ function(action, entity, config){
   efforts_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
   
   # School
-  efforts_pivot_WCPFC$School<-"UNK"
+  efforts_pivot_WCPFC$School<-"OTH"
   
   ### Reach the efforts harmonized DSD using a function in WCPFC_functions.R
   colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
@@ -153,10 +153,10 @@ function(action, entity, config){
   #@eblondel
   efforts_pivot_WCPFC$RFMO <- "WCPFC"
   efforts_pivot_WCPFC$Ocean <- "PAC_W"
-  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_ID 
+  efforts_pivot_WCPFC$FishingFleet <- efforts_pivot_WCPFC$FLAG_CODE 
   efforts_pivot_WCPFC <- harmo_time_2(efforts_pivot_WCPFC, "YY", "MM")
-  efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
-  #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT
+  efforts_pivot_WCPFC <- harmo_spatial_3(efforts_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
+  #@eblondel change column names LAT5 -> LAT_SHORT, LON5 -> LON_SHORT # rechanged as reupdated by WCPFC in 2026
   efforts_pivot_WCPFC$CatchType <- "ALL"
   
   efforts_pivot_WCPFC$Effort <- efforts_pivot_WCPFC$value
@@ -195,12 +195,16 @@ function(action, entity, config){
     sep = "/"
   )
   entity$setTemporalExtent(dataset_temporal_extent)
-  
+  efforts$measurement_processing_level <- "unknown" 
+  base1 <- tools::file_path_sans_ext(basename(filename1))
   #@geoflow -> export as csv
-  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+  # output in same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
   write.csv(efforts, output_name_dataset, row.names = FALSE)
-  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  
+  file.rename(    from = entity$getJobDataResource(config, filename2),    to   = output_name_codelists  )
   #----------------------------------------------------------------------------------------------------------------------------
   entity$addResource("source", path_to_raw_dataset)
   entity$addResource("harmonized", output_name_dataset)

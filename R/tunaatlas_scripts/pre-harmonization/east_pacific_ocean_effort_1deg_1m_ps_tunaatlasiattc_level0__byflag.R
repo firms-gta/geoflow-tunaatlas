@@ -29,8 +29,6 @@ function(action, entity, config){
   
 #packages
 
-  
-
 #----------------------------------------------------------------------------------------------------------------------------
 #@geoflow --> with this script 2 objects are pre-loaded
 #config --> the global config of the workflow
@@ -49,16 +47,19 @@ options(encoding = "UTF-8")
 ##Efforts
 
 # Reach the efforts pivot DSD using a function in IATTC_functions.R
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_IATTC_CE_allbutLLTunaBillfish.R")
+source(here::here("./R/sardara_functions/FUN_efforts_IATTC_CE_allbutLLTunaBillfish.R"))
 efforts_pivot_IATTC <-FUN_efforts_IATTC_CE_allbutLLTunaBillfish(path_to_raw_dataset,"NumSets","Flag","PS")
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+source(here::here("./R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
 efforts<-IATTC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_IATTC,colToKeep_efforts)
 
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
 efforts$source_authority<-"IATTC"
 efforts$measurement <- "effort"
+efforts$measurement_processing_level <- "unknown" 
+efforts <- efforts %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "ALL", "OTH", fishing_mode))
+
 #----------------------------------------------------------------------------------------------------------------------------
 #@eblondel additional formatting for next time support
 efforts$time_start <- as.Date(efforts$time_start)
@@ -70,12 +71,15 @@ dataset_temporal_extent <- paste(
 	sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
-
+base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+# output in same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)

@@ -48,7 +48,7 @@ function(action, entity, config){
       time_start = as.Date(paste(Year, Month, "01", sep = "-")),
       time_end = as.Date(time_start) + lubridate::days(lubridate::days_in_month(time_start) - 1),
       fishing_fleet = Flag,
-      fishing_mode = "UNK",
+      fishing_mode = "OTH",
       source_authority = "IATTC",
       gear_type = "LL" )%>% 
     dplyr::select(
@@ -63,7 +63,7 @@ function(action, entity, config){
       measurement_value = Hooks
     )
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R")
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R"))
   
   df$Square_size <- 5 # 5-degree squares
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
@@ -78,11 +78,16 @@ function(action, entity, config){
     sep = "/"
   )
   entity$setTemporalExtent(dataset_temporal_extent)
+  df$measurement_processing_level <- "unknown" 
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # output in same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
   
-  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
   write.csv(df, output_name_dataset, row.names = FALSE)
-  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  
+  file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
   #----------------------------------------------------------------------------------------------------------------------------  
   entity$addResource("source", path_to_raw_dataset)
   entity$addResource("harmonized", output_name_dataset)

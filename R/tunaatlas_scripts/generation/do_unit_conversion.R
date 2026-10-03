@@ -1,8 +1,8 @@
 do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE, converting_dataset_mapped  = TRUE){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/extract_dataset.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/convert_units.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/list_metadata_datasets.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/map_codelist.R")
+  source(here::here("R/sardara_functions/extract_dataset.R"))
+  source(here::here("R/tunaatlas_scripts/generation/convert_units.R"))
+  source(here::here("R/sardara_functions/list_metadata_datasets.R"))
+  source(here::here("R/sardara_functions/map_codelist.R"))
   con <- config$software$output$dbi
   
   if(is.data.frame(unit_conversion_csv_conversion_factor_url)){
@@ -40,8 +40,21 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     df_conversion_factor <- df_conversion_factor %>% dplyr::rename(conversion_factor = measurement_value)
   }
   
-  df_conversion_factor <- df_conversion_factor %>% dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT", "t")~ "t", measurement_unit %in% c("NO", "no")~"no", TRUE ~ measurement_unit)) %>% 
-    dplyr::mutate(unit_target = dplyr::case_when(unit_target %in% c("MT", "t")~ "t", unit_target %in% c("NO", "no")~"no", TRUE ~ unit_target)) 
+  df_conversion_factor <- df_conversion_factor %>%
+    dplyr::mutate(
+      measurement_unit = dplyr::case_when(
+        measurement_unit %in% c("MT", "t") ~ "t",
+        measurement_unit %in% c("NO", "no") ~ "no",
+        TRUE ~ as.character(measurement_unit)
+      )
+    ) %>%
+    dplyr::mutate(
+      unit_target = dplyr::case_when(
+        unit_target %in% c("MT", "t") ~ "t",
+        unit_target %in% c("NO", "no") ~ "no",
+        TRUE ~ as.character(unit_target)
+      )
+    )
   
   
   if (!mapping_map_code_lists){
@@ -52,7 +65,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     mapping_dataset<-data.frame(source_authority,db_mapping_dataset_name)
     df_mapping_final_this_dimension<-NULL
     for (j in 1:nrow(mapping_dataset)){ 
-      source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/extract_dataset.R")
+      source(here::here("./R/sardara_functions/extract_dataset.R"))
       df_mapping<-extract_dataset(con,list_metadata_datasets(con,identifier=mapping_dataset$db_mapping_dataset_name[j]))  # Extract the code list mapping dataset from the DB
       df_mapping$source_authority<-as.character(mapping_dataset$source_authority[j])  # Add the dimension "source_authority" to the mapping dataset. That dimension is not included in the code list mapping datasets. However, it is necessary to map the code list.
       df_mapping_final_this_dimension<-rbind(df_mapping_final_this_dimension,df_mapping)

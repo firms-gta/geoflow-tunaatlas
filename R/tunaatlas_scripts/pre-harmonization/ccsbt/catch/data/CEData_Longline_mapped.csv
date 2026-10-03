@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+AUS,09.39,1987-03-01,1987-03-31,6230130,UNK,SBF,RC,no,CCSBT,catch,unknown,6
+AUS,09.39,1987-05-01,1987-05-31,6235150,UNK,SBF,RC,no,CCSBT,catch,unknown,1
+AUS,09.39,1987-06-01,1987-06-30,6230150,UNK,SBF,RC,no,CCSBT,catch,unknown,2
+AUS,09.39,1987-06-01,1987-06-30,6235150,UNK,SBF,RC,no,CCSBT,catch,unknown,47
+AUS,09.39,1987-07-01,1987-07-31,6225150,UNK,SBF,RC,no,CCSBT,catch,unknown,1

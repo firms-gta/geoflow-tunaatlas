@@ -73,12 +73,12 @@ options(encoding = "UTF-8")
 ## Catches
 
 # Reach the catches pivot DSD using a function stored in IATTC_functions.R
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
+source(here::here("./R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R"))
 catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"Flag","LP")
 catches_pivot_IATTC$NumSets<-NULL
 
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
+source(here::here("./R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R"))
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
 
 colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
@@ -93,17 +93,21 @@ catches$time_start <- as.Date(catches$time_start)
 catches$time_end <- as.Date(catches$time_end)
 #we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
-	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-	paste0(format(max(catches$time_end), "%Y"), "-12-31"),
-	sep = "/"
+  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
+  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
+  sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
+base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+# output in same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(catches, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)

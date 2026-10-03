@@ -1,0 +1,11 @@
+"Entity","tRFMO","negative_values.csv","not_conform_conversion_factors.csv","removed_irregular_areas.csv","areas_in_land.csv","outside_juridiction.csv"
+"catch_1deg_1m_bb_iattc_level0__tuna_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_1deg_1m_ccsbt_level0__surface","CCSBT",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_1deg_1m_ps_iattc_level0__billfish_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_1deg_1m_ps_iattc_level0__shark_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_1deg_1m_ps_iattc_level0__tuna_byflag","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_5deg_1m_bb_wcpfc_level0","WCPFC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_5deg_1m_driftnet_wcpfc_level0","WCPFC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_5deg_1m_ll_ccsbt_level0","CCSBT",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_5deg_1m_ll_iattc_level0__shark","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE
+"catch_5deg_1m_ll_iattc_level0__tuna_billfish","IATTC",FALSE,FALSE,FALSE,FALSE,FALSE

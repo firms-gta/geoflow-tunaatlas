@@ -58,7 +58,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # ---------------
 
 # # Load function to convert to NetCDF and process entities
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_actions/convert_to_netcdf.R")
+# source(here::here("./R/tunaatlas_actions/convert_to_netcdf.R"))
 # entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 # wd <- getwd()
 # 
@@ -78,7 +78,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # # --------------
 # 
 # # Process entities for DOI
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_actions/process_entities_for_DOI.R")
+# source(here::here("./R/tunaatlas_actions/process_entities_for_DOI.R"))
 # process_entities_for_DOI(tunaatlas_qa_global_datasets_catch_path, "~/firms-gta/geoflow-tunaatlas/jobs/processed_entities_for_DOI")
 # 
 # 
@@ -86,7 +86,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # # -------------------------
 # 
 # # Extract data irregularities between nominal and georeferenced datasets
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
+# source("./Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
 # upgraded_nominal <- strata_in_georef_but_not_in_nominal_report_launching("~/blue-cloud-dataspace/GlobalFisheriesAtlas/data", connectionDB = con)
 # 
 # 
@@ -94,7 +94,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # # -------------
 # 
 # # Perform analysis on Catch Per Unit Effort (CPUE)
-# source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_with_catches_without_effort.R")
+# source("./Analysis_markdown/functions/strata_with_catches_without_effort.R")
 # CPUE <- strata_with_catches_without_effort(tunaatlas_qa_global_datasets_catch_path, connectionDB = con)
 # 
 # # Filter CPUE data for cases with catch but no effort, and vice versa

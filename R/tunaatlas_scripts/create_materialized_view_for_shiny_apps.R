@@ -1,6 +1,6 @@
 create_materialized_view_for_shiny_apps <- function(config, software, software_config){
   db_name <- software_config$parameters$dbname
-  repository_sql_scripts_database_deployment <- geoflow::get_config_resource_path(config, "tunaatlas_sql")
+  repository_sql_scripts_database_deployment <- here::here( "./R/tunaatlas_sql")
   outsql <- paste("-- Creation of the materialized view for shiny apps in ", db_name)
   
   fileName <- paste(repository_sql_scripts_database_deployment,"i6i7i8.sql",sep="/")

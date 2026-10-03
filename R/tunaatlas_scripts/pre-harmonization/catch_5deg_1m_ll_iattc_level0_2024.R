@@ -76,19 +76,17 @@ function(action, entity, config){
       measurement_value
     )
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R")
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/cwp_grid_from_latlon.R"))
   
   df$Square_size <- 5 # 5-degree squares
   df <- cwp_grid_from_latlon(df, colname_latitude = "LatC5", colname_longitude = "LonC5", colname_squaresize = "Square_size")
   df <- df %>% dplyr::select(-c(Square_size, LatC5, LonC5)) %>% dplyr::filter(measurement_value != 0)
   
-  if (stringr::str_detect(filename1, "shark")) {
-    df$measurement_processing_level <- "original_sample"
-  } else {
-    df$measurement_processing_level <- "unknown"
-  }
+  shark_list <- c("BSH","CCL","FAL","MAK","OCS","RSK","SKH","SMA","SPN","THR")
   
-  
+  df <- df %>%
+    dplyr::mutate(measurement_processing_level = ifelse(species%in%shark_list, "original_sample", "unknown")) # only sharks are in original sample
+     
   
   df$time_start <- as.Date(df$time_start)
   df$time_end <- as.Date(df$time_end)
@@ -100,10 +98,15 @@ function(action, entity, config){
   )
   entity$setTemporalExtent(dataset_temporal_extent)
   
-  output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+  base1 <- tools::file_path_sans_ext(basename(filename1))
+  #@geoflow -> export as csv
+  # output in same folder as path_to_raw_dataset 
+  output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+  output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+  
   write.csv(df, output_name_dataset, row.names = FALSE)
-  output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-  file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+  
+  file.rename(from = entity$getJobDataResource(config, filename2),    to   = output_name_codelists  )
   #----------------------------------------------------------------------------------------------------------------------------  
   entity$addResource("source", path_to_raw_dataset)
   entity$addResource("harmonized", output_name_dataset)

@@ -32,7 +32,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   # Définition du fichier local
   # Définition du fichier local
-  csv_file <- here::here("data/cl_areal_grid.csv")
+  csv_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
   
   # Initialisation
   db_working <- FALSE
@@ -69,7 +69,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   }
   
   cwp_grid <- cwp_grid %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/identification_data_on_land_cwp.R")
+  source(here::here("./R/tunaatlas_scripts/generation/identification_data_on_land_cwp.R"))
   cat("Reallocating data that are in land areas")
   
   cat("Executing spatial_curation_intersect_areas")
@@ -79,7 +79,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   CA_WITH_GRIDS$on_land_p <- as.numeric(CA_WITH_GRIDS$on_land_p)
   areas_in_land <- CA_WITH_GRIDS %>% dplyr::filter(on_land_p == 100)
   
-  dataset_in_land <- georef_dataset %>% dplyr::filter(geographic_identifier %in%areas_in_land)
+  dataset_in_land <- georef_dataset %>% dplyr::filter(geographic_identifier %in%areas_in_land$geographic_identifier)
   
   df_input_cwp_grid <- georef_dataset %>% dplyr::inner_join(cwp_grid) %>% dplyr::select(-c(on_land_p))
   
@@ -104,7 +104,7 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   if (action_on_mislocated=="remove"){ # We remove data that is mislocated
     cat("Removing data that are in land areas...\n")
     # remove rows with areas in land
-    georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% c(areas_in_land))), ]
+    georef_dataset<-georef_dataset[ which(!(georef_dataset$geographic_identifier %in% c(areas_in_land$geographic_identifier))), ]
     
     # fill metadata elements
     lineage<-paste0("Some data might be mislocated: either located on land areas or without any area information. These data were not kept.	Information regarding the reallocation of mislocated data for this dataset: The data that were mislocated represented percentage_of_total_catches_reallocated_weight % of the whole catches expressed in weight in the dataset and percentage_of_total_catches_reallocated_number % of the catches expressed in number. percentage_catches_on_land_reallocated % of the catches that were removed.")
@@ -115,11 +115,11 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   if (action_on_mislocated=="reallocate"){   # We reallocate data that is mislocated (they will be equally distributed on areas with same reallocation_dimensions (month|year|gear|flag|species|schooltype).
     cat("Reallocating data that are in land areas...\n")
-    source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_function_reallocate_data.R")
+    source(here::here("./R/tunaatlas_scripts/generation/spatial_curation_function_reallocate_data.R"))
     
     catch_curate_data_mislocated<-spatial_curation_function_reallocate_data(df_input = georef_dataset,
                                                                             dimension_reallocation = "geographic_identifier",
-                                                                            vector_to_reallocate = c(areas_in_land, not_cwp_grid$geographic_identifier),
+                                                                            vector_to_reallocate = c(areas_in_land$geographic_identifier, not_cwp_grid$geographic_identifier),
                                                                             reallocation_dimensions = setdiff(colnames(georef_dataset),c("measurement_value","geographic_identifier")))
     georef_dataset<-catch_curate_data_mislocated$df
     

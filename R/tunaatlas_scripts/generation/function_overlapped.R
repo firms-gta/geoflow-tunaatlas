@@ -118,11 +118,28 @@ function_overlapped <- function(dataset,
   
   # Remove ambiguous codes if requested
   if (removing_unk) {
+    
+    cols_present <- names(overlapping_kept)
+    
+    cond <- rep(FALSE, nrow(overlapping_kept))
+    
+    if ("species" %in% cols_present) {
+      cond <- cond | overlapping_kept$species == "MZZ"
+    }
+    
+    if ("gear_type" %in% cols_present) {
+      cond <- cond | overlapping_kept$gear_type == "99.9"
+    }
+    
+    if ("fishing_fleet" %in% cols_present) {
+      cond <- cond | overlapping_kept$fishing_fleet == "NEI"
+    }
+    
     overlapping_kept <- overlapping_kept %>%
       dplyr::group_by(across(c(strata, "source_authority"))) %>%
       dplyr::mutate(overlap = n_distinct(source_authority)) %>%
       dplyr::ungroup() %>%
-      dplyr::filter(!(overlap == 2 & (species == "MZZ" | gear_type == "99.9" | fishing_fleet == "NEI" ))) %>% 
+      dplyr::filter(!(overlap == 2 & cond)) %>%
       dplyr::select(-overlap)
   }
   

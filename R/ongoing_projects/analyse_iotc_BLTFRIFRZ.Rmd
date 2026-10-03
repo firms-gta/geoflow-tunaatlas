@@ -1,0 +1,418 @@
+---
+title: "FRI / BLT / FRZ mismatches between nominal and georeferenced IOTC data"
+output: html_document
+---------------------
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(dplyr)
+library(lubridate)
+library(purrr)
+```
+
+## Context
+
+This note focuses on the species-group inconsistencies involving `FRI`, `BLT`, and `FRZ` between the nominal IOTC dataset (`iotc_nom`) and the georeferenced IOTC dataset (`iotc`).
+
+The issue is restricted to strata where:
+
+* `fishing_fleet == "NEI"`
+* `gear_type == "99.9"`
+
+This means the problem is limited to very imprecise strata and does not affect the more detailed fleet/gear combinations.
+
+## Diagnostic code
+
+```{r}
+prepare_species_strata <- function(data,
+                                   dataset_name,
+                                   grouping_keys = c("year", "fishing_fleet", "gear_type"),
+                                   date_col = "time_start",
+                                   species_col = "species") {
+  
+  data <- data %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(year = lubridate::year(.data[[date_col]]))
+  
+  missing_cols <- setdiff(c(grouping_keys, species_col), names(data))
+  if (length(missing_cols) > 0) {
+    stop("Missing columns in data: ", paste(missing_cols, collapse = ", "))
+  }
+  
+  data %>%
+    dplyr::select(dplyr::all_of(c(grouping_keys, species_col))) %>%
+    dplyr::distinct() %>%
+    dplyr::mutate(dataset = dataset_name)
+}
+
+inspect_species_group_mismatches <- function(nominal_data,
+                                             georef_data,
+                                             group_species = c("FRI", "BLT", "FRZ"),
+                                             group_label = "FRZ_group",
+                                             grouping_keys = c("year", "fishing_fleet", "gear_type"),
+                                             date_col_nom = "time_start",
+                                             date_col_geo = "time_start",
+                                             species_col = "species") {
+  
+  nom <- prepare_species_strata(
+    data = nominal_data,
+    dataset_name = "nominal",
+    grouping_keys = grouping_keys,
+    date_col = date_col_nom,
+    species_col = species_col
+  ) %>%
+    dplyr::filter(.data[[species_col]] %in% group_species)
+  
+  geo <- prepare_species_strata(
+    data = georef_data,
+    dataset_name = "georef",
+    grouping_keys = grouping_keys,
+    date_col = date_col_geo,
+    species_col = species_col
+  ) %>%
+    dplyr::filter(.data[[species_col]] %in% group_species)
+  
+  join_keys <- c(grouping_keys, species_col)
+  
+  raw_compare <- dplyr::full_join(
+    geo %>% dplyr::mutate(in_georef = TRUE),
+    nom %>% dplyr::mutate(in_nominal = TRUE),
+    by = join_keys
+  ) %>%
+    dplyr::mutate(
+      in_georef = dplyr::coalesce(in_georef, FALSE),
+      in_nominal = dplyr::coalesce(in_nominal, FALSE),
+      match_status = dplyr::case_when(
+        in_georef & in_nominal ~ "common",
+        in_georef & !in_nominal ~ "only_georef",
+        !in_georef & in_nominal ~ "only_nominal"
+      )
+    )
+  
+  mismatched_strata <- raw_compare %>%
+    dplyr::filter(match_status != "common") %>%
+    dplyr::distinct(dplyr::across(dplyr::all_of(grouping_keys)))
+  
+  if (nrow(mismatched_strata) == 0) {
+    return(list(
+      raw_compare = raw_compare,
+      mismatched_species = raw_compare %>% dplyr::filter(match_status != "common"),
+      grouped_diagnosis = tibble::tibble(),
+      warnings = tibble::tibble()
+    ))
+  }
+  
+  grouped_diagnosis <- mismatched_strata %>%
+    dplyr::left_join(
+      geo %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(grouping_keys))) %>%
+        dplyr::summarise(
+          species_georef = list(sort(unique(.data[[species_col]]))),
+          n_georef_species = dplyr::n_distinct(.data[[species_col]]),
+          .groups = "drop"
+        ),
+      by = grouping_keys
+    ) %>%
+    dplyr::left_join(
+      nom %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(grouping_keys))) %>%
+        dplyr::summarise(
+          species_nominal = list(sort(unique(.data[[species_col]]))),
+          n_nominal_species = dplyr::n_distinct(.data[[species_col]]),
+          .groups = "drop"
+        ),
+      by = grouping_keys
+    ) %>%
+    dplyr::mutate(
+      species_georef = purrr::map(species_georef, ~ if (is.null(.x)) character(0) else .x),
+      species_nominal = purrr::map(species_nominal, ~ if (is.null(.x)) character(0) else .x),
+      common_species = purrr::map2(species_georef, species_nominal, intersect),
+      only_georef_species = purrr::map2(species_georef, species_nominal, setdiff),
+      only_nominal_species = purrr::map2(species_nominal, species_georef, setdiff),
+      n_common_species = purrr::map_int(common_species, length),
+      n_only_georef_species = purrr::map_int(only_georef_species, length),
+      n_only_nominal_species = purrr::map_int(only_nominal_species, length),
+      group_present_in_both =
+        purrr::map_int(species_georef, length) > 0 &
+        purrr::map_int(species_nominal, length) > 0,
+      regrouping_possible =
+        group_present_in_both &
+        (n_only_georef_species > 0 | n_only_nominal_species > 0),
+      partial_warning =
+        n_common_species > 0 &
+        (n_only_georef_species > 0 | n_only_nominal_species > 0),
+      warning_message = dplyr::case_when(
+        partial_warning ~ purrr::pmap_chr(
+          list(common_species, only_georef_species, only_nominal_species),
+          function(common_species, only_georef_species, only_nominal_species) {
+            paste0(
+              "Partial match inside ", group_label, ": common = {",
+              paste(common_species, collapse = ", "),
+              "}; only_georef = {",
+              paste(only_georef_species, collapse = ", "),
+              "}; only_nominal = {",
+              paste(only_nominal_species, collapse = ", "),
+              "}."
+            )
+          }
+        ),
+        regrouping_possible ~ "Mismatch may be resolved by grouping species.",
+        TRUE ~ NA_character_
+      )
+    )
+  
+  warnings_tbl <- grouped_diagnosis %>%
+    dplyr::filter(!is.na(warning_message))
+  
+  list(
+    raw_compare = raw_compare,
+    mismatched_species = raw_compare %>% dplyr::filter(match_status != "common"),
+    grouped_diagnosis = grouped_diagnosis,
+    warnings = warnings_tbl
+  )
+}
+```
+
+## Run the diagnostic
+
+```{r}
+res_frz <- inspect_species_group_mismatches(
+  nominal_data = iotc_nom,
+  georef_data = iotc,
+  group_species = c("FRI", "BLT", "FRZ"),
+  group_label = "FRI_BLT_FRZ",
+  grouping_keys = c("year", "fishing_fleet", "gear_type"),
+  date_col_nom = "time_start",
+  date_col_geo = "time_start",
+  species_col = "species"
+)
+```
+
+## Relevant problematic strata
+
+```{r}
+res_frz$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible)
+```
+
+## Restriction to the problematic fleet and gear strata
+
+```{r}
+res_frz$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible) %>%
+  dplyr::count(fishing_fleet, gear_type, sort = TRUE)
+```
+
+The output shows that these mismatches concern only:
+
+* `fishing_fleet = "NEI"`
+* `gear_type = "99.9"`
+
+## Interpretation by period
+
+### 1970 to 1983
+
+For 1970 to 1983, the georeferenced dataset contains only `FRI`, whereas the nominal dataset contains `BLT` and `FRI`.
+
+This suggests two possible interpretations:
+
+1. only `BLT` is missing in the georeferenced dataset;
+2. or the georeferenced `FRI` was in fact intended to represent the broader grouped category later represented by `FRZ`.
+
+In practice, this discrepancy remains limited because the mismatch occurs only in `NEI` / `99.9` strata.
+
+### 1984 to 2021
+
+From 1984 to 2021, the georeferenced dataset contains `BLT`, `FRI`, and `FRZ`, while the nominal dataset does not contain `FRZ`.
+
+This is not a major issue, but a methodological choice is needed:
+
+* either aggregate everything into `FRZ`;
+* or redistribute / raise `BLT`, `FRI`, and `FRZ` in the georeferenced data against the nominal sum of `BLT + FRI`.
+
+The second option preserves more detail, but the first is simpler and may be more robust if the goal is only to ensure compatibility between datasets.
+
+### 1992 to 1993 and 2007 to 2013
+
+For 1992 to 1993 and 2007 to 2013, the situation is less clear.
+
+In these years, the georeferenced dataset contains `FRI` and `FRZ`, whereas the nominal dataset contains only `BLT` and `FRI`.
+
+The key question is whether georeferenced `FRZ` corresponds mainly to nominal `BLT`, or whether both datasets should instead be harmonised at the aggregated `FRZ` level.
+
+A cautious solution would be to aggregate over the full group (`FRI`, `BLT`, `FRZ`) for these strata rather than trying to infer a one-to-one correspondence.
+
+## Useful extracts
+
+### Problematic strata only
+
+```{r}
+res_frz$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible) %>%
+  dplyr::select(
+    year, fishing_fleet, gear_type,
+    species_georef, species_nominal,
+    common_species,
+    only_georef_species,
+    only_nominal_species,
+    warning_message
+  )
+```
+
+### Focus on 1970 to 1983
+
+```{r}
+res_frz$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible, dplyr::between(year, 1970, 1983)) %>%
+  dplyr::select(
+    year, fishing_fleet, gear_type,
+    species_georef, species_nominal,
+    common_species,
+    only_georef_species,
+    only_nominal_species
+  )
+```
+
+### Focus on 1984 to 2021
+
+```{r}
+res_frz$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible, dplyr::between(year, 1984, 2021)) %>%
+  dplyr::select(
+    year, fishing_fleet, gear_type,
+    species_georef, species_nominal,
+    common_species,
+    only_georef_species,
+    only_nominal_species
+  )
+```
+
+### Focus on 1992 to 1993 and 2007 to 2013
+
+```{r}
+res_frz$grouped_diagnosis %>%
+  dplyr::filter(
+    regrouping_possible,
+    year %in% c(1992, 1993, 2007:2013)
+  ) %>%
+  dplyr::select(
+    year, fishing_fleet, gear_type,
+    species_georef, species_nominal,
+    common_species,
+    only_georef_species,
+    only_nominal_species,
+    warning_message
+  )
+```
+
+## Short conclusion
+
+These `FRI` / `BLT` / `FRZ` inconsistencies are limited to the very coarse strata `fishing_fleet = NEI` and `gear_type = 99.9`.
+
+They do not suggest a broad incompatibility between nominal and georeferenced datasets, but rather a coding difference within a small tuna group.
+
+A pragmatic decision is still needed for harmonisation:
+
+* aggregate all these strata to `FRZ`; or
+* keep detail in the georeferenced data and compare / raise on the nominal total of `BLT + FRI`.
+
+For the ambiguous years (1992-1993 and 2007-2013), aggregation at the group level is likely the safest approach.
+
+## Same diagnostic for ICCAT
+
+```{r}
+iccat_nom <- nominal_catch_for_raising %>%
+  dplyr::filter(source_authority == "ICCAT")
+
+iccat <- georef_dataset %>%
+  dplyr::filter(source_authority == "ICCAT")
+```
+
+### Diagnostic at `year x fishing_fleet x gear_type`
+
+```{r}
+res_frz_iccat_detail <- inspect_species_group_mismatches(
+  nominal_data = iccat_nom,
+  georef_data = iccat,
+  group_species = c("FRI", "BLT", "FRZ"),
+  group_label = "FRI_BLT_FRZ",
+  grouping_keys = c("year", "fishing_fleet", "gear_type"),
+  date_col_nom = "time_start",
+  date_col_geo = "time_start",
+  species_col = "species"
+)
+```
+
+```{r}
+res_frz_iccat_detail$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible)
+```
+
+For ICCAT, the detailed comparison suggests that some mismatches come from nominal strata being less precise than georeferenced strata rather than from a true contradiction between datasets.
+
+For example, `FRI` is missing in nominal USA data in 1970, and this likely corresponds to a broader `NEI` category. This appears to happen in several years. In such cases, georeferenced data may simply be more precise than nominal data.
+
+A specific point is that for `GG`, the issue seems to concern only `gear_type = 99.9`.
+
+### Diagnostic at year level only
+
+Because the `year x fishing_fleet x gear_type` comparison can produce many georeferenced-only strata with no nominal counterpart, it is useful to also inspect the same issue at the year level only.
+
+```{r}
+res_frz_iccat_year <- inspect_species_group_mismatches(
+  nominal_data = iccat_nom,
+  georef_data = iccat,
+  group_species = c("FRI", "BLT", "FRZ"),
+  group_label = "FRI_BLT_FRZ",
+  grouping_keys = c("year"),
+  date_col_nom = "time_start",
+  date_col_geo = "time_start",
+  species_col = "species"
+)
+```
+
+```{r}
+res_frz_iccat_year$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible)
+```
+
+### Interpretation for ICCAT
+
+Before 1967, there are only nominal data, which is not problematic in itself.
+
+After 1967, the main issue is that georeferenced data contain `FRI` while nominal data contain `BLT + FRI`.
+
+This leaves an open question:
+
+* either georeferenced data are missing `BLT`;
+* or georeferenced `FRI` is in fact an aggregated category, but coded as `FRI` rather than `FRZ`.
+
+For 2022 and 2023, nominal data do not contain `BLT` or `FRI`, which should be treated separately from the earlier pattern.
+
+### Useful extracts for ICCAT
+
+```{r}
+res_frz_iccat_detail$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible) %>%
+  dplyr::select(
+    year, fishing_fleet, gear_type,
+    species_georef, species_nominal,
+    common_species,
+    only_georef_species,
+    only_nominal_species,
+    warning_message
+  )
+```
+
+```{r}
+res_frz_iccat_year$grouped_diagnosis %>%
+  dplyr::filter(regrouping_possible) %>%
+  dplyr::select(
+    year,
+    species_georef, species_nominal,
+    common_species,
+    only_georef_species,
+    only_nominal_species,
+    warning_message
+  )
+```

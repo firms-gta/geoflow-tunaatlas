@@ -1,0 +1,102 @@
+ARG BASE_IMAGE=rocker/rstudio:4.2.3
+FROM ${BASE_IMAGE}
+
+LABEL maintainer="Grasset Bastien <bastien.grasset@ird.fr>"
+
+ARG MODE=dev
+ARG RUN_WORKFLOW=false
+ARG GITHUB_BRANCH=master
+
+ENV MODE=${MODE}
+ENV PROJECT_DIR=/home/rstudio/geoflow-tunaatlas
+ENV RENV_PATHS_ROOT=/opt/renv
+ENV RENV_PATHS_CACHE=/opt/renv/cache
+ENV RENV_CONFIG_CACHE_SYMLINKS=FALSE
+ENV GTA2026_ARCHIVE=/opt/data_input/all_raw_data_GTA.tar.gz
+ENV GTA2026_RAW_DIR=/home/rstudio/blue-cloud-dataspace/GlobalFisheriesAtlas/data_pre_harmo_tRFMOs/All_raw_data_GTA_2026
+
+WORKDIR ${PROJECT_DIR}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pandoc \
+    pandoc-citeproc \
+    sudo \
+    git \
+    curl \
+    wget \
+    unzip \
+    dos2unix \
+    cmake \
+    pkg-config \
+    protobuf-compiler \
+    gdal-bin \
+    udunits-bin \
+    redland-utils \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libxml2-dev \
+    libudunits2-dev \
+    libproj-dev \
+    libgeos-dev \
+    libgdal-dev \
+    libv8-dev \
+    libsodium-dev \
+    libsecret-1-dev \
+    libnetcdf-dev \
+    libjq-dev \
+    libprotobuf-dev \
+    librdf0 \
+    librdf0-dev \
+    libtbb-dev \
+    libzmq3-dev \
+    libpoppler-cpp-dev \
+    libcairo2-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    texlive-latex-base \
+    texlive-latex-recommended \
+    texlive-latex-extra \
+    texlive-fonts-recommended \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN id -u rstudio >/dev/null 2>&1 || useradd -m -s /bin/bash rstudio
+
+RUN mkdir -p \
+    ${PROJECT_DIR} \
+    ${RENV_PATHS_CACHE} \
+    /opt/data_input \
+    ${GTA2026_RAW_DIR} \
+ && chown -R rstudio:rstudio /home/rstudio ${RENV_PATHS_ROOT} /opt/data_input
+
+RUN git clone --branch ${GITHUB_BRANCH} --depth 1 \
+    https://github.com/firms-gta/geoflow-tunaatlas.git \
+    ${PROJECT_DIR}
+
+WORKDIR ${PROJECT_DIR}
+
+RUN wget -O ${GTA2026_ARCHIVE} \
+    "https://zenodo.org/records/20019715/files/all_raw_data_GTA.tar.gz?download=1" \
+ && mkdir -p /tmp/gta_raw \
+ && tar -xzf ${GTA2026_ARCHIVE} -C /tmp/gta_raw \
+ && if [ -d /tmp/gta_raw/all_raw_data_GTA ]; then \
+      cp -a /tmp/gta_raw/all_raw_data_GTA/. ${GTA2026_RAW_DIR}/ ; \
+    else \
+      cp -a /tmp/gta_raw/. ${GTA2026_RAW_DIR}/ ; \
+    fi \
+ && rm -rf /tmp/gta_raw
+
+RUN Rscript -e "install.packages(c('remotes','jsonlite'), repos='https://cloud.r-project.org')" \
+ && Rscript -e "ver <- jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version; remotes::install_version('renv', version = ver, upgrade = 'never', repos = 'https://cloud.r-project.org')" \
+ && Rscript -e "renv::restore(prompt = FALSE)"
+
+RUN chown -R rstudio:rstudio ${PROJECT_DIR} ${GTA2026_RAW_DIR} ${RENV_PATHS_ROOT}
+
+RUN if [ "${RUN_WORKFLOW}" = "true" ]; then \
+      Rscript -e "source(here::here('R/launching_workflows/GTA_2026_creation.R'))"; \
+    fi
+
+EXPOSE 8787
+
+CMD ["/bin/bash"]

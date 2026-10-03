@@ -20,12 +20,7 @@
         "source": "https://docs.google.com/spreadsheets/d/13SJB2PYkCCdrzw8HNJMPFg0yXs0OSYY2mUOAl5dagUc/edit?gid=186137991#gid=186137991"
       }
     ],
-    "contacts" : [
-      {
-        "handler": "gsheet",
-        "source": "https://docs.google.com/spreadsheets/d/1DtGR8cHAkro12DOFZn40cehfU9LoI9l7wVUCHfHH-xY/edit?usp=sharing"
-      }
-    ]
+    "contacts" : []
   },
   "software": [
     {
@@ -57,7 +52,7 @@
     {
       "id": "Tidying_and_mapping_data",
       "script": "./R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
-      "run": true,
+      "run": false,
       "options": {
         "recap_each_step": true
       }
@@ -66,7 +61,7 @@
     {
       "id": "load_dataset",
       "script": "./R/tunaatlas_actions/load_dataset.R",
-      "run": true,
+      "run": false,
       "options": {
         "upload_to_db": true,
         "create_materialized_view": false,
@@ -87,7 +82,7 @@
     {
       "id": "create_report_global_action",
       "script": "./R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
-      "run": true,
+      "run": false,
       "options": {
       }
     }

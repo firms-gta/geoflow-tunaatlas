@@ -8,20 +8,20 @@ spatial_curation =function (con, df_input, remove_reallocate){
     message("no connexion to DB trying to unzip file")
     csv_file <- here::here("data/cl_areal_grid.csv")
     if(!file.exists(csv_file)){
-      message("no connexion to DB nor zip, downloading cwp_grid")
+      message("no connexion to DB nor zip, harvesting from CWP.dataset package")
       
-      # Téléchargement du fichier ZIP depuis l'URL
-      zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
-      local_file <- here::here("data", "cwp_grid.zip")
-      download.file(zip_url, local_file, mode = "wb")
-      
-      # Extraction du contenu du fichier ZIP
-      unzip(local_file, exdir = here::here("data"))
+      # # Téléchargement du fichier ZIP depuis l'URL # ancient way but removed for Docker with no connection to internet
+      # zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
+      # local_file <- here::here("data", "cwp_grid.zip")
+      # download.file(zip_url, local_file, mode = "wb")
+      # 
+      # # Extraction du contenu du fichier ZIP
+      # unzip(local_file, exdir = here::here("data"))
       
       # Lecture du fichier CSV extrait
       
     } 
-    cwp_grid <- read.csv(csv_file)
+    cwp_grid <- read.csv(system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset"))
     
     # Renommage de colonnes
     cwp_grid <- cwp_grid %>% dplyr::select(ON_LAND_P, CWP_CODE) %>% 

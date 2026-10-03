@@ -1,5 +1,5 @@
 function(action,entity, config){
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/getSQLSardaraQueries.R"))
+  source(here::here( "./R/sardara_functions/getSQLSardaraQueries.R"))
   
   
   base::options(stringsAsFactors = FALSE)

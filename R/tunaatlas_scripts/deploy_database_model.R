@@ -3,7 +3,7 @@ deploy_database_model <- function(config, software, software_config){
 
 	db_name <- software_config$parameters$dbname
 	db_read <- software_config$properties$user_readonly
-	repository_sql_scripts_database_deployment <- geoflow::get_config_resource_path(config, "./R/tunaatlas_sql")
+	repository_sql_scripts_database_deployment <- here::here( "./R/tunaatlas_sql")
 	db_dimensions <- "area,measurement_type,measurement_unit,fishing_fleet,gear_type,fishing_mode,sex,size_class,species,time,source"
 	db_variables_and_associated_dimensions <- "catch=fishing_mode,species,time,area,gear_type,fishing_fleet,measurement_type,measurement_unit,source@effort=fishing_mode,time,area,gear_type,fishing_fleet,measurement_unit,source@catch_at_size=fishing_mode,species,time,area,gear_type,fishing_fleet,measurement_type,sex,measurement_unit,size_class,source"
  

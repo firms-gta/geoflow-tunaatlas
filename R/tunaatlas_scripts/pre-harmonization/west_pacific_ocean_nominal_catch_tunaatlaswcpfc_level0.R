@@ -38,10 +38,9 @@
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BET       ALL         MT    64
   #   AU    L 1987-01-01 1988-01-01    WCPFC    ALL     BLM       ALL         MT    17
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
+  source(here::here("./R/sardara_functions/format_time_db_format.R"))
 #packages
 
-  
 if(!require(dplyr)){
   install.packages("dplyr")
   require(dplyr)
@@ -159,11 +158,15 @@ dataset_temporal_extent <- paste(
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
+base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-output_name_dataset <- file.path(dirname(filename1), paste0(entity$identifiers$id, "_harmonized.csv"))
+# output in same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset1), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset1), paste0(base1, "_codelists.csv"))
+
+file.rename(  from = entity$getJobDataResource(config, filename3),  to   = output_name_codelists)
+#----------------------------------------------------------------------------------------------------------------------------  
 write.csv(NC, output_name_dataset, row.names = FALSE)
-output_name_codelists <- file.path(dirname(filename1), paste0(entity$identifiers$id, "_codelists.csv"))
-file.rename(from = entity$getJobDataResource(config, filename3), to = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", c(path_to_raw_dataset1, path_to_raw_dataset2))
 entity$addResource("harmonized", output_name_dataset)

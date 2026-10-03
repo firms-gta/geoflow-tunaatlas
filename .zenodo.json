@@ -64,6 +64,12 @@
       },
       {
       "scheme": "url",
+      "identifier": "https://dx.doi.org/10.5281/zenodo.1164127",
+      "relation": "isSupplementTo",
+      "resource_type": "dataset"
+      },
+      {
+      "scheme": "url",
       "identifier": "https://github.com/firms-gta/geoflow-tunaatlas/",
       "relation": "isIdenticalTo",
       "resource_type": "software"

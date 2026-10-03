@@ -28,25 +28,23 @@ Tidying_and_mapping_data = function(action, entity, config) {
     config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
   }
   
-  # Define the base URL for scripts
-  base_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/"
-  
   # Source scripts from URLs
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
-  source(file.path(base_url, "tunaatlas_scripts/pre-harmonization/map_codelists.R"))
-  
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists.R"))
+  
+  source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"),
+         encoding = "UTF-8"
+  )
   
   # Save options in a CSV file
   CWP.dataset::write_options_to_csv(opts)
   
   
   stepnumber <- 1
-  
   df_to_load <- as.data.frame(readr::read_csv(harmonized, guess_max=0)) %>%
     mutate(measurement_value = as.numeric(measurement_value))
   
@@ -90,13 +88,57 @@ Tidying_and_mapping_data = function(action, entity, config) {
   
   if (!grepl("nominal", harmonized)){
     
-    # Curation absurd converted data ------------------------------------------
+    # ---------- Not displayed monthly (external CSV) ------------------------------
+    is_monthly_period <- function(time_start, time_end) {
+      # montly if :
+      # - time_start = first day month
+      # - time_end = dernier day same month mois
+      # - et time_end >= time_start
+      ts <- as.Date(time_start)
+      te <- as.Date(time_end)
+      
+      last_day <- as.Date(format(ts, "%Y-%m-01"))
+      last_day <- as.Date(format(last_day + 32, "%Y-%m-01")) - 1
+      
+      ok <- !is.na(ts) & !is.na(te) &
+        te >= ts &
+        format(ts, "%d") == "01" &
+        te == last_day
+      
+      ok
+    }
+    
+    stepLogger(level = 0, step = stepnumber, msg = "Check monthly periods and filter non-monthly rows")
+    stepnumber <- stepnumber + 1
+    
+    monthly_ok <- is_monthly_period(georef_dataset$time_start, georef_dataset$time_end)
+    
+    not_displayed_monthly <- georef_dataset[!monthly_ok | is.na(monthly_ok), , drop = FALSE]
+    
+    # Save for report
+    if (is.data.frame(not_displayed_monthly) && nrow(not_displayed_monthly) > 0) {
+      readr::write_csv(not_displayed_monthly, "data/not_displayed_monthly.csv")
+      
+      if (recap_each_step) {
+        CWP.dataset::function_recap_each_step(
+          "not_displayed_monthly",
+          georef_dataset[monthly_ok, , drop = FALSE],
+          "In this step, we detect rows that are not reported on a monthly time period (time_start/time_end not matching a full calendar month). These rows are excluded from the mapped dataset and saved in data/not_displayed_monthly.csv.",
+          "is_monthly_period"
+        )
+      }
+    }
+    
+    # Keep only monthly rows
+    georef_dataset <- georef_dataset[which(monthly_ok), , drop = FALSE]
+    
+    # Curation absurd converted data ------------------------------------------ not really usefull anymore
     stepLogger(level = 0, step = stepnumber, msg = "Curation absurd converted data")
     stepnumber = stepnumber+1
-    
+    if(file.exists(here::here("data/max_conversion_factor.csv"))){
     curation_absurd_converted_data_list <-
       curation_absurd_converted_data(georef_dataset = georef_dataset,
-                                     max_conversion_factor = "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/max_conversion_factor.csv")
+                                     max_conversion_factor = here::here("data/max_conversion_factor.csv"))
     
     georef_dataset <- curation_absurd_converted_data_list$georef_dataset
     
@@ -117,6 +159,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
       )
       readr::write_csv(not_conform_conversion_factors, "data/not_conform_conversion_factors.csv")
       
+    }
     }
     
     #----------Standardizing unit of measures---------------------------------------------------------------------------------------------------------------------------
@@ -225,14 +268,12 @@ Tidying_and_mapping_data = function(action, entity, config) {
       
     }
     
-    
-    
-    
     files_to_check <- c("data/not_conform_conversion_factors.csv",
                         "data/removed_irregular_areas.csv",
                         "data/areas_in_land.csv",
                         "data/outside_juridiction.csv",
-                        "data/not_mapped_total.csv")
+                        "data/not_mapped_total.csv",
+                        "data/not_displayed_monthly.csv")
     
     if(any(file.exists(files_to_check))) {
       parameter_directory <- getwd()
@@ -247,7 +288,11 @@ Tidying_and_mapping_data = function(action, entity, config) {
   #Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)
   #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   options("OutDec" = ".")
-  source_authority_to_map = if(!is.null(opts$source_authority_to_map)) opts$source_authority_to_map else c("CCSBT", "IATTC", "WCPFC")
+  if(opts$fact == "effort"){
+    source_authority_to_map <- c("CCSBT", "IATTC", "WCPFC", "IOTC", "ICCAT")
+  } else {
+    source_authority_to_map <-  c("CCSBT", "IATTC", "WCPFC")
+  }
   
   if(any(unique(georef_dataset$source_authority)%in%source_authority_to_map)){
     stepLogger(level = 0, step = stepnumber, msg = "Map to CWP standard codelists (if not provided by tRFMO according to the CWP RH standard data exchange format)")
@@ -259,7 +304,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
     # mapping_codelist <-map_codelists(con, opts$fact, mapping_dataset = mapping_dataset,dataset_to_map = georef_dataset, mapping_keep_src_code,summary_mapping = TRUE,source_authority_to_map = source_authority_to_map) #this map condelist function is to retrieve the mapping dataset used
     mapping_codelist <-map_codelists_no_DB(opts$fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", 
                                            dataset_to_map = georef_dataset, 
-                                           mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("CCSBT", "IATTC", "WCPFC")) 
+                                           mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map) 
     
     
     georef_dataset <- mapping_codelist$dataset_mapped
@@ -298,7 +343,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
 	Codes used by the tuna RFMOs in their respective datasets were mapped with global code lists for
 	gear (ISSCFG), flag (ISO3 countries codes), and species (ASFIS). Some codes could not be mapped
 	to standard code lists, for some tRFMOs own-defined codes that usually are aggregation of existing
-	codes (e.g. flag ’IDPH’ standing for Indonesia and Philippines within WCPFC or the species “Otun”
+	codes (e.g. flag 'IDPH' standing for Indonesia and Philippines within WCPFC or the species 'Otun'
 	standing for other tuna within for ICCAT). In those cases, the code was set to UNK (Unknown). For
 	species and gears, these codes were mapped with more aggregated code lists, i.e. resp. group of species
 	and groups of gears.",
@@ -328,8 +373,22 @@ Tidying_and_mapping_data = function(action, entity, config) {
     stepnumber = stepnumber +1
     #url_asfis_list <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_species_level0.csv"
     
-    url_mapping_asfis_rfmo = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv"
-    species_to_be_kept_by_rfmo_in_level0 <- readr::read_csv(url_mapping_asfis_rfmo) %>% dplyr::distinct()
+    mapping_file <- here::here(
+      "data",
+      "codelist_mapping_source_authority_species.csv"
+    )
+    
+    if (!file.exists(mapping_file)) {
+      utils::download.file(
+        "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
+        mapping_file,
+        mode = "wb"
+      )
+    }
+    
+    species_to_be_kept_by_rfmo_in_level0 <-
+      readr::read_csv(mapping_file) %>%
+      dplyr::distinct()
     georef_dataset <- georef_dataset %>% dplyr::inner_join(species_to_be_kept_by_rfmo_in_level0, 
                                                            by = c("species" = "species", "source_authority" = "source_authority"))
     
@@ -339,7 +398,7 @@ Tidying_and_mapping_data = function(action, entity, config) {
         georef_dataset,
         paste0(
           "Filtering species on the base of the file ",
-          url_mapping_asfis_rfmo,
+          "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/cross-term/codelist_mapping_source_authority_species.csv",
           " to keep only the species under mandate of tRFMOs. This file contains " ,
           as.character(length(nrow(
             species_to_be_kept_by_rfmo_in_level0

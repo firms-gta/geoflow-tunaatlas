@@ -1,0 +1,146 @@
+ARG MODE=dev
+ARG BASE_IMAGE=rocker/rstudio:4.2.3
+
+FROM ${BASE_IMAGE} AS app
+
+LABEL maintainer="Grasset Bastien <bastien.grasset@ird.fr>"
+
+RUN apt-get update && apt-get install -y \
+    sudo \
+    pandoc \
+    pandoc-citeproc \
+    libssl-dev \
+    libcurl4-gnutls-dev \
+    libxml2-dev \
+    libudunits2-dev \
+    libproj-dev \
+    libgeos-dev \
+    libgdal-dev \
+    libv8-dev \
+    libsodium-dev \
+    libsecret-1-dev \
+    git \
+    libnetcdf-dev \
+    curl \
+    udunits-bin \
+    gdal-bin \
+    libjq-dev \
+    cmake \
+    protobuf-compiler \
+    libprotobuf-dev \
+    wget \
+    librdf0 \
+    librdf0-dev \
+    libtbb-dev \
+    libzmq3-dev \
+    libpoppler-cpp-dev \
+    redland-utils \
+    pkg-config \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    dos2unix && \
+    apt-get clean
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libcairo2-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libcairo2-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN install2.r --error --skipinstalled --ncpus -1 httpuv
+
+WORKDIR /root/geoflow-tunaatlas
+
+ENV RENV_PATHS_ROOT=/root/.cache/R/renv
+
+# Si en mode dev, changer pour le user rstudio
+RUN if [ "$MODE" = "dev" ]; then \
+      export NEW_PATH="/home/rstudio/.cache/R/renv" && \
+      mkdir -p "$NEW_PATH" && \
+      chown -R rstudio:rstudio "$(dirname $NEW_PATH)" && \
+      echo "RENV_PATHS_ROOT=$NEW_PATH" >> /etc/environment && \
+      echo "RENV_PATHS_CACHE=$NEW_PATH" >> /etc/environment; \
+    fi
+
+# Ces variables sont utilisées par R/renv à runtime
+ENV RENV_PATHS_CACHE=${RENV_PATHS_ROOT}
+
+ARG RENV_LOCK_HASH
+RUN if [ -z "${RENV_LOCK_HASH}" ]; then \
+      export RENV_LOCK_HASH=$(sha256sum renv.lock | cut -d' ' -f1); \
+    fi && \
+    echo "RENV_LOCK_HASH=${RENV_LOCK_HASH}" > /tmp/renv_lock_hash.txt
+
+RUN mkdir -p ${RENV_PATHS_ROOT}
+RUN mkdir -p ${RENV_PATHS_ROOT}
+COPY renv.lock ./
+
+# Copy renv configuration and lockfile
+COPY renv/activate.R renv/
+COPY renv/settings.json renv/
+
+RUN Rscript -e "install.packages('remotes', repos='https://cloud.r-project.org'); \
+                remotes::install_version('jsonlite', version = '1.9.1', upgrade = 'never', repos = 'https://cran.r-project.org')"
+                
+RUN Rscript -e "remotes::install_version('renv', version = jsonlite::fromJSON('renv.lock')\$Packages[['renv']]\$Version, repos = 'https://cran.r-project.org')"
+
+COPY R/tunaatlas_scripts/pre-harmonization/renvminimalpreharmo.lock ./
+
+# Restore renv packages
+RUN R -e "renv::activate()" 
+# Used to setup the environment (with the path cache)
+RUN R -e "renv::restore(lockfile = 'renvminimalpreharmo.lock')" 
+
+COPY R/docker_creation/testing_loading_of_all_packages.R ./testing_loading_of_all_packages.R
+RUN R -e "source('testing_loading_of_all_packages.R')"
+
+# Echo the RENV_PATHS_ROOT for logging
+RUN echo "RENV_PATHS_ROOT=${RENV_PATHS_ROOT}"
+RUN echo "RENV_PATHS_CACHE=${RENV_PATHS_CACHE}"
+
+# Define the build argument for the hash of renv.lock to stop cache if renv.lock has changed
+ARG RENV_LOCK_HASH
+RUN if [ -z "${RENV_LOCK_HASH}" ]; then \
+export RENV_LOCK_HASH=$(sha256sum renv.lock | cut -d' ' -f1); \
+fi && \
+echo "RENV_LOCK_HASH=${RENV_LOCK_HASH}" > /tmp/renv_lock_hash.txt
+
+# Create the renv cache directory
+RUN mkdir -p ${RENV_PATHS_ROOT}
+
+# Install renv package that records the packages used in the shiny app
+RUN R -e "install.packages('renv', repos='https://cran.r-project.org/')"
+
+# Copy the rest of the application code
+COPY . .
+
+# Create directories for configuration
+RUN mkdir -p /etc/geoflow-tunaatlas/
+
+RUN if [ "$MODE" = "dev" ]; then R -e "renv::isolate()"; fi
+
+# COPY data/GTA_2026/ data/GTA_2026/
+
+EXPOSE 3838
+EXPOSE 8787
+
+COPY R/docker_creation/entrypoint.sh ./entrypoint.sh
+ 
+RUN chmod +x ./entrypoint.sh
+
+RUN if [ "$MODE" = "dev" ] && [ -d "/home/rstudio" ]; then \
+      echo "RENV_PATHS_ROOT=/home/rstudio/geoflow-tunaatlas/renv/library" >> /home/rstudio/.Renviron && \
+      echo "RENV_PATHS_CACHE=/home/rstudio/geoflow-tunaatlas/renv/library" >> /home/rstudio/.Renviron && \
+      chown rstudio:rstudio /home/rstudio/.Renviron; \
+    fi
+
+ENTRYPOINT ["./entrypoint.sh"]
+

@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+BMU,01.1,1975-01-01,1975-01-31,5301081,UNK,YFT,RC,TRUE,IATTC,catch,unknown,57.9
+BMU,01.1,1975-01-01,1975-01-31,5301082,UNK,SKJ,RC,TRUE,IATTC,catch,unknown,77.2
+BMU,01.1,1975-01-01,1975-01-31,5301083,UNK,SKJ,RC,TRUE,IATTC,catch,unknown,23.5
+BMU,01.1,1975-01-01,1975-01-31,5302081,UNK,SKJ,RC,TRUE,IATTC,catch,unknown,55.3
+BMU,01.1,1975-01-01,1975-01-31,5302081,UNK,YFT,RC,TRUE,IATTC,catch,unknown,45.4

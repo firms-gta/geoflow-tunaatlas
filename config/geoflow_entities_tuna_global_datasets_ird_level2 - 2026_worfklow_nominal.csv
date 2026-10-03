@@ -1,0 +1,50 @@
+Identifier,Title,Description,Subject,Creator,Date,Type,Language,SpatialCoverage,TemporalCoverage,Relation,Rights,Provenance,Format,Data
+id:global_nominal_catch_firms_level0_2026,title:Global annual catch of tuna and tuna-like species (%temporal_extent:start% - %temporal_extent:end%) FIRMS Level 0,"abstract: This dataset aggregates five global tuna RFMO catch datasets harmonized under the FIRMS Tuna Atlas workflow. It compiles annualy global catch data for tuna, tuna-like species and sharks. Catches are stratified by:
+  - year  
+  - month  
+  - species  
+  - gear_type  
+  - fishing_fleet  
+  - fishing_mode  
+  - geographic_identifier (oecan/subocean)  
+  - measurement_unit (weight in tons)  
+  - measurement_value  
+  - measurement_type  
+
+FIRMS Level 0 denotes the harmonization and standardization of publicly available catch-and-effort datasets provided by tuna RFMOs (IOTC, ICCAT, IATTC, WCPFC, CCSBT). The workflow includes:
+
+- Collection of publicly available RFMO datasets from official websites.  
+- Harmonization of column names and data structures.  
+- Standardization of species, gear, fleet and area code lists to FAO reference lists.  
+- Retention of best available georeferenced resolution.  
+
+More details on harmonization procedures are provided in the lineage section.
+
+info: Users should refer to each RFMO’s official documentation for dataset-specific caveats and reporting limitations. Data are provided as reported by RFMOs and harmonized structurally but not analytically modified (no raising applied at this level).  
+
+Warning: This dataset reflects reported catches and harmonization choices performed under the FIRMS Tuna Atlas workflow. It is not intended for quota compliance assessment, legal analysis of fishing zones, or precise fleet spatial attribution._  ",,"owner:FAO-HQ@fao.org_
+custodian:FAO-HQ@fao.org_
+pointOfContact:FIRMS-Secretariat@fao.org_
+publisher:FIRMS-Secretariat@fao.org_
+Data structure:FIRMS-Secretariat@fao.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr_
+processor:FIRMS-Secretariat@fao.org_,:emmanuel.blondel@fao.org,:julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2026-01-15_
+edition:2026-01-15",dataset,eng,"SRID=4326;POLYGON((-180 -90,-180 90,180 90,180 -90,-180 -90))",2026-01-15,"thumbnail:Map overview@https://github.com/eblondel/geoflow-tunaatlas/raw/master/assets/global_catch_1deg_1m_ps_bb_firms_level0.png",,"statement:Data management workflow_
+process:Public domain datasets from IOTC were collated through the RFMO website (www.iotc.org) and harmonized._
+process:Public domain datasets from ICCAT were collated through the RFMO website (www.iccat.int) and harmonized._
+process:Public domain datasets from IATTC were collated through the RFMO website (www.iattc.org) and harmonized._
+process:Public domain datasets from WCPFC were collated through the RFMO website (www.wcpfc.int) and harmonized._
+process:Public domain datasets from CCSBT were collated through the RFMO website (www.ccsbt.org) and harmonized._
+process:Merging of RFMO datasets into a unified global dataset while preserving spatial resolution and removing duplicated strata in overlapping convention areas._",,"source:./data/GTA_2026/dataoutputpreharmo/nominal_catch_ccsbt_level0__bygear.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_wcpfc_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iattc_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iccat_level0.csv,./data/GTA_2026/dataoutputpreharmo/nominal_catch_iotc_level0.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+featureType:catch_
+action:create_global_tuna_atlas_dataset.R[R generation script]@./R/tunaatlas_scripts/generation/create_global_tuna_atlas_nominal_catch.R_
+action_option_fact:catch_
+action_option_dataset_level:0_
+action_option_from_rawdata:true_
+action_option_mapping_map_code_lists:true_
+action_option_raising_georef_to_nominal:false_
+action_option_mapping_keep_src_code:false_
+action_option_recap_each_step:true"

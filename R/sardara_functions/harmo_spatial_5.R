@@ -1,7 +1,7 @@
 harmo_spatial_5 = function (df_input, colname_latitude, colname_longitude, SquareSize, 
           CodeSquareSize) 
 {
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_1.R")
+  source(here::here("./R/sardara_functions/harmo_spatial_1.R"))
   indice.quad.4 <- which(df_input[, colname_longitude] >= -180 & df_input[, colname_longitude] < 0 & df_input[,colname_latitude] > 0 & df_input[, colname_latitude] <= 90)
   indice.quad.3 <- which(df_input[, colname_longitude] >= -180 & df_input[, colname_longitude] < 0 & df_input[, colname_latitude] > -90 & df_input[, colname_latitude] <= 0)
   indice.quad.2 <- which(df_input[, colname_longitude] >= 0 & df_input[, colname_longitude] < 180 & df_input[, colname_latitude] > -90 & df_input[, colname_latitude] <= 0)

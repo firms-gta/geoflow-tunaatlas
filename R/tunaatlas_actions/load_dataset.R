@@ -1,10 +1,10 @@
 load_dataset <- function(action,entity, config){
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/getSQLSardaraQueries.R"))
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/FUNMergeDimensions_CodeListLike.R"))
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/FUNUploadDatasetToTableInDB.R"))
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/FUNMergeDimensions_NonCodeListLike.R"))
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/FUNUploadDatasetToTableInDB.R"))
-  source(geoflow::get_config_resource_path(config, "./R/sardara_functions/FUNuploadNewRecordsToDB.R"))
+  source(here::here( "./R/sardara_functions/getSQLSardaraQueries.R"))
+  source(here::here( "./R/sardara_functions/FUNMergeDimensions_CodeListLike.R"))
+  source(here::here( "./R/sardara_functions/FUNUploadDatasetToTableInDB.R"))
+  source(here::here( "./R/sardara_functions/FUNMergeDimensions_NonCodeListLike.R"))
+  source(here::here( "./R/sardara_functions/FUNUploadDatasetToTableInDB.R"))
+  source(here::here( "./R/sardara_functions/FUNuploadNewRecordsToDB.R"))
   
   opts <- action$options
   
@@ -39,6 +39,8 @@ load_dataset <- function(action,entity, config){
   index_materialized_view <- if(!is.null(opts$index_materialized_view)) opts$index_materialized_view else TRUE
   comment_materialized_view <- if(!is.null(opts$comment_materialized_view)) opts$comment_materialized_view else TRUE
   upload_to_googledrive <- if(!is.null(opts$upload_to_googledrive)) opts$upload_to_googledrive else TRUE
+  save_local_path <- opts$save_local_path %||% NULL
+  save_local_overwrite <- opts$save_local_overwrite %||% TRUE
   
   #db
   con = config$software$output$dbi
@@ -53,10 +55,13 @@ load_dataset <- function(action,entity, config){
   id_version <- dataset_pid
   entity$setIdentifier("id_version", id_version)
   entity$enrichWithMetadata()
-  
   #----------------------------------------------------------------------------------------------------------------------------
   #resources
   path_to_dataset <- entity$resources$mapped
+  if(is.null(path_to_dataset)){
+    path_to_dataset <- entity$resources$public
+    
+  }
   if(is.null(path_to_dataset)){
     path_to_dataset <- entity$resources$harmonized
     
@@ -71,6 +76,48 @@ load_dataset <- function(action,entity, config){
   
   #whether view has to been created
   go_view = upload_to_db && create_materialized_view && !is.na(database_view_name)
+  
+
+# Saving in local ---------------------------------------------------------
+
+  if (!is.null(save_local_path)) {
+    
+    # Si c'est un dossier on fabrique un nom de fichier
+    if (dir.exists(save_local_path) || grepl("/$", save_local_path)) {
+      save_local_path <- file.path(
+        save_local_path,
+        paste0(entity$identifiers$id, ".csv")
+      )
+    }
+    
+    # Chemin absolu (toujours avant file.copy)
+    save_local_path <- normalizePath(
+      file.path(getwd(), save_local_path),
+      winslash = "/",
+      mustWork = FALSE
+    )
+    
+    dir.create(dirname(save_local_path), recursive = TRUE, showWarnings = FALSE)
+    
+    if (!save_local_overwrite && file.exists(save_local_path)) {
+      config$logger.info(sprintf("File already exists and overwrite is FALSE: %s", save_local_path))
+      return(NULL)
+    }
+    
+    ok <- file.copy(
+      from = path_to_dataset,
+      to   = save_local_path,
+      overwrite = save_local_overwrite
+    )
+    if (!ok) stop(sprintf("Failed to copy file to: %s", save_local_path))
+    
+    config$logger.info(sprintf(
+      "Saved final dataset locally: %s",
+      save_local_path
+    ))
+  }
+  
+  
   
   #-------------------------------------------------------------------------------------------------------------------------
   #we upload the dataset (in its public enriched form) as it is to public schema
@@ -140,11 +187,11 @@ load_dataset <- function(action,entity, config){
     InputMetadataset[is.na(InputMetadataset)] <- "NA"
     
     # julien => should be taken from data dictionnary embedded in the database and used for 19110 ?
-    db_dimensions_parameters<-read.csv(geoflow::get_config_resource_path(config, "./data/db_dimensions_parameters.csv"),stringsAsFactors = F,strip.white=TRUE)
+    db_dimensions_parameters<-read.csv(here::here( "./data/db_dimensions_parameters.csv"),stringsAsFactors = F,strip.white=TRUE)
     # db_dimensions_parameters<-read.csv(system.file("extdata", "db_dimensions_parameters.csv",package="rtunaatlas"),stringsAsFactors = F,strip.white=TRUE)
     
     variable_name<-gsub("fact_tables.","",InputMetadataset$database_table_name)
-    source(geoflow::get_config_resource_path(config, "./R/sardara_functions/list_variable_available_dimensions.R"))
+    source(here::here( "./R/sardara_functions/list_variable_available_dimensions.R"))
     dimensions<-list_variable_available_dimensions(con,variable_name)
     
     df_codelists_input<-df_codelists[which(df_codelists$dimension %in% dimensions),]

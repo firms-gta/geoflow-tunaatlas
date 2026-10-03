@@ -14,7 +14,7 @@ enrich_db_for_services <- function(action,entity, config){
   dimensions <- c(dimensions[!dimensions %in% c("geographic_identifier", "measurement_value")],"aggregation_method")
   
   #scripts
-  source(geoflow::get_config_resource_path(config, "./R/tunaatlas_actions/create_plsql_data_getter.R"))
+  source(here::here( "./R/tunaatlas_actions/create_plsql_data_getter.R"))
   create_plsql_data_getter(action,entity, config) #create pl/sql function in DB to get fact dataset (generic function, one function per fact)
   
   #entity management

@@ -16,6 +16,7 @@
 #'        those that have an equivalent in tons. Default is TRUE.
 #' @param raise_only_on_unk Logical, if TRUE, the function will raise only the strata containing UNK, NEI or 99.9, this 
 #'        is to make sure no data for instance of a certain gear_type is allocated to another gear_type if the gear_type dimension is not used
+#' @param flag_for_measurement_processing_level Character default to raised, should the column measurement_processing_level be changed ? and if yes to what, 
 #'
 #' @return A list containing two datasets:
 #' \item{georef_dataset}{The combined dataset with measurements in tons and numbers.}
@@ -27,9 +28,11 @@
 convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms_level0, 
                                       strata = c("source_authority", "species", "gear_type", "fishing_fleet", "year"),
                                       raise_only_unmatched = TRUE, 
-                                      raise_only_on_unk = TRUE) {
+                                      raise_only_on_unk = TRUE, 
+                                      dim_perfectly_compatible_data = c("species", "fishing_mode", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom", "source_authority"),
+                                      flag_for_measurement_processing_level = NULL) {
   
-  dim_perfectly_compatible_data <- c("species", "fishing_mode", "gear_type", "fishing_fleet", "year", "geographic_identifier_nom", "source_authority")
+  
   
   if(raise_only_on_unk){
     unk_dim <- setdiff(dim_perfectly_compatible_data, strata)
@@ -107,9 +110,16 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
       
       georef_dataset_tons_groupped <- georef_dataset_tons %>% dplyr::group_by(across(all_of(strata))) %>% dplyr::summarise(measurement_value = sum(measurement_value))
       
-      global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% inner_join(georef_dataset_tons_groupped, by =strata) %>% 
-        dplyr::mutate(measurement_value_decreased_with_tons = measurement_value.x - measurement_value.y) %>% 
-        dplyr::filter(measurement_value_decreased_with_tons > 0 ) %>% 
+      global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% left_join(georef_dataset_tons_groupped, by =strata) %>% 
+        dplyr::mutate(measurement_value.y = ifelse(is.na(measurement_value.y), 0, measurement_value.y)) %>% 
+        dplyr::mutate(measurement_value_decreased_with_tons = measurement_value.x - measurement_value.y)
+      
+      to_high_in_georef <-  global_nominal_catch_firms_level0%>% 
+        dplyr::filter(measurement_value_decreased_with_tons < 0 )
+      saveRDS(to_high_in_georef, file.path("data",paste0(Sys.time(),"data_to_high_in_georef_for_increasing.rds")))
+      
+      global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0%>% 
+        dplyr::filter(measurement_value_decreased_with_tons >= 0 ) %>% 
         dplyr::mutate(measurement_value = measurement_value_decreased_with_tons) %>% 
         dplyr::select(-c(measurement_value.x, measurement_value.y))
       
@@ -124,7 +134,7 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
   }
   
   global_nominal_catch_firms_level0 <- global_nominal_catch_firms_level0 %>% dplyr::select(c(strata, "measurement_value")) %>% 
-    dplyr::group_by(across(-measurement_value)) %>% dplyr::summarise(measurement_value = sum(measurement_value))
+    dplyr::group_by(across(-measurement_value)) %>% dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE))
   
   georef_and_nominal_augmentation <- georef_dataset_number %>%
     dplyr::left_join(global_nominal_catch_firms_level0, by = strata) %>%
@@ -140,7 +150,7 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
     dplyr::select(-sum)
   
   
-  saveRDS(georef_and_nominal_augmentation, "data/raisingfactorfromnumber_to_nominal.rds")
+  saveRDS(georef_and_nominal_augmentation, file.path("data",paste0(Sys.time(),"raisingfactorfromnumber_to_nominal.rds")))
   flog.info("Saved raising factors from numbers to nominal.")
   
   # Create new strata for converted measurements
@@ -149,8 +159,12 @@ convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms
     dplyr::rename(measurement_value = new_measurement) %>%
     dplyr::ungroup() %>%
     dplyr::select(all_of(columns)) %>%
-    dplyr::mutate(measurement_unit = "t")%>% 
-    dplyr::mutate(measurement_processing_level = "raised")
+    dplyr::mutate(measurement_unit = "t")
+  
+  if(!is.null(flag_for_measurement_processing_level)){
+    nouvelles_strates <- nouvelles_strates%>% 
+    dplyr::mutate(measurement_processing_level = flag_for_measurement_processing_level)
+  }
   
   # Handle hopeless cases (entries without conversion)
   not_converted_number <- georef_and_nominal_augmentation %>%

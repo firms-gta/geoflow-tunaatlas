@@ -1,7 +1,7 @@
 IATTC_CE_catches_pivotDSD_to_harmonizedDSD= function (IATTC_CE_catches_df_pivotDSD, colToKeep_captures) 
 {
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_4.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_4.R"))
   if(!(require(dplyr))){ 
     install.packages(dplyr) 
     (require(dplyr))} 

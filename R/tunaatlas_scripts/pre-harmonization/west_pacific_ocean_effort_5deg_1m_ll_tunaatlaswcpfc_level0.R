@@ -52,9 +52,9 @@
 #  ALL    L 2000-01-01 2000-02-01  6100145    ALL      HHOOKS  867903
 
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_3.R"))
+  source(here::here("./R/sardara_functions/WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
   #packages
   
     
@@ -122,7 +122,7 @@ function(action, entity, config){
   efforts_pivot_WCPFC$Gear<-"L"
   
   # School
-efforts_pivot_WCPFC$School<-"UNK"
+efforts_pivot_WCPFC$School<-"OTH"
 efforts_pivot_WCPFC$Gear<-"L"
 
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")

@@ -1,0 +1,6 @@
+fishing_fleet,gear_type,time_start,time_end,geographic_identifier,fishing_mode,species,measurement_type,measurement_unit,source_authority,measurement,measurement_processing_level,measurement_value
+AUS,09.31,1987-04-01,1987-04-30,6235150,OTH,ALB,RC,no,WCPFC,catch,raised,3714
+AUS,09.31,1987-04-01,1987-04-30,6235150,OTH,ALB,RC,t,WCPFC,catch,raised,30.456
+AUS,09.31,1987-04-01,1987-04-30,6235150,OTH,BET,RC,no,WCPFC,catch,raised,170
+AUS,09.31,1987-04-01,1987-04-30,6235150,OTH,BET,RC,t,WCPFC,catch,raised,15.737
+AUS,09.31,1987-04-01,1987-04-30,6235150,OTH,MLS,RC,no,WCPFC,catch,raised,24

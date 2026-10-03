@@ -43,8 +43,8 @@
 # 1984  1  40S 170W    704     ALB  3850         NO    ALL        DAYS    D
 # 1984  1  40S 175W     88     ALB   966         NO    ALL        DAYS    D
 function(action, entity, config){
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_3.R")
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/harmo_spatial_3.R"))
 #packages
 
   
@@ -97,7 +97,7 @@ DF <- read.table(path_to_raw_dataset, sep=",", header=TRUE, stringsAsFactors=FAL
 #---------------------------------------
 DF$cwp_grid=NULL # remove column cwp_grid
 colnames(DF)<-toupper(colnames(DF))
-if(any(DF$FLAG_ID == "")) DF[DF$FLAG_ID == "",]$FLAG_ID <- "UNK"
+if(any(DF$flag_code == "")) DF[DF$flag_code == "",]$flag_code <- "UNK"
 # DF<-melt(DF, id=c(colnames(DF[1:6]))) 
 # DF <- melt(as.data.table(DF), id=c(colnames(DF[1:6]))) 
 DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:6])))
@@ -145,16 +145,14 @@ catches_pivot_WCPFC[index.catchinnumberonly,"CatchUnits"]="no"
 
 ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-
 catches_pivot_WCPFC$RFMO <- "WCPFC"
 catches_pivot_WCPFC$Ocean <- "PAC_W"
-catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_ID
+catches_pivot_WCPFC$FishingFleet <- catches_pivot_WCPFC$FLAG_CODE
 
 catches_pivot_WCPFC <- harmo_time_2(catches_pivot_WCPFC, 
 	"YY", "MM")
-catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT_SHORT", "LON_SHORT", 5, 6) 
+catches_pivot_WCPFC <- harmo_spatial_3(catches_pivot_WCPFC, "LAT5", "LON5", 5, 6) 
 catches_pivot_WCPFC$CatchType <- "RC" # retained catch
-
 catches_pivot_WCPFC$Catch <- catches_pivot_WCPFC$value
 catches <- catches_pivot_WCPFC[colToKeep_captures]
 rm(catches_pivot_WCPFC)
@@ -196,11 +194,15 @@ dataset_temporal_extent <- paste(
 )
 entity$setTemporalExtent(dataset_temporal_extent)
 
+base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+# output in same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(catches, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)

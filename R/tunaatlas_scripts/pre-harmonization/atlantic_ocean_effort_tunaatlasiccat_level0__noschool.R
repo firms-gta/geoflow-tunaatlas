@@ -64,12 +64,12 @@ if(!require(dplyr)){
 
 # Effort: final data sample:
 # Flag Gear time_start   time_end AreaName School EffortUnits Effort
-#  ARG   LL 1967-02-01 1967-03-01  7330040    ALL    NO.HOOKS  13000
-#  ARG   LL 1967-03-01 1967-04-01  7330040    ALL    NO.HOOKS  67000
-#  ARG   LL 1967-04-01 1967-05-01  7330040    ALL    NO.HOOKS 107000
-#  ARG   LL 1967-05-01 1967-06-01  7330040    ALL    NO.HOOKS  88000
-#  ARG   LL 1967-06-01 1967-07-01  7330040    ALL    NO.HOOKS  66000
-#  ARG   LL 1967-07-01 1967-08-01  7330040    ALL    NO.HOOKS  50000
+#  ARG   LL 1967-02-01 1967-03-01  7330040    OTH    NO.HOOKS  13000
+#  ARG   LL 1967-03-01 1967-04-01  7330040    OTH    NO.HOOKS  67000
+#  ARG   LL 1967-04-01 1967-05-01  7330040    OTH    NO.HOOKS 107000
+#  ARG   LL 1967-05-01 1967-06-01  7330040    OTH    NO.HOOKS  88000
+#  ARG   LL 1967-06-01 1967-07-01  7330040    OTH    NO.HOOKS  66000
+#  ARG   LL 1967-07-01 1967-08-01  7330040    OTH    NO.HOOKS  50000
 
 ## download database
 # to get .mdb ./R/tunaatlas_scripts/pre-harmonization/data_iccat_from_mdb.R
@@ -84,7 +84,38 @@ config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifie
 keep_fleet_instead_of_flag=FALSE  
 
 t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
-ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
+ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID",
+                                                    "FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode",
+                                                    "QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode", 
+                                                    "SchoolTypeCode", "FlagName", "StatusCode"))
+
+# remove duplicated lines, as displayed in kilos and numbers 
+eff_cols <- c("Eff1","Eff1Type","Eff2","Eff2Type")
+species_cols <- ICCAT_CE_species_colnames
+
+key_cols <- setdiff(
+  colnames(t2ce),
+  c("StrataID", "CatchUnit", eff_cols, species_cols)
+)
+
+unit_priority <- function(x) {
+  dplyr::case_when(
+    x == "kg" ~ 1L,
+    x == "nr" ~ 2L,
+    TRUE      ~ 3L
+  )
+}
+
+t2ce <- t2ce %>%
+  dplyr::mutate(.unit_rank = unit_priority(CatchUnit)) %>%
+  dplyr::group_by(across(all_of(key_cols))) %>%
+  dplyr::arrange(.unit_rank, .by_group = TRUE) %>%
+  dplyr::slice(1) %>%
+  dplyr::ungroup() %>%
+  dplyr::select(-.unit_rank)
+
+# remove data displayed annualy
+
 
 config$logger.info(paste0("BEGIN  function   \n"))
 
@@ -96,26 +127,104 @@ config$logger.info(paste0("BEGIN  function   \n"))
 
 ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R")
-efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCAT_CE_species_colnames)
+# source(here::here("./R/sardara_functions/FUN_efforts_ICCAT_CE_without_schooltype.R"))
+# efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_without_schooltype(RFMO_CE = t2ce,ICCAT_CE_species_colnames)
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R")
-efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
+efforts_pivot_ICCAT <- t2ce %>%
+  dplyr::select(
+    -dplyr::all_of(ICCAT_CE_species_colnames),
+    -CatchUnit
+  )
+
+# source(here::here("./R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R"))
+# efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(efforts_pivot_ICCAT,c("Eff1","Eff2"),c("Eff1Type","Eff2Type"))
+
+# Keep all columns except the raw effort/unit columns,
+# because these will be rebuilt in a long format
+cols_to_keep <- setdiff(
+  names(efforts_pivot_ICCAT),
+  c("Eff1", "Eff2", "Eff1Type", "Eff2Type")
+)
+
+# Add an identifier for each original row,
+# so we can track which Eff1/Eff2 pairs come from the same source row
+tmp <- efforts_pivot_ICCAT %>%
+  dplyr::mutate(original_row_id = dplyr::row_number())
+
+# Convert Eff1 and Eff2 to numeric safely
+# (important because some effort values may use commas instead of dots)
+tmp <- tmp %>%
+  dplyr::mutate(
+    Eff1_num = suppressWarnings(as.numeric(gsub(",", ".", Eff1))),
+    Eff2_num = suppressWarnings(as.numeric(gsub(",", ".", Eff2)))
+  )
+
+# Build the Eff1 rows:
+# these are always considered the primary effort rows
+eff1_rows <- tmp %>%
+  dplyr::transmute(
+    dplyr::across(dplyr::all_of(cols_to_keep)),
+    original_row_id,
+    effort_source = "Eff1",
+    Effort = Eff1_num,
+    EffortUnits = Eff1Type,
+    is_duplicate_strata = FALSE
+  ) %>%
+  # Remove empty or zero Eff1 values
+  dplyr::filter(!is.na(Effort) & Effort != 0)
+
+# Build the Eff2 rows:
+# these may either replace missing Eff1, or become duplicated rows
+eff2_rows <- tmp %>%
+  dplyr::transmute(
+    dplyr::across(dplyr::all_of(cols_to_keep)),
+    original_row_id,
+    Eff1_num,
+    effort_source = "Eff2",
+    Effort = Eff2_num,
+    EffortUnits = Eff2Type
+  ) %>%
+  # Remove empty or zero Eff2 values
+  dplyr::filter(!is.na(Effort) & Effort != 0) %>%
+  # If Eff1 existed and was non-zero, then Eff2 is an additional duplicated row
+  # If Eff1 was missing or zero, then Eff2 replaces Eff1 and is not a duplicate
+  dplyr::mutate(
+    is_duplicate_strata = !is.na(Eff1_num) & Eff1_num != 0
+  ) %>%
+  dplyr::select(-Eff1_num)%>% dplyr::mutate(EffortUnits = as.character(EffortUnits))
+
+# Combine both sets of rows into one long dataset
+efforts_pivot_ICCAT <- dplyr::bind_rows(eff1_rows, eff2_rows) %>%
+  dplyr::select(
+    original_row_id,
+    effort_source,
+    is_duplicate_strata,
+    dplyr::everything()
+  )
 
 # School
-efforts_pivot_ICCAT$School<-"UNK"
+efforts_pivot_ICCAT$School<-"OTH"
 
 # Flag
-efforts_pivot_ICCAT$Flag<-efforts_pivot_ICCAT$FlagCode
+efforts_pivot_ICCAT$FleetCode_short <- sub("-.*", "", efforts_pivot_ICCAT$FleetCode) # fleet code only what is after the '-'
 
-names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode'] <- 'FishingFleet'
+names(efforts_pivot_ICCAT)[names(efforts_pivot_ICCAT) == 'FleetCode_short'] <- 'FishingFleet'
+efforts_pivot_ICCAT <- efforts_pivot_ICCAT[, c("FishingFleet", setdiff(names(efforts_pivot_ICCAT), "FishingFleet"))] # put flag in first position
+
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R")
+message("up to here")
+source(here::here("R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R"))
+efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
+efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
+
+# handling duplicated stratas
+
 efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
 efforts$CatchType <- "C" #bastien adding as it is not in effort function but it is in chatch function
 colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","measurement_type")
 efforts$source_authority<-"ICCAT"
+efforts <- efforts %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "UNK", "OTH", fishing_mode))
 
 #----------------------------------------------------------------------------------------------------------------------------
 efforts$time_start <- as.Date(efforts$time_start)
@@ -129,10 +238,15 @@ dataset_temporal_extent <- paste(
 
 entity$setTemporalExtent(dataset_temporal_extent)
 
-output_name_dataset <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_harmonized.csv"), path_to_raw_dataset)
+base1 <- tools::file_path_sans_ext(basename(filename1))
+#@geoflow -> export as csv
+# output in same folder as path_to_raw_dataset 
+output_name_dataset   <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_harmonized.csv"))
+output_name_codelists <- file.path(dirname(path_to_raw_dataset), paste0(base1, "_codelists.csv"))
+
 write.csv(efforts, output_name_dataset, row.names = FALSE)
-output_name_codelists <- gsub(filename1, paste0(unlist(strsplit(filename1,".csv"))[1], "_codelists.csv"), path_to_raw_dataset)
-file.rename(from = entity$getJobDataResource(config, filename2), to = output_name_codelists)
+
+file.rename(  from = entity$getJobDataResource(config, filename2),  to   = output_name_codelists)
 #----------------------------------------------------------------------------------------------------------------------------
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)

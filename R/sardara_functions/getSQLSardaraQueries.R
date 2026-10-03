@@ -1,7 +1,7 @@
 getSQLSardaraQueries <-  function (con, dataset_metadata) 
 {
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/get_codelist_of_dimension.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/list_dataset_available_dimensions.R")
+  source(here::here("./R/sardara_functions/get_codelist_of_dimension.R"))
+  source(here::here("./R/sardara_functions/list_dataset_available_dimensions.R"))
   if (nrow(dataset_metadata) == 0) {
     stop("There is no dataset that corresponds to your query")
   }

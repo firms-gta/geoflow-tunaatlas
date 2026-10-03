@@ -1,0 +1,73 @@
+{
+  "profile": {
+    "id": "tuna-atlas-datasets-iattc",
+    "mode": "entity",
+    "project": "FIRMS Tuna Atlas",
+    "organization": "FIRMS Tuna Atlas",
+    "logos": [
+      "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
+      "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+      "http://www.umr-marbec.fr/images/logo-ird-en.png"
+    ],
+    "options": {
+      "line_separator": "_\n"
+    }
+  },
+  "metadata": {
+    "entities": [
+      {
+        "handler": "csv",
+        "source": "config/geoflow_entities_tuna_global_datasets - Nominal_catch_2026_CCSBT_IATTC_WCPFC.csv"
+      }
+    ],
+    "contacts" : []
+  },
+  "software": [
+	{
+		"id": "my-database-write",
+		"type": "output",
+		"software_type": "dbi",
+		"parameters": {
+			"drv": "PostgreSQL",
+			"user": "{{DB_USER}}",
+			"password": "{{DB_PASSWORD}}",
+			"host": "{{DB_HOST}}",
+			"port": "{{DB_PORT}}",
+			"dbname": "{{DB_NAME}}"
+		},
+		"properties" : {}
+	}
+  ],
+  "actions": [
+    {
+      "id": "Tidying_and_mapping_data",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "run": true,
+      "options": {
+        "recap_each_step": true
+      }
+    }, 
+        {
+      "id": "load_dataset",
+      "script": "../R/tunaatlas_actions/load_dataset.R",
+      "run": true,
+      "options": {
+        "upload_to_db": false,
+        "upload_to_db_public": false,
+        "create_materialized_view" : false,
+        "add_sql_comments" : false,
+        "upload_to_googledrive" : false,
+        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
+        "save_local_overwrite": true
+      }
+    },
+    {
+      "id": "create_report_global_action",
+      "script": "../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "run": true,
+      "options": {
+      }
+    }
+    
+  ]
+}

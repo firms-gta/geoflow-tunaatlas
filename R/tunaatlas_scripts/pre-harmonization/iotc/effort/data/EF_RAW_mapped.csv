@@ -1,0 +1,6 @@
+source_authority,gear_type,fishing_fleet,fishing_mode,fishing_fleet_label,time_start,time_end,geographic_identifier,gridtype,measurement_unit,measurement_processing_level,measurement,measurement_value
+IOTC,01.1,AUS,FS,Australia,2013-01-01,2013-01-31,5234133,1deg_x_1deg,DAYS,unknown,effort,18
+IOTC,01.1,AUS,FS,Australia,2013-01-01,2013-01-31,5234134,1deg_x_1deg,DAYS,unknown,effort,1
+IOTC,01.1,AUS,FS,Australia,2013-01-01,2013-01-31,5235134,1deg_x_1deg,DAYS,unknown,effort,14
+IOTC,01.1,AUS,FS,Australia,2013-01-01,2013-01-31,5235135,1deg_x_1deg,DAYS,unknown,effort,30
+IOTC,01.1,AUS,FS,Australia,2013-01-01,2013-01-31,5236135,1deg_x_1deg,DAYS,unknown,effort,15
