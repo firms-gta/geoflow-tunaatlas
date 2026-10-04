@@ -17,23 +17,32 @@ All commands below are run from the **repository root**.
 ```bash
 git clone https://github.com/firms-gta/geoflow-tunaatlas.git
 cd geoflow-tunaatlas
-git checkout feature/mapping-codelist-cloned-in-docker-image
 
-docker pull ghcr.io/firms-gta/gta-workflow:sha-af1c837-dev
-export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:sha-af1c837-dev
+docker pull ghcr.io/firms-gta/gta-workflow:latest
 ```
+
+`latest` is the image of the last tested commit of `master`. It is the default
+of the compose file, so there is nothing to export. Docker does not download a
+tag it already has: run the `docker pull` line again to get a newer image.
 
 Images are built and tested by the CI, then published in
 `ghcr.io/firms-gta/gta-workflow`:
 
 | Tag | Meaning |
 | --- | --- |
+| `latest` | last tested commit of `master` (moves on each push) |
+| `sha-<commit>` | image of one commit of `master` (never moves) |
+| `<branch-name>-dev` | last tested commit of a feature branch (moves on each push) |
 | `sha-<commit>-dev` | image of one commit of a feature branch (never moves) |
-| `<branch-name>-dev` | latest tested image of that branch (moves on each push) |
-| `sha-<commit>` / `latest` | images built from `master` |
 
-Prefer a `sha-…` tag for reproducible runs. Without `GTA_IMAGE`, Compose uses
-the published image set as default in the compose file.
+To use another image than `latest`, set `GTA_IMAGE`:
+
+```bash
+export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:sha-<commit>
+```
+
+Use a `sha-…` tag for any run you want to be able to reproduce, and keep a note
+of it: `latest` will point to another image after the next push.
 
 ### Without cloning the repository
 
@@ -43,7 +52,7 @@ out of the image instead of cloning:
 ```bash
 mkdir gta && cd gta
 
-export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:<tag>
+export GTA_IMAGE=ghcr.io/firms-gta/gta-workflow:latest
 docker pull $GTA_IMAGE
 
 docker run --rm --entrypoint tar $GTA_IMAGE \
@@ -57,9 +66,9 @@ instead of the repository root.
   init scripts. Nothing else is needed: the workflow uses the code of the
   image, and the script copies `docker_local.env.compose` and the sample data
   out of the image the first time it runs.
-- The files are those of the commit the image was built from. Keep `GTA_IMAGE`
-  set to the same tag, so that the scripts and the image match.
-- Requires an image built after this section was added.
+- The files are those of the commit the image was built from. After pulling a
+  newer image, run the `docker run … | tar -x` command again so that the
+  scripts and the image match.
 - RStudio (section 6) mounts `R/` and `config/` from the host: clone the
   repository to use it.
 
@@ -147,8 +156,9 @@ docker build -f compose/Dockerfile.workflow -t gta-workflow:local .
 export GTA_IMAGE=gta-workflow:local
 ```
 
-Then run step 2 or 3 again. Otherwise, just push to the branch: the CI tests the
-commit and publishes `ghcr.io/firms-gta/gta-workflow:sha-<commit>-dev`
+Then run step 2 or 3 again. Otherwise, just push: the CI tests the commit and
+publishes the image (`latest` and `sha-<commit>` from `master`,
+`<branch-name>-dev` and `sha-<commit>-dev` from a feature branch)
 (see [docs/CI.md](../docs/CI.md)).
 
 ## 6. Work from RStudio
@@ -259,7 +269,7 @@ defaults.
 
 | Variable | Default (test / full) | Purpose |
 | --- | --- | --- |
-| `GTA_IMAGE` | the published image set in the compose file | Workflow image to run |
+| `GTA_IMAGE` | `ghcr.io/firms-gta/gta-workflow:latest` | Workflow image to run |
 | `GTA_DATA_DIR` | `tests/sample_data` / `runtime/extracted/all_raw_data_GTA` | Raw data folder on your machine |
 | `GTA_STEPS` | see above | Steps to run, e.g. `GTA_STEPS=services` (order does not matter) |
 | `GTA_MOUNT_CODE` | `false` | `false`: use the code inside the image (what the CI tests). `true`: use `R/` and `config/` of your checkout, to try a code change without rebuilding the image |

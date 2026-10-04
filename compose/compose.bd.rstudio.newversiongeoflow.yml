@@ -39,7 +39,7 @@ services:
     build:
       context: ..
       dockerfile: compose/Dockerfile.workflow
-    image: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:sha-420350c-dev}
+    image: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:latest}
     # Profil : "docker compose up" ne lance pas le workflow. Il ne démarre que
     # nommément ("docker compose run workflow", ce que font les scripts).
     profiles: ["workflow"]
@@ -59,7 +59,7 @@ services:
       context: ..
       dockerfile: compose/Dockerfile.rstudio
       args:
-        BASE_IMAGE: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:sha-af1c837-dev}
+        BASE_IMAGE: ${GTA_IMAGE:-ghcr.io/firms-gta/gta-workflow:latest}
     ports:
       - "127.0.0.1:${GTA_RSTUDIO_PORT:-18787}:8787"
     environment:
