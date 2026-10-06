@@ -6,43 +6,31 @@ This repository contains the reproducible R and `geoflow` processing workflow us
 
 The workflow processes data from the five tuna Regional Fisheries Management Organisations (tRFMOs) and produces harmonised nominal catch, georeferenced catch, fishing-effort and Level 0–2 catch products.
 
-## Documentation
+No local R installation is needed: everything runs in Docker.
 
-* [Running the workflow](docs/RUNNING.md) — quick start, input data and standard runs
-* [Advanced execution](docs/RUNNING_ADVANCED.md) — partial runs, runtime parameters, existing jobs, reporting and local builds
+## Which way to run it?
+
+| I want to… | Use | Guide |
+| --- | --- | --- |
+| produce the datasets (no database, no publication) | `docker run` | [docs/RUNNING.md](docs/RUNNING.md) |
+| same, with shorter commands | `compose.workflow.yml` | [docs/DOCKER_COMPOSE.md](docs/DOCKER_COMPOSE.md) |
+| produce **and publish** (PostGIS, GeoServer, GeoNetwork, Zenodo), or run the test | `compose/` scripts | [compose/README.md](compose/README.md) |
+
+Other documentation:
+
+* [Advanced execution](docs/RUNNING_ADVANCED.md) — runtime parameters, data source modes, partial runs, existing jobs, reports, local builds
 * [Workflow architecture](docs/WORKFLOW.md) — processing stages, configurations and dependencies
 * [Validation](docs/VALIDATION.md) — technical and scientific validation procedures
-
-## Docker images
-
-Pre-built Docker images are available from the GitHub Container Registry (GHCR):
-
-| Image                              | Purpose                                             |
-| ---------------------------------- | --------------------------------------------------- |
-| `ghcr.io/firms-gta/gta-workflow`   | GTA scientific data-processing workflow             |
-| `ghcr.io/firms-gta/tunaatlas-data` | GTA input-data image for self-contained deployments |
-
-For reproducible runs, use an immutable version or commit tag rather than `latest`.
-
-For example:
-
-```bash
-docker pull ghcr.io/firms-gta/gta-workflow:2d93b5a
-```
-
-The workflow image contains the R environment and required dependencies, so no local R installation is required.
+* [Continuous integration](docs/CI.md) — automated tests and published images
+* [Deployment](docs/DEPLOYMENT.md) — batch runs on SSP Cloud / Kubernetes
 
 ## Quick start
 
-Create persistent runtime directories:
-
-```bash 
-mkdir -p runtime/extracted runtime/jobs runtime/cache
-```
-
-Run the complete production workflow directly from the GTA input archive published on Zenodo:
+Run the complete processing chain directly from the input archive published on Zenodo:
 
 ```bash
+mkdir -p runtime/extracted runtime/jobs runtime/cache
+
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
@@ -56,48 +44,64 @@ docker run --rm \
   ghcr.io/firms-gta/gta-workflow:2d93b5a
 ```
 
-The first run downloads the input archive from Zenodo. Downloaded files are cached in `runtime/cache`, prepared data are persisted in `runtime/extracted`, and workflow jobs and logs are written to `runtime/jobs`.
+The archive is downloaded once and cached in `runtime/cache`; prepared data go to `runtime/extracted`, jobs and logs to `runtime/jobs`.
 
-For local data directories, ZIP archives, alternative input datasets and other standard execution modes, see [Running the workflow](docs/RUNNING.md).
+To run with the database and the publication services:
 
-For partial runs, reuse of existing jobs, reporting and other advanced options, see [Advanced execution](docs/RUNNING_ADVANCED.md).
+```bash
+./compose/run_workflow_retry.sh    # test on the sample data (same as the CI)
+./compose/run_full_workflow.sh     # full run on runtime/extracted/all_raw_data_GTA
+```
+
+Read [compose/README.md](compose/README.md) before a full run, in particular for the Zenodo target.
+
+## Docker images
+
+Images are published on the GitHub Container Registry in `ghcr.io/firms-gta/gta-workflow`:
+
+| Tag | Origin |
+| --- | --- |
+| `sha-<commit>` / `latest` | built and tested by the CI from `master` |
+| `sha-<commit>-dev` / `<branch>-dev` | built and tested by the CI from a feature branch |
+| `2d93b5a` | earlier release |
+
+The input data are also available as an image, `ghcr.io/firms-gta/tunaatlas-data`, for self-contained deployments.
+
+Use an immutable `sha-…` tag (or a digest) for reproducible runs, rather than `latest`.
 
 ## Repository structure
 
-```text 
+```text
 geoflow-tunaatlas/
-├── R/                  # workflow and processing code
-├── config/             # geoflow workflow configurations
-├── data/               # static reference data
-├── docker/             # Docker images and entry points
-├── docs/               # project documentation
-├── reports/            # report sources
-├── tests/              # launcher and workflow checks
+├── R/                    # workflow and processing code
+├── compose/              # workflow Dockerfile, full Compose stack, geoflow patches, launch scripts
+├── config/               # geoflow workflow configurations
+├── data/                 # static reference data
+├── docker/               # additional Docker images (reporting, NetCDF, …)
+├── docs/                 # documentation
+├── tests/                # launcher checks and sample input data
+├── compose.workflow.yml  # workflow-only Compose file
 └── renv.lock
 ```
 
-Runtime input data and generated jobs are not part of the repository and should be mounted externally.
+Runtime input data and generated jobs are not part of the repository and are mounted at runtime.
 
 ## Reproducibility
 
-The workflow separates the software environment from runtime data:
-
-* R dependencies are pinned with `renv.lock`;
-* Docker pins the R runtime and required system dependencies;
+* R dependencies are pinned with `renv.lock`, and Docker pins R and the system libraries;
 * raw datasets are supplied at runtime;
-* generated data, jobs and logs are persisted outside the container.
+* generated data, jobs and logs are written outside the container.
 
-For an auditable production run, retain the repository commit SHA, Docker image tag or digest, input DOI or checksum, runtime parameters and generated job directories.
+For an auditable run, keep the repository commit SHA, the image tag or digest, the input DOI or checksum, the `GTA_*` parameters and the job directories.
 
 ## Tests
 
-Run the launcher smoke tests with:
-
 ```bash
-Rscript tests/smoke_test_launcher.R
+Rscript tests/smoke_test_launcher.R   # launcher smoke tests (seconds, no Docker)
+./compose/run_workflow_retry.sh       # end-to-end test of the full stack on the sample data
 ```
 
-Scientific and runtime acceptance procedures are documented in [Validation](docs/VALIDATION.md).
+Both also run on GitHub Actions ([CI](docs/CI.md)). Scientific acceptance checks are in [Validation](docs/VALIDATION.md).
 
 ## Licence and citation
 

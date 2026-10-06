@@ -3,7 +3,7 @@ services:
     image: ${GTA_IMAGE:-gta-workflow:latest}
     build:
       context: .
-      dockerfile: docker/Dockerfile.workflow
+      dockerfile: compose/Dockerfile.workflow
     user: "${GTA_UID:-1000}:${GTA_GID:-1000}"
     environment:
       GTA_STEPS: ${GTA_STEPS:-rawdata}

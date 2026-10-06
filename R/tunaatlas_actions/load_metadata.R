@@ -15,7 +15,7 @@ load_metadata <- function(action,entity, config){
   # temporary patch to fit with DCMI data structure
   entity_df$Format <- "resource:application/x-sql"
   entity_df$Source <- "RFMOs"
-  
+  entity_df$Provenance <- "statement:Data management workflow_"
   if (!is.null(opts$create_table)) if(opts$create_table){
     query_create_table_metadata <- paste(readLines(here::here( "./R/tunaatlas_sql/create_Dublin_Core_metadata.sql")), collapse=" ")
     query_create_table_metadata <- gsub("%db_admin%",user_database,query_create_table_metadata)

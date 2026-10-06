@@ -22,7 +22,7 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
   stepnumber <- 1
   
   stepLogger <- function(level, step, msg) {
-    config$logger.info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
+    log_info(sprintf("LEVEL %s => STEP %s: %s", level, step, msg))
   }
   
   url_scripts_generation <- here::here("R/tunaatlas_scripts/generation")
@@ -168,7 +168,7 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
     original_cols <- colnames(georef_dataset)
     
     # IOTC specific conversion ----------------------------------------------
-    config$logger.info("Begin IOTC specific unit conversion")
+    log_info("Begin IOTC specific unit conversion")
     IOTC_conv_fact_mapped <- readr::read_csv(
       opts$unit_conversion_iotc_file %||% "data/IOTC_conv_fact_mapped.csv",
       guess_max = 0
@@ -262,11 +262,11 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
       )
     }
     
-    config$logger.info("End IOTC specific unit conversion")
+    log_info("End IOTC specific unit conversion")
     
     # IRD / other conversion -------------------------------------------------
     
-    config$logger.info("Begin IRD upgraded unit conversion")
+    log_info("Begin IRD upgraded unit conversion")
     
     georef_dataset <- perform_unit_conversion(
       conversion_factor_csv =
@@ -286,7 +286,7 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
       )
     )
   }
-    config$logger.info("End IRD upgraded unit conversion")
+    log_info("End IRD upgraded unit conversion")
     
   #   # Final cleanup ---------------------------------------------------------- useless 
   #   
@@ -485,7 +485,7 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
     )
   )
   
-  config$logger.info("End: Level 1 Tuna Atlas dataset has been created.")
+  log_info("End: Level 1 Tuna Atlas dataset has been created.")
   
   rm(georef_dataset)
   gc()

@@ -88,7 +88,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     require(raster)
     require(ncdf4)
     library(plyr)
-    config$logger.info("Beginning function write Netcdf")
+    log_info("Beginning function write Netcdf")
     
     # res_dimensions_and_variables2 <-res_dimensions_and_variables
     
@@ -183,7 +183,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     ######################################################################
     if(nchar(dimensions[1])!=0){
       for(dim in dimensions){
-        config$logger.info(dim)
+        log_info(dim)
         dimvals <- unique(res_dimensions_and_variables[[dim]])
         if(is.numeric(dimvals)){
           dimVector = sort(dimvals)
@@ -261,7 +261,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     gridDimInd_InTab <- res_dimensions_and_variables[ , cols ]}
     gridDimInd_InTab <- gsub(' ','',gridDimInd_InTab)
     # for(i in 1:nrow(gridDimInd2)){
-    #   config$logger.info(paste('couche ',i,' sur ',nrow(gridDimInd2),sep=''))
+    #   log_info(paste('couche ',i,' sur ',nrow(gridDimInd2),sep=''))
     #   tot <- unlist(as.vector(lapply(gridDimInd2[i,], as.character)))
     #   resTD <- res_dimensions_and_variables[which(gridDimInd_InTab %in% paste0(tot,collapse='_')),]
     #   if(!is.null(sp_resolution)){
@@ -289,7 +289,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     res_dimensions_and_variables_sf <- st_as_sf(res_dimensions_and_variables, wkt = "geom_wkt", crs = 4326)
     
     for(i in 1:nrow(gridDimInd2)) {
-      config$logger.info(paste('Layer ', i, ' of ', nrow(gridDimInd2), sep = ''))
+      log_info(paste('Layer ', i, ' of ', nrow(gridDimInd2), sep = ''))
       tot <- unlist(as.vector(lapply(gridDimInd2[i, ], as.character)))
       # Subset the sf object 
       resTD_sf <- res_dimensions_and_variables_sf[which(gridDimInd_InTab %in% paste0(tot, collapse = '_')), ]
@@ -323,7 +323,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
         loc <-  match(dimensions[indD], unlist(meaningValue$names))
         if(!is.na(loc)){
           ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_values"),paste((meaningValue$ref[[loc]]),collapse = ","))
-          config$logger.info(paste(paste0(dimensions[indD],paste0(meaningValue$names[[loc]],"_values"),paste((meaningValue$ref[[loc]]),collapse = ","))
+          log_info(paste(paste0(dimensions[indD],paste0(meaningValue$names[[loc]],"_values"),paste((meaningValue$ref[[loc]]),collapse = ","))
           ))
           ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_meanings"),paste(gsub(" ","_",as.character(meaningValue$values[[loc]])),collapse=" "))
           ncatt_put(nc,dimensions[indD],paste0(meaningValue$names[[loc]],"_valid_range"),paste(c(min(meaningValue$ref[[loc]]),max(meaningValue$ref[[loc]])),collapse = ","))}
@@ -433,7 +433,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   dataset_pid <- entity$identifiers[["id"]]
   
   if(!(!grepl("nominal_catch",dataset_pid) | !grepl("deg",dataset_pid) | grepl("0",dataset_pid))){
-    config$logger.info("This dataset is not converted to netcdf due to the fact that it contains multiples resolution and/or units")
+    log_info("This dataset is not converted to netcdf due to the fact that it contains multiples resolution and/or units")
     return(NULL)
   } #if it is not only one resolution (1 deg or 5 deg), we return nothing as well as if there are several units
   
@@ -506,7 +506,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
     dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
   } else {
     dataset <- dataset %>% dplyr::filter(measurement_unit == "t")
-    print(config$logger.info("Multiple units shouldn't be handled by netcdf only tons are kept"))
+    print(log_info("Multiple units shouldn't be handled by netcdf only tons are kept"))
     dataset_metadata$measurement_unit <- unique(dataset$measurement_unit)
   }
   
@@ -545,7 +545,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
       
       
       
-      config$logger.info("Multiple resolution cannot be handled by netcdf please aggregate or disagreggate some before writing to netcdf,
+      log_info("Multiple resolution cannot be handled by netcdf please aggregate or disagreggate some before writing to netcdf,
           for now we use the largest resolution")
     }
     
@@ -578,7 +578,7 @@ convert_to_netcdf = function(action, config, entity, uploadgoogledrive = TRUE){
   
   entity$addResource("netcdf", file.path("data",paste0(dataset_pid, ".nc")))
   if(uploadgoogledrive){
-    config$logger.info("Upload netcdf to Google Drive")
+    log_info("Upload netcdf to Google Drive")
     folder_datasets_id <- "16fVLytARK13uHCKffho3kYJgm0KopbKL"
     path_to_dataset_new <- file.path(getwd(), "data", paste0(dataset_pid, ".nc"))
     id_csv_dataset <- drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)$id

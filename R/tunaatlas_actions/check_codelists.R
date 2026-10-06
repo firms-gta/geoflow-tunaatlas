@@ -7,7 +7,7 @@ check_codelists <- function(action,entity, config){
 	}
 	
 	CON = config$software$input$dbi
-	config$logger.info("Action to check codelists updateness from datasets")
+	log_info("Action to check codelists updateness from datasets")
 	
 	filename <- entity$data$source[[1]]
 	attributes(filename) <- NULL

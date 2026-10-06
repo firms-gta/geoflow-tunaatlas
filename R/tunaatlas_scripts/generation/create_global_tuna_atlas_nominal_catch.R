@@ -37,7 +37,7 @@ function(action, entity, config){
     install.packages("readr")
     require(readr)
   }
-  
+
   if(from_repo){
     nominal_catch <-
       readr::read_csv("~/firms-gta/geoflow-tunaatlas/data/global_nominal_catch_firms_level0_harmonized.csv",
@@ -60,9 +60,9 @@ function(action, entity, config){
   
   
   #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
-  config$logger.info("Retrieving RFMOs nominal catch...")
+  log_info("Retrieving RFMOs nominal catch...")
   nominal_catch <-retrieve_nominal_catch(entity, config, opts)
-  config$logger.info("Retrieving RFMOs nominal catch OK")
+  log_info("Retrieving RFMOs nominal catch OK")
   
   if(recap_each_step){
     CWP.dataset::function_recap_each_step(
@@ -74,13 +74,13 @@ function(action, entity, config){
   
   if (!is.null(SBF_data_rfmo_to_keep)){
     
-    config$logger.info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
+    log_info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
     if (SBF_data_rfmo_to_keep=="CCSBT"){
       nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
     } else {
       nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
     }
-    config$logger.info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
+    log_info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
     
     if(recap_each_step){
       CWP.dataset::function_recap_each_step(
@@ -102,5 +102,5 @@ function(action, entity, config){
                                                     "measurement", "measurement_type", "measurement_processing_level"))
   
   #### END
-  config$logger.info("End: Your tuna atlas dataset has been created!")
+  log_info("End: Your tuna atlas dataset has been created!")
 }

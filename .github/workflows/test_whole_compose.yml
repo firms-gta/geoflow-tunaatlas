@@ -1,0 +1,123 @@
+name: CI GTA workflow
+
+on:
+  push:
+    branches: [master, feature/mapping-codelist-cloned-in-docker-image]
+  workflow_dispatch:
+
+jobs:
+  gta-workflow:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GTA_IMAGE: gta-workflow:ci-${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache applicatif
+        uses: actions/cache@v4
+        with:
+          path: runtime/cache
+          key: gta-cache-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            gta-cache-${{ github.ref_name }}-
+            gta-cache-
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build de l'image depuis le commit
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: compose/Dockerfile.workflow
+          tags: ${{ env.GTA_IMAGE }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Préparer le runner
+        run: |
+          mkdir -p runtime/jobs runtime/cache \
+                   tests/sample_data/dataoutputpreharmo tests/sample_data/dataoutputGTA
+          cat > zenodo_secrets.env <<EOF
+          ZENODO_URL=https://sandbox.zenodo.org/api
+          ZENODO_TOKEN=${{ secrets.ZENODO_SANDBOX_TOKEN }}
+          EOF
+          cat > docker_local.env.compose <<'EOF'
+          DB_DRV=PostgreSQL
+          DB_HOST=postgres
+          DB_PORT=5432
+          DB_NAME=gta
+          DB_USER=gta
+          DB_PASSWORD=gta
+          DB_USER_READONLY=gta_reader
+          DB_PASSWORD_READONLY=gta_reader
+          GTA_DB_UPLOAD=true
+          RUN_ZENODO_T_F=true
+          EOF
+          # le conteneur tourne en 1000:1000 (rstudio), le runner en 1001
+          sudo chown -R 1000:1000 runtime tests/sample_data R config
+
+      - name: Lancer le workflow
+        timeout-minutes: 90
+        env:
+          GTA_RUN_USER: "1000:1000"
+          GTA_STEPS: DB,rawdata,nominal,effort,level0,services
+          GTA_MOUNT_CODE: "false"
+        run: ./compose/run_workflow_retry.sh
+
+      - name: Logs en cas d'échec
+        if: failure()
+        run: |
+          docker compose \
+            -f compose/compose.bd.rstudio.newversiongeoflow.yml \
+            -f compose/compose.ci.yml \
+            logs
+
+      - name: Rendre le cache au runner
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" runtime
+        
+      - name: Login GHCR
+        if: success() && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push de l'image testée sur GHCR
+        if: success() && github.event_name == 'push'
+        run: |
+          REPO=ghcr.io/firms-gta/gta-workflow
+          SHA=sha-${GITHUB_SHA::7}
+
+          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+            TAGS=("latest" "$SHA")
+          else
+            BRANCH=$(echo "$GITHUB_REF_NAME" | tr '/' '-')
+            TAGS=("${BRANCH}-dev" "${SHA}-dev")
+          fi
+
+          for t in "${TAGS[@]}"; do
+            docker tag "$GTA_IMAGE" "$REPO:$t"
+            docker push "$REPO:$t"
+          done
+          
+      - name: Build et push de l'image RStudio
+        if: success() && github.event_name == 'push'
+        run: |
+          REPO=ghcr.io/firms-gta/gta-workflow
+          if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+            BASE=$REPO:sha-${GITHUB_SHA::7}
+          else
+            BASE=$REPO:sha-${GITHUB_SHA::7}-dev
+          fi
+          docker buildx build -f compose/Dockerfile.rstudio \
+            --build-arg BASE_IMAGE="$BASE" \
+            -t "$BASE-rstudio" --push .

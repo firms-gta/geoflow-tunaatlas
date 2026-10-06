@@ -5,7 +5,6 @@
 .RData
 .Rhistory
 
-data/
 jobs/
 gta_output/
 all_raw_data_GTA/
@@ -19,7 +18,12 @@ Markdown/
 report/
 _book/
 _bookdown_files/
+runtime/
 
 *.tar.gz
 *.gpkg
 level0.csv
+*.env
+
+data/fdi-codelists/
+data/fdi-mappings/

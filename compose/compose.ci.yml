@@ -1,0 +1,17 @@
+# =============================================================================
+# compose/compose.ci.yml
+#
+# Override appliqué EN PLUS de compose.bd.rstudio.newversiongeoflow.yml pendant
+# la CI (ajouté automatiquement par compose/run_workflow_retry.sh quand CI=true).
+#
+# Ne pas redéfinir ici l'image du service workflow : elle vient de GTA_IMAGE,
+# c'est-à-dire l'image buildée depuis le commit testé. Un "image:" ici ferait
+# tester une autre image que celle qui est ensuite publiée sur GHCR.
+#
+# Les données (tests/sample_data) et les étapes (GTA_STEPS) sont passées par le
+# script de lancement, pas ici.
+# =============================================================================
+services:
+  elasticsearch:
+    environment:
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"   # runner GitHub : mémoire limitée

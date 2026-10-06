@@ -78,7 +78,7 @@ filename1 <- entity$data$source[[1]] #data
 filename2 <- entity$data$source[[2]] #structure
 # Historical name for the dataset at source  iccat_effort_code_lists.csv
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+
 #----------------------------------------------------------------------------------------------------------------------------
 
 keep_fleet_instead_of_flag=FALSE  
@@ -117,7 +117,7 @@ t2ce <- t2ce %>%
 # remove data displayed annualy
 
 
-config$logger.info(paste0("BEGIN  function   \n"))
+log_info(paste0("BEGIN  function   \n"))
 
 # data_pivot_ICCAT<-left_join(t2ce,Flags,by="FleetID")  # equivalent to "select FlagCode,FlagID,t2ce.* from t2ce, Flags where t2ce.FleetID=Flags.FleetID"
 

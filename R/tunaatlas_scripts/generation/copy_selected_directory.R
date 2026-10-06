@@ -91,7 +91,7 @@ copy_selected_directory <- function(ancient_dir, entity_name, new_dir) {
       # Copy the file
       file.copy(file_path, dest_path)
     }
-    config$logger.info(sprintf("Directory '%s' copied to '%s'.\n", selected_dir, new_dir))
+    log_info(sprintf("Directory '%s' copied to '%s'.\n", selected_dir, new_dir))
     cat(sprintf("Directory '%s' copied to '%s'.\n", selected_dir, new_dir))
   }
 }

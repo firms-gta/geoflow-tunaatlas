@@ -9,12 +9,12 @@ create_mappings_materialized_view <- function(action,entity, config){
   #whent the last entity has been processed we launch the creation of materialized views from normal views
   if(dataset_pid == last_entity$identifiers[["id"]]){
     
-    config$logger.info(sprintf("\n Last entity, action create_mappings_materialized_view will be launched '%s' ",dataset_pid))
+    log_info(sprintf("\n Last entity, action create_mappings_materialized_view will be launched '%s' ",dataset_pid))
     views<-dbGetQuery(CON, "SELECT * FROM information_schema.tables WHERE table_type='VIEW' AND table_name LIKE '%_mapping_view' and table_schema NOT IN('pg_catalog','public');")
-    config$logger.info(sprintf("\n List views => '%s' ",views))
+    log_info(sprintf("\n List views => '%s' ",views))
     
     for(v in 1:nrow(views)){
-      config$logger.info(sprintf("\n Case of schema '%s' ",views$table_name[v]))
+      log_info(sprintf("\n Case of schema '%s' ",views$table_name[v]))
       
       this_view <- paste0(views$table_schema[v],".",views$table_name[v])
       view_def <- dbGetQuery(CON,paste0("SELECT definition FROM (select pg_get_viewdef('",this_view,"', true) AS definition) AS view_def"))
@@ -32,25 +32,25 @@ create_mappings_materialized_view <- function(action,entity, config){
       
       dbGetQuery(CON,paste0("DROP VIEW IF EXISTS ",this_view,";"))
       
-      config$logger.info(sprintf("\n Replace view '%s' by materialized view",views$table_name[v]))
+      log_info(sprintf("\n Replace view '%s' by materialized view",views$table_name[v]))
       sql_mat_view <- paste0("CREATE MATERIALIZED VIEW ",this_view," AS ",view_def$definition)
-      config$logger.info(sprintf("\n SQL mat view '%s' ",sql_mat_view))
+      log_info(sprintf("\n SQL mat view '%s' ",sql_mat_view))
       create_materialized_view <- dbGetQuery(CON,sql_mat_view) 
       
-      config$logger.info(sprintf("\n Add comments for view '%s' and related columns ",views$table_name[v]))
+      log_info(sprintf("\n Add comments for view '%s' and related columns ",views$table_name[v]))
       sql_view_comment <- paste0("COMMENT ON MATERIALIZED VIEW ",this_view," IS '",view_comment$comment[1],"';")
       dbGetQuery(CON,sql_view_comment)
       
       for(c in 1:nrow(view_columns_comments)){
         this_column <-paste0(this_view,".",view_columns_comments$column_name[c])
         sql_comment <- paste0("COMMENT ON COLUMN ",this_column," IS '",view_columns_comments$description[c],"';")
-        config$logger.info(sprintf("\n %s",sql_comment))
+        log_info(sprintf("\n %s",sql_comment))
         dbGetQuery(CON,sql_comment)
       }
       
     }
   }else{
-    config$logger.info(sprintf("\n Waiting for last entity to launch this action '%s' ",dataset_pid))
+    log_info(sprintf("\n Waiting for last entity to launch this action '%s' ",dataset_pid))
   }
   
 }

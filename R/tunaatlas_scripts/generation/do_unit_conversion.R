@@ -10,11 +10,11 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     df_conversion_factor <- unit_conversion_csv_conversion_factor_url
   } else {
   
-  config$logger.info("Reading the conversion factors dataset")
+  log_info("Reading the conversion factors dataset")
   googledrive_baseurl <- "https://drive.google.com/open?id="
   if(startsWith(unit_conversion_csv_conversion_factor_url, googledrive_baseurl)){
     #managing download through google drive
-    config$logger.info("Downloading file using Google Drive R interface")
+    log_info("Downloading file using Google Drive R interface")
     drive_id <- unlist(strsplit(unit_conversion_csv_conversion_factor_url, "id="))[2]
     drive_id <- unlist(strsplit(drive_id, "&export"))[1] #control in case export param is appended
     googledrive::drive_download(file = googledrive::as_id(drive_id), path = file.path("data", paste0(entity$identifiers[["id"]], "_conversion_factors.csv")), overwrite = TRUE)
@@ -24,7 +24,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   }
   }
   ## If we have not mapped the code lists (i.e. if mapping_map_code_lists==FALSE), we need to map the source gear coding system with ISSCFG coding system. In fact, the conversion factors dataset is expressed with ISSCFG coding system for gears, while the primary tRFMOs datasets are expressed with their own gear coding system.
-  config$logger.info("Checking if 'mapping_map_code_lists' option is set to TRUE")
+  log_info("Checking if 'mapping_map_code_lists' option is set to TRUE")
   
   if("gear" %in% colnames(df_conversion_factor)){
     df_conversion_factor <- df_conversion_factor %>% dplyr::rename(gear_type = gear)
@@ -58,7 +58,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   
   
   if (!mapping_map_code_lists){
-    config$logger.info("'mapping_map_code_lists' option is set to TRUE")
+    log_info("'mapping_map_code_lists' option is set to TRUE")
     
     source_authority<-c("IOTC","ICCAT","IATTC","WCPFC","CCSBT")
     db_mapping_dataset_name<-c("codelist_mapping_gear_iotc_isscfg_revision_1","codelist_mapping_gear_iccat_isscfg_revision_1","codelist_mapping_gear_iattc_isscfg_revision_1","codelist_mapping_gear_wcpfc_isscfg_revision_1","codelist_mapping_gear_ccsbt_isscfg_revision_1")
@@ -91,12 +91,12 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     }
     
   }
-  config$logger.info("'mapping_map_code_lists' option is set to FALSE")
+  log_info("'mapping_map_code_lists' option is set to FALSE")
   
   
   
-  config$logger.info("Execute rtunaatlas::convert_units() function")
-  config$logger.info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
+  log_info("Execute rtunaatlas::convert_units() function")
+  log_info(sprintf("Gridded catch dataset before tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
   if(fact == "catch"){
     sum_no_before <- georef_dataset %>% filter(measurement_unit=="no")  %>% select(measurement_value)  %>% sum()
     species_no_before <- georef_dataset %>% filter(measurement_unit=="no") %>% distinct(species)
@@ -113,7 +113,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   # to get stats on the process (useful for metadata)
   stats<-georef_dataset$stats
   georef_dataset<-georef_dataset$df
-  config$logger.info(sprintf("fact is", fact))
+  log_info(sprintf("fact is", fact))
   
   #check what species didn't get  conversion factors from IRD file
   if(fact == "catch"){
@@ -124,9 +124,9 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     # test <- df_conversion_factor %>% filter(species=='SKJ')
     # df_conversion_factor %>% filter(species=='SKJ',source_authority=='IOTC')
   }
-  config$logger.info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
-  config$logger.info("rtunaatlas::convert_units() function executed !")
-  config$logger.info(sprintf("Gridded catch dataset after tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
+  log_info(sprintf("Statitstics are : \n [%s]", georef_dataset$stats))
+  log_info("rtunaatlas::convert_units() function executed !")
+  log_info(sprintf("Gridded catch dataset after tunaatlas::convert_units() has [%s] lines", nrow(georef_dataset)))
   
   
   #filter by unit MT
@@ -136,13 +136,13 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     sum_no_after<- georef_dataset %>% filter(measurement_unit=="no")  %>% select(measurement_value)  %>% sum()
     nrow_no <- nrow(georef_dataset %>% filter(measurement_unit=="no")  %>% select(measurement_value))
     # sum_t <- df %>% filter(measurement_unit=="t")  %>% select(measurement_value)  %>% sum()
-    config$logger.info(sprintf("Gridded catch dataset has [%s] lines using 'number' as unit of measure", nrow_no))
-    config$logger.info(sprintf("Now removing all lines still using 'number' (NO) as unit of measure and still representing a total of [%s] inidviduals", sum_no_after))
+    log_info(sprintf("Gridded catch dataset has [%s] lines using 'number' as unit of measure", nrow_no))
+    log_info(sprintf("Now removing all lines still using 'number' (NO) as unit of measure and still representing a total of [%s] inidviduals", sum_no_after))
     if(removing_numberfish_final){
       georef_dataset <- georef_dataset[georef_dataset$measurement_unit == "t", ]}
     
     #georef_dataset <- georef_dataset[georef_dataset$measurement_unit == "t", ]
-    config$logger.info(sprintf("Ratio of converted numbers is [%s] due to lack on conversion factors for some dimensions (species, time, gears..)", 1-sum_no_after/sum_no_before))
+    log_info(sprintf("Ratio of converted numbers is [%s] due to lack on conversion factors for some dimensions (species, time, gears..)", 1-sum_no_after/sum_no_before))
   }
   
   if (mapping_map_code_lists=="FALSE"){
@@ -156,7 +156,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   }
   
   # fill metadata elements
-  config$logger.info("Fill metadata elements accordingly")
+  log_info("Fill metadata elements accordingly")
   
   lineage <- ""
   description <- ""
@@ -178,7 +178,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   }
   #@juldebar modify FIRMS-Secretariat@fao.org 
   #@juldebar begin commented
-  #@config$logger.info("Fill contact metadata elements")
+  #@log_info("Fill contact metadata elements")
   #@firms_contact <- config$getContacts()[sapply(config$getContacts(), function(x){x$id == "FIRMS-Secretariat@fao.org"})][[1]]
   #@firms_contact$setRole("processor")
   #@conversion_step <- geoflow_process$new()
@@ -197,6 +197,6 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
     
   }
   
-  config$logger.info("Converting units of georef_dataset OK")
+  log_info("Converting units of georef_dataset OK")
   return(georef_dataset)
 }

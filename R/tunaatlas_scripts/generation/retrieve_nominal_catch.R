@@ -5,6 +5,10 @@ retrieve_nominal_catch <- function(entity, config, options){
 	#list of dataset files (from entity data sources)
 	dataset_files <- sapply(entity$data$source, function(x){ entity$getJobDataResource(config, x) })
 	dataset_files_nominal_catch <- dataset_files[regexpr("nominal", basename(dataset_files)) > 0]
+	# Exclure les fichiers de codelists
+	dataset_files_nominal_catch <- dataset_files_nominal_catch[
+	  !grepl("codelist", basename(dataset_files_nominal_catch), ignore.case = TRUE)
+	]
 	
 	if (!options$include_IOTC)  dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("iotc",  dataset_files_nominal_catch, ignore.case = TRUE)]
 	if (!options$include_ICCAT) dataset_files_nominal_catch <- dataset_files_nominal_catch[!grepl("iccat", dataset_files_nominal_catch, ignore.case = TRUE)]

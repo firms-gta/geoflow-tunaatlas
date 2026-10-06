@@ -68,7 +68,7 @@ if(!require(dplyr)){
 filename1 <- entity$data$source[[1]] #data
 filename2 <- entity$data$source[[2]] #structure
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+
 #----------------------------------------------------------------------------------------------------------------------------
 
 keep_fleet_instead_of_flag=FALSE  
@@ -80,12 +80,12 @@ t2ce <- as.data.frame(readr::read_csv(path_to_raw_dataset))
 ICCAT_CE_species_colnames<-setdiff(colnames(t2ce),c("StrataID","DSetID","FleetID","GearGrpCode","GearCode","FileTypeCode","YearC","TimePeriodID","SquareTypeCode","QuadID","Lat","Lon","Eff1","Eff1Type","Eff2","Eff2Type","DSetTypeID","CatchUnit", "FleetCode", "FleetName", "FlagID", "FlagCode"))
 source(here::here("./R/sardara_functions/FUN_catches_ICCAT_CE.R"))
 
-config$logger.info(paste0("BEGIN  function   \n"))
+log_info(paste0("BEGIN  function   \n"))
 catches_pivot_ICCAT<-FUN_catches_ICCAT_CE(RFMO_CE=t2ce,
                                           RFMO_CE_species_colnames=ICCAT_CE_species_colnames
                                           )
 
-config$logger.info(paste0(" END function   \n"))
+log_info(paste0(" END function   \n"))
 
 #School
 catches_pivot_ICCAT$School<-"UNK"
@@ -96,7 +96,7 @@ catches_pivot_ICCAT$FishingFleet<-catches_pivot_ICCAT$FlagCode
 #CatchUnits
 catches_pivot_ICCAT$CatchUnits<-catches_pivot_ICCAT$CatchUnit
 
-config$logger.info(paste0(" Change units  \n"))
+log_info(paste0(" Change units  \n"))
 
 
 index.kg <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == ".w" )
@@ -106,7 +106,7 @@ index.nr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "nr"  & catches_pivot_I
 catches_pivot_ICCAT[index.nr,"CatchUnits"]<- "no"               
 
 
-config$logger.info(paste0(" Change units  \n"))
+log_info(paste0(" Change units  \n"))
 
 
 index.kgnr <- which( catches_pivot_ICCAT[,"CatchUnits"] == "kg" & catches_pivot_ICCAT[,"DSetTypeID"] == "nw" )

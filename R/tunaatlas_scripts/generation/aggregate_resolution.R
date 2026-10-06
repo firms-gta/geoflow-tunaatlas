@@ -25,7 +25,7 @@ aggregate_resolution =function (con, df_input, resolution)
   
   if(nrow(areas_to_project_data_to_aggregate) != 0){
     areas_to_project_data_to_aggregate <- areas_to_project_data_to_aggregate%>% dplyr::distinct()
-  } else {config$logger.info("No areas to project data to aggregate or no areas to aggregate")
+  } else {log_info("No areas to project data to aggregate or no areas to aggregate")
 }
   
   

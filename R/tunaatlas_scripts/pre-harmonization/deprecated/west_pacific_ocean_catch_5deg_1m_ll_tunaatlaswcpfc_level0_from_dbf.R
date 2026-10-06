@@ -60,7 +60,7 @@ if(!require(dplyr)){
 filename1 <- entity$data$source[[1]] #data
 filename2 <- entity$data$source[[2]] #structure
 path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+
 opts <- options()
 options(encoding = "UTF-8")
 #----------------------------------------------------------------------------------------------------------------------------

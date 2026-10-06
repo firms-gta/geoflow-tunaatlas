@@ -77,20 +77,20 @@ function(action, entity, config){
   filename2 <- entity$data$source[[2]] #structure
 # Historical name for the dataset at source  ccsbt_effort_code_lists.csv
   path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   opts <- options()
   options(encoding = "UTF-8")
   
   
   RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
   
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub("\\(", "", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub("\\)", "", colnames(RFMO_CE))
   RFMO_CE<-as.data.frame(RFMO_CE)
-  config$logger.info(sprintf("Pre-harmonization of dataset '%s'", entity$identifiers[["id"]]))
+  
   
   #Remove lines that are read in the Excel but that are not real
   RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
@@ -148,7 +148,7 @@ function(action, entity, config){
     dplyr::summarise(Effort = sum(Effort))  
   efforts<-as.data.frame(efforts)
   
-  config$logger.info(sprintf("colnumbers",ncol(efforts)))
+  log_info(sprintf("colnumbers",ncol(efforts)))
   
   colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
   efforts$source_authority<-"CCSBT"

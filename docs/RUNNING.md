@@ -5,6 +5,10 @@ This page provides the shortest way to run the Global Tuna Atlas (GTA) productio
 The workflow is intended for **reproducing or updating GTA datasets**.
 No local R installation is required.
 
+This page covers the **processing only**. To also load the database and publish
+to GeoServer, GeoNetwork and Zenodo, use the full stack in
+[compose/README.md](../compose/README.md).
+
 ## Requirements
 
 You need:
@@ -25,13 +29,9 @@ For reproducibility, use a fixed image tag rather than `latest`.
 
 # 1. Get the GTA input data
 
-The GTA raw-data archive is available from Zenodo record:
-
-```markdown
 The GTA raw-data archive is available from
 [Zenodo record 20834708](https://zenodo.org/records/20834708)
 (DOI: `10.5281/zenodo.20834708`).
-```
 
 The required file is:
 

@@ -4,11 +4,11 @@ double_unit_data_handling = function(con, entity, config,fact,unit_conversion_cs
   #@juldebar => see what to do with redundant action in Level 0 workflow
   #@eblondel => to refactor to align on standard units
   if (fact=="catch"){
-    config$logger.info("Dealing with cacth => Removing old NOMT / MTNO units if any")
+    log_info("Dealing with cacth => Removing old NOMT / MTNO units if any")
     georef_dataset$measurement_unit[which(georef_dataset$measurement_unit == "MTNO")]<-"t"
     georef_dataset<-georef_dataset[!(georef_dataset$measurement_unit=="NOMT"),]
   } else if (fact=="effort"){
-    config$logger.info("Dealing with effort => harmonization of units")
+    log_info("Dealing with effort => harmonization of units")
     ## For efforts: 
     # Les strates sont potentiellement exprimées avec plusieurs unités par strates. 
     # Si les states sont exprimées dans au moins une des unités standard, on isole l'unité standard et on supprime les autres unités.
