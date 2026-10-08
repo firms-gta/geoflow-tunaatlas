@@ -20,6 +20,7 @@
 #   GTA_RUN_USER         uid:gid du conteneur              (défaut : utilisateur courant ; CI : 1000:1000)
 #   GTA_MOUNT_CODE       false : code de l'image ; true : monte R/ et config/ du dépôt,
 #                        pour tester une modification sans reconstruire l'image (défaut : false)
+#   GTA_MOUNT_DATA       true : monte aussi les fichiers de data/ du dépôt (défaut : false)
 #   GTA_MAX_ATTEMPTS     nombre de tentatives en cas de blocage GC   (défaut : 3)
 #   GTA_GC_TIMEOUT       secondes sans ligne normale après un message GC avant d'abandonner (défaut : 60)
 # =============================================================================
@@ -31,6 +32,7 @@ STEPS="${GTA_STEPS:-DB,rawdata,nominal,level0,services}"
 PROJECT="${GTA_COMPOSE_PROJECT:-}"
 RUN_USER="${GTA_RUN_USER:-$(id -u):$(id -g)}"
 MOUNT_CODE="${GTA_MOUNT_CODE:-false}"
+MOUNT_DATA="${GTA_MOUNT_DATA:-false}"
 MAX_ATTEMPTS="${GTA_MAX_ATTEMPTS:-3}"
 GC_TIMEOUT="${GTA_GC_TIMEOUT:-60}"
 
@@ -86,6 +88,16 @@ if [[ "$MOUNT_CODE" == "true" ]]; then
   )
 fi
 
+# Fichiers de référence de data/ (listes de codes, paramètres...). On monte les
+# fichiers un par un, pas le dossier : data/ contient aussi, dans l'image
+# seulement, fdi-codelists/ et fdi-mappings/, qu'un montage du dossier masquerait.
+if [[ "$MOUNT_DATA" == "true" ]]; then
+  [[ -d data ]] || { echo ">>> GTA_MOUNT_DATA=true mais data/ est absent" >&2; exit 2; }
+  for f in data/*; do
+    [[ -f "$f" ]] && CODE_MOUNTS+=(-v "$PWD/$f":"$CONTAINER_ROOT/$f")
+  done
+fi
+
 # --- Préparation de l'hôte -----------------------------------------------------
 mkdir -p runtime/jobs runtime/cache
 # Dossiers de sortie que le workflow écrit DANS le dossier de données
@@ -96,7 +108,7 @@ mkdir -p "$DATA_DIR/dataoutputpreharmo" "$DATA_DIR/dataoutputGTA"
 
 echo ">>> Données : $DATA_DIR"
 echo ">>> Étapes  : $STEPS"
-echo ">>> Projet  : ${PROJECT:-(défaut)} | utilisateur : $RUN_USER | code monté : $MOUNT_CODE"
+echo ">>> Projet  : ${PROJECT:-(défaut)} | utilisateur : $RUN_USER | code monté : $MOUNT_CODE | data/ monté : $MOUNT_DATA"
 
 run_once() {
   "${COMPOSE[@]}" run --rm --name "$NAME" \
