@@ -71,6 +71,7 @@ services:
       - ../R:/home/rstudio/geoflow-tunaatlas/R
       - ../config:/home/rstudio/geoflow-tunaatlas/config
       - ../compose:/home/rstudio/geoflow-tunaatlas/compose
+      - ../data/global_catch_ird_codelists.csv:/home/rstudio/geoflow-tunaatlas/data/global_catch_ird_codelists.csv
       - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
       - ../runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
       - ../runtime/cache:/cache
