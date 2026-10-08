@@ -143,7 +143,7 @@ process:Data harmonization[""The catches from 1952 to 1974 made by purse seiners
 process:Data conversion[""The source MS Excel (xlsx) dataset was manually converted to CSV format. The column separator was set to comma (« , ») and the decimal separator of numerical values was set to point (« . »).""]_
 process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
 process:Data export[""The dataset was exported in CSV format.""]_
-process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/CCSBT_Global_Catch.xlsx,./data/ccsbt_catch_code_lists.csv_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"source:./data/GTA_2026/CCSBT_Global_Catch.xlsx,./data/ccsbt_nominal_catch_code_lists.csv_
 sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
