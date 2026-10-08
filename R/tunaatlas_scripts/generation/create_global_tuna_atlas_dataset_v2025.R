@@ -1351,7 +1351,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             candidate_cols_order = c("fishing_mode_wcpfc_issue_unk_solved", "gear_type", "geographic_identifier_nom", "fishing_fleet")
           )
           
-          qs::qsave(res_map, file.path("data", "mapping_georef_to_nominal.qs"))
+          saveRDS(res_map, file.path("data", "mapping_georef_to_nominal.rds"))
           
           
           georef_dataset <- georef_dataset %>% dplyr::mutate(year = as.character(lubridate::year(time_start))) %>% dplyr::left_join(res_map$candidate_mappings, 
@@ -1362,7 +1362,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
             dplyr::mutate(fishing_fleet_solved = ifelse(is.na(fishing_fleet_nominal), fishing_fleet, fishing_fleet_nominal)) %>% 
             dplyr::mutate(gear_type_solved = ifelse(is.na(gear_type_nominal), gear_type, gear_type_nominal))
           
-          qs::qsave(georef_dataset, file.path("data", "georef_mapped_with_info_on_recoding.qs"))
+          data.table::fwrite(georef_dataset, file.path("data", "georef_mapped_with_info_on_recoding.csv"))
           
           
           cols_after_georef_no_solved <- c(
