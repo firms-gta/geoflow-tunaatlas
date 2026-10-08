@@ -1,9 +1,9 @@
 dimension,code_list_identifier
 area,areas_tuna_rfmos_task1
-measurement_type,catchtype_iotc
+measurement_type,catch_concepts
 measurement_unit,catchunit_rfmos
-fishing_fleet,flag_iotc
-gear_type,gear_iotc
+fishing_fleet,fishingfleet_firms
+gear_type,isscfg_revision_1
 fishing_mode,schooltype_rfmos
-species,species_iotc
+species,species_asfis
 source_authority,source_authority

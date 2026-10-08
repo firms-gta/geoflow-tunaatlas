@@ -138,6 +138,28 @@ process: The code list was integrated into the Tuna atlas database.","source:cl_
 sourceType:csv_
 uploadSource:measurement_type.catchtype_tunaatlas_
 uploadType:dbtable"
+id:catch_concepts,CWP catch concepts,"abstract:Code list of the catch concepts defined by the Coordinating Working Party on Fishery Statistics (CWP), e.g. NC (nominal catch), RC (retained catch). Used as measurement type of the catch datasets once mapped to the standard code lists.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: The code list is maintained in the fdi-codelists repository (global/cwp/cl_catch_concepts.csv)._
+process: The code list was integrated into the Tuna atlas database.","source:cl_catch_concepts.csv@./data/fdi-codelists/global/cwp/cl_catch_concepts.csv_
+sourceType:csv_
+uploadSource:measurement_type.catch_concepts_
+uploadType:dbtable"
+id:areas_tuna_rfmos_task1,Areas used by the tuna RFMOs to report nominal catch,"abstract:Areas used by the five tuna RFMOs to report nominal catch (ICCAT main areas, IOTC east and west areas, RFMO convention areas, eastern and western-central Pacific), with their geometry.
+",,"owner:ird@ird.fr,paul.taconet@ird.fr_
+metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_
+pointOfContact:paul.taconet@ird.fr_
+principalInvestigator:emmanuel.chassot@ird.fr_
+processor:FIRMS-Secretariat@fao.org,emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr",,codelist,eng,,2025-05-05,,,,"statement:Data management workflow_
+process: The code list is maintained in the fdi-codelists repository (global/firms/gta/cl_nc_areas.csv, built by cl_nc_areas.R)._
+process: The code list was integrated into the Tuna atlas database.","source:cl_nc_areas.csv@./data/fdi-codelists/global/firms/gta/cl_nc_areas.csv_
+sourceType:csv_
+uploadSource:area.areas_tuna_rfmos_task1_
+uploadType:dbtable"
 id:catchtype_wcpfc,Code list for types of catch used by WCPFC,"abstract:Code list for types of catches used by the Western and Central Pacific Fisheries Commission (WCPFC). Presently, WCPFC does not have any catch type code list, since the public datasets do not have a catch type detail. This table was created by the database manager in order to standardize the organization of the code lists and to facilitate the integration of the data  within the Sardara database.
 ",,"owner:ird@ird.fr,paul.taconet@ird.fr;PeterW@spc.int_
 metadata:paul.taconet@ird.fr;julien.barde@ird.fr;emmanuel.blondel@fao.org_

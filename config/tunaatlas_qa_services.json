@@ -52,6 +52,12 @@
 			"dbname": "{{DB_NAME}}"
 		},
 		"properties" : {
+  "user": "{{DB_USER}}",
+
+		  "onend_r": {
+  "script": "../R/tunaatlas_actions/export_gta_geopackage.R",
+  "fun": "onend_export_gta_geopackage"
+}
 		}
 	},
 	{
@@ -109,22 +115,27 @@
     		"addfeatures": false
       }
 	},
-  	{
-  	  "id": "geometa-create-iso-19110",
-  	  "run": true,
-  	  "options" : {
-		  "exclude_attributes": ["time_start", "time_end"],
-		  "exclude_values_for_attributes": ["geographic_identifier", "measurement"],
-		  "extra_attributes": ["geom","aggregation_method"]
-  	  }
-  	},
+{
+  "id": "geometa-create-iso-19110",
+  "run": true,
+  "options": {
+    "exclude_attributes": ["time_start", "time_end", "id_area", "longitude", "latitude"],
+    "exclude_attributes_not_in_dictionary": false,
+    "exclude_values_for_attributes": ["geographic_identifier", "measurement"],
+    "extra_attributes": ["geom", "aggregation_method"],
+    "upload_to_db": false,
+    "upload_to_db_public": false,
+    "create_materialized_view": false,
+    "add_sql_comments": false
+  }
+},
   	{
   	  "id": "geonapi-publish-iso-19139",
   	  "run": true
   	},
   		{
 		"id": "geosapi-publish-ogc-services",
-		"run":true,
+		"run": true,
 		"options": {
 		  "createWorkspace": true,
 		  "createStore": true,
