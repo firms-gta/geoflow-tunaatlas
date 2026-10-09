@@ -20,6 +20,7 @@ Other documentation:
 
 * [Advanced execution](docs/RUNNING_ADVANCED.md) — runtime parameters, data source modes, partial runs, existing jobs, reports, local builds
 * [Workflow architecture](docs/WORKFLOW.md) — processing stages, configurations and dependencies
+* [Incremental runs with {targets}](docs/TARGETS.md) — re-run only what changed, for development and debugging (RStudio)
 * [Validation](docs/VALIDATION.md) — technical and scientific validation procedures
 * [Continuous integration](docs/CI.md) — automated tests and published images
 * [Deployment](docs/DEPLOYMENT.md) — batch runs on SSP Cloud / Kubernetes

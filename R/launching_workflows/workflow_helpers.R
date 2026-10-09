@@ -122,8 +122,19 @@ remove_dbi_software <- function(file) {
     }, workflow$software)
   }
   
+  # Actions that read or write the database: switched off. GeoPackage and
+  # GeoParquet read the CWP grid from the database unless a grid_file option
+  # is given.
+  db_actions <- c("enrich_metadata", "enrich_for_db_services", "load_metadata")
+  grid_actions <- c("create_geopackage", "create_geoparquet")
+
   if (!is.null(workflow$actions)) {
     for (i in seq_along(workflow$actions)) {
+      action_id <- workflow$actions[[i]]$id %||% ""
+      if (action_id %in% db_actions ||
+          (action_id %in% grid_actions && is.null(workflow$actions[[i]]$options$grid_file))) {
+        workflow$actions[[i]]$run <- FALSE
+      }
       if (!is.null(workflow$actions[[i]]$options)) {
         workflow$actions[[i]]$options$upload_to_db <- FALSE
         workflow$actions[[i]]$options$upload_to_db_public <- FALSE
@@ -191,6 +202,10 @@ force_upload_to_db <- function(config, action_id = "load_dataset") {
 # Initialise a workflow. If DBI initialisation fails, write a temporary _nodb JSON
 # file and retry without database software blocks.
 init_workflow_maybe_without_dbi <- function(file, handle_metadata = TRUE) {
+  if (gta_no_db()) {
+    return(initWorkflow(remove_dbi_software(file), handleMetadata = handle_metadata,
+                        dir = here::here()))
+  }
   tryCatch(
     initWorkflow(file, handleMetadata = handle_metadata, dir = here::here()),
     error = function(e) {
@@ -210,6 +225,10 @@ log_info <- function(msg, ..., config = NULL) {
   }
 }
 
+gta_no_db <- function() {
+  tolower(Sys.getenv("GTA_NO_DB", "false")) %in% c("true", "1", "yes")
+}
+
 # Execute a workflow and optionally rename the output job folder. Upload is
 # activated dynamically only when the database context is explicitly validated.
 execute_workflow_maybe_upload <- function(
@@ -218,12 +237,26 @@ execute_workflow_maybe_upload <- function(
     rename_suffix = NULL,
     requires_db = FALSE
 ) {
-  config_test <- initWorkflow(
+  workflow_file <- file
+  
+  # GTA_NO_DB=true: never touch the database (used by the {targets} pipeline,
+  # whose results must not depend on whether PostGIS happens to be reachable).
+  if (gta_no_db()) {
+    if (requires_db) {
+      message("GTA_NO_DB=true: skipping database workflow ", basename(file))
+      return(NULL)
+    }
+    output <- executeWorkflow(file = remove_dbi_software(file), dir = dir)
+    if (!is.null(rename_suffix)) {
+      output <- executeAndRename(output, rename_suffix)
+    }
+    return(output)
+  }
+  
+  config_test <- try(initWorkflow(
     file,dir = dir,
     handleMetadata = FALSE
-  )
-  
-  workflow_file <- file
+  ), silent = TRUE)
   
   if (inherits(config_test, "try-error")) {
     
@@ -266,6 +299,7 @@ execute_workflow_maybe_upload <- function(
 # Initialise a workflow only to retrieve its DBI connection. NULL is returned when
 # the workflow cannot be initialised with DBI, which lets summaries run without DB.
 get_workflow_con <- function(config_file) {
+  if (gta_no_db()) return(NULL)
   config <- try(
     initWorkflow(here::here(config_file), handleMetadata = FALSE, dir = here::here()),
     silent = TRUE
