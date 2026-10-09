@@ -44,22 +44,21 @@
         "cowplot",
         "data.table",
         "dplyr",
-        "DT",
-        "dygraphs",
         "flextable",
         "futile.logger",
         "ggplot2",
-        "googledrive",
         "grDevices",
         "grid",
         "gridExtra",
         "here",
+        "htmltools",
         "janitor",
         "knitr",
+        "leaflet",
+        "leafsync",
         "lubridate",
-        "plotrix",
+        "nanoparquet",
         "purrr",
-        "qs",
         "RColorBrewer",
         "readr",
         "rlang",
@@ -69,32 +68,36 @@
         "stringr",
         "tibble",
         "tidyr",
-        "tmap",
         "tools",
         "utils",
-        "xts",
         "DBI",
         "fs",
         "yaml"
       ],
       "Suggests": [
+        "DT",
+        "dygraphs",
         "fusen",
-        "testthat"
+        "qs",
+        "testthat",
+        "tinytex",
+        "tmap",
+        "xts"
       ],
       "VignetteBuilder": "knitr",
       "Config/fusen/version": "0.7.0",
       "Encoding": "UTF-8",
       "LazyData": "true",
       "Roxygen": "list(markdown = TRUE)",
-      "RoxygenNote": "7.3.2",
+      "Config/roxygen2/version": "8.1.0",
       "Author": "Bastien Grasset [aut, cre] (<https://orcid.org/0000-0002-9946-1338>)",
       "Maintainer": "Bastien Grasset <bastien.grasset@ird.fr>",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteRepo": "CWP.dataset",
       "RemoteUsername": "bastienird",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "851b0664d0d0aa8c3f2e321dee702331e0acb708"
+      "RemoteRepo": "CWP.dataset",
+      "RemoteRef": "perf/enrich-io-grouping",
+      "RemoteSha": "63a043506310cb6ea03a40898610055390e514f5"
     },
     "DBI": {
       "Package": "DBI",
@@ -1104,20 +1107,20 @@
     },
     "arrow": {
       "Package": "arrow",
-      "Version": "23.0.0",
+      "Version": "19.0.1",
       "Source": "Repository",
       "Title": "Integration to 'Apache' 'Arrow'",
-      "Authors@R": "c( person(\"Neal\", \"Richardson\", email = \"neal.p.richardson@gmail.com\", role = c(\"aut\")), person(\"Ian\", \"Cook\", email = \"ianmcook@gmail.com\", role = c(\"aut\")), person(\"Nic\", \"Crane\", email = \"thisisnic@gmail.com\", role = c(\"aut\")), person(\"Dewey\", \"Dunnington\", role = c(\"aut\"), email = \"dewey@fishandwhistle.net\", comment = c(ORCID = \"0000-0002-9415-4582\")), person(\"Romain\", \"Fran\\u00e7ois\", role = c(\"aut\"), comment = c(ORCID = \"0000-0002-2444-4226\")), person(\"Jonathan\", \"Keane\", email = \"jkeane@gmail.com\", role = c(\"aut\", \"cre\")), person(\"Bryce\", \"Mecum\", email = \"brycemecum@gmail.com\", role = c(\"aut\")), person(\"Drago\\u0219\", \"Moldovan-Gr\\u00fcnfeld\", email = \"dragos.mold@gmail.com\", role = c(\"aut\")), person(\"Jeroen\", \"Ooms\", email = \"jeroen@berkeley.edu\", role = c(\"aut\")), person(\"Jacob\", \"Wujciak-Jens\", email = \"jacob@wujciak.de\", role = c(\"aut\")), person(\"Javier\", \"Luraschi\", email = \"javier@rstudio.com\", role = c(\"ctb\")), person(\"Karl\", \"Dunkle Werner\", email = \"karldw@users.noreply.github.com\", role = c(\"ctb\"), comment = c(ORCID = \"0000-0003-0523-7309\")), person(\"Jeffrey\", \"Wong\", email = \"jeffreyw@netflix.com\", role = c(\"ctb\")), person(\"Apache Arrow\", email = \"dev@arrow.apache.org\", role = c(\"aut\", \"cph\")) )",
+      "Authors@R": "c( person(\"Neal\", \"Richardson\", email = \"neal.p.richardson@gmail.com\", role = c(\"aut\")), person(\"Ian\", \"Cook\", email = \"ianmcook@gmail.com\", role = c(\"aut\")), person(\"Nic\", \"Crane\", email = \"thisisnic@gmail.com\", role = c(\"aut\")), person(\"Dewey\", \"Dunnington\", role = c(\"aut\"), email = \"dewey@fishandwhistle.net\", comment = c(ORCID = \"0000-0002-9415-4582\")), person(\"Romain\", \"Fran\\u00e7ois\", role = c(\"aut\"), comment = c(ORCID = \"0000-0002-2444-4226\")), person(\"Jonathan\", \"Keane\", email = \"jkeane@gmail.com\", role = c(\"aut\", \"cre\")), person(\"Drago\\u0219\", \"Moldovan-Gr\\u00fcnfeld\", email = \"dragos.mold@gmail.com\", role = c(\"aut\")), person(\"Jeroen\", \"Ooms\", email = \"jeroen@berkeley.edu\", role = c(\"aut\")), person(\"Jacob\", \"Wujciak-Jens\", email = \"jacob@wujciak.de\", role = c(\"aut\")), person(\"Javier\", \"Luraschi\", email = \"javier@rstudio.com\", role = c(\"ctb\")), person(\"Karl\", \"Dunkle Werner\", email = \"karldw@users.noreply.github.com\", role = c(\"ctb\"), comment = c(ORCID = \"0000-0003-0523-7309\")), person(\"Jeffrey\", \"Wong\", email = \"jeffreyw@netflix.com\", role = c(\"ctb\")), person(\"Apache Arrow\", email = \"dev@arrow.apache.org\", role = c(\"aut\", \"cph\")) )",
       "Description": "'Apache' 'Arrow' <https://arrow.apache.org/> is a cross-language development platform for in-memory data. It specifies a standardized language-independent columnar memory format for flat and hierarchical data, organized for efficient analytic operations on modern hardware. This package provides an interface to the 'Arrow C++' library.",
       "Depends": [
-        "R (>= 4.1)"
+        "R (>= 4.0)"
       ],
       "License": "Apache License (>= 2.0)",
       "URL": "https://github.com/apache/arrow/, https://arrow.apache.org/docs/r/",
       "BugReports": "https://github.com/apache/arrow/issues",
       "Encoding": "UTF-8",
       "Language": "en-US",
-      "SystemRequirements": "C++20; for AWS S3 support on Linux, libcurl and openssl (optional); cmake >= 3.26 (build-time only, and only for full source build)",
+      "SystemRequirements": "C++17; for AWS S3 support on Linux, libcurl and openssl (optional); cmake >= 3.16 (build-time only, and only for full source build)",
       "Biarch": "true",
       "Imports": [
         "assertthat",
@@ -1132,7 +1135,7 @@
         "utils",
         "vctrs"
       ],
-      "RoxygenNote": "7.3.3",
+      "RoxygenNote": "7.3.2",
       "Config/testthat/edition": "3",
       "Config/build/bootstrap": "TRUE",
       "Suggests": [
@@ -1166,7 +1169,7 @@
       ],
       "Collate": "'arrowExports.R' 'enums.R' 'arrow-object.R' 'type.R' 'array-data.R' 'arrow-datum.R' 'array.R' 'arrow-info.R' 'arrow-package.R' 'arrow-tabular.R' 'buffer.R' 'chunked-array.R' 'io.R' 'compression.R' 'scalar.R' 'compute.R' 'config.R' 'csv.R' 'dataset.R' 'dataset-factory.R' 'dataset-format.R' 'dataset-partition.R' 'dataset-scan.R' 'dataset-write.R' 'dictionary.R' 'dplyr-across.R' 'dplyr-arrange.R' 'dplyr-by.R' 'dplyr-collect.R' 'dplyr-count.R' 'dplyr-datetime-helpers.R' 'dplyr-distinct.R' 'dplyr-eval.R' 'dplyr-filter.R' 'dplyr-funcs-agg.R' 'dplyr-funcs-augmented.R' 'dplyr-funcs-conditional.R' 'dplyr-funcs-datetime.R' 'dplyr-funcs-doc.R' 'dplyr-funcs-math.R' 'dplyr-funcs-simple.R' 'dplyr-funcs-string.R' 'dplyr-funcs-type.R' 'expression.R' 'dplyr-funcs.R' 'dplyr-glimpse.R' 'dplyr-group-by.R' 'dplyr-join.R' 'dplyr-mutate.R' 'dplyr-select.R' 'dplyr-slice.R' 'dplyr-summarize.R' 'dplyr-union.R' 'record-batch.R' 'table.R' 'dplyr.R' 'duckdb.R' 'extension.R' 'feather.R' 'field.R' 'filesystem.R' 'flight.R' 'install-arrow.R' 'ipc-stream.R' 'json.R' 'memory-pool.R' 'message.R' 'metadata.R' 'parquet.R' 'python.R' 'query-engine.R' 'record-batch-reader.R' 'record-batch-writer.R' 'reexports-bit64.R' 'reexports-tidyselect.R' 'schema.R' 'udf.R' 'util.R'",
       "NeedsCompilation": "yes",
-      "Author": "Neal Richardson [aut], Ian Cook [aut], Nic Crane [aut], Dewey Dunnington [aut] (ORCID: <https://orcid.org/0000-0002-9415-4582>), Romain François [aut] (ORCID: <https://orcid.org/0000-0002-2444-4226>), Jonathan Keane [aut, cre], Bryce Mecum [aut], Dragoș Moldovan-Grünfeld [aut], Jeroen Ooms [aut], Jacob Wujciak-Jens [aut], Javier Luraschi [ctb], Karl Dunkle Werner [ctb] (ORCID: <https://orcid.org/0000-0003-0523-7309>), Jeffrey Wong [ctb], Apache Arrow [aut, cph]",
+      "Author": "Neal Richardson [aut], Ian Cook [aut], Nic Crane [aut], Dewey Dunnington [aut] (<https://orcid.org/0000-0002-9415-4582>), Romain François [aut] (<https://orcid.org/0000-0002-2444-4226>), Jonathan Keane [aut, cre], Dragoș Moldovan-Grünfeld [aut], Jeroen Ooms [aut], Jacob Wujciak-Jens [aut], Javier Luraschi [ctb], Karl Dunkle Werner [ctb] (<https://orcid.org/0000-0003-0523-7309>), Jeffrey Wong [ctb], Apache Arrow [aut, cph]",
       "Maintainer": "Jonathan Keane <jkeane@gmail.com>",
       "Repository": "CRAN"
     },
@@ -3094,7 +3097,8 @@
       "NeedsCompilation": "no",
       "Author": "Folashade Daniel [cre], Microsoft Corporation [aut, cph], Steve Weston [aut], Dan Tenenbaum [ctb]",
       "Maintainer": "Folashade Daniel <fdaniel@microsoft.com>",
-      "Repository": "CRAN"
+      "Repository": "RSPM",
+      "Encoding": "UTF-8"
     },
     "dotenv": {
       "Package": "dotenv",
@@ -3782,7 +3786,8 @@
       "NeedsCompilation": "no",
       "Author": "Folashade Daniel [cre], Hong Ooi [ctb], Rich Calaway [ctb], Microsoft [aut, cph], Steve Weston [aut]",
       "Maintainer": "Folashade Daniel <fdaniel@microsoft.com>",
-      "Repository": "CRAN"
+      "Repository": "RSPM",
+      "Encoding": "UTF-8"
     },
     "foreign": {
       "Package": "foreign",
@@ -4009,11 +4014,11 @@
     },
     "gdtools": {
       "Package": "gdtools",
-      "Version": "0.4.2",
+      "Version": "0.5.1",
       "Source": "Repository",
-      "Title": "Utilities for Graphical Rendering and Fonts Management",
+      "Title": "Font Metrics and Font Management Utilities for R Graphics",
       "Authors@R": "c( person(\"David\", \"Gohel\", , \"david.gohel@ardata.fr\", role = c(\"aut\", \"cre\")), person(\"Hadley\", \"Wickham\", , \"hadley@rstudio.com\", role = \"aut\"), person(\"Lionel\", \"Henry\", , \"lionel@rstudio.com\", role = \"aut\"), person(\"Jeroen\", \"Ooms\", , \"jeroen@berkeley.edu\", role = \"aut\", comment = c(ORCID = \"0000-0002-4035-0289\")), person(\"Yixuan\", \"Qiu\", role = \"ctb\"), person(\"R Core Team\", role = \"cph\", comment = \"Cairo code from X11 device\"), person(\"ArData\", role = \"cph\"), person(\"RStudio\", role = \"cph\") )",
-      "Description": "Tools are provided to compute metrics of formatted strings and to check the availability of a font.  Another set of functions is provided to support the collection of fonts from 'Google Fonts' in a cache. Their use is simple within 'R Markdown' documents and 'shiny' applications but also with graphic productions generated with the 'ggiraph', 'ragg' and 'svglite' packages or with tabular productions from the 'flextable' package.",
+      "Description": "Compute text metrics (width, ascent, descent) using 'Cairo' and 'FreeType', independently of the active graphic device. Font lookup is delegated to 'systemfonts'. Additional utilities let users register 'Google Fonts' or bundled 'Liberation' fonts, check font availability, and assemble 'htmlDependency' objects so that fonts are correctly embedded in 'Shiny' applications, 'R Markdown' documents, and 'htmlwidgets' outputs such as 'ggiraph'.",
       "License": "GPL-3 | file LICENSE",
       "URL": "https://davidgohel.github.io/gdtools/",
       "BugReports": "https://github.com/davidgohel/gdtools/issues",
@@ -4024,7 +4029,7 @@
         "fontquiver (>= 0.2.0)",
         "htmltools",
         "Rcpp (>= 0.12.12)",
-        "systemfonts (>= 1.1.0)",
+        "systemfonts (>= 1.3.1)",
         "tools"
       ],
       "Suggests": [
@@ -4037,10 +4042,10 @@
         "Rcpp"
       ],
       "Encoding": "UTF-8",
-      "RoxygenNote": "7.3.2",
       "SystemRequirements": "cairo, freetype2, fontconfig",
+      "Config/roxygen2/version": "8.0.0",
       "NeedsCompilation": "yes",
-      "Author": "David Gohel [aut, cre], Hadley Wickham [aut], Lionel Henry [aut], Jeroen Ooms [aut] (<https://orcid.org/0000-0002-4035-0289>), Yixuan Qiu [ctb], R Core Team [cph] (Cairo code from X11 device), ArData [cph], RStudio [cph]",
+      "Author": "David Gohel [aut, cre], Hadley Wickham [aut], Lionel Henry [aut], Jeroen Ooms [aut] (ORCID: <https://orcid.org/0000-0002-4035-0289>), Yixuan Qiu [ctb], R Core Team [cph] (Cairo code from X11 device), ArData [cph], RStudio [cph]",
       "Maintainer": "David Gohel <david.gohel@ardata.fr>",
       "Repository": "CRAN"
     },
@@ -4079,8 +4084,8 @@
     "geoflow": {
       "Package": "geoflow",
       "Version": "1.3.0",
-      "Source": "Repository",
-      "Date": "2026-06-12",
+      "Source": "GitHub",
+      "Date": "2026-06-21",
       "Title": "Orchestrate Geospatial (Meta)Data Management Workflows and Manage FAIR Services",
       "Description": "An engine to facilitate the orchestration and execution of metadata-driven data management workflows, in compliance with 'FAIR'  (Findable, Accessible, Interoperable and Reusable) data management principles. By means of a pivot metadata model, relying on the 'DublinCore' standard (<https://dublincore.org/>),  a unique source of metadata can be used to operate multiple and inter-connected data management actions. Users can also customise their own workflows by creating specific actions  but the library comes with a set of native actions targeting common geographic information and data management, in particular actions oriented to the publication on the web of metadata  and data resources to provide standard discovery and access services. At first, default actions of the library were meant to focus on providing turn-key actions for geospatial (meta)data:  1) by creating manage geospatial (meta)data complying with 'ISO/TC211' (<https://committee.iso.org/home/tc211>) and 'OGC' (<https://www.ogc.org/standards/>) geographic information standards  (eg 19115/19119/19110/19139) and related best practices (eg. 'INSPIRE'); and 2) by facilitating extraction, reading and publishing of standard geospatial (meta)data within widely used software  that compound a Spatial Data Infrastructure ('SDI'), including spatial databases (eg. 'PostGIS'), metadata catalogues (eg. 'GeoNetwork', 'CSW' servers), data servers (eg. 'GeoServer'). The library was  then extended to actions for other domains: 1) biodiversity (meta)data standard management including handling of 'EML' metadata, and their management with 'DataOne' servers, 2) in situ sensors,  remote sensing and model outputs  (meta)data standard management by handling part of 'CF' conventions, 'NetCDF' data format and 'OPeNDAP' access protocol, and their management with 'Thredds' servers,  3) generic / domain agnostic (meta)data standard managers ('DublinCore', 'DataCite'), to facilitate the publication of data within (meta)data repositories such as 'Zenodo' (<https://zenodo.org>)  or DataVerse (<https://dataverse.org/>). The execution of several actions will then allow to cross-reference (meta)data resources in each action performed, offering a way to bind resources  between each other (eg. reference 'Zenodo' 'DOI' in 'GeoNetwork'/'GeoServer' metadata, or vice versa reference 'GeoNetwork'/'GeoServer' links in 'Zenodo' or 'EML' metadata). The use of standardized configuration files ('JSON' or 'YAML' formats) allow fully reproducible workflows to facilitate the work of data and information managers.",
       "Authors@R": "c( person(\"Emmanuel\", \"Blondel\", role = c(\"aut\", \"cre\", \"cph\"), email = \"emmanuel.blondel1@gmail.com\", comment = c(ORCID = \"0000-0002-5870-5762\")), person(\"Julien,\", \"Barde\", role = c(\"aut\"), comment = c(ORCID = \"0000-0002-3519-6141\")), person(\"Wilfried\", \"Heintz\", role = c(\"aut\"), comment = c(ORCID = \"0000-0002-9244-9766\")), person(\"Alexandre\", \"Bennici\", role = c(\"ctb\")), person(\"Sylvain\", \"Poulain\", role = c(\"ctb\")), person(\"Bastien\", \"Grasset\", role = c(\"ctb\")), person(\"Mathias\", \"Rouan\", role = c(\"ctb\")), person(\"Emilie\", \"Lerigoleur\", role = c(\"ctb\")), person(\"Yvan\", \"Le Bras\", role = c(\"ctb\")), person(\"Jeroen\", \"Ooms\", role = c(\"ctb\")) )",
@@ -4152,9 +4157,13 @@
       "BugReports": "https://github.com/r-geoflow/geoflow/issues",
       "LazyLoad": "yes",
       "RoxygenNote": "7.3.3",
-      "NeedsCompilation": "no",
-      "Author": "Emmanuel Blondel [aut, cre, cph] (ORCID: <https://orcid.org/0000-0002-5870-5762>), Julien, Barde [aut] (ORCID: <https://orcid.org/0000-0002-3519-6141>), Wilfried Heintz [aut] (ORCID: <https://orcid.org/0000-0002-9244-9766>), Alexandre Bennici [ctb], Sylvain Poulain [ctb], Bastien Grasset [ctb], Mathias Rouan [ctb], Emilie Lerigoleur [ctb], Yvan Le Bras [ctb], Jeroen Ooms [ctb]",
-      "Repository": "CRAN"
+      "Author": "Emmanuel Blondel [aut, cre, cph] (<https://orcid.org/0000-0002-5870-5762>), Julien, Barde [aut] (<https://orcid.org/0000-0002-3519-6141>), Wilfried Heintz [aut] (<https://orcid.org/0000-0002-9244-9766>), Alexandre Bennici [ctb], Sylvain Poulain [ctb], Bastien Grasset [ctb], Mathias Rouan [ctb], Emilie Lerigoleur [ctb], Yvan Le Bras [ctb], Jeroen Ooms [ctb]",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "bastienird",
+      "RemoteRepo": "geoflow",
+      "RemoteRef": "patch-gc-invocation",
+      "RemoteSha": "8fac5ac01427c492812a365ba5cc3af0d00b2949"
     },
     "geojson": {
       "Package": "geojson",
@@ -5741,7 +5750,8 @@
       "NeedsCompilation": "no",
       "Author": "Folashade Daniel [cre], Revolution Analytics [aut, cph], Steve Weston [aut]",
       "Maintainer": "Folashade Daniel <fdaniel@microsoft.com>",
-      "Repository": "CRAN"
+      "Repository": "RSPM",
+      "Encoding": "UTF-8"
     },
     "janitor": {
       "Package": "janitor",
@@ -5931,7 +5941,8 @@
       "NeedsCompilation": "no",
       "Author": "Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>), rOpenSci [fnd] (https://ropensci.org)",
       "Maintainer": "Jeroen Ooms <jeroen@berkeley.edu>",
-      "Repository": "CRAN"
+      "Repository": "RSPM",
+      "Encoding": "UTF-8"
     },
     "jsonlite": {
       "Package": "jsonlite",
@@ -6518,7 +6529,7 @@
       "NeedsCompilation": "no",
       "Author": "Lionel Henry [aut, cre], Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>), Posit Software, PBC [cph, fnd]",
       "Maintainer": "Lionel Henry <lionel@posit.co>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/__linux__/focal/latest"
     },
     "lme4": {
       "Package": "lme4",
@@ -7107,6 +7118,47 @@
       "NeedsCompilation": "no",
       "Repository": "CRAN"
     },
+    "nanoparquet": {
+      "Package": "nanoparquet",
+      "Version": "0.5.2",
+      "Source": "Repository",
+      "Title": "Read and Write 'Parquet' Files",
+      "Authors@R": "c( person(\"Gábor\", \"Csárdi\", role = c(\"aut\", \"cre\"), email = \"csardi.gabor@gmail.com\"), person(\"Hannes\", \"Mühleisen\", role = c(\"aut\", \"cph\"), comment = c(ORCID = \"0000-0001-8552-0029\")), person(\"Google Inc.\", role = \"cph\"), person(\"Apache Software Foundation\", role = \"cph\"), person(\"Posit Software, PBC\", role = \"cph\"), person(\"RAD Game Tools\", role = \"cph\"), person(\"Valve Software\", role = \"cph\"), person(\"Tenacious Software LLC\", role = \"cph\"), person(\"Facebook, Inc.\", role = \"cph\"))",
+      "Description": "Self-sufficient reader and writer for flat 'Parquet' files. Can read most 'Parquet' data types. Can write many 'R' data types, including factors and temporal types. See docs for limitations.",
+      "Depends": [
+        "R (>= 4.0.0)"
+      ],
+      "License": "MIT + file LICENSE",
+      "URL": "https://github.com/r-lib/nanoparquet, https://nanoparquet.r-lib.org/",
+      "BugReports": "https://github.com/r-lib/nanoparquet/issues",
+      "Encoding": "UTF-8",
+      "Suggests": [
+        "arrow",
+        "bit64",
+        "blob",
+        "DBI",
+        "duckdb (>= 1.4.0)",
+        "hms",
+        "mockery",
+        "pillar",
+        "processx",
+        "rprojroot",
+        "spelling",
+        "testthat",
+        "tzdb",
+        "withr"
+      ],
+      "Config/testthat/edition": "3",
+      "Config/testthat/parallel": "TRUE",
+      "Config/Needs/website": "tidyverse/tidytemplate, r-lib/pkgdown, dplyr, gt, gtExtras, knitr, nycflights13, prettyunits, quarto, rmarkdown, sessioninfo, svglite",
+      "Language": "en-US",
+      "Biarch": "true",
+      "Config/roxygen2/version": "8.1.0",
+      "NeedsCompilation": "yes",
+      "Author": "Gábor Csárdi [aut, cre], Hannes Mühleisen [aut, cph] (ORCID: <https://orcid.org/0000-0001-8552-0029>), Google Inc. [cph], Apache Software Foundation [cph], Posit Software, PBC [cph], RAD Game Tools [cph], Valve Software [cph], Tenacious Software LLC [cph], Facebook, Inc. [cph]",
+      "Maintainer": "Gábor Csárdi <csardi.gabor@gmail.com>",
+      "Repository": "CRAN"
+    },
     "ncdf4": {
       "Package": "ncdf4",
       "Version": "1.22",
@@ -7321,23 +7373,25 @@
     },
     "officer": {
       "Package": "officer",
-      "Version": "0.6.8",
+      "Version": "0.7.6",
       "Source": "Repository",
       "Type": "Package",
       "Title": "Manipulation of Microsoft Word and PowerPoint Documents",
-      "Authors@R": "c( person(\"David\", \"Gohel\", , \"david.gohel@ardata.fr\", role = c(\"aut\", \"cre\")), person(\"Stefan\", \"Moog\", , \"moogs@gmx.de\", role = \"aut\"), person(\"Mark\", \"Heckmann\", , \"heckmann.mark@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0002-0736-7417\")), person(\"ArData\", role = \"cph\"), person(\"Frank\", \"Hangler\", , \"frank@plotandscatter.com\", role = \"ctb\", comment = \"function body_replace_all_text\"), person(\"Liz\", \"Sander\", , \"lsander@civisanalytics.com\", role = \"ctb\", comment = \"several documentation fixes\"), person(\"Anton\", \"Victorson\", , \"anton@victorson.se\", role = \"ctb\", comment = \"fixes xml structures\"), person(\"Jon\", \"Calder\", , \"jonmcalder@gmail.com\", role = \"ctb\", comment = \"update vignettes\"), person(\"John\", \"Harrold\", , \"john.m.harrold@gmail.com\", role = \"ctb\", comment = \"function annotate_base\"), person(\"John\", \"Muschelli\", , \"muschellij2@gmail.com\", role = \"ctb\", comment = \"google doc compatibility\"), person(\"Bill\", \"Denney\", , \"wdenney@humanpredictions.com\", role = \"ctb\", comment = c(ORCID = \"0000-0002-5759-428X\", \"function as.matrix.rpptx\")), person(\"Nikolai\", \"Beck\", , \"beck.nikolai@gmail.com\", role = \"ctb\", comment = \"set speaker notes for .pptx documents\"), person(\"Greg\", \"Leleu\", , \"gregoire.leleu@gmail.com\", role = \"ctb\", comment = \"fields functionality in ppt\"), person(\"Majid\", \"Eismann\", role = \"ctb\"), person(\"Hongyuan\", \"Jia\", , \"hongyuanjia@cqust.edu.cn\", role = \"ctb\", comment = c(ORCID = \"0000-0002-0075-8183\")) )",
+      "Authors@R": "c( person(\"David\", \"Gohel\", , \"david.gohel@ardata.fr\", role = c(\"aut\", \"cre\")), person(\"Stefan\", \"Moog\", , \"moogs@gmx.de\", role = \"aut\"), person(\"Mark\", \"Heckmann\", , \"heckmann.mark@gmail.com\", role = \"aut\", comment = c(ORCID = \"0000-0002-0736-7417\")), person(\"ArData\", role = \"cph\"), person(\"Frank\", \"Hangler\", , \"frank@plotandscatter.com\", role = \"ctb\", comment = \"function body_replace_all_text\"), person(\"Liz\", \"Sander\", , \"lsander@civisanalytics.com\", role = \"ctb\", comment = \"several documentation fixes\"), person(\"Anton\", \"Victorson\", , \"anton@victorson.se\", role = \"ctb\", comment = \"fixes xml structures\"), person(\"Jon\", \"Calder\", , \"jonmcalder@gmail.com\", role = \"ctb\", comment = \"update vignettes\"), person(\"John\", \"Harrold\", , \"john.m.harrold@gmail.com\", role = \"ctb\", comment = \"function annotate_base\"), person(\"John\", \"Muschelli\", , \"muschellij2@gmail.com\", role = \"ctb\", comment = \"google doc compatibility\"), person(\"Bill\", \"Denney\", , \"wdenney@humanpredictions.com\", role = \"ctb\", comment = c(ORCID = \"0000-0002-5759-428X\", \"function as.matrix.rpptx\")), person(\"Nikolai\", \"Beck\", , \"beck.nikolai@gmail.com\", role = \"ctb\", comment = \"set speaker notes for .pptx documents\"), person(\"Greg\", \"Leleu\", , \"gregoire.leleu@gmail.com\", role = \"ctb\", comment = \"fields functionality in ppt\"), person(\"Majid\", \"Eismann\", role = \"ctb\"), person(\"Wahiduzzaman\", \"Khan\", role = \"ctb\", comment = \"vectorization of remove_slide\"), person(\"Hongyuan\", \"Jia\", , \"hongyuanjia@cqust.edu.cn\", role = \"ctb\", comment = c(ORCID = \"0000-0002-0075-8183\")), person(\"Michael\", \"Stackhouse\", , \"mike.stackhouse@atorusresearch.com\", role = \"ctb\") )",
       "Description": "Access and manipulate 'Microsoft Word', 'RTF' and 'Microsoft PowerPoint' documents from R.  The package focuses on tabular and graphical reporting from R; it also provides two functions that let users get document content into data objects. A set of functions lets add and remove images, tables and paragraphs of text in new or existing documents.  The package does not require any installation of Microsoft products to be able to write Microsoft files.",
       "License": "MIT + file LICENSE",
       "URL": "https://ardata-fr.github.io/officeverse/, https://davidgohel.github.io/officer/",
       "BugReports": "https://github.com/davidgohel/officer/issues",
       "Imports": [
         "cli",
+        "dplyr",
         "graphics",
         "grDevices",
         "openssl",
         "R6",
         "ragg",
         "stats",
+        "tidyr",
         "utils",
         "uuid",
         "xml2 (>= 1.1.0)",
@@ -7352,14 +7406,15 @@
         "magick",
         "rmarkdown",
         "rsvg",
+        "mschart",
         "testthat",
         "withr"
       ],
       "Encoding": "UTF-8",
-      "RoxygenNote": "7.3.2",
-      "Collate": "'core_properties.R' 'custom_properties.R' 'defunct.R' 'dev-utils.R' 'docx_add.R' 'docx_comments.R' 'docx_cursor.R' 'docx_part.R' 'docx_replace.R' 'docx_section.R' 'docx_settings.R' 'empty_content.R' 'formatting_properties.R' 'fortify_docx.R' 'fortify_pptx.R' 'knitr_utils.R' 'officer.R' 'ooxml.R' 'ooxml_block_objects.R' 'ooxml_run_objects.R' 'openxml_content_type.R' 'openxml_document.R' 'pack_folder.R' 'ph_location.R' 'post-proc.R' 'ppt_class_dir_collection.R' 'ppt_classes.R' 'ppt_notes.R' 'ppt_ph_dedupe_layout.R' 'ppt_ph_manipulate.R' 'ppt_ph_rename_layout.R' 'ppt_ph_with_methods.R' 'pptx_informations.R' 'pptx_layout_helper.R' 'pptx_matrix.R' 'utils.R' 'pptx_slide_manip.R' 'read_docx.R' 'read_docx_styles.R' 'read_pptx.R' 'read_xlsx.R' 'relationship.R' 'rtf.R' 'shape_properties.R' 'shorcuts.R'",
+      "Collate": "'core_properties.R' 'custom_properties.R' 'defunct.R' 'dev-utils.R' 'docx_add.R' 'docx_comments.R' 'docx_cursor.R' 'docx_embed_font.R' 'docx_part.R' 'docx_replace.R' 'docx_section.R' 'docx_settings.R' 'docx_styles.R' 'docx_utils_funs.R' 'empty_content.R' 'formatting_properties.R' 'fortify_docx.R' 'fortify_pptx.R' 'knitr_utils.R' 'officer.R' 'ooxml.R' 'ooxml_block_objects.R' 'ooxml_run_objects.R' 'openxml_content_type.R' 'openxml_document.R' 'pack_folder.R' 'ph_location.R' 'post-proc.R' 'ppt_class_dir_collection.R' 'ppt_classes.R' 'ppt_notes.R' 'ppt_ph_dedupe_layout.R' 'ppt_ph_manipulate.R' 'ppt_ph_rename_layout.R' 'ppt_ph_with_methods.R' 'pptx_informations.R' 'pptx_layout_helper.R' 'pptx_matrix.R' 'utils.R' 'pptx_slide_manip.R' 'read_docx.R' 'docx_write.R' 'read_docx_styles.R' 'read_pptx.R' 'read_xlsx.R' 'relationship.R' 'rtf.R' 'shape_properties.R' 'shorcuts.R' 'docx_append_context.R' 'utils-xml.R' 'deprecated.R' 'zzz.R'",
+      "Config/roxygen2/version": "8.0.0",
       "NeedsCompilation": "no",
-      "Author": "David Gohel [aut, cre], Stefan Moog [aut], Mark Heckmann [aut] (<https://orcid.org/0000-0002-0736-7417>), ArData [cph], Frank Hangler [ctb] (function body_replace_all_text), Liz Sander [ctb] (several documentation fixes), Anton Victorson [ctb] (fixes xml structures), Jon Calder [ctb] (update vignettes), John Harrold [ctb] (function annotate_base), John Muschelli [ctb] (google doc compatibility), Bill Denney [ctb] (<https://orcid.org/0000-0002-5759-428X>, function as.matrix.rpptx), Nikolai Beck [ctb] (set speaker notes for .pptx documents), Greg Leleu [ctb] (fields functionality in ppt), Majid Eismann [ctb], Hongyuan Jia [ctb] (<https://orcid.org/0000-0002-0075-8183>)",
+      "Author": "David Gohel [aut, cre], Stefan Moog [aut], Mark Heckmann [aut] (ORCID: <https://orcid.org/0000-0002-0736-7417>), ArData [cph], Frank Hangler [ctb] (function body_replace_all_text), Liz Sander [ctb] (several documentation fixes), Anton Victorson [ctb] (fixes xml structures), Jon Calder [ctb] (update vignettes), John Harrold [ctb] (function annotate_base), John Muschelli [ctb] (google doc compatibility), Bill Denney [ctb] (ORCID: <https://orcid.org/0000-0002-5759-428X>, function as.matrix.rpptx), Nikolai Beck [ctb] (set speaker notes for .pptx documents), Greg Leleu [ctb] (fields functionality in ppt), Majid Eismann [ctb], Wahiduzzaman Khan [ctb] (vectorization of remove_slide), Hongyuan Jia [ctb] (ORCID: <https://orcid.org/0000-0002-0075-8183>), Michael Stackhouse [ctb]",
       "Maintainer": "David Gohel <david.gohel@ardata.fr>",
       "Repository": "CRAN"
     },
@@ -7470,7 +7525,8 @@
       "VignetteBuilder": "knitr",
       "NeedsCompilation": "no",
       "Author": "Emmanuel Blondel [aut, cre] (ORCID: <https://orcid.org/0000-0002-5870-5762>), Alexandre Bennici [ctb] (ORCID: <https://orcid.org/0000-0003-2160-3487>), Norbert Billet [ctb]",
-      "Repository": "CRAN"
+      "Repository": "RSPM",
+      "Encoding": "UTF-8"
     },
     "packrat": {
       "Package": "packrat",
@@ -10106,7 +10162,7 @@
     },
     "rprojroot": {
       "Package": "rprojroot",
-      "Version": "2.0.4",
+      "Version": "2.1.1",
       "Source": "Repository",
       "Title": "Finding Files in Project Subdirectories",
       "Authors@R": "person(given = \"Kirill\", family = \"M\\u00fcller\", role = c(\"aut\", \"cre\"), email = \"kirill@cynkra.com\", comment = c(ORCID = \"0000-0002-1416-3412\"))",
@@ -10121,20 +10177,22 @@
         "covr",
         "knitr",
         "lifecycle",
-        "mockr",
         "rlang",
         "rmarkdown",
-        "testthat (>= 3.0.0)",
+        "testthat (>= 3.2.0)",
         "withr"
       ],
       "VignetteBuilder": "knitr",
       "Config/testthat/edition": "3",
       "Encoding": "UTF-8",
-      "RoxygenNote": "7.2.3",
+      "RoxygenNote": "7.3.2.9000",
+      "Config/autostyle/scope": "line_breaks",
+      "Config/autostyle/strict": "true",
+      "Config/Needs/website": "tidyverse/tidytemplate",
       "NeedsCompilation": "no",
-      "Author": "Kirill Müller [aut, cre] (<https://orcid.org/0000-0002-1416-3412>)",
+      "Author": "Kirill Müller [aut, cre] (ORCID: <https://orcid.org/0000-0002-1416-3412>)",
       "Maintainer": "Kirill Müller <kirill@cynkra.com>",
-      "Repository": "CRAN"
+      "Repository": "RSPM"
     },
     "rsconnect": {
       "Package": "rsconnect",
@@ -11568,7 +11626,7 @@
     },
     "systemfonts": {
       "Package": "systemfonts",
-      "Version": "1.2.3",
+      "Version": "1.3.2",
       "Source": "Repository",
       "Type": "Package",
       "Title": "System Native Font Finding",
@@ -11591,9 +11649,12 @@
       "Suggests": [
         "covr",
         "farver",
+        "ggplot2",
         "graphics",
         "knitr",
+        "ragg",
         "rmarkdown",
+        "svglite",
         "testthat (>= 2.1.0)"
       ],
       "LinkingTo": [
@@ -12128,7 +12189,7 @@
     },
     "timechange": {
       "Package": "timechange",
-      "Version": "0.3.0",
+      "Version": "0.4.0",
       "Source": "Repository",
       "Title": "Efficient Manipulation of Date-Times",
       "Authors@R": "c(person(\"Vitalie\", \"Spinu\", email = \"spinuvit@gmail.com\", role = c(\"aut\", \"cre\")), person(\"Google Inc.\", role = c(\"ctb\", \"cph\")))",
@@ -12145,14 +12206,14 @@
         "testthat (>= 0.7.1.99)",
         "knitr"
       ],
-      "SystemRequirements": "A system with zoneinfo data (e.g. /usr/share/zoneinfo) as well as a recent-enough C++11 compiler (such as g++-4.8 or later). On Windows the zoneinfo included with R is used.",
+      "SystemRequirements": "A system with zoneinfo data (e.g. /usr/share/zoneinfo). On Windows the zoneinfo included with R is used.",
       "BugReports": "https://github.com/vspinu/timechange/issues",
       "URL": "https://github.com/vspinu/timechange/",
       "RoxygenNote": "7.2.1",
       "NeedsCompilation": "yes",
       "Author": "Vitalie Spinu [aut, cre], Google Inc. [ctb, cph]",
       "Maintainer": "Vitalie Spinu <spinuvit@gmail.com>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/__linux__/focal/latest"
     },
     "tinytex": {
       "Package": "tinytex",
@@ -12685,7 +12746,7 @@
       "NeedsCompilation": "yes",
       "Author": "Hadley Wickham [aut], Lionel Henry [aut], Davis Vaughan [aut, cre], data.table team [cph] (Radix sort based on data.table's forder() and their contribution to R's order()), Posit Software, PBC [cph, fnd]",
       "Maintainer": "Davis Vaughan <davis@posit.co>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/__linux__/focal/latest"
     },
     "viridis": {
       "Package": "viridis",
@@ -12877,7 +12938,7 @@
       "NeedsCompilation": "yes",
       "Author": "Jim Hester [aut] (ORCID: <https://orcid.org/0000-0002-2739-7082>), Hadley Wickham [aut] (ORCID: <https://orcid.org/0000-0003-4757-117X>), Jennifer Bryan [aut, cre] (ORCID: <https://orcid.org/0000-0002-6983-2759>), Shelby Bearrows [ctb], https://github.com/mandreyel/ [cph] (mio library), Jukka Jylänki [cph] (grisu3 implementation), Mikkel Jørgensen [cph] (grisu3 implementation), Posit Software, PBC [cph, fnd] (ROR: <https://ror.org/03wc8by49>)",
       "Maintainer": "Jennifer Bryan <jenny@posit.co>",
-      "Repository": "CRAN"
+      "Repository": "https://packagemanager.posit.co/cran/__linux__/focal/latest"
     },
     "waldo": {
       "Package": "waldo",
