@@ -115,9 +115,11 @@ jobs:
           REPO=ghcr.io/firms-gta/gta-workflow
           if [[ "$GITHUB_REF_NAME" == "master" ]]; then
             BASE=$REPO:sha-${GITHUB_SHA::7}
+            MOVING=$REPO:latest-rstudio
           else
             BASE=$REPO:sha-${GITHUB_SHA::7}-dev
+            MOVING=$REPO:$(echo "$GITHUB_REF_NAME" | tr '/' '-')-rstudio
           fi
           docker buildx build -f compose/Dockerfile.rstudio \
             --build-arg BASE_IMAGE="$BASE" \
-            -t "$BASE-rstudio" --push .
+            -t "$BASE-rstudio" -t "$MOVING" --push .

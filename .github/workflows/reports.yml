@@ -1,0 +1,117 @@
+# Renders the summary reports (docs/reports/*.Rmd) and publishes them on
+# GitHub Pages. Replaces targeted_worfklow.yml and build_summary_catch.yml,
+# which rebuilt a dedicated image and committed the HTML into docs/.
+#
+# The reports run inside the workflow image already tested and published by
+# test_whole_compose.yml (same R and packages); nothing is rebuilt here.
+#
+# Data: each report downloads its default dataset (Zenodo) unless a file is
+# given (catch_file / effort_file: URL to a .csv, .qs, .parquet or .gpkg),
+# e.g. the files of the Zenodo record of a new GTA release.
+#
+# Requires: Settings > Pages > Source = "GitHub Actions".
+name: Reports on GitHub Pages
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag of ghcr.io/firms-gta/gta-workflow to render with"
+        required: true
+        default: "latest"
+      catch_file:
+        description: "Catch dataset (URL to .csv/.qs/.parquet/.gpkg). Empty = default of the report"
+        required: false
+        default: ""
+      effort_file:
+        description: "Effort dataset (URL to .csv/.qs/.parquet/.gpkg). Empty = default of the report"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/firms-gta/gta-workflow:${{ github.event.inputs.image_tag || 'latest' }}
+  PROJECT_DIR: /home/rstudio/geoflow-tunaatlas
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull the workflow image
+        run: docker pull "$IMAGE"
+
+      - name: Render the reports
+        env:
+          CATCH_FILE: ${{ github.event.inputs.catch_file }}
+          EFFORT_FILE: ${{ github.event.inputs.effort_file }}
+        run: |
+          mkdir -p site
+          chmod 777 site
+          # The workflow image has no pandoc (it is only in the -rstudio image):
+          # install it in the throw-away container, then render as usual.
+          docker run --rm --user root \
+            -v "$PWD/docs/reports":"$PROJECT_DIR/docs/reports" \
+            -v "$PWD/site":/site \
+            -e CATCH_FILE -e EFFORT_FILE \
+            -w "$PROJECT_DIR" \
+            "$IMAGE" \
+            bash -c '
+              set -e
+              apt-get update -qq && apt-get install -y -qq --no-install-recommends pandoc >/dev/null
+              Rscript -e "
+                rmarkdown::render(\"docs/reports/summary_catch.Rmd\",  output_dir = \"/site\",
+                                  params = list(data_file = Sys.getenv(\"CATCH_FILE\")))
+                rmarkdown::render(\"docs/reports/summary_effort.Rmd\", output_dir = \"/site\",
+                                  params = list(data_file = Sys.getenv(\"EFFORT_FILE\")))
+              "
+            '
+
+      - name: Build the index page
+        run: |
+          cat > site/index.html <<EOF
+          <!doctype html>
+          <html lang="en"><head><meta charset="utf-8">
+          <title>Global Tuna Atlas - reports</title>
+          <style>body{font-family:sans-serif;max-width:40rem;margin:3rem auto;padding:0 1rem;line-height:1.5}</style>
+          </head><body>
+          <h1>Global Tuna Atlas - reports</h1>
+          <ul>
+            <li><a href="summary_catch.html">Catch dataset analysis (IRD Level 2)</a></li>
+            <li><a href="summary_effort.html">Effort dataset analysis (IRD Level 0)</a></li>
+          </ul>
+          <p>Rendered on $(date -u +%Y-%m-%d) from commit
+          <code>${GITHUB_SHA::7}</code> with image <code>${IMAGE}</code>.</p>
+          </body></html>
+          EOF
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
