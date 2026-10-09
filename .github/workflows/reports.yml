@@ -6,7 +6,7 @@
 # test_whole_compose.yml (same R and packages); nothing is rebuilt here.
 #
 # Data: each report downloads its default dataset (Zenodo) unless a file is
-# given (catch_file / effort_file: URL to a .csv, .qs, .parquet or .gpkg),
+# given (catch_file / effort_file: URL to a .csv, .parquet, .gpkg or .rds),
 # e.g. the files of the Zenodo record of a new GTA release.
 #
 # Requires: Settings > Pages > Source = "GitHub Actions".
@@ -22,11 +22,11 @@ on:
         required: true
         default: "latest"
       catch_file:
-        description: "Catch dataset (URL to .csv/.qs/.parquet/.gpkg). Empty = default of the report"
+        description: "Catch dataset (URL to .csv/.parquet/.gpkg/.rds). Empty = default of the report"
         required: false
         default: ""
       effort_file:
-        description: "Effort dataset (URL to .csv/.qs/.parquet/.gpkg). Empty = default of the report"
+        description: "Effort dataset (URL to .csv/.parquet/.gpkg/.rds). Empty = default of the report"
         required: false
         default: ""
 

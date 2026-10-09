@@ -1,6 +1,8 @@
 ---
 title: "Catch dataset analysis (Global Tuna Atlas - IRD Level 2)"
 output: html_document
+params:
+  data_file: ""
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +17,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r packages, echo=TRUE, results='hide'}
-packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
+packages <- c("dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
@@ -31,60 +33,33 @@ If the timeout make impossible the downlading from R code, please download it fr
 
 ```{r downloadingcsv}
 
-csv_file <- here::here("data/global_catch_tunaatlasird_level2_without_geom.csv")
-source_file_csv <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_shiny_apps/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv"
+# params$data_file (path or URL, .csv/.parquet/.gpkg/.rds, or .qs if {qs} is installed) overrides the default
+# dataset below. Used by the "reports" GitHub workflow.
+source(here::here("docs/reports/read_gta_dataset.R"))
 
-if (!file.exists(csv_file)) {
-  if (file.exists(source_file_csv)) {
-    # copie depuis le dataspace
-    file.copy(source_file_csv, csv_file, overwrite = TRUE)
-  } else {
-    # sinon téléchargement
-    download.file(
-      "https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1",
-      csv_file,
-      mode = "wb"
-    )
-  }
-}
+if (nzchar(params$data_file)) {
+  catch_data <- read_gta_dataset(params$data_file)
+} else {
+  csv_file <- here::here("data/global_catch_tunaatlasird_level2_without_geom.csv")
+  source_file_csv <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_shiny_apps/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv"
 
-catch_data <- readr::read_csv(csv_file) %>%
-  dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
-
-```
-
-### From qs (if you want to download geometry as well, it can be heavy, not recommended unless specific use)
-
-```{r downloadingqs, eval=FALSE}
-
-qs_file <- "data/global_catch_tunaatlasird_level2_1950_2023.qs"
-qs_file_downloaded <- "data/global_catch_tunaatlasird_level2_1950_2023_15496164.qs"
-source_file <- "~/blue-cloud-dataspace/GlobalFisheriesAtlas/data_shiny_apps/global_catch_tunaatlasird_level2_1950_2023.qs"
-
-# Crée le dossier data si besoin
-if (!dir.exists(dirname(qs_file))) {
-  dir.create(dirname(qs_file), recursive = TRUE)
-}
-
-if (!file.exists(qs_file)) {
-  if (file.exists(source_file)) {
-    # copie depuis le dataspace
-    file.copy(source_file, qs_file, overwrite = TRUE)
-  } else {
-    # sinon téléchargement depuis Zenodo
-    if (!file.exists(qs_file_downloaded)) {
+  if (!file.exists(csv_file)) {
+    if (file.exists(source_file_csv)) {
+      # copie depuis le dataspace
+      file.copy(source_file_csv, csv_file, overwrite = TRUE)
+    } else {
+      # sinon téléchargement
       download.file(
-        "https://zenodo.org/record/15405414/files/global_catch_tunaatlasird_level2_1950_2023.qs?download=1",
-        qs_file_downloaded,
+        "https://zenodo.org/records/15405414/files/global_catch_tunaatlasird_level2_1950_2023_without_geom.csv?download=1",
+        csv_file,
         mode = "wb"
       )
     }
-    file.rename(qs_file_downloaded, qs_file)
   }
-}
 
-catch_data <- qs::qread(qs_file)
-catch_data$geom <- NULL
+  catch_data <- readr::read_csv(csv_file) %>%
+    dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
+}
 
 ```
 
@@ -161,9 +136,9 @@ kableExtra::kable(table(catch_data$measurement_unit))
      dplyr::rename(cwp_code = CWP_CODE) %>%
     dplyr::rename(geom = geom_wkt)
   
-qs_file <- "UN_CONTINENT2.qs"
+continent_file <- "UN_CONTINENT2.rds"
 
-if (!file.exists(qs_file)) {
+if (!file.exists(continent_file)) {
   message("Downloading UN_CONTINENT2 from FAO GeoServer...")
   WFS <- WFSClient$new(
     url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
@@ -172,11 +147,11 @@ if (!file.exists(qs_file)) {
   )
   continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
   
-  # Save to .qs for faster reloads later
-  qs::qsave(continent, qs_file)
+  # Save to .rds for faster reloads later
+  saveRDS(continent, continent_file)
 } else {
   message("Loading cached UN_CONTINENT2 from local file...")
-  continent <- qs::qread(qs_file)
+  continent <- readRDS(continent_file)
 }
 sf::st_crs(continent) <- 4326
 

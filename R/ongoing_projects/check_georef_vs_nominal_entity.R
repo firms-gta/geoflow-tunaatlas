@@ -15,15 +15,30 @@ check_georef_vs_nominal_entity <- function(
     flush.console()
   }
 
+  # Datasets written by the workflow or by CWP.dataset: .parquet (current
+  # CWP.dataset), .rds, or .qs (earlier versions, only if {qs} is installed).
+  read_dataset_file <- function(path) {
+    if (grepl("\\.parquet$", path, ignore.case = TRUE)) {
+      return(as.data.frame(nanoparquet::read_parquet(path)))
+    }
+    if (grepl("\\.qs$", path, ignore.case = TRUE)) {
+      if (!requireNamespace("qs", quietly = TRUE)) {
+        stop("'", path, "' was written with {qs}: install {qs} to read it, or run the workflow again.")
+      }
+      return(getExportedValue("qs", "qread")(path))
+    }
+    readRDS(path)
+  }
+
   read_or_compute_qs <- function(path, expr, use_cache = TRUE, force_recompute = FALSE, label = NULL) {
     if (use_cache && !force_recompute && file.exists(path)) {
       if (!is.null(label)) log_message("Loading cache:", label, "->", path)
-      return(qs::qread(path))
+      return(readRDS(path))
     }
     if (!is.null(label)) log_message("Computing:", label)
     obj <- expr()
     dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
-    qs::qsave(obj, path)
+    saveRDS(obj, path)
     if (!is.null(label)) log_message("Saved cache:", label, "->", path)
     obj
   }
@@ -169,6 +184,7 @@ check_georef_vs_nominal_entity <- function(
   log_message("Data directory:", data_dir)
 
   nominal_candidates <- c(
+    file.path(data_dir, "nominal_catch_for_raising.rds"),
     file.path(data_dir, "nominal_catch_for_raising.qs")
   )
 
@@ -191,17 +207,13 @@ check_georef_vs_nominal_entity <- function(
   log_message("Nominal dataset found:", nominal_path)
 
   nominal <- read_or_compute_qs(
-    path = file.path(global_cache_dir, "nominal_prepared.qs"),
+    path = file.path(global_cache_dir, "nominal_prepared.rds"),
     use_cache = use_cache,
     force_recompute = force_recompute,
     label = "nominal_prepared",
     expr = function() {
       log_message("Loading nominal dataset...")
-      nom <- if (grepl("\\.qs$", nominal_path, ignore.case = TRUE)) {
-        qs::qread(nominal_path)
-      } else {
-        readRDS(nominal_path)
-      }
+      nom <- read_dataset_file(nominal_path)
 
       nom %>%
         dplyr::mutate(year = lubridate::year(time_start)) %>%
@@ -210,7 +222,7 @@ check_georef_vs_nominal_entity <- function(
   )
 
   nominal_filtered <- read_or_compute_qs(
-    path = file.path(global_cache_dir, "nominal_filtered.qs"),
+    path = file.path(global_cache_dir, "nominal_filtered.rds"),
     use_cache = use_cache,
     force_recompute = force_recompute,
     label = "nominal_filtered",
@@ -224,11 +236,13 @@ check_georef_vs_nominal_entity <- function(
 
   step_dirs <- list.dirs(markdown_dir, recursive = FALSE, full.names = TRUE)
 
-  data_paths <- file.path(step_dirs, "data.qs")
-  ancient_paths <- file.path(step_dirs, "ancient.qs")
-
-  step_data_paths <- ifelse(file.exists(data_paths), data_paths,
-                            ifelse(file.exists(ancient_paths), ancient_paths, NA))
+  # First existing file of each step, newest format first
+  step_data_paths <- vapply(step_dirs, function(d) {
+    candidates <- file.path(d, c("data.parquet", "data.rds", "data.qs",
+                                 "ancient.parquet", "ancient.rds", "ancient.qs"))
+    found <- candidates[file.exists(candidates)]
+    if (length(found) == 0) NA_character_ else found[1]
+  }, character(1), USE.NAMES = FALSE)
 
   keep <- !is.na(step_data_paths)
 
@@ -236,7 +250,7 @@ check_georef_vs_nominal_entity <- function(
   step_data_paths <- step_data_paths[keep]
 
   if (length(step_dirs) == 0) {
-    stop("No step directories with data.qs or ancient.qs found in: ", markdown_dir)
+    stop("No step directories with a data or ancient file (.parquet, .rds, .qs) found in: ", markdown_dir)
   }
 
   step_info <- tibble::tibble(
@@ -298,23 +312,23 @@ check_georef_vs_nominal_entity <- function(
 
     log_message("--------------------------------------------------")
     log_message("Step", i, "/", nrow(step_info), ":", step_name)
-    log_message("data.qs mtime:", as.character(file_time))
+    log_message("step data mtime:", as.character(file_time))
 
     georef <- read_or_compute_qs(
-      path = file.path(step_cache_dir, "georef_prepared.qs"),
+      path = file.path(step_cache_dir, "georef_prepared.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute,
       label = paste(step_name, "georef_prepared"),
       expr = function() {
         log_message("Loading georef dataset:", data_path)
-        qs::qread(data_path) %>%
+        read_dataset_file(data_path) %>%
           dplyr::mutate(year = lubridate::year(time_start)) %>%
           dplyr::filter(!(source_authority == "IOTC" & year %in% c(2022, 2023, 2024)))
       }
     )
 
     georef_filtered <- read_or_compute_qs(
-      path = file.path(step_cache_dir, "georef_filtered.qs"),
+      path = file.path(step_cache_dir, "georef_filtered.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute,
       label = paste(step_name, "georef_filtered"),
@@ -332,7 +346,7 @@ check_georef_vs_nominal_entity <- function(
       level_name = "source_authority_species",
       step_rank = step_info$step_rank_original[i],
       file_time = file_time,
-      cache_path = file.path(step_cache_dir, "source_authority_species_all.qs"),
+      cache_path = file.path(step_cache_dir, "source_authority_species_all.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute
     )
@@ -346,7 +360,7 @@ check_georef_vs_nominal_entity <- function(
       level_name = "source_authority_species",
       step_rank = step_info$step_rank_original[i],
       file_time = file_time,
-      cache_path = file.path(step_cache_dir, "source_authority_species_selected.qs"),
+      cache_path = file.path(step_cache_dir, "source_authority_species_selected.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute
     )
@@ -360,7 +374,7 @@ check_georef_vs_nominal_entity <- function(
       level_name = "source_authority_species_year",
       step_rank = step_info$step_rank_original[i],
       file_time = file_time,
-      cache_path = file.path(step_cache_dir, "source_authority_species_year_all.qs"),
+      cache_path = file.path(step_cache_dir, "source_authority_species_year_all.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute
     )
@@ -375,7 +389,7 @@ check_georef_vs_nominal_entity <- function(
       level_name = "source_authority_species_year",
       step_rank = step_info$step_rank_original[i],
       file_time = file_time,
-      cache_path = file.path(step_cache_dir, "source_authority_species_year_selected.qs"),
+      cache_path = file.path(step_cache_dir, "source_authority_species_year_selected.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute
     )
@@ -389,7 +403,7 @@ check_georef_vs_nominal_entity <- function(
       level_name = "source_authority_species_year_fishing_fleet",
       step_rank = step_info$step_rank_original[i],
       file_time = file_time,
-      cache_path = file.path(step_cache_dir, "source_authority_species_year_fishing_fleet_all.qs"),
+      cache_path = file.path(step_cache_dir, "source_authority_species_year_fishing_fleet_all.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute
     )
@@ -404,7 +418,7 @@ check_georef_vs_nominal_entity <- function(
       level_name = "source_authority_species_year_fishing_fleet",
       step_rank = step_info$step_rank_original[i],
       file_time = file_time,
-      cache_path = file.path(step_cache_dir, "source_authority_species_year_fishing_fleet_selected.qs"),
+      cache_path = file.path(step_cache_dir, "source_authority_species_year_fishing_fleet_selected.rds"),
       use_cache = use_cache,
       force_recompute = force_recompute
     )
@@ -545,9 +559,9 @@ run_analysis <- function(file_path) {
   georef_sup_nom_analysis_folder <- file.path(file_path, "georef_sup_nom_analysis")
   dir.create(georef_sup_nom_analysis_folder, recursive = TRUE, showWarnings = FALSE)
   
-  qs::qsave(
+  saveRDS(
     res,
-    file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.qs")
+    file.path(georef_sup_nom_analysis_folder, "globaldataframesrecap.rds")
   )
   
   p <- plot_georef_vs_nominal_evolution(res)

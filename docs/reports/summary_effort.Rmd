@@ -1,6 +1,8 @@
 ---
 title: "Effort Dataset Analysis (Global Tuna Atlas - IRD Level 0)"
 output: html_document
+params:
+  data_file: ""
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r echo=TRUE, results='hide'}
-packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra")
+packages <- c("dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
@@ -23,29 +25,21 @@ lapply(packages, function(pkg) {
 
 ## 📥 Download and load the file
 
-```{r}
+```{r loading}
 
-qs_file <- "data/global_effort_tunaatlasird_level0_1950_2023.qs"
-qs_file_downloaded <- "data/global_catch_tunaatlasird_level2_1950_2023_15221705.qs"
+# params$data_file (path or URL, .csv/.parquet/.gpkg/.rds, or .qs if {qs} is installed) overrides the default
+# dataset below. Used by the "reports" GitHub workflow.
+source(here::here("docs/reports/read_gta_dataset.R"))
 
-if (!dir.exists(dirname(qs_file))) {
-  dir.create(dirname(qs_file), recursive = TRUE)
+if (nzchar(params$data_file)) {
+  effort_data <- read_gta_dataset(params$data_file)
+} else {
+  # 2023 release on Zenodo, only published as .qs: needs {qs}, which is no
+  # longer in the image. Give params$data_file (e.g. a .csv) to avoid it.
+  effort_data <- read_gta_dataset(
+    "https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1"
+  )
 }
-
-if (!file.exists(qs_file)) {
-  if (!file.exists(qs_file_downloaded)) {
-    download.file(
-      "https://zenodo.org/record/15221705/files/global_effort_tunaatlasird_level0_1950_2023.qs?download=1",
-      qs_file_downloaded,
-      mode = "wb"
-    )
-  }
-  file.rename(qs_file_downloaded, qs_file)
-}
-
-effort_data <- qs::qread(qs_file)
-
-effort_data$geom <- NULL 
 
 ```
 
@@ -112,9 +106,9 @@ First let's download the geometry.
      dplyr::rename(cwp_code = CWP_CODE) %>%
     dplyr::rename(geom = geom_wkt)
   
-qs_file <- "UN_CONTINENT2.qs"
+continent_file <- "UN_CONTINENT2.rds"
 
-if (!file.exists(qs_file)) {
+if (!file.exists(continent_file)) {
   message("Downloading UN_CONTINENT2 from FAO GeoServer...")
   WFS <- WFSClient$new(
     url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
@@ -123,11 +117,11 @@ if (!file.exists(qs_file)) {
   )
   continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
   
-  # Save to .qs for faster reloads later
-  qs::qsave(continent, qs_file)
+  # Save to .rds for faster reloads later
+  saveRDS(continent, continent_file)
 } else {
   message("Loading cached UN_CONTINENT2 from local file...")
-  continent <- qs::qread(qs_file)
+  continent <- readRDS(continent_file)
 }
 
 sf::st_crs(continent) <- 4326
