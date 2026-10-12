@@ -27,9 +27,14 @@ on:
         description: "Leave empty: uses the image built and tested for this commit. Otherwise a tag of ghcr.io/firms-gta/gta-workflow (e.g. latest)"
         required: false
         default: ""
+      datasets_from_run:
+        description: "Reports only: ID of an earlier run of this workflow whose final datasets are reused (number in its URL). Empty = complete run"
+        required: false
+        default: ""
 
 permissions:
   contents: read
+  actions: read
   packages: read
   pages: write
   id-token: write
@@ -41,6 +46,7 @@ concurrency:
 env:
   PROJECT_DIR: /home/rstudio/geoflow-tunaatlas
   # Raw data of the GTA (see docs/RUNNING.md)
+  FROM_RUN: ${{ github.event.inputs.datasets_from_run }}
   RAW_DATA_URL: https://zenodo.org/records/20834708/files/all_raw_data_GTA.zip?download=1
 
 jobs:
@@ -51,6 +57,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Free disk space and add swap
+        if: env.FROM_RUN == ''
         run: |
           df -h /
           # Tools preinstalled on the runner and not used here (~25-30 GB)
@@ -93,6 +100,7 @@ jobs:
           exit 1
 
       - name: Download the raw data
+        if: env.FROM_RUN == ''
         run: |
           mkdir -p runtime/data runtime/jobs
           wget -q -O raw.zip "$RAW_DATA_URL"
@@ -129,6 +137,7 @@ jobs:
           sudo chown -R 1000:1000 runtime
 
       - name: Run the workflow
+        if: env.FROM_RUN == ''
         run: |
           set -euo pipefail
           D=runtime/data
@@ -163,10 +172,11 @@ jobs:
           ls -la "$D"/dataoutputGTA
 
       - name: Give the files back to the runner
-        if: always()
+        if: always() && env.FROM_RUN == ''
         run: sudo chown -R "$(id -u):$(id -g)" runtime
 
       - name: Keep the final datasets
+        if: env.FROM_RUN == ''
         uses: actions/upload-artifact@v4
         with:
           name: gta-final-datasets-${{ github.sha }}
@@ -174,13 +184,23 @@ jobs:
           retention-days: 14
 
       - name: Keep the job logs
-        if: always()
+        if: always() && env.FROM_RUN == ''
         uses: actions/upload-artifact@v4
         with:
           name: gta-job-logs-${{ github.sha }}
           path: runtime/jobs/**/job-logs.txt
           if-no-files-found: ignore
           retention-days: 14
+
+      - name: Reuse the final datasets of an earlier run
+        if: env.FROM_RUN != ''
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gta-final-datasets-*
+          merge-multiple: true
+          path: runtime/data/dataoutputGTA
+          run-id: ${{ env.FROM_RUN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Render the reports
         run: |

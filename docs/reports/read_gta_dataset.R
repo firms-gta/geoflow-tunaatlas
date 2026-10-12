@@ -39,5 +39,35 @@ read_gta_dataset <- function(path, cache_dir = here::here("data")) {
   if ("geographic_identifier" %in% names(data)) {
     data$geographic_identifier <- as.character(data$geographic_identifier)
   }
+  add_gta_labels(data)
+}
+
+# The datasets written by the workflow (data/GTA_2026/dataoutputGTA) only have
+# codes; the published releases also have the *_label columns the reports use.
+# Missing labels are added from the code lists shipped with CWP.dataset; if that
+# fails, the code itself is used as label so that the report still renders.
+add_gta_labels <- function(data) {
+  dims <- c("species", "gear_type", "fishing_fleet", "fishing_mode", "measurement",
+            "measurement_type", "measurement_processing_level")
+  dims <- dims[dims %in% names(data)]
+  missing <- dims[!paste0(dims, "_label") %in% names(data)]
+  if (length(missing) == 0) return(data)
+
+  message("Adding missing labels: ", paste0(missing, "_label", collapse = ", "))
+  enriched <- tryCatch(
+    CWP.dataset::enrich_dataset_if_needed(data, with_geom = FALSE)$without_geom,
+    error = function(e) {
+      message("Labels from CWP.dataset failed (", conditionMessage(e), "): codes used as labels")
+      NULL
+    }
+  )
+  if (!is.null(enriched) && nrow(enriched) == nrow(data)) data <- as.data.frame(enriched)
+
+  for (d in dims) {
+    lab <- paste0(d, "_label")
+    if (!lab %in% names(data)) data[[lab]] <- NA_character_
+    data[[lab]] <- ifelse(is.na(data[[lab]]) | data[[lab]] == "",
+                          as.character(data[[d]]), as.character(data[[lab]]))
+  }
   data
 }

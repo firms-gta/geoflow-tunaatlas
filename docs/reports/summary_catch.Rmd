@@ -207,101 +207,76 @@ catch_data %>%
 ```
 
 
-# Your turn:
+# Decomposition by dimension
 
-If you want to use only part of the data you can filter the dataset using the dimensison provided exemple, here let's focus on silky sharks (note that this only concern catch data as effort cannot be related to species)
+Catches of the whole dataset by year, for the main categories of a few
+dimensions. To keep the plots readable, only the 10 largest categories (over
+the whole period) are shown, the others are grouped as "Other".
 
-```{r silky}
+```{r decompose_helper}
 
-silky_sharks <- catch_data %>% dplyr::filter(species_label == "Silky shark")
+# Total by year for the 10 largest categories of `dim`, the rest as "Other"
+by_year_top <- function(data, dim, n = 10) {
+  top <- data %>%
+    dplyr::group_by(.data[[dim]]) %>%
+    dplyr::summarise(total = sum(measurement_value, na.rm = TRUE), .groups = "drop") %>%
+    dplyr::slice_max(total, n = n, with_ties = FALSE) %>%
+    dplyr::pull(.data[[dim]])
+  data %>%
+    dplyr::mutate(category = ifelse(.data[[dim]] %in% top, as.character(.data[[dim]]), "Other")) %>%
+    dplyr::group_by(year = lubridate::year(time_start), category, measurement_unit) %>%
+    dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = "drop")
+}
 
-```
-
-```{r silkybyyear}
-
-silky_sharks %>%
-  dplyr::group_by(year = lubridate::year(time_start), measurement_unit) %>%
-  dplyr::summarise(total = sum(measurement_value, na.rm = TRUE)) %>%
-  ggplot2::ggplot(ggplot2::aes(x = year, y = total)) +
-  ggplot2::geom_line() +
-  ggplot2::facet_wrap(~measurement_unit, scales = "free_y") +
-  ggplot2::labs(title = "Total catches by Year and Measurement unit", y = "Measured Value", x = "Year")
-
-```
-
-## Let's decompose the data for some dimensions
-
-```{r silkybyyeargear}
-
-groupped_gear <- silky_sharks %>% dplyr::group_by(gear_type_label, time_start, measurement_unit) %>% 
-  dplyr::summarise(measurement_value = sum(measurement_value))
-
-ggplot(groupped_gear) +
-  aes(
-    x = time_start,
-    y = measurement_value,
-    colour = gear_type_label
-  ) +
-  geom_line() +  #
-  geom_point() +
-  scale_color_hue(direction = 1) +
-  theme_minimal() +
-  facet_wrap(vars(measurement_unit), scales = "free")
-
+plot_by_year <- function(df, title) {
+  ggplot2::ggplot(df, ggplot2::aes(x = year, y = measurement_value, colour = category)) +
+    ggplot2::geom_line() +
+    ggplot2::theme_minimal() +
+    ggplot2::facet_wrap(ggplot2::vars(measurement_unit), scales = "free") +
+    ggplot2::labs(title = title, x = "Year", y = "Measured value", colour = NULL)
+}
 
 ```
 
-
-```{r silkybyyearff, eval=FALSE}
-groupped_fishing_fleet <- silky_sharks %>% dplyr::group_by(fishing_fleet_label, time_start, measurement_unit) %>% 
-  dplyr::summarise(measurement_value = sum(measurement_value))
-
-ggplot(groupped_fishing_fleet) +
-  aes(
-    x = time_start,
-    y = measurement_value,
-    colour = fishing_fleet_label
-  ) +
-  geom_line() +  #
-  geom_point() +
-  scale_color_hue(direction = 1) +
-  theme_minimal() +
-  facet_wrap(vars(measurement_unit), scales = "free")
+```{r byyearspecies}
+plot_by_year(by_year_top(catch_data, "species_label"), "Catches by year and species")
 ```
 
-
-```{r silkybyyeartrfmos}
-groupped_source_auth <- silky_sharks %>% dplyr::group_by(source_authority, time_start, measurement_unit) %>% 
-  dplyr::summarise(measurement_value = sum(measurement_value))
-
-ggplot(groupped_source_auth) +
-  aes(
-    x = time_start,
-    y = measurement_value,
-    colour = source_authority
-  ) +
-  geom_line() +  #
-  geom_point() +
-  scale_color_hue(direction = 1) +
-  theme_minimal() +
-  facet_wrap(vars(measurement_unit), scales = "free")
-
-
+```{r byyeargear}
+plot_by_year(by_year_top(catch_data, "gear_type_label"), "Catches by year and gear type")
 ```
+
+```{r byyearff}
+plot_by_year(by_year_top(catch_data, "fishing_fleet_label"), "Catches by year and fishing fleet")
+```
+
+```{r byyeartrfmos}
+plot_by_year(by_year_top(catch_data, "source_authority"), "Catches by year and tRFMO")
+```
+
+To work on part of the data only, filter it on any dimension first, e.g.
+`catch_data %>% dplyr::filter(species == "YFT")`.
 
 # How to aggregate data from 1 deg to 5 deg ? 
 
 ```{r aggregate}
 
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R")
+source(here::here("R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R"))
 
-one_degree <- silky_sharks %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "5")
-five_degree <- silky_sharks %>% dplyr::filter(substr(geographic_identifier, 1, 1) == "6")
-silky_sharks_aggregated <- one_degree %>% rowwise() %>% 
-  dplyr::mutate(geographic_identifier = transform_cwp_code_from_1deg_to_5deg(geographic_identifier))
+# Convert each distinct 1-degree code once, then join: much faster than
+# converting row by row on the whole dataset
+one_degree_codes <- unique(catch_data$geographic_identifier[substr(catch_data$geographic_identifier, 1, 1) == "5"])
+code_1_to_5 <- data.frame(
+  geographic_identifier = one_degree_codes,
+  geographic_identifier_5deg = vapply(one_degree_codes, function(x) as.character(transform_cwp_code_from_1deg_to_5deg(x)), character(1))
+)
 
+catch_data_5deg <- catch_data %>%
+  dplyr::left_join(code_1_to_5, by = "geographic_identifier") %>%
+  dplyr::mutate(geographic_identifier = dplyr::coalesce(geographic_identifier_5deg, geographic_identifier)) %>%
+  dplyr::select(-geographic_identifier_5deg)
 
-
+table(substr(catch_data_5deg$geographic_identifier, 1, 1))
 
 ```
 
@@ -313,7 +288,7 @@ silky_sharks_aggregated <- one_degree %>% rowwise() %>%
 
 source("https://raw.githubusercontent.com/eblondel/geoflow-tunaatlas/master/R/tunaatlas_scripts/generation/spatial_curation_downgrade_resolution.R")
 
-georef_dataset<-spatial_curation_downgrade_resolution(con,silky_sharks,resolution = 1 , remove = FALSE)
+georef_dataset<-spatial_curation_downgrade_resolution(con,catch_data,resolution = 1 , remove = FALSE)
 
 ```
 
