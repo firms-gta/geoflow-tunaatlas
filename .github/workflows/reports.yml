@@ -105,6 +105,25 @@ jobs:
           rm -rf runtime/unzipped
           du -sh runtime/data
           df -h /
+          # Files the configurations read from data/GTA_2026 that are not in the
+          # raw-data archive (code lists, mappings...): taken from data/ in the
+          # repository when they are there. Anything still missing stops the
+          # run here rather than in the middle of a step.
+          missing=()
+          for f in $(cat config/*.csv | grep -o '\./data/GTA_2026/[A-Za-z0-9_.-]*' \
+                       | grep -v '/dataoutput' | sed 's#^\./data/GTA_2026/##; s#_$##' | sort -u); do
+            [[ -e "runtime/data/$f" ]] && continue
+            if [[ -e "data/$f" ]]; then
+              echo "Not in the archive, taken from the repository: data/$f"
+              cp "data/$f" "runtime/data/$f"
+            else
+              missing+=("$f")
+            fi
+          done
+          if (( ${#missing[@]} )); then
+            echo "::error::Missing in the raw-data archive and in data/: ${missing[*]}"
+            exit 1
+          fi
           # Same user as in the image and in the test (rstudio, 1000:1000):
           # with another uid, R does not find the renv library of the image
           sudo chown -R 1000:1000 runtime
@@ -136,9 +155,8 @@ jobs:
           step rawdata
           step nominal
           step effort
-          sudo rm -f "$D"/dataoutputpreharmo/effort_*.csv   # only read by effort
-          step level0
-          step level2                                   # needs pre-harmonised catch + nominal
+          step level0                                   # reads pre-harmonised catch and effort
+          step level2                                   # same + nominal
           sudo rm -rf "$D"/dataoutputpreharmo                # nothing reads it any more
           step level1                                   # reads dataoutputGTA only
 
