@@ -1,7 +1,7 @@
 # =============================================================================
 # compose/compose.ci.yml
 #
-# Override appliqué EN PLUS de compose.bd.rstudio.newversiongeoflow.yml pendant
+# Override appliqué EN PLUS de compose.yml pendant
 # la CI (ajouté automatiquement par compose/run_workflow_retry.sh quand CI=true).
 #
 # Ne pas redéfinir ici l'image du service workflow : elle vient de GTA_IMAGE,

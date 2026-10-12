@@ -75,7 +75,7 @@ jobs:
         if: failure()
         run: |
           docker compose \
-            -f compose/compose.bd.rstudio.newversiongeoflow.yml \
+            -f compose/compose.yml \
             -f compose/compose.ci.yml \
             logs
 

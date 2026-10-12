@@ -132,7 +132,7 @@ Start the services without running the workflow (database, GeoServer,
 GeoNetwork, RStudio):
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --no-build
+docker compose -f compose/compose.yml up -d --no-build
 ```
 
 The workflow itself only runs through the scripts (`docker compose run workflow`):
@@ -141,7 +141,7 @@ it has the Compose profile `workflow`, so a plain `up` never launches it.
 Stop everything:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml down
+docker compose -f compose/compose.yml down
 ```
 
 Add `-v` to also delete the volumes (database, layers, records) and start from
@@ -170,8 +170,8 @@ explore, debug or run steps by hand.
 Start it with the image published by the CI (workflow image + RStudio Server):
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml pull rstudio
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --no-build rstudio
+docker compose -f compose/compose.yml pull rstudio
+docker compose -f compose/compose.yml up -d --no-build rstudio
 ```
 
 `--no-build` makes sure the published image is used: if it is missing, the
@@ -182,7 +182,7 @@ To build it locally instead (after changing `Dockerfile.rstudio`), on top of
 `GTA_IMAGE`:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --build rstudio
+docker compose -f compose/compose.yml up -d --build rstudio
 ```
 
 Open <http://127.0.0.1:18787>, log in as `rstudio` / `test`, then open the project
@@ -220,7 +220,7 @@ Good to know:
 - The port only listens on `127.0.0.1`. On a remote server, use an SSH tunnel:
   `ssh -L 18787:localhost:18787 <server>`.
 - Stop RStudio alone with
-  `docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml stop rstudio`.
+  `docker compose -f compose/compose.yml stop rstudio`.
 
 ## 7. Run the Shiny app on the database
 
@@ -231,7 +231,7 @@ Run the workflow first (step 2 or 3), so that the database contains the
 datasets. Then start the app:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app up -d shiny
+docker compose -f compose/compose.yml --profile app up -d shiny
 ```
 
 Open <http://127.0.0.1:13838>. In the app, choose the database source, select
@@ -299,7 +299,7 @@ GTA_PG_PORT=25430 GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 \
 Remove it with its volumes:
 
 ```bash
-docker compose -p gta-test -f compose/compose.bd.rstudio.newversiongeoflow.yml down -v
+docker compose -p gta-test -f compose/compose.yml down -v
 ```
 
 ## Ports
@@ -331,7 +331,7 @@ GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 ./compose/run_workflow_retry.
 or edit `compose/.env` without committing it. Check the result with:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml config | grep -B1 -A3 published
+docker compose -f compose/compose.yml config | grep -B1 -A3 published
 ```
 
 If a port is already taken, `docker compose` stops with
@@ -341,7 +341,7 @@ If a port is already taken, `docker compose` stops with
 
 | File | Role |
 | --- | --- |
-| `compose.bd.rstudio.newversiongeoflow.yml` | The stack (see services below) |
+| `compose.yml` | The stack (see services below) |
 | `compose.ci.yml` | Small override added automatically in CI (smaller Elasticsearch heap) |
 | `Dockerfile.workflow` | The workflow image: R 4.2.3, `renv.lock`, patched geoflow, FDI code lists, project code |
 | `Dockerfile.rstudio` | Builds a second image: the workflow image + RStudio Server, so RStudio has exactly the workflow environment |
@@ -379,7 +379,7 @@ Tables, layers and records live in Docker volumes and persist between runs.
 | --- | --- |
 | `Permission denied` / renv fails to install | Your uid is not 1000. Run `sudo chown -R 1000:1000 runtime tests/sample_data R config` and `export GTA_RUN_USER=1000:1000`. |
 | Output stuck on `*** recursive gc invocation` | Known intermittent R bug. The scripts restart the run automatically; a single isolated message is harmless. |
-| `container …-geonetwork-1 is unhealthy` | GeoNetwork is slow on first start. Run `docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --force-recreate geonetwork`, wait until healthy, then retry. |
+| `container …-geonetwork-1 is unhealthy` | GeoNetwork is slow on first start. Run `docker compose -f compose/compose.yml up -d --force-recreate geonetwork`, wait until healthy, then retry. |
 | `Failed to copy file to: …/dataoutputpreharmo/…` | The data folder is not writable. The scripts create `dataoutputpreharmo/` and `dataoutputGTA/` there. |
 | `URL using bad/illegal format or missing URL` (Zenodo) | `ZENODO_URL` is missing from `zenodo_secrets.env`. |
 | `133 per 1 minute` (Zenodo) | Zenodo rate limit. Wait a few minutes, then rerun with `GTA_STEPS=services`. |

@@ -43,7 +43,7 @@ CONTAINER_DATA="$CONTAINER_ROOT/data/GTA_2026"
 # --- Fichiers manquants : on les prend dans l'image ---------------------------
 # Permet de lancer la stack sans cloner le dépôt, en n'ayant copié que le
 # dossier compose/ (voir compose/README.md, "Without cloning the repository").
-COMPOSE_FILE_PATH=compose/compose.bd.rstudio.newversiongeoflow.yml
+COMPOSE_FILE_PATH=compose/compose.yml
 IMAGE="${GTA_IMAGE:-$(sed -n 's/.*image: \${GTA_IMAGE:-\([^}]*\)}.*/\1/p' "$COMPOSE_FILE_PATH" | head -1)}"
 
 copy_from_image() {   # copy_from_image <chemin relatif à la racine du dépôt>
@@ -77,7 +77,7 @@ fi
 # --- Commande compose ----------------------------------------------------------
 COMPOSE=(docker compose)
 [[ -n "$PROJECT" ]] && COMPOSE+=(-p "$PROJECT")
-COMPOSE+=(-f compose/compose.bd.rstudio.newversiongeoflow.yml)
+COMPOSE+=(-f compose/compose.yml)
 [[ -n "${CI:-}" ]] && COMPOSE+=(-f compose/compose.ci.yml)
 
 CODE_MOUNTS=()

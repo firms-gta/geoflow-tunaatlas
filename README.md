@@ -13,7 +13,6 @@ No local R installation is needed: everything runs in Docker.
 | I want to… | Use | Guide |
 | --- | --- | --- |
 | produce the datasets (no database, no publication) | `docker run` | [docs/RUNNING.md](docs/RUNNING.md) |
-| same, with shorter commands | `compose.workflow.yml` | [docs/DOCKER_COMPOSE.md](docs/DOCKER_COMPOSE.md) |
 | produce **and publish** (PostGIS, GeoServer, GeoNetwork, Zenodo), or run the test | `compose/` scripts | [compose/README.md](compose/README.md) |
 
 Other documentation:
@@ -78,10 +77,9 @@ geoflow-tunaatlas/
 ├── compose/              # workflow Dockerfile, full Compose stack, geoflow patches, launch scripts
 ├── config/               # geoflow workflow configurations
 ├── data/                 # static reference data
-├── docker/               # additional Docker images (reporting, NetCDF, …)
+├── docker/               # auxiliary images: reporting (summaries), NetCDF
 ├── docs/                 # documentation
 ├── tests/                # launcher checks and sample input data
-├── compose.workflow.yml  # workflow-only Compose file
 └── renv.lock
 ```
 
