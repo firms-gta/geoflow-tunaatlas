@@ -45,7 +45,7 @@ if (nzchar(params$data_file)) {
 
 ## 📊 Data Overview
 
-This dataset provides monthly records of tuna and tuna-like species effort at the global scale between 1950 and 2023. Here is a description of the columns:
+This dataset provides monthly records of tuna and tuna-like species effort at the global scale between `r min(lubridate::year(effort_data$time_start), na.rm = TRUE)` and `r max(lubridate::year(effort_data$time_start), na.rm = TRUE)`. Here is a description of the columns:
 
 ```{r}
 kableExtra::kable(head(effort_data))
