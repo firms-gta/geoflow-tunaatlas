@@ -1,7 +1,8 @@
 # Read a Global Tuna Atlas dataset for the summary reports.
 #
 # `path` can be a local file or an http(s) URL (downloaded once to `cache_dir`).
-# Supported formats: .csv, .qs, .parquet, .gpkg. The geometry is dropped: the
+# Supported formats: .csv, .parquet, .gpkg, .rds, and .qs if {qs} is installed
+# (no longer in the image: older Zenodo releases only). The geometry is dropped: the
 # reports add it back from the CWP grid only where a map needs it.
 read_gta_dataset <- function(path, cache_dir = here::here("data")) {
   if (grepl("^https?://", path)) {
@@ -19,7 +20,13 @@ read_gta_dataset <- function(path, cache_dir = here::here("data")) {
   data <- switch(
     ext,
     csv     = readr::read_csv(path, show_col_types = FALSE),
-    qs      = qs::qread(path),
+    rds     = readRDS(path),
+    qs      = {
+      if (!requireNamespace("qs", quietly = TRUE)) {
+        stop("'", path, "' is a .qs file: install {qs} to read it, or use the .csv of the release.")
+      }
+      getExportedValue("qs", "qread")(path)
+    },
     parquet = arrow::read_parquet(path),
     gpkg    = sf::st_read(path, quiet = TRUE),
     stop("Unsupported format: .", ext)

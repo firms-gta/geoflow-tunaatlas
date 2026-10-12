@@ -29,7 +29,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
   options(encoding = "UTF-8")
   CWP.dataset::write_options_to_csv(opts)
   # List of required packages
-  packages <- c("dplyr" ,"sf", "stringr", "R3port", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
+  packages <- c("dplyr" ,"sf", "stringr", "reshape2", "readr", "tools", "RPostgreSQL", "DBI", "googledrive")
   
   # Function to check and install missing packages
   install_and_load <- function(package) {
