@@ -47,9 +47,6 @@ jobs:
   full-run-and-reports:
     runs-on: ubuntu-latest
     timeout-minutes: 355   # GitHub-hosted jobs stop at 6 h
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -222,6 +219,17 @@ jobs:
         with:
           path: site
 
+  # Separate job: the github-pages environment may only accept some branches or
+  # tags (Settings > Environments > github-pages). If it refuses, only this job
+  # fails; the run, the reports (artifact "github-pages") and the datasets are
+  # kept.
+  deploy:
+    needs: full-run-and-reports
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deploy
         uses: actions/deploy-pages@v4
