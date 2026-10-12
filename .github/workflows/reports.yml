@@ -105,6 +105,9 @@ jobs:
           rm -rf runtime/unzipped
           du -sh runtime/data
           df -h /
+          # Same user as in the image and in the test (rstudio, 1000:1000):
+          # with another uid, R does not find the renv library of the image
+          sudo chown -R 1000:1000 runtime
 
       - name: Run the workflow
         run: |
@@ -113,8 +116,8 @@ jobs:
 
           step() {
             echo "::group::$1"
-            docker run --rm --network none \
-              --user "$(id -u):$(id -g)" \
+            docker run --rm \
+              --user 1000:1000 \
               -v "$PWD/$D":"$PROJECT_DIR/data/GTA_2026" \
               -v "$PWD/runtime/jobs":"$PROJECT_DIR/jobs" \
               -e GTA_STEPS="$1" \
@@ -125,21 +128,25 @@ jobs:
               -e GTA_BOOTSTRAP_RESTORE_RENV=false \
               "$IMAGE"
             # Step snapshots used only by the summaries: not needed here
-            find runtime/jobs -type d -name Markdown -prune -exec rm -rf {} +
+            sudo find runtime/jobs -type d -name Markdown -prune -exec rm -rf {} +
             echo "::endgroup::"
-            echo "After $1:"; df -h / | tail -1; du -sh "$D" runtime/jobs
+            echo "After $1:"; df -h / | tail -1; sudo du -sh "$D" runtime/jobs
           }
 
           step rawdata
           step nominal
           step effort
-          rm -f "$D"/dataoutputpreharmo/effort_*.csv   # only read by effort
+          sudo rm -f "$D"/dataoutputpreharmo/effort_*.csv   # only read by effort
           step level0
           step level2                                   # needs pre-harmonised catch + nominal
-          rm -rf "$D"/dataoutputpreharmo                 # nothing reads it any more
+          sudo rm -rf "$D"/dataoutputpreharmo                # nothing reads it any more
           step level1                                   # reads dataoutputGTA only
 
           ls -la "$D"/dataoutputGTA
+
+      - name: Give the files back to the runner
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" runtime
 
       - name: Keep the final datasets
         uses: actions/upload-artifact@v4
