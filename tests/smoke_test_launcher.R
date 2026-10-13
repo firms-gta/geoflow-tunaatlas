@@ -6,7 +6,7 @@
 launcher_environment <- new.env(parent = globalenv())
 
 sys.source(
-  here::here("R/launching_workflows/zenodo_helpers.R"),
+  "R/launching_workflows/zenodo_helpers.R",
   envir = launcher_environment
 )
 
