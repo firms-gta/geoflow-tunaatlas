@@ -1,0 +1,318 @@
+# Runs the complete GTA workflow on the real data, then renders the summary
+# reports (docs/reports/*.Rmd) from the datasets it produced and publishes them
+# on GitHub Pages.
+#
+# The image is the one already tested on the sample data and published by
+# test_whole_compose.yml: if it passed the test, it is expected to pass here.
+# Nothing is rebuilt.
+#
+# Processing only: no database, GeoServer, GeoNetwork or Zenodo (GTA_NO_DB=true),
+# one container per step so that memory is freed between steps, and the
+# intermediate files are deleted as soon as no later step needs them, to fit
+# the disk of a GitHub runner. The final datasets (data/GTA_2026/dataoutputGTA)
+# are kept as a workflow artifact.
+#
+# Reports: catch at levels 0, 1 and 2, and effort, all on the datasets of this
+# run.
+#
+# Requires: Settings > Pages > Source = "GitHub Actions".
+name: Full run and reports
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Leave empty: uses the image built and tested for this commit. Otherwise a tag of ghcr.io/firms-gta/gta-workflow (e.g. latest)"
+        required: false
+        default: ""
+      datasets_from_run:
+        description: "Reports only: ID of an earlier run of this workflow whose final datasets are reused (number in its URL). Empty = complete run"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  actions: read
+  packages: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+env:
+  PROJECT_DIR: /home/rstudio/geoflow-tunaatlas
+  # Raw data of the GTA (see docs/RUNNING.md)
+  FROM_RUN: ${{ github.event.inputs.datasets_from_run }}
+  RAW_DATA_URL: https://zenodo.org/records/20834708/files/all_raw_data_GTA.zip?download=1
+
+jobs:
+  full-run-and-reports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355   # GitHub-hosted jobs stop at 6 h
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space and add swap
+        if: env.FROM_RUN == ''
+        run: |
+          df -h /
+          # Tools preinstalled on the runner and not used here (~25-30 GB)
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/share/swift
+          sudo docker image prune --all --force >/dev/null
+          df -h /
+          # Extra swap: a level that needs a bit more than 16 GB slows down
+          # instead of being killed
+          sudo fallocate -l 8G /swapfile_gta
+          sudo chmod 600 /swapfile_gta
+          sudo mkswap /swapfile_gta >/dev/null
+          sudo swapon /swapfile_gta
+          free -h
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull the workflow image
+        env:
+          IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+        run: |
+          REPO=ghcr.io/firms-gta/gta-workflow
+          if [[ -n "$IMAGE_TAG" ]]; then
+            CANDIDATES=("$IMAGE_TAG")
+          else
+            CANDIDATES=("sha-${GITHUB_SHA::7}" "sha-${GITHUB_SHA::7}-dev")
+          fi
+          for t in "${CANDIDATES[@]}"; do
+            if docker pull "$REPO:$t"; then
+              echo "IMAGE=$REPO:$t" >> "$GITHUB_ENV"
+              exit 0
+            fi
+          done
+          echo "No image found for: ${CANDIDATES[*]} (has test_whole_compose.yml passed on this commit?)"
+          exit 1
+
+      - name: Download the raw data
+        if: env.FROM_RUN == ''
+        run: |
+          mkdir -p runtime/data runtime/jobs
+          wget -q -O raw.zip "$RAW_DATA_URL"
+          unzip -q raw.zip -d runtime/unzipped
+          rm raw.zip
+          # The archive may contain an extra all_raw_data_GTA/ level
+          SRC=runtime/unzipped
+          if [[ -d runtime/unzipped/all_raw_data_GTA ]]; then SRC=runtime/unzipped/all_raw_data_GTA; fi
+          mv "$SRC"/* runtime/data/
+          rm -rf runtime/unzipped
+          du -sh runtime/data
+          df -h /
+          # Files the configurations read from data/GTA_2026 that are not in the
+          # raw-data archive (code lists, mappings...): taken from data/ in the
+          # repository when they are there. Anything still missing stops the
+          # run here rather than in the middle of a step.
+          missing=()
+          for f in $(cat config/*.csv | grep -o '\./data/GTA_2026/[A-Za-z0-9_.-]*' \
+                       | grep -v '/dataoutput' | sed 's#^\./data/GTA_2026/##; s#_$##' | sort -u); do
+            [[ -e "runtime/data/$f" ]] && continue
+            if [[ -e "data/$f" ]]; then
+              echo "Not in the archive, taken from the repository: data/$f"
+              cp "data/$f" "runtime/data/$f"
+            else
+              missing+=("$f")
+            fi
+          done
+          if (( ${#missing[@]} )); then
+            echo "::error::Missing in the raw-data archive and in data/: ${missing[*]}"
+            exit 1
+          fi
+          # Same user as in the image and in the test (rstudio, 1000:1000):
+          # with another uid, R does not find the renv library of the image
+          sudo chown -R 1000:1000 runtime
+
+      - name: Run the workflow
+        if: env.FROM_RUN == ''
+        run: |
+          set -euo pipefail
+          D=runtime/data
+
+          step() {   # step <GTA_STEPS> [extra docker run options...]
+            local steps="$1"; shift
+            echo "::group::$steps"
+            docker run --rm \
+              --user 1000:1000 \
+              -v "$PWD/$D":"$PROJECT_DIR/data/GTA_2026" \
+              -v "$PWD/runtime/jobs":"$PROJECT_DIR/jobs" \
+              -e GTA_STEPS="$steps" \
+              -e GTA_DATA_SOURCE=volume_dir \
+              -e GTA_DATA_PATH="$PROJECT_DIR/data/GTA_2026" \
+              -e GTA_NO_DB=true \
+              -e GTA_SUMMARISE_INVALID_RAW=false \
+              -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+              "$@" \
+              "$IMAGE"
+            echo "::endgroup::"
+            echo "After $steps:"; df -h / | tail -1; sudo du -sh "$D" runtime/jobs
+          }
+
+          # Step snapshots (jobs/*/.../Markdown): only read by the summaries
+          prune_markdown() { sudo find runtime/jobs -type d -name Markdown -prune -exec rm -rf {} +; }
+
+          # Summaries (CWP.dataset) of one level, from its step snapshots; the
+          # HTML reports are kept in runtime/summaries/<level>/ for the site
+          summaries() {   # summaries <level0|level1|level2> <job suffix> <GTA_TUNAATLAS_* variable>
+            job=$(ls -d runtime/jobs/*"$2" | sort | tail -1)
+            step summaries -e "$3=jobs/$(basename "$job")"
+            mkdir -p "runtime/summaries/$1"
+            sudo find "$job" -name '*_report.html' -exec cp {} "runtime/summaries/$1/" \;
+            sudo chown -R "$(id -u):$(id -g)" runtime/summaries
+            ls -la "runtime/summaries/$1"
+            prune_markdown
+          }
+
+          step rawdata;  prune_markdown
+          step nominal;  prune_markdown
+          step effort;   prune_markdown
+          step level0                                   # reads pre-harmonised catch and effort
+          summaries level0 level_0_catch_2026 GTA_TUNAATLAS_LEVEL0_CATCH
+          step level2                                   # same + nominal
+          summaries level2 level_2_catch_2026 GTA_TUNAATLAS_LEVEL2_CATCH
+          sudo rm -rf "$D"/dataoutputpreharmo                # nothing reads it any more
+          step level1                                   # reads dataoutputGTA only
+          summaries level1 level_1_catch_2026 GTA_TUNAATLAS_LEVEL1_CATCH
+
+          ls -la "$D"/dataoutputGTA
+
+      - name: Give the files back to the runner
+        if: always() && env.FROM_RUN == ''
+        run: sudo chown -R "$(id -u):$(id -g)" runtime
+
+      - name: Keep the final datasets
+        if: env.FROM_RUN == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: gta-final-datasets-${{ github.sha }}
+          path: runtime/data/dataoutputGTA
+          retention-days: 14
+
+      - name: Keep the summaries
+        if: env.FROM_RUN == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: gta-summaries-${{ github.sha }}
+          path: runtime/summaries
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Keep the job logs
+        if: always() && env.FROM_RUN == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: gta-job-logs-${{ github.sha }}
+          path: runtime/jobs/**/job-logs.txt
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Reuse the final datasets of an earlier run
+        if: env.FROM_RUN != ''
+        uses: actions/download-artifact@v4
+        with:
+          pattern: gta-final-datasets-*
+          merge-multiple: true
+          path: runtime/data/dataoutputGTA
+          run-id: ${{ env.FROM_RUN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Render the reports
+        run: |
+          mkdir -p site
+          chmod 777 site
+          # Final datasets of this run, as seen from inside the container (/gta)
+          pick() { basename "$(ls runtime/data/dataoutputGTA/$1 | grep -v _harmonized | head -1)"; }
+          export LEVEL0=/gta/$(pick 'global_catch_ird_level0_*.csv')
+          export LEVEL1=/gta/$(pick 'global_catch_ird_level1_*.csv')
+          export LEVEL2=/gta/$(pick 'global_catch_ird_level2_*.csv')
+          export EFFORT=/gta/$(pick 'global_effort_*.csv')
+          echo "level0: $LEVEL0  level1: $LEVEL1  level2: $LEVEL2  effort: $EFFORT"
+          # pandoc is in the workflow image; older images do not have it, so it
+          # is installed in the throw-away container when missing.
+          docker run --rm --user root \
+            -v "$PWD/docs/reports":"$PROJECT_DIR/docs/reports" \
+            -v "$PWD/runtime/data/dataoutputGTA":/gta:ro \
+            -v "$PWD/site":/site \
+            -e LEVEL0 -e LEVEL1 -e LEVEL2 -e EFFORT \
+            -w "$PROJECT_DIR" \
+            "$IMAGE" \
+            bash -c '
+              set -e
+              command -v pandoc >/dev/null || { apt-get update -qq && apt-get install -y -qq --no-install-recommends pandoc >/dev/null; }
+              Rscript -e "
+                for (lv in 0:2) {
+                  rmarkdown::render(\"docs/reports/summary_catch.Rmd\", output_dir = \"/site\",
+                                    output_file = sprintf(\"summary_catch_level%d.html\", lv),
+                                    intermediates_dir = tempdir(), envir = new.env(),
+                                    params = list(level = as.character(lv),
+                                                  data_file = Sys.getenv(paste0(\"LEVEL\", lv))))
+                }
+                rmarkdown::render(\"docs/reports/summary_effort.Rmd\", output_dir = \"/site\",
+                                  intermediates_dir = tempdir(), envir = new.env(),
+                                  params = list(data_file = Sys.getenv(\"EFFORT\")))
+              "
+            '
+
+      - name: Build the index page
+        run: |
+          # Summaries of this run (not available in reports-only mode)
+          summaries_html=""
+          if [[ -d runtime/summaries ]]; then
+            mkdir -p site/summaries
+            cp -r runtime/summaries/. site/summaries/
+            for f in $(cd site && find summaries -name '*.html' | sort); do
+              summaries_html+="<li><a href=\"$f\">$(basename "$(dirname "$f")"): $(basename "$f" .html)</a></li>"
+            done
+          fi
+          [[ -n "$summaries_html" ]] && summaries_html="<h2>Processing summaries (step by step)</h2><ul>$summaries_html</ul>"
+          cat > site/index.html <<EOF
+          <!doctype html>
+          <html lang="en"><head><meta charset="utf-8">
+          <title>Global Tuna Atlas - reports</title>
+          <style>body{font-family:sans-serif;max-width:40rem;margin:3rem auto;padding:0 1rem;line-height:1.5}</style>
+          </head><body>
+          <h1>Global Tuna Atlas - reports</h1>
+          <ul>
+            <li><a href="summary_catch_level0.html">Catch dataset analysis (IRD Level 0)</a></li>
+            <li><a href="summary_catch_level1.html">Catch dataset analysis (IRD Level 1)</a></li>
+            <li><a href="summary_catch_level2.html">Catch dataset analysis (IRD Level 2)</a></li>
+            <li><a href="summary_effort.html">Effort dataset analysis</a></li>
+          </ul>
+          ${summaries_html}
+          <p>Rendered on $(date -u +%Y-%m-%d) from commit
+          <code>${GITHUB_SHA::7}</code> with image <code>${IMAGE}</code>,
+          on the datasets produced by the complete workflow run of this commit.</p>
+          </body></html>
+          EOF
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # Separate job: the github-pages environment may only accept some branches or
+  # tags (Settings > Environments > github-pages). If it refuses, only this job
+  # fails; the run, the reports (artifact "github-pages") and the datasets are
+  # kept.
+  deploy:
+    needs: full-run-and-reports
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

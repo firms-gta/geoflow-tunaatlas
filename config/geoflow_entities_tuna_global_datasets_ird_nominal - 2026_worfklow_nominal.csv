@@ -46,4 +46,5 @@ action_option_from_rawdata:true_
 action_option_mapping_map_code_lists:true_
 action_option_raising_georef_to_nominal:false_
 action_option_mapping_keep_src_code:false_
+action_option_geom_table:area.erased_area_labels_
 action_option_recap_each_step:true"

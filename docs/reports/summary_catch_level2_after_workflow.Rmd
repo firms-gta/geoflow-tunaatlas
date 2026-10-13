@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r packages, echo=TRUE, results='hide'}
-packages <- c("qs", "dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
+packages <- c("dplyr", "ggplot2", "sf", "lubridate", "here", "ows4R", "patchwork", "kableExtra", "purrr")
 lapply(packages, function(pkg) {
   if (!require(pkg, character.only = TRUE)) install.packages(pkg)
   library(pkg, character.only = TRUE)
@@ -109,9 +109,9 @@ kableExtra::kable(table(catch_data$measurement_unit))
      dplyr::rename(cwp_code = CWP_CODE) %>%
     dplyr::rename(geom = geom_wkt)
   
-qs_file <- here::here("data/UN_CONTINENT2.qs")
+continent_file <- here::here("data/UN_CONTINENT2.rds")
 
-if (!file.exists(qs_file)) {
+if (!file.exists(continent_file)) {
   message("Downloading UN_CONTINENT2 from FAO GeoServer...")
   WFS <- WFSClient$new(
     url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
@@ -120,11 +120,11 @@ if (!file.exists(qs_file)) {
   )
   continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
   
-  # Save to .qs for faster reloads later
-  qs::qsave(continent, qs_file)
+  # Save to .rds for faster reloads later
+  saveRDS(continent, continent_file)
 } else {
   message("Loading cached UN_CONTINENT2 from local file...")
-  continent <- qs::qread(qs_file)
+  continent <- readRDS(continent_file)
 }
 sf::st_crs(continent) <- 4326
 

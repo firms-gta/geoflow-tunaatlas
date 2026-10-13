@@ -1,5 +1,0 @@
-docker build --build-arg BASE_IMAGE=rocker/rstudio:4.2.3 --build-arg MODE=dev \
-  -t dockerrstudiotrfmos:latest \
-  -f docker/docker_pre_harmo_trfmos/Dockerfile.pre_harmo_tRFMOs .
-
-

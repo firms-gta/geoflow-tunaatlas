@@ -30,7 +30,7 @@ RUN id -u rstudio >/dev/null 2>&1 || useradd -m -s /bin/bash rstudio
 
 WORKDIR ${PROJECT_DIR}
 
-# --- Bibliothèques système (liste inchangée) ---------------------------------
+# --- Bibliothèques système (+ pandoc : rapports HTML et summaries) -----------
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo git curl wget unzip dos2unix cmake pkg-config protobuf-compiler \
     gdal-bin udunits-bin redland-utils libssl-dev libcurl4-gnutls-dev libxml2-dev \
@@ -38,6 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsecret-1-dev libnetcdf-dev libjq-dev libprotobuf-dev librdf0 librdf0-dev \
     libtbb-dev libzmq3-dev libpoppler-cpp-dev libcairo2-dev libfontconfig1-dev \
     libfreetype6-dev libharfbuzz-dev libfribidi-dev \
+    pandoc \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --chown=rstudio:rstudio renv.lock ${PROJECT_DIR}/renv.lock

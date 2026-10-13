@@ -73,22 +73,15 @@
      "script": "../R/tunaatlas_actions/load_metadata.R",
       "run": true
     },
-    {
-      "id": "geometa-create-iso-19115",
-      "run": true,
-      "options": {
-        "doi": true,
-        "logo": true
-      }
+        {
+      "id": "create_geopackage",
+      "script": "../R/tunaatlas_actions/create_geopackage.R",
+      "run": true
     },
     {
-      "id": "geometa-create-iso-19110",
-      "run": true,
-      "options": {
-        "exclude_attributes": ["time_start", "time_end"],
-        "exclude_values_for_attributes": ["geographic_identifier", "measurement"],
-        "extra_attributes": ["geom", "aggregation_method"]
-      }
+      "id": "create_geoparquet",
+      "script": "../R/tunaatlas_actions/create_geoparquet.R",
+      "run": true
     }
     
   ]

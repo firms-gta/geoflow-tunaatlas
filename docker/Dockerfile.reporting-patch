@@ -1,0 +1,14 @@
+FROM gta-reporting:latest
+
+USER root
+
+COPY CWP.dataset /tmp/CWP.dataset
+
+RUN R_PROFILE_USER=/dev/null R CMD INSTALL \
+  --library=/home/rstudio/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu \
+  /tmp/CWP.dataset && \
+  chown -R rstudio:rstudio \
+    /home/rstudio/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset && \
+  rm -rf /tmp/CWP.dataset
+
+USER rstudio

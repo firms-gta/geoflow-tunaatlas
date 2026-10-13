@@ -3,7 +3,6 @@
 How to run the workflow outside a developer machine. For local runs, see:
 
 * [RUNNING.md](RUNNING.md) — processing only, with `docker run`;
-* [DOCKER_COMPOSE.md](DOCKER_COMPOSE.md) — processing only, with `compose.workflow.yml`;
 * [compose/README.md](../compose/README.md) — processing + database + GeoServer/GeoNetwork/Zenodo.
 
 ## Prerequisites
