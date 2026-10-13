@@ -658,14 +658,13 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   }
   
   required_packages <- c(
-    "remotes", "tinytex", "googledrive", "gsheet", "readr", "plotrix",
-    "janitor", "dotenv", "data.table", "here", "xfun", "RPostgreSQL",
-    "RPostgres", "DBI", "rpostgis", "terra", "sf", "RSQLite", "webshot",
-    "usethis", "ows4R", "sp", "flextable", "dplyr", "stringr", "tibble",
-    "bookdown", "knitr", "purrr", "readxl", "odbc", "rlang", "kableExtra",
+    "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor",
+    "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI",
+    "terra", "sf", "RSQLite", "ows4R", "sp", "flextable", "dplyr", "stringr",
+    "tibble", "bookdown", "knitr", "purrr", "readxl", "rlang", "kableExtra",
     "tidyr", "ggplot2", "fs", "stats", "RColorBrewer", "cowplot", "tmap",
-    "curl", "officer", "gdata", "R3port", "reshape2", "tools", "plogr",
-    "futile.logger", "lubridate", "geoflow"
+    "curl", "officer", "reshape2", "tools", "plogr", "futile.logger",
+    "lubridate", "geoflow"
   )
   
   load_required_package <- function(package) {

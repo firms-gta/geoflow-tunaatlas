@@ -362,17 +362,18 @@ config/
 └── catch_ird_level2_local.json
 
 compose/
-├── Dockerfile.workflow                         # workflow image (used by the CI and both Compose files)
+├── Dockerfile.workflow                         # workflow image (used by the CI and by compose.yml)
 ├── README.md                                   # how to run the full stack
 ├── Dockerfile.rstudio
-├── compose.bd.rstudio.newversiongeoflow.yml    # full stack: workflow + PostGIS + GeoServer + GeoNetwork
+├── compose.yml                                 # full stack: workflow + PostGIS + GeoServer + GeoNetwork
 ├── compose.ci.yml                              # CI override
 ├── patches/                                    # geoflow / geometa / zen4R patches
-├── run_workflow_retry.sh                       # test run on tests/sample_data
+├── run_workflow.sh                       # test run on tests/sample_data
 └── run_full_workflow.sh                        # complete run on the real data
 
 docker/
-└── Dockerfile.reporting                        # and other auxiliary images
+├── Dockerfile.reporting                        # workflow image + Pandoc/LaTeX, for the summaries
+└── Dockerfile.netcdf                           # NetCDF creation (docker_image_netcdf_creation_method.yml)
 ```
 
 The R launcher orchestrates execution, while the `geoflow` configurations remain the source of truth for the scientific processing definitions.

@@ -13,13 +13,13 @@ No local R installation is needed: everything runs in Docker.
 | I want to… | Use | Guide |
 | --- | --- | --- |
 | produce the datasets (no database, no publication) | `docker run` | [docs/RUNNING.md](docs/RUNNING.md) |
-| same, with shorter commands | `compose.workflow.yml` | [docs/DOCKER_COMPOSE.md](docs/DOCKER_COMPOSE.md) |
 | produce **and publish** (PostGIS, GeoServer, GeoNetwork, Zenodo), or run the test | `compose/` scripts | [compose/README.md](compose/README.md) |
 
 Other documentation:
 
 * [Advanced execution](docs/RUNNING_ADVANCED.md) — runtime parameters, data source modes, partial runs, existing jobs, reports, local builds
 * [Workflow architecture](docs/WORKFLOW.md) — processing stages, configurations and dependencies
+* [Incremental runs with {targets}](docs/TARGETS.md) — re-run only what changed, for development and debugging (RStudio)
 * [Validation](docs/VALIDATION.md) — technical and scientific validation procedures
 * [Continuous integration](docs/CI.md) — automated tests and published images
 * [Deployment](docs/DEPLOYMENT.md) — batch runs on SSP Cloud / Kubernetes
@@ -49,7 +49,7 @@ The archive is downloaded once and cached in `runtime/cache`; prepared data go t
 To run with the database and the publication services:
 
 ```bash
-./compose/run_workflow_retry.sh    # test on the sample data (same as the CI)
+./compose/run_workflow.sh    # test on the sample data (same as the CI)
 ./compose/run_full_workflow.sh     # full run on runtime/extracted/all_raw_data_GTA
 ```
 
@@ -77,10 +77,9 @@ geoflow-tunaatlas/
 ├── compose/              # workflow Dockerfile, full Compose stack, geoflow patches, launch scripts
 ├── config/               # geoflow workflow configurations
 ├── data/                 # static reference data
-├── docker/               # additional Docker images (reporting, NetCDF, …)
+├── docker/               # auxiliary images: reporting (summaries), NetCDF
 ├── docs/                 # documentation
 ├── tests/                # launcher checks and sample input data
-├── compose.workflow.yml  # workflow-only Compose file
 └── renv.lock
 ```
 
@@ -98,7 +97,7 @@ For an auditable run, keep the repository commit SHA, the image tag or digest, t
 
 ```bash
 Rscript tests/smoke_test_launcher.R   # launcher smoke tests (seconds, no Docker)
-./compose/run_workflow_retry.sh       # end-to-end test of the full stack on the sample data
+./compose/run_workflow.sh       # end-to-end test of the full stack on the sample data
 ```
 
 Both also run on GitHub Actions ([CI](docs/CI.md)). Scientific acceptance checks are in [Validation](docs/VALIDATION.md).

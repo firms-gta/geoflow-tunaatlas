@@ -18,8 +18,8 @@ published to the GitHub Container Registry (GHCR).
 2. **Prepare the runner**: write `docker_local.env.compose` and
    `zenodo_secrets.env`, create the output folders of the sample data, give the
    mounted folders to uid 1000 (the `rstudio` user of the image).
-3. **Run** `./compose/run_workflow_retry.sh` with
-   `GTA_STEPS=DB,rawdata,nominal,effort,level0,services`,
+3. **Run** `./compose/run_workflow.sh` with
+   `GTA_STEPS=DB,rawdata,nominal,effort,level0,level1,services`,
    `GTA_RUN_USER=1000:1000` and `GTA_MOUNT_CODE=false`, so the code inside the
    image is tested, not the checkout. With `CI=true`, the script adds
    `compose/compose.ci.yml` (smaller Elasticsearch heap).
@@ -69,7 +69,7 @@ affects reading.
 
 ```bash
 docker build -f compose/Dockerfile.workflow -t gta-workflow:local .
-CI=true GTA_IMAGE=gta-workflow:local GTA_MOUNT_CODE=false ./compose/run_workflow_retry.sh
+CI=true GTA_IMAGE=gta-workflow:local GTA_MOUNT_CODE=false ./compose/run_workflow.sh
 ```
 
 See [compose/README.md](../compose/README.md) for the scripts and their options.

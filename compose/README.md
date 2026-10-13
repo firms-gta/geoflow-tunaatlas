@@ -75,11 +75,11 @@ instead of the repository root.
 ## 2. Run the test
 
 ```bash
-./compose/run_workflow_retry.sh
+./compose/run_workflow.sh
 ```
 
 It starts PostGIS, GeoServer and GeoNetwork, then runs
-`DB,rawdata,nominal,level0,services` on the small sample in `tests/sample_data`
+`DB,rawdata,nominal,effort,level0,level1,services` (everything but level2) on the small sample in `tests/sample_data`
 (a few rows of each raw file, same file names). It ends with
 `Workflow terminé avec succès`.
 
@@ -132,7 +132,7 @@ Start the services without running the workflow (database, GeoServer,
 GeoNetwork, RStudio):
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --no-build
+docker compose -f compose/compose.yml up -d --no-build
 ```
 
 The workflow itself only runs through the scripts (`docker compose run workflow`):
@@ -141,7 +141,7 @@ it has the Compose profile `workflow`, so a plain `up` never launches it.
 Stop everything:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml down
+docker compose -f compose/compose.yml down
 ```
 
 Add `-v` to also delete the volumes (database, layers, records) and start from
@@ -170,8 +170,8 @@ explore, debug or run steps by hand.
 Start it with the image published by the CI (workflow image + RStudio Server):
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml pull rstudio
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --no-build rstudio
+docker compose -f compose/compose.yml pull rstudio
+docker compose -f compose/compose.yml up -d --no-build rstudio
 ```
 
 `--no-build` makes sure the published image is used: if it is missing, the
@@ -182,7 +182,7 @@ To build it locally instead (after changing `Dockerfile.rstudio`), on top of
 `GTA_IMAGE`:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --build rstudio
+docker compose -f compose/compose.yml up -d --build rstudio
 ```
 
 Open <http://127.0.0.1:18787>, log in as `rstudio` / `test`, then open the project
@@ -214,13 +214,10 @@ Outputs go to `runtime/jobs/`, exactly as with the scripts.
 
 Good to know:
 
-- If the session freezes on `*** recursive gc invocation`, restart R
-  (*Session → Restart R*) and run again: there is no automatic restart in
-  RStudio.
 - The port only listens on `127.0.0.1`. On a remote server, use an SSH tunnel:
   `ssh -L 18787:localhost:18787 <server>`.
 - Stop RStudio alone with
-  `docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml stop rstudio`.
+  `docker compose -f compose/compose.yml stop rstudio`.
 
 ## 7. Run the Shiny app on the database
 
@@ -231,7 +228,7 @@ Run the workflow first (step 2 or 3), so that the database contains the
 datasets. Then start the app:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml --profile app up -d shiny
+docker compose -f compose/compose.yml --profile app up -d shiny
 ```
 
 Open <http://127.0.0.1:13838>. In the app, choose the database source, select
@@ -273,16 +270,16 @@ defaults.
 | `GTA_DATA_DIR` | `tests/sample_data` / `runtime/extracted/all_raw_data_GTA` | Raw data folder on your machine |
 | `GTA_STEPS` | see above | Steps to run, e.g. `GTA_STEPS=services` (order does not matter) |
 | `GTA_MOUNT_CODE` | `false` | `false`: use the code inside the image (what the CI tests). `true`: use `R/` and `config/` of your checkout, to try a code change without rebuilding the image |
+| `GTA_MOUNT_DATA` | `false` | `true`: also use the files of `data/` of your checkout (code lists, parameters). Sub-folders are not mounted |
 | `GTA_COMPOSE_PROJECT` | *(none)* | Separate stack with its own containers and volumes, e.g. `gta-test` |
 | `GTA_RUN_USER` | your `uid:gid` | User inside the container (use `1000:1000` if your uid is not 1000) |
-| `GTA_GC_TIMEOUT` | `60` / `300` | Seconds to wait before restarting R when it hangs (see Troubleshooting) |
 
 Examples:
 
 ```bash
-GTA_STEPS=services ./compose/run_workflow_retry.sh            # only publish again
+GTA_STEPS=services ./compose/run_workflow.sh            # only publish again
 GTA_DATA_DIR=/data/gta ./compose/run_full_workflow.sh          # data stored elsewhere
-GTA_COMPOSE_PROJECT=gta-test ./compose/run_workflow_retry.sh   # do not touch your usual stack
+GTA_COMPOSE_PROJECT=gta-test ./compose/run_workflow.sh   # do not touch your usual stack
 ```
 
 A separate project (`gta-test`) uses the same host ports: stop one stack before
@@ -292,13 +289,13 @@ compose file needed, see [Ports](#ports)):
 ```bash
 GTA_COMPOSE_PROJECT=gta-test \
 GTA_PG_PORT=25430 GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 \
-./compose/run_workflow_retry.sh
+./compose/run_workflow.sh
 ```
 
 Remove it with its volumes:
 
 ```bash
-docker compose -p gta-test -f compose/compose.bd.rstudio.newversiongeoflow.yml down -v
+docker compose -p gta-test -f compose/compose.yml down -v
 ```
 
 ## Ports
@@ -324,13 +321,13 @@ To use other ports, set the variable for one run (it takes precedence over the
 file):
 
 ```bash
-GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 ./compose/run_workflow_retry.sh
+GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 ./compose/run_workflow.sh
 ```
 
 or edit `compose/.env` without committing it. Check the result with:
 
 ```bash
-docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml config | grep -B1 -A3 published
+docker compose -f compose/compose.yml config | grep -B1 -A3 published
 ```
 
 If a port is already taken, `docker compose` stops with
@@ -340,12 +337,12 @@ If a port is already taken, `docker compose` stops with
 
 | File | Role |
 | --- | --- |
-| `compose.bd.rstudio.newversiongeoflow.yml` | The stack (see services below) |
+| `compose.yml` | The stack (see services below) |
 | `compose.ci.yml` | Small override added automatically in CI (smaller Elasticsearch heap) |
 | `Dockerfile.workflow` | The workflow image: R 4.2.3, `renv.lock`, patched geoflow, FDI code lists, project code |
 | `Dockerfile.rstudio` | Builds a second image: the workflow image + RStudio Server, so RStudio has exactly the workflow environment |
-| `run_workflow_retry.sh` | Test run; restarts R if it hangs |
-| `run_full_workflow.sh` | Same script with full-run defaults |
+| `run_workflow.sh` | Runs the workflow in the stack; defaults to the test on the sample data (what the CI runs) |
+| `run_full_workflow.sh` | `run_workflow.sh` with full-run defaults (real data, all steps) |
 | `init-db/` | SQL run when the PostGIS volume is created: creates the GeoNetwork database |
 | `patches/` | Fixes for geoflow 1.3.0, geometa and zen4R |
 
@@ -377,8 +374,8 @@ Tables, layers and records live in Docker volumes and persist between runs.
 | Symptom | Fix |
 | --- | --- |
 | `Permission denied` / renv fails to install | Your uid is not 1000. Run `sudo chown -R 1000:1000 runtime tests/sample_data R config` and `export GTA_RUN_USER=1000:1000`. |
-| Output stuck on `*** recursive gc invocation` | Known intermittent R bug. The scripts restart the run automatically; a single isolated message is harmless. |
-| `container …-geonetwork-1 is unhealthy` | GeoNetwork is slow on first start. Run `docker compose -f compose/compose.bd.rstudio.newversiongeoflow.yml up -d --force-recreate geonetwork`, wait until healthy, then retry. |
+| Output stuck on `*** recursive gc invocation` | R bug fixed in the patched geoflow of `renv.lock`. If it comes back, check that the image uses that geoflow. |
+| `container …-geonetwork-1 is unhealthy` | GeoNetwork is slow on first start. Run `docker compose -f compose/compose.yml up -d --force-recreate geonetwork`, wait until healthy, then retry. |
 | `Failed to copy file to: …/dataoutputpreharmo/…` | The data folder is not writable. The scripts create `dataoutputpreharmo/` and `dataoutputGTA/` there. |
 | `URL using bad/illegal format or missing URL` (Zenodo) | `ZENODO_URL` is missing from `zenodo_secrets.env`. |
 | `133 per 1 minute` (Zenodo) | Zenodo rate limit. Wait a few minutes, then rerun with `GTA_STEPS=services`. |

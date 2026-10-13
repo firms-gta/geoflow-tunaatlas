@@ -1,0 +1,14 @@
+# compose/compose.test.yml
+services:
+  postgres:
+    ports: !override ["5431:5432"]
+  geoserver:
+    ports: !override ["8090:8080"]
+  geonetwork:
+    ports: !override ["8091:8080"]
+    
+#torunwith 
+# docker compose -p gta-test \
+#   -f compose/compose.bd.rstudio.newversiongeoflow.yml \
+#   -f compose/compose.test.yml \
+#   run --rm ...

@@ -33,3 +33,46 @@ if (requireNamespace("zen4R", quietly = TRUE)) {
     }
   })
 }
+# zen4R 0.10.6 : une erreur passagère de Zenodo (504 Gateway Timeout, 502, 503,
+# 429, coupure réseau) fait planter tout le workflow, car la page HTML d'erreur
+# est lue comme du JSON ("lexical error: invalid char in json text"). On
+# relance la requête quelques fois, avec une attente croissante, avant
+# d'abandonner. Attention : un POST qui a expiré côté passerelle a pu aboutir
+# côté Zenodo ; la relance peut alors créer un brouillon en double.
+if (requireNamespace("zen4R", quietly = TRUE)) {
+  local({
+    gen <- zen4R::ZenodoRequest
+    if (!isTRUE(attr(gen$public_methods$execute, "gta_retry"))) {
+      once <- gen$public_methods$execute
+      retry <- function() {
+        delays <- c(10, 30, 60, 120)
+        transient_status <- c(429, 500, 502, 503, 504)
+        transient_error <- "lexical error|Gateway|<html|[Tt]imeout|timed out|Could not resolve|Connection|SSL"
+        for (attempt in seq_len(length(delays) + 1)) {
+          err <- tryCatch({ self$execute_once(); NULL }, error = function(e) e)
+          status <- suppressWarnings(as.integer(private$status))
+          transient <- if (!is.null(err)) grepl(transient_error, conditionMessage(err))
+                       else isTRUE(status %in% transient_status)
+          if (!transient || attempt > length(delays)) {
+            if (!is.null(err)) stop(err)
+            return(invisible(NULL))
+          }
+          msg <- sprintf("Zenodo: transient error (%s), retry %d/%d in %ds",
+                         if (!is.null(err)) substr(conditionMessage(err), 1, 80) else paste("HTTP", status),
+                         attempt, length(delays), delays[attempt])
+          cli::cli_alert_warning(msg)
+          self$WARN(msg)
+          Sys.sleep(delays[attempt])
+        }
+      }
+      attr(retry, "gta_retry") <- TRUE
+      set <- function(name, fun) {
+        tryCatch(gen$set("public", name, fun, overwrite = TRUE),
+                 error = function(e) { gen$unlock(); gen$set("public", name, fun, overwrite = TRUE) })
+      }
+      set("execute_once", once)
+      set("execute", retry)
+      message("[patch] zen4R::ZenodoRequest$execute : relance sur erreur passagère")
+    }
+  })
+}

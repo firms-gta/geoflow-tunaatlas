@@ -47,7 +47,7 @@ effort, Level 0 and publication to GeoServer, GeoNetwork and sandbox Zenodo) on
 the small sample in `tests/sample_data`:
 
 ```bash
-./compose/run_workflow_retry.sh
+./compose/run_workflow.sh
 ```
 
 It runs on every push through GitHub Actions, on the image built from the

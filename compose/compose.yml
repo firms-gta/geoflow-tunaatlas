@@ -71,11 +71,13 @@ services:
       - ../R:/home/rstudio/geoflow-tunaatlas/R
       - ../config:/home/rstudio/geoflow-tunaatlas/config
       - ../compose:/home/rstudio/geoflow-tunaatlas/compose
+      - ../data:/home/rstudio/geoflow-tunaatlas/data
       - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
       - ../runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
       - ../runtime/cache:/cache
       - ../docker_local.env.compose:/home/rstudio/geoflow-tunaatlas/docker_local.env.compose:ro
       - ../zenodo_secrets.env:/home/rstudio/geoflow-tunaatlas/zenodo_secrets.env:ro
+      - ../renv.lock:/home/rstudio/geoflow-tunaatlas/renv.lock:ro
     depends_on:
       - postgres
       - geoserver

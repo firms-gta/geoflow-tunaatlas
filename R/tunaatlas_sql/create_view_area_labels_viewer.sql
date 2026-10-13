@@ -16,6 +16,17 @@ BEGIN
     CREATE MATERIALIZED VIEW IF NOT EXISTS area.erased_area_labels AS
         SELECT * FROM area.area_labels WHERE tablesource_area = 'areas_tuna_rfmos_task1';
 
+    -- Areas of the nominal catch datasets (ICCAT main areas, IOTC east/west,
+    -- convention areas...). The "code" column is the one get_fact_dataset_catch()
+    -- joins on, as for area.grid_area_labels.
+    DROP MATERIALIZED VIEW IF EXISTS area.nominal_area_labels;
+    CREATE MATERIALIZED VIEW area.nominal_area_labels AS
+        SELECT *, codesource_area::text AS code
+        FROM area.area_labels WHERE tablesource_area = 'areas_tuna_rfmos_task1';
+
+    CREATE INDEX IF NOT EXISTS nominal_area_labels_code_idx
+        ON area.nominal_area_labels (code);
+
     -- code column cast to text: required for join compatibility with
     -- get_fact_dataset_catch(), whose geographic_identifier is text.
     -- Without this cast, "code" would inherit the double precision type
