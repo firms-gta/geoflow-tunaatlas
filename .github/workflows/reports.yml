@@ -142,32 +142,50 @@ jobs:
           set -euo pipefail
           D=runtime/data
 
-          step() {
-            echo "::group::$1"
+          step() {   # step <GTA_STEPS> [extra docker run options...]
+            local steps="$1"; shift
+            echo "::group::$steps"
             docker run --rm \
               --user 1000:1000 \
               -v "$PWD/$D":"$PROJECT_DIR/data/GTA_2026" \
               -v "$PWD/runtime/jobs":"$PROJECT_DIR/jobs" \
-              -e GTA_STEPS="$1" \
+              -e GTA_STEPS="$steps" \
               -e GTA_DATA_SOURCE=volume_dir \
               -e GTA_DATA_PATH="$PROJECT_DIR/data/GTA_2026" \
               -e GTA_NO_DB=true \
               -e GTA_SUMMARISE_INVALID_RAW=false \
               -e GTA_BOOTSTRAP_RESTORE_RENV=false \
+              "$@" \
               "$IMAGE"
-            # Step snapshots used only by the summaries: not needed here
-            sudo find runtime/jobs -type d -name Markdown -prune -exec rm -rf {} +
             echo "::endgroup::"
-            echo "After $1:"; df -h / | tail -1; sudo du -sh "$D" runtime/jobs
+            echo "After $steps:"; df -h / | tail -1; sudo du -sh "$D" runtime/jobs
           }
 
-          step rawdata
-          step nominal
-          step effort
+          # Step snapshots (jobs/*/.../Markdown): only read by the summaries
+          prune_markdown() { sudo find runtime/jobs -type d -name Markdown -prune -exec rm -rf {} +; }
+
+          # Summaries (CWP.dataset) of one level, from its step snapshots; the
+          # HTML reports are kept in runtime/summaries/<level>/ for the site
+          summaries() {   # summaries <level0|level1|level2> <job suffix> <GTA_TUNAATLAS_* variable>
+            job=$(ls -d runtime/jobs/*"$2" | sort | tail -1)
+            step summaries -e "$3=jobs/$(basename "$job")"
+            mkdir -p "runtime/summaries/$1"
+            sudo find "$job" -name '*_report.html' -exec cp {} "runtime/summaries/$1/" \;
+            sudo chown -R "$(id -u):$(id -g)" runtime/summaries
+            ls -la "runtime/summaries/$1"
+            prune_markdown
+          }
+
+          step rawdata;  prune_markdown
+          step nominal;  prune_markdown
+          step effort;   prune_markdown
           step level0                                   # reads pre-harmonised catch and effort
+          summaries level0 level_0_catch_2026 GTA_TUNAATLAS_LEVEL0_CATCH
           step level2                                   # same + nominal
+          summaries level2 level_2_catch_2026 GTA_TUNAATLAS_LEVEL2_CATCH
           sudo rm -rf "$D"/dataoutputpreharmo                # nothing reads it any more
           step level1                                   # reads dataoutputGTA only
+          summaries level1 level_1_catch_2026 GTA_TUNAATLAS_LEVEL1_CATCH
 
           ls -la "$D"/dataoutputGTA
 
@@ -181,6 +199,15 @@ jobs:
         with:
           name: gta-final-datasets-${{ github.sha }}
           path: runtime/data/dataoutputGTA
+          retention-days: 14
+
+      - name: Keep the summaries
+        if: env.FROM_RUN == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: gta-summaries-${{ github.sha }}
+          path: runtime/summaries
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Keep the job logs
@@ -213,8 +240,8 @@ jobs:
           export LEVEL2=/gta/$(pick 'global_catch_ird_level2_*.csv')
           export EFFORT=/gta/$(pick 'global_effort_*.csv')
           echo "level0: $LEVEL0  level1: $LEVEL1  level2: $LEVEL2  effort: $EFFORT"
-          # The workflow image has no pandoc (it is only in the -rstudio image):
-          # install it in the throw-away container, then render as usual.
+          # pandoc is in the workflow image; older images do not have it, so it
+          # is installed in the throw-away container when missing.
           docker run --rm --user root \
             -v "$PWD/docs/reports":"$PROJECT_DIR/docs/reports" \
             -v "$PWD/runtime/data/dataoutputGTA":/gta:ro \
@@ -224,7 +251,7 @@ jobs:
             "$IMAGE" \
             bash -c '
               set -e
-              apt-get update -qq && apt-get install -y -qq --no-install-recommends pandoc >/dev/null
+              command -v pandoc >/dev/null || { apt-get update -qq && apt-get install -y -qq --no-install-recommends pandoc >/dev/null; }
               Rscript -e "
                 for (lv in 0:2) {
                   rmarkdown::render(\"docs/reports/summary_catch.Rmd\", output_dir = \"/site\",
@@ -241,6 +268,16 @@ jobs:
 
       - name: Build the index page
         run: |
+          # Summaries of this run (not available in reports-only mode)
+          summaries_html=""
+          if [[ -d runtime/summaries ]]; then
+            mkdir -p site/summaries
+            cp -r runtime/summaries/. site/summaries/
+            for f in $(cd site && find summaries -name '*.html' | sort); do
+              summaries_html+="<li><a href=\"$f\">$(basename "$(dirname "$f")"): $(basename "$f" .html)</a></li>"
+            done
+          fi
+          [[ -n "$summaries_html" ]] && summaries_html="<h2>Processing summaries (step by step)</h2><ul>$summaries_html</ul>"
           cat > site/index.html <<EOF
           <!doctype html>
           <html lang="en"><head><meta charset="utf-8">
@@ -254,6 +291,7 @@ jobs:
             <li><a href="summary_catch_level2.html">Catch dataset analysis (IRD Level 2)</a></li>
             <li><a href="summary_effort.html">Effort dataset analysis</a></li>
           </ul>
+          ${summaries_html}
           <p>Rendered on $(date -u +%Y-%m-%d) from commit
           <code>${GITHUB_SHA::7}</code> with image <code>${IMAGE}</code>,
           on the datasets produced by the complete workflow run of this commit.</p>
