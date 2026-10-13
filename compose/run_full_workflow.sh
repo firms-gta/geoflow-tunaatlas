@@ -3,22 +3,19 @@
 # compose/run_full_workflow.sh
 #
 # Lance le workflow GTA COMPLET sur les vraies données, dans la stack Docker
-# Compose (Postgres, GeoServer, GeoNetwork), avec relance automatique en cas de
-# blocage "recursive gc invocation".
+# Compose (Postgres, GeoServer, GeoNetwork).
 #
-# C'est une surcouche de compose/run_workflow_retry.sh : mêmes montages, même
-# détection du bug GC, seules les valeurs par défaut changent.
+# C'est une surcouche de compose/run_workflow.sh : mêmes montages, seules
+# les valeurs par défaut changent.
 #
 # Usage (depuis n'importe quel dossier) :
 #   ./compose/run_full_workflow.sh
 #   GTA_STEPS=level1,level2,services ./compose/run_full_workflow.sh
 #   GTA_COMPOSE_PROJECT=gta-full ./compose/run_full_workflow.sh   # stack isolée
 #
-# Variables (en plus de celles de run_workflow_retry.sh) :
+# Variables (en plus de celles de run_workflow.sh) :
 #   GTA_DATA_DIR   défaut : runtime/extracted/all_raw_data_GTA
 #   GTA_STEPS      défaut : DB,rawdata,effort,nominal,level0,level1,level2,services
-#   GTA_GC_TIMEOUT défaut : 300 (les étapes sur données complètes peuvent rester
-#                  longtemps silencieuses)
 #
 # ATTENTION : l'étape "services" publie sur GeoServer, GeoNetwork et Zenodo
 # selon docker_local.env.compose (RUN_ZENODO_T_F) et zenodo_secrets.env
@@ -30,7 +27,6 @@ cd "$(dirname "$0")/.."   # racine du dépôt
 
 export GTA_DATA_DIR="${GTA_DATA_DIR:-runtime/extracted/all_raw_data_GTA}"
 export GTA_STEPS="${GTA_STEPS:-DB,rawdata,effort,nominal,level0,level1,level2,services}"
-export GTA_GC_TIMEOUT="${GTA_GC_TIMEOUT:-300}"
 
 if [[ ! -d "$GTA_DATA_DIR" ]]; then
   cat >&2 <<EOF
@@ -47,4 +43,4 @@ if [[ ",$GTA_STEPS," == *",services,"* || ",$GTA_STEPS," == *",all,"* ]]; then
   echo ">>> Étape services incluse : publication Zenodo vers ${zenodo_url:-<ZENODO_URL non défini>}"
 fi
 
-exec ./compose/run_workflow_retry.sh
+exec ./compose/run_workflow.sh

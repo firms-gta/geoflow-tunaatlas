@@ -49,7 +49,7 @@ The archive is downloaded once and cached in `runtime/cache`; prepared data go t
 To run with the database and the publication services:
 
 ```bash
-./compose/run_workflow_retry.sh    # test on the sample data (same as the CI)
+./compose/run_workflow.sh    # test on the sample data (same as the CI)
 ./compose/run_full_workflow.sh     # full run on runtime/extracted/all_raw_data_GTA
 ```
 
@@ -97,7 +97,7 @@ For an auditable run, keep the repository commit SHA, the image tag or digest, t
 
 ```bash
 Rscript tests/smoke_test_launcher.R   # launcher smoke tests (seconds, no Docker)
-./compose/run_workflow_retry.sh       # end-to-end test of the full stack on the sample data
+./compose/run_workflow.sh       # end-to-end test of the full stack on the sample data
 ```
 
 Both also run on GitHub Actions ([CI](docs/CI.md)). Scientific acceptance checks are in [Validation](docs/VALIDATION.md).

@@ -58,13 +58,16 @@
         "yaml"
       ],
       "Suggests": [
+        "codetools",
+        "curl",
         "DT",
         "dygraphs",
         "fusen",
-        "qs",
+        "shiny",
         "testthat",
         "tinytex",
         "tmap",
+        "usethis",
         "xts"
       ],
       "VignetteBuilder": "knitr",
@@ -73,14 +76,12 @@
       "LazyData": "true",
       "Roxygen": "list(markdown = TRUE)",
       "Config/roxygen2/version": "8.1.0",
-      "Author": "Bastien Grasset [aut, cre] (<https://orcid.org/0000-0002-9946-1338>)",
-      "Maintainer": "Bastien Grasset <bastien.grasset@ird.fr>",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "bastienird",
       "RemoteRepo": "CWP.dataset",
-      "RemoteRef": "perf/enrich-io-grouping",
-      "RemoteSha": "63a043506310cb6ea03a40898610055390e514f5"
+      "RemoteRef": "dev",
+      "RemoteSha": "fcf74672f27f3cfb71b67e45db94e0442694ae4f"
     },
     "DBI": {
       "Package": "DBI",
@@ -2638,12 +2639,11 @@
       "BugReports": "https://github.com/r-geoflow/geoflow/issues",
       "LazyLoad": "yes",
       "RoxygenNote": "7.3.3",
-      "Author": "Emmanuel Blondel [aut, cre, cph] (<https://orcid.org/0000-0002-5870-5762>), Julien, Barde [aut] (<https://orcid.org/0000-0002-3519-6141>), Wilfried Heintz [aut] (<https://orcid.org/0000-0002-9244-9766>), Alexandre Bennici [ctb], Sylvain Poulain [ctb], Bastien Grasset [ctb], Mathias Rouan [ctb], Emilie Lerigoleur [ctb], Yvan Le Bras [ctb], Jeroen Ooms [ctb]",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "bastienird",
       "RemoteRepo": "geoflow",
-      "RemoteRef": "patch-gc-invocation",
+      "RemoteRef": "8fac5ac01427c492812a365ba5cc3af0d00b2949",
       "RemoteSha": "8fac5ac01427c492812a365ba5cc3af0d00b2949"
     },
     "geojsonsf": {

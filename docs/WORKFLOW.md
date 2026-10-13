@@ -368,7 +368,7 @@ compose/
 ├── compose.yml                                 # full stack: workflow + PostGIS + GeoServer + GeoNetwork
 ├── compose.ci.yml                              # CI override
 ├── patches/                                    # geoflow / geometa / zen4R patches
-├── run_workflow_retry.sh                       # test run on tests/sample_data
+├── run_workflow.sh                       # test run on tests/sample_data
 └── run_full_workflow.sh                        # complete run on the real data
 
 docker/

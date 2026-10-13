@@ -75,11 +75,11 @@ instead of the repository root.
 ## 2. Run the test
 
 ```bash
-./compose/run_workflow_retry.sh
+./compose/run_workflow.sh
 ```
 
 It starts PostGIS, GeoServer and GeoNetwork, then runs
-`DB,rawdata,nominal,level0,services` on the small sample in `tests/sample_data`
+`DB,rawdata,nominal,effort,level0,level1,services` (everything but level2) on the small sample in `tests/sample_data`
 (a few rows of each raw file, same file names). It ends with
 `Workflow terminé avec succès`.
 
@@ -214,9 +214,6 @@ Outputs go to `runtime/jobs/`, exactly as with the scripts.
 
 Good to know:
 
-- If the session freezes on `*** recursive gc invocation`, restart R
-  (*Session → Restart R*) and run again: there is no automatic restart in
-  RStudio.
 - The port only listens on `127.0.0.1`. On a remote server, use an SSH tunnel:
   `ssh -L 18787:localhost:18787 <server>`.
 - Stop RStudio alone with
@@ -276,14 +273,13 @@ defaults.
 | `GTA_MOUNT_DATA` | `false` | `true`: also use the files of `data/` of your checkout (code lists, parameters). Sub-folders are not mounted |
 | `GTA_COMPOSE_PROJECT` | *(none)* | Separate stack with its own containers and volumes, e.g. `gta-test` |
 | `GTA_RUN_USER` | your `uid:gid` | User inside the container (use `1000:1000` if your uid is not 1000) |
-| `GTA_GC_TIMEOUT` | `60` / `300` | Seconds to wait before restarting R when it hangs (see Troubleshooting) |
 
 Examples:
 
 ```bash
-GTA_STEPS=services ./compose/run_workflow_retry.sh            # only publish again
+GTA_STEPS=services ./compose/run_workflow.sh            # only publish again
 GTA_DATA_DIR=/data/gta ./compose/run_full_workflow.sh          # data stored elsewhere
-GTA_COMPOSE_PROJECT=gta-test ./compose/run_workflow_retry.sh   # do not touch your usual stack
+GTA_COMPOSE_PROJECT=gta-test ./compose/run_workflow.sh   # do not touch your usual stack
 ```
 
 A separate project (`gta-test`) uses the same host ports: stop one stack before
@@ -293,7 +289,7 @@ compose file needed, see [Ports](#ports)):
 ```bash
 GTA_COMPOSE_PROJECT=gta-test \
 GTA_PG_PORT=25430 GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 \
-./compose/run_workflow_retry.sh
+./compose/run_workflow.sh
 ```
 
 Remove it with its volumes:
@@ -325,7 +321,7 @@ To use other ports, set the variable for one run (it takes precedence over the
 file):
 
 ```bash
-GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 ./compose/run_workflow_retry.sh
+GTA_GEOSERVER_PORT=28080 GTA_GEONETWORK_PORT=28081 ./compose/run_workflow.sh
 ```
 
 or edit `compose/.env` without committing it. Check the result with:
@@ -345,8 +341,8 @@ If a port is already taken, `docker compose` stops with
 | `compose.ci.yml` | Small override added automatically in CI (smaller Elasticsearch heap) |
 | `Dockerfile.workflow` | The workflow image: R 4.2.3, `renv.lock`, patched geoflow, FDI code lists, project code |
 | `Dockerfile.rstudio` | Builds a second image: the workflow image + RStudio Server, so RStudio has exactly the workflow environment |
-| `run_workflow_retry.sh` | Test run; restarts R if it hangs |
-| `run_full_workflow.sh` | Same script with full-run defaults |
+| `run_workflow.sh` | Runs the workflow in the stack; defaults to the test on the sample data (what the CI runs) |
+| `run_full_workflow.sh` | `run_workflow.sh` with full-run defaults (real data, all steps) |
 | `init-db/` | SQL run when the PostGIS volume is created: creates the GeoNetwork database |
 | `patches/` | Fixes for geoflow 1.3.0, geometa and zen4R |
 
@@ -378,7 +374,7 @@ Tables, layers and records live in Docker volumes and persist between runs.
 | Symptom | Fix |
 | --- | --- |
 | `Permission denied` / renv fails to install | Your uid is not 1000. Run `sudo chown -R 1000:1000 runtime tests/sample_data R config` and `export GTA_RUN_USER=1000:1000`. |
-| Output stuck on `*** recursive gc invocation` | Known intermittent R bug. The scripts restart the run automatically; a single isolated message is harmless. |
+| Output stuck on `*** recursive gc invocation` | R bug fixed in the patched geoflow of `renv.lock`. If it comes back, check that the image uses that geoflow. |
 | `container …-geonetwork-1 is unhealthy` | GeoNetwork is slow on first start. Run `docker compose -f compose/compose.yml up -d --force-recreate geonetwork`, wait until healthy, then retry. |
 | `Failed to copy file to: …/dataoutputpreharmo/…` | The data folder is not writable. The scripts create `dataoutputpreharmo/` and `dataoutputGTA/` there. |
 | `URL using bad/illegal format or missing URL` (Zenodo) | `ZENODO_URL` is missing from `zenodo_secrets.env`. |
