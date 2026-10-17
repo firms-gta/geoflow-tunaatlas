@@ -130,7 +130,7 @@ ENV FDI_CODELISTS_REPO="https://github.com/bastienird/fdi-codelists.git"
 ENV FDI_CODELISTS_REF="8b9d530b76b64857a1e74246d6f4dfced3db9b34"
 ENV FDI_CODELISTS_DIR=${PROJECT_DIR}/data/fdi-codelists
 ENV FDI_MAPPINGS_REPO="https://github.com/bastienird/fdi-mappings.git"
-ENV FDI_MAPPINGS_REF="b2ead38f6a07474989532b261a343ac37611c3f1"
+ENV FDI_MAPPINGS_REF="c121ccf171f3f15ccb9673ca051f0a17b9668a50"
 ENV FDI_MAPPINGS_DIR=${PROJECT_DIR}/data/fdi-mappings
 
 RUN git clone ${FDI_CODELISTS_REPO} ${FDI_CODELISTS_DIR} \
