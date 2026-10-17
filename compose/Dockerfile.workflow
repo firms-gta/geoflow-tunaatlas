@@ -127,10 +127,10 @@ RUN chmod 644 /opt/patches/patch-geoflow-zenodo.R \
 
 # --- Ressources FDI ---
 ENV FDI_CODELISTS_REPO="https://github.com/bastienird/fdi-codelists.git"
-ENV FDI_CODELISTS_REF="f469d9767110c4ea947dbd356a3e4b79b9108d92"
+ENV FDI_CODELISTS_REF="8b9d530b76b64857a1e74246d6f4dfced3db9b34"
 ENV FDI_CODELISTS_DIR=${PROJECT_DIR}/data/fdi-codelists
-ENV FDI_MAPPINGS_REPO="https://github.com/fdiwg/fdi-mappings.git"
-ENV FDI_MAPPINGS_REF="c74ff137ebd28b0367172a8a73821a0d6"
+ENV FDI_MAPPINGS_REPO="https://github.com/bastienird/fdi-mappings.git"
+ENV FDI_MAPPINGS_REF="b2ead38f6a07474989532b261a343ac37611c3f1"
 ENV FDI_MAPPINGS_DIR=${PROJECT_DIR}/data/fdi-mappings
 
 RUN git clone ${FDI_CODELISTS_REPO} ${FDI_CODELISTS_DIR} \
