@@ -53,7 +53,7 @@ generation script is picked up automatically.
 Every step runs with `GTA_NO_DB=true`: the database software is removed from
 the configuration, nothing is uploaded, and the actions that need the database
 (`enrich_metadata`, `enrich_for_db_services`, `load_metadata`, and
-`create_geopackage` / `create_geoparquet` without a `grid_file` option) are
+`create_geoparquet` without a `grid_file` option) are
 switched off. Results therefore never depend on whether PostGIS was
 reachable, and deleting the database volume does not invalidate the cache.
 
@@ -140,8 +140,8 @@ tell {targets} anything: invalidate the matching step with
 * `summaries`, `reports` and `qa_rmd` are not part of the pipeline: use the
   classic launcher for them, pointing to the job directories given by
   `gta_tar_job()` (see §7–8 of [RUNNING_ADVANCED.md](RUNNING_ADVANCED.md)).
-* Without database, no GeoPackage or GeoParquet is produced unless a CWP grid
-  file is given with the `grid_file` option of those actions.
+* Without database, no GeoParquet is produced unless a CWP grid
+  file is given with the `grid_file` option of that action.
 
 ---
 

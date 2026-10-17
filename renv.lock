@@ -76,12 +76,14 @@
       "LazyData": "true",
       "Roxygen": "list(markdown = TRUE)",
       "Config/roxygen2/version": "8.1.0",
+      "Author": "Bastien Grasset [aut, cre] (<https://orcid.org/0000-0002-9946-1338>)",
+      "Maintainer": "Bastien Grasset <bastien.grasset@ird.fr>",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "bastienird",
       "RemoteRepo": "CWP.dataset",
-      "RemoteRef": "dev",
-      "RemoteSha": "fcf74672f27f3cfb71b67e45db94e0442694ae4f"
+      "RemoteRef": "master",
+      "RemoteSha": "8475be100a0cf14fe67793f6f415166eafa9a435"
     },
     "DBI": {
       "Package": "DBI",

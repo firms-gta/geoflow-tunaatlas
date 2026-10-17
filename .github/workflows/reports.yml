@@ -51,7 +51,7 @@ env:
 
 jobs:
   full-run-and-reports:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 355   # GitHub-hosted jobs stop at 6 h
     steps:
       - uses: actions/checkout@v4
@@ -164,15 +164,28 @@ jobs:
           # Step snapshots (jobs/*/.../Markdown): only read by the summaries
           prune_markdown() { sudo find runtime/jobs -type d -name Markdown -prune -exec rm -rf {} +; }
 
-          # Summaries (CWP.dataset) of one level, from its step snapshots; the
-          # HTML reports are kept in runtime/summaries/<level>/ for the site
+          # Summaries (CWP.dataset) of one level, from its step snapshots. Each
+          # entity gets a gitbook (folder <prefix>recappdf/ in its entity
+          # directory): it is copied to summaries/<level>/<entity>/, outside
+          # runtime/ (owned by the container user), with an index.html that
+          # opens its first page
           summaries() {   # summaries <level0|level1|level2> <job suffix> <GTA_TUNAATLAS_* variable>
+            local job book entity out first
             job=$(ls -d runtime/jobs/*"$2" | sort | tail -1)
             step summaries -e "$3=jobs/$(basename "$job")"
-            mkdir -p "runtime/summaries/$1"
-            sudo find "$job" -name '*_report.html' -exec cp {} "runtime/summaries/$1/" \;
-            sudo chown -R "$(id -u):$(id -g)" runtime/summaries
-            ls -la "runtime/summaries/$1"
+            while IFS= read -r book; do
+              entity=$(basename "$(dirname "$book")")
+              out="summaries/$1/$entity"
+              mkdir -p "$out"
+              sudo cp -r "$book"/. "$out"/
+              sudo chown -R "$(id -u):$(id -g)" "$out"
+              if [[ ! -e "$out/index.html" ]]; then
+                first=$(cd "$out" && ls summary-of-the-final-provided-data*.html 2>/dev/null | head -1 || true)
+                [[ -n "$first" ]] || first=$(cd "$out" && ls *.html 2>/dev/null | head -1 || true)
+                printf '<!doctype html><meta http-equiv="refresh" content="0; url=%s">\n' "$first" > "$out/index.html"
+              fi
+            done < <(sudo find "$job" -type d -name '*recappdf' -prune)
+            ls -la "summaries/$1" || echo "::warning::No summary produced for $1"
             prune_markdown
           }
 
@@ -206,7 +219,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gta-summaries-${{ github.sha }}
-          path: runtime/summaries
+          path: summaries
           if-no-files-found: warn
           retention-days: 14
 
@@ -270,11 +283,13 @@ jobs:
         run: |
           # Summaries of this run (not available in reports-only mode)
           summaries_html=""
-          if [[ -d runtime/summaries ]]; then
+          if [[ -d summaries ]]; then
             mkdir -p site/summaries
-            cp -r runtime/summaries/. site/summaries/
-            for f in $(cd site && find summaries -name '*.html' | sort); do
-              summaries_html+="<li><a href=\"$f\">$(basename "$(dirname "$f")"): $(basename "$f" .html)</a></li>"
+            cp -r summaries/. site/summaries/
+            # one link per gitbook: summaries/<level>/<entity>/index.html
+            for f in $(cd site && find summaries -mindepth 3 -maxdepth 3 -name index.html | sort); do
+              d=$(dirname "$f")
+              summaries_html+="<li><a href=\"$f\">$(basename "$(dirname "$d")"): $(basename "$d")</a></li>"
             done
           fi
           [[ -n "$summaries_html" ]] && summaries_html="<h2>Processing summaries (step by step)</h2><ul>$summaries_html</ul>"
@@ -308,7 +323,7 @@ jobs:
   # kept.
   deploy:
     needs: full-run-and-reports
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}

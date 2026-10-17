@@ -43,6 +43,19 @@ load_codelist <- function(action,entity, config){
       ignore.case = TRUE
     )
     
+    # Files written next to the data by geoflow are not the code list: e.g.
+    # <name>__geometry_issues.csv (rows with an invalid or empty geometry).
+    # Taking "the first CSV" picked that file whenever it sorted first, which
+    # depends on the locale.
+    csv_files <- csv_files[!grepl("__geometry_issues\\.csv$", csv_files)]
+    # The file named after the archive comes first (e.g. x.zip -> x.csv)
+    zip_base <- tools::file_path_sans_ext(basename(path_to_dataset))
+    by_name <- function(files) {
+      files[order(tools::file_path_sans_ext(basename(files)) != zip_base)]
+    }
+    shp_files <- by_name(shp_files)
+    csv_files <- by_name(csv_files)
+    
     if (length(shp_files) >= 1) {
       
       path_to_dataset <- shp_files[1]
@@ -115,7 +128,7 @@ load_codelist <- function(action,entity, config){
   dimension_name <- sub('\\..*', '', table_name)
   
   log_info(sprintf("Load codelist '%s' as table '%s'",codelist_pid, table_name))
-  ##log_info(sprintf("Load codelist from jobdir file '%s'", path_to_dataset))
+  log_info(sprintf("Load codelist from jobdir file '%s'", path_to_dataset))
   if (grepl("\\.shp$", path_to_dataset, ignore.case = TRUE)) {
     
     sf_data <- sf::st_read(
