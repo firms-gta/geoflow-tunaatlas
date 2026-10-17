@@ -1,16 +1,24 @@
 # Export of the Tuna Atlas database to GeoPackage
 # -----------------------------------------------------------------------------
-# The GeoPackage is a copy of the relational model: every table of every
-# schema (fact tables, dimensions, labels, source code lists, grids, metadata).
-# The materialized views of fact_tables (flat datasets) can be added on top.
+# Two contents, which can be combined:
+#   - the tables: a copy of the relational model, every table of every schema
+#     (fact tables, dimensions, labels, source code lists, grids, metadata);
+#   - the materialized views of fact_tables: the flat datasets, with geometry.
+# Plain views are never exported: they are queries on the tables, so their
+# content is already in the tables. The materialized views are redundant with
+# the tables too, which is why the two contents are kept in separate files.
 #
 # Arguments of export_gta_geopackage():
-#   identifiers   NULL  : the whole database
-#                 c(..) : fact tables and metadata restricted to these datasets
-#                         (all other tables are still copied entirely)
-#   include_views TRUE  : also export the materialized views of fact_tables
-#                         (only those of the listed datasets if identifiers
-#                         is given)
+#   identifiers    NULL  : the whole database
+#                  c(..) : fact tables, metadata and materialized views
+#                          restricted to these datasets (all other tables are
+#                          still copied entirely)
+#   include_tables TRUE  : export the tables
+#   include_views  TRUE  : export the materialized views of fact_tables; with
+#                          identifiers, every listed dataset must have one
+#   exclude_schemas        schemas whose tables are not exported (e.g.
+#                          "public": flat copies of the datasets made for the
+#                          services, redundant with the fact tables)
 #
 # Writing goes through GDAL (ogr2ogr) via sf::gdal_utils: data are streamed
 # from PostgreSQL to the file, without being loaded into R.
@@ -42,8 +50,12 @@ gta_dcmi_identifiers <- function(con) {
 }
 
 export_gta_geopackage <- function(con, dsn, out, identifiers = NULL,
-                                  include_views = TRUE) {
+                                  include_tables = TRUE, include_views = TRUE,
+                                  exclude_schemas = character(0)) {
   
+  if (!include_tables && !include_views) {
+    stop("export_gta_geopackage: nothing to export (include_tables and include_views are FALSE)")
+  }
   if (file.exists(out)) unlink(out)
   
   add_layer <- function(layer, sql, multipolygon = FALSE) {
@@ -77,7 +89,7 @@ export_gta_geopackage <- function(con, dsn, out, identifiers = NULL,
        AND table_schema NOT IN (%s)
        AND table_name <> 'spatial_ref_sys'
      ORDER BY 1, 2",
-    paste(sprintf("'%s'", GTA_EXCLUDED_SCHEMAS), collapse = ", ")))
+    paste(sprintf("'%s'", c(GTA_EXCLUDED_SCHEMAS, exclude_schemas)), collapse = ", ")))
   
   # Fact tables that can be filtered by dataset (they have an id_metadata column)
   fact_with_meta <- dbGetQuery(con,
@@ -93,7 +105,8 @@ export_gta_geopackage <- function(con, dsn, out, identifiers = NULL,
     if (!is.null(identifiers)) {
       missing <- setdiff(identifiers, views)
       if (length(missing) > 0)
-        warning("No materialized view for: ", paste(missing, collapse = ", "))
+        stop("export_gta_geopackage: no materialized view in fact_tables for: ",
+             paste(missing, collapse = ", "))
       views <- intersect(views, identifiers)
     }
     message("materialized views to export: ",
@@ -109,6 +122,7 @@ export_gta_geopackage <- function(con, dsn, out, identifiers = NULL,
                          paste(tables$table_schema, tables$table_name, sep = "_"),
                          tables$table_name)
   
+  if (!include_tables) tables <- tables[0, ]
   for (i in seq_len(nrow(tables))) {
     schema <- tables$table_schema[i]
     name <- tables$table_name[i]
@@ -151,14 +165,23 @@ onend_export_gta_geopackage <- function(config, software, software_config) {
   p <- config$software$output$dbi_config$parameters
   dsn <- gta_pg_dsn(p$host, p$port, p$dbname, p$user, p$password)
   
-  # 1) Whole database
-  export_gta_geopackage(con, dsn,
-                        file.path(config$job, "global_tuna_atlas_full.gpkg"))
+  # No export if the fact tables hold NULL values (see check_loaded_dataset.R)
+  source(here::here("R/tunaatlas_actions/check_loaded_dataset.R"))
+  gta_check_fact_nulls(con, mode = "error")
   
-  # 2) Only the datasets listed in metadata.metadata_dcmi
+  # 1) Whole database, tables only: no views, no materialized views, and not
+  #    the public schema (flat copies of the datasets made for the services)
+  export_gta_geopackage(con, dsn,
+                        file.path(config$job, "global_tuna_atlas_full.gpkg"),
+                        include_tables = TRUE, include_views = FALSE,
+                        exclude_schemas = "public")
+  
+  # 2) Final datasets only: one layer per dataset listed in
+  #    metadata.metadata_dcmi (its materialized view, flat, with geometry)
   export_gta_geopackage(con, dsn,
                         file.path(config$job, "global_tuna_atlas.gpkg"),
-                        identifiers = gta_dcmi_identifiers(con))
+                        identifiers = gta_dcmi_identifiers(con),
+                        include_tables = FALSE, include_views = TRUE)
   
   # geoflow executes the returned value as SQL: return a statement with no result set
   return("DO $$ BEGIN NULL; END $$;")
@@ -171,12 +194,13 @@ onend_export_gta_geopackage <- function(config, software, software_config) {
 #                  dbname = "gta", user = "gta", password = "gta")
 # dsn <- gta_pg_dsn("localhost", 15430, "gta", "gta", "gta")
 #
-# # Whole database, tables only (no materialized views)
+# # Whole database, tables only (no materialized views, no public schema)
 # export_gta_geopackage(con, dsn, "global_tuna_atlas_full.gpkg",
-#                       include_views = FALSE)
+#                       include_views = FALSE, exclude_schemas = "public")
 #
-# # Only the datasets listed in metadata.metadata_dcmi
+# # Final datasets only (materialized views of metadata.metadata_dcmi)
 # export_gta_geopackage(con, dsn, "global_tuna_atlas.gpkg",
-#                       identifiers = gta_dcmi_identifiers(con))
+#                       identifiers = gta_dcmi_identifiers(con),
+#                       include_tables = FALSE)
 #
 # dbDisconnect(con)
