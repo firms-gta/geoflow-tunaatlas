@@ -375,7 +375,7 @@ config/                                         # declarative configuration only
 ├── entities/                                   # geoflow entity tables (CSV)
 └── sql/                                        # database SQL scripts
 
-ongoing_projects/                               # exploratory analyses, not part of the workflow
+analyses/                                       # one-off exploratory analyses, not part of the workflow
 
 compose/
 ├── Dockerfile.workflow                         # workflow image (used by the CI and by compose.yml)

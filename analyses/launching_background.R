@@ -105,14 +105,14 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
                               source_authoritylist = c("CCSBT"))
 
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = c("YFT", "SKJ", "BET", "ALB", "SBF", "SWO"))
-source(("~/firms-gta/geoflow-tunaatlas/ongoing_projects/summarising_step2.R"))
+source(("~/firms-gta/geoflow-tunaatlas/analyses/summarising_step2.R"))
 summarising_step2(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                   config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                   source_authoritylist = c("all"), nameoutput = "majortunas")
 no_sbf <- setdiff(unique((qs::qread("~/firms-gta/geoflow-tunaatlas/jobs/20260311191047level_2_catch_2026/entities/global_catch_ird_level2_1950_2024/Markdown/rawdata/ancient.qs"))$species), "SBF")
 
 config$metadata$content$entities[[1]]$data$actions[[1]]$options$parameter_filtering <- list(species = no_sbf)
-source(("~/firms-gta/geoflow-tunaatlas/ongoing_projects/summarising_step2.R"))
+source(("~/firms-gta/geoflow-tunaatlas/analyses/summarising_step2.R"))
 summarising_step2(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                   config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                   source_authoritylist = c("all"), nameoutput = "noSBF")

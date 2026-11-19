@@ -949,7 +949,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       "reports / level2"
     )
     
-    source(here::here("ongoing_projects/plot_diffs_from_nominal_files.R"))
+    source(here::here("R/tunaatlas_scripts/checks/plot_diffs_from_nominal_files.R"))
     
     comparisons <- c(
       "sums_species.csv" = here::here(
@@ -994,7 +994,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       dpi = 300
     )
     
-    source(here::here("ongoing_projects/check_georef_vs_nominal_entity.R"))
+    source(here::here("R/tunaatlas_scripts/checks/check_georef_vs_nominal_entity.R"))
     
     level2_entity_paths <- list(
       paste0(tunaatlas_level2_catch_path, "/entities/global_catch_ird_level2_1950_2024")

@@ -817,7 +817,7 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
               
           }
           
-# We create the group of sharks for IATTC has there is no detail o -------- see ongoing_projects/analyse_BIL_Sharks.R for more details
+# We create the group of sharks for IATTC has there is no detail o -------- see analyses/analyse_BIL_Sharks.R for more details
           # Hardcoded ffrom data review detected by humans
           # En cas de non mapping, on regarde les strates ou il n'y pas dambiguite car par exemple un gear existe uniquement en georef et on fait un choix facile pour cette strate
           # (exemple mettre en 99.9), et on le code a la main. Pour le reste, on a le score qui calcule une probabilite de mapping avec une autre strate
