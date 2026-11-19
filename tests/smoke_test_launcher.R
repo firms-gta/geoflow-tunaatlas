@@ -6,7 +6,7 @@
 launcher_environment <- new.env(parent = globalenv())
 
 sys.source(
-  "R/launching_workflows/zenodo_helpers.R",
+  "config/geoflow/launchers/zenodo_helpers.R",
   envir = launcher_environment
 )
 
@@ -53,7 +53,7 @@ required_environment_variables <- c(
 )
 
 cli_text <- paste(
-  readLines("R/launching_workflows/run_gta_2026_workflow_cli.R", warn = FALSE),
+  readLines("config/geoflow/launchers/run_gta_2026_workflow_cli.R", warn = FALSE),
   collapse = "\n"
 )
 
@@ -66,4 +66,3 @@ stopifnot(all(vapply(
 )))
 
 message("Launcher smoke tests passed.")
-

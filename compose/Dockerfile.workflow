@@ -142,7 +142,7 @@ RUN git clone ${FDI_MAPPINGS_REPO} ${FDI_MAPPINGS_DIR} \
 # --- Code du projet (après la restauration : un changement de script n'invalide pas les couches renv)
 COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
 
-RUN cd ${PROJECT_DIR} && Rscript -e 'for (d in c("R/launching_workflows","R/tunaatlas_actions","R/tunaatlas_scripts/generation")) for (f in list.files(d, pattern="[.]R$", recursive=TRUE, full.names=TRUE)) parse(f)'
+RUN cd ${PROJECT_DIR} && Rscript -e 'for (d in c("config/geoflow/launchers","config/geoflow/actions","R/tunaatlas_scripts/generation")) for (f in list.files(d, pattern="[.]R$", recursive=TRUE, full.names=TRUE)) parse(f)'
 
 # --- Provenance ---
 RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
@@ -164,4 +164,4 @@ RUN chown -R rstudio:rstudio ${PROJECT_DIR}/data/fdi-codelists ${PROJECT_DIR}/da
  && chown rstudio:rstudio ${PROJECT_DIR}/RESOURCE_VERSIONS.json ${PROJECT_DIR}
 
 USER rstudio
-CMD ["Rscript", "R/launching_workflows/run_gta_2026_workflow_cli.R"]
+CMD ["Rscript", "config/geoflow/launchers/run_gta_2026_workflow_cli.R"]

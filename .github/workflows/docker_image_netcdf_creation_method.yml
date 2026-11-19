@@ -83,7 +83,7 @@ jobs:
           fi
 
           # Paths that should trigger a build
-          WATCH_1="R/create_netcdf/"
+          WATCH_1="(config/netcdf/|R/netcdf/)"
           WATCH_2=".github/workflows/createnetcdf.yml"
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
@@ -209,7 +209,7 @@ jobs:
     if: needs.changes.outputs.relevant != 'true'
     steps:
       - run: |
-          echo "No changes in R/create_netcdf/ or workflow file."
+          echo "No changes in config/netcdf/, R/netcdf/ or workflow file."
           echo "Diff was:"
           echo "${{ needs.changes.outputs.diff }}"
           

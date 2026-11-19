@@ -1,0 +1,127 @@
+---
+title: "Georef vs Nominal - Strata Comparison Report"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(flextable)
+library(htmltools)
+```
+
+# Summary
+
+```{r, results='asis'}
+make_summary_report <- function(res_tests) {
+  do.call(rbind, lapply(res_tests, function(x) {
+    test_name <- paste(x$dims, collapse = " + ")
+    if (!is.null(x$error)) {
+      return(data.frame(
+        test = test_name,
+        n_only_georef = NA,
+        n_only_nominal = NA,
+        diff = NA,
+        status = "ERROR"
+      ))
+    }
+    n_geo <- nrow(x$only_georef)
+    n_nom <- nrow(x$only_nominal)
+    data.frame(
+      test = test_name,
+      n_only_georef = n_geo,
+      n_only_nominal = n_nom,
+      diff = n_geo - n_nom,
+      status = ifelse(n_geo == 0 & n_nom == 0, "OK", "MISMATCH")
+    )
+  }))
+}
+
+ft_html <- function(x) {
+  flextable::htmltools_value(flextable::flextable(x))
+}
+
+print_one_test_report <- function(x) {
+  if (!is.null(x$error)) {
+    return(
+      htmltools::tagList(
+        htmltools::tags$h3("Error"),
+        ft_html(data.frame(error = x$error))
+      )
+    )
+  }
+  
+  htmltools::tagList(
+    htmltools::tags$h3("Counts"),
+    ft_html(data.frame(
+      metric = c("Only in georef", "Only in nominal"),
+      value = c(nrow(x$only_georef), nrow(x$only_nominal))
+    )),
+    
+    htmltools::tags$h3("Summary by source_authority - only in georef"),
+    ft_html(x$summary_only_georef),
+    
+    htmltools::tags$h3("Summary by source_authority - only in nominal"),
+    ft_html(x$summary_only_nominal),
+    
+    htmltools::tags$h3("Detailed rows - only in georef"),
+    ft_html(x$only_georef),
+    
+    htmltools::tags$h3("Detailed rows - only in nominal"),
+    ft_html(x$only_nominal)
+  )
+}
+
+report <- make_summary_report(res_tests)
+report <- report[order(-abs(report$diff)), ]
+htmltools::browsable(
+  htmltools::tagList(
+    htmltools::tags$h3("Global summary"),
+    ft_html(report)
+  )
+)
+```
+
+# Detailed results
+
+## Source_authority + fishing_fleet
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + fishing_fleet']]))
+```
+
+## Source_authority + gear_type
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + gear_type']]))
+```
+
+## Source_authority + species
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + species']]))
+```
+
+## Source_authority + geographic_identifier_nom
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + geographic_identifier_nom']]))
+```
+
+## Source_authority + year
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + year']]))
+```
+
+## Source_authority + fishing_mode
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + fishing_mode']]))
+```
+
+## Source_authority + group_species_iattc_sharks
+
+```{r}
+htmltools::browsable(print_one_test_report(res_tests[['source_authority + group_species_iattc_sharks']]))
+```

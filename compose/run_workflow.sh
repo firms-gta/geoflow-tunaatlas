@@ -123,7 +123,7 @@ docker rm -f "$NAME" >/dev/null 2>&1   # reste éventuel d'un run interrompu
   -e GTA_SUMMARISE_INVALID_RAW="${GTA_SUMMARISE_INVALID_RAW:-false}" \
   -e GTA_BOOTSTRAP_RESTORE_RENV=false \
   workflow \
-  Rscript R/launching_workflows/run_gta_2026_workflow_cli.R
+  Rscript config/geoflow/launchers/run_gta_2026_workflow_cli.R
 status=$?
 
 if [[ $status -eq 0 ]]; then

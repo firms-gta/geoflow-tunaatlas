@@ -65,7 +65,7 @@ The workflow can execute the full chain or selected stages.
 The main launcher code is located under:
 
 ```text
-R/launching_workflows/
+config/geoflow/launchers/
 ```
 
 The principal entry points are:
@@ -93,15 +93,15 @@ Each production stage is associated with one or more `geoflow` configurations.
 | Stage                     | `GTA_STEPS` selector | Main configuration                        | Purpose                                                               |
 | ------------------------- | -------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
 | Input validation          | automatic            | Pre-harmonisation configurations          | Verify required source files before long processing stages            |
-| Raw nominal catch         | `raw_nominal`        | `config/Nominal_catch_2026.json`          | Prepare source-specific nominal catch data                            |
-| Raw georeferenced catch   | `raw_georef`         | `config/All_raw_data_georef.json`         | Prepare source-specific spatial catch data                            |
-| Raw fishing effort        | `raw_effort`         | `config/All_raw_data_georef_effort.json`  | Prepare source-specific georeferenced fishing-effort data             |
+| Raw nominal catch         | `raw_nominal`        | `config/geoflow/workflows/Nominal_catch_2026.json`          | Prepare source-specific nominal catch data                            |
+| Raw georeferenced catch   | `raw_georef`         | `config/geoflow/workflows/All_raw_data_georef.json`         | Prepare source-specific spatial catch data                            |
+| Raw fishing effort        | `raw_effort`         | `config/geoflow/workflows/All_raw_data_georef_effort.json`  | Prepare source-specific georeferenced fishing-effort data             |
 | All raw branches          | `rawdata`            | Three configurations above                | Run the complete pre-harmonisation group                              |
-| Harmonised nominal catch  | `nominal`            | `config/create_nominal_dataset_2026.json` | Produce the harmonised nominal reference dataset                      |
-| Harmonised fishing effort | `effort`             | `config/create_effort_dataset_2026.json`  | Produce the harmonised fishing-effort dataset                         |
-| Catch Level 0             | `level0`             | `config/catch_ird_level0_local.json`      | Produce harmonised georeferenced catch before Level 1 transformations |
-| Catch Level 1             | `level1`             | `config/catch_ird_level1_local.json`      | Standardise measurement units and apply GTA Level 1 processing        |
-| Catch Level 2             | `level2`             | `config/catch_ird_level2_local.json`      | Raise georeferenced catch against nominal catch                       |
+| Harmonised nominal catch  | `nominal`            | `config/geoflow/workflows/create_nominal_dataset_2026.json` | Produce the harmonised nominal reference dataset                      |
+| Harmonised fishing effort | `effort`             | `config/geoflow/workflows/create_effort_dataset_2026.json`  | Produce the harmonised fishing-effort dataset                         |
+| Catch Level 0             | `level0`             | `config/geoflow/workflows/catch_ird_level0_local.json`      | Produce harmonised georeferenced catch before Level 1 transformations |
+| Catch Level 1             | `level1`             | `config/geoflow/workflows/catch_ird_level1_local.json`      | Standardise measurement units and apply GTA Level 1 processing        |
+| Catch Level 2             | `level2`             | `config/geoflow/workflows/catch_ird_level2_local.json`      | Raise georeferenced catch against nominal catch                       |
 | Summaries                 | `summaries`          | Product configurations / existing jobs    | Regenerate dataset summaries                                          |
 | Comparison reports        | `reports`            | Existing nominal and Level 2 jobs         | Compare Level 2 outputs with nominal catch                            |
 | QA documentation          | `qa_rmd`             | Existing raw jobs                         | Generate pre-harmonisation QA documentation                           |
@@ -188,7 +188,7 @@ The `effort` stage consumes the pre-harmonised effort branch and produces a harm
 Its processing logic is defined in:
 
 ```text
-config/create_effort_dataset_2026.json
+config/geoflow/workflows/create_effort_dataset_2026.json
 ```
 
 ## 9. Dependencies between stages
@@ -344,22 +344,38 @@ For an auditable production run, retain:
 
 ## 15. Repository components
 
-The main workflow-related repository components are:
+The repository separates the business logic (`R/`) from the way workflows are
+launched (`config/`):
 
 ```text
-R/
-├── launching_workflows/
-└── ...
+R/                                              # business logic only
+├── tunaatlas_scripts/
+│   ├── pre-harmonization/                      # one script per tRFMO dataset
+│   ├── generation/                             # level 0 / 1 / 2 and nominal creation
+│   └── tunaatlas_registers.R                   # geoflow dictionary registers
+├── sardara_functions/                          # shared harmonisation helpers
+└── netcdf/                                     # CWP grid -> raster mapping
 
-config/
-├── Nominal_catch_2026.json
-├── All_raw_data_georef.json
-├── All_raw_data_georef_effort.json
-├── create_nominal_dataset_2026.json
-├── create_effort_dataset_2026.json
-├── catch_ird_level0_local.json
-├── catch_ird_level1_local.json
-└── catch_ird_level2_local.json
+config/                                         # launching configuration
+├── geoflow/
+│   ├── workflows/                              # geoflow JSON configurations
+│   │   ├── Nominal_catch_2026.json
+│   │   ├── All_raw_data_georef.json
+│   │   ├── All_raw_data_georef_effort.json
+│   │   ├── create_nominal_dataset_2026.json
+│   │   ├── create_effort_dataset_2026.json
+│   │   ├── catch_ird_level0_local.json
+│   │   ├── catch_ird_level1_local.json
+│   │   └── catch_ird_level2_local.json
+│   ├── entities/                               # geoflow entity tables (CSV)
+│   ├── actions/                                # geoflow custom actions
+│   └── launchers/                              # R launchers (CLI, RStudio, {targets})
+├── postgis/                                    # database model creation
+│   ├── deploy_database_model.R
+│   └── sql/
+└── netcdf/                                     # NetCDF creation launchers
+
+ongoing_projects/                               # exploratory analyses, not part of the workflow
 
 compose/
 ├── Dockerfile.workflow                         # workflow image (used by the CI and by compose.yml)
@@ -373,7 +389,8 @@ compose/
 
 docker/
 ├── Dockerfile.reporting                        # workflow image + Pandoc/LaTeX, for the summaries
-└── Dockerfile.netcdf                           # NetCDF creation (docker_image_netcdf_creation_method.yml)
+├── Dockerfile.netcdf                           # NetCDF creation (docker_image_netcdf_creation_method.yml)
+└── scripts/                                    # image helpers (package checks, FDI cache, entrypoint)
 ```
 
 The R launcher orchestrates execution, while the `geoflow` configurations remain the source of truth for the scientific processing definitions.
