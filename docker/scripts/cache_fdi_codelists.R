@@ -7,7 +7,7 @@ cache_fdi_codelists <- function(
     "FDI_CODELISTS_REF",
     "b02ecc63edcf820f1719c0fc3200b5b177518bc4"
   ),
-  config_file = "config/geoflow/entities/geoflow_entities_tuna_codelists.csv",
+  config_file = "config/entities/geoflow_entities_tuna_codelists.csv",
   data_dir = "data"
 ) {
 

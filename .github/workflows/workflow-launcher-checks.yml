@@ -3,7 +3,7 @@ name: Workflow launcher checks
 on:
   pull_request:
     paths:
-      - "config/geoflow/launchers/**"
+      - "workflow/launchers/**"
       - "compose/Dockerfile.workflow"
       - ".Rprofile"
       - "tests/smoke_test_launcher.R"
@@ -30,8 +30,8 @@ jobs:
       - name: Parse launcher scripts
         shell: Rscript {0}
         run: |
-          parse("config/geoflow/launchers/GTA_2026_creation.R")
-          parse("config/geoflow/launchers/run_gta_2026_workflow_cli.R")
+          parse("workflow/launchers/GTA_2026_creation.R")
+          parse("workflow/launchers/run_gta_2026_workflow_cli.R")
 
       - name: Run launcher smoke tests
         run: Rscript tests/smoke_test_launcher.R

@@ -200,7 +200,7 @@ What RStudio sees:
 Run the workflow from the R console:
 
 ```r
-source("config/geoflow/launchers/GTA_2026_creation.R")
+source("workflow/launchers/GTA_2026_creation.R")
 
 run_gta_workflow(
   steps_to_run = c("rawdata", "nominal"),   # any steps, e.g. c("services")

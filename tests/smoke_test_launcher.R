@@ -6,7 +6,7 @@
 launcher_environment <- new.env(parent = globalenv())
 
 sys.source(
-  "config/geoflow/launchers/zenodo_helpers.R",
+  "workflow/launchers/zenodo_helpers.R",
   envir = launcher_environment
 )
 
@@ -53,7 +53,7 @@ required_environment_variables <- c(
 )
 
 cli_text <- paste(
-  readLines("config/geoflow/launchers/run_gta_2026_workflow_cli.R", warn = FALSE),
+  readLines("workflow/launchers/run_gta_2026_workflow_cli.R", warn = FALSE),
   collapse = "\n"
 )
 

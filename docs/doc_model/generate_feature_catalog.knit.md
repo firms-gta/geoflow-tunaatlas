@@ -309,7 +309,7 @@ The implementation of previous conceptual model for the facts leads to the physi
 
 Depending on the number of datasets loaded and their related codifications, the number of tables in each dimension schema can increase (see explantations in section XX).
 
-The SQL code of the physical model is made available on [github repository](https://github.com/eblondel/geoflow-tunaatlas/tree/master/config/postgis/sql).
+The SQL code of the physical model is made available on [github repository](https://github.com/eblondel/geoflow-tunaatlas/tree/master/config/sql).
 
 
 # Implementation : the Tuna Atlas use case
@@ -392,7 +392,7 @@ Interoperabiliy enables multiple users to access the data with a lot of clients 
 <!-- https://docs.oracle.com/cd/B13789_01/olap.101/b10333/multimodel.htm -->
 Web:
 
-* Tuna Atlas workflow [github repository](https://github.com/eblondel/geoflow-tunaatlas/tree/master/config/postgis/sql)
+* Tuna Atlas workflow [github repository](https://github.com/eblondel/geoflow-tunaatlas/tree/master/config/sql)
 * Tuna Atlas workflow [FIRMS and Blue Cloud Work plan](https://docs.google.com/document/d/172LnJQ62J8lj0TtnAxdjeAPmoNg1apkhzkxFeva2RcY/edit?usp=sharing)
 
 Reports / data papers: 

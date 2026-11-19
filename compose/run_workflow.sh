@@ -19,7 +19,7 @@
 #   GTA_STEPS            étapes du workflow                (défaut : DB,rawdata,nominal,effort,level0,level1,services)
 #   GTA_COMPOSE_PROJECT  nom de projet compose, pour isoler la stack (conteneurs + volumes)
 #   GTA_RUN_USER         uid:gid du conteneur              (défaut : utilisateur courant ; CI : 1000:1000)
-#   GTA_MOUNT_CODE       false : code de l'image ; true : monte R/ et config/ du dépôt,
+#   GTA_MOUNT_CODE       false : code de l'image ; true : monte R/, config/ et workflow/ du dépôt,
 #                        pour tester une modification sans reconstruire l'image (défaut : false)
 #   GTA_MOUNT_DATA       true : monte aussi les fichiers de data/ du dépôt (défaut : false)
 # =============================================================================
@@ -55,8 +55,8 @@ if [[ -z "${GTA_DATA_DIR:-}" && ! -d tests/sample_data ]]; then
 fi
 
 # Code : celui de l'image par défaut ; celui du dépôt avec GTA_MOUNT_CODE=true.
-if [[ "$MOUNT_CODE" == "true" && ! ( -d R && -d config ) ]]; then
-  echo ">>> GTA_MOUNT_CODE=true mais R/ ou config/ est absent" >&2
+if [[ "$MOUNT_CODE" == "true" && ! ( -d R && -d config && -d workflow ) ]]; then
+  echo ">>> GTA_MOUNT_CODE=true mais R/, config/ ou workflow/ est absent" >&2
   exit 2
 fi
 
@@ -82,6 +82,7 @@ if [[ "$MOUNT_CODE" == "true" ]]; then
   CODE_MOUNTS=(
     -v "$PWD/R":"$CONTAINER_ROOT/R"
     -v "$PWD/config":"$CONTAINER_ROOT/config"
+    -v "$PWD/workflow":"$CONTAINER_ROOT/workflow"
   )
 fi
 
@@ -123,7 +124,7 @@ docker rm -f "$NAME" >/dev/null 2>&1   # reste éventuel d'un run interrompu
   -e GTA_SUMMARISE_INVALID_RAW="${GTA_SUMMARISE_INVALID_RAW:-false}" \
   -e GTA_BOOTSTRAP_RESTORE_RENV=false \
   workflow \
-  Rscript config/geoflow/launchers/run_gta_2026_workflow_cli.R
+  Rscript workflow/launchers/run_gta_2026_workflow_cli.R
 status=$?
 
 if [[ $status -eq 0 ]]; then

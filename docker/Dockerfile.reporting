@@ -78,4 +78,4 @@ USER rstudio
 
 WORKDIR ${PROJECT_DIR}
 
-CMD ["Rscript", "config/geoflow/launchers/run_gta_2026_workflow_cli.R"]
+CMD ["Rscript", "workflow/launchers/run_gta_2026_workflow_cli.R"]

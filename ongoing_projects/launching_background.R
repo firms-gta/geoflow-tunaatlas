@@ -54,8 +54,8 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")
-source(here::here("config/geoflow/launchers/running_time_of_workflow.R"))
-source(here::here("config/geoflow/launchers/executeAndRename.R"))
+source(here::here("workflow/launchers/running_time_of_workflow.R"))
+source(here::here("workflow/launchers/executeAndRename.R"))
 setwd("~/firms-gta/geoflow-tunaatlas/")
 require(here)
 patch_geoflow_getJobDataResource <- function() {
@@ -75,11 +75,11 @@ patch_geoflow_getJobDataResource <- function() {
 
 patch_geoflow_getJobDataResource()
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/workflows/catch_ird_level2_local.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/catch_ird_level2_local.json")) # FROM DRIVE
 #tobeaddedlaterindata,./data/GTA_2026/dataoutputpreharmo/catch_iotc_level0.csv and ./data/GTA_2026/dataoutputpreharmo/catch_iccat_level0.csv,
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2026")
 gc()
-config <- initWorkflow(here::here("config/geoflow/workflows/catch_ird_level2_local.json"))
+config <- initWorkflow(here::here("config/geoflow/catch_ird_level2_local.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 gc()

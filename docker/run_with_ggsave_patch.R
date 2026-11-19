@@ -25,4 +25,4 @@ trace(
   print = FALSE
 )
 
-source("config/geoflow/launchers/run_gta_2026_workflow_cli.R")
+source("workflow/launchers/run_gta_2026_workflow_cli.R")

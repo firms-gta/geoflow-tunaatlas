@@ -70,6 +70,7 @@ services:
     volumes:
       - ../R:/home/rstudio/geoflow-tunaatlas/R
       - ../config:/home/rstudio/geoflow-tunaatlas/config
+      - ../workflow:/home/rstudio/geoflow-tunaatlas/workflow
       - ../compose:/home/rstudio/geoflow-tunaatlas/compose
       - ../data:/home/rstudio/geoflow-tunaatlas/data
       - ../runtime/extracted/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026

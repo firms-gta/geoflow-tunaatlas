@@ -31,20 +31,20 @@ RUN curl -L 'https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal
 # added later, here not to invalidated the cache
 RUN R -e "install.packages(c('plyr','chron'), repos='https://cloud.r-project.org')"
 
-COPY config/netcdf ./config/netcdf
+COPY workflow/netcdf ./workflow/netcdf
 COPY R/netcdf ./R/netcdf
 
 RUN Rscript ./R/netcdf/mapping_cwp_to_raster.R
 
 RUN mkdir -p /workspace/outputs
 
-COPY ./config/netcdf/run.sh /workspace/run.sh
+COPY ./workflow/netcdf/run.sh /workspace/run.sh
 RUN chmod +x /workspace/run.sh
 
 ENTRYPOINT ["/workspace/run.sh"]
 CMD ["bash"]
 
-# Rscript ./config/netcdf/launching_netcdf_creation.R \
+# Rscript ./workflow/netcdf/launching_netcdf_creation.R \
 #  --path outputs \
 #  --name majortunasall \
 #  --dimensions species_label,gear_type_label,fishing_fleet_label \
