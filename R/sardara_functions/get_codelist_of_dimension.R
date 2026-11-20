@@ -1,6 +1,6 @@
 get_codelist_of_dimension <- function (con, dataset_metadata, dimension_name) 
 {
-  db_dimensions_parameters<-read.csv("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/data/db_dimensions_parameters.csv",stringsAsFactors = F,strip.white=TRUE)
+  db_dimensions_parameters<-read.csv(here::here("data/db_dimensions_parameters.csv"),stringsAsFactors = F,strip.white=TRUE)
   
   db_dimensions_parameters <- db_dimensions_parameters %>% 
     filter(dimension == dimension_name)
