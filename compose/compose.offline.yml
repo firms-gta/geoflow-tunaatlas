@@ -1,0 +1,16 @@
+# =============================================================================
+# compose/compose.offline.yml
+#
+# Override appliqué EN PLUS de compose.yml pour lancer le workflow SANS INTERNET
+# (ajouté par compose/run_workflow.sh quand GTA_OFFLINE=true).
+#
+# Le réseau de la stack devient "internal" : les conteneurs (workflow, Postgres,
+# GeoServer, GeoNetwork) se parlent entre eux, mais rien ne sort vers internet.
+# Tout appel réseau oublié dans le code fait donc échouer le run.
+#
+# Les images doivent déjà être présentes en local (docker pull ou build avant).
+# Les ports publiés sur l'hôte ne sont pas joignables dans ce mode.
+# =============================================================================
+networks:
+  default:
+    internal: true

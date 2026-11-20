@@ -22,6 +22,9 @@
 #   GTA_MOUNT_CODE       false : code de l'image ; true : monte R/, config/ et workflow/ du dépôt,
 #                        pour tester une modification sans reconstruire l'image (défaut : false)
 #   GTA_MOUNT_DATA       true : monte aussi les fichiers de data/ du dépôt (défaut : false)
+#   GTA_OFFLINE          true : stack sans accès à internet (compose/compose.offline.yml),
+#                        pour vérifier que le workflow n'a besoin que de l'image et des données
+#                        (défaut : false)
 # =============================================================================
 set -uo pipefail
 cd "$(dirname "$0")/.."   # racine du dépôt
@@ -32,6 +35,7 @@ PROJECT="${GTA_COMPOSE_PROJECT:-}"
 RUN_USER="${GTA_RUN_USER:-$(id -u):$(id -g)}"
 MOUNT_CODE="${GTA_MOUNT_CODE:-false}"
 MOUNT_DATA="${GTA_MOUNT_DATA:-false}"
+OFFLINE="${GTA_OFFLINE:-false}"
 
 NAME="${PROJECT:-gta}-workflow-run"
 CONTAINER_ROOT=/home/rstudio/geoflow-tunaatlas
@@ -76,6 +80,7 @@ COMPOSE=(docker compose)
 [[ -n "$PROJECT" ]] && COMPOSE+=(-p "$PROJECT")
 COMPOSE+=(-f compose/compose.yml)
 [[ -n "${CI:-}" ]] && COMPOSE+=(-f compose/compose.ci.yml)
+[[ "$OFFLINE" == "true" ]] && COMPOSE+=(-f compose/compose.offline.yml)
 
 CODE_MOUNTS=()
 if [[ "$MOUNT_CODE" == "true" ]]; then
@@ -106,7 +111,7 @@ mkdir -p "$DATA_DIR/dataoutputpreharmo" "$DATA_DIR/dataoutputGTA"
 
 echo ">>> Données : $DATA_DIR"
 echo ">>> Étapes  : $STEPS"
-echo ">>> Projet  : ${PROJECT:-(défaut)} | utilisateur : $RUN_USER | code monté : $MOUNT_CODE | data/ monté : $MOUNT_DATA"
+echo ">>> Projet  : ${PROJECT:-(défaut)} | utilisateur : $RUN_USER | code monté : $MOUNT_CODE | data/ monté : $MOUNT_DATA | hors ligne : $OFFLINE"
 
 docker rm -f "$NAME" >/dev/null 2>&1   # reste éventuel d'un run interrompu
 
