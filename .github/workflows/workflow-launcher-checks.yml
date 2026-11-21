@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "workflow/launchers/**"
-      - "compose/Dockerfile.workflow"
+      - "Dockerfile"
       - ".Rprofile"
       - "tests/smoke_test_launcher.R"
       - ".github/workflows/workflow-launcher-checks.yml"
@@ -38,11 +38,11 @@ jobs:
 
       - name: Check workflow Dockerfile
         run: |
-          F=compose/Dockerfile.workflow
+          F=Dockerfile
           grep -q 'ENV PROJECT_DIR=/home/rstudio/geoflow-tunaatlas' "$F"
-          # patches geoflow 1.3.0 indispensables à la publication (GeoServer, Zenodo)
+          # geoflow 1.3.0 patches needed for the publication (GeoServer, Zenodo)
           grep -qF 's/c("Postgres","PostreSQL")/c("Postgres","PostgreSQL")/g' "$F"
           grep -q 'patch-geoflow-zenodo.R' "$F"
           grep -q 'patch-geoflow-zenodo-size' "$F"
-          # le correctif geometa doit être rechargé à chaque session
-          grep -q 'compose/patches/patch-geometa.R' .Rprofile
+          # the geometa fix must be reloaded in every session
+          grep -q 'docker/patches/patch-geometa.R' .Rprofile
