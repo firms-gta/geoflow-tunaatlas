@@ -25,6 +25,13 @@ services:
     # by name (`docker compose run workflow`, which the scripts do).
     profiles: ["workflow"]
     env_file: .env
+    # Fixed by the layout of the container (not settings, so not in .env);
+    # the steps are chosen by docker/*.sh (GTA_STEPS)
+    environment: &gta-run-env
+      GTA_DATA_SOURCE: volume_dir
+      GTA_DATA_PATH: /home/rstudio/geoflow-tunaatlas/data/GTA_2026
+      GTA_SUMMARISE_INVALID_RAW: "false"
+      GTA_BOOTSTRAP_RESTORE_RENV: "false"
     volumes:
       - ${GTA_DATA_DIR:?set GTA_DATA_DIR in .env}:/home/rstudio/geoflow-tunaatlas/data/GTA_2026
       - ./runtime/jobs:/home/rstudio/geoflow-tunaatlas/jobs
@@ -48,6 +55,7 @@ services:
       - "127.0.0.1:${GTA_RSTUDIO_PORT:?set GTA_RSTUDIO_PORT in .env}:8787"
     env_file: .env
     environment:
+      <<: *gta-run-env
       PASSWORD: ${RSTUDIO_PASSWORD:?set RSTUDIO_PASSWORD in .env}
       USERID: 1000
       GROUPID: 1000
