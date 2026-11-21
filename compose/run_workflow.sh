@@ -2,32 +2,32 @@
 # =============================================================================
 # compose/run_workflow.sh
 #
-# Lance le workflow GTA dans la stack Docker Compose (Postgres, GeoServer,
-# GeoNetwork) : prépare les montages, l'utilisateur et les fichiers
-# d'environnement, puis un seul "docker compose run workflow".
+# Runs the GTA workflow in the Docker Compose stack (Postgres, GeoServer,
+# GeoNetwork): prepares the mounts, the user and the environment files, then
+# runs a single "docker compose run workflow".
 #
-# Par défaut : run de TEST sur l'échantillon tests/sample_data.
-# Pour le workflow complet sur les vraies données : compose/run_full_workflow.sh
+# Default: TEST run on the tests/sample_data sample.
+# For the full workflow on the real data: compose/run_full_workflow.sh
 #
-# Usage (depuis n'importe quel dossier) :
+# Usage (from any folder):
 #   ./compose/run_workflow.sh
 #   GTA_STEPS=rawdata,nominal ./compose/run_workflow.sh
-#   GTA_DATA_DIR=/chemin/vers/donnees ./compose/run_workflow.sh
+#   GTA_DATA_DIR=/path/to/data ./compose/run_workflow.sh
 #
-# Variables (toutes facultatives) :
-#   GTA_DATA_DIR         dossier de données sur l'hôte     (défaut : tests/sample_data)
-#   GTA_STEPS            étapes du workflow                (défaut : DB,rawdata,nominal,effort,level0,level1,services)
-#   GTA_COMPOSE_PROJECT  nom de projet compose, pour isoler la stack (conteneurs + volumes)
-#   GTA_RUN_USER         uid:gid du conteneur              (défaut : utilisateur courant ; CI : 1000:1000)
-#   GTA_MOUNT_CODE       false : code de l'image ; true : monte R/, config/ et workflow/ du dépôt,
-#                        pour tester une modification sans reconstruire l'image (défaut : false)
-#   GTA_MOUNT_DATA       true : monte aussi les fichiers de data/ du dépôt (défaut : false)
-#   GTA_OFFLINE          true : stack sans accès à internet (compose/compose.offline.yml),
-#                        pour vérifier que le workflow n'a besoin que de l'image et des données
-#                        (défaut : false)
+# Variables (all optional):
+#   GTA_DATA_DIR         data folder on the host           (default: tests/sample_data)
+#   GTA_STEPS            workflow steps                    (default: DB,rawdata,nominal,effort,level0,level1,services)
+#   GTA_COMPOSE_PROJECT  compose project name, to isolate the stack (containers + volumes)
+#   GTA_RUN_USER         container uid:gid                 (default: current user; CI: 1000:1000)
+#   GTA_MOUNT_CODE       false: code of the image; true: mounts R/, config/ and workflow/ from the
+#                        repository, to test a change without rebuilding the image (default: false)
+#   GTA_MOUNT_DATA       true: also mounts the files of data/ from the repository (default: false)
+#   GTA_OFFLINE          true: stack without internet access (compose/compose.offline.yml),
+#                        to check that the workflow only needs the image and the data
+#                        (default: false)
 # =============================================================================
 set -uo pipefail
-cd "$(dirname "$0")/.."   # racine du dépôt
+cd "$(dirname "$0")/.."   # repository root
 
 DATA_DIR="${GTA_DATA_DIR:-tests/sample_data}"
 STEPS="${GTA_STEPS:-DB,rawdata,nominal,effort,level0,level1,services}"
@@ -41,16 +41,16 @@ NAME="${PROJECT:-gta}-workflow-run"
 CONTAINER_ROOT=/home/rstudio/geoflow-tunaatlas
 CONTAINER_DATA="$CONTAINER_ROOT/data/GTA_2026"
 
-# --- Fichiers manquants : on les prend dans l'image ---------------------------
-# Permet de lancer la stack sans cloner le dépôt, en n'ayant copié que le
-# dossier compose/ (voir compose/README.md, "Without cloning the repository").
+# --- Missing files: taken from the image ----------------------------------------
+# Lets the stack run without cloning the repository, with only the compose/
+# folder copied (see compose/README.md, "Without cloning the repository").
 COMPOSE_FILE_PATH=compose/compose.yml
 IMAGE="${GTA_IMAGE:-$(sed -n 's/.*image: \${GTA_IMAGE:-\([^}]*\)}.*/\1/p' "$COMPOSE_FILE_PATH" | head -1)}"
 
-copy_from_image() {   # copy_from_image <chemin relatif à la racine du dépôt>
-  echo ">>> $1 absent : copie depuis l'image $IMAGE"
+copy_from_image() {   # copy_from_image <path relative to the repository root>
+  echo ">>> $1 missing: copying it from image $IMAGE"
   docker run --rm --entrypoint tar "$IMAGE" -C "$CONTAINER_ROOT" -c "$1" | tar -x \
-    || { echo ">>> Impossible de copier $1 depuis l'image $IMAGE" >&2; exit 2; }
+    || { echo ">>> Could not copy $1 from image $IMAGE" >&2; exit 2; }
 }
 
 [[ -e docker_local.env.compose ]] || copy_from_image docker_local.env.compose
@@ -58,24 +58,24 @@ if [[ -z "${GTA_DATA_DIR:-}" && ! -d tests/sample_data ]]; then
   copy_from_image tests/sample_data
 fi
 
-# Code : celui de l'image par défaut ; celui du dépôt avec GTA_MOUNT_CODE=true.
+# Code: the image's by default; the repository's with GTA_MOUNT_CODE=true.
 if [[ "$MOUNT_CODE" == "true" && ! ( -d R && -d config && -d workflow ) ]]; then
-  echo ">>> GTA_MOUNT_CODE=true mais R/, config/ ou workflow/ est absent" >&2
+  echo ">>> GTA_MOUNT_CODE=true but R/, config/ or workflow/ is missing" >&2
   exit 2
 fi
 
-# --- Chemins absolus (docker n'accepte que des chemins absolus pour -v) ------
+# --- Absolute paths (docker -v only accepts absolute paths) --------------------
 case "$DATA_DIR" in
   /*) ;;
   *)  DATA_DIR="$PWD/$DATA_DIR" ;;
 esac
 
 if [[ ! -d "$DATA_DIR" ]] || [[ -z "$(ls -A "$DATA_DIR" 2>/dev/null)" ]]; then
-  echo ">>> Dossier de données absent ou vide : $DATA_DIR" >&2
+  echo ">>> Data folder missing or empty: $DATA_DIR" >&2
   exit 2
 fi
 
-# --- Commande compose ----------------------------------------------------------
+# --- Compose command -------------------------------------------------------------
 COMPOSE=(docker compose)
 [[ -n "$PROJECT" ]] && COMPOSE+=(-p "$PROJECT")
 COMPOSE+=(-f compose/compose.yml)
@@ -91,29 +91,29 @@ if [[ "$MOUNT_CODE" == "true" ]]; then
   )
 fi
 
-# Fichiers de référence de data/ (listes de codes, paramètres...). On monte les
-# fichiers un par un, pas le dossier : data/ contient aussi, dans l'image
-# seulement, fdi-codelists/ et fdi-mappings/, qu'un montage du dossier masquerait.
+# Reference files of data/ (code lists, parameters...). They are mounted one by
+# one, not the folder: in the image only, data/ also holds fdi-codelists/ and
+# fdi-mappings/, which a mount of the whole folder would hide.
 if [[ "$MOUNT_DATA" == "true" ]]; then
-  [[ -d data ]] || { echo ">>> GTA_MOUNT_DATA=true mais data/ est absent" >&2; exit 2; }
+  [[ -d data ]] || { echo ">>> GTA_MOUNT_DATA=true but data/ is missing" >&2; exit 2; }
   for f in data/*; do
     [[ -f "$f" ]] && CODE_MOUNTS+=(-v "$PWD/$f":"$CONTAINER_ROOT/$f")
   done
 fi
 
-# --- Préparation de l'hôte -----------------------------------------------------
+# --- Host preparation ------------------------------------------------------------
 mkdir -p runtime/jobs runtime/cache
-# Dossiers de sortie que le workflow écrit DANS le dossier de données
+# Output folders that the workflow writes INSIDE the data folder
 mkdir -p "$DATA_DIR/dataoutputpreharmo" "$DATA_DIR/dataoutputGTA"
-# Sans ces fichiers, docker créerait un dossier à leur place
+# Without these files, docker would create a folder in their place
 [[ -e zenodo_secrets.env ]] || touch zenodo_secrets.env
-[[ -e docker_local.env.compose ]] || { echo ">>> docker_local.env.compose manquant" >&2; exit 2; }
+[[ -e docker_local.env.compose ]] || { echo ">>> docker_local.env.compose is missing" >&2; exit 2; }
 
-echo ">>> Données : $DATA_DIR"
-echo ">>> Étapes  : $STEPS"
-echo ">>> Projet  : ${PROJECT:-(défaut)} | utilisateur : $RUN_USER | code monté : $MOUNT_CODE | data/ monté : $MOUNT_DATA | hors ligne : $OFFLINE"
+echo ">>> Data    : $DATA_DIR"
+echo ">>> Steps   : $STEPS"
+echo ">>> Project : ${PROJECT:-(default)} | user: $RUN_USER | code mounted: $MOUNT_CODE | data/ mounted: $MOUNT_DATA | offline: $OFFLINE"
 
-docker rm -f "$NAME" >/dev/null 2>&1   # reste éventuel d'un run interrompu
+docker rm -f "$NAME" >/dev/null 2>&1   # leftover of an interrupted run
 
 "${COMPOSE[@]}" run --rm --name "$NAME" \
   --user "$RUN_USER" \
@@ -133,8 +133,8 @@ docker rm -f "$NAME" >/dev/null 2>&1   # reste éventuel d'un run interrompu
 status=$?
 
 if [[ $status -eq 0 ]]; then
-  echo ">>> Workflow terminé avec succès"
+  echo ">>> Workflow completed successfully"
 else
-  echo ">>> Échec du workflow (code $status)"
+  echo ">>> Workflow failed (exit code $status)"
 fi
 exit "$status"

@@ -2,45 +2,45 @@
 # =============================================================================
 # compose/run_full_workflow.sh
 #
-# Lance le workflow GTA COMPLET sur les vraies données, dans la stack Docker
-# Compose (Postgres, GeoServer, GeoNetwork).
+# Runs the COMPLETE GTA workflow on the real data, in the Docker Compose stack
+# (Postgres, GeoServer, GeoNetwork).
 #
-# C'est une surcouche de compose/run_workflow.sh : mêmes montages, seules
-# les valeurs par défaut changent.
+# It is a wrapper around compose/run_workflow.sh: same mounts, only the
+# default values change.
 #
-# Usage (depuis n'importe quel dossier) :
+# Usage (from any folder):
 #   ./compose/run_full_workflow.sh
 #   GTA_STEPS=level1,level2,services ./compose/run_full_workflow.sh
-#   GTA_COMPOSE_PROJECT=gta-full ./compose/run_full_workflow.sh   # stack isolée
+#   GTA_COMPOSE_PROJECT=gta-full ./compose/run_full_workflow.sh   # isolated stack
 #
-# Variables (en plus de celles de run_workflow.sh) :
-#   GTA_DATA_DIR   défaut : runtime/extracted/all_raw_data_GTA
-#   GTA_STEPS      défaut : DB,rawdata,effort,nominal,level0,level1,level2,services
+# Variables (on top of those of run_workflow.sh):
+#   GTA_DATA_DIR   default: runtime/extracted/all_raw_data_GTA
+#   GTA_STEPS      default: DB,rawdata,effort,nominal,level0,level1,level2,services
 #
-# ATTENTION : l'étape "services" publie sur GeoServer, GeoNetwork et Zenodo
-# selon docker_local.env.compose (RUN_ZENODO_T_F) et zenodo_secrets.env
-# (ZENODO_URL / ZENODO_TOKEN). Vérifiez ces deux fichiers avant un run complet :
-# un dépôt sur zenodo.org (et non sandbox.zenodo.org) crée un DOI définitif.
+# WARNING: the "services" step publishes to GeoServer, GeoNetwork and Zenodo
+# according to docker_local.env.compose (RUN_ZENODO_T_F) and zenodo_secrets.env
+# (ZENODO_URL / ZENODO_TOKEN). Check both files before a complete run: a
+# deposit on zenodo.org (not sandbox.zenodo.org) creates a permanent DOI.
 # =============================================================================
 set -euo pipefail
-cd "$(dirname "$0")/.."   # racine du dépôt
+cd "$(dirname "$0")/.."   # repository root
 
 export GTA_DATA_DIR="${GTA_DATA_DIR:-runtime/extracted/all_raw_data_GTA}"
 export GTA_STEPS="${GTA_STEPS:-DB,rawdata,effort,nominal,level0,level1,level2,services}"
 
 if [[ ! -d "$GTA_DATA_DIR" ]]; then
   cat >&2 <<EOF
->>> Dossier de données introuvable : $GTA_DATA_DIR
-    Extrayez l'archive all_raw_data_GTA.zip (Zenodo 10.5281/zenodo.20834708)
-    dans runtime/extracted/, ou indiquez un autre dossier avec GTA_DATA_DIR.
+>>> Data folder not found: $GTA_DATA_DIR
+    Extract the all_raw_data_GTA.zip archive (Zenodo 10.5281/zenodo.20834708)
+    into runtime/extracted/, or point GTA_DATA_DIR to another folder.
 EOF
   exit 2
 fi
 
-# Rappel de la cible Zenodo avant de lancer une publication
+# Show the Zenodo target before a publication starts
 if [[ ",$GTA_STEPS," == *",services,"* || ",$GTA_STEPS," == *",all,"* ]]; then
   zenodo_url=$(grep -E '^\s*ZENODO_URL=' zenodo_secrets.env 2>/dev/null | tail -1 | cut -d= -f2- || true)
-  echo ">>> Étape services incluse : publication Zenodo vers ${zenodo_url:-<ZENODO_URL non défini>}"
+  echo ">>> services step included: Zenodo publication to ${zenodo_url:-<ZENODO_URL not set>}"
 fi
 
 exec ./compose/run_workflow.sh
