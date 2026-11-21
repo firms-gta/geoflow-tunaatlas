@@ -18,6 +18,14 @@ repos:
           quit(status = as.integer(!ok))'
         files: '\.[rR]$'
         exclude: '^deprecated/'
+      # Every local file named by config/geoflow/*.json and config/entities/*.csv
+      # exists and is tracked by git (the Docker image only has tracked files).
+      - id: config-paths
+        name: config paths exist and are tracked
+        language: system
+        entry: python3 tests/check_config_paths.py
+        pass_filenames: false
+        files: '^(config/(geoflow|entities)/|data/|R/|workflow/|compose/|tests/check_config_paths\.py$)'
 
   # Secrets in the staged changes
   - repo: https://github.com/gitleaks/gitleaks
