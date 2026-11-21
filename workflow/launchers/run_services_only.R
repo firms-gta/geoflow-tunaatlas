@@ -26,24 +26,13 @@ source("workflow/launchers/GTA_2026_creation.R")
 cat(format(Sys.time()), "- GTA_2026_creation.R sourcé\n")
 source("workflow/launchers/workflow_helpers.R")
 cat(format(Sys.time()), "- helpers sourcés, lancement du workflow\n")
-docker_env_file <- "docker_local.env.compose"
-
-if (file.exists(here::here(docker_env_file))) {
-  tryCatch(
-    dotenv::load_dot_env(file = here::here(docker_env_file)),
-    error = function(e) message("No environment file loaded: ", e$message)
-  )
-} else {
-  message("No '", docker_env_file, "' found, skipping DB-specific env file.")
+# Settings: the single .env at the repository root (template: env.example)
+if (!file.exists(here::here(".env"))) {
+  stop("No .env at the repository root: copy env.example to .env and fill it in.",
+       call. = FALSE)
 }
-source(here::here("compose/patches/patch-zen4r-upload-error.R"))
-if(file.exists(here::here("zenodo_secrets.env"))){
-  
-  tryCatch(
-    dotenv::load_dot_env(file = here::here("zenodo_secrets.env")),
-    error = function(e) message("No environment file loaded: ", e$message)
-  )
-}
+dotenv::load_dot_env(file = here::here(".env"))
+source(here::here("docker/patches/patch-zen4r-upload-error.R"))
 
 tunaatlas_qa_dbmodel_path <- execute_workflow_maybe_upload(
   file = here::here("config/geoflow/tunaatlas_qa_services.json"),

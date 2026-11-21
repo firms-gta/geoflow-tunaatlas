@@ -6,7 +6,7 @@ It is meant for **development and debugging** (typically from RStudio).
 
 Publication (PostGIS, GeoServer, GeoNetwork, Zenodo) never uses this cache: it
 always runs from scratch with the classic launcher, see
-[RUNNING_ADVANCED.md](RUNNING_ADVANCED.md) and [compose/README.md](../compose/README.md).
+[RUNNING_ADVANCED.md](RUNNING_ADVANCED.md) and [docker/README.md](../docker/README.md).
 
 ---
 

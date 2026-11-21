@@ -25,7 +25,7 @@ repos:
         language: system
         entry: python3 tests/check_config_paths.py
         pass_filenames: false
-        files: '^(config/(geoflow|entities)/|data/|R/|workflow/|compose/|tests/check_config_paths\.py$)'
+        files: '^(config/(geoflow|entities)/|data/|R/|workflow/|docker/|tests/check_config_paths\.py$)'
 
   # Secrets in the staged changes
   - repo: https://github.com/gitleaks/gitleaks

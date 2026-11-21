@@ -13,7 +13,7 @@ No local R installation is needed: everything runs in Docker.
 | I want to… | Use | Guide |
 | --- | --- | --- |
 | produce the datasets (no database, no publication) | `docker run` | [docs/RUNNING.md](docs/RUNNING.md) |
-| produce **and publish** (PostGIS, GeoServer, GeoNetwork, Zenodo), or run the test | `compose/` scripts | [compose/README.md](compose/README.md) |
+| produce **and publish** (PostGIS, GeoServer, GeoNetwork, Zenodo), or run the test | `docker/` scripts | [docker/README.md](docker/README.md) |
 
 Other documentation:
 
@@ -30,11 +30,13 @@ Run the complete processing chain directly from the input archive published on Z
 
 ```bash
 mkdir -p runtime/extracted runtime/jobs runtime/cache
+cp env.example .env    # settings, once (read by the geoflow configurations)
 
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/.env":/home/rstudio/geoflow-tunaatlas/.env:ro \
   -v "$PWD/runtime/cache":/cache \
   -e GTA_STEPS=rawdata,nominal,effort,level0,level1,level2 \
   -e GTA_DATA_SOURCE=doi \
@@ -46,14 +48,14 @@ docker run --rm \
 
 The archive is downloaded once and cached in `runtime/cache`; prepared data go to `runtime/extracted`, jobs and logs to `runtime/jobs`.
 
-To run with the database and the publication services:
+To run with the database and the publication services (settings in `.env`, once: `cp env.example .env`):
 
 ```bash
-./compose/run_workflow.sh    # test on the sample data (same as the CI)
-./compose/run_full_workflow.sh     # full run on runtime/extracted/all_raw_data_GTA
+./docker/run_workflow.sh    # test on the sample data (same as the CI)
+./docker/run_full_workflow.sh     # full run on GTA_DATA_DIR (set in .env)
 ```
 
-Read [compose/README.md](compose/README.md) before a full run, in particular for the Zenodo target.
+Read [docker/README.md](docker/README.md) before a full run, in particular for the Zenodo target.
 
 ## Docker images
 
@@ -73,13 +75,17 @@ Use an immutable `sha-…` tag (or a digest) for reproducible runs, rather than 
 
 ```text
 geoflow-tunaatlas/
-├── R/                    # workflow and processing code
-├── compose/              # workflow Dockerfile, full Compose stack, geoflow patches, launch scripts
-├── config/               # geoflow workflow configurations
+├── R/                    # business logic: pre-harmonisation and creation of the levels
+├── workflow/             # launching code: launchers, geoflow actions, PostGIS, NetCDF
+├── config/               # declarative only: geoflow JSON, entity tables, SQL
+├── analyses/             # one-off analyses, not part of the workflow
 ├── data/                 # static reference data
-├── docker/               # auxiliary images: reporting (summaries), NetCDF
+├── docker/               # launch scripts, geoflow patches, database initialisation
 ├── docs/                 # documentation
-├── tests/                # launcher checks and sample input data
+├── tests/                # launcher checks, A/B comparison, sample input data
+├── Dockerfile            # single Dockerfile: workflow (default), rstudio, reporting, netcdf
+├── compose.yml           # full stack: workflow, PostGIS, GeoServer, GeoNetwork, Shiny, RStudio
+├── env.example           # template of .env, the single settings file (never committed)
 └── renv.lock
 ```
 
@@ -97,7 +103,7 @@ For an auditable run, keep the repository commit SHA, the image tag or digest, t
 
 ```bash
 Rscript tests/smoke_test_launcher.R   # launcher smoke tests (seconds, no Docker)
-./compose/run_workflow.sh       # end-to-end test of the full stack on the sample data
+./docker/run_workflow.sh       # end-to-end test of the full stack on the sample data
 ```
 
 Both also run on GitHub Actions ([CI](docs/CI.md)). Scientific acceptance checks are in [Validation](docs/VALIDATION.md).

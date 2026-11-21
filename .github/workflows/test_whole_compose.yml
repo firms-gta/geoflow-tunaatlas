@@ -43,7 +43,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: compose/Dockerfile.workflow
+          file: Dockerfile
+          target: workflow
           tags: ${{ env.GTA_IMAGE }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
@@ -53,25 +54,19 @@ jobs:
           cache-to: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
       - name: Prepare the runner
+        env:
+          ZENODO_TOKEN: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
         run: |
           mkdir -p runtime/jobs runtime/cache \
                    tests/sample_data/dataoutputpreharmo tests/sample_data/dataoutputGTA
-          cat > zenodo_secrets.env <<EOF
-          ZENODO_URL=https://sandbox.zenodo.org/api
-          ZENODO_TOKEN=${{ secrets.ZENODO_SANDBOX_TOKEN }}
-          EOF
-          cat > docker_local.env.compose <<'EOF'
-          DB_DRV=PostgreSQL
-          DB_HOST=postgres
-          DB_PORT=5432
-          DB_NAME=gta
-          DB_USER=gta
-          DB_PASSWORD=gta
-          DB_USER_READONLY=gta_reader
-          DB_PASSWORD_READONLY=gta_reader
-          GTA_DB_UPLOAD=true
-          RUN_ZENODO_T_F=true
-          EOF
+          # Settings: env.example (values of the local stack) with the CI
+          # changes: publication on the Zenodo sandbox, less memory for
+          # Elasticsearch (limited memory on the runner)
+          cp env.example .env
+          sed -i -e 's|^RUN_ZENODO_T_F=.*|RUN_ZENODO_T_F=true|' \
+                 -e 's|^ES_JAVA_OPTS=.*|ES_JAVA_OPTS="-Xms512m -Xmx512m"|' \
+                 -e '/^ZENODO_TOKEN=/d' .env
+          echo "ZENODO_TOKEN=${ZENODO_TOKEN}" >> .env
           # the container runs as 1000:1000 (rstudio), the runner as 1001
           sudo chown -R 1000:1000 runtime tests/sample_data R config
 
@@ -81,15 +76,11 @@ jobs:
           GTA_RUN_USER: "1000:1000"
           GTA_STEPS: DB,rawdata,nominal,effort,level0,level1,services
           GTA_MOUNT_CODE: "false"
-        run: ./compose/run_workflow.sh
+        run: ./docker/run_workflow.sh
 
       - name: Logs on failure
         if: failure()
-        run: |
-          docker compose \
-            -f compose/compose.yml \
-            -f compose/compose.ci.yml \
-            logs
+        run: docker compose logs
 
       - name: Give the cache back to the runner
         if: always()
@@ -124,6 +115,8 @@ jobs:
             BASE=$REPO:sha-${GITHUB_SHA::7}-dev
             MOVING=$REPO:$(echo "$GITHUB_REF_NAME" | tr '/' '-')-rstudio
           fi
-          docker buildx build -f compose/Dockerfile.rstudio \
-            --build-arg BASE_IMAGE="$BASE" \
+          # Same Dockerfile, rstudio target: the workflow layers come from the
+          # cache of the build tested above
+          docker buildx build --target rstudio \
+            --cache-from type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache \
             -t "$BASE-rstudio" -t "$MOVING" --push .

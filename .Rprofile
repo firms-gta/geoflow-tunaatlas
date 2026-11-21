@@ -4,8 +4,8 @@ options(knitr.duplicate.label = "allow")
 # Correctif en mémoire de geometa::GMLUnitDefinition$buildFrom() (unité NA ou
 # non scalaire). Il doit être rechargé à chaque session : l'appliquer au build
 # de l'image ne suffit pas. Idempotent.
-if (file.exists("compose/patches/patch-geometa.R")) {
-  try(source("compose/patches/patch-geometa.R"), silent = TRUE)
+if (file.exists("docker/patches/patch-geometa.R")) {
+  try(source("docker/patches/patch-geometa.R"), silent = TRUE)
 }
 
 data_dir <- file.path("data", "GTA_2026")

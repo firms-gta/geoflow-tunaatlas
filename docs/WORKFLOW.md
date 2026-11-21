@@ -360,7 +360,8 @@ workflow/                                       # R code that launches, no busin
 ├── launchers/                                  # CLI, RStudio and {targets} launchers
 ├── actions/                                    # geoflow custom actions
 ├── postgis/                                    # database model creation (R)
-└── netcdf/                                     # NetCDF creation launchers
+├── netcdf/                                     # NetCDF creation launchers
+└── setup/fetch_fdi.sh                          # FDI code lists and mappings at the commits of config/fdi_versions.conf (image build and local copy)
 
 config/                                         # declarative configuration only
 ├── geoflow/                                    # geoflow JSON configurations
@@ -373,24 +374,22 @@ config/                                         # declarative configuration only
 │   ├── catch_ird_level1_local.json
 │   └── catch_ird_level2_local.json
 ├── entities/                                   # geoflow entity tables (CSV)
+├── fdi_versions.conf                           # pinned commits of the FDI code lists and mappings (Docker and local)
 └── sql/                                        # database SQL scripts
 
 analyses/                                       # one-off exploratory analyses, not part of the workflow
 
-compose/
-├── Dockerfile.workflow                         # workflow image (used by the CI and by compose.yml)
-├── README.md                                   # how to run the full stack
-├── Dockerfile.rstudio
-├── compose.yml                                 # full stack: workflow + PostGIS + GeoServer + GeoNetwork
-├── compose.ci.yml                              # CI override
-├── patches/                                    # geoflow / geometa / zen4R patches
-├── run_workflow.sh                       # test run on tests/sample_data
-└── run_full_workflow.sh                        # complete run on the real data
+Dockerfile                                      # single Dockerfile: targets workflow (default), rstudio, reporting, netcdf
+compose.yml                                     # full stack: workflow + PostGIS + GeoServer + GeoNetwork + Shiny + RStudio
+env.example                                     # template of .env, the single settings file (never committed)
 
 docker/
-├── Dockerfile.reporting                        # workflow image + Pandoc/LaTeX, for the summaries
-├── Dockerfile.netcdf                           # NetCDF creation (docker_image_netcdf_creation_method.yml)
-└── scripts/                                    # image helpers (package checks, FDI cache, entrypoint)
+├── README.md                                   # how to run the full stack
+├── init-db/                                    # database initialisation (GeoNetwork database)
+├── patches/                                    # geoflow / geometa / zen4R patches
+├── repair_renv_library.R                       # reuse an existing renv library: rebuild only what fails to load
+├── run_workflow.sh                             # test run on tests/sample_data
+└── run_full_workflow.sh                        # complete run on the real data
 ```
 
 The R launcher orchestrates execution, while the `geoflow` configurations remain the source of truth for the scientific processing definitions.
@@ -399,6 +398,6 @@ The R launcher orchestrates execution, while the `geoflow` configurations remain
 
 * [README](../README.md) — project overview and quick start
 * [RUNNING.md](RUNNING.md) — Docker images, input data, runtime parameters and execution examples
-* [compose/README.md](../compose/README.md) — full stack with database and publication services
+* [docker/README.md](../docker/README.md) — full stack with database and publication services
 * [CI.md](CI.md) — automated tests and published images
 * [VALIDATION.md](VALIDATION.md) — technical and scientific validation

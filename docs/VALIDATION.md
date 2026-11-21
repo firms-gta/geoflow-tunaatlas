@@ -47,7 +47,7 @@ effort, Level 0 and publication to GeoServer, GeoNetwork and sandbox Zenodo) on
 the small sample in `tests/sample_data`:
 
 ```bash
-./compose/run_workflow.sh
+./docker/run_workflow.sh
 ```
 
 It runs on every push through GitHub Actions, on the image built from the
@@ -155,6 +155,7 @@ docker run --rm \
   -v /absolute/path/to/all_raw_data_GTA:/data/GTA_2026:ro \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/.env":/home/rstudio/geoflow-tunaatlas/.env:ro \
   -v "$PWD/runtime/cache":/cache \
   -e GTA_STEPS=rawdata \
   -e GTA_DATA_SOURCE=volume_dir \

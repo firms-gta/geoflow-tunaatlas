@@ -675,15 +675,25 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   
   invisible(lapply(unique(required_packages), load_required_package))
   
-  docker_env_file <- "docker_local.env.compose"
-  
-  if (file.exists(here::here(docker_env_file))) {
-    tryCatch(
-      dotenv::load_dot_env(file = here::here(docker_env_file)),
-      error = function(e) message("No environment file loaded: ", e$message)
+  # Settings: the single .env at the repository root (template: env.example).
+  # The geoflow configurations load it too, so a run cannot go without it.
+  env_file <- here::here(".env")
+  if (!file.exists(env_file)) {
+    stop(
+      "No .env at the repository root: copy env.example to .env and fill it in ",
+      "(docker/run_workflow.sh mounts it into the workflow container).",
+      call. = FALSE
     )
-  } else {
-    message("No '", docker_env_file, "' found, skipping DB-specific env file.")
+  }
+  dotenv::load_dot_env(file = env_file)
+  old_env_files <- c("docker_local.env.compose", "zenodo_secrets.env")
+  old_env_files <- old_env_files[file.exists(here::here(old_env_files))]
+  if (length(old_env_files) > 0) {
+    warning(
+      paste(old_env_files, collapse = ", "),
+      " is no longer read: its values belong in .env.",
+      call. = FALSE, immediate. = TRUE
+    )
   }
   
   source(here::here("workflow/launchers/running_time_of_workflow.R"))
@@ -1008,16 +1018,9 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # OGC Services ------------------------------------------------------------
 
   if (run_any_step(c("services"))) {
-    if(file.exists(here::here("zenodo_secrets.env"))){
-      
-      tryCatch(
-        dotenv::load_dot_env(file = here::here("zenodo_secrets.env")),
-        error = function(e) message("No environment file loaded: ", e$message)
-      )
-    }
-    dotenv::load_dot_env(here::here("docker_local.env.compose"))
+    # Zenodo and database settings come from .env, loaded at the start
     source(here::here("workflow/actions/ensure_geoserver_ready.R"))
-    source(here::here("compose/patches/patch-zen4r-upload-error.R"))
+    source(here::here("docker/patches/patch-zen4r-upload-error.R"))
     ensure_geoserver_ready()
     tunaatlas_services <- execute_workflow_maybe_upload(
       file = here::here("config/geoflow/tunaatlas_qa_services.json"),
