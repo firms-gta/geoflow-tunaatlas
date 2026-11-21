@@ -385,6 +385,7 @@ docker/
 ├── README.md                                   # how to run the full stack
 ├── init-db/                                    # database initialisation (GeoNetwork database)
 ├── patches/                                    # geoflow / geometa / zen4R patches
+├── repair_renv_library.R                       # reuse an existing renv library: rebuild only what fails to load
 ├── run_workflow.sh                             # test run on tests/sample_data
 └── run_full_workflow.sh                        # complete run on the real data
 ```

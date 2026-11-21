@@ -179,6 +179,12 @@ The single `Dockerfile` has one target per image: `workflow` (default),
 CCP / EDITO platforms). Everything up to the `renv` restore is cached: as long
 as `renv.lock` does not change, a rebuild downloads almost nothing.
 
+To test with a renv library you already have (for example mounted in a
+container) instead of reinstalling everything, run
+`Rscript docker/repair_renv_library.R` from the repository root: it installs
+only the missing packages, then rebuilds only those that fail to load
+(`--check` to report without changing anything).
+
 ## 6. Work from RStudio
 
 RStudio runs in the same environment as the workflow (same R, packages, patched
@@ -358,6 +364,7 @@ If a port is already taken, `docker compose` stops with
 | `env.example` (root) | Template of `.env`, the single settings file |
 | `docker/run_workflow.sh` | Runs the workflow in the stack; defaults to the test on the sample data (what the CI runs) |
 | `docker/run_full_workflow.sh` | `run_workflow.sh` with full-run defaults (real data, all steps) |
+| `docker/repair_renv_library.R` | Makes an existing renv library usable: installs the missing packages, rebuilds only those that fail to load |
 | `docker/init-db/` | SQL run when the PostGIS volume is created: creates the GeoNetwork database |
 | `docker/patches/` | Fixes for geoflow 1.3.0, geometa and zen4R |
 
