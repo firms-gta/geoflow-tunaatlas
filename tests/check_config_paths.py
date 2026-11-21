@@ -8,7 +8,7 @@ reaches the CI (the image only contains tracked files).
 Checked:
 * config/geoflow/*.json: "script", "onstart_sql" and "onend_sql" are resolved
   like geoflow does, relative to the JSON folder (one level up per "../");
-  "source" values starting with R/, config/, workflow/, data/ or compose/ are
+  "source" values starting with R/, config/, workflow/, data/ or docker/ are
   resolved from the repository root.
 * config/entities/*.csv: local sources written "./<dir>/..." are resolved from
   the repository root.
@@ -27,7 +27,7 @@ import re
 import subprocess
 import sys
 
-LOCAL_DIRS = ("R/", "config/", "workflow/", "data/", "compose/")
+LOCAL_DIRS = ("R/", "config/", "workflow/", "data/", "docker/")
 NOT_IN_GIT = ("data/fdi-codelists", "data/fdi-mappings", "data/GTA_2026")
 JSON_RELATIVE_KEYS = ("script", "onstart_sql", "onend_sql")
 ENTITY_SOURCE = re.compile(r"\./((?:R|config|workflow|data|compose)/[^,;\"\s@]+)")

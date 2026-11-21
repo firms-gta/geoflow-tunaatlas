@@ -3,7 +3,7 @@
     "id": "tuna-atlas-services",
     "mode": "entity",
     "environment": {
-  		"file": "zenodo_secrets.env",
+  		"file": ".env",
   		"hide_env_vars": ["USER", "PASSWORD", "TOKEN"]
   	},
     "project": "FIRMS Tuna Atlas",

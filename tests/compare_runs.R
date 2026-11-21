@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # =============================================================================
 # Compare the outputs of two workflow runs, for example master (A) and a
-# branch (B) run on the same input data with compose/run_workflow.sh.
+# branch (B) run on the same input data with docker/run_workflow.sh.
 #
 # Usage: Rscript tests/compare_runs.R <runtime/jobs of A> <runtime/jobs of B>
 #

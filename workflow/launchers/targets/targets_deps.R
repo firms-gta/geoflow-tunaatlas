@@ -94,7 +94,7 @@ gta_launcher_deps <- function(root = ".") {
     "workflow/launchers/executeAndRename.R",
     "workflow/launchers/running_time_of_workflow.R",
     "workflow/launchers/targets/targets_deps.R",
-    "docker_local.env.compose"
+    ".env"
   )
   file.path(root, f[file.exists(file.path(root, f))])
 }

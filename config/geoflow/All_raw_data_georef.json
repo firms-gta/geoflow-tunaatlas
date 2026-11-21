@@ -3,7 +3,7 @@
     "id": "tuna-atlas-raw-georef",
     "mode": "entity",
   	"environment": {
-  		"file": "docker_local.env.compose",
+  		"file": ".env",
   		"hide_env_vars": ["USER", "PASSWORD", "TOKEN"]
   	},
     "project": "FIRMS Tuna Atlas",
