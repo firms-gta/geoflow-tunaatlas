@@ -2,7 +2,7 @@
 
 This document describes advanced execution options for the Global Tuna Atlas (GTA) workflow, including partial runs, runtime configuration, reuse of existing jobs, reporting and local Docker builds.
 
-For a standard production run, see [RUNNING.md](RUNNING.md). To run with the database and publication services, see [compose/README.md](../compose/README.md).
+For a standard production run, see [RUNNING.md](RUNNING.md). To run with the database and publication services, see [docker/README.md](../docker/README.md).
 
 For the processing architecture and scientific workflow stages, see [WORKFLOW.md](WORKFLOW.md).
 
@@ -238,6 +238,7 @@ docker run --rm --network none \
   --user "$(id -u):$(id -g)" \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/.env":/home/rstudio/geoflow-tunaatlas/.env:ro \
   -v "$PWD/runtime/cache":/cache \
   -v "$PWD/runtime/cwp-summary-figures":/home/rstudio/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset/rmd/Figures \
   -e GTA_STEPS=summaries \
@@ -270,6 +271,7 @@ docker run --rm --network none \
   --user "$(id -u):$(id -g)" \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/.env":/home/rstudio/geoflow-tunaatlas/.env:ro \
   -v "$PWD/runtime/cache":/cache \
   -e GTA_STEPS=reports \
   -e GTA_DATA_SOURCE=volume_dir \
@@ -313,27 +315,21 @@ Pre-built GHCR images are recommended for reproducing an existing release.
 
 Build locally when developing or modifying the workflow.
 
+All images come from the single `Dockerfile` at the repository root, one
+target each.
+
 ### Workflow image
 
 From the repository root:
 
 ```bash
-docker build \
-  -f compose/Dockerfile.workflow \
-  -t gta-workflow:latest \
-  .
+docker build -t gta-workflow:latest .     # workflow target (default)
 ```
 
-### Reporting image
-
-Build the workflow image first, then:
+### Reporting image (workflow + LaTeX)
 
 ```bash
-docker build \
-  -f docker/Dockerfile.reporting \
-  --build-arg BASE_IMAGE=gta-workflow:latest \
-  -t gta-reporting:latest \
-  .
+docker build --target reporting -t gta-reporting:latest .
 ```
 
 ---

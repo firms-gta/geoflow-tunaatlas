@@ -7,7 +7,7 @@ No local R installation is required.
 
 This page covers the **processing only**. To also load the database and publish
 to GeoServer, GeoNetwork and Zenodo, use the full stack in
-[compose/README.md](../compose/README.md).
+[docker/README.md](../docker/README.md).
 
 ## Requirements
 
@@ -91,7 +91,8 @@ Replace:
 /absolute/path/to/all_raw_data_GTA
 ```
 
-with the location of your extracted GTA input directory.
+with the location of your extracted GTA input directory. The run reads its
+settings from `.env` (once: `cp env.example .env`).
 
 Run:
 
@@ -100,6 +101,7 @@ docker run --rm --network none \
   --user "$(id -u):$(id -g)" \
   -v /absolute/path/to/all_raw_data_GTA:/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/.env":/home/rstudio/geoflow-tunaatlas/.env:ro \
   -e GTA_STEPS=rawdata,nominal,effort,level0,level1,level2 \
   -e GTA_DATA_SOURCE=volume_dir \
   -e GTA_DATA_PATH=/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
@@ -178,6 +180,7 @@ docker run --rm \
   --user "$(id -u):$(id -g)" \
   -v "$PWD/runtime/extracted":/home/rstudio/geoflow-tunaatlas/data/GTA_2026 \
   -v "$PWD/runtime/jobs":/home/rstudio/geoflow-tunaatlas/jobs \
+  -v "$PWD/.env":/home/rstudio/geoflow-tunaatlas/.env:ro \
   -v "$PWD/runtime/cache":/cache \
   -e GTA_STEPS=rawdata,nominal,effort,level0,level1,level2 \
   -e GTA_DATA_SOURCE=doi \
