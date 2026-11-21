@@ -360,7 +360,8 @@ workflow/                                       # R code that launches, no busin
 ├── launchers/                                  # CLI, RStudio and {targets} launchers
 ├── actions/                                    # geoflow custom actions
 ├── postgis/                                    # database model creation (R)
-└── netcdf/                                     # NetCDF creation launchers
+├── netcdf/                                     # NetCDF creation launchers
+└── setup/                                      # to work outside Docker: FDI code lists and mappings at pinned commits
 
 config/                                         # declarative configuration only
 ├── geoflow/                                    # geoflow JSON configurations
