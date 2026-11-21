@@ -139,24 +139,12 @@ RUN chmod 644 /opt/patches/patch-geoflow-zenodo.R \
  && grep -q 'c("Postgres","PostgreSQL")' $L/actions/geosapi_publish_ogc_services.R \
  && ! grep -q 'PostreSQL' $L/actions/geosapi_publish_ogc_services.R
 
-# --- FDI code lists and mappings, at pinned commits -----------------------------
-# Only the pinned commit is fetched (--depth 1), not the whole history.
-ENV FDI_CODELISTS_REPO="https://github.com/bastienird/fdi-codelists.git"
-ENV FDI_CODELISTS_REF="8b9d530b76b64857a1e74246d6f4dfced3db9b34"
-ENV FDI_CODELISTS_DIR=${PROJECT_DIR}/data/fdi-codelists
-ENV FDI_MAPPINGS_REPO="https://github.com/bastienird/fdi-mappings.git"
-ENV FDI_MAPPINGS_REF="c121ccf171f3f15ccb9673ca051f0a17b9668a50"
-ENV FDI_MAPPINGS_DIR=${PROJECT_DIR}/data/fdi-mappings
-
-RUN mkdir -p ${FDI_CODELISTS_DIR} && cd ${FDI_CODELISTS_DIR} \
- && git init -q && git remote add origin ${FDI_CODELISTS_REPO} \
- && git fetch -q --depth 1 origin ${FDI_CODELISTS_REF} && git checkout -q FETCH_HEAD \
- && rm -rf .git
-
-RUN mkdir -p ${FDI_MAPPINGS_DIR} && cd ${FDI_MAPPINGS_DIR} \
- && git init -q && git remote add origin ${FDI_MAPPINGS_REPO} \
- && git fetch -q --depth 1 origin ${FDI_MAPPINGS_REF} && git checkout -q FETCH_HEAD \
- && rm -rf .git
+# --- FDI code lists and mappings, at the commits of config/fdi_versions.conf ----
+# Same script as outside Docker (workflow/setup/fetch_fdi.sh): the image and a
+# local copy hold the same files. Only the pinned commits are fetched.
+COPY --chown=rstudio:rstudio config/fdi_versions.conf ${PROJECT_DIR}/config/fdi_versions.conf
+COPY --chown=rstudio:rstudio workflow/setup/fetch_fdi.sh ${PROJECT_DIR}/workflow/setup/fetch_fdi.sh
+RUN bash workflow/setup/fetch_fdi.sh --no-git
 
 # --- Project code (after the restore: a script change keeps the renv layers) ----
 COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
@@ -164,7 +152,8 @@ COPY --chown=rstudio:rstudio . ${PROJECT_DIR}
 RUN cd ${PROJECT_DIR} && Rscript -e 'for (d in c("workflow/launchers","workflow/actions","R/tunaatlas_scripts/generation")) for (f in list.files(d, pattern="[.]R$", recursive=TRUE, full.names=TRUE)) parse(f)'
 
 # --- Provenance -------------------------------------------------------------------
-RUN cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
+RUN set -a && . ${PROJECT_DIR}/config/fdi_versions.conf && set +a \
+ && cat > ${PROJECT_DIR}/RESOURCE_VERSIONS.json <<EOF
 {
   "project": { "repository": "https://github.com/firms-gta/geoflow-tunaatlas" },
   "build": {

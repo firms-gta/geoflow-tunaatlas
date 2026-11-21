@@ -179,6 +179,10 @@ The single `Dockerfile` has one target per image: `workflow` (default),
 CCP / EDITO platforms). Everything up to the `renv` restore is cached: as long
 as `renv.lock` does not change, a rebuild downloads almost nothing.
 
+The FDI code lists and mappings come from the commits pinned in
+`config/fdi_versions.conf`. Outside Docker, `./workflow/setup/fetch_fdi.sh`
+puts exactly the same files in `data/` (the image build runs the same script).
+
 To test with a renv library you already have (for example mounted in a
 container) instead of reinstalling everything, run
 `Rscript docker/repair_renv_library.R` from the repository root: it installs

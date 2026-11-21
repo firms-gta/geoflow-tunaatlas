@@ -361,7 +361,7 @@ workflow/                                       # R code that launches, no busin
 ├── actions/                                    # geoflow custom actions
 ├── postgis/                                    # database model creation (R)
 ├── netcdf/                                     # NetCDF creation launchers
-└── setup/                                      # to work outside Docker: FDI code lists and mappings at pinned commits
+└── setup/fetch_fdi.sh                          # FDI code lists and mappings at the commits of config/fdi_versions.conf (image build and local copy)
 
 config/                                         # declarative configuration only
 ├── geoflow/                                    # geoflow JSON configurations
@@ -374,6 +374,7 @@ config/                                         # declarative configuration only
 │   ├── catch_ird_level1_local.json
 │   └── catch_ird_level2_local.json
 ├── entities/                                   # geoflow entity tables (CSV)
+├── fdi_versions.conf                           # pinned commits of the FDI code lists and mappings (Docker and local)
 └── sql/                                        # database SQL scripts
 
 analyses/                                       # one-off exploratory analyses, not part of the workflow
