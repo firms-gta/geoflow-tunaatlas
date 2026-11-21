@@ -27,6 +27,18 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
+      # Avant le build : le cache Docker est lu et écrit sur GHCR.
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Cache des couches sur GHCR (tag "buildcache", pas une image utilisable) :
+      # contrairement au cache GitHub Actions, il n'expire pas après 7 jours,
+      # n'est pas limité à 10 Go et sert à toutes les branches. Tant que
+      # renv.lock ne change pas, la couche renv::restore() est réutilisée.
       - name: Build de l'image depuis le commit
         uses: docker/build-push-action@v6
         with:
@@ -37,8 +49,8 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache
+          cache-to: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
       - name: Préparer le runner
         run: |
@@ -82,14 +94,6 @@ jobs:
       - name: Rendre le cache au runner
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" runtime
-        
-      - name: Login GHCR
-        if: success() && github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push de l'image testée sur GHCR
         if: success() && github.event_name == 'push'
