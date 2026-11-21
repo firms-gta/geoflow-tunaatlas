@@ -27,3 +27,6 @@ level0.csv
 
 data/fdi-codelists/
 data/fdi-mappings/
+
+# One-off analyses, not used by the workflow
+analyses/

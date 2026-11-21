@@ -35,12 +35,12 @@ require(geoflow)
 # -------------------------------------
 
 # Initialize and execute the workflow
-config <- initWorkflow(here::here("config/tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 
 # Execute workflows and rename outputs
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/tunaatlas_qa_global_datasets_catch.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json"))
 
 # Summarizing Step
 # ----------------
@@ -48,7 +48,7 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
   default_file <- "geoserver_sdi_lab.env"
 } # as it is the one used on Blue Cloud project, for personal use replace .env with your personal one
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
-config <- initWorkflow(here::here("config/creating_dataset.json"))
+config <- initWorkflow(here::here("config/geoflow/creating_dataset.json"))
 con <- config$software$output$dbi
 # Load function and run summarizing step
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, config = config, sizepdf = "middle", savestep = TRUE, usesave = FALSE)
@@ -58,7 +58,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # ---------------
 
 # # Load function to convert to NetCDF and process entities
-# source(here::here("./R/tunaatlas_actions/convert_to_netcdf.R"))
+# source(here::here("./workflow/actions/convert_to_netcdf.R"))
 # entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 # wd <- getwd()
 # 
@@ -78,7 +78,7 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # # --------------
 # 
 # # Process entities for DOI
-# source(here::here("./R/tunaatlas_actions/process_entities_for_DOI.R"))
+# source(here::here("./workflow/actions/process_entities_for_DOI.R"))
 # process_entities_for_DOI(tunaatlas_qa_global_datasets_catch_path, "~/firms-gta/geoflow-tunaatlas/jobs/processed_entities_for_DOI")
 # 
 # 
@@ -106,4 +106,4 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # # -----------------------------------------------
 # 
 # # Initialize and deploy datasets on geoserver
-# tunaatlas_qa_services <- initWorkflow("config/tunaatlas_qa_services.json")
+# tunaatlas_qa_services <- initWorkflow("config/geoflow/tunaatlas_qa_services.json")

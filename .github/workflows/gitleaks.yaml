@@ -1,0 +1,37 @@
+# Scans the whole git history (all commits of the checked-out refs) for
+# secrets with gitleaks. Uses the gitleaks binary directly, pinned and
+# checksum-verified, rather than gitleaks-action (which needs a paid licence
+# for repositories owned by an organisation).
+# Known false positives go in .gitleaksignore (one fingerprint per line).
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+name: gitleaks
+
+permissions: read-all
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.21.2
+      GITLEAKS_SHA256: 5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history
+
+      - name: Install gitleaks
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+          echo "${GITLEAKS_SHA256}  ${archive}" | sha256sum --check
+          tar -xzf "$archive" gitleaks
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Scan git history
+        run: gitleaks git . --redact --verbose --no-banner

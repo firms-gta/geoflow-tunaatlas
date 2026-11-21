@@ -49,8 +49,8 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
 
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")
-source(here::here("R/running_time_of_workflow.R"))
-source(here::here("R/executeAndRename.R"))
+source(here::here("workflow/launchers/running_time_of_workflow.R"))
+source(here::here("workflow/launchers/executeAndRename.R"))
 
 patch_geoflow_getJobDataResource <- function() {
   gen <- geoflow::geoflow_entity
@@ -84,7 +84,7 @@ copy_all_nested_data_folders <- function(source_root, target_data_folder = here:
 
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
-raw_nominal_catch <- executeWorkflow(here::here("config/Nominal_catch_2026.json"))
+raw_nominal_catch <- executeWorkflow(here::here("config/geoflow/Nominal_catch_2026.json"))
 raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch_2026_final")
 running_time_of_workflow(raw_nominal_catch)
 time_Summarising_invalid_data <- system.time({
@@ -93,14 +93,14 @@ time_Summarising_invalid_data <- system.time({
 
 ## Georeferenced catch: These datasets contains catch AND EFFORT FOR SOME DATA as effort are used to raise catch data for level 0 to 2
 # Around 1.2 hours
-raw_data_georef <- executeWorkflow(here::here("config/All_raw_data_georef.json"))
+raw_data_georef <- executeWorkflow(here::here("config/geoflow/All_raw_data_georef.json"))
 raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2026")
 dir.create(file.path(getwd(), "data"))
 # copy_all_nested_data_folders(source_root = getwd(),target_data_folder = file.path(getwd(), "data"))
 
 running_time_of_workflow(raw_data_georef)
 require(CWP.dataset)
-config <- initWorkflow(here::here("config/tunaatlas_qa_dbmodel+codelists.json"))
+config <- initWorkflow(here::here("config/geoflow/tunaatlas_qa_dbmodel+codelists.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 con <- NULL
@@ -119,11 +119,11 @@ setwd("~/firms-gta/geoflow-tunaatlas")
 # gen$set("public", "getJobDataResource",
 #         get(".geoflow_old_getJobDataResource", envir = .GlobalEnv),
 #         overwrite = TRUE)
-raw_data_georef_effort <- executeWorkflow(here::here("config/All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
+raw_data_georef_effort <- executeWorkflow(here::here("config/geoflow/All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
 raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort_final")
 # copy_all_nested_data_folders(source_root = getwd(),target_data_folder = file.path(getwd(), "data"))
 running_time_of_workflow(raw_data_georef_effort)
-config <- initWorkflow(here::here("config/All_raw_data_georef_effort.json"), handleMetadata = FALSE)
+config <- initWorkflow(here::here("config/geoflow/All_raw_data_georef_effort.json"), handleMetadata = FALSE)
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 con <- NULL
@@ -147,22 +147,22 @@ rewrite_functions_as_rmd(raw_nominal_catch)
 
 
 setwd("~/firms-gta/geoflow-tunaatlas")
-tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/create_effort_dataset_2026.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
+tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/geoflow/create_effort_dataset_2026.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
 tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts_final")
 
 # Level 0 2026 ------------------------------------------------------------
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level0_local.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/catch_ird_level0_local.json")) # FROM DRIVE
 tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_0_catch_2026")
 CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path, connectionDB = con, 
                               config  = config, sizepdf = "short",savestep = FALSE, usesave = FALSE, 
                               source_authoritylist = c("all"))
 
 
-# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/catch_ird_level2_local.json")) # FROM DRIVE
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/catch_ird_level2_local.json")) # FROM DRIVE
 # tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
 # gc()
-# config <- initWorkflow(here::here("config/level_2_catch_2025.json"))
+# config <- initWorkflow(here::here("config/geoflow/level_2_catch_2025.json"))
 # unlink(config$job, recursive = TRUE)
 # con <- config$software$output$dbi
 # gc()

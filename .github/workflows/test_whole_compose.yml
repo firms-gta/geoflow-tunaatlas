@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache applicatif
+      - name: Application cache
         uses: actions/cache@v4
         with:
           path: runtime/cache
@@ -27,7 +27,7 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      # Avant le build : le cache Docker est lu et écrit sur GHCR.
+      # Before the build: the Docker cache is read from and written to GHCR.
       - name: Login GHCR
         uses: docker/login-action@v3
         with:
@@ -35,11 +35,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Cache des couches sur GHCR (tag "buildcache", pas une image utilisable) :
-      # contrairement au cache GitHub Actions, il n'expire pas après 7 jours,
-      # n'est pas limité à 10 Go et sert à toutes les branches. Tant que
-      # renv.lock ne change pas, la couche renv::restore() est réutilisée.
-      - name: Build de l'image depuis le commit
+      # Layer cache on GHCR (tag "buildcache", not a runnable image): unlike the
+      # GitHub Actions cache, it does not expire after 7 days, is not limited to
+      # 10 GB and is shared by all branches. As long as renv.lock does not
+      # change, the renv::restore() layer is reused.
+      - name: Build the image from the commit
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -52,7 +52,7 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache
           cache-to: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
-      - name: Préparer le runner
+      - name: Prepare the runner
         run: |
           mkdir -p runtime/jobs runtime/cache \
                    tests/sample_data/dataoutputpreharmo tests/sample_data/dataoutputGTA
@@ -72,10 +72,10 @@ jobs:
           GTA_DB_UPLOAD=true
           RUN_ZENODO_T_F=true
           EOF
-          # le conteneur tourne en 1000:1000 (rstudio), le runner en 1001
+          # the container runs as 1000:1000 (rstudio), the runner as 1001
           sudo chown -R 1000:1000 runtime tests/sample_data R config
 
-      - name: Lancer le workflow
+      - name: Run the workflow
         timeout-minutes: 90
         env:
           GTA_RUN_USER: "1000:1000"
@@ -83,7 +83,7 @@ jobs:
           GTA_MOUNT_CODE: "false"
         run: ./compose/run_workflow.sh
 
-      - name: Logs en cas d'échec
+      - name: Logs on failure
         if: failure()
         run: |
           docker compose \
@@ -91,11 +91,11 @@ jobs:
             -f compose/compose.ci.yml \
             logs
 
-      - name: Rendre le cache au runner
+      - name: Give the cache back to the runner
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" runtime
 
-      - name: Push de l'image testée sur GHCR
+      - name: Push the tested image to GHCR
         if: success() && github.event_name == 'push'
         run: |
           REPO=ghcr.io/firms-gta/gta-workflow
@@ -113,7 +113,7 @@ jobs:
             docker push "$REPO:$t"
           done
           
-      - name: Build et push de l'image RStudio
+      - name: Build and push the RStudio image
         if: success() && github.event_name == 'push'
         run: |
           REPO=ghcr.io/firms-gta/gta-workflow

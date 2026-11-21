@@ -81,7 +81,7 @@ instead of the repository root.
 It starts PostGIS, GeoServer and GeoNetwork, then runs
 `DB,rawdata,nominal,effort,level0,level1,services` (everything but level2) on the small sample in `tests/sample_data`
 (a few rows of each raw file, same file names). It ends with
-`Workflow terminé avec succès`.
+`Workflow completed successfully`.
 
 ## 3. Run the full workflow
 
@@ -200,7 +200,7 @@ What RStudio sees:
 Run the workflow from the R console:
 
 ```r
-source("R/launching_workflows/GTA_2026_creation.R")
+source("workflow/launchers/GTA_2026_creation.R")
 
 run_gta_workflow(
   steps_to_run = c("rawdata", "nominal"),   # any steps, e.g. c("services")

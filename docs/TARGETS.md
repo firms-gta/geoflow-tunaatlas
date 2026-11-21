@@ -66,7 +66,7 @@ The step outputs are the usual geoflow job directories under `jobs/`.
 From the root of the project:
 
 ```r
-source("R/launching_workflows/targets/targets_rstudio.R")
+source("workflow/launchers/targets/targets_rstudio.R")
 
 gta_tar_graph()                     # dependency graph, outdated steps in colour
 gta_tar_outdated()                  # steps that would re-run
@@ -104,7 +104,7 @@ store = .gta_tar_store())` lists the errors and warnings of the last run.
 ## 3. Running from a terminal
 
 ```bash
-GTA_STEPS=level0 Rscript R/launching_workflows/targets/run_targets_cli.R
+GTA_STEPS=level0 Rscript workflow/launchers/targets/run_targets_cli.R
 ```
 
 | Variable            | Default                                    | Meaning                                    |
@@ -147,7 +147,7 @@ tell {targets} anything: invalidate the matching step with
 
 ## 6. Files
 
-All in `R/launching_workflows/targets/`:
+All in `workflow/launchers/targets/`:
 
 | File                 | Role                                                       |
 | -------------------- | ---------------------------------------------------------- |
@@ -156,4 +156,4 @@ All in `R/launching_workflows/targets/`:
 | `targets_rstudio.R`  | `gta_tar_*()` helpers for RStudio                          |
 | `run_targets_cli.R`  | command-line launcher                                      |
 
-The `GTA_NO_DB` switch itself is in `R/launching_workflows/workflow_helpers.R`.
+The `GTA_NO_DB` switch itself is in `workflow/launchers/workflow_helpers.R`.
