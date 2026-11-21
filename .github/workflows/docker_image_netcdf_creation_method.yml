@@ -199,8 +199,9 @@ jobs:
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           no-cache: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'build-no-cache' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Cache des couches sur GHCR (n'expire pas, partagé entre branches)
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
           
   skip:
     name: Skip (no relevant changes)

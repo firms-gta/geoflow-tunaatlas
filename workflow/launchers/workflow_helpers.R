@@ -122,11 +122,10 @@ remove_dbi_software <- function(file) {
     }, workflow$software)
   }
   
-  # Actions that read or write the database: switched off. GeoPackage and
-  # GeoParquet read the CWP grid from the database unless a grid_file option
-  # is given.
+  # Actions that read or write the database: switched off. GeoParquet reads
+  # the CWP grid from the database unless a grid_file option is given.
   db_actions <- c("enrich_metadata", "enrich_for_db_services", "load_metadata")
-  grid_actions <- c("create_geopackage", "create_geoparquet")
+  grid_actions <- c("create_geoparquet")
 
   if (!is.null(workflow$actions)) {
     for (i in seq_along(workflow$actions)) {
