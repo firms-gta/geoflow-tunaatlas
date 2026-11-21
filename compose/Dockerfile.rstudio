@@ -1,8 +1,15 @@
 ARG BASE_IMAGE=gta-workflow:geoflow-1.3.0
 FROM ${BASE_IMAGE}
 USER root
-ENV S6_VERSION=v2.1.0.2 RSTUDIO_VERSION=latest DEFAULT_USER=rstudio \
-    PANDOC_VERSION=default PATH=/usr/lib/rstudio-server/bin:$PATH
+# Pinned versions, for reproducible builds:
+# - RStudio "latest" (2026.11) puts its pandoc in quarto/bin/tools/x86_64/,
+#   a path the rocker script of the base image does not know;
+# - with no pandoc found, PANDOC_VERSION=default calls the GitHub API (rate
+#   limited on CI runners) and the build fails without any message.
+# With an exact version, the pandoc .deb is downloaded straight from the
+# release page, without the API.
+ENV S6_VERSION=v2.1.0.2 RSTUDIO_VERSION=2026.10.0+233 DEFAULT_USER=rstudio \
+    PANDOC_VERSION=3.12.1 PATH=/usr/lib/rstudio-server/bin:$PATH
 RUN /rocker_scripts/install_rstudio.sh && /rocker_scripts/install_pandoc.sh
 ENTRYPOINT []
 CMD ["/init"]
