@@ -5,6 +5,7 @@ load_dataset <- function(action,entity, config){
   source(here::here( "./R/sardara_functions/FUNMergeDimensions_NonCodeListLike.R"))
   source(here::here( "./R/sardara_functions/FUNUploadDatasetToTableInDB.R"))
   source(here::here( "./R/sardara_functions/FUNuploadNewRecordsToDB.R"))
+  source(here::here( "./R/tunaatlas_actions/check_loaded_dataset.R"))
   
   opts <- action$options
   
@@ -40,6 +41,8 @@ load_dataset <- function(action,entity, config){
   upload_to_googledrive <- if(!is.null(opts$upload_to_googledrive)) opts$upload_to_googledrive else TRUE
   save_local_path <- opts$save_local_path %||% NULL
   save_local_overwrite <- opts$save_local_overwrite %||% TRUE
+  # check of the loaded data against the file sent: "error", "warn" or "none"
+  check_loaded_data <- opts$check_loaded_data %||% "error"
   
   #db
   con = config$software$output$dbi
@@ -607,6 +610,20 @@ load_dataset <- function(action,entity, config){
       }
       dbSendQuery(con,column_comments)
     }
+  }
+  
+  # Check back: the dataset read back from the database (its materialized
+  # view, or the same query when there is no view) must be exactly the file
+  # that was sent, and the fact table must hold no NULL for it
+  if(upload_to_db){
+    gta_check_loaded_dataset(
+      con, path_to_dataset,
+      table = InputMetadataset$database_table_name,
+      id_metadata = PK_metadata,
+      view = if (go_view) paste0(schema_name_for_view, ".", database_view_name) else NULL,
+      query = sql_query_dataset_extraction$query_CSV,
+      mode = check_loaded_data
+    )
   }
   
   #upload dataset to Google drive

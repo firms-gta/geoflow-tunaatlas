@@ -74,11 +74,6 @@
       "run": true
     },
         {
-      "id": "create_geopackage",
-      "script": "../R/tunaatlas_actions/create_geopackage.R",
-      "run": true
-    },
-    {
       "id": "create_geoparquet",
       "script": "../R/tunaatlas_actions/create_geoparquet.R",
       "run": true
