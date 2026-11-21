@@ -118,7 +118,7 @@ jobs:
           # repository when they are there. Anything still missing stops the
           # run here rather than in the middle of a step.
           missing=()
-          for f in $(cat config/*.csv | grep -o '\./data/GTA_2026/[A-Za-z0-9_.-]*' \
+          for f in $(cat config/entities/*.csv | grep -o '\./data/GTA_2026/[A-Za-z0-9_.-]*' \
                        | grep -v '/dataoutput' | sed 's#^\./data/GTA_2026/##; s#_$##' | sort -u); do
             [[ -e "runtime/data/$f" ]] && continue
             if [[ -e "data/$f" ]]; then
