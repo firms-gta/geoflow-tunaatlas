@@ -44,6 +44,8 @@ This script works with any dataset that has the first 5 columns named and ordere
   (wcpfc/effort/driftnet/action_wcpfc_effort_driftnet.R).
 
 ```{r}
+# Packages the function uses unqualified, attached as in the workflow
+suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_wcpfc_effort_driftnet <- function(data) {
   
@@ -155,8 +157,9 @@ Unmapped values, then the results:
 
 ```{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
-data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'driftnet', 'data', 'WCPFC_G_PUBLIC_BY_YR_MON_recap_mapping.csv'))
-data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'driftnet', 'data', 'WCPFC_G_PUBLIC_BY_YR_MON_not_mapped_total.csv'))
+# The summaries are NULL when nothing was mapped (e.g. tRFMOs not in source_authority_to_map)
+if (!is.null(mapping_codelist$recap_mapping)) data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'driftnet', 'data', 'WCPFC_G_PUBLIC_BY_YR_MON_recap_mapping.csv'))
+if (!is.null(mapping_codelist$not_mapped_total)) data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'driftnet', 'data', 'WCPFC_G_PUBLIC_BY_YR_MON_not_mapped_total.csv'))
 data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'effort', 'driftnet', 'data', 'WCPFC_G_PUBLIC_BY_YR_MON_CWP_dataset.csv'))
 head(mapping_codelist$recap_mapping)
 ```

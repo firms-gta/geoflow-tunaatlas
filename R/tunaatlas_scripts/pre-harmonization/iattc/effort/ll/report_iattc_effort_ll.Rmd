@@ -34,6 +34,8 @@ This function transforms a dataset containing catch information into the CWP (Co
   (iattc/effort/ll/action_iattc_effort_ll.R).
 
 ```{r}
+# Packages the function uses unqualified, attached as in the workflow
+suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_iattc_effort_ll <- function(data) {
   # Samples of the input and output data (from the former script)
@@ -116,8 +118,9 @@ Unmapped values, then the results:
 
 ```{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
-data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'll', 'data', 'PublicLLTunaBillfishMt_recap_mapping.csv'))
-data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'll', 'data', 'PublicLLTunaBillfishMt_not_mapped_total.csv'))
+# The summaries are NULL when nothing was mapped (e.g. tRFMOs not in source_authority_to_map)
+if (!is.null(mapping_codelist$recap_mapping)) data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'll', 'data', 'PublicLLTunaBillfishMt_recap_mapping.csv'))
+if (!is.null(mapping_codelist$not_mapped_total)) data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'll', 'data', 'PublicLLTunaBillfishMt_not_mapped_total.csv'))
 data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'effort', 'll', 'data', 'PublicLLTunaBillfishMt_CWP_dataset.csv'))
 head(mapping_codelist$recap_mapping)
 ```

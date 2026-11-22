@@ -68,6 +68,8 @@ gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
     description,
     "",
     chunk(
+      "# Packages the function uses unqualified, attached as in the workflow",
+      "suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })",
       "source(here::here('R/core/gta_data.R'))",
       code
     ),
@@ -95,8 +97,9 @@ gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
     "",
     chunk(
       "georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))",
-      sprintf("data.table::fwrite(mapping_codelist$recap_mapping, %s)", data_path(paste0(base, "_recap_mapping.csv"))),
-      sprintf("data.table::fwrite(mapping_codelist$not_mapped_total, %s)", data_path(paste0(base, "_not_mapped_total.csv"))),
+      "# The summaries are NULL when nothing was mapped (e.g. tRFMOs not in source_authority_to_map)",
+      sprintf("if (!is.null(mapping_codelist$recap_mapping)) data.table::fwrite(mapping_codelist$recap_mapping, %s)", data_path(paste0(base, "_recap_mapping.csv"))),
+      sprintf("if (!is.null(mapping_codelist$not_mapped_total)) data.table::fwrite(mapping_codelist$not_mapped_total, %s)", data_path(paste0(base, "_not_mapped_total.csv"))),
       sprintf("data.table::fwrite(georef_dataset, %s)", data_path(paste0(base, "_CWP_dataset.csv"))),
       "head(mapping_codelist$recap_mapping)"
     )
