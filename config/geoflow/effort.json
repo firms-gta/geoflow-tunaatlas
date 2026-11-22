@@ -1,6 +1,6 @@
 {
   "profile": {
-    "id": "tuna-atlas-raw-nominal-catch",
+    "id": "tuna-atlas-effort",
     "mode": "entity",
   	"environment": {
   		"file": ".env",
@@ -10,23 +10,23 @@
     "organization": "FIRMS Tuna Atlas",
     "logos": [
       "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
-      "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
-      "http://www.umr-marbec.fr/images/logo-ird-en.png"
+      "https://www.blue-cloud.org/sites/default/files/styles/logo_small/public/FAO_2lines_500x500_1.png?itok=igwPSL5v",
+      "https://en.ird.fr/sites/ird_fr/files/2019-08/logo_IRD_2016_BLOC_UK_COUL.png"
     ],
     "options": {
       "line_separator": "_\n"
     }
   },
   "metadata": {
-    "entities": [
+    "entities" : [
       {
         "handler": "csv",
-        "source": "config/entities/geoflow_entities_tuna_global_datasets - Raw_Nominal_catch_2026.csv"
+        "source": "config/entities/entities_effort.csv"
       }
     ],
     "contacts" : []
   },
-  "software": [
+ "software": [
 	{
 		"id": "my-database-write",
 		"type": "output",
@@ -43,15 +43,8 @@
 	}
   ],
   "actions": [
+    
     {
-      "id": "Tidying_and_mapping_data",
-      "script": "../../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
-      "run": true,
-      "options": {
-        "recap_each_step": true
-      }
-    }, 
-        {
       "id": "load_dataset",
       "script": "../../workflow/actions/load_dataset.R",
       "run": true,
@@ -61,17 +54,31 @@
         "create_materialized_view" : true,
         "add_sql_comments" : true,
         "upload_to_googledrive" : false,
-        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
+        "save_local_path": "../../../../data/GTA_2026/dataoutputGTA/",
         "save_local_overwrite": true
       }
     },
     {
-      "id": "create_report_global_action",
-      "script": "../../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
-      "run": true,
-      "options": {
-      }
+      "id": "enrich_metadata",
+     "script": "../../workflow/actions/enrich_metadata.R",
+      "run": true
+    },
+    {
+      "id": "enrich_for_db_services",
+     "script": "../../workflow/actions/enrich_db_for_services.R",
+      "run": true
+    },
+    {
+      "id": "load_metadata",
+     "script": "../../workflow/actions/load_metadata.R",
+      "run": true
+    },
+        {
+      "id": "create_geoparquet",
+      "script": "../../workflow/actions/create_geoparquet.R",
+      "run": true
     }
+    
     
   ]
 }

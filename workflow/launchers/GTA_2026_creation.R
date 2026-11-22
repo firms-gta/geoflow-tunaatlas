@@ -697,7 +697,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   }
   
   source(here::here("workflow/launchers/running_time_of_workflow.R"))
-  source(here::here("workflow/launchers/executeAndRename.R"))
+  source(here::here("workflow/launchers/rename_job_folder.R"))
   source(here::here("workflow/launchers/workflow_helpers.R"))
   
   setwd(here::here())
@@ -707,9 +707,9 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # ---------------------------------------------------------------------------
   
   preharmo_json_files <- c(
-    "config/geoflow/Nominal_catch_2026.json",
-    "config/geoflow/All_raw_data_georef.json",
-    "config/geoflow/All_raw_data_georef_effort.json"
+    "config/geoflow/raw_nominal_catch.json",
+    "config/geoflow/raw_catch.json",
+    "config/geoflow/raw_effort.json"
   )
   
   message("Checking pre-harmonisation JSON input files before launching workflows...")
@@ -738,16 +738,16 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # ---------------------------------------------------------------------------
   if (run_any_step(c("DB"))) {
     
-    tunaatlas_qa_dbmodel_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/tunaatlas_qa_dbmodel+codelists.json"),
+    tunaatlas_qa_dbmodel_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/db_model_codelists.json"),
       requires_db = TRUE,
       rename_suffix = "_qa_dbmodel_codelists_final"
     )
     
     running_time_of_workflow(tunaatlas_qa_dbmodel_path)
     
-    tunaatlas_qa_mappings_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/tunaatlas_qa_mappings.json"),
+    tunaatlas_qa_mappings_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/db_mappings.json"),
       requires_db = TRUE,
       rename_suffix = "_qa_mappings_final"
     )
@@ -756,41 +756,41 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   }
   
   if (run_any_step(c("rawdata", "raw_nominal"))) {
-    raw_nominal_catch <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/Nominal_catch_2026.json"),
+    raw_nominal_catch <- run_geoflow_workflow(
+      file = here::here("config/geoflow/raw_nominal_catch.json"),
       rename_suffix = "_raw_nominal_catch_2026_final"
     )
     
     running_time_of_workflow(raw_nominal_catch)
     
     if (summarise_invalid_raw) {
-      summarise_invalid(raw_nominal_catch)
+      summarise_invalid_raw_data(raw_nominal_catch)
     }
   }
   
   if (run_any_step(c("rawdata", "raw_effort"))) {
-    raw_data_georef_effort <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/All_raw_data_georef_effort.json"),
+    raw_data_georef_effort <- run_geoflow_workflow(
+      file = here::here("config/geoflow/raw_effort.json"),
       rename_suffix = "_raw_data_georef_effort_final"
     )
     
     running_time_of_workflow(raw_data_georef_effort)
     
     if (summarise_invalid_raw) {
-      summarise_invalid(raw_data_georef_effort)
+      summarise_invalid_raw_data(raw_data_georef_effort)
     }
   }
   
   if (run_any_step(c("rawdata", "raw_georef"))) {
-    raw_data_georef <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/All_raw_data_georef.json"),
+    raw_data_georef <- run_geoflow_workflow(
+      file = here::here("config/geoflow/raw_catch.json"),
       rename_suffix = "_raw_data_georef_final"
     )
     
     running_time_of_workflow(raw_data_georef)
     
     if (summarise_invalid_raw) {
-      summarise_invalid(raw_data_georef)
+      summarise_invalid_raw_data(raw_data_georef)
     }
   }
   
@@ -830,28 +830,28 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # ---------------------------------------------------------------------------
   
   if (run_step("effort")) {
-    tunaatlas_effort_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/create_effort_dataset_2026.json"),
+    tunaatlas_effort_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/effort.json"),
       rename_suffix = "new_efforts_final"
     )
   }
   
   if (run_step("nominal")) {
-    tunaatlas_nominal_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/create_nominal_dataset_2026.json"),
+    tunaatlas_nominal_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/nominal_catch.json"),
       rename_suffix = "nominal_final"
     )
   }
   
   if (run_step("level0")) {
-    tunaatlas_level0_catch_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/catch_ird_level0_local.json"),
+    tunaatlas_level0_catch_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/catch_level0.json"),
       rename_suffix = "level_0_catch_2026"
     )
     if (run_step("summaries")) {
       if (!is.null(tunaatlas_level0_catch_path)) {
     run_step_summary(
-      workflow_file = "config/geoflow/catch_ird_level0_local.json",
+      workflow_file = "config/geoflow/catch_level0.json",
       workflow_output = tunaatlas_level0_catch_path,
       source_authority = "all"
     )
@@ -860,14 +860,14 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   }
   
   if (run_step("level1")) {
-    tunaatlas_level1_catch_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/catch_ird_level1_local.json"),
+    tunaatlas_level1_catch_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/catch_level1.json"),
       rename_suffix = "level_1_catch_2026"
     )
     if (run_step("summaries")) {
       if (!is.null(tunaatlas_level1_catch_path)) {
     run_step_summary(
-      workflow_file = "config/geoflow/catch_ird_level1_local.json",
+      workflow_file = "config/geoflow/catch_level1.json",
       workflow_output = tunaatlas_level1_catch_path,
       source_authority = "all"
     )
@@ -877,15 +877,15 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   
   if (run_step("level2")) {
       
-    tunaatlas_level2_catch_path <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/catch_ird_level2_local.json"),
+    tunaatlas_level2_catch_path <- run_geoflow_workflow(
+      file = here::here("config/geoflow/catch_level2.json"),
       rename_suffix = "level_2_catch_2026"
     )
     if (run_step("summaries")) {
       if (!is.null(tunaatlas_level2_catch_path)) {
         
     run_step_summary(
-      workflow_file = "config/geoflow/catch_ird_level2_local.json",
+      workflow_file = "config/geoflow/catch_level2.json",
       workflow_output = tunaatlas_level2_catch_path,
       source_authority = "all"
     )
@@ -919,7 +919,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     if (!is.null(tunaatlas_level0_catch_path)) {
       
     run_step_summary(
-      workflow_file = "config/geoflow/catch_ird_level0_local.json",
+      workflow_file = "config/geoflow/catch_level0.json",
       workflow_output = tunaatlas_level0_catch_path,
       source_authority = "all"
     )
@@ -927,7 +927,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     if (!is.null(tunaatlas_level1_catch_path)) {
       
     run_step_summary(
-      workflow_file = "config/geoflow/catch_ird_level1_local.json",
+      workflow_file = "config/geoflow/catch_level1.json",
       workflow_output = tunaatlas_level1_catch_path,
       source_authority = "all"
     )
@@ -935,7 +935,7 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     if (!is.null(tunaatlas_level2_catch_path)) {
       
     run_step_summary(
-      workflow_file = "config/geoflow/catch_ird_level2_local.json",
+      workflow_file = "config/geoflow/catch_level2.json",
       workflow_output = tunaatlas_level2_catch_path,
       source_authority = "all"
     )
@@ -1024,8 +1024,8 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
     source(here::here("workflow/actions/ensure_geoserver_ready.R"))
     source(here::here("docker/patches/patch-zen4r-upload-error.R"))
     ensure_geoserver_ready()
-    tunaatlas_services <- execute_workflow_maybe_upload(
-      file = here::here("config/geoflow/tunaatlas_qa_services.json"),
+    tunaatlas_services <- run_geoflow_workflow(
+      file = here::here("config/geoflow/services.json"),
       requires_db = TRUE,
       rename_suffix = "_qa_services"
     )

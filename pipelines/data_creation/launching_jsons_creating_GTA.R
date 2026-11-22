@@ -50,9 +50,9 @@ if(file.exists(here::here("geoserver_sdi_lab.env"))){
 load_dot_env(file = here::here(default_file)) # to be replaced by the one used
 # load_dot_env(file = "~/Documents/Tunaatlas_level1/catch_local.env")
 source(here::here("workflow/launchers/running_time_of_workflow.R"))
-source(here::here("workflow/launchers/executeAndRename.R"))
+source(here::here("workflow/launchers/rename_job_folder.R"))
 
-config <- initWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("config/geoflow/db_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 
@@ -61,13 +61,13 @@ action <- entity$data$actions[[1]]
 
 stop("Stop")
 # First step is creation of the database model and loading of the codelist (around 5 minutes)
-db_model <- executeWorkflow(here("config/geoflow/tunaatlas_qa_dbmodel+codelists.json"))
-db_model <- executeAndRename(db_model, "_db_model")
+db_model <- executeWorkflow(here("config/geoflow/db_model_codelists.json"))
+db_model <- rename_job_folder(db_model, "_db_model")
 running_time_of_workflow(db_model)
 
 # Second step is the loading of the mappings (around 1.2 minutes)
-mappings <- executeWorkflow(here("config/geoflow/tunaatlas_qa_mappings.json"))
-mappings <- executeAndRename(mappings, "_mappings")
+mappings <- executeWorkflow(here("config/geoflow/db_mappings.json"))
+mappings <- rename_job_folder(mappings, "_mappings")
 running_time_of_workflow(mappings)
 
 # Third step is pre-harmonizing the datasets provide by tRFMOs: This step is divided in 3 
@@ -87,14 +87,14 @@ copy_all_nested_data_folders <- function(source_root, target_data_folder = here:
 ## Nominal data: These datasets are mandatory to create the georeferenced dataset level 2. For level 0 or 1 they are not mandatory time around 2.7 minutes
 # Around 2.7 minutes
 raw_nominal_catch <- executeWorkflow(here::here("config/geoflow/Raw_nominal_catch.json"))
-raw_nominal_catch <- executeAndRename(raw_nominal_catch, "_raw_nominal_catch_2024")
+raw_nominal_catch <- rename_job_folder(raw_nominal_catch, "_raw_nominal_catch_2024")
 running_time_of_workflow(raw_nominal_catch)
 
 
 ## Georeferenced catch: These datasets contains catch AND EFFORT FOR SOME DATA as effort are used to raise catch data for level 0 to 2
 # Around 1.2 hours
-raw_data_georef <- executeWorkflow(here::here("config/geoflow/All_raw_data_georef.json")) 
-raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024")
+raw_data_georef <- executeWorkflow(here::here("config/geoflow/raw_catch.json")) 
+raw_data_georef <- rename_job_folder(raw_data_georef, "_raw_data_georef_2024")
 copy_all_nested_data_folders(raw_data_georef)
 
 running_time_of_workflow(raw_data_georef)
@@ -104,7 +104,7 @@ running_time_of_workflow(raw_data_georef)
 setwd("~/firms-gta/geoflow-tunaatlas/data")
 raw_data_georef <- executeWorkflow(here::here("config/geoflow/All_raw_data_georef_local.json"))
 config <- initWorkflow(here::here("config/geoflow/All_raw_data_georef_local.json"))
-raw_data_georef <- executeAndRename(raw_data_georef, "_raw_data_georef_2024_local")
+raw_data_georef <- rename_job_folder(raw_data_georef, "_raw_data_georef_2024_local")
 dir.create("data_raw_georef")
 copy_all_nested_data_folders(file.path("data",raw_data_georef), "data_raw_georef")
 
@@ -121,8 +121,8 @@ time_Summarising_invalid_data <- system.time({
 
 ## Goereferenced effort: These datasets are used to create the georeferenced effort
 # Around 30 minutes
-raw_data_georef_effort <- executeWorkflow(here::here("config/geoflow/All_raw_data_georef_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
-raw_data_georef_effort <- executeAndRename(raw_data_georef_effort, "_raw_data_georef_effort")
+raw_data_georef_effort <- executeWorkflow(here::here("config/geoflow/raw_effort.json"))# for iattc 5 deg, only keep the tuna because not much differneces betwwen the two, mostly duplicates
+raw_data_georef_effort <- rename_job_folder(raw_data_georef_effort, "_raw_data_georef_effort")
 copy_all_nested_data_folders(raw_data_georef_effort)
 copy_all_nested_data_folders(raw_data_georef_effort, target_data_folder = "efforts_all")
 running_time_of_workflow(raw_data_georef_effort)
@@ -144,7 +144,7 @@ running_time_of_workflow(raw_data_georef_effort)
 ## Summarising the invalid data for all the datasets pre-harmonized
 # source("./Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
 # source("~/firms-gta/geoflow-tunaatlas/Analysis_markdown/Checking_raw_files_markdown/Summarising_invalid_data.R")
-config <- initWorkflow(here::here("config/geoflow/All_raw_data_georef.json"), handleMetadata = FALSE)
+config <- initWorkflow(here::here("config/geoflow/raw_catch.json"), handleMetadata = FALSE)
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 time_Summarising_invalid_data <- system.time({
@@ -168,14 +168,14 @@ time_Summarising_invalid_data_georef <- system.time({
 
 executeWorkflow("manu_geoflow_gta_config_model.json")
 
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json")) # FROM DRIVE
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/db_global_datasets_catch.json")) # FROM DRIVE
 file.copy(list.files(file.path(tunaatlas_qa_global_datasets_catch_path, "data"), 
                      full.names = TRUE), 
           here::here("data"), 
           recursive = TRUE)
 
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/level_2_catch_2025.json")) # FROM DRIVE
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
+tunaatlas_qa_global_datasets_catch_path <- rename_job_folder(tunaatlas_qa_global_datasets_catch_path, "level_2_catch_2025")
 gc()
 config <- initWorkflow(here::here("config/geoflow/level_2_catch_2025.json"))
 unlink(config$job, recursive = TRUE)
@@ -212,11 +212,11 @@ copy_all_nested_data_folders(tunaatlas_qa_global_datasets_effort_path)
 tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/creating_dataset.json"))
 
 tunaatlas_qa_global_datasets_effort_path <- executeWorkflow(here::here("config/geoflow/create_effort_dataset.json"))  # FROM LOCAL IF NOT RUNNING USE DRIVE
-tunaatlas_qa_global_datasets_effort_path <- executeAndRename(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
-# tunaatlas_qa_services <- initWorkflow("tunaatlas_qa_services.json")
+tunaatlas_qa_global_datasets_effort_path <- rename_job_folder(tunaatlas_qa_global_datasets_effort_path, "new_efforts")
+# tunaatlas_qa_services <- initWorkflow("services.json")
 # save.image()
 # tunaatlas_qa_global_datasets_catch_path <- "jobs/20241104162955/entities/global_catch_ird_level2_rf1"
-tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "new_level_1_2_01_2025")
+tunaatlas_qa_global_datasets_catch_path <- rename_job_folder(tunaatlas_qa_global_datasets_catch_path, "new_level_1_2_01_2025")
 ### TODO add create_materialized_view_for_shiny_apps.R in the end of the workflow action on end
 
 running_time_of_workflow(tunaatlas_qa_global_datasets_catch_path)
@@ -250,7 +250,7 @@ for (entity_dir in entity_dirs) {
 
 ## Recapitulation of all the treatment done for each final dataset, these allows the recap of each step to ensure comprehension of the impact of each treatment
 config <- initWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_effort.json"))
-# config <- initWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
+# config <- initWorkflow(here::here("db_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 #removed of Sumamrising step required_packages <- c("webshot","here", "usethis","ows4R","sp", "data.table", "flextable", "readtext", "sf", "dplyr", "stringr", "tibble",
@@ -369,10 +369,10 @@ saveRDS(results, "data/resultsonallthegeorefsuptonom.rds")
 source(here::here("./workflow/actions/convert_to_netcdf.R"))
 entity_dirs <- list.dirs(file.path(tunaatlas_qa_global_datasets_catch_path, "entities"), full.names = TRUE, recursive = FALSE)
 wd <- getwd()
-# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("tunaatlas_qa_global_datasets_catch.json"))
-# tunaatlas_qa_global_datasets_catch_path <- executeAndRename(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
+# tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("db_global_datasets_catch.json"))
+# tunaatlas_qa_global_datasets_catch_path <- rename_job_folder(tunaatlas_qa_global_datasets_catch_path, "_global_datasets_level1_2")
 
-config <- initWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("config/geoflow/db_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 
 
@@ -416,7 +416,7 @@ cwp_catch <- unique(global_catch_firms_level0_public$geographic_identifier)
 
 
 # Putting dataset on geoserver, geonetwork and zenodo #For now zenodo does not work due to issue with api
-tunaatlas_qa_services <- initWorkflow("config/geoflow/tunaatlas_qa_services.json")
+tunaatlas_qa_services <- initWorkflow("config/geoflow/services.json")
 
 # Enriching data with copernicus data
 all_files <- list.files(getwd(), pattern = "\\.nc$", full.names = TRUE, recursive = TRUE)

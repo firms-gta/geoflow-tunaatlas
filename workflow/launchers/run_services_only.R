@@ -34,8 +34,8 @@ if (!file.exists(here::here(".env"))) {
 dotenv::load_dot_env(file = here::here(".env"))
 source(here::here("docker/patches/patch-zen4r-upload-error.R"))
 
-tunaatlas_qa_dbmodel_path <- execute_workflow_maybe_upload(
-  file = here::here("config/geoflow/tunaatlas_qa_services.json"),
+tunaatlas_qa_dbmodel_path <- run_geoflow_workflow(
+  file = here::here("config/geoflow/services.json"),
   requires_db = TRUE,
   rename_suffix = "services"
 )

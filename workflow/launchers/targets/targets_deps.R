@@ -1,7 +1,7 @@
 # =============================================================================
 # Files a geoflow configuration depends on, for {targets}.
 #
-# gta_config_deps("config/geoflow/catch_ird_level0_local.json") returns, recursively:
+# gta_config_deps("config/geoflow/catch_level0.json") returns, recursively:
 #   * the JSON itself;
 #   * every file it names: entity CSVs, action scripts ("script": "../actions/..."),
 #     onstart/onend SQL;
@@ -91,7 +91,7 @@ gta_launcher_deps <- function(root = ".") {
     "workflow/launchers/workflow_helpers.R",
     "workflow/launchers/zenodo_helpers.R",
     "R/tunaatlas_scripts/pre-harmonization/bootstrap_preharmo.R",
-    "workflow/launchers/executeAndRename.R",
+    "workflow/launchers/rename_job_folder.R",
     "workflow/launchers/running_time_of_workflow.R",
     "workflow/launchers/targets/targets_deps.R",
     ".env"

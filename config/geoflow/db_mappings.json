@@ -21,7 +21,7 @@
   "metadata": {
     "entities": {
       "handler": "csv",
-      "source": "config/entities/geoflow_entities_tuna_mappings.csv"
+      "source": "config/entities/entities_mappings.csv"
     }
   },
   "software": [

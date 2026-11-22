@@ -1,6 +1,6 @@
 {
   "profile": {
-    "id": "tuna-atlas-effort",
+    "id": "tuna-atlas-catch-level0",
     "mode": "entity",
   	"environment": {
   		"file": ".env",
@@ -21,12 +21,12 @@
     "entities" : [
       {
         "handler": "csv",
-        "source": "config/entities/entities_effort_2026.csv"
+        "source": "config/entities/entities_catch_level0.csv"
       }
     ],
     "contacts" : []
   },
- "software": [
+  "software": [
 	{
 		"id": "my-database-write",
 		"type": "output",
@@ -49,8 +49,8 @@
       "script": "../../workflow/actions/load_dataset.R",
       "run": true,
       "options": {
-        "upload_to_db": true,
         "upload_to_db_public": true,
+        "upload_to_db": true,
         "create_materialized_view" : true,
         "add_sql_comments" : true,
         "upload_to_googledrive" : false,
@@ -78,7 +78,6 @@
       "script": "../../workflow/actions/create_geoparquet.R",
       "run": true
     }
-    
     
   ]
 }

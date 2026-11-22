@@ -1,6 +1,6 @@
 {
   "profile": {
-    "id": "tuna-atlas-catch-level0",
+    "id": "tuna-atlas-raw-effort",
     "mode": "entity",
   	"environment": {
   		"file": ".env",
@@ -20,8 +20,8 @@
   "metadata": {
     "entities" : [
       {
-        "handler": "csv",
-        "source": "config/entities/geoflow_entities_tuna_global_datasets_ird_level0 - 2026_worfklow_catch_level0.csv"
+      "handler": "csv",
+      "source": "config/entities/entities_raw_effort.csv"
       }
     ],
     "contacts" : []
@@ -43,40 +43,36 @@
 	}
   ],
   "actions": [
+    {
+      "id": "Tidying_and_mapping_data",
+      "script": "../../R/tunaatlas_scripts/pre-harmonization/Tidying_and_mapping_data.R",
+      "run": true,
+      "options": {
+        "recap_each_step": true
+      }
+    }, 
     
     {
       "id": "load_dataset",
       "script": "../../workflow/actions/load_dataset.R",
       "run": true,
       "options": {
-        "upload_to_db_public": true,
         "upload_to_db": true,
+        "upload_to_db_public": true,
         "create_materialized_view" : true,
         "add_sql_comments" : true,
         "upload_to_googledrive" : false,
-        "save_local_path": "../../../../data/GTA_2026/dataoutputGTA/",
+        "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
         "save_local_overwrite": true
       }
     },
+    
     {
-      "id": "enrich_metadata",
-     "script": "../../workflow/actions/enrich_metadata.R",
-      "run": true
-    },
-    {
-      "id": "enrich_for_db_services",
-     "script": "../../workflow/actions/enrich_db_for_services.R",
-      "run": true
-    },
-    {
-      "id": "load_metadata",
-     "script": "../../workflow/actions/load_metadata.R",
-      "run": true
-    },
-        {
-      "id": "create_geoparquet",
-      "script": "../../workflow/actions/create_geoparquet.R",
-      "run": true
+      "id": "create_report_global_action",
+      "script": "../../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",
+      "run": true,
+      "options": {
+      }
     }
     
   ]

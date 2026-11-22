@@ -106,14 +106,14 @@ list(
   # --- files each step depends on ---------------------------------------------
   tar_target(launcher_files, gta_launcher_deps(), format = "file",
              cue = tar_cue(mode = "always")),
-  cfg_target("cfg_raw_nominal", "config/geoflow/Nominal_catch_2026.json",           include_data = TRUE),
-  cfg_target("cfg_raw_effort",  "config/geoflow/All_raw_data_georef_effort.json",  include_data = TRUE),
-  cfg_target("cfg_raw_georef",  "config/geoflow/All_raw_data_georef.json",         include_data = TRUE),
-  cfg_target("cfg_nominal",     "config/geoflow/create_nominal_dataset_2026.json"),
-  cfg_target("cfg_effort",      "config/geoflow/create_effort_dataset_2026.json"),
-  cfg_target("cfg_level0",      "config/geoflow/catch_ird_level0_local.json"),
-  cfg_target("cfg_level1",      "config/geoflow/catch_ird_level1_local.json"),
-  cfg_target("cfg_level2",      "config/geoflow/catch_ird_level2_local.json"),
+  cfg_target("cfg_raw_nominal", "config/geoflow/raw_nominal_catch.json",           include_data = TRUE),
+  cfg_target("cfg_raw_effort",  "config/geoflow/raw_effort.json",  include_data = TRUE),
+  cfg_target("cfg_raw_georef",  "config/geoflow/raw_catch.json",         include_data = TRUE),
+  cfg_target("cfg_nominal",     "config/geoflow/nominal_catch.json"),
+  cfg_target("cfg_effort",      "config/geoflow/effort.json"),
+  cfg_target("cfg_level0",      "config/geoflow/catch_level0.json"),
+  cfg_target("cfg_level1",      "config/geoflow/catch_level1.json"),
+  cfg_target("cfg_level2",      "config/geoflow/catch_level2.json"),
 
   # --- workflow steps -----------------------------------------------------------
   tar_target(raw_nominal, gta_step("raw_nominal",

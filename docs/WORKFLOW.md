@@ -93,15 +93,15 @@ Each production stage is associated with one or more `geoflow` configurations.
 | Stage                     | `GTA_STEPS` selector | Main configuration                        | Purpose                                                               |
 | ------------------------- | -------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
 | Input validation          | automatic            | Pre-harmonisation configurations          | Verify required source files before long processing stages            |
-| Raw nominal catch         | `raw_nominal`        | `config/geoflow/Nominal_catch_2026.json`          | Prepare source-specific nominal catch data                            |
-| Raw georeferenced catch   | `raw_georef`         | `config/geoflow/All_raw_data_georef.json`         | Prepare source-specific spatial catch data                            |
-| Raw fishing effort        | `raw_effort`         | `config/geoflow/All_raw_data_georef_effort.json`  | Prepare source-specific georeferenced fishing-effort data             |
+| Raw nominal catch         | `raw_nominal`        | `config/geoflow/raw_nominal_catch.json`          | Prepare source-specific nominal catch data                            |
+| Raw georeferenced catch   | `raw_georef`         | `config/geoflow/raw_catch.json`         | Prepare source-specific spatial catch data                            |
+| Raw fishing effort        | `raw_effort`         | `config/geoflow/raw_effort.json`  | Prepare source-specific georeferenced fishing-effort data             |
 | All raw branches          | `rawdata`            | Three configurations above                | Run the complete pre-harmonisation group                              |
-| Harmonised nominal catch  | `nominal`            | `config/geoflow/create_nominal_dataset_2026.json` | Produce the harmonised nominal reference dataset                      |
-| Harmonised fishing effort | `effort`             | `config/geoflow/create_effort_dataset_2026.json`  | Produce the harmonised fishing-effort dataset                         |
-| Catch Level 0             | `level0`             | `config/geoflow/catch_ird_level0_local.json`      | Produce harmonised georeferenced catch before Level 1 transformations |
-| Catch Level 1             | `level1`             | `config/geoflow/catch_ird_level1_local.json`      | Standardise measurement units and apply GTA Level 1 processing        |
-| Catch Level 2             | `level2`             | `config/geoflow/catch_ird_level2_local.json`      | Raise georeferenced catch against nominal catch                       |
+| Harmonised nominal catch  | `nominal`            | `config/geoflow/nominal_catch.json` | Produce the harmonised nominal reference dataset                      |
+| Harmonised fishing effort | `effort`             | `config/geoflow/effort.json`  | Produce the harmonised fishing-effort dataset                         |
+| Catch Level 0             | `level0`             | `config/geoflow/catch_level0.json`      | Produce harmonised georeferenced catch before Level 1 transformations |
+| Catch Level 1             | `level1`             | `config/geoflow/catch_level1.json`      | Standardise measurement units and apply GTA Level 1 processing        |
+| Catch Level 2             | `level2`             | `config/geoflow/catch_level2.json`      | Raise georeferenced catch against nominal catch                       |
 | Summaries                 | `summaries`          | Product configurations / existing jobs    | Regenerate dataset summaries                                          |
 | Comparison reports        | `reports`            | Existing nominal and Level 2 jobs         | Compare Level 2 outputs with nominal catch                            |
 | QA documentation          | `qa_rmd`             | Existing raw jobs                         | Generate pre-harmonisation QA documentation                           |
@@ -188,7 +188,7 @@ The `effort` stage consumes the pre-harmonised effort branch and produces a harm
 Its processing logic is defined in:
 
 ```text
-config/geoflow/create_effort_dataset_2026.json
+config/geoflow/effort.json
 ```
 
 ## 9. Dependencies between stages
@@ -365,14 +365,14 @@ workflow/                                       # R code that launches, no busin
 
 config/                                         # declarative configuration only
 ├── geoflow/                                    # geoflow JSON configurations
-│   ├── Nominal_catch_2026.json
-│   ├── All_raw_data_georef.json
-│   ├── All_raw_data_georef_effort.json
-│   ├── create_nominal_dataset_2026.json
-│   ├── create_effort_dataset_2026.json
-│   ├── catch_ird_level0_local.json
-│   ├── catch_ird_level1_local.json
-│   └── catch_ird_level2_local.json
+│   ├── raw_nominal_catch.json
+│   ├── raw_catch.json
+│   ├── raw_effort.json
+│   ├── nominal_catch.json
+│   ├── effort.json
+│   ├── catch_level0.json
+│   ├── catch_level1.json
+│   └── catch_level2.json
 ├── entities/                                   # geoflow entity tables (CSV)
 ├── fdi_versions.conf                           # pinned commits of the FDI code lists and mappings (Docker and local)
 └── sql/                                        # database SQL scripts

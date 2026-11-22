@@ -21,7 +21,7 @@
     "entities": [
 		{
 		  "handler": "csv",
-		  "source": "config/entities/geoflow_entities_tuna_codelists.csv"
+		  "source": "config/entities/entities_codelists.csv"
 		}
 	],
     "contacts" : {
