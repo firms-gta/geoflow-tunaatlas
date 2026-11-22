@@ -5,22 +5,18 @@
 #' (R/core/gta_rawdata_report.R) from the core function of the dataset. The
 #' dataset is found from the path of the entity's action
 #' (R/tunaatlas_scripts/pre-harmonization/<tRFMO>/<type>/<dataset>/action_*.R).
-#' Datasets already in the CWP format (cwp_format/) have no report.
+#' The datasets already in the CWP format (cwp_format/) have one report per
+#' tRFMO and type (see gta_rawdata_report_dataset()).
 #'
 #' @param config A config geoflow object, not used in this function.
 #' @param entity The entity geoflow object of the raw dataset.
 #' @param action An action geoflow object, not used in this function.
-#' @return The path of the report written, or NULL, invisibly.
+#' @return The path of the report written, invisibly.
 create_report_global_action <- function(config, entity, action) {
   source(here::here("R/core/gta_rawdata_report.R"))
-  root <- "R/tunaatlas_scripts/pre-harmonization/"
-  script_path <- sub("^\\./", "", entity$data$actions[[1]]$script)
-  dataset <- sub(paste0("^.*", root), "", dirname(script_path))
-  if (length(strsplit(dataset, "/", fixed = TRUE)[[1]]) != 3) {
-    return(invisible(NULL))   # e.g. cwp_format: already in CWP format
-  }
   sources <- basename(unlist(entity$data$source))
   raw_files <- sources[!grepl("code_lists", sources)]
+  dataset <- gta_rawdata_report_dataset(entity$data$actions[[1]]$script, raw_files)
   output_file <- paste0("report_", gsub("/", "_", dataset), ".Rmd")
   invisible(gta_rawdata_report(dataset, raw_files, output_file = output_file))
 }

@@ -30,11 +30,11 @@ update_rawdata_reports <- function(job_dirs = NULL, render = TRUE, n_rows = 5) {
   datasets <- unique(do.call(rbind, lapply(rows$Data, function(d) {
     script <- sub("^[^@]*@\\./", "", field(d, "action"))
     sources <- basename(strsplit(field(d, "source"), ",", fixed = TRUE)[[1]])
-    data.frame(dataset = sub(paste0("^", root, "/"), "", dirname(script)),
-               raw_files = paste(sources[!grepl("code_lists", sources)], collapse = ","),
+    raw_files <- sources[!grepl("code_lists", sources)]
+    data.frame(dataset = gta_rawdata_report_dataset(script, raw_files),
+               raw_files = paste(raw_files, collapse = ","),
                stringsAsFactors = FALSE)
   })))
-  datasets <- datasets[lengths(strsplit(datasets$dataset, "/", fixed = TRUE)) == 3, ]  # not cwp_format
   all_datasets <- datasets   # every entity, for the sample outputs
   # A dataset used by several entities: one report, from the first entity
   datasets <- datasets[!duplicated(datasets$dataset), ]
