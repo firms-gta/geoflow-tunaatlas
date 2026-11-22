@@ -1,201 +1,126 @@
 ---
 title: "Harmonize WCPFC Purse Seine Catch Datasets"
-output: 
-  html_document: 
+output:
+  html_document:
     code_folding: hide
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 # Introduction
 
-This R Markdown document is designed to transform data that is not in CWP format into CWP format.
-Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/west_pacific_ocean_catch_5deg_1m_ps_tunaatlaswcpfc_level0.R, the documentation keeps the format of roxygen2 skeleton.
+This document transforms a dataset that is not in the CWP format into the CWP format:
+it first changes the structure of the data, then maps its codes to the CWP code lists.
+It is generated from the function `gta_rawdata_wcpfc_catch_5deg_1m_ps()` (`R/core/rawdata/wcpfc_catch_5deg_1m_ps.R`), the code that the Global Tuna Atlas workflow runs.
 
-A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
-The datasets are named after the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+The raw dataset is read from the `data/` folder next to this document, which holds the first
+lines of each file under the name given by the tRFMO at export (this name may change).
+A summary of the mapping is given at the end; the results are saved in the same folder.
 
-Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+*Knit the document from the repository (here::here() locates its root), or run it chunk by chunk.*
 
-If you are interested in further details, the results and codes are available for review.
-
-*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
-It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-```
+# The function
 
 
-````{r}
-path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM.csv')
-````
+Converts the WCPFC purse seine catch dataset (5 degrees, monthly; file named
+`WCPFC_S_PUBLIC_BY_YY_MM.csv` at the source) to the harmonized data structure
+of the Tuna Atlas.
 
-Harmonize WCPFC Purse Seine Catch Datasets
+@param data The raw WCPFC dataset: a data frame or the path to the CSV file.
+@return The harmonized catches: one row per fishing fleet, gear, period,
+  area, fishing mode and species, with `source_authority`, `measurement`,
+  `measurement_type`, `measurement_unit`, `measurement_value` and
+  `measurement_processing_level`.
 
-This function harmonizes WCPFC Purse Seine catch datasets for integration into the Tuna Atlas database, ensuring data compliance with specified format requirements.
+@details Input data sample:
+\preformatted{
+YY MM LAT5 LON5 DAYS SETS_UNA SETS_LOG ... SKJ_C_UNA YFT_C_UNA BET_C_UNA OTH_C_UNA ...
+1967  2  30N 135E    0        0        0 ...         0         0         0         0 ...
+}
+Output data sample:
+\preformatted{
+fishing_fleet gear_type time_start time_end geographic_identifier fishing_mode species ...
+ALL           S         1970-01-01 1970-02-01 6100135             LOG          BET     ...
+}
 
-
-@return None; the function outputs files directly, including harmonized datasets,
-        optional metadata, and code lists for integration within the Tuna Atlas database.
-
-@details This function modifies the Purse Seine catch dataset to ensure compliance with the standardized
-         format, including renaming, reordering, and recalculating specific fields as necessary.
-         Metadata integration is contingent on the intended use within the Tuna Atlas database.
-
-@importFrom dplyr %>% filter select mutate group_by summarise
-@importFrom tidyr gather
-@importFrom reshape melt
-@seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} to convert WCPFC task 2 Purse Seine data structure.
-@export
-@keywords data harmonization, fisheries, WCPFC, tuna
+@seealso \code{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD} (R/sardara_functions).
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
-````{r}
-  # Input data sample:
-  # YY MM LAT5 LON5 DAYS SETS_UNA SETS_LOG SETS_DFAD SETS_AFAD SETS_OTH SKJ_C_UNA YFT_C_UNA BET_C_UNA OTH_C_UNA SKJ_C_LOG YFT_C_LOG BET_C_LOG OTH_C_LOG SKJ_C_DFAD
-  # 1967  2  30N 135E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0
-  # 1967  2  30N 140E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0
-  # 1967  2  35N 140E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0
-  # 1967  2  40N 140E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0
-  # 1967  2  40N 145E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0
-  # 1967  3  30N 135E    0        0        0         0         0        0         0         0         0         0         0         0         0         0          0
-  # YFT_C_DFAD BET_C_DFAD OTH_C_DFAD SKJ_C_AFAD YFT_C_AFAD BET_C_AFAD OTH_C_AFAD SKJ_C_OTH YFT_C_OTH BET_C_OTH OTH_C_OTH
-  #          0          0          0          0          0          0          0         0         0         0         0
-  #          0          0          0          0          0          0          0         0         0         0         0
-  #          0          0          0          0          0          0          0         0         0         0         0
-  #          0          0          0          0          0          0          0         0         0         0         0
-  #          0          0          0          0          0          0          0         0         0         0         0
-  #          0          0          0          0          0          0          0         0         0         0         0
-  
-  
-  # Catch: final data sample:
-  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits   Catch
-  #  ALL    S 1970-01-01 1970-02-01  6100135    LOG     BET       ALL         MT  12.181
-  #  ALL    S 1970-01-01 1970-02-01  6100135    LOG     SKJ       ALL         MT  84.587
-  #  ALL    S 1970-01-01 1970-02-01  6100135    LOG     YFT       ALL         MT 110.307
-  #  ALL    S 1970-02-01 1970-03-01  6100125    LOG     BET       ALL         MT   5.943
-  #  ALL    S 1970-02-01 1970-03-01  6100125    LOG     SKJ       ALL         MT  35.133
-  #  ALL    S 1970-02-01 1970-03-01  6100125    LOG     YFT       ALL         MT  53.466
-````
+```{r}
+source(here::here('R/core/gta_data.R'))
+gta_rawdata_wcpfc_catch_5deg_1m_ps <- function(data) {
+  DF <- gta_data(data, reader = gta_read_csv_utf8)
 
-packages
+  ## Catches: reach the catches pivot data structure
+  # - to upper colnames
+  # - remove the CWP grid code
+  colnames(DF) <- toupper(colnames(DF))
+  DF$CWP_GRID <- NULL
 
-````{r}
-if(!require(reshape)){
-  install.packages("reshape")
-  require(reshape)
+  DF <- tidyr::gather(DF, variable, value, -c(colnames(DF[1:10])))
+
+  DF <- dplyr::filter(DF, !value %in% 0)
+  DF <- dplyr::filter(DF, !is.na(value))
+  DF$variable <- as.character(DF$variable)
+  colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+  DF$School <- substr(DF$Species, 7, nchar(DF$Species))
+  DF$Species <- sub("_C_UNA", "", DF$Species)
+  DF$Species <- sub("_C_LOG", "", DF$Species)
+  DF$Species <- sub("_C_DFAD", "", DF$Species)
+  DF$Species <- sub("_C_AFAD", "", DF$Species)
+  DF$Species <- sub("_C_OTH", "", DF$Species)
+  DF$CatchUnits <- "t"
+  DF$EffortUnits <- colnames(DF[5])
+  colnames(DF)[5] <- "Effort"
+  catches_pivot_WCPFC <- DF; rm(DF)
+
+  # Gear
+  catches_pivot_WCPFC$Gear <- "S"
+
+  ## Reach the catches harmonized data structure
+  colToKeep_captures <- c("FishingFleet", "Gear", "time_start", "time_end", "AreaName",
+                          "School", "Species", "CatchType", "CatchUnits", "Catch")
+  source(here::here("R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R"))
+  catches <- WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC, colToKeep_captures)
+
+  colnames(catches) <- c("fishing_fleet", "gear_type", "time_start", "time_end",
+                         "geographic_identifier", "fishing_mode", "species",
+                         "measurement_type", "measurement_unit", "measurement_value")
+  catches$source_authority <- "WCPFC"
+  catches$measurement_type <- "RC" # Retained catches
+  catches$measurement <- "catch"
+  catches$measurement_processing_level <- "raised"
+  catches$time_start <- as.Date(catches$time_start)
+  catches$time_end <- as.Date(catches$time_end)
+  catches
 }
+```
 
-if(!require(tidyr)){
-  install.packages("tidyr")
-  require(tidyr)
-}
+# Harmonisation
 
-if(!require(dplyr)){
-  install.packages("dplyr")
-  require(dplyr)
-}
-````
+```{r}
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM.csv')
+georef_dataset <- gta_rawdata_wcpfc_catch_5deg_1m_ps(path_to_raw_dataset)
+write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM_harmonized.csv'), row.names = FALSE)
+```
 
-Historical name for the dataset at source  WCPFC_S_PUBLIC_BY_YR_MON.csv
+# Mapping to the CWP code lists
 
-````{r}
-opts <- options()
-options(encoding = "UTF-8")
-````
-
-# Catches
-# # Reach the catches pivot DSD
-Changes
-- change from dbf to csv
-- remove cwp_grid code
-- to upper colnames
-
-````{r}
-DF <- read.csv(path_to_raw_dataset)
-colnames(DF) <- toupper(colnames(DF))
-DF$CWP_GRID <- NULL
-
-DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:10])))
-
-DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
-DF$variable <- as.character(DF$variable)
-colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
-DF$School <- substr(DF$Species, 7, nchar(DF$Species))
-DF$Species <- sub("_C_UNA", "", DF$Species)
-DF$Species <- sub("_C_LOG", "", DF$Species)
-DF$Species <- sub("_C_DFAD", "", DF$Species)
-DF$Species <- sub("_C_AFAD", "", DF$Species)
-DF$Species <- sub("_C_OTH", "", DF$Species)
-DF$CatchUnits <- "t"
-DF$EffortUnits <- colnames(DF[5])
-colnames(DF)[5] <- "Effort"
-catches_pivot_WCPFC <- DF; rm(DF)
-````
-
-Gear
-
-````{r}
-catches_pivot_WCPFC$Gear<-"S"
-````
-
-Catchunits
-# # Reach the catches harmonized DSD using a function in WCPFC_functions.R
-
-````{r}
-colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/WCPFC_CE_catches_pivotDSD_to_harmonizedDSD.R")
-catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
-
-colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
-catches$source_authority<-"WCPFC"
-catches$measurement_type <- "RC" # Retained catches
-catches$measurement <- "catch" 
-catches$measurement_processing_level <- "raised"
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
-dataset_temporal_extent <- paste(
-  paste0(format(min(catches$time_start), "%Y"), "-01-01"),
-  paste0(format(max(catches$time_end), "%Y"), "-12-31"),
-  sep = "/"
-)
-
-````
-
-output in same folder as path_to_raw_dataset 
-
-````{r}
-output_name_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM_harmonized.csv')
-
-write.csv(catches, output_name_dataset, row.names = FALSE)
-georef_dataset <- catches
-````
-
-@ Load pre-harmonization scripts and apply mappings
-
-````{r}
-download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
-source('local_map_codelists_no_DB.R')
+```{r}
+source(here::here('R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))
 fact <- "catch"
-mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
-````
+mapping_codelist <- map_codelists_no_DB(fact, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
+```
 
-@ Handle unmapped values and save the results
+Unmapped values, then the results:
 
-````{r}
+```{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
 data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM_recap_mapping.csv'))
 data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM_not_mapped_total.csv'))
 data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'catch', 'data', 'WCPFC_S_PUBLIC_BY_YY_MM_CWP_dataset.csv'))
-````
-
-Display the first few rows of the mapping summaries
-
-````{r}
-print(head(mapping_codelist$recap_mapping))
-````
-
+head(mapping_codelist$recap_mapping)
+```
