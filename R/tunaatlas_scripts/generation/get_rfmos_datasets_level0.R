@@ -424,6 +424,13 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                             }
                           }
                           
+                          # Pole-and-line (baitboat) effort, by flag only (IATTC gives no
+                          # school type for this gear): added after the purse seine raising
+                          df_iattc_effort_LPFlag <- as.data.frame(readr::read_csv(file.path("data", "effort_1deg_1m_bb_iattc_level0__tuna_byflag.csv"), guess_max = 0))
+                          df_iattc_effort_LPFlag <- df_iattc_effort_LPFlag[, columns_to_keep_effort]
+                          class(df_iattc_effort_LPFlag$measurement_value) <- "numeric"
+                          df <- rbind(df, df_iattc_effort_LPFlag)
+
                           iattc_data <- rbind(iattc_data, df)
                         }
                         
