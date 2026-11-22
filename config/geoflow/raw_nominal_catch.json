@@ -1,6 +1,6 @@
 {
   "profile": {
-    "id": "tuna-atlas-raw-georef",
+    "id": "tuna-atlas-raw-nominal-catch",
     "mode": "entity",
   	"environment": {
   		"file": ".env",
@@ -21,7 +21,7 @@
     "entities": [
       {
         "handler": "csv",
-        "source": "config/entities/geoflow_entities_tuna_datasets - Georef_data_2026.csv"
+        "source": "config/entities/entities_raw_nominal_catch.csv"
       }
     ],
     "contacts" : []
@@ -51,22 +51,20 @@
         "recap_each_step": true
       }
     }, 
-    
-    {
+        {
       "id": "load_dataset",
       "script": "../../workflow/actions/load_dataset.R",
       "run": true,
       "options": {
         "upload_to_db": true,
         "upload_to_db_public": true,
-        "create_materialized_view": true,
-        "add_sql_comments": true,
-        "upload_to_googledrive": false,
+        "create_materialized_view" : true,
+        "add_sql_comments" : true,
+        "upload_to_googledrive" : false,
         "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
         "save_local_overwrite": true
       }
-    }, 
-    
+    },
     {
       "id": "create_report_global_action",
       "script": "../../R/tunaatlas_scripts/pre-harmonization/create_report_global_action.R",

@@ -56,9 +56,9 @@ get_trfmo_folder <- function(filename) {
 
 
 # Boucle pour nettoyer et sauvegarder les scripts 
-config_catch <- initWorkflow(here::here("config/geoflow/All_raw_data_georef.json"))
+config_catch <- initWorkflow(here::here("config/geoflow/raw_catch.json"))
 # list_url_catch <- rewrite_scripts(config_catch)
-config_effort <- initWorkflow(here::here("config/geoflow/All_raw_data_georef_effort.json"))
+config_effort <- initWorkflow(here::here("config/geoflow/raw_effort.json"))
 config_nominal <- initWorkflow(here::here("config/geoflow/Raw_nominal_catch.json"))
 # list_url_effort <- rewrite_scripts(config_effort)
 list_url_effort <- url_function(config_effort)

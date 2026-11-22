@@ -21,7 +21,7 @@
     "entities" : [
       {
         "handler": "csv",
-        "source": "config/entities/geoflow_entities_tuna_global_datasets_ird_nominal - 2026_worfklow_nominal.csv"
+        "source": "config/entities/entities_nominal_catch.csv"
       }
     ],
     "contacts" : []

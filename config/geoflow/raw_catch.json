@@ -1,6 +1,6 @@
 {
   "profile": {
-    "id": "tuna-atlas-raw-effort",
+    "id": "tuna-atlas-raw-georef",
     "mode": "entity",
   	"environment": {
   		"file": ".env",
@@ -10,18 +10,18 @@
     "organization": "FIRMS Tuna Atlas",
     "logos": [
       "http://firms.fao.org/figis/website/assets/images/templates/firms/firms_banner.gif",
-      "https://www.blue-cloud.org/sites/default/files/styles/logo_small/public/FAO_2lines_500x500_1.png?itok=igwPSL5v",
-      "https://en.ird.fr/sites/ird_fr/files/2019-08/logo_IRD_2016_BLOC_UK_COUL.png"
+      "http://www.fao.org/fileadmin/templates/family-farming-decade/images/FAO-IFAD-Logos/FAO-Logo-EN.svg",
+      "http://www.umr-marbec.fr/images/logo-ird-en.png"
     ],
     "options": {
       "line_separator": "_\n"
     }
   },
   "metadata": {
-    "entities" : [
+    "entities": [
       {
-      "handler": "csv",
-      "source": "config/entities/geoflow_entities_tuna_datasets - Effort_data_2026.csv"
+        "handler": "csv",
+        "source": "config/entities/entities_raw_catch.csv"
       }
     ],
     "contacts" : []
@@ -59,13 +59,13 @@
       "options": {
         "upload_to_db": true,
         "upload_to_db_public": true,
-        "create_materialized_view" : true,
-        "add_sql_comments" : true,
-        "upload_to_googledrive" : false,
+        "create_materialized_view": true,
+        "add_sql_comments": true,
+        "upload_to_googledrive": false,
         "save_local_path": "../../../../data/GTA_2026/dataoutputpreharmo/",
         "save_local_overwrite": true
       }
-    },
+    }, 
     
     {
       "id": "create_report_global_action",

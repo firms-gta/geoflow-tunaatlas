@@ -109,7 +109,7 @@ check_files_from_json <- function(json_files, data_dir = "data", max_age_days = 
 # Remove DBI-related software and upload options from a workflow JSON file. This
 # allows the same workflow to run locally or in Docker when the database is not
 # reachable, while keeping the original JSON file untouched.
-remove_dbi_software <- function(file) {
+write_workflow_without_db <- function(file) {
   workflow <- jsonlite::fromJSON(file, simplifyVector = FALSE)
   
   if (!is.null(workflow$software)) {
@@ -155,7 +155,7 @@ remove_dbi_software <- function(file) {
 # Return TRUE only in the expected GTA database context and only if the DBI
 # connection is valid. This prevents accidental upload to another database or
 # failed upload attempts when the local environment variables are incomplete.
-should_upload_to_db <- function(config) {
+can_upload_to_db <- function(config) {
   con <- config$software$output$dbi
   if (is.null(con)) return(FALSE)
   
@@ -166,8 +166,8 @@ should_upload_to_db <- function(config) {
 }
 
 # Enable all actions required for database publication. This is called only after
-# should_upload_to_db() has confirmed that the execution context is safe.
-force_upload_to_db <- function(config, action_id = "load_dataset") {
+# can_upload_to_db() has confirmed that the execution context is safe.
+enable_db_upload <- function(config, action_id = "load_dataset") {
   db_related_actions <- c(
     "enrich_metadata",
     "enrich_for_db_services",
@@ -200,16 +200,16 @@ force_upload_to_db <- function(config, action_id = "load_dataset") {
 
 # Initialise a workflow. If DBI initialisation fails, write a temporary _nodb JSON
 # file and retry without database software blocks.
-init_workflow_maybe_without_dbi <- function(file, handle_metadata = TRUE) {
+init_geoflow_workflow <- function(file, handle_metadata = TRUE) {
   if (gta_no_db()) {
-    return(initWorkflow(remove_dbi_software(file), handleMetadata = handle_metadata,
+    return(initWorkflow(write_workflow_without_db(file), handleMetadata = handle_metadata,
                         dir = here::here()))
   }
   tryCatch(
     initWorkflow(file, handleMetadata = handle_metadata, dir = here::here()),
     error = function(e) {
       message("initWorkflow failed. Retrying without DBI software: ", e$message)
-      initWorkflow(remove_dbi_software(file), handleMetadata = handle_metadata, dir = here::here())
+      initWorkflow(write_workflow_without_db(file), handleMetadata = handle_metadata, dir = here::here())
     }
   )
 }
@@ -230,7 +230,7 @@ gta_no_db <- function() {
 
 # Execute a workflow and optionally rename the output job folder. Upload is
 # activated dynamically only when the database context is explicitly validated.
-execute_workflow_maybe_upload <- function(
+run_geoflow_workflow <- function(
     file,
     dir = here::here(),
     rename_suffix = NULL,
@@ -245,9 +245,9 @@ execute_workflow_maybe_upload <- function(
       message("GTA_NO_DB=true: skipping database workflow ", basename(file))
       return(NULL)
     }
-    output <- executeWorkflow(file = remove_dbi_software(file), dir = dir)
+    output <- executeWorkflow(file = write_workflow_without_db(file), dir = dir)
     if (!is.null(rename_suffix)) {
-      output <- executeAndRename(output, rename_suffix)
+      output <- rename_job_folder(output, rename_suffix)
     }
     return(output)
   }
@@ -265,7 +265,7 @@ execute_workflow_maybe_upload <- function(
     }
     
     message("initWorkflow failed. Retrying execution without DBI software.")
-    workflow_file <- remove_dbi_software(file)
+    workflow_file <- write_workflow_without_db(file)
     
   } else {
     unlink(config_test$job, recursive = TRUE)
@@ -275,11 +275,11 @@ execute_workflow_maybe_upload <- function(
     file = workflow_file,
     dir = dir,
     on_initWorkflow = function(config, queue) {
-      if (should_upload_to_db(config)) {
+      if (can_upload_to_db(config)) {
         log_info(
           "Database reachable and context validated: enabling upload."
         )
-        force_upload_to_db(config, "load_dataset")
+        enable_db_upload(config, "load_dataset")
       } else {
         log_info(
           "Database unavailable or context not validated: upload disabled."
@@ -289,7 +289,7 @@ execute_workflow_maybe_upload <- function(
   )
   
   if (!is.null(rename_suffix)) {
-    output <- executeAndRename(output, rename_suffix)
+    output <- rename_job_folder(output, rename_suffix)
   }
   
   output
@@ -315,7 +315,7 @@ get_workflow_con <- function(config_file) {
 
 # Wrapper around the invalid-data summary. Kept as a small helper so the same
 # options are reused consistently across pre-harmonisation outputs.
-summarise_invalid <- function(path, con = NULL) {
+summarise_invalid_raw_data <- function(path, con = NULL) {
   CWP.dataset::summarising_invalid_data(
     path,
     connectionDB = con,
@@ -336,7 +336,7 @@ run_step_summary <- function(workflow_file,
                              parameter_colnames_to_keep_fact = NULL) {
   gc()
   
-  config <- init_workflow_maybe_without_dbi(
+  config <- init_geoflow_workflow(
     here::here(workflow_file),
     handle_metadata = TRUE
   )

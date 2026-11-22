@@ -69,7 +69,7 @@ renv::restore()
 source(here::here("R/tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R"))
 
 # ─── 1) Initialisation du workflow ───────────────────────────────────────────
-config <- initWorkflow(here("config/geoflow/catch_ird_level2_local.json"))
+config <- initWorkflow(here("config/geoflow/catch_level2.json"))
 
 # ─── 2) Extraction de l’entité et suppression des relations inutiles ────────
 entityfile <- config$metadata$content$entities[[1]]

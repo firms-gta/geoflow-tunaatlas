@@ -1,4 +1,4 @@
-executeAndRename <- function(executed_file, suffix) {
+rename_job_folder <- function(executed_file, suffix) {
   
   # Derive folder and file names
   folder_file <- file.path("jobs", basename(executed_file))

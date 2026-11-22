@@ -35,12 +35,12 @@ require(geoflow)
 # -------------------------------------
 
 # Initialize and execute the workflow
-config <- initWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json"))
+config <- initWorkflow(here::here("config/geoflow/db_global_datasets_catch.json"))
 unlink(config$job, recursive = TRUE)
 con <- config$software$output$dbi
 
 # Execute workflows and rename outputs
-tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/tunaatlas_qa_global_datasets_catch.json"))
+tunaatlas_qa_global_datasets_catch_path <- executeWorkflow(here::here("config/geoflow/db_global_datasets_catch.json"))
 
 # Summarizing Step
 # ----------------
@@ -106,4 +106,4 @@ CWP.dataset::summarising_step(main_dir = tunaatlas_qa_global_datasets_catch_path
 # # -----------------------------------------------
 # 
 # # Initialize and deploy datasets on geoserver
-# tunaatlas_qa_services <- initWorkflow("config/geoflow/tunaatlas_qa_services.json")
+# tunaatlas_qa_services <- initWorkflow("config/geoflow/services.json")
