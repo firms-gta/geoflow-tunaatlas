@@ -26,6 +26,14 @@ repos:
         entry: python3 tests/check_config_paths.py
         pass_filenames: false
         files: '^(config/(geoflow|entities)/|data/|R/|workflow/|docker/|tests/check_config_paths\.py$)'
+      # Raw dataset actions against their expected outputs (tests/test_rawdata.R,
+      # ~40 s), only when a raw dataset, its code or the test changes
+      - id: rawdata-tests
+        name: raw datasets give their expected outputs
+        language: system
+        entry: Rscript tests/test_rawdata.R
+        pass_filenames: false
+        files: '^(R/core/|R/tunaatlas_scripts/pre-harmonization/|R/sardara_functions/|config/entities/entities_raw_|tests/(test_rawdata\.R|expected/rawdata/|sample_data/))'
 
   # Secrets in the staged changes
   - repo: https://github.com/gitleaks/gitleaks
