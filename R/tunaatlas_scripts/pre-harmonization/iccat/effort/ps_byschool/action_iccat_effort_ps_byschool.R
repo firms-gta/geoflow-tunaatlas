@@ -1,29 +1,15 @@
-#' Harmonize data structure of ICCAT by operation mode effort datasets
+#' Harmonize data structure of ICCAT by operation mode effort datasets (geoflow action)
 #'
-#' This function harmonizes the structure of ICCAT catch-and-effort datasets
-#' based on operation modes. It adapts the dataset structure for compatibility with
-#' the Tuna Atlas database, considering only specific fields as mandatory. The
-#' function also handles optional metadata integration if provided.
+#' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iccat_effort_ps_byschool()
+#' (R/core/rawdata_iccat_effort_ps_byschool.R), writes the outputs and declares the resources of
+#' the entity. The processing itself is in the core function, usable without geoflow.
 #'
-#' @param action The action context from geoflow, typically involving workflow control.
-#' @param entity The entity context from geoflow, managing specific dataset handling.
-#' @param config The configuration context from geoflow, used for managing global settings.
-#' @param keep_fleet_instead_of_flag Logical, defaults to FALSE. Determines whether to
-#'        replace the 'flag' column with the 'fleet' column in the output dataset.
-#'
-#' @return None; this function performs data manipulation and outputs files directly.
-#'
-#' @import dplyr
-#' @importFrom stringr str_detect str_replace
-#' @importFrom readr read_csv write_csv
-#' @seealso \code{\link{FUN_efforts_ICCAT_CE_keep_all_efforts}} for converting ICCAT task 2,
-#' @export
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' @keywords ICCAT, tuna, fisheries, data harmonization
+#' @param action The action context from geoflow.
+#' @param entity The entity context from geoflow.
+#' @param config The configuration context from geoflow.
 function(action, entity, config){
 
-keep_fleet_instead_of_flag=FALSE
+
 
 #packages
 
@@ -68,58 +54,18 @@ options(encoding = "UTF-8")
 
 ## Catches
 # RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
-RFMO_CE <- read_excel(path_to_raw_dataset,
-                sheet = "Data")
 
-RFMO_CE$FleetCode_short <- sub("-.*", "", RFMO_CE$FleetCode) # fleet code only what is after the '-'
+source(here::here("R/core/gta_data.R"))
+source(here::here("R/core/rawdata_iccat_effort_ps_byschool.R"))
+efforts <- gta_rawdata_iccat_effort_ps_byschool(path_to_raw_dataset)
 
-names(RFMO_CE)[names(RFMO_CE) == 'FleetCode_short'] <- 'FishingFleet'
-RFMO_CE <- RFMO_CE[, c("FishingFleet", setdiff(names(RFMO_CE), "FishingFleet"))] # oput flag in first position
-
-
-# ## If we want in the output dataset the column 'FleetCode' instead of 'flag'
-# 
-# if(keep_fleet_instead_of_flag==TRUE){
-#   RFMO_CE$Flag<-NULL
-#   names(RFMO_CE)[names(RFMO_CE) == 'Fishingfleet'] <- 'Flag'
-# }
-
-##Efforts
-
-last_column_not_catch_value=27
-RFMO_CE<-RFMO_CE[,-(last_column_not_catch_value:ncol(RFMO_CE))] 
-
-source(here::here("./R/sardara_functions/FUN_efforts_ICCAT_CE_keep_all_efforts.R"))
-efforts_pivot_ICCAT<-FUN_efforts_ICCAT_CE_keep_all_efforts(RFMO_CE,c("Eff1","Eff2","Eff3","Eff4","Eff5"),c("Eff1Type","Eff2Type","Eff3Type","Eff4Type","Eff5Type"))
-
-# School
-# The format changed, the school is now in the FishMode column
-
-efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::mutate(FishMode = ifelse(FishMode == "n/a", "OTH", FishMode)) 
-efforts_pivot_ICCAT<- efforts_pivot_ICCAT %>% dplyr::rename("School" = "FishMode")
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source(here::here("./R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R"))
-efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::rename(SquareTypeCode = GeoStrataCode) # to match definition in ICCAT_CE_effort_pivotDSD_to_harmonizedDSD
-efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
-efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
-efforts<-ICCAT_CE_effort_pivotDSD_to_harmonizedDSD(efforts_pivot_ICCAT,colToKeep_efforts)
-efforts$AreaName <- as.character(as.integer(efforts$AreaName))
-colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
-efforts$source_authority<-"ICCAT"
-#----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
-efforts$time_start <- as.Date(efforts$time_start)
-efforts$time_end <- as.Date(efforts$time_end)
-#we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
   paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
   paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
   sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
-efforts$geographic_identifier <- format(as.integer(efforts$geographic_identifier), scientific = FALSE, trim = TRUE)
 
-#@geoflow -> export as csv
 base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
 # output in same folder as path_to_raw_dataset 
@@ -132,4 +78,5 @@ file.rename(  from = entity$getJobDataResource(config, filename2),  to   = outpu
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)}
+entity$addResource("codelists", output_name_codelists)
+}
