@@ -43,7 +43,7 @@ preparing them for integration into the Tuna Atlas database, according to specif
 
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_iattc_nominal_all <- function(data) {
   # Samples of the input and output data (from the former script)

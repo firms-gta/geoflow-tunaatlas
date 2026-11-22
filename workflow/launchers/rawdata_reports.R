@@ -60,9 +60,13 @@ update_rawdata_reports <- function(job_dirs = NULL, render = TRUE, n_rows = 5) {
     report <- gta_rawdata_report(datasets$dataset[i], strsplit(datasets$raw_files[i], ",")[[1]])
     reports <- c(reports, report)
     if (render) {
+      # Each report in its own R session, as a reader would knit it: packages
+      # attached by one report do not hide a missing library() in another
       tryCatch(
-        rmarkdown::render(report, output_dir = dirname(report), quiet = TRUE,
-                          intermediates_dir = tempdir(), envir = new.env()),
+        callr::r(function(report) {
+          rmarkdown::render(report, output_dir = dirname(report), quiet = TRUE,
+                            intermediates_dir = tempdir(), envir = new.env())
+        }, args = list(report = report), wd = here::here()),
         error = function(e) message("Rendering failed for ", report, ": ", conditionMessage(e))
       )
     }

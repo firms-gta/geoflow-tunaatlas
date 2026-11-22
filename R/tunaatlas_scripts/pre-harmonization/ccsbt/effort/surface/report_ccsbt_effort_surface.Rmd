@@ -49,7 +49,7 @@ date range and exports the harmonized data, metadata, and code lists as CSV file
 
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_ccsbt_effort_surface <- function(data) {
   source(here::here("./R/sardara_functions/harmo_spatial_5.R"))

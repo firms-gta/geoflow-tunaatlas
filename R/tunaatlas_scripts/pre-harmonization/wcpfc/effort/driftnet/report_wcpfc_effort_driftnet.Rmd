@@ -45,7 +45,7 @@ This script works with any dataset that has the first 5 columns named and ordere
 
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_wcpfc_effort_driftnet <- function(data) {
   

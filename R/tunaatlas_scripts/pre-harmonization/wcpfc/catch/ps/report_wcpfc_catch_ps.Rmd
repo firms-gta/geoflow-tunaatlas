@@ -51,7 +51,7 @@ ALL           S         1970-01-01 1970-02-01 6100135             LOG          B
 
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_wcpfc_catch_ps <- function(data) {
   DF <- gta_data(data, reader = gta_read_csv_utf8)

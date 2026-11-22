@@ -35,7 +35,7 @@ This function transforms a dataset containing catch information into the CWP (Co
 
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_iattc_effort_ll <- function(data) {
   # Samples of the input and output data (from the former script)

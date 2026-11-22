@@ -43,7 +43,7 @@ The function also manages optional metadata and code lists for integration withi
 
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here('R/core/gta_data.R'))
 gta_rawdata_wcpfc_effort_ll <- function(data) {
   source(here::here("./R/sardara_functions/harmo_time_2.R"))

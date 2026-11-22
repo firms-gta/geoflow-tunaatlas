@@ -79,7 +79,7 @@ gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
     "",
     chunk(
       "# Packages the function uses unqualified, attached as in the workflow",
-      "suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })",
+      "suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })",
       "source(here::here('R/core/gta_data.R'))",
       code
     ),
