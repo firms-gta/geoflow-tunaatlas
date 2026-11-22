@@ -10,11 +10,12 @@
 #'   `<tRFMO>/<catch|effort|nominal>/<dataset>`, e.g. `"wcpfc/catch/ps"`. The core
 #'   function is `gta_rawdata_<tRFMO>_<type>_<dataset>()`, in
 #'   `R/core/rawdata_<tRFMO>_<type>_<dataset>.R`.
-#' @param raw_file Name of the raw file, in the `data/` folder of the dataset.
+#' @param raw_files Name(s) of the raw file(s), in the `data/` folder of the dataset,
+#'   in the order of the arguments of the core function.
 #' @param output_file Path of the `.Rmd` to write; by default
 #'   `report_<tRFMO>_<type>_<dataset>.Rmd` in the folder of the dataset.
 #' @return The path of the report, invisibly.
-gta_rawdata_report <- function(dataset, raw_file, output_file = NULL) {
+gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
   root <- "R/tunaatlas_scripts/pre-harmonization"
   parts <- strsplit(dataset, "/", fixed = TRUE)[[1]]
   slug <- paste(parts, collapse = "_")
@@ -31,7 +32,7 @@ gta_rawdata_report <- function(dataset, raw_file, output_file = NULL) {
   description <- doc[-1]
 
   fact <- if (type == "effort") "effort" else "catch"
-  base <- tools::file_path_sans_ext(raw_file)
+  base <- tools::file_path_sans_ext(raw_files[1])
   data_path <- function(file) {
     sprintf("here::here('%s', %s, 'data', '%s')",
             root, paste0("'", parts, "'", collapse = ", "), file)
@@ -73,8 +74,14 @@ gta_rawdata_report <- function(dataset, raw_file, output_file = NULL) {
     "# Harmonisation",
     "",
     chunk(
-      sprintf("path_to_raw_dataset <- %s", data_path(raw_file)),
-      sprintf("georef_dataset <- %s(path_to_raw_dataset)", fun_name),
+      if (length(raw_files) == 1) {
+        c(sprintf("path_to_raw_dataset <- %s", data_path(raw_files)),
+          sprintf("georef_dataset <- %s(path_to_raw_dataset)", fun_name))
+      } else {
+        c(sprintf("path_to_raw_dataset%d <- %s", seq_along(raw_files), vapply(raw_files, data_path, "")),
+          sprintf("georef_dataset <- %s(%s)", fun_name,
+                  paste0("path_to_raw_dataset", seq_along(raw_files), collapse = ", ")))
+      },
       sprintf("write.csv(georef_dataset, %s, row.names = FALSE)", data_path(paste0(base, "_harmonized.csv")))
     ),
     "# Mapping to the CWP code lists",

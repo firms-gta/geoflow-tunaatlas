@@ -1,45 +1,33 @@
 ---
 title: "Harmonize CCSBT Surface Effort Datasets"
-output: 
-  html_document: 
+output:
+  html_document:
     code_folding: hide
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 # Introduction
 
-This R Markdown document is designed to transform data that is not in CWP format into CWP format.
-Initially, it changes the format of the data; subsequently, it maps the data to adhere to CWP standards.
-This markdown is automatically created from the function: https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/R/tunaatlas_scripts/pre-harmonization/southern_hemisphere_oceans_effort_1deg_1m_tunaatlasccsbt_level0__surface.R, the documentation keeps the format of roxygen2 skeleton.
+This document transforms a dataset that is not in the CWP format into the CWP format:
+it first changes the structure of the data, then maps its codes to the CWP code lists.
+It is generated from the function `gta_rawdata_ccsbt_effort_surface()` (`R/core/rawdata_ccsbt_effort_surface.R`), the code that the Global Tuna Atlas workflow runs.
 
-A summary of the mapping process is provided. The path to the dataset is specified. You will find on this same repository on GitHub the first line of each dataset.
-The datasets are named after the historical name provided by tRFMOs while exporting and may change.
-The information provided in the Rmd allows understanding correctly which dataset should be used in this markdown.
+The raw dataset is read from the `data/` folder next to this document, which holds the first
+lines of each file under the name given by the tRFMO at export (this name may change).
+A summary of the mapping is given at the end; the results are saved in the same folder.
 
-Additional operations are performed next to verify other aspects of the data, such as the consistency of the geolocation, the values, and the reported catches in numbers and tons.
+*Knit the document from the repository (here::here() locates its root), or run it chunk by chunk.*
 
-If you are interested in further details, the results and codes are available for review.
+# The function
 
-*Each `.Rmd` script requires the user to knit the dataset at the beginning of the script in order to execute the harmonization process correctly.
-It is also possible to run the code chunk by chunk but be sure to be in the correct working directory (i.e., the one of the `.Rmd`).*
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
-```
-
-
-````{r}
-path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'data', 'CEData_Surface.xlsx')
-````
-
-Harmonize CCSBT Surface Effort Datasets
 
 Harmonizes the structure of CCSBT catch-and-effort datasets specifically for 'Surface' effort data.
 This involves reading the raw dataset, performing various data transformations including renaming,
 mutating, and selecting columns, and calculating new fields. The output is a harmonized dataset suitable
 for integration into the Tuna Atlas database.
-
 
 @details
 The function performs the following key steps:
@@ -51,69 +39,58 @@ The function performs the following key steps:
 The harmonization process is tailored to CCSBT 'Surface' datasets and assumes specific column names
 date range and exports the harmonized data, metadata, and code lists as CSV files.
 
-
 @examples
 \dontrun{
 }
 
-@importFrom dplyr filter mutate group_by summarise
-@importFrom readxl read_excel
-@importFrom lubridate as_date ceiling_date
-@export
+@param data The raw dataset: a data frame, or the path to the file.
+@return The harmonized dataset (data frame), as written by the geoflow action
+  (ccsbt/effort/surface/action_ccsbt_effort_surface.R).
 
-
-
-````{r}
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_spatial_5.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/harmo_time_2.R")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/format_time_db_format.R")
-  
-  if(!(require(dplyr))){ 
-    install.packages(dplyr) 
-    (require(dplyr))} 
+```{r}
+source(here::here('R/core/gta_data.R'))
+gta_rawdata_ccsbt_effort_surface <- function(data) {
+  source(here::here("./R/sardara_functions/harmo_spatial_5.R"))
+  source(here::here("./R/sardara_functions/harmo_time_2.R"))
+  source(here::here("./R/sardara_functions/format_time_db_format.R"))
   
   
-  if(!require(readxl)){
-    install.packages("readxl")
-    require(readxl)
-  }
-````
+  
 
-Input data sample (after importing as data.frame in R):
-YEAR MONTH COUNTRY_CODE GEAR_CODE CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOURS_SEARCHED WEIGHT_(Kg)_OF_SBT_RETAINED
-1975    12           AU        PS                      4      -37       150                       17                       59800
-1976     8           AU        BB                      4      -36       150                        8                           0
-1976     9           AU        BB                      4      -37       150                       14                       36200
-1976     9           AU        BB                      4      -35       150                        4                           0
-1976     9           AU        BB                      4      -34       151                       21                           0
-1976    10           AU        BB                      4      -37       150                       51                       41000
-Effort: final data sample:
-Flag Gear time_start   time_end AreaName School EffortUnits Effort
-AU   BB 1976-08-01 1976-09-01  6336150    ALL       HRSRH      8
-AU   BB 1976-09-01 1976-10-01  6334151    ALL       HRSRH     21
-AU   BB 1976-09-01 1976-10-01  6335150    ALL       HRSRH      4
-AU   BB 1976-09-01 1976-10-01  6337150    ALL       HRSRH     14
-AU   BB 1976-10-01 1976-11-01  6334151    ALL       HRSRH     21
-AU   BB 1976-10-01 1976-11-01  6336150    ALL       HRSRH     29
+# Input data sample (after importing as data.frame in R):
+# YEAR MONTH COUNTRY_CODE GEAR_CODE CCSBT_STATISTICAL_AREA LATITUDE LONGITUDE NUMBER_OF_HOURS_SEARCHED WEIGHT_(Kg)_OF_SBT_RETAINED
+# 1975    12           AU        PS                      4      -37       150                       17                       59800
+# 1976     8           AU        BB                      4      -36       150                        8                           0
+# 1976     9           AU        BB                      4      -37       150                       14                       36200
+# 1976     9           AU        BB                      4      -35       150                        4                           0
+# 1976     9           AU        BB                      4      -34       151                       21                           0
+# 1976    10           AU        BB                      4      -37       150                       51                       41000
 
-````{r}
+# Effort: final data sample:
+# Flag Gear time_start   time_end AreaName School EffortUnits Effort
+#   AU   BB 1976-08-01 1976-09-01  6336150    ALL       HRSRH      8
+#   AU   BB 1976-09-01 1976-10-01  6334151    ALL       HRSRH     21
+#   AU   BB 1976-09-01 1976-10-01  6335150    ALL       HRSRH      4
+#   AU   BB 1976-09-01 1976-10-01  6337150    ALL       HRSRH     14
+#   AU   BB 1976-10-01 1976-11-01  6334151    ALL       HRSRH     21
+#   AU   BB 1976-10-01 1976-11-01  6336150    ALL       HRSRH     29
+
   #----------------------------------------------------------------------------------------------------------------------------
-````
-
-Historical name for the dataset at source  CEData_Surface.xlsx
-
-````{r}
-  opts <- options()
-  options(encoding = "UTF-8")
+  #config --> the global config of the workflow
+# Historical name for the dataset at source  CEData_Surface.xlsx
+# Historical name for the dataset at source  ccsbt_effort_code_lists.csv
   
   
-  RFMO_CE<-readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")
+  
+  RFMO_CE <- gta_data(data, reader = function(path_to_raw_dataset) gta_utf8(readxl::read_excel(path_to_raw_dataset, sheet = "CEData_Surface", col_names = TRUE, col_types = NULL,na = "")))
+  
   
   colnames(RFMO_CE)<-gsub("\r\n", "_", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub(" ", "_", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub("\\(", "", colnames(RFMO_CE))
   colnames(RFMO_CE)<-gsub("\\)", "", colnames(RFMO_CE))
   RFMO_CE<-as.data.frame(RFMO_CE)
+  
   
   #Remove lines that are read in the Excel but that are not real
   RFMO_CE<- RFMO_CE[!is.na(RFMO_CE$YEAR),] 
@@ -171,49 +148,43 @@ Historical name for the dataset at source  CEData_Surface.xlsx
     dplyr::summarise(Effort = sum(Effort))  
   efforts<-as.data.frame(efforts)
   
+  message(sprintf("colnumbers",ncol(efforts)))
   
   colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
   efforts$source_authority<-"CCSBT"
   efforts$measurement <- "effort" 
   
   #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
   efforts$time_start <- as.Date(efforts$time_start)
   efforts$time_end <- as.Date(efforts$time_end)
-  dataset_temporal_extent <- paste(
-    paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
-    paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
-    sep = "/"
-  )
   efforts$measurement_processing_level <- "unknown" 
-  # output in same folder as path_to_raw_dataset 
-  output_name_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'data', 'CEData_Surface_harmonized.csv')
-  
-  write.csv(efforts, output_name_dataset, row.names = FALSE)
-georef_dataset <- efforts
-  
-  #----------------------------------------------------------------------------------------------------------------------------
-````
+  efforts
+}
+```
 
-@ Load pre-harmonization scripts and apply mappings
+# Harmonisation
 
-````{r}
-download.file('https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R', destfile = 'local_map_codelists_no_DB.R')
-source('local_map_codelists_no_DB.R')
+```{r}
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'surface', 'data', 'CEData_Surface.xlsx')
+georef_dataset <- gta_rawdata_ccsbt_effort_surface(path_to_raw_dataset)
+write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'surface', 'data', 'CEData_Surface_harmonized.csv'), row.names = FALSE)
+```
+
+# Mapping to the CWP code lists
+
+```{r}
+source(here::here('R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))
 fact <- "effort"
-mapping_codelist <- map_codelists_no_DB(fact, mapping_dataset = "https://raw.githubusercontent.com/fdiwg/fdi-mappings/main/global/firms/gta/codelist_mapping_rfmos_to_global.csv", dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC", "ICCAT", "IOTC"))
-````
+mapping_codelist <- map_codelists_no_DB(fact, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
+```
 
-@ Handle unmapped values and save the results
+Unmapped values, then the results:
 
-````{r}
+```{r}
 georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
-data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'data', 'CEData_Surface_recap_mapping.csv'))
-data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'data', 'CEData_Surface_not_mapped_total.csv'))
-data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'data', 'CEData_Surface_CWP_dataset.csv'))
-````
-
-Display the first few rows of the mapping summaries
-
-````{r}
-print(head(mapping_codelist$recap_mapping))
-````
+data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'surface', 'data', 'CEData_Surface_recap_mapping.csv'))
+data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'surface', 'data', 'CEData_Surface_not_mapped_total.csv'))
+data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'ccsbt', 'effort', 'surface', 'data', 'CEData_Surface_CWP_dataset.csv'))
+head(mapping_codelist$recap_mapping)
+```
