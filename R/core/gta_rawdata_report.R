@@ -6,15 +6,24 @@
 #' and saves the results. The code shown is the core function itself, so the
 #' report always matches what the workflow runs.
 #'
-#' @param fun_name Name of the core function, e.g.
-#'   `"gta_rawdata_wcpfc_catch_5deg_1m_ps"`.
-#' @param core_file File defining it, relative to the repository root.
-#' @param trfmo tRFMO folder: `"iattc"`, `"iccat"`, `"iotc"`, `"wcpfc"` or `"ccsbt"`.
-#' @param type Dataset folder: `"catch"`, `"effort"` or `"nominal"`.
-#' @param raw_file Name of the raw file, in `<trfmo>/<type>/data/`.
-#' @param output_file Path of the `.Rmd` to write.
+#' @param dataset Folder of the dataset in R/tunaatlas_scripts/pre-harmonization,
+#'   `<tRFMO>/<catch|effort|nominal>/<dataset>`, e.g. `"wcpfc/catch/ps"`. The core
+#'   function is `gta_rawdata_<tRFMO>_<type>_<dataset>()`, in
+#'   `R/core/rawdata_<tRFMO>_<type>_<dataset>.R`.
+#' @param raw_file Name of the raw file, in the `data/` folder of the dataset.
+#' @param output_file Path of the `.Rmd` to write; by default
+#'   `report_<tRFMO>_<type>_<dataset>.Rmd` in the folder of the dataset.
 #' @return The path of the report, invisibly.
-gta_rawdata_report <- function(fun_name, core_file, trfmo, type, raw_file, output_file) {
+gta_rawdata_report <- function(dataset, raw_file, output_file = NULL) {
+  root <- "R/tunaatlas_scripts/pre-harmonization"
+  parts <- strsplit(dataset, "/", fixed = TRUE)[[1]]
+  slug <- paste(parts, collapse = "_")
+  type <- parts[2]
+  fun_name <- paste0("gta_rawdata_", slug)
+  core_file <- file.path("R/core", paste0("rawdata_", slug, ".R"))
+  if (is.null(output_file)) {
+    output_file <- here::here(root, dataset, paste0("report_", slug, ".Rmd"))
+  }
   lines <- readLines(here::here(core_file), warn = FALSE, encoding = "UTF-8")
   doc <- sub("^#' ?", "", lines[grepl("^#'", lines)])
   code <- lines[!grepl("^#'", lines)]
@@ -24,8 +33,8 @@ gta_rawdata_report <- function(fun_name, core_file, trfmo, type, raw_file, outpu
   fact <- if (type == "effort") "effort" else "catch"
   base <- tools::file_path_sans_ext(raw_file)
   data_path <- function(file) {
-    sprintf("here::here('R/tunaatlas_scripts/pre-harmonization', '%s', '%s', 'data', '%s')",
-            trfmo, type, file)
+    sprintf("here::here('%s', %s, 'data', '%s')",
+            root, paste0("'", parts, "'", collapse = ", "), file)
   }
   chunk <- function(...) c("```{r}", ..., "```", "")
 
