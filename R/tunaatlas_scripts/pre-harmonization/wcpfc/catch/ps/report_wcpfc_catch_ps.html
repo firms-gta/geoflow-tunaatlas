@@ -460,7 +460,7 @@ pre code {
 <p><span class="citation">@details</span> Input data sample:  Output data sample: </p>
 <p><span class="citation">@seealso</span>  (R/sardara_functions). <span class="citation">@author</span> Paul Taconet, IRD  <span class="citation">@author</span> Bastien Grasset, IRD </p>
 <pre class="r"><code># Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here(&#39;R/core/gta_data.R&#39;))
 gta_rawdata_wcpfc_catch_ps &lt;- function(data) {
   DF &lt;- gta_data(data, reader = gta_read_csv_utf8)

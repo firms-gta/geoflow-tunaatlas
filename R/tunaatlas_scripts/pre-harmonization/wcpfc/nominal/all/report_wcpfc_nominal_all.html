@@ -460,7 +460,7 @@ pre code {
 <p><span class="citation">@seealso</span>  for converting WCPFC task 2 data structures. <span class="citation">@author</span> Paul Taconet, IRD  <span class="citation">@author</span> Bastien Grasset, IRD </p>
 <p><span class="citation">@param</span> data_wcpfc The WCPFC nominal catch dataset (file XLS_WCPFC_<date>.csv): a data frame, or the path to the CSV file. <span class="citation">@param</span> data_wcpo The WCPO nominal catch dataset (file XLS_WCPO_<date>.csv), idem. <span class="citation">@return</span> The harmonized dataset (data frame), as written by the geoflow action (wcpfc/nominal/all/action_wcpfc_nominal_all.R).</p>
 <pre class="r"><code># Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here(&#39;R/core/gta_data.R&#39;))
 gta_rawdata_wcpfc_nominal_all &lt;- function(data_wcpfc, data_wcpo) {
   source(here::here(&quot;./R/sardara_functions/format_time_db_format.R&quot;))

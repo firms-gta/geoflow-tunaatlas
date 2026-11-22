@@ -460,7 +460,7 @@ pre code {
 <p><span class="citation">@seealso</span>  for other conversions related to IATTC data,  to standardize time formatting for database integration. <span class="citation">@author</span> Paul Taconet, IRD  <span class="citation">@author</span> Bastien Grasset, IRD </p>
 <p><span class="citation">@param</span> data The raw dataset: a data frame, or the path to the file. <span class="citation">@return</span> The harmonized dataset (data frame), as written by the geoflow action (iattc/catch/ps_byflag/action_iattc_catch_ps_byflag.R).</p>
 <pre class="r"><code># Packages the function uses unqualified, attached as in the workflow
-suppressPackageStartupMessages({ library(dplyr); library(tidyr); library(readxl) })
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
 source(here::here(&#39;R/core/gta_data.R&#39;))
 gta_rawdata_iattc_catch_ps_byflag &lt;- function(data) {
   source(here::here(&quot;./R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R&quot;))
