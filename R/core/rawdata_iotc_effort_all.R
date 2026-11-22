@@ -28,8 +28,8 @@ gta_rawdata_iotc_effort_all <- function(data) {
   
   effort_raw <- effort_raw %>% dplyr::mutate(GEAR_CODE = ifelse(is.na(GEAR_CODE), "UNCL", GEAR_CODE)) #some NAs replaced by UNCL which is coding for Other/Unk
   
-  log_info(paste0("EF_RAW columns: ", paste(colnames(effort_raw), collapse = ", ")))
-  log_info(sprintf("Raw effort dimensions: %s rows", nrow(effort_raw)))
+  message(paste0("EF_RAW columns: ", paste(colnames(effort_raw), collapse = ", ")))
+  message(sprintf("Raw effort dimensions: %s rows", nrow(effort_raw)))
   
   # ---- format inline ----
   effort <- effort_raw %>%

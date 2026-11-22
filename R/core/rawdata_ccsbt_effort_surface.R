@@ -121,7 +121,7 @@ gta_rawdata_ccsbt_effort_surface <- function(data) {
     dplyr::summarise(Effort = sum(Effort))  
   efforts<-as.data.frame(efforts)
   
-  log_info(sprintf("colnumbers",ncol(efforts)))
+  message(sprintf("colnumbers",ncol(efforts)))
   
   colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
   efforts$source_authority<-"CCSBT"
