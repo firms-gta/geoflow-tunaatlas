@@ -209,6 +209,39 @@ sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
 action:action_iattc_catch_ps_byflag.R@./R/tunaatlas_scripts/pre-harmonization/iattc/catch/ps_byflag/action_iattc_catch_ps_byflag.R"
+id:catch_1deg_1m_ps_iattc_level0__billfish_byschool,title:Monthly catch of billfishes in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by type of school (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of billfish species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %year_start% to %year_end%. Species-specific catches are stratified by year, month, fishing gear, type of school (fishing mode: sets on floating objects, on dolphins, on unassociated schools) and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. Observers record billfish bycatch in number of individuals. 
+ 
+Estimated East Pacific Ocean billfish bycatch totals are presented in the Inter-American Tropical Tuna Commission (IATTC) Fishery Status Reports
+(http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.""",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-05-27_
+access:2020-10-21",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/PublicPSBillfish.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicPSBillfish.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:./data/GTA_2026/PublicPSBillfishSetType.csv,./data/iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:action_iattc_catch_ps_byschool.R@./R/tunaatlas_scripts/pre-harmonization/iattc/catch/ps_byschool/action_iattc_catch_ps_byschool.R"
 id:catch_1deg_1m_ps_iattc_level0__shark_byflag,title:Monthly catch of sharks in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of shark species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
  
 This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
@@ -241,6 +274,38 @@ sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
 action:action_iattc_catch_ps_shark_byflag.R@./R/tunaatlas_scripts/pre-harmonization/iattc/catch/ps_shark_byflag/action_iattc_catch_ps_shark_byflag.R"
+id:catch_1deg_1m_ps_iattc_level0__shark_byschool,title:Monthly catch of sharks in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by type of school (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of shark species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, type of school (fishing mode: sets on floating objects, on dolphins, on unassociated schools) and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. Observers record shark bycatch in number of individuals or weight, and in this file the data are presented in the original units, not converted from numbers to weight or vice-versa.""
+ 
+Estimated East Pacific Ocean shark bycatch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.",,"owner:nvogel@iattc.org_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-05-27_
+access:2020-10-21",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/PublicPSShark.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicPSShark.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:./data/GTA_2026/PublicPSSharkSetType.csv,./data/iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:action_iattc_catch_ps_shark_byschool.R@./R/tunaatlas_scripts/pre-harmonization/iattc/catch/ps_shark_byschool/action_iattc_catch_ps_shark_byschool.R"
 id:catch_1deg_1m_ps_iattc_level0__tuna_byflag,title:Monthly catch of tunas in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
  
 This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
@@ -272,6 +337,37 @@ sourceType:other_
 uploadSource:fact_tables.catch_
 uploadType:dbtable_
 action:action_iattc_catch_ps_byflag.R@./R/tunaatlas_scripts/pre-harmonization/iattc/catch/ps_byflag/action_iattc_catch_ps_byflag.R"
+id:catch_1deg_1m_ps_iattc_level0__tuna_byschool,title:Monthly catch of tunas in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by type of school (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% to %temporal_extent:end%. Species-specific catches are stratified by year, month, fishing gear, type of school (fishing mode: sets on floating objects, on dolphins, on unassociated schools) and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
+ 
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+ 
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+ 
+Characteristics, specific issues and problems that need to be taken into account :
+ 
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+ 
+The file contain data provided by Members and Cooperating Non-Members. The data on catch are recorded by on-board observers at sea, or abstracted from vessel logbooks when observer data are not available. The data on catch weight and species composition are not adjusted by data from other sources, such as unloadings or sets for which catch data is not available
+ 
+Estimated EPO tuna catch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.""",,"owner:ird@ird.fr_
+pointOfContact:nvogel@iattc.org_
+publisher:ird@ird.fr_
+dsd:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr,julien.barde@ird.fr,emmanuel.blondel@fao.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","creation:2020-06-01_
+access:2020-10-21",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/PublicPSTuna.zip_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicPSTuna.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1laK8syJgDDmB_JDNbt6zZqomPcXYujRz",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:./data/GTA_2026/PublicPSTunaSetType.csv,./data/iattc_catch_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.catch_
+uploadType:dbtable_
+action:action_iattc_catch_ps_byschool.R@./R/tunaatlas_scripts/pre-harmonization/iattc/catch/ps_byschool/action_iattc_catch_ps_byschool.R"
 id:catch_1deg_1m_bb_iattc_level0__tuna_byflag,title:Monthly catch of tunas in the East Pacific Ocean (%temporal_extent:start% - %temporal_extent:end%) by pole-and-liners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated catch of tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by pole-and-line vessels (baitboats) from %year_start% to %year_end%. Species-specific catches are stratified by year, month, fishing gear, vessel flag reporting country and area (statistical squares of 1° longitude and latitude). It corresponds to the catch part of the IATTC catch-and-effort (task2) dataset.
  
 This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.

@@ -1,0 +1,6 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level"
+"ALL","PS",1998-06-01,1998-06-30,"5314092","OBJ","BUM","RC","MT",1,"IATTC","catch","unknown"
+"ALL","PS",2009-07-01,2009-07-31,"5302093","OBJ","BUM","RC","MT",4,"IATTC","catch","unknown"
+"ALL","PS",2011-10-01,2011-10-31,"5403125","OBJ","BUM","RC","MT",1,"IATTC","catch","unknown"
+"ALL","PS",2012-03-01,2012-03-31,"5408101","DEL","BUM","RC","MT",1,"IATTC","catch","unknown"
+"ALL","PS",2017-06-01,2017-06-30,"5402112","OBJ","BIL","RC","MT",1,"IATTC","catch","unknown"
