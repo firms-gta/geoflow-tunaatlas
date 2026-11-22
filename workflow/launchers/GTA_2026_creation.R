@@ -848,15 +848,6 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       file = here::here("config/geoflow/catch_level0.json"),
       rename_suffix = "level_0_catch_2026"
     )
-    if (run_step("summaries")) {
-      if (!is.null(tunaatlas_level0_catch_path)) {
-    run_step_summary(
-      workflow_file = "config/geoflow/catch_level0.json",
-      workflow_output = tunaatlas_level0_catch_path,
-      source_authority = "all"
-    )
-      }
-    }
   }
   
   if (run_step("level1")) {
@@ -864,15 +855,6 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       file = here::here("config/geoflow/catch_level1.json"),
       rename_suffix = "level_1_catch_2026"
     )
-    if (run_step("summaries")) {
-      if (!is.null(tunaatlas_level1_catch_path)) {
-    run_step_summary(
-      workflow_file = "config/geoflow/catch_level1.json",
-      workflow_output = tunaatlas_level1_catch_path,
-      source_authority = "all"
-    )
-      }
-    }
   }
   
   if (run_step("level2")) {
@@ -881,64 +863,52 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       file = here::here("config/geoflow/catch_level2.json"),
       rename_suffix = "level_2_catch_2026"
     )
-    if (run_step("summaries")) {
-      if (!is.null(tunaatlas_level2_catch_path)) {
-        
-    run_step_summary(
-      workflow_file = "config/geoflow/catch_level2.json",
-      workflow_output = tunaatlas_level2_catch_path,
-      source_authority = "all"
-    )
-      }
-    }
 
   }
   
   # ---------------------------------------------------------------------------
-  # Summary-only reruns
+  # Summaries: one global step, after all the levels
   # ---------------------------------------------------------------------------
   
   if (run_step("summaries")) {
-    tunaatlas_level0_catch_path <- get_existing_or_stop(
-      "tunaatlas_level0_catch_path",
-      existing_paths$tunaatlas_level0_catch,
-      "summaries / level0"
+    # One summary per catch level, each from the job of this run or, when the
+    # level was not run here, from `existing_paths`. A failed summary does not
+    # stop the others; they are listed at the end.
+    summary_levels <- list(
+      level0 = "config/geoflow/catch_level0.json",
+      level1 = "config/geoflow/catch_level1.json",
+      level2 = "config/geoflow/catch_level2.json"
     )
-    
-    tunaatlas_level1_catch_path <- get_existing_or_stop(
-      "tunaatlas_level1_catch_path",
-      existing_paths$tunaatlas_level1_catch,
-      "summaries / level1"
-    )
-    
-    tunaatlas_level2_catch_path <- get_existing_or_stop(
-      "tunaatlas_level2_catch_path",
-      existing_paths$tunaatlas_level2_catch,
-      "summaries / level2"
-    )
-    if (!is.null(tunaatlas_level0_catch_path)) {
-      
-    run_step_summary(
-      workflow_file = "config/geoflow/catch_level0.json",
-      workflow_output = tunaatlas_level0_catch_path,
-      source_authority = "all"
-    )
+    summary_failures <- character(0)
+    for (level in names(summary_levels)) {
+      # The job of this run when the level ran here (checked in this frame:
+      # get_existing_or_stop() cannot see the variables of this function)
+      run_var <- sprintf("tunaatlas_%s_catch_path", level)
+      job_path <- if (exists(run_var, inherits = FALSE)) {
+        get(run_var, inherits = FALSE)
+      } else {
+        existing_paths[[sprintf("tunaatlas_%s_catch", level)]]
+      }
+      if (is.null(job_path)) {
+        message("Summary of ", level, " skipped: not run here and no existing job given.")
+        next
+      }
+      done <- tryCatch({
+        run_step_summary(
+          workflow_file = summary_levels[[level]],
+          workflow_output = job_path,
+          source_authority = "all"
+        )
+        TRUE
+      }, error = function(e) {
+        message("Summary of ", level, " failed: ", conditionMessage(e))
+        FALSE
+      })
+      if (!done) summary_failures <- c(summary_failures, level)
     }
-    if (!is.null(tunaatlas_level1_catch_path)) {
-      
-    run_step_summary(
-      workflow_file = "config/geoflow/catch_level1.json",
-      workflow_output = tunaatlas_level1_catch_path,
-      source_authority = "all"
-    )
-    }
-    if (!is.null(tunaatlas_level2_catch_path)) {
-      
-    run_step_summary(
-      workflow_file = "config/geoflow/catch_level2.json",
-      workflow_output = tunaatlas_level2_catch_path,
-      source_authority = "all"
-    )
+    if (length(summary_failures) > 0) {
+      warning("Summaries failed for: ", paste(summary_failures, collapse = ", "),
+              call. = FALSE, immediate. = TRUE)
     }
   }
   
