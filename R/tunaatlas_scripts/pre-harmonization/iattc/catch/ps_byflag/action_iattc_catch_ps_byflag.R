@@ -1,32 +1,14 @@
-#' Harmonize IATTC PS ByFlag Catch Datasets
+#' Harmonize IATTC PS ByFlag Catch Datasets (geoflow action)
 #'
-#' Harmonizes the structure of IATTC PS (Purse Seine) catch datasets by flag. This function is designed
-#' to adjust catch data to fit standardized formats required for integration into the Tuna Atlas database.
-#' The process involves reformatting the data and possibly integrating metadata and code lists if they
-#' will be loaded into the Tuna Atlas database.
-#' This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
+#' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iattc_catch_ps_byflag()
+#' (R/core/rawdata_iattc_catch_ps_byflag.R), writes the outputs and declares the resources of
+#' the entity. The processing itself is in the core function, usable without geoflow.
 #'
-#' @param action Contextual action data typically provided by the geoflow framework.
-#' @param entity Contextual entity data describing the dataset within the geoflow framework.
-#' @param config Configuration settings provided by the geoflow framework.
-#'
-#' @details The function reads raw data, processes it according to specified stratifications such as
-#'          'PublicPSBillfishFlag', 'PublicPSTunaFlag', and 'PublicPSSharkFlag', and then outputs a
-#'          harmonized dataset. It can conditionally include metadata and code lists based on whether the
-#'          data is intended for database loading.
-#'
-#' @return Does not return anything; it outputs files directly to the specified location within the geoflow system.
-#'
-#' @importFrom dplyr filter mutate
-#' @importFrom readr read_csv write_csv
-#' @seealso \code{\link{convertDSD_iattc_ce}} for other conversions related to IATTC data,
-#'          \code{\link{format_time_db_format}} to standardize time formatting for database integration.
-#' @export
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-#' @keywords IATTC, tuna, fisheries, data harmonization, catch data
+#' @param action The action context from geoflow.
+#' @param entity The entity context from geoflow.
+#' @param config The configuration context from geoflow.
 function(action, entity, config){
-  source(here::here("./R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R"))
+
 #packages
 
   if(!require(data.table)){
@@ -58,23 +40,11 @@ options(encoding = "UTF-8")
 
 ## Catches
 
-catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"Flag","PS")
-catches_pivot_IATTC$NumSets<-NULL
 
-colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
-source(here::here("./R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R"))
-catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
+source(here::here("R/core/gta_data.R"))
+source(here::here("R/core/rawdata_iattc_catch_ps_byflag.R"))
+catches <- gta_rawdata_iattc_catch_ps_byflag(path_to_raw_dataset)
 
-colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
-catches$source_authority<-"IATTC"
-catches$measurement_type <- "RC" # Retained catches
-catches$measurement <- "catch"
-catches$measurement_processing_level <- "unknown"
-#----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
-catches$time_start <- as.Date(catches$time_start)
-catches$time_end <- as.Date(catches$time_end)
-#we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
 	paste0(format(min(catches$time_start), "%Y"), "-01-01"),
 	paste0(format(max(catches$time_end), "%Y"), "-12-31"),

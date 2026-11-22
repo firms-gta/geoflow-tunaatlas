@@ -1,31 +1,14 @@
-#' Harmonize IATTC PS ByFlag Effort Datasets
+#' Harmonize IATTC PS ByFlag Effort Datasets (geoflow action)
 #'
-#' This function harmonizes the effort data for the IATTC PS ByFlag datasets,
-#' preparing them for integration into the Tuna Atlas database, following the required format specifications.
-#' This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
+#' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iattc_effort_ps_byflag()
+#' (R/core/rawdata_iattc_effort_ps_byflag.R), writes the outputs and declares the resources of
+#' the entity. The processing itself is in the core function, usable without geoflow.
 #'
-#' @param action The action context from geoflow, used for controlling workflow processes.
-#' @param entity The entity context from geoflow, which manages dataset-specific details.
-#' @param config The configuration context from geoflow, used for managing global settings.
-#'
-#' @return None; the function outputs files directly, including harmonized datasets,
-#'         optional metadata, and code lists for integration within the Tuna Atlas database.
-#'
-#' @details This function modifies the dataset to ensure compliance with the standardized
-#'          format, including renaming, reordering, and recalculating specific fields as necessary.
-#'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
-#'
-#' @import dplyr
-#' @import readr
-#' @importFrom stringr str_replace
-#' @seealso \code{\link{FUN_efforts_IATTC_CE_allbutLLTunaBillfish}} for initial effort data preprocessing,
-#'          \code{\link{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD}} for converting effort data to a standardized structure.
-#' @export
-#' @keywords data harmonization, fisheries, IATTC, tuna
-#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
-#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-
+#' @param action The action context from geoflow.
+#' @param entity The entity context from geoflow.
+#' @param config The configuration context from geoflow.
 function(action, entity, config){
+
   
 #packages
 
@@ -47,30 +30,18 @@ options(encoding = "UTF-8")
 ##Efforts
 
 # Reach the efforts pivot DSD using a function in IATTC_functions.R
-source(here::here("./R/sardara_functions/FUN_efforts_IATTC_CE_allbutLLTunaBillfish.R"))
-efforts_pivot_IATTC <-FUN_efforts_IATTC_CE_allbutLLTunaBillfish(path_to_raw_dataset,"NumSets","Flag","PS")
 
-colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
-source(here::here("./R/sardara_functions/IATTC_CE_efforts_pivotDSD_to_harmonizedDSD.R"))
-efforts<-IATTC_CE_efforts_pivotDSD_to_harmonizedDSD(efforts_pivot_IATTC,colToKeep_efforts)
+source(here::here("R/core/gta_data.R"))
+source(here::here("R/core/rawdata_iattc_effort_ps_byflag.R"))
+efforts <- gta_rawdata_iattc_effort_ps_byflag(path_to_raw_dataset)
 
-colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value")
-efforts$source_authority<-"IATTC"
-efforts$measurement <- "effort"
-efforts$measurement_processing_level <- "unknown" 
-efforts <- efforts %>% dplyr::mutate(fishing_mode = ifelse(fishing_mode == "ALL", "OTH", fishing_mode))
-
-#----------------------------------------------------------------------------------------------------------------------------
-#@eblondel additional formatting for next time support
-efforts$time_start <- as.Date(efforts$time_start)
-efforts$time_end <- as.Date(efforts$time_end)
-#we enrich the entity with temporal coverage
 dataset_temporal_extent <- paste(
 	paste0(format(min(efforts$time_start), "%Y"), "-01-01"),
 	paste0(format(max(efforts$time_end), "%Y"), "-12-31"),
 	sep = "/"
 )
 entity$setTemporalExtent(dataset_temporal_extent)
+
 base1 <- tools::file_path_sans_ext(basename(filename1))
 #@geoflow -> export as csv
 # output in same folder as path_to_raw_dataset 
@@ -83,4 +54,5 @@ file.rename(  from = entity$getJobDataResource(config, filename2),  to   = outpu
 #----------------------------------------------------------------------------------------------------------------------------  
 entity$addResource("source", path_to_raw_dataset)
 entity$addResource("harmonized", output_name_dataset)
-entity$addResource("codelists", output_name_codelists)}
+entity$addResource("codelists", output_name_codelists)
+}

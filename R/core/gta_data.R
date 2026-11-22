@@ -43,3 +43,22 @@ gta_utf8 <- function(expr) {
   on.exit(options(old), add = TRUE)
   expr
 }
+
+#' Path of a dataset given as a data frame or as a file path
+#'
+#' For the core functions whose reading is done by a helper that takes a file
+#' path: a data frame is written to a temporary CSV file, a path is returned as is.
+#'
+#' @param x A data frame, or the path to a file.
+#' @return A file path.
+gta_path <- function(x) {
+  if (is.data.frame(x)) {
+    path <- tempfile(fileext = ".csv")
+    utils::write.csv(x, path, row.names = FALSE)
+    return(path)
+  }
+  if (!is.character(x) || length(x) != 1L || !file.exists(x)) {
+    stop("Expected a data frame or the path of an existing file.", call. = FALSE)
+  }
+  x
+}
