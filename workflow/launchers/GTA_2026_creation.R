@@ -1018,7 +1018,9 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
   # OGC Services ------------------------------------------------------------
 
   if (run_any_step(c("services"))) {
-    # Zenodo and database settings come from .env, loaded at the start
+    # geoflow unloads the variables of its env file at the end of each
+    # workflow: reload .env for the GeoServer, database and Zenodo settings
+    dotenv::load_dot_env(file = here::here(".env"))
     source(here::here("workflow/actions/ensure_geoserver_ready.R"))
     source(here::here("docker/patches/patch-zen4r-upload-error.R"))
     ensure_geoserver_ready()
