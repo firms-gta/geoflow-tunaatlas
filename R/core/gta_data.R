@@ -29,3 +29,17 @@ gta_read_csv_utf8 <- function(path) {
   on.exit(options(old), add = TRUE)
   utils::read.csv(path)
 }
+
+#' Evaluate an expression with the UTF-8 encoding option
+#'
+#' The pre-harmonisation scripts set `options(encoding = "UTF-8")` before
+#' reading their files; the core functions read the same way, then restore the
+#' option.
+#'
+#' @param expr Expression to evaluate, e.g. a `read.csv()` call.
+#' @return The value of `expr`.
+gta_utf8 <- function(expr) {
+  old <- options(encoding = "UTF-8")
+  on.exit(options(old), add = TRUE)
+  expr
+}
