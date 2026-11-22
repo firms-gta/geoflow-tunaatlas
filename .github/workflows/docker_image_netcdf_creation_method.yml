@@ -83,8 +83,9 @@ jobs:
           fi
 
           # Paths that should trigger a build
-          WATCH_1="R/create_netcdf/"
-          WATCH_2=".github/workflows/createnetcdf.yml"
+          # The netcdf image is a target of the single Dockerfile
+          WATCH_1="(workflow/netcdf/|R/netcdf/|Dockerfile$)"
+          WATCH_2=".github/workflows/docker_image_netcdf_creation_method.yml"
 
           if [[ "${{ github.event_name }}" == "push" ]]; then
             # Tag push: compare the tagged commit to its first parent
@@ -187,7 +188,7 @@ jobs:
           echo "WORKSPACE=${GITHUB_WORKSPACE}"
           ls -la
           ls -la docker || true
-          find . -maxdepth 3 -type f -name "Dockerfile.netcdf" -print
+          ls -la Dockerfile
           echo "---- .dockerignore ----"
           test -f .dockerignore && cat .dockerignore || echo "no .dockerignore"
           
@@ -195,12 +196,16 @@ jobs:
         uses: docker/build-push-action@v6 # may be creating issue with rewriting above other package
         with:
           context: ${{ github.workspace }}
-          file: ${{ github.workspace }}/docker/Dockerfile.netcdf
+          file: ${{ github.workspace }}/Dockerfile
+          target: netcdf
           push: true
           tags: ${{ steps.tags.outputs.tags }}
           no-cache: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'build-no-cache' }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Layer cache on GHCR (does not expire, shared between branches)
+          cache-from: |
+            type=registry,ref=${{ env.IMAGE }}:buildcache
+            type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
           
   skip:
     name: Skip (no relevant changes)
@@ -209,12 +214,13 @@ jobs:
     if: needs.changes.outputs.relevant != 'true'
     steps:
       - run: |
-          echo "No changes in R/create_netcdf/ or workflow file."
+          echo "No changes in workflow/netcdf/, R/netcdf/ or workflow file."
           echo "Diff was:"
           echo "${{ needs.changes.outputs.diff }}"
           
-# Autre moyen de faire la meme chose que build-push-action@v6 en gerant le cache soi meme. la on utilise cache gha qui est le cahce natif de GitHub Actions, a pa utiliser si on veut gerer ca hors GitHub
-# La novuelle methode permet de gerer le cache meme si ça sarrete vvant le push
+# Alternative to build-push-action@v6 that handles the registry cache by hand
+# (kept for reference: the step above already uses a GHCR registry cache).
+# It also keeps the cache when the job stops before the push.
 #       # -------- Build & PUSH vers GHCR --------
 #       - name: 🐳 Build & Push image
 #         run: |
@@ -223,7 +229,7 @@ jobs:
 #           TAG_ARGS=()
 #           for t in "${TAGS[@]}"; do TAG_ARGS+=("-t" "$t"); done
 # 
-#           # Option no-cache selon l'input
+#           # no-cache option, from the workflow input
 #           NO_CACHE=""
 #           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.action }}" == "build-no-cache" ]]; then
 #             NO_CACHE="--no-cache"
@@ -237,7 +243,7 @@ jobs:
 #             --build-arg RENV_PATHS_ROOT=${{ env.RENV_PATHS_ROOT }} \
 #             --build-arg RENV_LOCK_HASH=${{ env.renv_lock_hash }} \
 #             --build-arg DOI_CSV_HASH=${{ env.doi_csv_hash }} \
-#             -f docker/Dockerfile.netcdf \
+#             -f Dockerfile --target netcdf \
 #             "${TAG_ARGS[@]}" \
 #             --push .
             

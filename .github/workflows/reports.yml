@@ -118,7 +118,7 @@ jobs:
           # repository when they are there. Anything still missing stops the
           # run here rather than in the middle of a step.
           missing=()
-          for f in $(cat config/*.csv | grep -o '\./data/GTA_2026/[A-Za-z0-9_.-]*' \
+          for f in $(cat config/entities/*.csv | grep -o '\./data/GTA_2026/[A-Za-z0-9_.-]*' \
                        | grep -v '/dataoutput' | sed 's#^\./data/GTA_2026/##; s#_$##' | sort -u); do
             [[ -e "runtime/data/$f" ]] && continue
             if [[ -e "data/$f" ]]; then
@@ -141,6 +141,9 @@ jobs:
         run: |
           set -euo pipefail
           D=runtime/data
+          # Settings of the workflow container (the geoflow configurations load
+          # .env). No database here (GTA_NO_DB), the local-stack values are enough.
+          cp env.example .env
 
           step() {   # step <GTA_STEPS> [extra docker run options...]
             local steps="$1"; shift
@@ -149,6 +152,7 @@ jobs:
               --user 1000:1000 \
               -v "$PWD/$D":"$PROJECT_DIR/data/GTA_2026" \
               -v "$PWD/runtime/jobs":"$PROJECT_DIR/jobs" \
+              -v "$PWD/.env":"$PROJECT_DIR/.env:ro" \
               -e GTA_STEPS="$steps" \
               -e GTA_DATA_SOURCE=volume_dir \
               -e GTA_DATA_PATH="$PROJECT_DIR/data/GTA_2026" \

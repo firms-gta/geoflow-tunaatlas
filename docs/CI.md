@@ -7,22 +7,23 @@ published to the GitHub Container Registry (GHCR).
 
 | Workflow file | Trigger | What it checks |
 | --- | --- | --- |
-| `workflow-launcher-checks.yml` | pull requests touching the launcher or the Dockerfile | launcher scripts parse, `tests/smoke_test_launcher.R`, required patches present in `compose/Dockerfile.workflow` |
+| `workflow-launcher-checks.yml` | pull requests touching the launcher or the Dockerfile | launcher scripts parse, `tests/smoke_test_launcher.R`, required patches present in the `Dockerfile` |
 | `test_whole_compose.yml` | push on `master` and the feature branch, manual | end-to-end run of the full stack on the sample data, then publication of the tested image |
 
 ## End-to-end test (`test_whole_compose.yml`)
 
-1. **Build** `compose/Dockerfile.workflow` from the commit (tag
-   `gta-workflow:ci-<sha>`, local to the runner). Layers are cached between runs:
-   when only R code changes, `renv::restore()` is not re-run.
-2. **Prepare the runner**: write `docker_local.env.compose` and
-   `zenodo_secrets.env`, create the output folders of the sample data, give the
-   mounted folders to uid 1000 (the `rstudio` user of the image).
-3. **Run** `./compose/run_workflow.sh` with
+1. **Build** the `workflow` target of the `Dockerfile` from the commit (tag
+   `gta-workflow:ci-<sha>`, local to the runner). Layers are cached on GHCR
+   (`gta-workflow:buildcache`, shared by all branches): when only R code
+   changes, `renv::restore()` is not re-run.
+2. **Prepare the runner**: create `.env` from `env.example` (publication on the
+   Zenodo sandbox, smaller Elasticsearch heap), create the output folders of the
+   sample data, give the mounted folders to uid 1000 (the `rstudio` user of the
+   image).
+3. **Run** `./docker/run_workflow.sh` with
    `GTA_STEPS=DB,rawdata,nominal,effort,level0,level1,services`,
    `GTA_RUN_USER=1000:1000` and `GTA_MOUNT_CODE=false`, so the code inside the
-   image is tested, not the checkout. With `CI=true`, the script adds
-   `compose/compose.ci.yml` (smaller Elasticsearch heap).
+   image is tested, not the checkout.
 4. **On failure**, print the logs of all services.
 5. **On success of a push**, publish the image that was just tested.
 
@@ -68,8 +69,9 @@ affects reading.
 ## Reproducing the CI locally
 
 ```bash
-docker build -f compose/Dockerfile.workflow -t gta-workflow:local .
-CI=true GTA_IMAGE=gta-workflow:local GTA_MOUNT_CODE=false ./compose/run_workflow.sh
+docker build -t gta-workflow:local .     # workflow target (default)
+cp env.example .env                      # once
+GTA_IMAGE=gta-workflow:local GTA_MOUNT_CODE=false ./docker/run_workflow.sh
 ```
 
-See [compose/README.md](../compose/README.md) for the scripts and their options.
+See [docker/README.md](../docker/README.md) for the scripts and their options.

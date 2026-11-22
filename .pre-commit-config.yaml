@@ -1,0 +1,44 @@
+# Hooks run on the staged files at each `git commit`.
+# Install: pip install pre-commit && pre-commit install
+# Run on every file by hand: pre-commit run --all-files
+# Same hook versions as CWP.dataset, so both repositories share one cache.
+repos:
+  # R: every staged R file must parse. Run with --vanilla so that .Rprofile
+  # (renv activation) is not loaded. styler and lintr are not run here yet:
+  # the existing code would fail them; they come with the R package.
+  - repo: local
+    hooks:
+      - id: r-parse
+        name: R files parse
+        language: system
+        entry: >-
+          Rscript --vanilla -e 'ok <- TRUE; for (f in commandArgs(TRUE))
+          tryCatch(parse(f), error = function(e) {
+          message(f, ": ", conditionMessage(e)); ok <<- FALSE });
+          quit(status = as.integer(!ok))'
+        files: '\.[rR]$'
+        exclude: '^deprecated/'
+      # Every local file named by config/geoflow/*.json and config/entities/*.csv
+      # exists and is tracked by git (the Docker image only has tracked files).
+      - id: config-paths
+        name: config paths exist and are tracked
+        language: system
+        entry: python3 tests/check_config_paths.py
+        pass_filenames: false
+        files: '^(config/(geoflow|entities)/|data/|R/|workflow/|docker/|tests/check_config_paths\.py$)'
+
+  # Secrets in the staged changes
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+  # Basic checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+        exclude: '^(deprecated|docs|renv)/|\.(html|qs|rds|rda|RData|parquet|csv|xlsx|gpkg)$'
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1000]
