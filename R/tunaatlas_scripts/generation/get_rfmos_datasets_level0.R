@@ -394,28 +394,40 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                                                              "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
                                                              "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv"
                           )
-                          # dataset_file_effort_settype <- switch(options$iattc_ps_effort_to_extract,
-                          #                                       "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
-                          #                                       "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv",
-                          #                                       "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
-                          #                                       
-                          # )
                           # For the effort data, we keep only effort from one of the files (tuna or billfishes or shark). This is driven by the parameter "iattc_ps_effort_to_extract"
-                          # df_iattc_effort_PSSetType <- as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_settype]), guess_max = 0))
-                          # df_iattc_effort_PSSetType <- df_iattc_effort_PSSetType[,columns_to_keep_effort]
-                          # class(df_iattc_effort_PSSetType$measurement_value) <- "numeric"
-                          df_iattc_effort_PSFlag <- rbind(as.data.frame(readr::read_csv(file.path("data",basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_flag]), guess_max = 0)), 
-                                                          as.data.frame(readr::read_csv(file.path("data",basename("effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv")), guess_max = 0))) # need to update csv to match this 
-                          df_iattc_effort_PSFlag <- df_iattc_effort_PSFlag[,columns_to_keep_effort]
-                          class(df_iattc_effort_PSFlag$measurement_value) <- "numeric"
-                          
+                          read_effort <- function(file) {
+                            x <- as.data.frame(readr::read_csv(file.path("data", basename(file)), guess_max = 0))
+                            x <- x[, columns_to_keep_effort]
+                            class(x$measurement_value) <- "numeric"
+                            x
+                          }
+                          df_iattc_effort_PSFlag <- read_effort(basename(dataset_files)[basename(names(dataset_files))==dataset_file_effort_flag])
+                          # Longline effort: by flag only, added after the purse seine raising
+                          df_iattc_effort_LLFlag <- read_effort("effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv")
+                          use_settype <- options$iattc_ps_raise_flags_to_schooltype ||
+                            options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishing_mode'
+                          if (use_settype) {
+                            dataset_file_effort_settype <- switch(options$iattc_ps_effort_to_extract,
+                                                                  "tuna" = "effort_1deg_1m_ps_iattc_level0__tuna_byschool.csv",
+                                                                  "billfish" = "effort_1deg_1m_ps_iattc_level0__billfish_byschool.csv",
+                                                                  "shark" = "effort_1deg_1m_ps_iattc_level0__shark_byschool.csv"
+                            )
+                            df_iattc_effort_PSSetType <- read_effort(dataset_file_effort_settype)
+                          }
+
                           if (options$iattc_ps_raise_flags_to_schooltype){
-                            #Get Tuna effort by raising flags to schooltype
+                            # Purse seine effort by flag and type of school: the sets of each flag
+                            # are shared among the types of school of their stratum (both files
+                            # have the same strata and the same number of sets in each stratum).
+                            # Only the purse seine: raise_datasets_by_dimension() keeps only the
+                            # strata found in both datasets.
+                            log_info("IATTC purse seine effort: raising flags to type of school")
+                            source(here::here("./R/sardara_functions/raise_datasets_by_dimension.R"))
                             df <- raise_datasets_by_dimension(df1=df_iattc_effort_PSFlag,
                                                               df2=df_iattc_effort_PSSetType,
                                                               dimension_missing_df1="fishing_mode",
                                                               dimension_missing_df2="fishing_fleet")$df
-                            
+
                           } else {  # If the user decides not to raise flags to type of school, he chooses to use either the data with stratification by fishing_fleet or the data with stratification by schooltype
                             if (options$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype == 'fishing_fleet'){
                               df<-df_iattc_effort_PSFlag
@@ -423,6 +435,7 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
                               df<-df_iattc_effort_PSSetType
                             }
                           }
+                          df <- rbind(df, df_iattc_effort_LLFlag)
                           
                           # Pole-and-line (baitboat) effort, by flag only (IATTC gives no
                           # school type for this gear): added after the purse seine raising
