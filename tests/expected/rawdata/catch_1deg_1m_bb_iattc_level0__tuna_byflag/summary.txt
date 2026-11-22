@@ -1,0 +1,3 @@
+extent: 1978-01-01/2008-12-31
+resources: codelists,harmonized,source
+outputs: PublicLPTunaFlag_codelists.csv,PublicLPTunaFlag_harmonized.csv
