@@ -154,4 +154,3 @@ Display the first few rows of the mapping summaries
 print(head(mapping_codelist$recap_mapping))
 print(head(mapping_codelist$not_mapped_total))
 ```
-

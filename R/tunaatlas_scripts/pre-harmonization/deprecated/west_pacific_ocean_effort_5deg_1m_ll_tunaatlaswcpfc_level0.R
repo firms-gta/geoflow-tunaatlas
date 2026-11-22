@@ -169,6 +169,3 @@ colnames(efforts)<-c("fishing_fleet","gear_type","time_start","time_end","geogra
 efforts$source_authority<-"WCPFC"
 efforts$measurement <- "effort" 
 }
-
-
-

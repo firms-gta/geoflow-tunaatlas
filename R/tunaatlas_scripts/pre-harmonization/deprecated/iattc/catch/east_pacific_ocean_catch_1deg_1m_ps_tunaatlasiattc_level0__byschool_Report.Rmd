@@ -1,5 +1,5 @@
 ---
-title: "Harmonize IATTC PS Shark BySchool Catch Datasets"
+title: "Harmonize IATTC PSSetType Catch Datasets by School"
 output: 
   html_document: 
     code_folding: hide
@@ -18,41 +18,36 @@ Additional operations are performed next to verify other aspects of the data, su
 If you are interested in further details, the results and codes are available for review.
 
 ```{r}
-path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicPSSharkSetType.csv')
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iattc', 'catch', 'data', 'PublicPSTunaSetType.csv')
 ```
 
-Harmonize IATTC PS Shark BySchool Catch Datasets
+Harmonize IATTC PSSetType Catch Datasets by School
 
-This function processes and harmonizes the Inter-American Tropical Tuna Commission (IATTC)
-PS (Purse Seine) shark catch datasets by school type. It prepares the data for integration into the
-Tuna Atlas database, aligning with the requirements for data standardization and optionally
-including metadata if the dataset is intended for database loading.
+This function harmonizes the structure of IATTC PS (Purse Seine) catch datasets by school type,
+specifically for Billfish, Tuna, and Shark, according to the operation modes 'PublicPSBillfishSetType',
+'PublicPSTunaSetType', and 'PublicPSSharkSetType'. It prepares the data for integration into the
+Tuna Atlas database, ensuring that only the essential fields are retained and that metadata
+is included if the dataset will be loaded into the database.
+This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
 
 
-@return None; the function outputs files directly, including harmonized datasets,
+@return None; this function outputs files directly, including harmonized datasets,
         optional metadata, and code lists for integration within the Tuna Atlas database.
 
-@details This function restructures the dataset to include only essential fields, performs any necessary calculations
-         for catch units, and standardizes the format for date fields and geographical identifiers.
-         Metadata integration is contingent on the final use of the dataset within the Tuna Atlas database.
+@details The function requires the path to a raw dataset and, optionally, a metadata file.
+         It processes the data to harmonize it based on the specified school type stratification.
+         The process may include renaming columns, recalculating fields, and reformatting the data
+         for consistency with database requirements.
 
+@importFrom dplyr select mutate
 @importFrom readr read_csv write_csv
-@importFrom dplyr filter mutate
-@importFrom tidyr gather
-@seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType_Shark}} for specific data processing of shark catches by school,
-         \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} for general data structuring operations.
+@seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType}} to convert IATTC task 2,
+         \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} to convert IATTC nominal catch data structure.
 @export
-@keywords IATTC, tuna, fisheries, data harmonization, shark catch, school
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
-'# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|Flag|LatC1|LonC1|NumSets}
-
-```{r}
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType_Shark.R")
-```
-
-packages
-Historical name for the dataset at source  PublicPSSharkSetType.csv
+@keywords IATTC, tuna, fisheries, data harmonization, catch data
+Historical name for the dataset at source  PublicPSTunaSetType.csv or PublicPSBillfishSetType.csv
 
 ```{r}
 opts <- options()
@@ -62,9 +57,19 @@ options(encoding = "UTF-8")
 # Catches
 
 ```{r}
-catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType_Shark(path_to_raw_dataset,"SetType","PS")
-catches_pivot_IATTC$NumSets<-NULL
+source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/FUN_catches_IATTC_CE_Flag_or_SetType.R")
+```
 
+Reach the catches pivot DSD using a function stored in IATTC_functions.R
+
+```{r}
+catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"SetType","PS")
+catches_pivot_IATTC$NumSets<-NULL
+```
+
+Reach the catches harmonized DSD using a function in IATTC_functions.R
+
+```{r}
 colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
 source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/R/sardara_functions/IATTC_CE_catches_pivotDSD_to_harmonizedDSD.R")
 catches<-IATTC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_IATTC,colToKeep_captures)
@@ -115,4 +120,3 @@ Display the first few rows of the mapping summaries
 print(head(mapping_codelist$recap_mapping))
 print(head(mapping_codelist$not_mapped_total))
 ```
-
