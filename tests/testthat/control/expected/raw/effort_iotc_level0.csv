@@ -1,0 +1,21 @@
+"source_authority","gear_type","fishing_fleet","fishing_mode","fishing_fleet_label","time_start","time_end","geographic_identifier","gridtype","measurement_unit","measurement_processing_level","measurement","measurement_value"
+"IOTC","01.1","EUESP","UNK","EU (Spain)",1999-04-01,1999-04-30,"5209043","1deg_x_1deg","HOURS","unknown","effort",24
+"IOTC","01.1","EUFRA","UNK","EU (France)",1983-12-01,1983-12-31,"5205065","1deg_x_1deg","STDHR","unknown","effort",12.4
+"IOTC","01.1","EUFRA","UNK","EU (France)",1994-06-01,1994-06-30,"5209043","1deg_x_1deg","HOURS","unknown","effort",24
+"IOTC","01.1","EUFRA","UNK","EU (France,Mayotte)",2007-05-01,2007-05-31,"5205045","1deg_x_1deg","FHOURS","unknown","effort",11.9
+"IOTC","01.1","EUFRA","UNK","EU (France,Mayotte)",2009-06-01,2009-06-30,"5207073","1deg_x_1deg","STDHR","unknown","effort",11.7
+"IOTC","01.1","NEI","UNK","NEI (other)",1985-06-01,1985-06-30,"5204047","1deg_x_1deg","FHOURS","unknown","effort",13
+"IOTC","01.1","NEI","UNK","NEI (other)",2008-11-01,2008-11-30,"5206052","1deg_x_1deg","STDHR","unknown","effort",14.5
+"IOTC","01.1","SUN","UNK","Soviet Union",1987-03-01,1987-03-31,"5204068","1deg_x_1deg","FDAYS","unknown","effort",5
+"IOTC","01.1","SYC","LS","Seychelles",2020-07-01,2020-07-31,"5102058","1deg_x_1deg","FDAYS","unknown","effort",1.02
+"IOTC","01.1","SYC","LS","Seychelles",2023-01-01,2023-01-31,"5103065","1deg_x_1deg","SETS","unknown","effort",3
+"IOTC","01.1","SYC","UNK","Seychelles",2010-02-01,2010-02-28,"5100055","1deg_x_1deg","STDHR","unknown","effort",14.1
+"IOTC","01.1","SYC","UNK","Seychelles",2015-12-01,2015-12-31,"5200061","1deg_x_1deg","FHOURS","unknown","effort",24.2
+"IOTC","01.1","SYC","UNK","Seychelles",2019-12-01,2019-12-31,"5207051","1deg_x_1deg","FDAYS","unknown","effort",0.33
+"IOTC","01.2","LKA","UNK","Sri Lanka",2022-05-01,2022-05-31,"5102087","1deg_x_1deg","TRIPS","unknown","effort",1
+"IOTC","07.2","LKA","UNK","Sri Lanka",2016-05-01,2016-05-31,"5116087","1deg_x_1deg","TRIPS","unknown","effort",7
+"IOTC","07.2","LKA","UNK","Sri Lanka",2023-07-01,2023-07-31,"5204077","1deg_x_1deg","TRIPS","unknown","effort",11
+"IOTC","09.32","JPN","UNK","Japan",2006-12-01,2006-12-31,"6205060","5deg_x_5deg","HOOKS","unknown","effort",18873
+"IOTC","09.32","JPN","UNK","Japan",2020-10-01,2020-10-31,"6235100","5deg_x_5deg","HOOKS","unknown","effort",107452
+"IOTC","09.32","SYC","UNK","Seychelles",2024-02-01,2024-02-29,"5203057","1deg_x_1deg","HOOKS","unknown","effort",33700
+"IOTC","09.9","MDV","UNK","Maldives",2019-05-01,2019-05-31,"5202074","1deg_x_1deg","HOOKS","unknown","effort",18560

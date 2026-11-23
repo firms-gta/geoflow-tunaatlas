@@ -1,0 +1,16 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"AUS","01.1",1992-02-01,1992-02-29,"5238148","UNK","HRSRH","CCSBT","effort","unknown",288
+"AUS","01.1",2004-01-01,2004-01-31,"5237150","UNK","HRSRH","CCSBT","effort","unknown",39
+"AUS","09.1",1977-03-01,1977-03-31,"5235134","UNK","HRSRH","CCSBT","effort","unknown",13
+"AUS","09.1",1979-01-01,1979-01-31,"5233134","UNK","HRSRH","CCSBT","effort","unknown",12
+"AUS","09.1",1979-01-01,1979-01-31,"5234133","UNK","HRSRH","CCSBT","effort","unknown",1
+"AUS","09.1",1979-02-01,1979-02-28,"5236136","UNK","HRSRH","CCSBT","effort","unknown",7
+"AUS","09.1",1981-01-01,1981-01-31,"5234134","UNK","HRSRH","CCSBT","effort","unknown",5
+"AUS","09.1",1983-04-01,1983-04-30,"5234120","UNK","HRSRH","CCSBT","effort","unknown",524
+"AUS","09.1",1984-11-01,1984-11-30,"5236150","UNK","HRSRH","CCSBT","effort","unknown",105
+"AUS","09.1",1987-02-01,1987-02-28,"5234122","UNK","HRSRH","CCSBT","effort","unknown",56
+"AUS","09.1",1987-04-01,1987-04-30,"5235117","UNK","HRSRH","CCSBT","effort","unknown",160
+"AUS","09.1",1988-04-01,1988-04-30,"5234119","UNK","HRSRH","CCSBT","effort","unknown",70
+"AUS","09.1",1990-09-01,1990-09-30,"5234120","UNK","HRSRH","CCSBT","effort","unknown",136
+"AUS","09.1",1991-01-01,1991-01-31,"5236150","UNK","HRSRH","CCSBT","effort","unknown",103
+"AUS","09.1",1994-02-01,1994-02-28,"5236150","UNK","HRSRH","CCSBT","effort","unknown",48

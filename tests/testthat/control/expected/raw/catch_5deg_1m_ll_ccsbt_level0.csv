@@ -1,0 +1,14 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"JPN","09.39",1966-12-01,1966-12-31,"6240105","UNK","SBF","RC","no","CCSBT","catch","unknown",19
+"JPN","09.39",1974-11-01,1974-11-30,"6205125","UNK","SBF","RC","no","CCSBT","catch","unknown",3
+"JPN","09.39",1975-11-01,1975-11-30,"6240135","UNK","SBF","RC","no","CCSBT","catch","unknown",532
+"JPN","09.39",1977-05-01,1977-05-31,"6250150","UNK","SBF","RC","no","CCSBT","catch","unknown",27
+"JPN","09.39",1978-06-01,1978-06-30,"6240105","UNK","SBF","RC","no","CCSBT","catch","unknown",71
+"JPN","09.39",1981-03-01,1981-03-31,"6340005","UNK","SBF","RC","no","CCSBT","catch","unknown",17
+"JPN","09.39",1981-05-01,1981-05-31,"6335005","UNK","SBF","RC","no","CCSBT","catch","unknown",641
+"JPN","09.39",1982-08-01,1982-08-31,"6230160","UNK","SBF","RC","no","CCSBT","catch","unknown",6
+"JPN","09.39",1983-03-01,1983-03-31,"6340040","UNK","SBF","RC","no","CCSBT","catch","unknown",15
+"JPN","09.39",1986-01-01,1986-01-31,"6245090","UNK","SBF","RC","no","CCSBT","catch","unknown",7
+"JPN","09.39",2005-05-01,2005-05-31,"6240150","UNK","SBF","RC","no","CCSBT","catch","unknown",1565
+"JPN","09.39",2006-02-01,2006-02-28,"6230100","UNK","SBF","RC","no","CCSBT","catch","unknown",1035
+"KOR","09.39",1994-04-01,1994-04-30,"6240030","UNK","SBF","RC","no","CCSBT","catch","unknown",132
