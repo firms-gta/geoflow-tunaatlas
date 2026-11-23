@@ -2,6 +2,11 @@
 
 This page provides the shortest way to run the Global Tuna Atlas (GTA) production workflow with Docker.
 
+> **Simplest way:** `./gta.sh produce` at the root of the repository runs the
+> command of this page for you (input archive from Zenodo, outputs in
+> `runtime/`). `./gta.sh help` lists the other commands (`test`, `sample`,
+> `publish`). This page explains what it does and how to adapt it.
+
 The workflow is intended for **reproducing or updating GTA datasets**.
 No local R installation is required.
 
