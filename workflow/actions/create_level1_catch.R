@@ -107,7 +107,7 @@ create_level1_catch <- function(action, entity, config) {
     con = con,
     unit_conversion_convert = opts$unit_conversion_convert,
     unit_conversion_iotc_file = opts$unit_conversion_iotc_file %||% "data/IOTC_conv_fact_mapped.csv",
-    unit_conversion_ird_file = opts$unit_conversion_ird_file %||% "data/fact_conv_ird_complete_01_mai_2026.csv",
+    unit_conversion_ird_file = opts$unit_conversion_ird_file %||% "data/fact_conv_ird_complete_01_May_2026.csv",
     unit_conversion_codelist_geoidentifiers_conversion_factors =
       opts$unit_conversion_codelist_geoidentifiers_conversion_factors,
     mapping_map_code_lists = opts$mapping_map_code_lists,

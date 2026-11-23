@@ -72,7 +72,10 @@ create_georef_dataset <- function(action, entity, config) {
   
   # Processing: core function gta_georef_dataset() (R/georef_dataset.R), on the
   # files of the entity (data/ folder of the job)
-  files <- basename(unlist(entity$data$source[2:length(entity$data$source)]))
+  # (the nominal catch is not a georeferenced dataset: excluded by its name,
+  # whatever its position among the sources)
+  files <- basename(unlist(entity$data$source))
+  files <- files[!grepl("nominal", files)]
   res <- gta_georef_dataset(files, opts, con = con, entity = entity, data_dir = "data")
   georef_dataset <- res$georef_dataset
   opts <- res$opts

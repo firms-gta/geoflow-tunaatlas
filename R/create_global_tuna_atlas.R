@@ -116,12 +116,12 @@ create_global_tuna_atlas <- function(data, options = gta_default_options(),
   }
 
   # Georeferenced datasets: level 0 catch, effort, level 2 catch -------------------
-  # (the sources are read from the second one, as the geoflow action does)
+  # (all the sources except the nominal catch, as the geoflow action does)
   georef <- function(o) {
     step_dir(o$id, o$sources)
     opts <- o$options
     opts$recap_each_step <- recap_each_step
-    res <- gta_georef_dataset(o$sources[-1], opts, con = con, entity = NULL, data_dir = "data")
+    res <- gta_georef_dataset(o$sources[!grepl("nominal", o$sources)], opts, con = con, entity = NULL, data_dir = "data")
     write_outputs(res$georef_dataset, o$id)
   }
   if ("level0" %in% steps) result$level0 <- georef(options$level0)
@@ -138,7 +138,7 @@ create_global_tuna_atlas <- function(data, options = gta_default_options(),
       con = con,
       unit_conversion_convert = opts$unit_conversion_convert %||% TRUE,
       unit_conversion_iotc_file = opts$unit_conversion_iotc_file %||% "data/IOTC_conv_fact_mapped.csv",
-      unit_conversion_ird_file = opts$unit_conversion_ird_file %||% "data/fact_conv_ird_complete_01_mai_2026.csv",
+      unit_conversion_ird_file = opts$unit_conversion_ird_file %||% "data/fact_conv_ird_complete_01_May_2026.csv",
       unit_conversion_codelist_geoidentifiers_conversion_factors =
         opts$unit_conversion_codelist_geoidentifiers_conversion_factors %||% "areas_conversion_factors_numtoweight_ird",
       mapping_map_code_lists = opts$mapping_map_code_lists %||% TRUE,
