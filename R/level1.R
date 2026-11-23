@@ -8,8 +8,9 @@
 #'
 #' @param georef_dataset The level 0 georeferenced catch: a data frame, or the
 #'   path to the CSV file.
-#' @param con Connection to the Tuna Atlas database, used by the IRD unit
-#'   conversion (code list of the areas of the conversion factors).
+#' @param con Connection to the Tuna Atlas database, or NULL (default): not
+#'   needed with the IRD conversion areas (areas_conversion_factors_numtoweight_ird),
+#'   whose cells are classified from their CWP code.
 #' @param unit_conversion_convert Convert the units (IOTC and IRD factors).
 #' @param unit_conversion_iotc_file CSV of the IOTC conversion factors.
 #' @param unit_conversion_ird_file CSV of the IRD conversion factors.

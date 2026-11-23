@@ -10,8 +10,10 @@
 #' @param df_conversion_factor The conversion factors (data frame); the columns
 #'   `gear`, `unit` and `measurement_value` are accepted for `gear_type`,
 #'   `measurement_unit` and `conversion_factor`.
-#' @param con Connection to the Tuna Atlas database (code list of the areas of
-#'   the conversion factors; code list mappings when they were not mapped).
+#' @param con Connection to the Tuna Atlas database, or NULL. Only needed when
+#'   the code lists of the dataset were not mapped (mappings stored in the
+#'   database) or for areas of conversion factors other than the CWP grid and
+#'   areas_conversion_factors_numtoweight_ird.
 #' @param fact `"catch"` or `"effort"`.
 #' @param unit_conversion_codelist_geoidentifiers_conversion_factors Code list
 #'   of the areas of the conversion factors.
@@ -20,7 +22,7 @@
 #' @param removing_numberfish_final For catch, remove the rows still in number
 #'   of fish after the conversion.
 #' @return The converted dataset (data frame).
-gta_unit_conversion <- function(georef_dataset, df_conversion_factor, con, fact,
+gta_unit_conversion <- function(georef_dataset, df_conversion_factor, con = NULL, fact = "catch",
                                 unit_conversion_codelist_geoidentifiers_conversion_factors,
                                 mapping_map_code_lists = FALSE, removing_numberfish_final = TRUE) {
 

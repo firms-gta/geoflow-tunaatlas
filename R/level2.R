@@ -10,7 +10,8 @@
 #' @param georef_dataset The georeferenced catch (data frame).
 #' @param opts List of the options, with their defaults already set (see the
 #'   geoflow action workflow/actions/create_georef_dataset.R).
-#' @param con Connection to the Tuna Atlas database.
+#' @param con Connection to the Tuna Atlas database, or NULL (default): not needed
+#'   with the default options (see gta_require_con()).
 #' @param files Names of the tRFMO dataset files (to read again some tRFMO
 #'   datasets, see gta_rfmo_dataset_level0()).
 #' @param rawdata The options used to read the tRFMO datasets (returned by

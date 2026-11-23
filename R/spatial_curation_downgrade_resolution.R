@@ -1,5 +1,6 @@
 spatial_curation_downgrade_resolution <- function (con, df_input, resolution, remove = FALSE) 
 {
+  gta_require_con(con, "The disaggregation of data at a coarser resolution (spatial_curation_downgrade_resolution)")
   georef_dataset <- df_input
   columns_dataset_input <- colnames(georef_dataset)
   dataset_distinct_area <- unique(georef_dataset$geographic_identifier)

@@ -9,6 +9,7 @@ extract_dataset = function (con, metadata_dataset, labels = FALSE)
   else {
     query <- getSQLSardaraQueries(con, metadata_dataset)$query_CSV_with_labels
   }
+  gta_require_con(con, "Reading a dataset stored in the database (extract_dataset)")
   df <- dbGetQuery(con, query)
   return(df)
 }

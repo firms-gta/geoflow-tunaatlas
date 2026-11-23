@@ -52,6 +52,7 @@ convert_units = function (con, df_input, df_conversion_factor, codelist_geoident
                      sep = "")
       
       
+      gta_require_con(con, paste0("The unit conversion with the areas ", codelist_geoidentifiers_conversion_factors))
       correspondance_geo_identifiers_input_df_conv_fact_df <- dbGetQuery(con, 
                                                                          query)
       fileConn <- file("/tmp/query.sql")

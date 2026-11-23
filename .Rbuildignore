@@ -26,3 +26,4 @@
 ^R/sardara_functions$
 ^R/tunaatlas_scripts$
 ^tests/(?!testthat)
+^gta$

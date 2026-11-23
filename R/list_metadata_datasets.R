@@ -10,6 +10,7 @@ list_metadata_datasets = function (con, identifier = NULL, source_authority = NU
     where_clause <- paste0(where_clause, " and source IN ('", 
                            source_authority, "')")
   }
+  gta_require_con(con, "Listing the datasets stored in the database (list_metadata_datasets)")
   metadata_datasets <- dbGetQuery(con, paste("SELECT * from metadata.metadata where lineage is not null ", 
                                              where_clause, " order by source,identifier", sep = ))
   if (nrow(metadata_datasets) == 0) {

@@ -12,6 +12,7 @@ get_codelist_of_dimension <- function (con, dataset_metadata, dimension_name)
                                                   db_dimensions_parameters$db_pkattribute_colname, " where tab.", 
                                                   db_dimensions_parameters$db_pkattribute_colname, "<>0 and tab.id_metadata=", 
                                                   dataset_metadata$id_metadata)
+  gta_require_con(con, "Reading a code list stored in the database (get_codelist_of_dimension)")
   dataset_name_codelist_dimension <- dbGetQuery(con, dataset_name_codelist_dimension_query)
   metadata_codelist_dimension = dbGetQuery(con, paste0("SELECT * FROM metadata.metadata where identifier='", 
                                                        dataset_name_codelist_dimension, "'"))

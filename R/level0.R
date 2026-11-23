@@ -13,7 +13,8 @@
 #' @param files Names (or paths) of the dataset files of the tRFMOs.
 #' @param opts List of the options, with their defaults already set (see the
 #'   geoflow action workflow/actions/create_georef_dataset.R).
-#' @param con Connection to the Tuna Atlas database.
+#' @param con Connection to the Tuna Atlas database, or NULL (default): not needed
+#'   with the default options (see gta_require_con()).
 #' @param entity A geoflow entity whose metadata (provenance) the step
 #'   summaries complete, or `NULL`.
 #' @param recap_each_step Write the summary of each step.

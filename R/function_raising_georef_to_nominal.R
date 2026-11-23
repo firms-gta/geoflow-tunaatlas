@@ -23,6 +23,7 @@ function_raising_georef_to_nominal<-function(con, opts,entity,
   if (raising_raise_only_for_PS_LL==TRUE){
     
     # @juldebar =>  check if gear codes are correct
+    gta_require_con(con, "The raising restricted to purse seine and longline (raising_raise_only_for_PS_LL)")
     gears_PS_LL<-dbGetQuery(con,"SELECT distinct(src_code) FROM gear_type.gear_type_mapping_view WHERE trg_codingsystem='geargroup_tunaatlas' AND trg_code IN ('PS','LL')")$src_code
     # log_info("Now filtering gear codes with those returned by SLQ query",  gears_PS_LL)
     
