@@ -1,0 +1,3 @@
+extent: 1974-01-01/2023-12-31
+resources: codelists,harmonized,source
+outputs: XLS_WCPFC_2025-11-27_codelists.csv,XLS_WCPFC_2025-11-27_harmonized.csv

@@ -1,3 +1,7 @@
+# The repository is also the gta R package (DESCRIPTION at the root): renv
+# would then keep its library in the user cache. Keep the project library
+# in renv/library, as before.
+if (!nzchar(Sys.getenv("RENV_PATHS_LIBRARY"))) Sys.setenv(RENV_PATHS_LIBRARY = "renv/library")
 source("renv/activate.R")
 options(knitr.duplicate.label = "allow")
 

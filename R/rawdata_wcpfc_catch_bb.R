@@ -1,0 +1,116 @@
+#' Harmonize WCPFC Pole-and-Line Catch Datasets
+#'
+#' This function processes and harmonizes the structure of Western and Central Pacific Fisheries Commission (WCPFC)
+#' pole-and-line catch datasets. The output is tailored for integration into the Tuna Atlas database, aligning with 
+#' the requirements for data standardization and optionally including metadata if the dataset is intended for database loading.
+#'
+#' @details The function restructures datasets to include only essential fields, performs any necessary calculations for catch units, 
+#'          and standardizes the format for date fields and geographical identifiers. Metadata incorporation is contingent on the final 
+#'          data usage within the Tuna Atlas database.
+#'
+#' @seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} for detailed data structuring operations.
+#' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+#' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+#'
+#' @param data The raw dataset: a data frame, or the path to the file.
+#' @return The harmonized dataset (data frame), as written by the geoflow action
+#'   (wcpfc/catch/bb/action_wcpfc_catch_bb.R).
+gta_rawdata_wcpfc_catch_bb <- function(data) {
+  # Samples of the input and output data (from the former script)
+  # Input data sample:
+  # YY MM LAT5 LON5 DAYS SKJ_C YFT_C OTH_C
+  # 1950  1  30N 135E    0     0     0     0
+  # 1950  1  30N 140E    0     0     0     0
+  # 1950  1  35N 140E    0     0     0     0
+  # 1950  1  40N 140E    0     0     0     0
+  # 1950  1  40N 145E    0     0     0     0
+  # 1950  2  30N 135E    0     0     0     0
+  # Catch: pivot data sample:
+  # YY MM LAT5 LON5 Effort Species  value CatchUnits School EffortUnits Gear
+  # 1970  3  05S 150E     82     SKJ 279.16         MT    ALL        DAYS    P
+  # 1970  4  05S 150E     74     SKJ 336.61         MT    ALL        DAYS    P
+  # 1970  5  05S 150E     82     SKJ 361.80         MT    ALL        DAYS    P
+  # 1970  6  05S 150E     81     SKJ 438.48         MT    ALL        DAYS    P
+  # 1970  7  05S 150E     75     SKJ 472.75         MT    ALL        DAYS    P
+  # 1970 12  05S 150E     56     SKJ 215.05         MT    ALL        DAYS    P
+  # Catch: final data sample:
+  # FishingFleet Gear time_start   time_end AreaName School Species CatchType CatchUnits  Catch
+  #  ALL    P 1970-03-01 1970-04-01  6200150    ALL     OTH       ALL         MT   0.01
+  #  ALL    P 1970-03-01 1970-04-01  6200150    ALL     SKJ       ALL         MT 279.16
+  #  ALL    P 1970-03-01 1970-04-01  6200150    ALL     YFT       ALL         MT  27.81
+  #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     OTH       ALL         MT   0.14
+  #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     SKJ       ALL         MT 336.61
+  #  ALL    P 1970-04-01 1970-05-01  6200150    ALL     YFT       ALL         MT  11.34
+#packages 
+
+  
+
+
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------
+#config --> the global config of the workflow
+  
+  # Historical name for the dataset at source  WCPFC_P_PUBLIC_BY_YR_MON.csv
+  # Historical name for the dataset at source  wcpfc_catch_code_lists.csv
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  
+  
+  ## Catches
+  
+  ### Reach the catches pivot DSD using a function stored in WCPFC_functions.R
+  #-------------
+  #Changes:
+  #	- switch to csv
+  #	- switch to upper colnames
+  #	- CWP grid (removed for the timebeing to apply rtunaatlas codes)
+  #	- toupper applied to Species/CatchUnits
+  
+  DF <- gta_data(data, reader = function(path_to_raw_dataset) gta_utf8(read.csv(path_to_raw_dataset)))
+  colnames(DF) <- toupper(colnames(DF))
+  DF$CWP_GRID <- NULL 
+  
+  DF <- DF %>% tidyr::gather(variable, value, -c(colnames(DF[1:5])))
+  
+  DF <- DF %>% dplyr::filter(!value %in% 0) %>% dplyr::filter(!is.na(value))
+  DF$variable <- as.character(DF$variable)
+  colnames(DF)[which(colnames(DF) == "variable")] <- "Species"
+  DF$CatchUnits <- substr(DF$Species, nchar(DF$Species), nchar(DF$Species))
+  DF$CatchUnits <- toupper(DF$CatchUnits) 
+  DF$Species <- toupper(DF$Species) 
+  DF$Species <- sub("_C", "", DF$Species)
+  DF$Species <- sub("_N", "", DF$Species)
+  DF$School <- "OTH"
+  DF$EffortUnits <- colnames(DF[5])
+  colnames(DF)[5] <- "Effort"
+  catches_pivot_WCPFC <- DF; rm(DF)
+  #-------------
+  
+  #Gear
+  catches_pivot_WCPFC$Gear<-"P"
+  
+  # Catchunits
+  index.kg <- which( catches_pivot_WCPFC[,"CatchUnits"] == "C" )
+  catches_pivot_WCPFC[index.kg,"CatchUnits"]<- "t"
+  
+  index.nr <- which( catches_pivot_WCPFC[,"CatchUnits"] == "N" )
+  catches_pivot_WCPFC[index.nr,"CatchUnits"]<- "no" 
+  
+  ### Reach the catches harmonized DSD using a function in WCPFC_functions.R
+  
+  colToKeep_captures <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")
+  catches<-WCPFC_CE_catches_pivotDSD_to_harmonizedDSD(catches_pivot_WCPFC,colToKeep_captures)
+  
+  colnames(catches)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value")
+  catches$source_authority<-"WCPFC"
+  catches$measurement_type <- "RC" # Retained catches
+  catches$measurement <- "catch" 
+  catches$measurement_processing_level <- "raised"
+  #----------------------------------------------------------------------------------------------------------------------------
+  catches$time_start <- as.Date(catches$time_start)
+  catches$time_end <- as.Date(catches$time_end)
+  catches$measurement_processing_level <- "unknown" 
+  catches
+}

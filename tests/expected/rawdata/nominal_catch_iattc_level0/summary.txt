@@ -1,0 +1,3 @@
+extent: 1943-01-01/2021-12-31
+resources: codelists,harmonized,source
+outputs: CatchByFlagGear1918-2024_codelists.csv,CatchByFlagGear1918-2024_harmonized.csv

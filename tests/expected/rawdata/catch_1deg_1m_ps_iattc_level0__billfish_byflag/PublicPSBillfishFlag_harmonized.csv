@@ -1,0 +1,5 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level"
+"PAN","PS",2007-11-01,2007-11-30,"5402084","ALL","BIL","RC","MT",1,"IATTC","catch","unknown"
+"PAN","PS",2007-11-01,2007-11-30,"5402084","ALL","BUM","RC","MT",3,"IATTC","catch","unknown"
+"VEN","PS",2003-11-01,2003-11-30,"5402078","ALL","BUM","RC","MT",2,"IATTC","catch","unknown"
+"VEN","PS",2003-11-01,2003-11-30,"5402078","ALL","SFA","RC","MT",2,"IATTC","catch","unknown"

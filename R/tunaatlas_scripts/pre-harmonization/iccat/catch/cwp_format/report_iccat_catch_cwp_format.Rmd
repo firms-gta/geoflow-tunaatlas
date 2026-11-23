@@ -1,0 +1,115 @@
+---
+title: "Format pre-harmonized data to cwp format"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+This document shows the small changes made to the ICCAT dataset, already in the CWP format
+and with the CWP codes, before it enters the Global Tuna Atlas (the changes are summarised below).
+It is generated from the function `gta_rawdata_cwp_format()` (`R/rawdata_cwp_format.R`), the code that the Global Tuna Atlas workflow runs.
+
+The raw dataset is read from the `data/` folder next to this document, which holds the first
+lines of each file under the name given by the tRFMO at export (this name may change).
+The result is saved in the same folder.
+
+*Knit the document from the repository (here::here() locates its root), or run it chunk by chunk.*
+
+# The function
+
+
+This function preprocesses catch data for harmonization, including renaming columns, converting data types,
+and filtering records. It then exports the processed data along with associated code lists as CSV files.
+
+@details
+The function performs several steps to prepare the catch data for further processing or integration:
+- Reads the dataset from a specified path.
+- Optionally renames the 'fishingfleet' column to 'fishing_fleet' if it exists.
+- Converts time fields to character format, then to Date, and numerically transforms the 'measurement_value'.
+- Filters out records with a 'measurement_value' of zero.
+- Selects specific columns for the final dataset.
+- Calculates and sets the temporal extent of the dataset based on the time fields.
+
+It relies on the 'dplyr' package for data manipulation and 'readr' for reading CSV files. The function assumes
+
+@examples
+\dontrun{
+}
+
+@param data The dataset, already in CWP format (ICCAT, IOTC): a data frame, or
+  the path to the CSV file.
+@return The harmonized dataset (data frame), as written by the geoflow action
+  (cwp_format/action_cwp_format.R).
+
+```{r}
+# Packages the function uses unqualified, attached as in the workflow
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
+pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)   # gta package of the repository
+gta_rawdata_cwp_format <- function(data) {
+  catches <- gta_data(data, reader = function(path) readr::read_csv(path, guess_max = 0))
+  #----------------------------------------------------------------------------------------------------------------------------
+  
+  ## Catches
+  if("fishingfleet" %in%colnames(catches)){
+  catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
+  }
+  
+  # IOTC gives the processing level in measurement_obs ("raised", "unknown",
+  # "original sample"): same codes as measurement_processing_level, with a space
+  if(!"measurement_processing_level" %in% colnames(catches) && "measurement_obs" %in% colnames(catches)){
+    catches$measurement_processing_level <- gsub(" ", "_", catches$measurement_obs, fixed = TRUE)
+  }
+  if(!"measurement_processing_level" %in% colnames(catches)){
+    catches$measurement_processing_level <- "raised"
+  }
+  
+  catches <- catches %>% dplyr::mutate( time_start = as.character(time_start), time_end = as.character(time_end),  geographic_identifier= as.character(geographic_identifier), measurement_value = as.numeric(catches$measurement_value))
+  
+  catches <- catches %>% filter(measurement_value!= 0)
+  
+  catches<-catches %>% dplyr::select("fishing_fleet","gear_type","time_start","time_end","geographic_identifier",
+                                     "fishing_mode","species","measurement_type","measurement_unit","measurement_value", "source_authority", "measurement_processing_level") %>% 
+    dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
+  
+  #----------------------------------------------------------------------------------------------------------------------------
+  #@eblondel additional formatting for next time support
+  catches$time_start <- as.Date(catches$time_start)
+  catches$time_end <- as.Date(catches$time_end)
+  catches
+}
+```
+
+# Harmonisation
+
+```{r}
+path_to_raw_dataset <- here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'catch', 'cwp_format', 'data', 'iccat_catch_all_1m_firms_level0_20260422.csv')
+georef_dataset <- gta_rawdata_cwp_format(path_to_raw_dataset)
+write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'iccat', 'catch', 'cwp_format', 'data', 'iccat_catch_all_1m_firms_level0_20260422_harmonized.csv'), row.names = FALSE)
+```
+
+# What the function changes
+
+Rows, columns and total of `measurement_value`, by unit, before and after the function:
+
+```{r}
+raw <- readr::read_csv(path_to_raw_dataset, guess_max = 0, show_col_types = FALSE)
+raw_value <- suppressWarnings(as.numeric(raw$measurement_value))
+data.frame(
+  ` ` = c("rows", "rows with a measurement_value of 0 (removed)", "columns"),
+  raw = c(nrow(raw), sum(raw_value == 0, na.rm = TRUE), ncol(raw)),
+  harmonized = c(nrow(georef_dataset), sum(georef_dataset$measurement_value == 0, na.rm = TRUE), ncol(georef_dataset)),
+  check.names = FALSE)
+cat("Columns removed:", paste(setdiff(colnames(raw), colnames(georef_dataset)), collapse = ", "), "\n")
+cat("Columns added:", paste(setdiff(colnames(georef_dataset), colnames(raw)), collapse = ", "), "\n")
+merge(
+  stats::aggregate(list(raw = raw_value), list(measurement_unit = raw$measurement_unit), sum, na.rm = TRUE),
+  stats::aggregate(list(harmonized = georef_dataset$measurement_value), list(measurement_unit = georef_dataset$measurement_unit), sum, na.rm = TRUE),
+  all = TRUE)
+if ("measurement_processing_level" %in% colnames(georef_dataset)) table(measurement_processing_level = georef_dataset$measurement_processing_level, useNA = "ifany")
+```

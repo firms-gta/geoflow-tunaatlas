@@ -1,5 +1,4 @@
 function(action,entity, config){
-  source(here::here( "./R/sardara_functions/getSQLSardaraQueries.R"))
   
   
   base::options(stringsAsFactors = FALSE)

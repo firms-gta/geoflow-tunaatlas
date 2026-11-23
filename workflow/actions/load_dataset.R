@@ -1,5 +1,4 @@
 load_dataset <- function(action,entity, config){
-  source(here::here( "./R/sardara_functions/getSQLSardaraQueries.R"))
   source(here::here( "./R/sardara_functions/FUNMergeDimensions_CodeListLike.R"))
   source(here::here( "./R/sardara_functions/FUNUploadDatasetToTableInDB.R"))
   source(here::here( "./R/sardara_functions/FUNMergeDimensions_NonCodeListLike.R"))

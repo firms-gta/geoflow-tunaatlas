@@ -1,0 +1,5 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level"
+"ALL","PS",1996-03-01,1996-03-31,"5304130","OBJ","OCS","RC","NO",1,"IATTC","catch","original_sample"
+"ALL","PS",2010-04-01,2010-04-30,"5303134","OBJ","FAL","RC","NO",4,"IATTC","catch","original_sample"
+"ALL","PS",2024-02-01,2024-02-29,"5300094","NOA","FAL","RC","NO",5,"IATTC","catch","original_sample"
+"ALL","PS",2024-03-01,2024-03-31,"5300092","OBJ","FAL","RC","NO",3,"IATTC","catch","original_sample"

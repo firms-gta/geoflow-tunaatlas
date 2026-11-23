@@ -1,0 +1,3 @@
+extent: 1980-01-01/2023-12-31
+resources: codelists,harmonized,source
+outputs: WCPFC_L_PUBLIC_BY_YY_MM_FLAG_codelists.csv,WCPFC_L_PUBLIC_BY_YY_MM_FLAG_harmonized.csv

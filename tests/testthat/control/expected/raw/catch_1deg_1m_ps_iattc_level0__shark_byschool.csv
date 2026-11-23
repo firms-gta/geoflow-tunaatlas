@@ -1,0 +1,5 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"NEI","01.1",1996-03-01,1996-03-31,"5304130","LS","OCS","RC","no","IATTC","catch","original_sample",1
+"NEI","01.1",2010-04-01,2010-04-30,"5303134","LS","FAL","RC","no","IATTC","catch","original_sample",4
+"NEI","01.1",2024-02-01,2024-02-29,"5300094","FS","FAL","RC","no","IATTC","catch","original_sample",5
+"NEI","01.1",2024-03-01,2024-03-31,"5300092","LS","FAL","RC","no","IATTC","catch","original_sample",3

@@ -53,6 +53,21 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache
           cache-to: type=registry,ref=ghcr.io/firms-gta/gta-workflow:buildcache,mode=max,image-manifest=true,oci-mediatypes=true
 
+      - name: Raw dataset tests
+        # Each raw dataset action against its expected outputs, in the image
+        run: |
+          docker run --rm --network none --user 1000:1000 \
+            -w /home/rstudio/geoflow-tunaatlas --entrypoint Rscript \
+            "$GTA_IMAGE" tests/test_rawdata.R
+
+      - name: gta package tests
+        # testthat tests of the gta package (tests/testthat), on the control
+        # datasets, in the image and without network or database
+        run: |
+          docker run --rm --network none --user 1000:1000 \
+            -w /home/rstudio/geoflow-tunaatlas --entrypoint Rscript \
+            "$GTA_IMAGE" -e 'testthat::test_local(stop_on_failure = TRUE)'
+
       - name: Prepare the runner
         env:
           ZENODO_TOKEN: ${{ secrets.ZENODO_SANDBOX_TOKEN }}

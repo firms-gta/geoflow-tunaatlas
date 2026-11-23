@@ -261,7 +261,7 @@ To work on part of the data only, filter it on any dimension first, e.g.
 
 ```{r aggregate}
 
-source(here::here("R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R"))
+pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)   # gta package (transform_cwp_code_from_1deg_to_5deg)
 
 # Convert each distinct 1-degree code once, then join: much faster than
 # converting row by row on the whole dataset

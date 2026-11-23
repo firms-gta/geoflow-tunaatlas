@@ -1,0 +1,3 @@
+extent: 1966-01-01/2013-12-31
+resources: codelists,harmonized,source
+outputs: CEData_Longline_codelists.csv,CEData_Longline_harmonized.csv

@@ -1,0 +1,3 @@
+extent: 1983-01-01/1990-12-31
+resources: codelists,harmonized,source
+outputs: WCPFC_G_PUBLIC_BY_YR_MON_codelists.csv,WCPFC_G_PUBLIC_BY_YR_MON_harmonized.csv

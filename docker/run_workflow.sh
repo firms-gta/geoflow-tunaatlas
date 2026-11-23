@@ -21,7 +21,8 @@
 #   GTA_STEPS            workflow steps                    (default: DB,rawdata,nominal,effort,level0,level1,services)
 #   GTA_COMPOSE_PROJECT  compose project name, to isolate the stack (containers + volumes)
 #   GTA_RUN_USER         container uid:gid                 (default: current user; CI: 1000:1000)
-#   GTA_MOUNT_CODE       true: mounts R/, config/ and workflow/ from the repository, to test
+#   GTA_MOUNT_CODE       true: mounts R/, config/, workflow/ and the package files (DESCRIPTION,
+#                        NAMESPACE, .Rprofile) from the repository, to test
 #                        a change without rebuilding the image (default: false)
 #   GTA_MOUNT_DATA       true: also mounts the files of data/ from the repository (default: false)
 #   GTA_OFFLINE          true: stack without internet access (default: the value in .env)
@@ -98,6 +99,10 @@ if [[ "$MOUNT_CODE" == "true" ]]; then
     -v "$PWD/config":"$CONTAINER_ROOT/config"
     -v "$PWD/workflow":"$CONTAINER_ROOT/workflow"
   )
+  # The gta package files of the root, loaded by the workflow (pkgload::load_all)
+  for f in DESCRIPTION NAMESPACE .Rprofile; do
+    [[ -f "$f" ]] && EXTRA+=(-v "$PWD/$f":"$CONTAINER_ROOT/$f":ro)
+  done
 fi
 
 # Reference files of data/ (code lists, parameters...). They are mounted one by
