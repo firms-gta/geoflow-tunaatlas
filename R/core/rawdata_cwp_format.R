@@ -31,6 +31,11 @@ gta_rawdata_cwp_format <- function(data) {
   catches <- catches %>% dplyr::rename(fishing_fleet = fishingfleet) 
   }
   
+  # IOTC gives the processing level in measurement_obs ("raised", "unknown",
+  # "original sample"): same codes as measurement_processing_level, with a space
+  if(!"measurement_processing_level" %in% colnames(catches) && "measurement_obs" %in% colnames(catches)){
+    catches$measurement_processing_level <- gsub(" ", "_", catches$measurement_obs, fixed = TRUE)
+  }
   if(!"measurement_processing_level" %in% colnames(catches)){
     catches$measurement_processing_level <- "raised"
   }
