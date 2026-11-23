@@ -30,7 +30,7 @@ gta_rfmo_dataset_level0 <- function(rfmo, files, options, data_dir = "data") {
     columns_to_keep<-c("source_authority","gear_type","fishing_fleet","fishing_mode","time_start","time_end","geographic_identifier","measurement_unit","measurement_value", "measurement")
   }
   
-  dataset_files <- files
+  dataset_files <- file.path(data_dir, basename(files))   # paths, as read by some branches
   names(dataset_files) <- basename(files)
 
   dataset <- switch(rfmo,
