@@ -49,6 +49,11 @@ create_global_tuna_atlas <- function(data, options = gta_default_options(),
   dir.create(outputs_dir, showWarnings = FALSE)
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
+  # Input paths made absolute: each step runs in its own folder
+  abs_path <- function(x) if (length(x)) normalizePath(unlist(x), mustWork = TRUE) else character(0)
+  data$files <- abs_path(data$files)
+  data$outputs <- abs_path(data$outputs)
+  data$raw <- lapply(data$raw, function(r) { r$files <- abs_path(r$files); r })
   for (f in data$outputs) file.copy(f, file.path(outputs_dir, basename(f)), overwrite = TRUE)
 
   # Folder of a step, with its data/ subfolder holding the files it reads
