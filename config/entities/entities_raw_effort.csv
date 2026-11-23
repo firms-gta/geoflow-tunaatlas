@@ -269,6 +269,41 @@ uploadSource:fact_tables.effort_
 uploadType:dbtable_
 action:action_iattc_effort_ps_byflag.R[R harmonization script]@./R/tunaatlas_scripts/pre-harmonization/iattc/effort/ps_byflag/action_iattc_effort_ps_byflag.R_
 run:true"
+id:effort_1deg_1m_bb_iattc_level0__tuna_byflag,title:Monthly fishing effort targeting tunas in the East Pacific Ocean (%temporal_extent:start%-%temporal_extent:end%) by pole-and-liners aggregated by statistical squares of 1° longitude and latitude and by flag (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated fishing effort targeting tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by pole-and-liners from %temporal_extent:start% - %temporal_extent:end%. Efforts are stratified by year, month, fishing gear, vessel flag reporting country, unit of effort and area (statistical squares of 1° longitude and latitude). It corresponds to the effort part of the IATTC catch-and-effort (task2) dataset.
+
+Efforts are expressed in number of sets.
+
+This dataset was downloaded on the IATTC website. It was then restructured to be in line with the Tuna atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.
+
+The description below is extracted from the IATTC web page where the dataset has been downloaded.
+
+
+Characteristics, specific issues and problems that need to be taken into account :
+
+Stratification by fishing mode (i.e. type of school used) is not available in this dataset, since IATTC confidentiality policy restricts the release of public domain data by both flag and set type. 
+
+The file contain data provided by Members and Cooperating Non-Members.
+
+Estimated EPO tuna catch totals are presented in the IATTC Fishery Status Reports (http://www.iattc.org/FisheryStatusReportsENG.htm). In accordance with the IATTC policy on confidentiality, data from flags with less than 3 vessels or less than 3 companies are grouped in the “Other” category in the “Flag” column.""",,"owner:nvogel@iattc.org_
+metadata:paul.taconet@ird.fr;emmanuel.blondel@fao.org;julien.barde@ird.fr_
+pointOfContact:info@iattc.org_
+principalInvestigator:nvogel@iattc.org_
+dsd:nvogel@iattc.org_
+processor:emmanuel.blondel@fao.org,julien.barde@ird.fr,bastien.grasset@ird.fr","publication:2016-04-01_
+access:2016-04-01",dataset,eng,,1950-01-01/2024-12-31,"http:website[Source website]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:data[Source dataset]@http://www.iattc.org/PublicDomainData/IATTC-Catch-by-species1.htm_
+http:metadata[Source metadata]@http://www.iattc.org/PublicDomainData/PublicLPTuna.zip_
+http:codelists[Source codelists]@https://drive.google.com/open?id=1UAs0nL8Z_jlKh1RP99dZLZNMXLi9KNAL",,"statement:Data management workflow_
+process:Data download[""The dataset was downloaded on the %dates:key:access:value% at this URL: %relations:name:data:link% reached through this web page: %relations:name:website:link%""]_
+process:Data harmonization[""Through a dedicated R script, the dataset was restructured to be in line with the Tuna Atlas database structure (columns normalization, names, etc.). However the content of data and the code lists were kept exactly as their are available in the source dataset.""]_
+process:Data export[""The dataset was exported in CSV format.""]_
+process:Data upload[""The CSV file was integrated into the Tuna Atlas database.""]",,"
+source:./data/GTA_2026/PublicLPTunaFlag.csv,./data/iattc_effort_code_lists.csv_
+sourceType:other_
+uploadSource:fact_tables.effort_
+uploadType:dbtable_
+action:action_iattc_effort_bb_byflag.R[R harmonization script]@./R/tunaatlas_scripts/pre-harmonization/iattc/effort/bb_byflag/action_iattc_effort_bb_byflag.R_
+run:true"
 id:effort_1deg_1m_ps_iattc_level0__tuna_byschool,title:Monthly fishing effort targeting tunas in the East Pacific Ocean (%temporal_extent:start%-%temporal_extent:end%) by purse seiners aggregated by statistical squares of 1° longitude and latitude and by type of school (IATTC level 0),"abstract:""This dataset lists the monthly-spatially aggregated fishing effort targeting tuna species from the Commission for the Inter-American Tropical Tuna Commission (IATTC) by purse seiners from %temporal_extent:start% - %temporal_extent:end%. Efforts are stratified by year, month, fishing gear, type of school (fishing mode: sets on floating objects, on dolphins, on unassociated schools), unit of effort and area (statistical squares of 1° longitude and latitude). It corresponds to the effort part of the IATTC catch-and-effort (task2) dataset.
 
 Efforts are expressed in number of sets.

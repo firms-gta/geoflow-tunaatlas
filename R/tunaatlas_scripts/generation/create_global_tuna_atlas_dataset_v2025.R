@@ -142,6 +142,11 @@ create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
     rawdata$iattc_ps_raise_flags_to_schooltype <- FALSE
     rawdata$iattc_ps_catch_billfish_shark_raise_to_effort <- FALSE
     rawdata$iattc_ps_dimension_to_use_if_no_raising_flags_to_schooltype <- "fishing_fleet"
+    # Effort: no later IATTC processing, the purse seine flag x school type
+    # raising is done when the data are read (get_rfmos_datasets_level0)
+    if (opts$fact == "effort") {
+      rawdata$iattc_ps_raise_flags_to_schooltype <- opts$iattc_ps_raise_flags_to_schooltype
+    }
     # 1) Charger chaque dataset
     datasets_list <- lapply(
       c("IOTC", "WCPFC", "CCSBT", "ICCAT", "IATTC"),
