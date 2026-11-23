@@ -4,7 +4,9 @@
 # update_rawdata_reports(): rewrites the harmonisation reports of the raw
 # datasets in the repository (R/tunaatlas_scripts/pre-harmonization/<tRFMO>/
 # <type>/<dataset>/report_*.Rmd), from their core functions, and optionally
-# refreshes the sample outputs and renders the HTML. Used by the qa_rmd step.
+# refreshes the sample outputs and renders the HTML. Used by the qa_rmd step
+# (on a local run of the full data) and by the rawdata-reports pre-commit hook
+# (render = FALSE). The HTML and the outputs of the reports are not versioned.
 # =============================================================================
 
 #' Rewrite the harmonisation reports of the raw datasets
@@ -12,7 +14,8 @@
 #' @param job_dirs Job folders of the rawdata workflows (optional): the first
 #'   rows of their `*_mapped.csv` outputs are copied to the `data/` folder of
 #'   each dataset, as samples.
-#' @param render Also render each report to HTML, next to it.
+#' @param render Also render each report to HTML, next to it (meaningful on
+#'   the full data, for a local check; ignored by git).
 #' @param n_rows Number of rows kept in the sample outputs.
 #' @return The paths of the reports, invisibly.
 update_rawdata_reports <- function(job_dirs = NULL, render = TRUE, n_rows = 5) {
