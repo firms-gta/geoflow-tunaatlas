@@ -1,0 +1,154 @@
+---
+title: "Harmonize WCPFC Nominal Catch Datasets"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+This document transforms a dataset that is not in the CWP format into the CWP format:
+it first changes the structure of the data, then maps its codes to the CWP code lists.
+It is generated from the function `gta_rawdata_wcpfc_nominal_all()` (`R/core/rawdata_wcpfc_nominal_all.R`), the code that the Global Tuna Atlas workflow runs.
+
+The raw dataset is read from the `data/` folder next to this document, which holds the first
+lines of each file under the name given by the tRFMO at export (this name may change).
+A summary of the mapping is given at the end; the results are saved in the same folder.
+
+*Knit the document from the repository (here::here() locates its root), or run it chunk by chunk.*
+
+# The function
+
+
+This function harmonizes WCPFC nominal catch datasets for integration into the Tuna Atlas database, ensuring data compliance with specified format requirements.
+
+@details This function modifies the nominal catch dataset to ensure compliance with the standardized
+         format, including renaming, reordering, and recalculating specific fields as necessary.
+         Metadata integration is contingent on the intended use within the Tuna Atlas database.
+
+@seealso \code{\link{format_time_db_format}} for converting WCPFC task 2 data structures.
+@author Paul Taconet, IRD \email{paul.taconet@ird.fr}
+@author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+
+@param data_wcpfc The WCPFC nominal catch dataset (file XLS_WCPFC_<date>.csv): a data frame,
+  or the path to the CSV file.
+@param data_wcpo The WCPO nominal catch dataset (file XLS_WCPO_<date>.csv), idem.
+@return The harmonized dataset (data frame), as written by the geoflow action
+  (wcpfc/nominal/all/action_wcpfc_nominal_all.R).
+
+```{r}
+# Packages the function uses unqualified, attached as in the workflow
+suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
+source(here::here('R/core/gta_data.R'))
+gta_rawdata_wcpfc_nominal_all <- function(data_wcpfc, data_wcpo) {
+  source(here::here("./R/sardara_functions/format_time_db_format.R"))
+#----------------------------------------------------------------------------------------------------------------------------
+
+
+### Nominal catches
+#from wcpfc
+wcpfc_species = c("ALV", "BLM", "BSH", "BTH", "BUM", "FAL", "LMA", "MAK", "OCS", "POR", "PTH", "RHN", "SMA", "SPK", "SPL", "SPN", "SPY", "SPZ", "THR")
+NC1 <- gta_data(data_wcpfc, reader = function(path) gta_utf8(read.csv(path)))
+NC1<-NC1[NC1$SP_CODE %in% wcpfc_species,]
+#from wcpo
+wcpo_species = c("ALB", "BET", "MLS", "PBF", "SKJ", "SWO", "YFT")
+NC2 <- gta_data(data_wcpo, reader = function(path) gta_utf8(read.csv(path)))
+NC2<-NC2[NC2$SP_CODE %in% wcpo_species,]
+
+NC2$AreaName <- "WCPO"
+NC1$AreaName <- "WCPFC"
+
+#bind both sources
+NC <- rbind(NC1,NC2)
+
+colnames(NC)[colnames(NC) == "YY"] <- "Year"
+colnames(NC)[colnames(NC) == "FLAG_CODE"] <- "FishingFleet"
+colnames(NC)[colnames(NC) == "GEAR_CODE"] <- "Gear"
+colnames(NC)[colnames(NC) == "SP_CODE"] <- "Species"
+colnames(NC)[colnames(NC) == "SP_MT"] <- "Catch"
+NC$Catch<-as.numeric(NC$Catch)
+NC <- NC[!is.na(NC$Catch),]
+NC <- NC[NC$Catch != 0,]
+NC$CatchUnits <- "t"
+NC$SP_NAME <- NULL
+NC$FLEET_CODE <- NULL
+
+NCAreaCWPgrid<-NA
+NC$School<-"UNK"
+NC$CatchType<-"NC"
+NC$CatchUnits<-"t"
+NC$RFMO<-"WCPFC"
+NC$Ocean<-"PAC_W"
+
+NC$MonthStart<-1
+NC$Period<-12
+#Format inputDataset time to have the time format of the DB, which is one column time_start and one time_end
+NC<-format_time_db_format(NC)
+NC <- NC[NC$Catch !=0 ,] #not sure if needed
+
+NC <-NC[c("FishingFleet","Gear","time_start","time_end","AreaName","School","Species","CatchType","CatchUnits","Catch")]
+
+# remove 0 and NA values 
+NC <- NC[!is.na(NC$Catch),]
+NC <- NC[NC$Catch != 0,]
+
+NC <- aggregate(NC$Catch,
+		FUN = sum,
+		by = list(
+			FishingFleet = NC$FishingFleet,
+			Gear = NC$Gear,
+			time_start = NC$time_start,
+			time_end = NC$time_end,
+			AreaName = NC$AreaName,
+			School = NC$School,
+			Species = NC$Species,
+			CatchType = NC$CatchType,
+			CatchUnits = NC$CatchUnits
+		)
+	)
+
+
+colnames(NC)<-c("fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type",
+                "measurement_unit","measurement_value")
+NC$source_authority<-"WCPFC"
+NC$measurement<-"catch"
+NC$measurement_processing_level<-"raised"
+#----------------------------------------------------------------------------------------------------------------------------
+#@eblondel additional formatting for next time support
+NC$time_start <- as.Date(NC$time_start)
+NC$time_end <- as.Date(NC$time_end)
+  NC
+}
+```
+
+# Harmonisation
+
+```{r}
+path_to_raw_dataset1 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'all', 'data', 'XLS_WCPFC_2025-11-27.csv')
+path_to_raw_dataset2 <- here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'all', 'data', 'XLS_WCPO_2025-11-27.csv')
+georef_dataset <- gta_rawdata_wcpfc_nominal_all(path_to_raw_dataset1, path_to_raw_dataset2)
+write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'all', 'data', 'XLS_WCPFC_2025-11-27_harmonized.csv'), row.names = FALSE)
+```
+
+# Mapping to the CWP code lists
+
+```{r}
+source(here::here('R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))
+fact <- "catch"
+mapping_codelist <- map_codelists_no_DB(fact, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
+```
+
+Unmapped values, then the results:
+
+```{r}
+georef_dataset <- mapping_codelist$dataset_mapped %>% dplyr::mutate(fishing_fleet = ifelse(fishing_fleet == 'UNK', 'NEI', fishing_fleet), gear_type = ifelse(gear_type == 'UNK', '99.9', gear_type))
+# The summaries are NULL when nothing was mapped (e.g. tRFMOs not in source_authority_to_map)
+if (!is.null(mapping_codelist$recap_mapping)) data.table::fwrite(mapping_codelist$recap_mapping, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'all', 'data', 'XLS_WCPFC_2025-11-27_recap_mapping.csv'))
+if (!is.null(mapping_codelist$not_mapped_total)) data.table::fwrite(mapping_codelist$not_mapped_total, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'all', 'data', 'XLS_WCPFC_2025-11-27_not_mapped_total.csv'))
+data.table::fwrite(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'wcpfc', 'nominal', 'all', 'data', 'XLS_WCPFC_2025-11-27_CWP_dataset.csv'))
+head(mapping_codelist$recap_mapping)
+```

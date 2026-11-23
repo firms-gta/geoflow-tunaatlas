@@ -1,0 +1,3 @@
+extent: 1972-01-01/2016-12-31
+resources: codelists,harmonized,source
+outputs: WCPFC_P_PUBLIC_BY_YY_MM_codelists.csv,WCPFC_P_PUBLIC_BY_YY_MM_harmonized.csv

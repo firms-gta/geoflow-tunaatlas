@@ -1,0 +1,3 @@
+extent: 1961-11-01/2022-09-30
+resources: codelists,harmonized,source
+outputs: iotc_catch_all_1m_firms_level0_2026-04-13_codelists.csv,iotc_catch_all_1m_firms_level0_2026-04-13_harmonized.csv

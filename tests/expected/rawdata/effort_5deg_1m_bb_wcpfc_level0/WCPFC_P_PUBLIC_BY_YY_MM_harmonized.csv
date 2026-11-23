@@ -1,0 +1,8 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","measurement_value","source_authority","measurement","measurement_processing_level"
+"ALL","P",1972-01-01,1972-01-31,"6205145","OTH","DAYS",474,"WCPFC","effort","unknown"
+"ALL","P",1974-12-01,1974-12-31,"6105135","OTH","DAYS",432,"WCPFC","effort","unknown"
+"ALL","P",1979-04-01,1979-04-30,"6100160","OTH","DAYS",1464,"WCPFC","effort","unknown"
+"ALL","P",1987-09-01,1987-09-30,"6200120","OTH","DAYS",570,"WCPFC","effort","unknown"
+"ALL","P",1993-10-01,1993-10-31,"6135150","OTH","DAYS",288,"WCPFC","effort","unknown"
+"ALL","P",1997-01-01,1997-01-31,"6205120","OTH","DAYS",130,"WCPFC","effort","unknown"
+"ALL","P",2016-04-01,2016-04-30,"6110155","OTH","DAYS",130,"WCPFC","effort","unknown"

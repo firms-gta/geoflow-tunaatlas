@@ -813,16 +813,10 @@ run_gta_workflow <- function(steps_to_run = c("rawdata"),
       "qa_rmd / raw effort"
     )
     
-    source(here::here("R/tunaatlas_scripts/pre-harmonization/rewrite_functions_as_rmd.R"))
-    
-    dir.create(file.path(raw_nominal_catch, "data"), showWarnings = FALSE, recursive = TRUE)
-    rewrite_functions_as_rmd(raw_nominal_catch)
-    
-    dir.create(file.path(raw_data_georef, "data"), showWarnings = FALSE, recursive = TRUE)
-    rewrite_functions_as_rmd(raw_data_georef)
-    
-    dir.create(file.path(raw_data_georef_effort, "data"), showWarnings = FALSE, recursive = TRUE)
-    rewrite_functions_as_rmd(raw_data_georef_effort)
+    # Reports of the raw datasets, from their core functions, with the sample
+    # outputs of these jobs (workflow/launchers/rawdata_reports.R)
+    source(here::here("workflow/launchers/rawdata_reports.R"))
+    update_rawdata_reports(c(raw_nominal_catch, raw_data_georef, raw_data_georef_effort))
   }
   
   # ---------------------------------------------------------------------------
