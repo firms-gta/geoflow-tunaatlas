@@ -61,7 +61,7 @@ action_option_include_CCSBT:true_
 uploadSource:fact_tables.effort_
 uploadType:dbtable_
 featureType:effort_
-action:create_global_tuna_atlas_dataset.R[R generation script]@./R/tunaatlas_scripts/generation/create_global_tuna_atlas_dataset_v2025.R_
+action:create_georef_dataset.R[R generation script]@./workflow/actions/create_georef_dataset.R_
 action_option_fact:effort_
 action_option_dataset_level:0_
 action_option_from_level0:true_

@@ -7,12 +7,12 @@
 #' handles the overlapping zones between tRFMOs (function_overlapped(), which
 #' queries the database for the areas of competence).
 #'
-#' This is the level 0 part of create_global_tuna_atlas_dataset_v2025(), moved
+#' This is the level 0 part of create_georef_dataset(), moved
 #' as is: the options keep their names and meaning.
 #'
 #' @param files Names (or paths) of the dataset files of the tRFMOs.
 #' @param opts List of the options, with their defaults already set (see the
-#'   geoflow action create_global_tuna_atlas_dataset_v2025.R).
+#'   geoflow action workflow/actions/create_georef_dataset.R).
 #' @param con Connection to the Tuna Atlas database.
 #' @param entity A geoflow entity whose metadata (provenance) the step
 #'   summaries complete, or `NULL`.

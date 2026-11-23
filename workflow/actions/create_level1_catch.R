@@ -11,7 +11,7 @@
 #' @param config Geoflow configuration object.
 #'
 #' @export
-create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
+create_level1_catch <- function(action, entity, config) {
   
   # Initialisation ----------------------------------------------------------
   opts <- action$options

@@ -20,7 +20,7 @@
 #' }
 #' @export
 #' 
-create_global_tuna_atlas_dataset_v2025 <- function(action, entity, config) {
+create_georef_dataset <- function(action, entity, config) {
   
   # Initialisation ----------------------------------------------------------
   

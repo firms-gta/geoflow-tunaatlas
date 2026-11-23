@@ -1,6 +1,6 @@
 #' Georeferenced catch, level 2 (raised to the nominal catch)
 #'
-#' Level 2 part of create_global_tuna_atlas_dataset_v2025(), moved as is: from
+#' Level 2 part of create_georef_dataset(), moved as is: from
 #' the level 1 georeferenced catch, loads the nominal catch (file in data/, or
 #' Zenodo), converts and maps it, raises the georeferenced catch to the
 #' nominal catch (successive passes on fewer and fewer dimensions), then
@@ -9,7 +9,7 @@
 #'
 #' @param georef_dataset The georeferenced catch (data frame).
 #' @param opts List of the options, with their defaults already set (see the
-#'   geoflow action create_global_tuna_atlas_dataset_v2025.R).
+#'   geoflow action workflow/actions/create_georef_dataset.R).
 #' @param con Connection to the Tuna Atlas database.
 #' @param files Names of the tRFMO dataset files (to read again some tRFMO
 #'   datasets, see gta_rfmo_dataset_level0()).
