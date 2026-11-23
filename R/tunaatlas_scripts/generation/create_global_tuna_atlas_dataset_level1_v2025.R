@@ -120,14 +120,8 @@ create_global_tuna_atlas_level1_v2025 <- function(action, entity, config) {
     resolution_filter = opts$resolution_filter,
     filtering = opts$filtering,
     gear_filter = opts$gear_filter,
-    input_description = paste0(
-      "Level 0 georeferenced dataset loaded from DOI/file. DOI: ",
-      opts$doilevel0,
-      ". Key: ",
-      opts$keylevel0,
-      "."
-    ),
-    input_options = list(opts$doilevel0, opts$keylevel0),
+    doilevel0 = opts$doilevel0,
+    keylevel0 = opts$keylevel0,
     recap_each_step = opts$recap_each_step,
     entity = entity
   )

@@ -25,8 +25,8 @@
 #' @param filtering Filters on the dimensions (list, or its R code as a
 #'   string), see dimension_filtering_function(), or `NULL`.
 #' @param gear_filter Only reported in the summary of the filtering step.
-#' @param input_description Text of the summary of the input step.
-#' @param input_options Options reported in the summary of the input step.
+#' @param doilevel0,keylevel0 DOI and file name of the level 0 dataset, only
+#'   reported in the summary of the input step.
 #' @param recap_each_step Write the summary of each step
 #'   (CWP.dataset::function_recap_each_step(), in the working directory).
 #' @param entity A geoflow entity whose metadata (provenance, description) the
@@ -44,8 +44,8 @@ gta_level1 <- function(georef_dataset,
                        resolution_filter = NULL,
                        filtering = NULL,
                        gear_filter = NULL,
-                       input_description = "Level 0 georeferenced dataset.",
-                       input_options = list(),
+                       doilevel0 = NULL,
+                       keylevel0 = NULL,
                        recap_each_step = FALSE,
                        entity = NULL) {
   url_scripts_generation <- here::here("R/tunaatlas_scripts/generation")
@@ -54,6 +54,13 @@ gta_level1 <- function(georef_dataset,
   source(file.path(url_scripts_generation, "perform_unit_conversion.R"))
   source(file.path(url_scripts_generation, "dimension_filtering_function.R"))
   source(here::here("R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R"))
+
+  # The step summaries (CWP.dataset::function_recap_each_step()) write the text
+  # of the option expressions they are given: the options are kept in a list
+  # named opts so that this text stays "opts$<option>", as in the geoflow action
+  opts <- list(doilevel0 = doilevel0, keylevel0 = keylevel0,
+               unit_conversion_iotc_file = unit_conversion_iotc_file,
+               resolution_filter = resolution_filter, filtering = filtering, gear_filter = gear_filter)
 
   stepnumber <- 1
   stepLogger <- function(level, step, msg) {
@@ -74,9 +81,15 @@ gta_level1 <- function(georef_dataset,
     CWP.dataset::function_recap_each_step(
       "Level0_input",
       georef_dataset,
-      input_description,
+      paste0(
+        "Level 0 georeferenced dataset loaded from DOI/file. DOI: ",
+        opts$doilevel0,
+        ". Key: ",
+        opts$keylevel0,
+        "."
+      ),
       "read_csv/download.file",
-      input_options,
+      list(opts$doilevel0, opts$keylevel0),
       entity
     )
   }
@@ -182,7 +195,7 @@ gta_level1 <- function(georef_dataset,
           "the number-based record is not converted and is removed."
         ),
         "IOTC_conv_fact_mapped",
-        list(unit_conversion_iotc_file),
+        list(opts$unit_conversion_iotc_file),
         entity
       )
     }
@@ -293,7 +306,7 @@ gta_level1 <- function(georef_dataset,
         georef_dataset,
         paste0("Dataset filtered on spatial resolution: ", resolution_filter),
         "dplyr::filter",
-        list(resolution_filter),
+        list(opts$resolution_filter),
         entity
       )
     }
@@ -321,7 +334,7 @@ gta_level1 <- function(georef_dataset,
         georef_dataset,
         "Optional filters were applied on the dataset.",
         "dimension_filtering_function/dplyr::filter",
-        list(filtering, gear_filter),
+        list(opts$filtering, opts$gear_filter),
         entity
       )
     }
