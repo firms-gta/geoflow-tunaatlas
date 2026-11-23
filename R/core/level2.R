@@ -27,6 +27,7 @@ gta_georef_level2 <- function(georef_dataset, opts, con = NULL, files = characte
                               geographic_identifier_to_nominal = NULL, DATASET_LEVEL = 2,
                               entity = NULL, recap_each_step = TRUE, stepnumber = 1,
                               data_dir = "data") {
+  url_scripts_create_own_tuna_atlas <- here::here("R/tunaatlas_scripts/generation")
   source(file.path(url_scripts_create_own_tuna_atlas,"download_zenodo_csv.R"))
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
   source(here::here("R/tunaatlas_scripts/pre-harmonization/map_codelists.R"))
