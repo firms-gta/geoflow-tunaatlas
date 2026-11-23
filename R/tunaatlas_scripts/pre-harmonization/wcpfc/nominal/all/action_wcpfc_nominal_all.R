@@ -1,7 +1,7 @@
 #' Harmonize WCPFC Nominal Catch Datasets (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_wcpfc_nominal_all()
-#' (R/core/rawdata_wcpfc_nominal_all.R), writes the outputs and declares the resources of
+#' (R/rawdata_wcpfc_nominal_all.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -45,8 +45,6 @@ path_to_raw_dataset2 <- entity$getJobDataResource(config, filename2) #WCPO data
 opts <- options()
 options(encoding = "UTF-8")
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_wcpfc_nominal_all.R"))
 NC <- gta_rawdata_wcpfc_nominal_all(path_to_raw_dataset1, path_to_raw_dataset2)
 
 dataset_temporal_extent <- paste(

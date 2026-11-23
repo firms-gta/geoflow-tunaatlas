@@ -1,7 +1,7 @@
 #' Harmonize IATTC PS Shark BySchool Catch Datasets (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iattc_catch_ps_shark_byschool()
-#' (R/core/rawdata_iattc_catch_ps_shark_byschool.R), writes the outputs and declares the resources of
+#' (R/rawdata_iattc_catch_ps_shark_byschool.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -42,8 +42,6 @@ options(encoding = "UTF-8")
 
 ## Catches
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_iattc_catch_ps_shark_byschool.R"))
 catches <- gta_rawdata_iattc_catch_ps_shark_byschool(path_to_raw_dataset)
 
 dataset_temporal_extent <- paste(

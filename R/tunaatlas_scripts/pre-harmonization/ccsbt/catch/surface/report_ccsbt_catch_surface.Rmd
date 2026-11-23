@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This document transforms a dataset that is not in the CWP format into the CWP format:
 it first changes the structure of the data, then maps its codes to the CWP code lists.
-It is generated from the function `gta_rawdata_ccsbt_catch_surface()` (`R/core/rawdata_ccsbt_catch_surface.R`), the code that the Global Tuna Atlas workflow runs.
+It is generated from the function `gta_rawdata_ccsbt_catch_surface()` (`R/rawdata_ccsbt_catch_surface.R`), the code that the Global Tuna Atlas workflow runs.
 
 The raw dataset is read from the `data/` folder next to this document, which holds the first
 lines of each file under the name given by the tRFMO at export (this name may change).
@@ -46,7 +46,7 @@ preparing them for integration into the Tuna Atlas database, according to specif
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
 suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
-source(here::here('R/core/gta_data.R'))
+pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)   # gta package of the repository
 gta_rawdata_ccsbt_catch_surface <- function(data) {
   # Samples of the input and output data (from the former script)
   # Input data sample (after importing as data.frame in R):
@@ -65,9 +65,6 @@ gta_rawdata_ccsbt_catch_surface <- function(data) {
   #   AU   BB 1976-12-01 1977-01-01  6333134    ALL     SBT       ALL         MT  35.6
   #   AU   BB 1976-12-01 1977-01-01  6334134    ALL     SBT       ALL         MT  56.5
   #   AU   BB 1976-12-01 1977-01-01  6334135    ALL     SBT       ALL         MT  37.0
-  source(here::here("./R/sardara_functions/harmo_time_2.R"))
-  source(here::here("./R/sardara_functions/harmo_spatial_5.R"))
-  source(here::here("./R/sardara_functions/format_time_db_format.R"))
   #packages
 
   
@@ -175,7 +172,6 @@ write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'c
 # Mapping to the CWP code lists
 
 ```{r}
-source(here::here('R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))
 fact <- "catch"
 mapping_codelist <- map_codelists_no_DB(fact, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
 ```

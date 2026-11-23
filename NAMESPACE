@@ -1,0 +1,17 @@
+# Written by hand for now (roxygen2 later): every function is exported, so
+# that the geoflow actions, the reports and the tests keep calling them.
+exportPattern("^[^\\.]")
+import(dplyr)
+importFrom(magrittr, "%>%")
+importFrom(data.table, ":=", data.table, setDT)
+importFrom(DBI, dbGetQuery)
+importFrom(futile.logger, flog.info)
+importFrom(httr, content)
+importFrom(jsonlite, fromJSON)
+importFrom(lubridate, "%m+%", days, year)
+importFrom(purrr, reduce)
+importFrom(readr, col_character, cols, read_csv)
+importFrom(readxl, read_excel)
+importFrom(reshape2, melt)
+importFrom(sf, "st_geometry<-", st_is_empty, st_make_valid, st_read, st_within)
+importFrom(stringr, str_c)

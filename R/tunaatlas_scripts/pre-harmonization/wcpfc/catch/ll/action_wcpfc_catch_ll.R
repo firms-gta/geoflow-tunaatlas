@@ -1,7 +1,7 @@
 #' Harmonize WCPFC Longline Catch Datasets From CSV (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_wcpfc_catch_ll()
-#' (R/core/rawdata_wcpfc_catch_ll.R), writes the outputs and declares the resources of
+#' (R/rawdata_wcpfc_catch_ll.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -31,8 +31,6 @@ path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 opts <- options()
 options(encoding = "UTF-8")
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_wcpfc_catch_ll.R"))
 catches <- gta_rawdata_wcpfc_catch_ll(path_to_raw_dataset)
 
 dataset_temporal_extent <- paste(

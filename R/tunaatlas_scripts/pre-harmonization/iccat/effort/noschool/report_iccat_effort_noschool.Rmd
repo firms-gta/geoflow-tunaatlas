@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This document transforms a dataset that is not in the CWP format into the CWP format:
 it first changes the structure of the data, then maps its codes to the CWP code lists.
-It is generated from the function `gta_rawdata_iccat_effort_noschool()` (`R/core/rawdata_iccat_effort_noschool.R`), the code that the Global Tuna Atlas workflow runs.
+It is generated from the function `gta_rawdata_iccat_effort_noschool()` (`R/rawdata_iccat_effort_noschool.R`), the code that the Global Tuna Atlas workflow runs.
 
 The raw dataset is read from the `data/` folder next to this document, which holds the first
 lines of each file under the name given by the tRFMO at export (this name may change).
@@ -43,7 +43,7 @@ Depending on the parameter settings, either 'fleet' or 'flag' column will be kep
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
 suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
-source(here::here('R/core/gta_data.R'))
+pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)   # gta package of the repository
 gta_rawdata_iccat_effort_noschool <- function(data) {
 keep_fleet_instead_of_flag=FALSE
 keep_fleet_instead_of_flag=FALSE  
@@ -178,7 +178,6 @@ efforts_pivot_ICCAT <- efforts_pivot_ICCAT[, c("FishingFleet", setdiff(names(eff
 # Reach the efforts harmonized DSD using a function in ICCAT_functions.R
 colToKeep_efforts <- c("FishingFleet","Gear","time_start","time_end","AreaName","School","EffortUnits","Effort")
 message("up to here")
-source(here::here("R/sardara_functions/ICCAT_CE_effort_pivotDSD_to_harmonizedDSD.R"))
 efforts_pivot_ICCAT$Lat <- floor(abs(efforts_pivot_ICCAT$Lat)) # we put floor as independently of the quadrant the floor always correspond to the cwp
 efforts_pivot_ICCAT$Lon <- floor(abs(efforts_pivot_ICCAT$Lon))
 
@@ -208,7 +207,6 @@ write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'i
 # Mapping to the CWP code lists
 
 ```{r}
-source(here::here('R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))
 fact <- "effort"
 mapping_codelist <- map_codelists_no_DB(fact, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
 ```

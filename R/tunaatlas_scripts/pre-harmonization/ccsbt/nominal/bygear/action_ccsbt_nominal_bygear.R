@@ -1,7 +1,7 @@
 #' Harmonize CCSBT Nominal Catch Dataset (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_ccsbt_nominal_bygear()
-#' (R/core/rawdata_ccsbt_nominal_bygear.R), writes the outputs and declares the resources of
+#' (R/rawdata_ccsbt_nominal_bygear.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -27,8 +27,6 @@ function(action, entity, config){
   opts <- options()
   options(encoding = "UTF-8")
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_ccsbt_nominal_bygear.R"))
 NC <- gta_rawdata_ccsbt_nominal_bygear(path_to_raw_dataset)
 
   dataset_temporal_extent <- paste(

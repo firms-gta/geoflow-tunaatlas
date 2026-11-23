@@ -33,8 +33,6 @@ Tidying_and_mapping_data = function(action, entity, config) {
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/curation_absurd_converted_data.R"))
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/outside_juridiction.R"))
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation.R"))
-  source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R"))
-  source(here::here("./R/tunaatlas_scripts/pre-harmonization/map_codelists.R"))
   
   source(here::here("./R/tunaatlas_scripts/pre-harmonization/spatial_curation_data_mislocated.R"),
          encoding = "UTF-8"

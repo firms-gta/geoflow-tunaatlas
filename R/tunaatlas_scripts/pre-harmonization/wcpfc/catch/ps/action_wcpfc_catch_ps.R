@@ -1,7 +1,7 @@
 #' Harmonize WCPFC Purse Seine Catch Datasets (geoflow action)
 #'
 #' geoflow action of the entity: finds the files of the entity, runs the core
-#' function gta_rawdata_wcpfc_catch_ps() (R/core/rawdata_wcpfc_catch_ps.R),
+#' function gta_rawdata_wcpfc_catch_ps() (R/rawdata_wcpfc_catch_ps.R),
 #' writes the harmonized dataset and declares the resources of the entity.
 #' The processing itself is in the core function, usable without geoflow.
 #'
@@ -27,8 +27,6 @@ if(!require(dplyr)){
   require(dplyr)
 }
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_wcpfc_catch_ps.R"))
 
 # Files of the entity, in the geoflow job directory
 filename1 <- entity$data$source[[1]] # data (at source: WCPFC_S_PUBLIC_BY_YR_MON.csv)

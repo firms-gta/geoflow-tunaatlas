@@ -1,7 +1,7 @@
 #' Harmonize data structure of ICCAT by operation mode effort datasets (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iccat_effort_ps_byschool()
-#' (R/core/rawdata_iccat_effort_ps_byschool.R), writes the outputs and declares the resources of
+#' (R/rawdata_iccat_effort_ps_byschool.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -55,8 +55,6 @@ options(encoding = "UTF-8")
 ## Catches
 # RFMO_CE<-read.csv(path_to_raw_dataset,stringsAsFactors = F)
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_iccat_effort_ps_byschool.R"))
 efforts <- gta_rawdata_iccat_effort_ps_byschool(path_to_raw_dataset)
 
 dataset_temporal_extent <- paste(

@@ -367,3 +367,15 @@ run_step_summary <- function(workflow_file,
   
   invisible(list(config = config, connection = con))
 }
+
+# -----------------------------------------------------------------------------
+# Business functions: the gta package of this repository (DESCRIPTION, R/*.R),
+# loaded from the source so that the code mounted in Docker is the one used
+# -----------------------------------------------------------------------------
+load_gta <- function() {
+  if (!"gta" %in% loadedNamespaces()) {
+    pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)
+  }
+  invisible(TRUE)
+}
+load_gta()

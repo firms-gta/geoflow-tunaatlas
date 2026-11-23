@@ -1,7 +1,7 @@
 #' Georeferenced catch or effort of one tRFMO, from a geoflow entity (level 0)
 #'
 #' Lists the data files of the entity (all its sources but the first) and runs
-#' the core function gta_rfmo_dataset_level0() (R/core/rfmo_datasets_level0.R)
+#' the core function gta_rfmo_dataset_level0() (R/rfmo_datasets_level0.R)
 #' on them, read from the data/ folder of the job.
 #'
 #' @param rfmo `"IOTC"`, `"WCPFC"`, `"CCSBT"`, `"ICCAT"` or `"IATTC"`.
@@ -27,9 +27,8 @@ get_rfmos_datasets_level0 <- function(rfmo, entity, config, options){
   names(dataset_files) <- entity$data$source[2:length(entity$data$source)]
   names(dataset_files) <- basename(names(dataset_files))
   
-  # Processing: core function gta_rfmo_dataset_level0() (R/core/rfmo_datasets_level0.R),
+  # Processing: core function gta_rfmo_dataset_level0() (R/rfmo_datasets_level0.R),
   # on the files of the entity (read from the data/ folder of the job)
-  source(here::here("R/core/rfmo_datasets_level0.R"))
   dataset <- gta_rfmo_dataset_level0(rfmo, names(dataset_files), options, data_dir = "data")
   return(dataset)
 }

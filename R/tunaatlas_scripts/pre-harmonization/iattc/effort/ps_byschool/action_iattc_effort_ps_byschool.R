@@ -1,7 +1,7 @@
 #' Harmonize IATTC PS BySchool Effort Datasets (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iattc_effort_ps_byschool()
-#' (R/core/rawdata_iattc_effort_ps_byschool.R), writes the outputs and declares the resources of
+#' (R/rawdata_iattc_effort_ps_byschool.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -31,8 +31,6 @@ options(encoding = "UTF-8")
 
 # Reach the efforts pivot DSD using a function in IATTC_functions.R
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_iattc_effort_ps_byschool.R"))
 efforts <- gta_rawdata_iattc_effort_ps_byschool(path_to_raw_dataset)
 
 dataset_temporal_extent <- paste(

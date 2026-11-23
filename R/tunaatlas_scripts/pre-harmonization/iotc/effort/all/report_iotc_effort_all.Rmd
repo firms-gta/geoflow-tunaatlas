@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This document transforms a dataset that is not in the CWP format into the CWP format:
 it first changes the structure of the data, then maps its codes to the CWP code lists.
-It is generated from the function `gta_rawdata_iotc_effort_all()` (`R/core/rawdata_iotc_effort_all.R`), the code that the Global Tuna Atlas workflow runs.
+It is generated from the function `gta_rawdata_iotc_effort_all()` (`R/rawdata_iotc_effort_all.R`), the code that the Global Tuna Atlas workflow runs.
 
 The raw dataset is read from the `data/` folder next to this document, which holds the first
 lines of each file under the name given by the tRFMO at export (this name may change).
@@ -45,7 +45,7 @@ The formatting logic is implemented inline:
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
 suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
-source(here::here('R/core/gta_data.R'))
+pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)   # gta package of the repository
 gta_rawdata_iotc_effort_all <- function(data) {
   
   
@@ -133,7 +133,6 @@ write.csv(georef_dataset, here::here('R/tunaatlas_scripts/pre-harmonization', 'i
 # Mapping to the CWP code lists
 
 ```{r}
-source(here::here('R/tunaatlas_scripts/pre-harmonization/map_codelists_no_DB.R'))
 fact <- "effort"
 mapping_codelist <- map_codelists_no_DB(fact, dataset_to_map = georef_dataset, mapping_keep_src_code = FALSE, summary_mapping = TRUE, source_authority_to_map = c("IATTC", "CCSBT", "WCPFC"))
 ```

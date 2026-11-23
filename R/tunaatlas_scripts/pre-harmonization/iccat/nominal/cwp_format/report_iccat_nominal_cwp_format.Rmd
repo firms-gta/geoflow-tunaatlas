@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 
 This document shows the small changes made to the ICCAT dataset, already in the CWP format
 and with the CWP codes, before it enters the Global Tuna Atlas (the changes are summarised below).
-It is generated from the function `gta_rawdata_cwp_format()` (`R/core/rawdata_cwp_format.R`), the code that the Global Tuna Atlas workflow runs.
+It is generated from the function `gta_rawdata_cwp_format()` (`R/rawdata_cwp_format.R`), the code that the Global Tuna Atlas workflow runs.
 
 The raw dataset is read from the `data/` folder next to this document, which holds the first
 lines of each file under the name given by the tRFMO at export (this name may change).
@@ -50,7 +50,7 @@ It relies on the 'dplyr' package for data manipulation and 'readr' for reading C
 ```{r}
 # Packages the function uses unqualified, attached as in the workflow
 suppressPackageStartupMessages({ library(data.table); library(reshape2); library(dplyr); library(tidyr); library(readxl) })
-source(here::here('R/core/gta_data.R'))
+pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)   # gta package of the repository
 gta_rawdata_cwp_format <- function(data) {
   catches <- gta_data(data, reader = function(path) readr::read_csv(path, guess_max = 0))
   #----------------------------------------------------------------------------------------------------------------------------

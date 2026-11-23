@@ -46,35 +46,22 @@ create_georef_dataset <- function(action, entity, config) {
   url_scripts_create_own_tuna_atlas <- here::here("R/tunaatlas_scripts/generation")
   
   # Retrieve data from zenodo 
-  source(file.path(url_scripts_create_own_tuna_atlas,"download_zenodo_csv.R"))
   
   #for level 0 - FIRMS
   source(here::here("R/tunaatlas_scripts/generation/get_rfmos_datasets_level0.R")) #modified for geoflow
   source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/pre-harmonization/map_codelists.R")) #modified for geoflow
-  source(file.path(url_scripts_create_own_tuna_atlas, "function_overlapped.R")) #modified for geoflow
   #for filtering if needed
-  source(file.path(url_scripts_create_own_tuna_atlas, "dimension_filtering_function.R")) # adding this function as overlapping is now a recurent procedures for several overlapping 
   
   # Process and aggregate final data 
   source(here::here("R/tunaatlas_scripts/generation/process_and_aggregate_dataset.R"))
   
   
   #for level 1 - FIRMS (candidate)
-  source(file.path(url_scripts_create_own_tuna_atlas, "double_unit_data_handling.R")) # new function for double unit
-  source(file.path(url_scripts_create_own_tuna_atlas, "do_unit_conversion.R"))
-  source(file.path(url_scripts_create_own_tuna_atlas, "perform_unit_conversion.R"))
   
   
   #for level 2 - IRD
-  source(file.path(url_scripts_create_own_tuna_atlas, "disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg.R"))
-  source(here::here("R/tunaatlas_scripts/generation/function_raising_georef_to_nominal.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/generation/convert_number_to_nominal.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/generation/decrease_precision_of_nominal_with_georef.R")) #modified for geoflow
-  source(here::here("R/tunaatlas_scripts/generation/function_raise_data.R")) #modified for geoflow
   
   # For filtering/aggregating
-  source(here::here("R/sardara_functions/transform_cwp_code_from_1deg_to_5deg.R"))
   
   #stepLog
   stepLogger = function(level, step, msg){
@@ -132,8 +119,7 @@ create_georef_dataset <- function(action, entity, config) {
   # LEVEL 0 FIRMS PRODUCT ---------------------------------------------------
   if(DATASET_LEVEL == 0 | from_rawdata){
     # Level 0 from the tRFMO datasets: core function gta_georef_level0()
-    # (R/core/level0.R), on the files of the entity (data/ folder of the job)
-    source(here::here("R/core/level0.R"))
+    # (R/level0.R), on the files of the entity (data/ folder of the job)
     files <- basename(unlist(entity$data$source[2:length(entity$data$source)]))
     level0 <- gta_georef_level0(files, opts, con = con, entity = entity,
                                 recap_each_step = recap_each_step,
@@ -219,8 +205,7 @@ create_georef_dataset <- function(action, entity, config) {
   
   # LEVEL 1 IRD ---------------------------------------------------
   if(DATASET_LEVEL >= 2){
-    # Level 2: core function gta_georef_level2() (R/core/level2.R)
-    source(here::here("R/core/level2.R"))
+    # Level 2: core function gta_georef_level2() (R/level2.R)
     level2 <- gta_georef_level2(
       georef_dataset, opts, con = con,
       files = basename(unlist(entity$data$source[2:length(entity$data$source)])),
