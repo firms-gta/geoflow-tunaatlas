@@ -34,6 +34,17 @@ repos:
         entry: Rscript tests/test_rawdata.R
         pass_filenames: false
         files: '^(R/core/|R/tunaatlas_scripts/pre-harmonization/|R/sardara_functions/|config/entities/entities_raw_|tests/(test_rawdata\.R|expected/rawdata/|sample_data/))'
+      # The report_*.Rmd of the raw datasets copy the code of their core
+      # function: rewritten here when that code changes (the hook fails if a
+      # report changed; stage it and commit again). Not rendered to HTML.
+      - id: rawdata-reports
+        name: raw dataset reports match their core functions
+        language: system
+        entry: >-
+          Rscript -e 'source("workflow/launchers/rawdata_reports.R");
+          invisible(update_rawdata_reports(render = FALSE))'
+        pass_filenames: false
+        files: '^(R/core/|R/tunaatlas_scripts/pre-harmonization/|config/entities/entities_raw_|workflow/launchers/rawdata_reports\.R$)'
 
   # Secrets in the staged changes
   - repo: https://github.com/gitleaks/gitleaks
