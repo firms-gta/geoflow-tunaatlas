@@ -472,6 +472,11 @@ gta_rawdata_cwp_format &lt;- function(data) {
   catches &lt;- catches %&gt;% dplyr::rename(fishing_fleet = fishingfleet) 
   }
   
+  # IOTC gives the processing level in measurement_obs (&quot;raised&quot;, &quot;unknown&quot;,
+  # &quot;original sample&quot;): same codes as measurement_processing_level, with a space
+  if(!&quot;measurement_processing_level&quot; %in% colnames(catches) &amp;&amp; &quot;measurement_obs&quot; %in% colnames(catches)){
+    catches$measurement_processing_level &lt;- gsub(&quot; &quot;, &quot;_&quot;, catches$measurement_obs, fixed = TRUE)
+  }
   if(!&quot;measurement_processing_level&quot; %in% colnames(catches)){
     catches$measurement_processing_level &lt;- &quot;raised&quot;
   }
@@ -524,8 +529,8 @@ data.frame(
 ## 2                t 121.5898   121.5898</code></pre>
 <pre class="r"><code>if (&quot;measurement_processing_level&quot; %in% colnames(georef_dataset)) table(measurement_processing_level = georef_dataset$measurement_processing_level, useNA = &quot;ifany&quot;)</code></pre>
 <pre><code>## measurement_processing_level
-## raised 
-##     20</code></pre>
+## original_sample          raised         unknown 
+##               2              13               5</code></pre>
 </div>
 
 
