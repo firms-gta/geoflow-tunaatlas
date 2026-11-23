@@ -39,6 +39,7 @@
 #'               files = list.files("tests/sample_data", full.names = TRUE)),
 #'   steps = c("rawdata", "nominal", "level0"))
 #' }
+#' @export
 create_global_tuna_atlas <- function(data, options = gta_default_options(),
                                      steps = c("rawdata", "nominal", "level0", "effort", "level1", "level2"),
                                      work_dir = tempfile("gta_"), con = NULL, recap_each_step = FALSE) {

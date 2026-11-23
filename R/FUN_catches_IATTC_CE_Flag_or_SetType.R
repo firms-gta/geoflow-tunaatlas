@@ -23,12 +23,9 @@
 #' # Example of function usage with a fictional file path
 #' FUN_catches_IATTC_CE_Flag_or_SetType("path/to/IATTC_data.csv", "Flag", "PS")
 #'
-#' @import data.table
-#' @importFrom dplyr filter
-#' @importFrom reshape2 melt
-#' @export
+#' @noRd
 #'
-#' @seealso \code{\link{create_additional_columns_IATTC_CE}} for details on the additional column creation function
+#' @seealso \code{create_additional_columns_IATTC_CE()} for details on the additional column creation function
 
 FUN_catches_IATTC_CE_Flag_or_SetType = function (Path_to_IATTC_CE, aggregation_dimension, GearCode) 
 {

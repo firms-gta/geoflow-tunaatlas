@@ -14,14 +14,12 @@
 #'
 #' It relies on the 'dplyr' package for data manipulation and 'readr' for reading CSV files. The function assumes
 #'
-#' @examples
-#' \dontrun{
-#' }
 #'
 #' @param data The dataset, already in CWP format (ICCAT, IOTC): a data frame, or
 #'   the path to the CSV file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (cwp_format/action_cwp_format.R).
+#' @export
 gta_rawdata_cwp_format <- function(data) {
   catches <- gta_data(data, reader = function(path) readr::read_csv(path, guess_max = 0))
   #----------------------------------------------------------------------------------------------------------------------------

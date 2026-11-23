@@ -32,10 +32,8 @@ This script works with any data that has the first 5 columns named and ordered a
          format, including renaming, reordering, and recalculating specific fields as necessary.
          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 
-@import dplyr
-@import readr
-@seealso \code{\link{FUN_efforts_IATTC_CE_allbutLLTunaBillfish}} for initial effort data preprocessing,
-         \code{\link{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD}} for converting effort data to a standardized structure.
+@seealso \code{FUN_efforts_IATTC_CE_allbutLLTunaBillfish()} for initial effort data preprocessing,
+         \code{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD()} for converting effort data to a standardized structure.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

@@ -38,9 +38,6 @@ The function performs several steps to prepare the catch data for further proces
 
 It relies on the 'dplyr' package for data manipulation and 'readr' for reading CSV files. The function assumes
 
-@examples
-\dontrun{
-}
 
 @param data The dataset, already in CWP format (ICCAT, IOTC): a data frame, or
   the path to the CSV file.

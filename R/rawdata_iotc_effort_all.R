@@ -17,6 +17,7 @@
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iotc/effort/all/action_iotc_effort_all.R).
+#' @export
 gta_rawdata_iotc_effort_all <- function(data) {
   
   

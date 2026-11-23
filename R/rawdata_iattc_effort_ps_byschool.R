@@ -8,16 +8,15 @@
 #'          format, including renaming, reordering, and recalculating specific fields as necessary.
 #'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 #'
-#' @import dplyr
-#' @import readr
-#' @seealso \code{\link{FUN_efforts_IATTC_CE_allbutLLTunaBillfish}} for initial effort data preprocessing,
-#'          \code{\link{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD}} for converting effort data to a standardized structure.
+#' @seealso \code{FUN_efforts_IATTC_CE_allbutLLTunaBillfish()} for initial effort data preprocessing,
+#'          \code{IATTC_CE_efforts_pivotDSD_to_harmonizedDSD()} for converting effort data to a standardized structure.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iattc/effort/ps_byschool/action_iattc_effort_ps_byschool.R).
+#' @export
 gta_rawdata_iattc_effort_ps_byschool <- function(data) {
   path_to_raw_dataset <- gta_path(data)
 efforts_pivot_IATTC <-FUN_efforts_IATTC_CE_allbutLLTunaBillfish(path_to_raw_dataset,"NumSets","SetType","PS")

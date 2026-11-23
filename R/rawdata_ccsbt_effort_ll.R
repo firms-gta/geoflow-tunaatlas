@@ -6,15 +6,16 @@
 #'          format, including renaming, reordering, and recalculating specific fields as necessary.
 #'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 #'
-#' @seealso \code{\link{harmo_time_2}}
-#'          \code{\link{harmo_spatial_5}}
-#'          \code{\link{format_time_db_format}}
+#' @seealso \code{harmo_time_2()}
+#'          \code{harmo_spatial_5()}
+#'          \code{format_time_db_format()}
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (ccsbt/effort/ll/action_ccsbt_effort_ll.R).
+#' @export
 gta_rawdata_ccsbt_effort_ll <- function(data) {
   
   

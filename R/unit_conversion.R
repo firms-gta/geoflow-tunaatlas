@@ -22,6 +22,7 @@
 #' @param removing_numberfish_final For catch, remove the rows still in number
 #'   of fish after the conversion.
 #' @return The converted dataset (data frame).
+#' @export
 gta_unit_conversion <- function(georef_dataset, df_conversion_factor, con = NULL, fact = "catch",
                                 unit_conversion_codelist_geoidentifiers_conversion_factors,
                                 mapping_map_code_lists = FALSE, removing_numberfish_final = TRUE) {

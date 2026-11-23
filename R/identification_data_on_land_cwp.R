@@ -5,10 +5,7 @@
 #' @param con Un objet de connexion à la base de données.
 #' @param df_input Le jeu de données d'entrée à utiliser pour l'identification des données sur terre.
 #' @return Un vecteur contenant les identifiants uniques des zones sur terre dans le jeu de données cwp.
-#' @export
-#' @import DBI
-#' @import dplyr
-#' @importFrom here here
+#' @noRd
 
 identification_data_on_land_cwp = function(con, df_input){
   

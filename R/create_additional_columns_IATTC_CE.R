@@ -17,7 +17,7 @@
 #' # Example usage:
 #' create_additional_columns_IATTC_CE(my_data, "LatitudeColumn", "LongitudeColumn", 5, "PS")
 #'
-#' @export
+#' @noRd
 
 create_additional_columns_IATTC_CE = function (input_IATTC_CE_file, ColLat, ColLon, SquareSizeDegrees, 
           GearCode) 

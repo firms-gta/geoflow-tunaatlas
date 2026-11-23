@@ -31,7 +31,7 @@
 #' )
 #' }
 #'
-#' @export
+#' @noRd
 perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codelist_geoidentifiers_conversion_factors, georef_dataset, entity, config, opts, step_description, addeddescription = NULL, con = NULL) {
   if (file.exists(conversion_factor_csv)) {
     # Load the conversion factor dataset

@@ -32,7 +32,7 @@ ensuring standardization of fields and optional inclusion of metadata if the dat
          to long format, calculates derived metrics, and formats data according to the Tuna Atlas database requirements.
          Metadata is optionally included based on the final use of the dataset.
 
-@seealso \code{\link{harmo_time_2}} and \code{\link{harmo_spatial_3}} for specific data structuring functions.
+@seealso \code{harmo_time_2()} and \code{harmo_spatial_3()} for specific data structuring functions.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

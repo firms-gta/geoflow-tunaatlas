@@ -1,8 +1,5 @@
 IATTC_CE_efforts_pivotDSD_to_harmonizedDSD = function (IATTC_CE_efforts_df_pivotDSD, colToKeep_efforts) 
 {
-  if(!(require(dplyr))){ 
-    install.packages(dplyr) 
-    (require(dplyr))} 
   
   IATTC_CE_efforts_df_pivotDSD$RFMO <- "IATTC"
   IATTC_CE_efforts_df_pivotDSD$Ocean <- "PAC_E"

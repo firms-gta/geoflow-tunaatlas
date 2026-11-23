@@ -35,6 +35,7 @@
 #'   removing_unk = TRUE,
 #'   use_five_degree = TRUE
 #' )
+#' @noRd
 function_overlapped <- function(dataset,
                            con,
                            rfmo_to_keep,

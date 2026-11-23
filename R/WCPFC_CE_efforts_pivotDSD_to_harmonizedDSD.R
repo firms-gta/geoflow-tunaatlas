@@ -1,8 +1,5 @@
 WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD = function (efforts_pivot_WCPFC, colToKeep_efforts) 
 {
-  if(!(require(dplyr))){ 
-    install.packages(dplyr) 
-    (require(dplyr))} 
   
   efforts_pivot_WCPFC$RFMO <- "WCPFC"
   efforts_pivot_WCPFC$Ocean <- "PAC_W"

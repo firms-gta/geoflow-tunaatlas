@@ -11,6 +11,7 @@
 #'   output files <id>.csv); each element is a list with `dataset` (e.g.
 #'   "wcpfc/catch/ps", or "iccat/catch/cwp_format") and `files` (raw files, in
 #'   the order of the arguments of the core function).
+#' @export
 gta_raw_datasets <- function(entities_dir = here::here("config/entities"), data_dir = NULL) {
   tables <- Sys.glob(file.path(entities_dir, "entities_raw_*.csv"))
   rows <- do.call(rbind, lapply(tables, function(f) {
@@ -38,6 +39,7 @@ gta_raw_datasets <- function(entities_dir = here::here("config/entities"), data_
 #'   "iotc/nominal/cwp_format" (see gta_raw_datasets()).
 #' @return The function gta_rawdata_<tRFMO>_<type>_<dataset>(), or
 #'   gta_rawdata_cwp_format() for the datasets already in CWP format.
+#' @export
 gta_rawdata_function <- function(dataset) {
   parts <- strsplit(dataset, "/", fixed = TRUE)[[1]]
   slug <- if (parts[length(parts)] == "cwp_format") "cwp_format" else paste(parts, collapse = "_")

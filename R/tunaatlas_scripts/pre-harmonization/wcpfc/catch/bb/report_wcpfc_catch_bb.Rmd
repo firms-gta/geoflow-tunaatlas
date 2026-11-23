@@ -32,7 +32,7 @@ the requirements for data standardization and optionally including metadata if t
          and standardizes the format for date fields and geographical identifiers. Metadata incorporation is contingent on the final 
          data usage within the Tuna Atlas database.
 
-@seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} for detailed data structuring operations.
+@seealso \code{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD()} for detailed data structuring operations.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

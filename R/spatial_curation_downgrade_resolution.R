@@ -103,7 +103,7 @@ spatial_curation_downgrade_resolution <- function (con, df_input, resolution, re
   log_info("END rtunaatlas::spatial_curation_downgrade_resolution() function")
   georef_dataset<-georef_dataset$df
   
-  log_info(sprintf("Disaggregating / Removing data that are defined on quadrants or areas superior to [%s]° quadrant resolution OK", resolution))
+  log_info(sprintf("Disaggregating / Removing data that are defined on quadrants or areas superior to [%s]\u00b0 quadrant resolution OK", resolution))
   
   return(list(dataset=georef_dataset,lineage=lineage,description=description, stats_reallocated_data = stats_reallocated_data))
   

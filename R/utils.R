@@ -7,6 +7,7 @@
 #' @param msg The message, or a sprintf() format.
 #' @param ... Values for the format.
 #' @return NULL, invisibly.
+#' @noRd
 log_info <- function(msg, ...) {
   msg <- if (...length() > 0) sprintf(msg, ...) else msg
   message("[INFO] ", msg)
@@ -24,6 +25,7 @@ log_info <- function(msg, ...) {
 #' @param con The connection, or NULL.
 #' @param what What needs the database, for the message.
 #' @return `con`, invisibly.
+#' @noRd
 gta_require_con <- function(con, what) {
   if (is.null(con) || !inherits(con, "DBIConnection")) {
     stop(sprintf(paste0("%s needs a connection to the Tuna Atlas database (argument con). ",

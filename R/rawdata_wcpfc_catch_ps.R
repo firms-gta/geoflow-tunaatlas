@@ -24,6 +24,7 @@
 #' @seealso \code{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD} (R/sardara_functions).
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
+#' @export
 gta_rawdata_wcpfc_catch_ps <- function(data) {
   DF <- gta_data(data, reader = gta_read_csv_utf8)
 

@@ -32,8 +32,8 @@ fields are retained and that metadata is included if the dataset is destined for
          It involves cleaning, restructuring, and harmonizing data fields to meet specified
          standards. Metadata integration is optional and contingent on the destination of the dataset.
 
-@seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType_Shark}} for the specific processing of shark catches by type of school (set type),
-         \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} for general data structuring.
+@seealso \code{FUN_catches_IATTC_CE_Flag_or_SetType_Shark()} for the specific processing of shark catches by type of school (set type),
+         \code{IATTC_CE_catches_pivotDSD_to_harmonizedDSD()} for general data structuring.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 
 @param data The raw dataset: a data frame, or the path to the file.

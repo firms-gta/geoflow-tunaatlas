@@ -5,7 +5,7 @@ check_unique_strata_georef_nominal <- function(rawdata, nominal_catch) {
     # "fishing_mode_wcpfc_issue_unk_solved",
     # 
     # "group_species_iattc_sharks",
-    "gear_type",
+    "gear_type"
     # "geographic_identifier_nom",
     # "year",
     # "fishing_fleet"

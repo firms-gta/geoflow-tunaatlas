@@ -7,15 +7,14 @@
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}, Bastien Grasset, IRD \email{bastien.grassset@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
-#' @seealso \code{\link{convertDSD_wcpfc_ce_Driftnet}}, \code{\link{convertDSD_wcpfc_ce_Longline}},
-#' \code{\link{convertDSD_wcpfc_ce_Pole_and_line}}, \code{\link{convertDSD_wcpfc_ce_PurseSeine}},
-#' \code{\link{convertDSD_wcpfc_nc}} for other specific conversions within WCPFC datasets.
-#'
-#' @examples
+#' @seealso \code{convertDSD_wcpfc_ce_Driftnet()}, \code{convertDSD_wcpfc_ce_Longline()},
+#' \code{convertDSD_wcpfc_ce_Pole_and_line()}, \code{convertDSD_wcpfc_ce_PurseSeine()},
+#' \code{convertDSD_wcpfc_nc()} for other specific conversions within WCPFC datasets.
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (wcpfc/effort/ll/action_wcpfc_effort_ll.R).
+#' @export
 gta_rawdata_wcpfc_effort_ll <- function(data) {
   
   

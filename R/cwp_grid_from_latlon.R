@@ -9,7 +9,7 @@
 #' @param colname_squaresize The name of the column containing the grid size (e.g., 1, 5, 10).
 #'
 #' @return A data frame with an additional column `geographic_identifier` containing the 7-digit CWP grid code.
-#' @export
+#' @noRd
 #'
 #' @examples
 #' df_test <- data.frame(latitude = c(12.4, -8.6, -5.2, 47.3), 
@@ -18,7 +18,6 @@
 #' df_result <- cwp_grid_from_latlon(df_test, "latitude", "longitude", "squaresize")
 #' print(df_result)
 cwp_grid_from_latlon <- function(df_input, colname_latitude, colname_longitude, colname_squaresize) {
-  library(dplyr)
   
   # Determine the quadrant based on latitude and longitude
   df_input <- df_input %>%

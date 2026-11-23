@@ -8,13 +8,14 @@
 #'          It involves cleaning, restructuring, and harmonizing data fields to meet specified
 #'          standards. Metadata integration is optional and contingent on the destination of the dataset.
 #'
-#' @seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType_Shark}} for the specific processing of shark catches by type of school (set type),
-#'          \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} for general data structuring.
+#' @seealso \code{FUN_catches_IATTC_CE_Flag_or_SetType_Shark()} for the specific processing of shark catches by type of school (set type),
+#'          \code{IATTC_CE_catches_pivotDSD_to_harmonizedDSD()} for general data structuring.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iattc/catch/ps_shark_byschool/action_iattc_catch_ps_shark_byschool.R).
+#' @export
 gta_rawdata_iattc_catch_ps_shark_byschool <- function(data) {
   # Samples of the input and output data (from the former script)
   # '# This script works with any data that has the first 5 columns named and ordered as follow: {Year|Month|SetType|LatC1|LonC1|NumSets}

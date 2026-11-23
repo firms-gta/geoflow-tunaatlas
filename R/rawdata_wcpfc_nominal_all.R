@@ -6,7 +6,7 @@
 #'          format, including renaming, reordering, and recalculating specific fields as necessary.
 #'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 #'
-#' @seealso \code{\link{format_time_db_format}} for converting WCPFC task 2 data structures.
+#' @seealso \code{format_time_db_format()} for converting WCPFC task 2 data structures.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
@@ -15,6 +15,7 @@
 #' @param data_wcpo The WCPO nominal catch dataset (file XLS_WCPO_<date>.csv), idem.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (wcpfc/nominal/all/action_wcpfc_nominal_all.R).
+#' @export
 gta_rawdata_wcpfc_nominal_all <- function(data_wcpfc, data_wcpo) {
 #----------------------------------------------------------------------------------------------------------------------------
 

@@ -15,13 +15,11 @@
 #' The harmonization process is tailored to CCSBT 'Surface' datasets and assumes specific column names
 #' date range and exports the harmonized data, metadata, and code lists as CSV files.
 #'
-#' @examples
-#' \dontrun{
-#' }
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (ccsbt/effort/surface/action_ccsbt_effort_surface.R).
+#' @export
 gta_rawdata_ccsbt_effort_surface <- function(data) {
   
   

@@ -1,9 +1,6 @@
 ICCAT_CE_effort_pivotDSD_to_harmonizedDSD = function (efforts_pivot_ICCAT, colToKeep_efforts) 
 {
   message("working dir up to here")
-  if(!(require(dplyr))){ 
-    install.packages(dplyr) 
-    (require(dplyr))} 
   
   efforts_pivot_ICCAT <- efforts_pivot_ICCAT %>% dplyr::filter(!Effort %in% 
                                                                  0) %>% dplyr::filter(!is.na(Effort)) %>% dplyr::filter(!EffortUnits %in% 

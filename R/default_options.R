@@ -14,6 +14,7 @@
 #' driftnet catch is not in the level 0; to correct separately).
 #'
 #' @return A named list: nominal, level0, effort, level1, level2.
+#' @export
 gta_default_options <- function() {
   list(
     nominal = list(

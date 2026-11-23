@@ -1,8 +1,5 @@
 IATTC_CE_catches_pivotDSD_to_harmonizedDSD= function (IATTC_CE_catches_df_pivotDSD, colToKeep_captures) 
 {
-  if(!(require(dplyr))){ 
-    install.packages(dplyr) 
-    (require(dplyr))} 
   
   IATTC_CE_catches_df_pivotDSD$RFMO <- "IATTC"
   IATTC_CE_catches_df_pivotDSD$Ocean <- "PAC_E"

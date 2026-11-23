@@ -4,7 +4,6 @@ curation_absurd_converted_data <- function(georef_dataset, max_conversion_factor
     max_conversion_factor <-
       read.csv(max_conversion_factor)
   }
-  require(dplyr)
   colnames_georef_dataset_groupping <- setdiff(colnames(georef_dataset), c("measurement_value", "measurement_unit"))
   
   strata_nomt <- georef_dataset %>% dplyr::filter(measurement_unit %in% c("NOMT"))

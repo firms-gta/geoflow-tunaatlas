@@ -33,6 +33,7 @@
 #' @param entity A geoflow entity whose metadata (provenance, description) the
 #'   steps complete, or `NULL`.
 #' @return The level 1 catch (data frame).
+#' @export
 gta_level1 <- function(georef_dataset,
                        con = NULL,
                        unit_conversion_convert = TRUE,

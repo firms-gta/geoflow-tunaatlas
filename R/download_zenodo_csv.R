@@ -12,27 +12,8 @@
 #' key <- "40d1749dfeac0b45d5601445f28f80a4"
 #' data <- download_zenodo_csv(doi, key)
 #' }
-#' @export
+#' @noRd
 download_zenodo_csv <- function(doi, key) {
-  
-  if (!require(httr)) {
-    install.packages("httr")
-    require(httr)
-  }
-  
-  if (!require(jsonlite)) {
-    install.packages("jsonlite")
-    require(jsonlite)
-  }
-  if (!require(readr)) {
-    install.packages("readr")
-    require(readr)
-  }
-  
-  if (!require(dplyr)) {
-    install.packages("dplyr")
-    require(dplyr)
-  }
   # Convert DOI to Zenodo API URL
   zenodo_url <- paste0("https://zenodo.org/api/records/", sub("10.5281/zenodo.", "", doi))
   name <- key

@@ -8,13 +8,14 @@
 #'          and standardizes the format for date fields and geographical identifiers. Metadata incorporation is contingent on the final 
 #'          data usage within the Tuna Atlas database.
 #'
-#' @seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} for detailed data structuring operations.
+#' @seealso \code{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD()} for detailed data structuring operations.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (wcpfc/catch/bb/action_wcpfc_catch_bb.R).
+#' @export
 gta_rawdata_wcpfc_catch_bb <- function(data) {
   # Samples of the input and output data (from the former script)
   # Input data sample:

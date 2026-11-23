@@ -17,6 +17,7 @@
 #' @param output_file Path of the `.Rmd` to write; by default
 #'   `report_<tRFMO>_<type>_<dataset>.Rmd` in the folder of the dataset.
 #' @return The path of the report, invisibly.
+#' @export
 gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
   root <- "R/tunaatlas_scripts/pre-harmonization"
   parts <- strsplit(dataset, "/", fixed = TRUE)[[1]]
@@ -31,6 +32,7 @@ gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
   }
   lines <- readLines(here::here(core_file), warn = FALSE, encoding = "UTF-8")
   doc <- sub("^#' ?", "", lines[grepl("^#'", lines)])
+  doc <- doc[!grepl("^@(export|noRd)\\b", doc)]   # package tags, not part of the report
   code <- lines[!grepl("^#'", lines)]
   title <- doc[1]
   description <- doc[-1]
@@ -153,6 +155,7 @@ gta_rawdata_report <- function(dataset, raw_files, output_file = NULL) {
 #' @param script_path Path of the geoflow action of the entity.
 #' @param raw_files Name(s) of the raw file(s) of the entity.
 #' @return The folder, relative to R/tunaatlas_scripts/pre-harmonization.
+#' @export
 gta_rawdata_report_dataset <- function(script_path, raw_files) {
   root <- "R/tunaatlas_scripts/pre-harmonization/"
   dataset <- sub(paste0("^.*", root), "", dirname(sub("^\\./", "", script_path)))

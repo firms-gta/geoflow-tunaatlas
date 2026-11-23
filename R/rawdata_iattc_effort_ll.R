@@ -2,12 +2,12 @@
 #'
 #' This function transforms a dataset containing catch information into the CWP (Coordinating Working Party) format.
 #'
-#' @param df A dataframe containing catch data.
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iattc/effort/ll/action_iattc_effort_ll.R).
+#' @export
 gta_rawdata_iattc_effort_ll <- function(data) {
   # Samples of the input and output data (from the former script)
   # A tibble: 6 × 26

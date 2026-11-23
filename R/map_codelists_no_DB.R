@@ -32,7 +32,7 @@
 #'         total statistics of the mappings, and details of the codes that
 #'         were not mapped.
 #'
-#' @export
+#' @noRd
 
 map_codelists_no_DB <- function(
     fact,

@@ -25,6 +25,7 @@
 #' @examples
 #' result <- convert_fish_capture_data(georef_dataset, global_nominal_catch_firms_level0, raise_only_unmatched = TRUE)
 #'
+#' @noRd
 convert_number_to_nominal <- function(georef_dataset, global_nominal_catch_firms_level0, 
                                       strata = c("source_authority", "species", "gear_type", "fishing_fleet", "year"),
                                       raise_only_unmatched = TRUE, 
