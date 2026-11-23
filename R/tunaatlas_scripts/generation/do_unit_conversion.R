@@ -1,9 +1,10 @@
-do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE, converting_dataset_mapped  = TRUE){
+do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE, converting_dataset_mapped  = TRUE, con = NULL) {
   source(here::here("R/sardara_functions/extract_dataset.R"))
   source(here::here("R/tunaatlas_scripts/generation/convert_units.R"))
   source(here::here("R/sardara_functions/list_metadata_datasets.R"))
   source(here::here("R/sardara_functions/map_codelist.R"))
-  con <- config$software$output$dbi
+  # Database connection: given, or the one of the geoflow configuration
+  if (is.null(con)) con <- config$software$output$dbi
   
   if(is.data.frame(unit_conversion_csv_conversion_factor_url)){
     
@@ -187,6 +188,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   #@entity$provenance$processes <- c(entity$provenance$processes, conversion_step)
   #@juldebar end commented
   
+  if (!is.null(entity)) {   # metadata of the geoflow entity, when there is one
   entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", description)
   if(!is.null(info)){	
     if(!is.null(entity$descriptions[["info"]])){
@@ -195,6 +197,7 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
       entity$setDescription("info", info)
     }
     
+  }
   }
   
   log_info("Converting units of georef_dataset OK")

@@ -32,7 +32,7 @@
 #' }
 #'
 #' @export
-perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codelist_geoidentifiers_conversion_factors, georef_dataset, entity, config, opts, step_description, addeddescription = NULL) {
+perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codelist_geoidentifiers_conversion_factors, georef_dataset, entity, config, opts, step_description, addeddescription = NULL, con = NULL) {
   if (file.exists(conversion_factor_csv)) {
     # Load the conversion factor dataset
     conversion_factors <- read_csv(conversion_factor_csv,
@@ -52,7 +52,8 @@ perform_unit_conversion <- function(conversion_factor_csv, unit_conversion_codel
       unit_conversion_codelist_geoidentifiers_conversion_factors = unit_conversion_codelist_geoidentifiers_conversion_factors,
       mapping_map_code_lists = opts$mapping_map_code_lists,
       georef_dataset = georef_dataset,
-      removing_numberfish_final = FALSE
+      removing_numberfish_final = FALSE,
+      con = con
     )
     
     # Log the step

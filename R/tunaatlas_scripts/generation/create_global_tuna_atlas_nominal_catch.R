@@ -15,6 +15,16 @@
 # wps.in: id = SBF_data_rfmo_to_keep, type = string, title = Concerns Southern Bluefin Tuna (SBF) data. Use only if parameter include_CCSBT is set to TRUE. SBF tuna data do exist in both CCSBT data and the other tuna RFMOs data. Wich data should be kept? CCSBT : CCSBT data are kept for SBF. other_trfmos : data from the other TRFMOs are kept for SBF. NULL : Keep data from all the tRFMOs. Caution: with the option NULL, data in the overlapping zones are likely to be redundant., value = "CCSBT|other_trfmos|NULL";
 # wps.out: id = zip_namefile, type = text/zip, title = Outputs are 3 csv files: the dataset of georeferenced catches + a dataset of metadata (including informations on the computation, i.e. how the primary datasets were transformed by each correction) [TO DO] + a dataset providing the code lists used for each dimension (column) of the output dataset [TO DO]. All outputs and codes are compressed within a single zip file. ; 
 
+#' Global nominal catch (geoflow action)
+#'
+#' geoflow action of the global nominal catch entity: reads the action
+#' options, finds the nominal catch files of the entity, runs the core function
+#' gta_nominal_catch() (R/core/nominal_catch.R), then writes the outputs and
+#' declares the resources (process_and_aggregate_dataset()).
+#'
+#' @param action The geoflow action (its options).
+#' @param entity The geoflow entity.
+#' @param config The geoflow configuration.
 function(action, entity, config){
   opts <- action$options
   # #############
@@ -38,62 +48,26 @@ function(action, entity, config){
     require(readr)
   }
 
+  url_scripts_create_own_tuna_atlas <- here::here("./R/tunaatlas_scripts/generation")
+  source(here::here("R/core/gta_data.R"))
+  source(here::here("R/core/nominal_catch.R"))
+
   if(from_repo){
     nominal_catch <-
       readr::read_csv("~/firms-gta/geoflow-tunaatlas/data/global_nominal_catch_firms_level0_harmonized.csv",
                       guess_max = 0) %>% dplyr::mutate(measurement_value = as.numeric(measurement_value))
   } else {
-  
-  # connect to Tuna atlas database
-  con <- config$software$output$dbi
-  
-  #scripts
-  url_scripts_create_own_tuna_atlas <- here::here("./R/tunaatlas_scripts/generation")
-  source(file.path(url_scripts_create_own_tuna_atlas, "retrieve_nominal_catch.R"))
-  
-  # For final processing
-  source(file.path(url_scripts_create_own_tuna_atlas, "process_and_aggregate_dataset.R"))
-  
-  
-  #for reporting
-  CWP.dataset::write_options_to_csv(opts)
-  
-  
-  #### 1) Retrieve tuna RFMOs data from Sardara DB at level 0. 
-  log_info("Retrieving RFMOs nominal catch...")
-  nominal_catch <-retrieve_nominal_catch(entity, config, opts)
-  log_info("Retrieving RFMOs nominal catch OK")
-  
-  if(recap_each_step){
-    CWP.dataset::function_recap_each_step(
-      "rawdata",
-      nominal_catch, "rawdata","retrieve_nominal_catch",NULL)
-  }
-  
-  #### 2) Southern Bluefin Tuna (SBF): SBF data: keep data from CCSBT or data from the other tuna RFMOs?
-  
-  if (!is.null(SBF_data_rfmo_to_keep)){
-    
-    log_info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna..."))
-    if (SBF_data_rfmo_to_keep=="CCSBT"){
-      nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority %in% c("ICCAT","IOTC","IATTC","WCPFC"))), ]
-    } else {
-      nominal_catch <- nominal_catch[ which(!(nominal_catch$species %in% "SBF" & nominal_catch$source_authority == "CCSBT")), ]
-    }
-    log_info(paste0("Keeping only data from ",SBF_data_rfmo_to_keep," for the Southern Bluefin Tuna OK")) 
-    
-    if(recap_each_step){
-      CWP.dataset::function_recap_each_step(
-        "Filtering_SBF_data",
-        nominal_catch,
-        paste0(
-          "Filtering SBF data to keep only data from",SBF_data_rfmo_to_keep),
-        "inner_join"  ,
-        NULL
-      )
-    }
-    
-  }
+    #for reporting
+    CWP.dataset::write_options_to_csv(opts)
+
+    # nominal catch files of the entity, for the included tRFMOs
+    dataset_files <- sapply(entity$data$source, function(x){ entity$getJobDataResource(config, x) })
+    files <- gta_nominal_catch_files(dataset_files, list(
+      IOTC = opts$include_IOTC, ICCAT = opts$include_ICCAT, WCPFC = opts$include_WCPFC,
+      CCSBT = opts$include_CCSBT, IATTC = opts$include_IATTC))
+
+    nominal_catch <- gta_nominal_catch(files, SBF_data_rfmo_to_keep = SBF_data_rfmo_to_keep,
+                                       recap_each_step = recap_each_step)
   }
   #final step
   source(file.path(url_scripts_create_own_tuna_atlas, "process_and_aggregate_dataset.R"))
