@@ -27,3 +27,4 @@
 ^R/tunaatlas_scripts$
 ^tests/(?!testthat)
 ^gta$
+^LICENSE\.md$

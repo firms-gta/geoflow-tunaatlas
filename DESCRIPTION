@@ -9,7 +9,7 @@ Description: Business functions of the Global Tuna Atlas: harmonisation of the
     (tRFMOs) to the CWP format, and creation of the nominal catch, level 0,
     level 1, level 2 and effort datasets. The geoflow workflow of this
     repository (workflow/, config/) calls these functions.
-License: Unspecified (to be chosen by the repository owners)
+License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
     R (>= 4.1)
