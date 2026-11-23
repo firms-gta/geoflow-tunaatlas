@@ -17,4 +17,3 @@ if(nrow(outside_juridiction) ==0){
 return(list(georef_dataset = georef_dataset,
        outside_juridiction = outside_juridiction))
 }
-

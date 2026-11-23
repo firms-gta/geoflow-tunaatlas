@@ -102,17 +102,3 @@ return(list(df = df_input_final_curated_on_resolution_to_curate, df_input_areas_
    }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

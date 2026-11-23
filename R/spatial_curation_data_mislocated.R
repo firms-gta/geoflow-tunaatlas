@@ -36,7 +36,6 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   # Initialisation
   db_working <- FALSE
-  library(RPostgreSQL)
   # Vérification de la connexion si elle existe
   # if (!is.null(con)) {
   #   if (DBI::dbIsValid(con)) {
@@ -69,7 +68,6 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   }
   
   cwp_grid <- cwp_grid %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
-  source(here::here("./R/tunaatlas_scripts/generation/identification_data_on_land_cwp.R"))
   cat("Reallocating data that are in land areas")
   
   cat("Executing spatial_curation_intersect_areas")
@@ -115,7 +113,6 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   if (action_on_mislocated=="reallocate"){   # We reallocate data that is mislocated (they will be equally distributed on areas with same reallocation_dimensions (month|year|gear|flag|species|schooltype).
     cat("Reallocating data that are in land areas...\n")
-    source(here::here("./R/tunaatlas_scripts/generation/spatial_curation_function_reallocate_data.R"))
     
     catch_curate_data_mislocated<-spatial_curation_function_reallocate_data(df_input = georef_dataset,
                                                                             dimension_reallocation = "geographic_identifier",
@@ -135,4 +132,3 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   
   
 }
-
