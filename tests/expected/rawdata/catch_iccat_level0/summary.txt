@@ -1,0 +1,3 @@
+extent: 1973-09-01/2023-11-30
+resources: codelists,harmonized,source
+outputs: iccat_catch_all_1m_firms_level0_20260422_codelists.csv,iccat_catch_all_1m_firms_level0_20260422_harmonized.csv

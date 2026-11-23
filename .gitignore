@@ -20,7 +20,9 @@ Analysis_markdown/Diffstratas
 Summary
 Temporal
 Analysis_markdown/figure
+# core dump files, but not the core functions of R/core/
 core
+!R/core/
 rdatafornetcdf.RData
 *.rds
 Analysis_markdown/Examplegitbookpdf
