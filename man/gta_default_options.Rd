@@ -2,7 +2,7 @@
 % Please edit documentation in R/default_options.R
 \name{gta_default_options}
 \alias{gta_default_options}
-\title{Default datasets and options of create_global_tuna_atlas()}
+\title{Default datasets and options of the Global Tuna Atlas levels}
 \usage{
 gta_default_options()
 }
@@ -11,16 +11,19 @@ A named list: nominal, level0, effort, level1, level2.
 }
 \description{
 The Global Tuna Atlas datasets as defined by the entities of the workflow
-(config/entities/entities_<nominal_catch|catch_level0|effort|catch_level1|catch_level2>.csv):
-for each one, its identifier (the name of its output file, \if{html}{\out{<id>}}.csv), the
-files it reads (outputs of the raw datasets, of the previous levels, and
-auxiliary files) and its options. The options have the types geoflow gives
-them: "true"/"false" become logical, the other values stay character
-(e.g. dataset_level = "0").
+(config/entities/entities_<nominal_catch|catch_level0|effort|catch_level1|catch_level2>.csv;
+a test checks that both stay the same). For each level:
+\itemize{
+\item \code{id}: identifier, i.e. name of its output file (\verb{<id>.csv});
+\item \code{datasets}: names of the datasets it reads (outputs of the raw datasets,
+or of the previous level for level 1);
+\item \code{nominal} (level 2 only): name of the nominal catch it is raised to;
+\item \code{files}: names of the auxiliary files it reads (code lists, conversion
+factors, geographic_identifier_to_nominal.csv);
+\item \code{options}: its options, with the types geoflow gives them ("true"/"false"
+become logical, the other values stay character, e.g. dataset_level = "0").
+}
 }
 \details{
-The georeferenced datasets (level 0, effort, level 2) read their sources
-from the second one, as the geoflow action does: the first source is not
-read (for the level 0, catch_5deg_1m_driftnet_wcpfc_level0.csv, so the WCPFC
-driftnet catch is not in the level 0; to correct separately).
+The files are found by their exact name (see gta_create_levels()).
 }

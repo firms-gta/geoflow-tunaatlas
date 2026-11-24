@@ -16,47 +16,44 @@ create_global_tuna_atlas(
 \arguments{
 \item{data}{List of the input data:
 \itemize{
-\item \code{raw}: the raw datasets, as returned by gta_raw_datasets() (a named
-list, names = dataset identifiers, elements = list(dataset, files));
+\item \code{raw}: the raw datasets, as returned by gta_raw_datasets();
 \item \code{files}: paths of the auxiliary files read by the levels (conversion
-factors, geographic_identifier_to_nominal.csv, code lists...), found by
-their name;
-\item \code{outputs} (optional): paths of outputs of earlier runs (\if{html}{\out{<id>}}.csv), to
-run only some steps.
+factors, geographic_identifier_to_nominal.csv, code lists...);
+\item \code{outputs} (optional): paths of harmonised datasets or levels of an
+earlier run (\verb{<id>.csv}), to run only some steps.
 }}
 
 \item{options}{Datasets and options of the levels, see gta_default_options().}
 
 \item{steps}{Steps to run, among "rawdata", "nominal", "level0", "effort",
-"level1", "level2" (in this order).}
+"level1", "level2".}
 
-\item{work_dir}{Working folder (created).}
+\item{work_dir}{Working folder (created): \verb{raw/} for the raw datasets,
+\verb{levels/} for the levels.}
 
 \item{con}{Connection to the Tuna Atlas database, or NULL (default): not
 needed with the default options.}
 
-\item{recap_each_step}{Write the summary of each step (CWP.dataset), in the
-folder of the step.}
+\item{recap_each_step}{Write the summary of each step (CWP.dataset).}
 }
 \value{
-A named list of the datasets created (data frames): the raw
-datasets under \code{raw} (named by identifier), and \code{nominal}, \code{level0},
-\code{effort}, \code{level1}, \code{level2} (their public version). The attribute
+A named list: the harmonised datasets under \code{raw} (named by
+identifier), and the levels created, \code{nominal}, \code{level0}, \code{effort},
+\code{level1}, \code{level2} (data frames, their public version). The attribute
 \code{work_dir} gives the working folder.
 }
 \description{
-Runs the whole Global Tuna Atlas chain without geoflow: the raw datasets of
-the tRFMOs (their gta_rawdata_*() function, then gta_tidy_raw_dataset()),
-then the nominal catch (gta_nominal_catch()), the level 0 georeferenced
-catch and the effort (gta_georef_dataset()), the level 1 catch
-(gta_level1()) and the level 2 catch (gta_georef_dataset()). It reproduces
-the outputs of the geoflow workflow, which runs the same functions.
+The whole Global Tuna Atlas chain without geoflow, in two halves that can
+also be run separately:
+\enumerate{
+\item gta_harmonise_raw_datasets(): the raw datasets of the tRFMOs, harmonised;
+\item gta_create_levels(): from them, the nominal catch, the level 0
+georeferenced catch, the effort, the level 1 and the level 2 catch.
+}
 }
 \details{
-Each step runs in its own folder of \code{work_dir} (with a data/ subfolder, as
-an entity in a geoflow job); the output of each dataset is written to
-\verb{work_dir/outputs/<id>.csv}, where the next steps read it (as the workflow
-does with dataoutputpreharmo/ and dataoutputGTA/).
+It reproduces the outputs of the geoflow workflow, which runs the same
+functions.
 }
 \examples{
 \dontrun{

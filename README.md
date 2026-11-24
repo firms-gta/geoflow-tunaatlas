@@ -53,26 +53,39 @@ and [docker/README.md](docker/README.md).
 ## Use the R package
 
 The `gta` functions take data frames or file paths and return data frames;
-they need neither geoflow nor the database. From the repository:
+they need neither geoflow nor the database. The chain has two halves, which
+can be run together or separately:
 
 ```r
 pkgload::load_all()   # the gta package of this repository
 
-atlas <- create_global_tuna_atlas(
-  data = list(
-    raw   = gta_raw_datasets(data_dir = "tests/sample_data"),          # raw files of the tRFMOs
-    files = list.files("tests/sample_data", full.names = TRUE)        # conversion factors, code lists...
-  ),
-  steps = c("rawdata", "nominal", "level0", "effort", "level1")
+# 1. Raw datasets of the tRFMOs -> harmonised datasets (as dataoutputpreharmo/)
+harmonised <- gta_harmonise_raw_datasets(gta_raw_datasets(data_dir = "tests/sample_data"))
+
+# 2. Harmonised datasets -> nominal, level 0, effort, level 1, level 2
+atlas <- gta_create_levels(
+  harmonised,                                                   # or paths of <id>.csv files
+  files = list.files("tests/sample_data", full.names = TRUE),  # conversion factors, code lists...
+  steps = c("nominal", "level0", "effort", "level1")
 )
 atlas$level0          # level 0 georeferenced catch (data frame)
-atlas$raw$catch_iotc_level0
+
+# Both at once
+atlas <- create_global_tuna_atlas(
+  data = list(raw = gta_raw_datasets(data_dir = "tests/sample_data"),
+              files = list.files("tests/sample_data", full.names = TRUE)),
+  steps = c("rawdata", "nominal", "level0", "effort", "level1")
+)
 ```
 
-Each step can also be run on its own: `gta_rawdata_wcpfc_catch_ps()` (and the
-other `gta_rawdata_*()`), `gta_tidy_raw_dataset()`, `gta_nominal_catch()`,
-`gta_georef_dataset()`, `gta_level1()`. The options of the levels and their
-defaults are in `gta_default_options()`.
+What each level reads and its options are in `gta_default_options()` (the
+same as the entity tables of the workflow, `config/entities/`): for each
+level, its `datasets`, the `nominal` catch for the level 2, its auxiliary
+`files` and its `options`. The files are found by their exact name; a missing
+name, or two different files with the same name, is an error. Each step can
+also be run on its own: `gta_rawdata_wcpfc_catch_ps()` (and the other
+`gta_rawdata_*()`), `gta_tidy_raw_dataset()`, `gta_nominal_catch()`,
+`gta_georef_dataset()`, `gta_level1()`.
 
 ## How the datasets are made
 
