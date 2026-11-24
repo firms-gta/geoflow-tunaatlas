@@ -1,0 +1,14 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"COL","01.1",2021-12-01,2021-12-31,"5403108","UNK","FAL","RC","no","IATTC","catch","original_sample",20
+"ECU","01.1",2009-10-01,2009-10-31,"5404108","UNK","FAL","RC","no","IATTC","catch","original_sample",14
+"ECU","01.1",2012-12-01,2012-12-31,"5304139","UNK","FAL","RC","no","IATTC","catch","original_sample",3
+"ECU","01.1",2013-10-01,2013-10-31,"5404116","UNK","FAL","RC","no","IATTC","catch","original_sample",6
+"ECU","01.1",2018-10-01,2018-10-31,"5304110","UNK","FAL","RC","no","IATTC","catch","original_sample",5
+"ECU","01.1",2018-10-01,2018-10-31,"5304110","UNK","SPN","RC","no","IATTC","catch","original_sample",1
+"EUESP","01.1",1999-09-01,1999-09-30,"5404118","UNK","FAL","RC","no","IATTC","catch","original_sample",3
+"EUESP","01.1",1999-09-01,1999-09-30,"5404118","UNK","OCS","RC","no","IATTC","catch","original_sample",4
+"NEI","01.1",2024-10-01,2024-10-31,"5306126","UNK","FAL","RC","no","IATTC","catch","original_sample",6
+"NEI","01.1",2024-10-01,2024-10-31,"5306126","UNK","OCS","RC","no","IATTC","catch","original_sample",4
+"VEN","01.1",1995-06-01,1995-06-30,"5410098","UNK","SPN","RC","no","IATTC","catch","original_sample",2
+"VEN","01.1",2008-02-01,2008-02-29,"5314082","UNK","SPL","RC","no","IATTC","catch","original_sample",7
+"VEN","01.1",2008-02-01,2008-02-29,"5314082","UNK","THR","RC","no","IATTC","catch","original_sample",1

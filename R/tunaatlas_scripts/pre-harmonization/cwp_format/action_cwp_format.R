@@ -1,7 +1,7 @@
 #' Format pre-harmonized data to cwp format (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_cwp_format()
-#' (R/core/rawdata_cwp_format.R), writes the outputs and declares the resources of
+#' (R/rawdata_cwp_format.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -22,8 +22,6 @@ function(action, entity, config){
   opts <- options()
   options(encoding = "UTF-8")
 
-  source(here::here("R/core/gta_data.R"))
-  source(here::here("R/core/rawdata_cwp_format.R"))
   catches <- gta_rawdata_cwp_format(path_to_raw_dataset)
 
   dataset_temporal_extent <- paste(

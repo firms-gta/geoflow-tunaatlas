@@ -1,0 +1,10 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"AUS","09.1",1977-03-01,1977-03-31,"5235134","UNK","SBF","RC","t","CCSBT","catch","unknown",82
+"AUS","09.1",1979-01-01,1979-01-31,"5233134","UNK","SBF","RC","t","CCSBT","catch","unknown",22.8
+"AUS","09.1",1979-01-01,1979-01-31,"5234133","UNK","SBF","RC","t","CCSBT","catch","unknown",2
+"AUS","09.1",1979-02-01,1979-02-28,"5236136","UNK","SBF","RC","t","CCSBT","catch","unknown",20.4
+"AUS","09.1",1981-01-01,1981-01-31,"5234134","UNK","SBF","RC","t","CCSBT","catch","unknown",7.5
+"AUS","09.1",1983-04-01,1983-04-30,"5234120","UNK","SBF","RC","t","CCSBT","catch","unknown",107.1
+"AUS","09.1",1987-04-01,1987-04-30,"5235117","UNK","SBF","RC","t","CCSBT","catch","unknown",22.1
+"AUS","09.1",1988-04-01,1988-04-30,"5234119","UNK","SBF","RC","t","CCSBT","catch","unknown",24
+"AUS","09.1",1990-09-01,1990-09-30,"5234120","UNK","SBF","RC","t","CCSBT","catch","unknown",37.1

@@ -2,7 +2,7 @@
 #'
 #' geoflow action of the level 1 catch entity: reads the action options,
 #' loads the level 0 dataset (file in data/, or Zenodo), runs the core function
-#' gta_level1() (R/core/level1.R: unit conversion and optional
+#' gta_level1() (R/level1.R: unit conversion and optional
 #' filtering/aggregation), then writes the outputs and declares the resources
 #' (process_and_aggregate_dataset()).
 #'
@@ -30,7 +30,6 @@ create_level1_catch <- function(action, entity, config) {
   
   url_scripts_generation <- here::here("R/tunaatlas_scripts/generation")
   
-  source(file.path(url_scripts_generation, "download_zenodo_csv.R"))
   source(file.path(url_scripts_generation, "process_and_aggregate_dataset.R"))
   
   
@@ -102,9 +101,7 @@ create_level1_catch <- function(action, entity, config) {
     stop("Please provide a Level 0 georeferenced dataset.")
   }
   
-  # Level 1 processing: core function gta_level1() (R/core/level1.R) ----------
-  source(here::here("R/core/gta_data.R"))
-  source(here::here("R/core/level1.R"))
+  # Level 1 processing: core function gta_level1() (R/level1.R) ----------
   georef_dataset <- gta_level1(
     georef_dataset,
     con = con,

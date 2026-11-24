@@ -1,0 +1,14 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","species","measurement_type","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"NEI","09.1",1972-01-01,1972-01-31,"6205145","OTH","SKJ","RC","t","WCPFC","catch","unknown",308.35
+"NEI","09.1",1972-01-01,1972-01-31,"6205145","OTH","YFT","RC","t","WCPFC","catch","unknown",0.04
+"NEI","09.1",1974-12-01,1974-12-31,"6105135","OTH","SKJ","RC","t","WCPFC","catch","unknown",737.5
+"NEI","09.1",1974-12-01,1974-12-31,"6105135","OTH","YFT","RC","t","WCPFC","catch","unknown",0.4
+"NEI","09.1",1979-04-01,1979-04-30,"6100160","OTH","SKJ","RC","t","WCPFC","catch","unknown",3773.1
+"NEI","09.1",1979-04-01,1979-04-30,"6100160","OTH","YFT","RC","t","WCPFC","catch","unknown",7.2
+"NEI","09.1",1987-09-01,1987-09-30,"6200120","OTH","SKJ","RC","t","WCPFC","catch","unknown",649.095
+"NEI","09.1",1987-09-01,1987-09-30,"6200120","OTH","YFT","RC","t","WCPFC","catch","unknown",131.535
+"NEI","09.1",1993-10-01,1993-10-31,"6135150","OTH","SKJ","RC","t","WCPFC","catch","unknown",1453.5
+"NEI","09.1",1997-01-01,1997-01-31,"6205120","OTH","SKJ","RC","t","WCPFC","catch","unknown",704.73
+"NEI","09.1",1997-01-01,1997-01-31,"6205120","OTH","YFT","RC","t","WCPFC","catch","unknown",142.805
+"NEI","09.1",2016-04-01,2016-04-30,"6110155","OTH","SKJ","RC","t","WCPFC","catch","unknown",375.9
+"NEI","09.1",2016-04-01,2016-04-30,"6110155","OTH","YFT","RC","t","WCPFC","catch","unknown",0.5

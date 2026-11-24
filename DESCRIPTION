@@ -1,0 +1,49 @@
+Package: gta
+Title: Global Tuna Atlas: Harmonisation and Levels of the Tuna RFMO Datasets
+Version: 0.1.0
+Authors@R: c(
+    person("Bastien", "Grasset", , "bastien.grasset@ird.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9946-1338")),
+    person("Paul", "Taconet", , "paul.taconet@ird.fr", role = "aut"),
+    person("Julien", "Barde", , "julien.barde@ird.fr", role = "aut"),
+    person("Emmanuel", "Blondel", , "emmanuel.blondel@fao.org", role = "aut"))
+Description: Business functions of the Global Tuna Atlas: harmonisation of the
+    raw datasets of the five tuna Regional Fisheries Management Organisations
+    (tRFMOs) to the CWP format, and creation of the nominal catch, level 0,
+    level 1, level 2 and effort datasets. The geoflow workflow of this
+    repository (workflow/, config/) calls these functions.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1)
+Imports:
+    CWP.dataset,
+    data.table,
+    DBI,
+    dplyr,
+    futile.logger,
+    here,
+    httr,
+    jsonlite,
+    lubridate,
+    magrittr,
+    methods,
+    purrr,
+    readr,
+    readxl,
+    reshape2,
+    rlang,
+    sf,
+    stats,
+    stringr,
+    tibble,
+    tidyr,
+    tools,
+    utils
+Suggests:
+    googledrive,
+    knitr,
+    qs,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

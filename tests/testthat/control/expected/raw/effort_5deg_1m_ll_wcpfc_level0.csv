@@ -1,0 +1,9 @@
+"fishing_fleet","gear_type","time_start","time_end","geographic_identifier","fishing_mode","measurement_unit","source_authority","measurement","measurement_processing_level","measurement_value"
+"CHN","09.32",2001-02-01,2001-02-28,"6305140","OTH","HOOKS","WCPFC","effort","unknown",2678.242
+"JPN","09.32",2001-01-01,2001-01-31,"6120155","OTH","HOOKS","WCPFC","effort","unknown",4754.103
+"JPN","09.32",2008-06-01,2008-06-30,"6305130","OTH","HOOKS","WCPFC","effort","unknown",1362.756
+"KIR","09.32",2023-04-01,2023-04-30,"6400155","OTH","HOOKS","WCPFC","effort","unknown",4028.859
+"KOR","09.32",1980-06-01,1980-06-30,"6200170","OTH","HOOKS","WCPFC","effort","unknown",14285.238
+"TWN","09.32",1996-07-01,1996-07-31,"6220175","OTH","HOOKS","WCPFC","effort","unknown",14531.702
+"USA","09.32",2010-06-01,2010-06-30,"6415155","OTH","HOOKS","WCPFC","effort","unknown",2111.361
+"VUT","09.32",2020-02-01,2020-02-29,"6130160","OTH","HOOKS","WCPFC","effort","unknown",11639.525

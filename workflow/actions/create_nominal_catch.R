@@ -19,7 +19,7 @@
 #'
 #' geoflow action of the global nominal catch entity: reads the action
 #' options, finds the nominal catch files of the entity, runs the core function
-#' gta_nominal_catch() (R/core/nominal_catch.R), then writes the outputs and
+#' gta_nominal_catch() (R/nominal_catch.R), then writes the outputs and
 #' declares the resources (process_and_aggregate_dataset()).
 #'
 #' @param action The geoflow action (its options).
@@ -49,8 +49,6 @@ function(action, entity, config){
   }
 
   url_scripts_create_own_tuna_atlas <- here::here("./R/tunaatlas_scripts/generation")
-  source(here::here("R/core/gta_data.R"))
-  source(here::here("R/core/nominal_catch.R"))
 
   if(from_repo){
     nominal_catch <-

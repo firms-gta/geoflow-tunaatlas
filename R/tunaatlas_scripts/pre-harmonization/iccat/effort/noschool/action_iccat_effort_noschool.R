@@ -1,7 +1,7 @@
 #' Harmonize Data Structure of ICCAT Effort Dataset (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iccat_effort_noschool()
-#' (R/core/rawdata_iccat_effort_noschool.R), writes the outputs and declares the resources of
+#' (R/rawdata_iccat_effort_noschool.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -66,8 +66,6 @@ path_to_raw_dataset <- entity$getJobDataResource(config, filename1)
 
 
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_iccat_effort_noschool.R"))
 efforts <- gta_rawdata_iccat_effort_noschool(path_to_raw_dataset)
 
 dataset_temporal_extent <- paste(

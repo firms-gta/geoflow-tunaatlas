@@ -25,17 +25,14 @@ process_and_aggregate_dataset <- function(dataset, entity, config, opts,
   # dataset <- as.data.frame(dataset)
   
   # Correct measurement unit if necessary
-  idx <- which(dataset$measurement_unit == "TRUE")
-  if (length(idx) > 0) {
-    dataset$measurement_unit[idx] <- "t"
-  }
+  # Harmonised and public versions: gta_dataset_outputs() (R/dataset_outputs.R)
+  outputs <- gta_dataset_outputs(dataset, columns_to_keep)
   
   # Convert time columns to Date format
-  dataset$time_start <- as.Date(dataset$time_start)
-  dataset$time_end <- as.Date(dataset$time_end)
+  # (dates, unit and geographic identifier formatted by gta_dataset_outputs())
   
   # Update entity with temporal extent
-  dataset_temporal_extent <- paste(as.character(min(dataset$time_start)), as.character(max(dataset$time_end)), sep = "/")
+  dataset_temporal_extent <- outputs$temporal_extent
   entity$setTemporalExtent(dataset_temporal_extent)
   
   dataset_files <- sapply(
@@ -72,21 +69,16 @@ process_and_aggregate_dataset <- function(dataset, entity, config, opts,
     df_codelists <- NULL
   }
   
-  dataset$geographic_identifier = as.character(dataset$geographic_identifier)
   # Export dataset as CSV
   output_name_dataset <- file.path("data", paste0(entity$identifiers[["id"]], "_harmonized.csv"))
-  readr::write_csv(dataset, output_name_dataset)
+  readr::write_csv(outputs$harmonized, output_name_dataset)
   
   # Create enriched public dataset
   output_name_dataset_public <- file.path("data", paste0(entity$identifiers[["id"]], "_public.csv"))
-  dataset$year <- as.integer(format(dataset$time_end, "%Y"))
-  dataset$month <- as.integer(format(dataset$time_end, "%m"))
-  dataset$quarter <- as.integer(substr(quarters(dataset$time_end), 2, 2))
   
   
-  columns_to_keep <- intersect(colnames(dataset), columns_to_keep)
   
-  dataset <- dataset[, columns_to_keep]
+  dataset <- outputs$public
   readr::write_csv(dataset, output_name_dataset_public)
   
   # Export codelists if available

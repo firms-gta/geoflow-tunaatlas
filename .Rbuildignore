@@ -1,0 +1,31 @@
+# Only DESCRIPTION, NAMESPACE, R/*.R, inst/ and tests/testthat/ make the gta
+# package; the rest of the repository is the geoflow workflow around it.
+^\.git
+^\.github$
+^\.pre-commit-config\.yaml$
+^\.gitleaks\.toml$
+^\.Rprofile$
+^renv$
+^renv\.lock$
+^.*\.Rproj$
+^\.Rproj\.user$
+^CLAUDE\.md$
+^README\.md$
+^env\.example$
+^analyses$
+^compose$
+^config$
+^data$
+^docker$
+^docs$
+^pipelines$
+^runtime$
+^workflow$
+^R/core$
+^R/netcdf$
+^R/sardara_functions$
+^R/tunaatlas_scripts$
+^tests/(?!testthat)
+^gta$
+^LICENSE\.md$
+^gta\.sh$

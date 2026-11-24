@@ -19,7 +19,9 @@
 #' @param n_rows Number of rows kept in the sample outputs.
 #' @return The paths of the reports, invisibly.
 update_rawdata_reports <- function(job_dirs = NULL, render = TRUE, n_rows = 5) {
-  source(here::here("R/core/gta_rawdata_report.R"))
+  if (!"gta" %in% loadedNamespaces()) {   # gta package of the repository
+    pkgload::load_all(here::here(), export_all = TRUE, helpers = FALSE, quiet = TRUE)
+  }
   root <- "R/tunaatlas_scripts/pre-harmonization"
 
   # Raw dataset entities: dataset folder (from the action path) and raw files

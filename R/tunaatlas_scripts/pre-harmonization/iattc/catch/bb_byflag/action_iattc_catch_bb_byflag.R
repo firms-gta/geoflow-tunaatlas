@@ -1,7 +1,7 @@
 #' Harmonize data structure of IATTC LP (Pole-and-line) catch datasets (geoflow action)
 #'
 #' geoflow action of the entity: finds its files, runs the core function gta_rawdata_iattc_catch_bb_byflag()
-#' (R/core/rawdata_iattc_catch_bb_byflag.R), writes the outputs and declares the resources of
+#' (R/rawdata_iattc_catch_bb_byflag.R), writes the outputs and declares the resources of
 #' the entity. The processing itself is in the core function, usable without geoflow.
 #'
 #' @param action The action context from geoflow.
@@ -42,8 +42,6 @@ options(encoding = "UTF-8")
 
 # Reach the catches pivot DSD using a function stored in IATTC_functions.R
 
-source(here::here("R/core/gta_data.R"))
-source(here::here("R/core/rawdata_iattc_catch_bb_byflag.R"))
 catches <- gta_rawdata_iattc_catch_bb_byflag(path_to_raw_dataset)
 
 dataset_temporal_extent <- paste(
