@@ -82,8 +82,8 @@
       "RemoteHost": "api.github.com",
       "RemoteUsername": "bastienird",
       "RemoteRepo": "CWP.dataset",
-      "RemoteRef": "master",
-      "RemoteSha": "8475be100a0cf14fe67793f6f415166eafa9a435"
+      "RemoteRef": "feature/no-ref/aggregate-and-common-periods",
+      "RemoteSha": "21bd6da4f1cf0d210a1a2f0a3f43fcd853cf64e8"
     },
     "DBI": {
       "Package": "DBI",

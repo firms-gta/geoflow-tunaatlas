@@ -10,7 +10,7 @@
 #' @keywords internal
 #' @import dplyr
 #' @importFrom magrittr %>%
-#' @importFrom data.table := data.table setDT
+#' @importFrom data.table := .N data.table setDT
 #' @importFrom DBI dbGetQuery
 #' @importFrom futile.logger flog.info
 #' @importFrom httr content

@@ -1,0 +1,112 @@
+---
+title: "Global Tuna Atlas - comparison of two runs"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+params:
+  previous: ""
+  new: ""
+  previous_label: "previous"
+  new_label: "new"
+  previous_info: ""
+  new_info: ""
+  threshold_pct: 1
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+options(CWP.dataset.interactive = FALSE)
+suppressMessages(pkgload::load_all(here::here(), quiet = TRUE, export_all = FALSE))
+library(ggplot2)
+labels <- c(params$previous_label, params$new_label)
+cmp <- gta_compare_summaries(params$previous, params$new, labels = labels)
+threshold <- as.numeric(params$threshold_pct)
+
+table_out <- function(x, caption = NULL, digits = 1) {
+  if (is.null(x) || !nrow(x)) { cat("\n*None.*\n\n"); return(invisible()) }
+  x <- as.data.frame(x)
+  if ("year" %in% names(x)) x$year <- as.character(x$year)   # no thousands separator
+  print(knitr::kable(x, caption = caption, digits = digits,
+                     format.args = list(big.mark = " ")))
+  cat("\n\n")
+}
+```
+
+**`r labels[1]`**: `r params$previous_info`
+
+**`r labels[2]`**: `r params$new_info`
+
+How to read this report:
+
+* the summaries compared are the final datasets of each run, summed by year
+  and by 5° square;
+* for each dataset and each tRFMO, only the **years present in both runs** are
+  compared (differences of values, strata present in one run only); the years
+  present in one run only, typically the new year of a release, are listed
+  apart with their totals;
+* a difference is highlighted when it is larger than `r threshold` %.
+
+# Datasets
+
+```{r datasets, results='asis'}
+table_out(cmp$datasets)
+```
+
+```{r per-dataset, results='asis'}
+for (key in names(cmp$comparison)) {
+  x <- cmp$comparison[[key]]
+  cat("\n\n# ", key, "\n\n", sep = "")
+
+  cat("## Years of each tRFMO\n\n")
+  table_out(x$years)
+
+  cat("## Years present in one run only\n\n")
+  table_out(x$uncommon)
+
+  cat("## Common years: totals by tRFMO\n\n")
+  bs <- data.table::copy(x$by_source)
+  bs[, flag := ifelse(abs(difference_pct) > threshold, "**>**", "")]
+  table_out(bs)
+
+  big <- x$annual[abs(difference_pct) > threshold][order(-abs(difference))]
+  cat("## Common years: years with a difference larger than ", threshold, " % (largest 50)\n\n", sep = "")
+  table_out(utils::head(big, 50))
+
+  if (nrow(x$annual)) {
+    long <- data.table::melt(x$annual, id.vars = c("source_authority", "year", "measurement_unit"),
+                             measure.vars = labels, variable.name = "run", value.name = "value")
+    long[, year := as.integer(year)]
+    p <- ggplot(long, aes(year, value, colour = run, linetype = run)) +
+      geom_line() + geom_point(size = 0.6) +
+      facet_wrap(~ source_authority + measurement_unit, scales = "free_y") +
+      labs(x = NULL, y = NULL, title = paste0(key, ": totals of the common years")) +
+      theme_minimal(base_size = 9) + theme(legend.position = "bottom")
+    print(p)
+    cat("\n\n")
+  }
+
+  a <- x$analysis
+  cat("## Common years: detailed comparison (CWP.dataset)\n\n")
+  if (is.character(a)) {
+    cat("*The detailed comparison failed:* `", a, "`\n\n", sep = "")
+  } else if (is.list(a)) {
+    cat("### Summary of the differences\n\n")
+    table_out(a$summary_of_differences)
+    cat("### Strata present in one run only\n\n")
+    table_out(a$compare_strata_differences_list$disapandap)
+    cat("### Number of distinct values of each dimension\n\n")
+    table_out(a$compare_strata_differences_list$number_init_column_final_column)
+    cat("### Largest differences by dimension\n\n")
+    table_out(a$compare_dimension_differences_list$Groupped_all_not_disap_or_app_to_dysplay)
+    plots <- a$plot_titles_list
+    if (is.list(plots) && length(plots$plots)) {
+      cat("### Temporal differences\n\n")
+      for (i in seq_along(plots$plots)) {
+        p <- tryCatch(CWP.dataset::cwp_materialise_plot(plots$plots[[i]]), error = function(e) NULL)
+        if (!is.null(p)) { print(p); cat("\n\n") }
+      }
+    }
+  }
+}
+```

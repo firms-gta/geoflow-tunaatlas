@@ -55,3 +55,9 @@ utils::globalVariables(c(
 utils::globalVariables(c(
   "dataset_final_disaggregated_on_resolution_to_disaggregate", "description", "lineage"
 ))
+
+# Run summaries and their comparison (R/run_summary.R)
+utils::globalVariables(c(
+  "dataset", "difference", "difference_pct", "n_rows", "value_sum_1",
+  "value_sum_2"
+))
