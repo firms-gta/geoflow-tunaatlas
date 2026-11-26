@@ -1,9 +1,9 @@
 # The levels of the control data, from the control outputs of the raw datasets:
-# create_global_tuna_atlas() gives the outputs of the workflow
+# gta_create_levels() gives the outputs of the workflow
 skip_if_no_control_data()
 options <- gta_default_options()
-atlas <- suppressMessages(create_global_tuna_atlas(
-  data = list(outputs = list.files(expected_dir("raw"), full.names = TRUE), files = control_files()),
+atlas <- suppressMessages(gta_create_levels(
+  harmonised = list.files(expected_dir("raw"), full.names = TRUE), files = control_files(),
   options = options, steps = c("nominal", "level0", "effort", "level1"), work_dir = tempfile("gta_test_")))
 
 for (level in c("nominal", "level0", "effort", "level1")) {

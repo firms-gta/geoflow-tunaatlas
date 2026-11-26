@@ -1,17 +1,18 @@
-#' Default datasets and options of create_global_tuna_atlas()
+#' Default datasets and options of the Global Tuna Atlas levels
 #'
 #' The Global Tuna Atlas datasets as defined by the entities of the workflow
-#' (config/entities/entities_<nominal_catch|catch_level0|effort|catch_level1|catch_level2>.csv):
-#' for each one, its identifier (the name of its output file, <id>.csv), the
-#' files it reads (outputs of the raw datasets, of the previous levels, and
-#' auxiliary files) and its options. The options have the types geoflow gives
-#' them: "true"/"false" become logical, the other values stay character
-#' (e.g. dataset_level = "0").
+#' (config/entities/entities_<nominal_catch|catch_level0|effort|catch_level1|catch_level2>.csv;
+#' a test checks that both stay the same). For each level:
+#' * `id`: identifier, i.e. name of its output file (`<id>.csv`);
+#' * `datasets`: names of the datasets it reads (outputs of the raw datasets,
+#'   or of the previous level for level 1);
+#' * `nominal` (level 2 only): name of the nominal catch it is raised to;
+#' * `files`: names of the auxiliary files it reads (code lists, conversion
+#'   factors, geographic_identifier_to_nominal.csv);
+#' * `options`: its options, with the types geoflow gives them ("true"/"false"
+#'   become logical, the other values stay character, e.g. dataset_level = "0").
 #'
-#' The georeferenced datasets (level 0, effort, level 2) read their sources
-#' from the second one, as the geoflow action does: the first source is not
-#' read (for the level 0, catch_5deg_1m_driftnet_wcpfc_level0.csv, so the WCPFC
-#' driftnet catch is not in the level 0; to correct separately).
+#' The files are found by their exact name (see gta_create_levels()).
 #'
 #' @return A named list: nominal, level0, effort, level1, level2.
 #' @export
@@ -19,12 +20,13 @@ gta_default_options <- function() {
   list(
     nominal = list(
       id = "global_nominal_catch_firms_level0_2026",
-      sources = c(
+      datasets = c(
         "nominal_catch_ccsbt_level0__bygear.csv",
         "nominal_catch_wcpfc_level0.csv",
         "nominal_catch_iattc_level0.csv",
         "nominal_catch_iccat_level0.csv",
-        "nominal_catch_iotc_level0.csv",
+        "nominal_catch_iotc_level0.csv"),
+      files = c(
         "global_nominal_catch_codelists.csv"),
       options = list(
         fact = "catch",
@@ -39,7 +41,7 @@ gta_default_options <- function() {
     ),
     level0 = list(
       id = "global_catch_ird_level0_1950_2024",
-      sources = c(
+      datasets = c(
         "catch_5deg_1m_driftnet_wcpfc_level0.csv",
         "catch_5deg_1m_ps_wcpfc_level0.csv",
         "catch_5deg_1m_ll_wcpfc_level0.csv",
@@ -58,7 +60,8 @@ gta_default_options <- function() {
         "effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv",
         "effort_5deg_1m_ll_iattc_level0__shark.csv",
         "catch_iccat_level0.csv",
-        "catch_iotc_level0.csv",
+        "catch_iotc_level0.csv"),
+      files = c(
         "global_catch_ird_codelists.csv"),
       options = list(
         fact = "catch",
@@ -77,7 +80,7 @@ gta_default_options <- function() {
     ),
     effort = list(
       id = "global_effort_2026",
-      sources = c(
+      datasets = c(
         "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv",
         "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
         "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
@@ -93,7 +96,8 @@ gta_default_options <- function() {
         "effort_1deg_1m_ccsbt_level0__surface.csv",
         "effort_5deg_1m_ll_ccsbt_level0.csv",
         "effort_iccat_level0__byschool.csv",
-        "effort_iccat_level0__noschool.csv",
+        "effort_iccat_level0__noschool.csv"),
+      files = c(
         "global_effort_codelists.csv"),
       options = list(
         recap_each_step = TRUE,
@@ -120,14 +124,14 @@ gta_default_options <- function() {
     ),
     level1 = list(
       id = "global_catch_ird_level1_1950_2024",
-      sources = c(
-        "global_catch_ird_level0_1950_2024.csv",
+      datasets = c(
+        "global_catch_ird_level0_1950_2024.csv"),
+      files = c(
         "IOTC_conv_fact_mapped.csv",
         "fact_conv_ird_complete_01_May_2026.csv",
         "global_catch_ird_codelists.csv"),
       options = list(
         fact = "catch",
-        keylevel0 = "global_catch_ird_level0_1950_2024.csv",
         dataset_level = "1",
         unit_conversion_convert = TRUE,
         geom_table = "area.grid_area_labels",
@@ -136,8 +140,7 @@ gta_default_options <- function() {
     ),
     level2 = list(
       id = "global_catch_ird_level2_1950_2024",
-      sources = c(
-        "global_nominal_catch_firms_level0_2026.csv",
+      datasets = c(
         "catch_5deg_1m_driftnet_wcpfc_level0.csv",
         "catch_5deg_1m_ps_wcpfc_level0.csv",
         "catch_5deg_1m_ll_wcpfc_level0.csv",
@@ -150,21 +153,22 @@ gta_default_options <- function() {
         "catch_1deg_1m_ps_iattc_level0__shark_byflag.csv",
         "catch_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
         "catch_1deg_1m_bb_iattc_level0__tuna_byflag.csv",
-        "geographic_identifier_to_nominal.csv",
         "effort_1deg_1m_ps_iattc_level0__shark_byflag.csv",
         "effort_1deg_1m_ps_iattc_level0__billfish_byflag.csv",
         "effort_1deg_1m_ps_iattc_level0__tuna_byflag.csv",
         "effort_5deg_1m_ll_iattc_level0__tuna_billfish.csv",
         "effort_5deg_1m_ll_iattc_level0__shark.csv",
         "catch_iotc_level0.csv",
-        "catch_iccat_level0.csv",
+        "catch_iccat_level0.csv"),
+      nominal = "global_nominal_catch_firms_level0_2026.csv",
+      files = c(
+        "geographic_identifier_to_nominal.csv",
         "global_catch_ird_codelists.csv"),
       options = list(
         fact = "catch",
         dataset_level = "2",
         from_rawdata = TRUE,
         keylevel0 = "global_georef_level0_no_duplicated_units.csv",
-        keynominal = "global_nominal_catch_firms_level0_2026.csv",
         mapping_map_code_lists = TRUE,
         unit_conversion_convert = FALSE,
         raising_georef_to_nominal = TRUE,
