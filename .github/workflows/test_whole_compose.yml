@@ -109,6 +109,20 @@ jobs:
         if: failure()
         run: docker compose logs
 
+      # The geoflow job log holds the details of the error (e.g. which metadata
+      # is invalid). Printed in the console, where GitHub masks the secrets,
+      # rather than kept as an artifact (public repository).
+      - name: geoflow job log on failure
+        if: failure()
+        run: |
+          last=$(ls -1d runtime/jobs/*/ 2>/dev/null | sort | tail -1)
+          if [[ -n "$last" && -f "$last/job-logs.txt" ]]; then
+            echo ">>> ${last}job-logs.txt (last 300 lines)"
+            sudo tail -n 300 "$last/job-logs.txt"
+          else
+            echo ">>> No geoflow job log found"
+          fi
+
       - name: Give the cache back to the runner
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" runtime

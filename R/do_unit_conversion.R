@@ -71,7 +71,12 @@ do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversi
   #@juldebar end commented
   
   if (!is.null(entity)) {   # metadata of the geoflow entity, when there is one
-  entity$descriptions[["abstract"]] <- paste0(entity$descriptions[["abstract"]], "\n", description)
+  # Only a non-empty description is appended, after a space: a newline in the
+  # abstract makes it invalid geoflow metadata (the services workflow then
+  # rejects the entity read back from the database)
+  if (nzchar(description)) {
+    entity$descriptions[["abstract"]] <- paste(entity$descriptions[["abstract"]], description)
+  }
   if(!is.null(info)){	
     if(!is.null(entity$descriptions[["info"]])){
       entity$descriptions[["info"]] <- paste0(entity$descriptions[["info"]], "\n", info)
