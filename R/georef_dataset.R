@@ -18,6 +18,7 @@
 #' @param data_dir Folder of the files.
 #' @return A list: `georef_dataset` (data frame) and `opts` (the options with
 #'   their defaults).
+#' @export
 gta_georef_dataset <- function(files, opts, con = NULL, entity = NULL, data_dir = "data") {
   stepnumber <- 1
   stepLogger <- function(level, step, msg) {
@@ -201,7 +202,7 @@ gta_georef_dataset <- function(files, opts, con = NULL, entity = NULL, data_dir 
         "The data with resolution lower to 5o is aggregated on resolution of 5o.",
         "spatial_curation_upgrade_resolution",
         list(
-          options_aggregate_on_5deg_data_with_resolution_inferior_to_5deg
+          opts$aggregate_on_5deg_data_with_resolution_inferior_to_5deg
         ), entity
       )
     }  
@@ -224,7 +225,7 @@ gta_georef_dataset <- function(files, opts, con = NULL, entity = NULL, data_dir 
         georef_dataset,
         "This step is to filter on the wanted resolution.",
         "",
-        list(options_resolution_filter), entity
+        list(opts$resolution_filter), entity
       )
     }
   }

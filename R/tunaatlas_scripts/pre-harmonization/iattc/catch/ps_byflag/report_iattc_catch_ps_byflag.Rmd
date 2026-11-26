@@ -35,8 +35,8 @@ This script works with any data that has the first 5 columns named and ordered a
          harmonized dataset. It can conditionally include metadata and code lists based on whether the
          data is intended for database loading.
 
-@seealso \code{\link{convertDSD_iattc_ce}} for other conversions related to IATTC data,
-         \code{\link{format_time_db_format}} to standardize time formatting for database integration.
+@seealso \code{convertDSD_iattc_ce()} for other conversions related to IATTC data,
+         \code{format_time_db_format()} to standardize time formatting for database integration.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

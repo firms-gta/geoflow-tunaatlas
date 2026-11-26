@@ -31,9 +31,7 @@ preparing them for integration into the Tuna Atlas database, according to specif
          format, including renaming, reordering, and recalculating specific fields as necessary.
          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 
-@import dplyr
-@import readr
-@seealso \code{\link{format_time_db_format}} for converting time format,
+@seealso \code{format_time_db_format()} for converting time format,
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

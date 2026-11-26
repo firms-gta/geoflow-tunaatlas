@@ -5,6 +5,7 @@
 #' a geoflow entity is given, adds the description of the conversion to its
 #' metadata. The database connection is `con`, or the one of `config`.
 #'
+#' @noRd
 do_unit_conversion  <- function(entity, config,fact,unit_conversion_csv_conversion_factor_url,unit_conversion_codelist_geoidentifiers_conversion_factors,mapping_map_code_lists = FALSE, georef_dataset, removing_numberfish_final = TRUE, converting_dataset_mapped  = TRUE, con = NULL) {
   # Database connection: given, or the one of the geoflow configuration
   if (is.null(con)) con <- config$software$output$dbi

@@ -30,7 +30,7 @@ This function harmonizes WCPFC nominal catch datasets for integration into the T
          format, including renaming, reordering, and recalculating specific fields as necessary.
          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 
-@seealso \code{\link{format_time_db_format}} for converting WCPFC task 2 data structures.
+@seealso \code{format_time_db_format()} for converting WCPFC task 2 data structures.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

@@ -4,17 +4,15 @@
 #' It handles datasets by potentially including metadata and code lists for integration within the Tuna Atlas database.
 #' Depending on the parameter settings, either 'fleet' or 'flag' column will be kept in the output.
 #'
-#' @param keep_fleet_instead_of_flag Boolean parameter to decide whether to keep 'fleet' instead of 'flag'.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
-#' @seealso \code{\link{convertDSD_iccat_ce_task2_ByOperationMode}}, \code{\link{convertDSD_iccat_nc}} for other ICCAT data structure conversions.
-#'
-#' @examples
+#' @seealso \code{convertDSD_iccat_ce_task2_ByOperationMode()}, \code{convertDSD_iccat_nc()} for other ICCAT data structure conversions.
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iccat/effort/noschool/action_iccat_effort_noschool.R).
+#' @export
 gta_rawdata_iccat_effort_noschool <- function(data) {
 keep_fleet_instead_of_flag=FALSE
 keep_fleet_instead_of_flag=FALSE  

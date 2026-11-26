@@ -9,9 +9,8 @@
 #'         which is a 7-digit number starting with '6'.
 #' @examples
 #' transformGeographicIdentifier(5431055)
-#' @export
+#' @noRd
 #'
-#' @importFrom stats setNames
 
 transform_cwp_code_from_1deg_to_5deg <- function(input_identifier) {
   adjustLongitude <- function(longitude, quadrant) {

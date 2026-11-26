@@ -2,6 +2,7 @@
 #'
 #' @return Character vector; the public dataset keeps those of its columns
 #'   that are in this list, in the order of the dataset.
+#' @export
 gta_public_columns <- function() {
   c("source_authority", "species", "gear_type", "fishing_fleet", "fishing_mode",
     "time_start", "time_end", "year", "month", "quarter", "geographic_identifier",
@@ -22,6 +23,7 @@ gta_public_columns <- function() {
 #' @param columns_to_keep Columns of the public version (see gta_public_columns()).
 #' @return A list: `harmonized`, `public` (data frames) and `temporal_extent`
 #'   ("start/end").
+#' @export
 gta_dataset_outputs <- function(dataset, columns_to_keep = gta_public_columns()) {
   # Correct measurement unit if necessary
   idx <- which(dataset$measurement_unit == "TRUE")

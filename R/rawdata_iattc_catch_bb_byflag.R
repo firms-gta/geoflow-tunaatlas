@@ -6,15 +6,15 @@
 #' The function assumes specific initial data columns and outputs a structured dataset with
 #' additional metadata and code lists as needed.
 #'
-#' @import reshape
-#' @seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType}} to convert IATTC nominal catch data structure,
-#'          \code{\link{IATTC_CE_catches_pivotDSD_to_harmonizedDSD}} to convert IATTC LLTunaBillfish and LLShark data structure,
+#' @seealso \code{FUN_catches_IATTC_CE_Flag_or_SetType()} to convert IATTC nominal catch data structure,
+#'          \code{IATTC_CE_catches_pivotDSD_to_harmonizedDSD()} to convert IATTC LLTunaBillfish and LLShark data structure,
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iattc/catch/bb_byflag/action_iattc_catch_bb_byflag.R).
+#' @export
 gta_rawdata_iattc_catch_bb_byflag <- function(data) {
   # Samples of the input and output data (from the former script)
   # Input data sample:

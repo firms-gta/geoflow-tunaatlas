@@ -8,13 +8,14 @@
 #'          to long format, calculates derived metrics, and formats data according to the Tuna Atlas database requirements.
 #'          Metadata is optionally included based on the final use of the dataset.
 #'
-#' @seealso \code{\link{harmo_time_2}} and \code{\link{harmo_spatial_3}} for specific data structuring functions.
+#' @seealso \code{harmo_time_2()} and \code{harmo_spatial_3()} for specific data structuring functions.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (wcpfc/catch/ll/action_wcpfc_catch_ll.R).
+#' @export
 gta_rawdata_wcpfc_catch_ll <- function(data) {
   # Samples of the input and output data (from the former script)
   # Input data sample:

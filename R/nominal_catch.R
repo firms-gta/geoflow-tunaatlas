@@ -9,6 +9,7 @@
 #'   `c(IOTC = TRUE, ICCAT = TRUE, WCPFC = TRUE, CCSBT = TRUE, IATTC = TRUE)`.
 #'   A tRFMO not named is included.
 #' @return The paths kept, in their order.
+#' @export
 gta_nominal_catch_files <- function(files, include = list()) {
   files <- files[regexpr("nominal", basename(files)) > 0]
   files <- files[!grepl("codelist", basename(files), ignore.case = TRUE)]
@@ -29,6 +30,7 @@ gta_nominal_catch_files <- function(files, include = list()) {
 #'   CSV files.
 #' @return The nominal catch of all the datasets (data frame), with
 #'   `measurement_value` numeric and the dates as "YYYY-MM-DD" strings.
+#' @export
 gta_read_nominal_catch <- function(datasets) {
   columns_to_keep <- c("source_authority", "species", "gear_type", "fishing_mode", "fishing_fleet",
                        "time_start", "time_end", "geographic_identifier", "measurement",
@@ -59,6 +61,7 @@ gta_read_nominal_catch <- function(datasets) {
 #' @param recap_each_step Write the summary of each step
 #'   (CWP.dataset::function_recap_each_step(), in the working directory).
 #' @return The global nominal catch (data frame).
+#' @export
 gta_nominal_catch <- function(datasets, SBF_data_rfmo_to_keep = "CCSBT", recap_each_step = FALSE) {
   message("Retrieving RFMOs nominal catch...")
   nominal_catch <- gta_read_nominal_catch(datasets)

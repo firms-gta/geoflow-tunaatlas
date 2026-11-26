@@ -8,7 +8,7 @@
 #'          recalculations for catch units, and standardizes the format for date fields and geographical identifiers.
 #'          Metadata integration is contingent on the final use of the dataset within the Tuna Atlas database.
 #'
-#' @seealso \code{\link{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD}} for specific data structuring operations.
+#' @seealso \code{WCPFC_CE_catches_pivotDSD_to_harmonizedDSD()} for specific data structuring operations.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #' This script works with any dataset that has the first 5 columns named and ordered as follow: {YY|MM|LAT5|LON5|DAYS} followed by a list of columns specifing the species codes with "_N" for catches expressed in number and "_T" for catches expressed in tons
@@ -16,6 +16,7 @@
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (wcpfc/catch/driftnet/action_wcpfc_catch_driftnet.R).
+#' @export
 gta_rawdata_wcpfc_catch_driftnet <- function(data) {
   # Samples of the input and output data (from the former script)
   # Input data sample:

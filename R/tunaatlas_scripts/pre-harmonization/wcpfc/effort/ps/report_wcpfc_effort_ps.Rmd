@@ -31,11 +31,8 @@ preparing them for integration into the Tuna Atlas database according to specifi
          format, including renaming, reordering, and recalculating specific fields as necessary.
          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 
-@import dplyr
-@import tidyr
-@import readr
-@seealso \code{\link{WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD}} for converting WCPFC Drifnet data structure,
-         \code{\link{convertDSD_wcpfc_nc}} for nominal catch data structure.
+@seealso \code{WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD()} for converting WCPFC Drifnet data structure,
+         \code{convertDSD_wcpfc_nc()} for nominal catch data structure.
 @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 

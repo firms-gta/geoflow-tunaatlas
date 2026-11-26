@@ -29,3 +29,5 @@
 ^gta$
 ^LICENSE\.md$
 ^gta\.sh$
+^\.dockerignore$
+^\.zenodo\.json$

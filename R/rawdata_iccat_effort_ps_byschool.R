@@ -5,17 +5,14 @@
 #' the Tuna Atlas database, considering only specific fields as mandatory. The
 #' function also handles optional metadata integration if provided.
 #'
-#' @param keep_fleet_instead_of_flag Logical, defaults to FALSE. Determines whether to
-#'        replace the 'flag' column with the 'fleet' column in the output dataset.
-#'
-#' @import dplyr
-#' @seealso \code{\link{FUN_efforts_ICCAT_CE_keep_all_efforts}} for converting ICCAT task 2,
+#' @seealso \code{FUN_efforts_ICCAT_CE_keep_all_efforts()} for converting ICCAT task 2,
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iccat/effort/ps_byschool/action_iccat_effort_ps_byschool.R).
+#' @export
 gta_rawdata_iccat_effort_ps_byschool <- function(data) {
 keep_fleet_instead_of_flag=FALSE
 RFMO_CE <- gta_data(data, reader = function(path_to_raw_dataset) gta_utf8(read_excel(path_to_raw_dataset, sheet = "Data")))

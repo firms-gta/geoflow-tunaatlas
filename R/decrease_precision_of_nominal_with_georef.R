@@ -46,7 +46,7 @@
 #' res$summary
 #' }
 #'
-#' @export
+#' @noRd
 decrease_precision_of_nominal_with_georef <- function(
     nominal,
     georef,

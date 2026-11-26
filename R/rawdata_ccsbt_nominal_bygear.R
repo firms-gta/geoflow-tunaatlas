@@ -6,12 +6,13 @@
 #'          including adjustments to column names, units conversion, and data aggregation.
 #'          Metadata integration is conditional, based on whether it will be loaded into the Tuna Atlas database.
 #'
-#' @seealso \code{\link{format_time_db_format}} for converting CCSBT Longline data structure.
+#' @seealso \code{format_time_db_format()} for converting CCSBT Longline data structure.
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (ccsbt/nominal/bygear/action_ccsbt_nominal_bygear.R).
+#' @export
 gta_rawdata_ccsbt_nominal_bygear <- function(data) {
   # Samples of the input and output data (from the former script)
   ## Catches

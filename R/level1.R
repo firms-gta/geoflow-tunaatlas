@@ -33,11 +33,12 @@
 #' @param entity A geoflow entity whose metadata (provenance, description) the
 #'   steps complete, or `NULL`.
 #' @return The level 1 catch (data frame).
+#' @export
 gta_level1 <- function(georef_dataset,
                        con = NULL,
                        unit_conversion_convert = TRUE,
                        unit_conversion_iotc_file = "data/IOTC_conv_fact_mapped.csv",
-                       unit_conversion_ird_file = "data/fact_conv_ird_complete_01_mai_2026.csv",
+                       unit_conversion_ird_file = "data/fact_conv_ird_complete_01_May_2026.csv",
                        unit_conversion_codelist_geoidentifiers_conversion_factors = "areas_conversion_factors_numtoweight_ird",
                        mapping_map_code_lists = TRUE,
                        fact = "catch",

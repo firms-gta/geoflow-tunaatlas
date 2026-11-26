@@ -22,8 +22,8 @@
 #' # Example usage with a hypothetical file path
 #' FUN_catches_IATTC_CE_Flag_or_SetType_Shark("path/to/IATTC_shark_data.csv", "Flag", "PS")
 #'
-#' @export
-#' @seealso \code{\link{FUN_catches_IATTC_CE_Flag_or_SetType}} for initial data processing.
+#' @noRd
+#' @seealso \code{FUN_catches_IATTC_CE_Flag_or_SetType()} for initial data processing.
 
 FUN_catches_IATTC_CE_Flag_or_SetType_Shark = function (Path_to_IATTC_CE, aggregation_dimension, GearCode) 
 {

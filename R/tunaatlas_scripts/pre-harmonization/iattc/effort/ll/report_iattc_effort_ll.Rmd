@@ -26,7 +26,6 @@ A summary of the mapping is given at the end; the results are saved in the same 
 
 This function transforms a dataset containing catch information into the CWP (Coordinating Working Party) format.
 
-@param df A dataframe containing catch data.
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
 @param data The raw dataset: a data frame, or the path to the file.

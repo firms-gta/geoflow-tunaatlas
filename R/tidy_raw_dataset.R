@@ -20,6 +20,7 @@
 #' @param recap_each_step Write the summary of each step.
 #' @param data_dir Folder where the removed or unmapped data are written.
 #' @return The tidied and mapped dataset (data frame, dates as Date).
+#' @export
 gta_tidy_raw_dataset <- function(dataset, opts = list(), nominal = FALSE,
                                  max_conversion_factor = here::here("data/max_conversion_factor.csv"),
                                  species_mapping_file = here::here("data", "fdi-mappings", "cross-term",

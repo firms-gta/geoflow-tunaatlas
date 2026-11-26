@@ -7,15 +7,14 @@
 #'          format, including renaming, reordering, and recalculating specific fields as necessary.
 #'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 #'
-#' @import dplyr
-#' @import readr
-#' @seealso \code{\link{format_time_db_format}} for converting time format,
+#' @seealso \code{format_time_db_format()} for converting time format,
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iattc/nominal/all/action_iattc_nominal_all.R).
+#' @export
 gta_rawdata_iattc_nominal_all <- function(data) {
   # Samples of the input and output data (from the former script)
   # Input data sample:

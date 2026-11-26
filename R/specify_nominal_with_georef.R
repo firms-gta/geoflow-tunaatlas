@@ -63,14 +63,14 @@
 #' )
 #' }
 #'
-#' @export
+#' @noRd
 specify_nominal_with_georef <- function(
     nominal_df,
     georef_df,
     strata_cols = c("species", "source_authority", "year", "geographic_identifier_nom", "measurement_unit"),
     step_order  = c("fishing_mode", "gear_type", "fishing_fleet"),
     unk_map     = list(fishing_fleet = "NEI", gear_type = "99.9", fishing_mode = "UNK"),
-    mode        = opts$strong_weak_upgrade,
+    mode        = "weak",
     logger      = message
 ) {
   
@@ -243,7 +243,7 @@ specify_nominal_with_georef <- function(
       dplyr::summarise(sum_val = sum(measurement_value, na.rm = TRUE), .groups = "drop") %>%
       dplyr::pull(sum_val)
     
-    logger(sprintf("Specified %s — %.3f t, %.3f no", dim_col, raised_t, raised_no))
+    logger(sprintf("Specified %s \u2014 %.3f t, %.3f no", dim_col, raised_t, raised_no))
   }
   
   # ---- Final cleanup: re-aggregate duplicates created by bind_rows ----

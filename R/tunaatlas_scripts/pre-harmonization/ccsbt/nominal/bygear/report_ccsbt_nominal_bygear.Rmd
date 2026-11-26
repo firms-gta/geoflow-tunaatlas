@@ -30,7 +30,7 @@ This function harmonizes the nominal catch dataset provided by the Commission fo
          including adjustments to column names, units conversion, and data aggregation.
          Metadata integration is conditional, based on whether it will be loaded into the Tuna Atlas database.
 
-@seealso \code{\link{format_time_db_format}} for converting CCSBT Longline data structure.
+@seealso \code{format_time_db_format()} for converting CCSBT Longline data structure.
 @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 
 @param data The raw dataset: a data frame, or the path to the file.

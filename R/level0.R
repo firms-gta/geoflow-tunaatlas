@@ -24,6 +24,7 @@
 #' @param data_dir Folder of the files.
 #' @return A list: `georef_dataset` (data frame), `rawdata` (the options used
 #'   to read the tRFMO datasets, reused by the level 2) and `stepnumber`.
+#' @export
 gta_georef_level0 <- function(files, opts, con = NULL, entity = NULL, recap_each_step = TRUE,
                               filtering_on_minimum_year_declared = TRUE, stepnumber = 1,
                               data_dir = "data") {

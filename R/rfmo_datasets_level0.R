@@ -18,6 +18,7 @@
 #'   iccat_ps_include_type_of_school).
 #' @param data_dir Folder of the files.
 #' @return The dataset of the tRFMO (data frame), or NULL if not included.
+#' @export
 gta_rfmo_dataset_level0 <- function(rfmo, files, options, data_dir = "data") {
 
   
@@ -268,7 +269,7 @@ gta_rfmo_dataset_level0 <- function(rfmo, files, options, data_dir = "data") {
                               
                               # Get RF for effort (rf=effort tuna / effort billfish   or    effort tuna / effort shark)
                               df_rf <- raise_get_rf(
-                                df_input=billfish_or_shark_effort,
+                                df_input_incomplete=billfish_or_shark_effort,
                                 df_input_total=tuna_effort,
                                 x_raising_dimensions=c(raising_dimensions,"measurement_unit")
                               )

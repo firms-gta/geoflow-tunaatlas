@@ -11,14 +11,15 @@
 #'          harmonized dataset. It can conditionally include metadata and code lists based on whether the
 #'          data is intended for database loading.
 #'
-#' @seealso \code{\link{convertDSD_iattc_ce}} for other conversions related to IATTC data,
-#'          \code{\link{format_time_db_format}} to standardize time formatting for database integration.
+#' @seealso \code{convertDSD_iattc_ce()} for other conversions related to IATTC data,
+#'          \code{format_time_db_format()} to standardize time formatting for database integration.
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (iattc/catch/ps_byflag/action_iattc_catch_ps_byflag.R).
+#' @export
 gta_rawdata_iattc_catch_ps_byflag <- function(data) {
   path_to_raw_dataset <- gta_path(data)
 catches_pivot_IATTC <-FUN_catches_IATTC_CE_Flag_or_SetType(path_to_raw_dataset,"Flag","PS")

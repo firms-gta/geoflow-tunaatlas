@@ -8,6 +8,7 @@
 #' @param reader Function reading the file when `x` is a path, so that each
 #'   dataset keeps its own reading options (separator, sheet, encoding...).
 #' @return A data frame.
+#' @export
 gta_data <- function(x, reader = utils::read.csv) {
   if (is.data.frame(x)) {
     return(x)
@@ -24,6 +25,7 @@ gta_data <- function(x, reader = utils::read.csv) {
 #'
 #' @param path Path to the CSV file.
 #' @return A data frame.
+#' @noRd
 gta_read_csv_utf8 <- function(path) {
   old <- options(encoding = "UTF-8")
   on.exit(options(old), add = TRUE)
@@ -38,6 +40,7 @@ gta_read_csv_utf8 <- function(path) {
 #'
 #' @param expr Expression to evaluate, e.g. a `read.csv()` call.
 #' @return The value of `expr`.
+#' @noRd
 gta_utf8 <- function(expr) {
   old <- options(encoding = "UTF-8")
   on.exit(options(old), add = TRUE)
@@ -51,6 +54,7 @@ gta_utf8 <- function(expr) {
 #'
 #' @param x A data frame, or the path to a file.
 #' @return A file path.
+#' @noRd
 gta_path <- function(x) {
   if (is.data.frame(x)) {
     path <- tempfile(fileext = ".csv")

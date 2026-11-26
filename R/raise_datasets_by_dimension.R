@@ -12,7 +12,7 @@
 #' df1 <- data.frame(fishingFleet = c("A", "B"), measurement_value = c(100, 200))
 #' df2 <- data.frame(schoolType = c("S1", "S2"), measurement_value = c(50, 150))
 #' result <- raise_datasets_by_dimension(df1, df2, dimension_missing_df1 = "schoolType", dimension_missing_df2 = "fishingFleet")
-#' @export
+#' @noRd
 raise_datasets_by_dimension <- function(df1, df2, dimension_missing_df1, dimension_missing_df2) {
   
   # Print a message indicating which dimensions are being raised

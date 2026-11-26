@@ -38,17 +38,10 @@
 #' print(mapped_data)
 #' }
 #'
-#' @importFrom dplyr left_join filter select rename mutate group_by_ summarise group_by
-#' @importFrom data.table setDT
-#' @importFrom reshape2 dcast
-#' @export
+#' @noRd
 
 map_codelist = function (df_input, df_mapping, dimension_to_map, keep_src_code = FALSE) 
 {
-  if(!require(data.table)){
-    install.packages("data.table")
-    require(data.table)
-  }
   cat(paste0("\n mapping dimension ", dimension_to_map, " with code list mapping"))
   column_names_df_input <- colnames(df_input)
   colnames(df_mapping)[colnames(df_mapping) == "src_code"] <- dimension_to_map

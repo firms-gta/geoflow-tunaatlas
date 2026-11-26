@@ -16,27 +16,22 @@
 #'         - `areas_in_land`: Data frame of geographic data located on land.
 #'         - `dataset_not_cwp_grid`: Data frame of geographic data not covered by the CWP grid.
 #'
-#' @importFrom dplyr filter inner_join anti_join select
-#' @importFrom DBI dbGetQuery
-#' @import readr
-#' @import httr
-#' @import here
 #' @examples
 #' config <- list(software = list(output = list(dbi = your_db_connection)))
 #' df <- read.csv("path/to/your/data.csv")
 #' result <- spatial_curation_data_mislocated(config, df, "remove")
 #' print(result)
+#' @noRd
 
 spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocated= "remove"){
   con <- config$software$output$dbi
   
-  # Définition du fichier local
-  # Définition du fichier local
+  # Local file
   csv_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
   
   # Initialisation
   db_working <- FALSE
-  # Vérification de la connexion si elle existe
+  # Check of the connection, if any
   # if (!is.null(con)) {
   #   if (DBI::dbIsValid(con)) {
   #     res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
@@ -45,14 +40,14 @@ spatial_curation_data_mislocated<-function(config = NULL,df, action_on_mislocate
   # }
   
   if (db_working) {
-    message("Connexion à la base réussie, récupération des données...")
+    message("Connected to the database, retrieving the data...")
     cwp_grid <- DBI::dbGetQuery(con, "SELECT ON_LAND_P, cwp_code FROM area.cwp_grid") %>%
       dplyr::rename(geographic_identifier = cwp_code)
   } else {
-    message("Pas de connexion à la base. Utilisation du fichier local...")
+    message("No database connection: using the local file...")
     
     if (!file.exists(csv_file)) {
-      message("Fichier local introuvable. Téléchargement en cours...")
+      message("Local file not found: downloading it...")
       
       zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
       local_zip <- here::here("data", "cwp_grid.zip")

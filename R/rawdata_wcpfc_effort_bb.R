@@ -7,16 +7,14 @@
 #'          format, including renaming, reordering, and recalculating specific fields as necessary.
 #'          Metadata integration is contingent on the intended use within the Tuna Atlas database.
 #'
-#' @import dplyr
-#' @import tidyr
-#' @import reshape
-#' @seealso \code{\link{WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD}} for converting WCPFC Driftnet data structure,
+#' @seealso \code{WCPFC_CE_efforts_pivotDSD_to_harmonizedDSD()} for converting WCPFC Driftnet data structure,
 #' @author Paul Taconet, IRD \email{paul.taconet@ird.fr}
 #' @author Bastien Grasset, IRD \email{bastien.grasset@ird.fr}
 #'
 #' @param data The raw dataset: a data frame, or the path to the file.
 #' @return The harmonized dataset (data frame), as written by the geoflow action
 #'   (wcpfc/effort/bb/action_wcpfc_effort_bb.R).
+#' @export
 gta_rawdata_wcpfc_effort_bb <- function(data) {
   
   # Input data sample:

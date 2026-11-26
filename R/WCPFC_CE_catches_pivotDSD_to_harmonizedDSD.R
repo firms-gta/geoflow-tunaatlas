@@ -1,8 +1,5 @@
 WCPFC_CE_catches_pivotDSD_to_harmonizedDSD = function (catches_pivot_WCPFC, colToKeep_captures) 
 {
-  if(!(require(dplyr))){ 
-    install.packages(dplyr) 
-    (require(dplyr))} 
   
   catches_pivot_WCPFC$RFMO <- "WCPFC"
   catches_pivot_WCPFC$Ocean <- "PAC_W"

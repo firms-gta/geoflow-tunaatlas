@@ -24,6 +24,7 @@
 #' @param stepnumber Number of the first step, for the log.
 #' @param data_dir Folder of the files.
 #' @return A list: `georef_dataset` (data frame) and `stepnumber`.
+#' @export
 gta_georef_level2 <- function(georef_dataset, opts, con = NULL, files = character(0), rawdata = opts,
                               geographic_identifier_to_nominal = NULL, DATASET_LEVEL = 2,
                               entity = NULL, recap_each_step = TRUE, stepnumber = 1,
@@ -202,7 +203,7 @@ gta_georef_level2 <- function(georef_dataset, opts, con = NULL, files = characte
           rm(rfmo_dataset)
           
           
-          if (mapping_map_code_lists == "TRUE") {
+          if (isTRUE(as.logical(opts$mapping_map_code_lists))) {
             dataset_catch <-
               map_codelists(
                 "catch",
@@ -776,7 +777,7 @@ gta_georef_level2 <- function(georef_dataset, opts, con = NULL, files = characte
               level = 2,
               step  = stepnumber - 1,
               msg   = sprintf(
-                paste0("Pass %d summary – tons: +%.3f / -%.3f, ",
+                paste0("Pass %d summary \u2013 tons: +%.3f / -%.3f, ",
                        "numbers: +%.3f / -%.3f"),
                 i, raised_tons, decr_tons, raised_num, decr_num
               )
@@ -982,7 +983,7 @@ gta_georef_level2 <- function(georef_dataset, opts, con = NULL, files = characte
       paste0("The data is disaggregated data on resolution higher than 5o in 5o resolution."),
       "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
       list(
-        options_disaggregate_on_5deg_data_with_resolution_superior_to_5deg
+        opts$disaggregate_on_5deg_data_with_resolution_superior_to_5deg
       ), entity
     )
   }
@@ -1015,7 +1016,7 @@ gta_georef_level2 <- function(georef_dataset, opts, con = NULL, files = characte
       "This step disaggregate data on resolution higher than 1o in 1o resolution",
       "function_disaggregate_on_resdeg_data_with_resolution_superior_to_resdeg",
       list(
-        options_disaggregate_on_1deg_data_with_resolution_superior_to_1deg
+        opts$disaggregate_on_1deg_data_with_resolution_superior_to_1deg
       ), entity
     )
     
