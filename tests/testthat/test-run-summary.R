@@ -63,3 +63,13 @@ test_that("summaries written to a file are read back with their codes", {
   expect_true(all(vapply(r$comparison, function(x) all(x$by_source$difference == 0), logical(1))))
   expect_true(all(vapply(r$comparison, function(x) nrow(x$uncommon) == 0, logical(1))))
 })
+
+test_that("compressed summaries are read without the R.utils package (gzip)", {
+  s <- gta_run_summary(level_files())
+  plain <- tempfile(fileext = ".csv")
+  gz <- tempfile(fileext = ".csv.gz")
+  data.table::fwrite(s, plain)
+  data.table::fwrite(s, gz)
+  expect_equal(gta_read_csv(gz), gta_read_csv(plain))
+  expect_type(gta_read_csv(gz)$gear_type, "character")
+})

@@ -429,6 +429,9 @@ jobs:
           [[ -n "$summaries_html" ]] && summaries_html="<h2>Processing summaries (step by step)</h2><ul>$summaries_html</ul>"
           if [[ -f site/run_comparison.html ]]; then
             comparison_html="<h2>Comparison with an earlier run</h2><ul><li><a href=\"run_comparison.html\">This run compared with ${REFERENCE_NAME}</a></li></ul>"
+          elif [[ -n "$REFERENCE_NAME" ]]; then
+            comparison_html="<h2>Comparison with an earlier run</h2><p>The comparison with ${REFERENCE_NAME} failed: see the step \"Compare with the earlier run\" of the run.</p>"
+            echo "::warning::The comparison with $REFERENCE_NAME failed (step 'Compare with the earlier run')"
           else
             comparison_html="<h2>Comparison with an earlier run</h2><p>No earlier run summary to compare with.</p>"
           fi

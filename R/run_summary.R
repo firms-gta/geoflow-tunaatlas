@@ -33,13 +33,27 @@ gta_run_summary <- function(datasets) {
   }
   out <- lapply(names(datasets), function(key) {
     d <- datasets[[key]]
-    if (is.character(d)) d <- data.table::fread(d, colClasses = "character", showProgress = FALSE)
+    if (is.character(d)) d <- gta_read_csv(d)
     s <- CWP.dataset::cwp_aggregate(d)
     s[, dataset := key]
     data.table::setcolorder(s, "dataset")
     s
   })
   data.table::rbindlist(out, use.names = TRUE, fill = TRUE)
+}
+
+#' Read a CSV file, compressed (.gz) or not, all columns as strings
+#'
+#' Codes stay strings (gear "09.39" is not the number 9.39). A .gz file is
+#' decompressed by gzip: data.table::fread() would need the R.utils package
+#' for it, which the workflow image does not have.
+#' @noRd
+gta_read_csv <- function(file) {
+  if (grepl("\\.gz$", file)) {
+    data.table::fread(cmd = paste("gzip -dc", shQuote(file)), colClasses = "character", showProgress = FALSE)
+  } else {
+    data.table::fread(file, colClasses = "character", showProgress = FALSE)
+  }
 }
 
 #' Name of a dataset without its years and its version suffix
@@ -83,8 +97,7 @@ gta_dataset_key <- function(file) {
 #' @export
 gta_compare_summaries <- function(previous, new, labels = c("previous", "new"), analyse = TRUE) {
   read <- function(x) {
-    # Codes stay strings (gear "09.39" is not the number 9.39)
-    if (is.character(x)) x <- data.table::fread(x, colClasses = "character", showProgress = FALSE)
+    if (is.character(x)) x <- gta_read_csv(x)
     x <- data.table::as.data.table(x)
     x[, measurement_value := as.numeric(measurement_value)]
     x[, n_rows := as.integer(n_rows)]
