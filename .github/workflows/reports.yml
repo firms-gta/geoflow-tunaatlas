@@ -389,7 +389,8 @@ jobs:
                                   params = list(previous = Sys.getenv(\"PREV\"), new = Sys.getenv(\"NEW\"),
                                                 previous_label = \"previous\", new_label = \"this run\",
                                                 previous_info = Sys.getenv(\"PREV_INFO\"),
-                                                new_info = Sys.getenv(\"NEW_INFO\")))
+                                                new_info = Sys.getenv(\"NEW_INFO\"),
+                                                markdown_file = \"/site/run_comparison_summary.md\"))
               "
             '
 
@@ -400,6 +401,24 @@ jobs:
           name: gta-run-comparison-${{ github.sha }}
           path: site/run_comparison.html
           retention-days: 90
+
+      # Short version of the comparison on the summary page of this run,
+      # readable without downloading anything
+      - name: Comparison on the run page
+        if: always() && env.REFERENCE_NAME != ''
+        run: |
+          {
+            echo "## Comparison with ${REFERENCE_NAME}"
+            echo
+            if [[ -f site/run_comparison_summary.md ]]; then
+              cat site/run_comparison_summary.md
+              echo
+              echo "Full report with the plots: artifact \`gta-run-comparison-${GITHUB_SHA}\` of [this run](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) (file \`run_comparison.html\`)."
+            else
+              echo ":x: The comparison failed: see the step \"Compare with the earlier run\"."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f site/run_comparison_summary.md   # not a page of the site
 
       - name: Archive the summary
         if: env.ARCHIVE_SUMMARY == 'true'

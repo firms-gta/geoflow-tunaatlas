@@ -73,3 +73,17 @@ test_that("compressed summaries are read without the R.utils package (gzip)", {
   expect_equal(gta_read_csv(gz), gta_read_csv(plain))
   expect_type(gta_read_csv(gz)$gear_type, "character")
 })
+
+test_that("the Markdown summary lists what differs and what is identical", {
+  new <- gta_run_summary(level_files())
+  previous <- new[!(gear_type %in% "07.2") & !(source_authority == "IATTC" & time_start == "2005-01-01")]
+  md <- gta_comparison_markdown(gta_compare_summaries(previous, new, labels = c("before", "after")))
+  expect_type(md, "character")
+  text <- paste(md, collapse = "\n")
+  expect_match(text, "### global_catch_ird_level0\n", fixed = TRUE)
+  expect_match(text, "| WCPFC | t |", fixed = TRUE)
+  expect_match(text, "| gear_type | 07.2 | t | only in after |", fixed = TRUE)
+  expect_match(text, "| IATTC |  | 2005 |", fixed = TRUE)
+  same <- gta_comparison_markdown(gta_compare_summaries(new, new, analyse = FALSE))
+  expect_true(all(grepl("identical on the common years", same[startsWith(same, "###")])))
+})

@@ -162,3 +162,72 @@ gta_compare_dataset <- function(a, b, labels, analyse, key) {
   list(years = split$periods, uncommon = split$uncommon, by_source = by_source, annual = annual,
        analysis = analysis)
 }
+
+#' Short Markdown summary of a comparison of two runs
+#'
+#' Summary of gta_compare_summaries() for a page that shows Markdown, e.g. the
+#' summary page of a GitHub Actions run: for each dataset, the tRFMOs whose
+#' totals differ on the common years, the years present in one run only, and
+#' the strata (values of a dimension) present in one run only. A dataset
+#' without any of these is reported as identical on its common years.
+#'
+#' @param cmp Result of gta_compare_summaries().
+#' @param threshold_pct Differences larger than this (in %) are flagged.
+#' @param max_rows Maximum number of rows of each table.
+#' @return A character vector of Markdown lines.
+#' @export
+gta_comparison_markdown <- function(cmp, threshold_pct = 1, max_rows = 20) {
+  labels <- cmp$labels
+  num <- function(x) format(round(x, 1), big.mark = " ", scientific = FALSE, trim = TRUE, nsmall = 1)
+  pct <- function(x) ifelse(is.finite(x), sprintf("%+.2f %%", x), "new")
+  md_table <- function(df) {
+    if (nrow(df) > max_rows) df <- utils::head(df, max_rows)
+    c(paste0("| ", paste(names(df), collapse = " | "), " |"),
+      paste0("|", paste(rep(" --- ", ncol(df)), collapse = "|"), "|"),
+      apply(df, 1, function(r) paste0("| ", paste(r, collapse = " | "), " |")))
+  }
+  out <- character(0)
+  missing <- cmp$datasets[!(cmp$datasets[[2]] & cmp$datasets[[3]]), , drop = FALSE]
+  if (nrow(missing)) {
+    out <- c(out, "**Datasets present in one run only:**", "", md_table(missing), "")
+  }
+  for (key in names(cmp$comparison)) {
+    x <- cmp$comparison[[key]]
+    changed <- x$by_source[difference != 0]
+    only <- x$years[x$years[[paste("Only in", labels[1])]] != "" | x$years[[paste("Only in", labels[2])]] != ""]
+    strata <- if (is.list(x$analysis)) x$analysis$compare_strata_differences_list$disapandap else NULL
+    if (!nrow(changed) && !nrow(only) && (is.null(strata) || !nrow(strata))) {
+      out <- c(out, sprintf("### %s: identical on the common years", key), "")
+      next
+    }
+    out <- c(out, sprintf("### %s", key), "")
+    if (nrow(changed)) {
+      t <- data.frame(
+        tRFMO = changed$source_authority, unit = changed$measurement_unit,
+        a = num(changed[[labels[1]]]), b = num(changed[[labels[2]]]),
+        difference = num(changed$difference), pct = pct(changed$difference_pct),
+        flag = ifelse(abs(changed$difference_pct) > threshold_pct, ":warning:", ""),
+        check.names = FALSE)
+      names(t)[3:4] <- labels
+      out <- c(out, "Totals of the common years that differ:", "", md_table(t), "")
+    } else {
+      out <- c(out, "Same totals on the common years.", "")
+    }
+    if (nrow(only)) {
+      out <- c(out, "Years present in one run only:", "",
+               md_table(as.data.frame(only[, c("source_authority", paste("Only in", labels)), with = FALSE],
+                                      check.names = FALSE)), "")
+    }
+    if (!is.null(strata) && nrow(strata)) {
+      s <- as.data.frame(strata)
+      t <- data.frame(dimension = s$Dimension, value = s$Precision, unit = s$measurement_unit,
+                      change = ifelse(s[["Loss / Gain"]] == "Gain", paste("only in", labels[2]), paste("only in", labels[1])),
+                      check.names = FALSE)
+      out <- c(out, "Values present in one run only (common years):", "", md_table(t), "")
+    }
+    if (is.character(x$analysis)) {
+      out <- c(out, sprintf("*Detailed comparison failed: %s*", x$analysis), "")
+    }
+  }
+  out
+}

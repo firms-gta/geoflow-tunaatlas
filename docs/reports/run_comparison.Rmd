@@ -12,6 +12,7 @@ params:
   previous_info: ""
   new_info: ""
   threshold_pct: 1
+  markdown_file: ""
 ---
 
 ```{r setup, include=FALSE}
@@ -27,8 +28,10 @@ table_out <- function(x, caption = NULL, digits = 1) {
   if (is.null(x) || !nrow(x)) { cat("\n*None.*\n\n"); return(invisible()) }
   x <- as.data.frame(x)
   if ("year" %in% names(x)) x$year <- as.character(x$year)   # no thousands separator
+  # Small differences stay visible (+0.05 %, not 0)
+  if ("difference_pct" %in% names(x)) x$difference_pct <- sprintf("%+.2f", x$difference_pct)
   print(knitr::kable(x, caption = caption, digits = digits,
-                     format.args = list(big.mark = " ")))
+                     format.args = list(big.mark = " ", scientific = FALSE)))
   cat("\n\n")
 }
 ```
@@ -108,5 +111,16 @@ for (key in names(cmp$comparison)) {
       }
     }
   }
+}
+```
+
+```{r markdown-summary, include=FALSE}
+# Short version of this report in Markdown (summary page of the GitHub run)
+if (nzchar(params$markdown_file)) {
+  writeLines(c(
+    sprintf("**%s**: %s  ", labels[1], params$previous_info),
+    sprintf("**%s**: %s", labels[2], params$new_info), "",
+    gta_comparison_markdown(cmp, threshold_pct = threshold)
+  ), params$markdown_file)
 }
 ```

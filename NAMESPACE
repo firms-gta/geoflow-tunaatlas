@@ -2,6 +2,7 @@
 
 export(create_global_tuna_atlas)
 export(gta_compare_summaries)
+export(gta_comparison_markdown)
 export(gta_create_levels)
 export(gta_data)
 export(gta_dataset_outputs)
