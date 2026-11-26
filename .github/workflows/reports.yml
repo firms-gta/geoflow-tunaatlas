@@ -15,6 +15,15 @@
 # Reports: catch at levels 0, 1 and 2, and effort, all on the datasets of this
 # run.
 #
+# Comparison with an earlier run: the final datasets are summarised
+# (gta_run_summary(): sums by year and 5 degree square, a few MB) and compared
+# (gta_compare_summaries(), docs/reports/run_comparison.Rmd) with the summary
+# of an earlier run, by default the last one archived. The summaries of the
+# runs of dev, master and the tags are archived as assets of the GitHub
+# release "run-summaries" (kept without time limit, unlike the artifacts); a
+# run of another branch is compared but archives nothing, and does not deploy
+# GitHub Pages (its pages are in the "github-pages" artifact).
+#
 # Requires: Settings > Pages > Source = "GitHub Actions".
 name: Full run and reports
 
@@ -31,9 +40,13 @@ on:
         description: "Reports only: ID of an earlier run of this workflow whose final datasets are reused (number in its URL). Empty = complete run"
         required: false
         default: ""
+      compare_with:
+        description: "Summary to compare with: name of an asset of the release run-summaries without extension (e.g. summary_20261123_324c380). Empty = the last one archived"
+        required: false
+        default: ""
 
 permissions:
-  contents: read
+  contents: write   # assets of the release run-summaries
   actions: read
   packages: read
   pages: write
@@ -47,6 +60,11 @@ env:
   PROJECT_DIR: /home/rstudio/geoflow-tunaatlas
   # Raw data of the GTA (see docs/RUNNING.md)
   FROM_RUN: ${{ github.event.inputs.datasets_from_run }}
+  COMPARE_WITH: ${{ github.event.inputs.compare_with }}
+  SUMMARIES_RELEASE: run-summaries
+  # Runs whose summary is archived (reference of the next comparisons)
+  ARCHIVE_SUMMARY: ${{ github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   RAW_DATA_URL: https://zenodo.org/records/20834708/files/all_raw_data_GTA.zip?download=1
 
 jobs:
@@ -283,6 +301,118 @@ jobs:
               "
             '
 
+      # Code of this commit (gta package and report), whatever the image
+      - name: Summarise the final datasets
+        run: |
+          set -euo pipefail
+          # Datasets of this run, or of the earlier run they come from
+          if [[ -n "$FROM_RUN" ]]; then
+            SRC_SHA=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FROM_RUN" --jq .head_sha)
+            SRC_DATE=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FROM_RUN" --jq .created_at)
+            SRC_BRANCH=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$FROM_RUN" --jq .head_branch)
+            SRC_RUN=$FROM_RUN
+          else
+            SRC_SHA=$GITHUB_SHA; SRC_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            SRC_BRANCH=$GITHUB_REF_NAME; SRC_RUN=$GITHUB_RUN_ID
+          fi
+          NAME="summary_$(date -u -d "$SRC_DATE" +%Y%m%d)_${SRC_SHA::7}"
+          echo "SUMMARY_NAME=$NAME" >> "$GITHUB_ENV"
+          mkdir -p run-summary && chmod 777 run-summary
+          docker run --rm \
+            -v "$PWD/R":"$PROJECT_DIR/R":ro \
+            -v "$PWD/DESCRIPTION":"$PROJECT_DIR/DESCRIPTION":ro \
+            -v "$PWD/NAMESPACE":"$PROJECT_DIR/NAMESPACE":ro \
+            -v "$PWD/runtime/data/dataoutputGTA":/gta:ro \
+            -v "$PWD/run-summary":/out \
+            -e NAME="$NAME" \
+            -w "$PROJECT_DIR" --entrypoint Rscript "$IMAGE" -e '
+              suppressMessages(pkgload::load_all(".", quiet = TRUE, export_all = FALSE))
+              s <- gta_run_summary(list.files("/gta", "\\.csv$", full.names = TRUE))
+              data.table::fwrite(s, file.path("/out", paste0(Sys.getenv("NAME"), ".csv.gz")))
+              print(s[, list(rows = .N, value = sum(measurement_value)), by = list(dataset, measurement_unit)])'
+          cat > "run-summary/$NAME.json" <<EOF
+          {"commit": "$SRC_SHA", "run": "$SRC_RUN", "date": "$SRC_DATE",
+           "branch": "$SRC_BRANCH", "image": "$IMAGE", "input": "$RAW_DATA_URL"}
+          EOF
+          ls -la run-summary
+
+      - name: Find the summary to compare with
+        run: |
+          set -euo pipefail
+          REF=""
+          if gh release view "$SUMMARIES_RELEASE" >/dev/null 2>&1; then
+            if [[ -n "$COMPARE_WITH" ]]; then
+              REF="$COMPARE_WITH"
+            else
+              # Names start with the date: the last one, other than this run
+              REF=$(gh release view "$SUMMARIES_RELEASE" --json assets --jq '.assets[].name' \
+                      | grep -E '^summary_[0-9]{8}_[0-9a-f]{7}\.csv\.gz$' | sed 's/\.csv\.gz$//' \
+                      | grep -vx "$SUMMARY_NAME" | sort | tail -1 || true)
+            fi
+          fi
+          if [[ -z "$REF" ]]; then
+            echo "::notice::No earlier summary to compare with (release $SUMMARIES_RELEASE empty or missing)"
+          else
+            mkdir -p reference
+            gh release download "$SUMMARIES_RELEASE" --dir reference --pattern "$REF.*"
+            ls -la reference
+          fi
+          echo "REFERENCE_NAME=$REF" >> "$GITHUB_ENV"
+
+      - name: Compare with the earlier run
+        if: env.REFERENCE_NAME != ''
+        continue-on-error: true   # the datasets and the other reports are kept anyway
+        run: |
+          set -euo pipefail
+          info() {   # short description of a summary, from its .json
+            python3 -c 'import json,sys; m=json.load(open(sys.argv[1])); print("commit %s, run %s, %s, branch %s" % (m["commit"][:7], m["run"], m["date"][:10], m["branch"]))' "$1" 2>/dev/null || echo "$2"
+          }
+          export PREV_INFO="$(info "reference/$REFERENCE_NAME.json" "$REFERENCE_NAME")"
+          export NEW_INFO="$(info "run-summary/$SUMMARY_NAME.json" "$SUMMARY_NAME")"
+          docker run --rm --user root \
+            -v "$PWD/R":"$PROJECT_DIR/R":ro \
+            -v "$PWD/DESCRIPTION":"$PROJECT_DIR/DESCRIPTION":ro \
+            -v "$PWD/NAMESPACE":"$PROJECT_DIR/NAMESPACE":ro \
+            -v "$PWD/docs/reports":"$PROJECT_DIR/docs/reports" \
+            -v "$PWD/reference":/reference:ro \
+            -v "$PWD/run-summary":/new:ro \
+            -v "$PWD/site":/site \
+            -e PREV="/reference/$REFERENCE_NAME.csv.gz" -e NEW="/new/$SUMMARY_NAME.csv.gz" \
+            -e PREV_INFO -e NEW_INFO \
+            -w "$PROJECT_DIR" "$IMAGE" \
+            bash -c '
+              set -e
+              command -v pandoc >/dev/null || { apt-get update -qq && apt-get install -y -qq --no-install-recommends pandoc >/dev/null; }
+              Rscript -e "
+                rmarkdown::render(\"docs/reports/run_comparison.Rmd\", output_dir = \"/site\",
+                                  intermediates_dir = tempdir(), envir = new.env(),
+                                  params = list(previous = Sys.getenv(\"PREV\"), new = Sys.getenv(\"NEW\"),
+                                                previous_label = \"previous\", new_label = \"this run\",
+                                                previous_info = Sys.getenv(\"PREV_INFO\"),
+                                                new_info = Sys.getenv(\"NEW_INFO\")))
+              "
+            '
+
+      - name: Keep the comparison
+        if: env.REFERENCE_NAME != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: gta-run-comparison-${{ github.sha }}
+          path: site/run_comparison.html
+          retention-days: 90
+
+      - name: Archive the summary
+        if: env.ARCHIVE_SUMMARY == 'true'
+        run: |
+          set -euo pipefail
+          if ! gh release view "$SUMMARIES_RELEASE" >/dev/null 2>&1; then
+            gh release create "$SUMMARIES_RELEASE" --target "$GITHUB_SHA" --prerelease --latest=false \
+              --title "Run summaries" \
+              --notes "Aggregated summaries of the final datasets of the complete runs (reports.yml), one per run: reference of the run comparisons. Not a release of the Global Tuna Atlas."
+          fi
+          gh release upload "$SUMMARIES_RELEASE" --clobber \
+            "run-summary/$SUMMARY_NAME.csv.gz" "run-summary/$SUMMARY_NAME.json"
+
       - name: Build the index page
         run: |
           # Summaries of this run (not available in reports-only mode)
@@ -297,6 +427,11 @@ jobs:
             done
           fi
           [[ -n "$summaries_html" ]] && summaries_html="<h2>Processing summaries (step by step)</h2><ul>$summaries_html</ul>"
+          if [[ -f site/run_comparison.html ]]; then
+            comparison_html="<h2>Comparison with an earlier run</h2><ul><li><a href=\"run_comparison.html\">This run compared with ${REFERENCE_NAME}</a></li></ul>"
+          else
+            comparison_html="<h2>Comparison with an earlier run</h2><p>No earlier run summary to compare with.</p>"
+          fi
           cat > site/index.html <<EOF
           <!doctype html>
           <html lang="en"><head><meta charset="utf-8">
@@ -310,6 +445,7 @@ jobs:
             <li><a href="summary_catch_level2.html">Catch dataset analysis (IRD Level 2)</a></li>
             <li><a href="summary_effort.html">Effort dataset analysis</a></li>
           </ul>
+          ${comparison_html}
           ${summaries_html}
           <p>Rendered on $(date -u +%Y-%m-%d) from commit
           <code>${GITHUB_SHA::7}</code> with image <code>${IMAGE}</code>,
@@ -325,8 +461,11 @@ jobs:
   # tags (Settings > Environments > github-pages). If it refuses, only this job
   # fails; the run, the reports (artifact "github-pages") and the datasets are
   # kept.
+  # Only dev, master and the tags publish the pages: a run of another branch
+  # (e.g. to check its differences before a merge) leaves them as they are.
   deploy:
     needs: full-run-and-reports
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     environment:
       name: github-pages

@@ -9,6 +9,7 @@ published to the GitHub Container Registry (GHCR).
 | --- | --- | --- |
 | `workflow-launcher-checks.yml` | pull requests touching the launcher or the Dockerfile | launcher scripts parse, `tests/smoke_test_launcher.R`, required patches present in the `Dockerfile` |
 | `test_whole_compose.yml` | push on `master` and the feature branch, manual | end-to-end run of the full stack on the sample data, then publication of the tested image |
+| `reports.yml` | tags `v*`, manual | complete run on the real data, reports on GitHub Pages, comparison with an earlier run |
 
 ## End-to-end test (`test_whole_compose.yml`)
 
@@ -34,6 +35,47 @@ GeoNetwork and **sandbox** Zenodo.
 The containers exist only on the runner during the job: GeoServer and
 GeoNetwork cannot be opened from outside. Checks must run inside the job, and
 anything worth keeping must be uploaded with `actions/upload-artifact`.
+
+## Complete run and comparison with an earlier run (`reports.yml`)
+
+Runs the whole workflow on the real data (input archive on Zenodo), renders
+the reports of the final datasets and publishes them on GitHub Pages. Then it
+compares the run with an earlier one:
+
+1. **Summary** of the final datasets (`gta_run_summary()`): values summed by
+   year, 5° square and all the other dimensions, about 20 MB in all.
+2. **Reference**: the last summary archived in the GitHub release
+   `run-summaries`, or the one named in the `compare_with` input.
+3. **Comparison** (`gta_compare_summaries()`, report
+   `docs/reports/run_comparison.Rmd`): for each dataset and each tRFMO, the
+   years present in both runs are compared (totals, strata present in one run
+   only, differences by dimension, with CWP.dataset); the years present in one
+   run only (the new year of a release) are listed apart. The page is
+   `run_comparison.html` on GitHub Pages, and the artifact
+   `gta-run-comparison-<sha>` (90 days).
+4. **Archive**: on `dev`, `master` and the tags, the summary is added to the
+   release `run-summaries` (no time limit, unlike the artifacts). Other
+   branches archive nothing and do not deploy GitHub Pages.
+
+To check the differences of a branch before merging it into `dev`:
+
+```bash
+gh workflow run reports.yml --ref feature/no-ref/my-branch
+```
+
+The comparison is then in the artifact of the run. The summary of the
+datasets of an earlier run can be archived without running the workflow
+again, as long as its artifacts exist (14 days): run `reports.yml` on `dev`
+with `datasets_from_run=<run id>`.
+
+The same functions work locally:
+
+```r
+pkgload::load_all()
+a <- gta_run_summary(list.files("<outputs of run A>", "\\.csv$", full.names = TRUE))
+b <- gta_run_summary(list.files("<outputs of run B>", "\\.csv$", full.names = TRUE))
+cmp <- gta_compare_summaries(a, b, labels = c("A", "B"))
+```
 
 ## Secrets and test data
 
