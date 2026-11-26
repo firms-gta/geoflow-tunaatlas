@@ -21,24 +21,28 @@ written with data.table::fwrite()).}
 longest part).}
 }
 \value{
-A list: \code{datasets} (which run has which dataset) and \code{comparison},
-one element per dataset present in both runs, with \code{years} (years of each
-tRFMO), \code{uncommon} (totals of the years present in one run only),
-\code{by_source} and \code{annual} (totals of the common years and their
-differences) and \code{analysis} (result of CWP.dataset, or the error message
+A list: \code{datasets} (which run has which dataset), \code{labels}, and
+\code{comparison}, one element per dataset present in both runs, with \code{years}
+(years of each tRFMO), \code{uncommon} (totals of the years present in one run
+only), \code{by_source} and \code{annual} (totals of the common years and their
+differences: \code{difference}, \code{difference_pct}) and \code{analysis} (result of
+CWP.dataset::comprehensive_cwp_dataframe_analysis(), or the error message
 when it failed).
 }
 \description{
-Compares two run summaries (gta_run_summary()), dataset by dataset and
-tRFMO by tRFMO, keeping apart:
+Compares two run summaries (gta_run_summary()), dataset by dataset, with
+the functions of CWP.dataset:
 }
 \details{
 \itemize{
-\item the years present in both runs for a tRFMO, which are comparable: totals
-and their differences, and the detailed comparison of CWP.dataset
-(CWP.dataset::comprehensive_cwp_dataframe_analysis(): differences by
-dimension, strata present in one run only, temporal differences);
-\item the years present in one run only (typically the new year of a release):
-listed with their totals, without difference.
+\item CWP.dataset::cwp_split_common_periods() keeps apart, for each tRFMO, the
+years present in both runs, which are comparable, and the years present
+in one run only (typically the new year of a release), listed with their
+totals;
+\item on the common years, CWP.dataset::fonction_groupement() gives the totals
+by tRFMO and by tRFMO and year with their differences, and
+CWP.dataset::comprehensive_cwp_dataframe_analysis() the detailed
+comparison (differences by dimension, strata present in one run only,
+temporal differences).
 }
 }

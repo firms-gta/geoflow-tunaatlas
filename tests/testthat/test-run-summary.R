@@ -1,5 +1,6 @@
-# Run summaries and their comparison (R/run_summary.R), on the expected outputs
-# of the control datasets
+# Run summaries and their comparison (R/run_summary.R, on top of
+# CWP.dataset::cwp_aggregate() and cwp_split_common_periods()), on the
+# expected outputs of the control datasets
 
 level_files <- function() list.files(expected_dir("levels"), pattern = "\\.csv$", full.names = TRUE)
 
@@ -8,16 +9,6 @@ test_that("dataset names drop their years and version suffix", {
                                  "global_effort_2026.csv",
                                  "global_catch_firms_level0_public.parquet")),
                c("global_catch_ird_level0", "global_effort", "global_catch_firms_level0"))
-})
-
-test_that("1 degree squares are grouped into their 5 degree square", {
-  expect_equal(gta_cwp_to_5deg(c("5212124", "5100003", "6230150", "IOTC_WEST", NA)),
-               c("6210120", "6100000", "6230150", "IOTC_WEST", NA))
-})
-
-test_that("year ranges are compact", {
-  expect_equal(gta_year_ranges(c(1990, 1950:1952, 1960)), "1950-1952, 1960, 1990")
-  expect_equal(gta_year_ranges(integer(0)), "")
 })
 
 test_that("the summary keeps the totals of each dataset", {
@@ -43,21 +34,20 @@ test_that("the comparison separates the common years from the years of one run o
   x <- r$comparison$global_catch_ird_level0
 
   iattc <- x$years[source_authority == "IATTC"]
-  expect_equal(iattc[["only in after"]], "2005")
-  expect_false(grepl("2005", iattc$common))
+  expect_equal(iattc[["Only in after"]], "2005")
+  expect_false(grepl("2005", iattc[["Common years"]]))
   expect_true(all(c("IATTC", "WCPFC") %in% x$uncommon$source_authority))
-  expect_true(all(x$uncommon$run == "after"))
+  expect_true(all(x$uncommon$dataset == "after"))
 
   # Common years: only WCPFC changes, and only by its driftnet catch of the
   # common years
   changed <- x$by_source[difference != 0]
   expect_equal(unique(changed$source_authority), "WCPFC")
-  common_driftnet <- new[dataset == "global_catch_ird_level0" & gear_type == "07.2" &
-                           as.integer(substr(time_start, 1, 4)) %in%
-                           previous[dataset == "global_catch_ird_level0" & source_authority == "WCPFC",
-                                    as.integer(substr(time_start, 1, 4))],
+  wcpfc_years <- previous[dataset == "global_catch_ird_level0" & source_authority == "WCPFC", unique(time_start)]
+  common_driftnet <- new[dataset == "global_catch_ird_level0" & gear_type == "07.2" & time_start %in% wcpfc_years,
                          sum(measurement_value)]
-  expect_equal(sum(changed$difference), common_driftnet)
+  expect_equal(sum(changed$difference), common_driftnet, tolerance = 1e-6)
+  expect_equal(sum(x$annual[source_authority == "WCPFC", difference]), common_driftnet, tolerance = 1e-6)
 
   # CWP.dataset finds the gear present in the new run only
   expect_type(x$analysis, "list")
@@ -71,4 +61,5 @@ test_that("summaries written to a file are read back with their codes", {
   data.table::fwrite(s, f)
   r <- gta_compare_summaries(f, s, analyse = FALSE)
   expect_true(all(vapply(r$comparison, function(x) all(x$by_source$difference == 0), logical(1))))
+  expect_true(all(vapply(r$comparison, function(x) nrow(x$uncommon) == 0, logical(1))))
 })

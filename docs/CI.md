@@ -42,15 +42,18 @@ Runs the whole workflow on the real data (input archive on Zenodo), renders
 the reports of the final datasets and publishes them on GitHub Pages. Then it
 compares the run with an earlier one:
 
-1. **Summary** of the final datasets (`gta_run_summary()`): values summed by
-   year, 5° square and all the other dimensions, about 20 MB in all.
+1. **Summary** of the final datasets (`gta_run_summary()`, on top of
+   `CWP.dataset::cwp_aggregate()`): values summed by year, 5° square and all
+   the other dimensions, about 20 MB in all.
 2. **Reference**: the last summary archived in the GitHub release
    `run-summaries`, or the one named in the `compare_with` input.
 3. **Comparison** (`gta_compare_summaries()`, report
    `docs/reports/run_comparison.Rmd`): for each dataset and each tRFMO, the
    years present in both runs are compared (totals, strata present in one run
-   only, differences by dimension, with CWP.dataset); the years present in one
-   run only (the new year of a release) are listed apart. The page is
+   only, differences by dimension); the years present in one run only (the new
+   year of a release) are listed apart. All with CWP.dataset:
+   `cwp_split_common_periods()`, `fonction_groupement()` and
+   `comprehensive_cwp_dataframe_analysis()`. The page is
    `run_comparison.html` on GitHub Pages, and the artifact
    `gta-run-comparison-<sha>` (90 days).
 4. **Archive**: on `dev`, `master` and the tags, the summary is added to the

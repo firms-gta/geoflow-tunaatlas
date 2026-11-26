@@ -13,19 +13,19 @@ data as the public file).}
 }
 \value{
 A data.table with one row per stratum: \code{dataset} (name of the file
-without its years, e.g. "global_catch_ird_level0"), \code{time_start} (first
-day of the year, as a string), the dimensions of the dataset
-(source_authority, species, gear_type, fishing_fleet, fishing_mode,
-geographic_identifier, measurement_type, measurement_unit, when present),
-\code{measurement_value} (sum) and \code{n_rows} (number of rows summed).
+without its years, e.g. "global_catch_ird_level0"), then the columns of
+CWP.dataset::cwp_aggregate(): \code{time_start} (first day of the year), the
+dimensions, \code{measurement_value} (sum) and \code{n_rows} (number of rows
+summed).
 }
 \description{
 Summarises the final datasets of a workflow run (nominal catch, level 0,
 level 1, level 2, effort) into one small table that can be kept for a long
 time and compared with the summary of another run
-(gta_compare_summaries()). The values are summed by year (the month is
-dropped), by 5 degree square (the 1 degree squares are grouped into their 5
-degree square) and by all the other dimensions of the dataset.
+(gta_compare_summaries()). Each dataset is aggregated with
+CWP.dataset::cwp_aggregate(): values summed by year, by 5 degree square
+(the 1 degree squares are grouped into their 5 degree square) and by all
+the other dimensions of the dataset.
 }
 \examples{
 \dontrun{

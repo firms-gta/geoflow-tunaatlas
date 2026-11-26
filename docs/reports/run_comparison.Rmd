@@ -76,6 +76,7 @@ for (key in names(cmp$comparison)) {
   if (nrow(x$annual)) {
     long <- data.table::melt(x$annual, id.vars = c("source_authority", "year", "measurement_unit"),
                              measure.vars = labels, variable.name = "run", value.name = "value")
+    long[, year := as.integer(year)]
     p <- ggplot(long, aes(year, value, colour = run, linetype = run)) +
       geom_line() + geom_point(size = 0.6) +
       facet_wrap(~ source_authority + measurement_unit, scales = "free_y") +

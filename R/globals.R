@@ -58,6 +58,6 @@ utils::globalVariables(c(
 
 # Run summaries and their comparison (R/run_summary.R)
 utils::globalVariables(c(
-  "dataset", "difference", "difference_pct", "n_rows", "run", "value_1",
-  "value_2"
+  "dataset", "difference", "difference_pct", "n_rows", "value_sum_1",
+  "value_sum_2"
 ))
