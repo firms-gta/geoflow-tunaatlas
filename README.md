@@ -96,8 +96,8 @@ raw data of the tRFMOs
        ├─ nominal   global nominal catch (gta_nominal_catch)
        ├─ level0    georeferenced catch: tRFMO datasets bound, overlaps handled (gta_georef_dataset)
        ├─ effort    georeferenced effort (gta_georef_dataset)
-       └─ level1    level 0 with units harmonised to tonnes (gta_level1)
-            └─ level2   level 1 raised to the nominal catch (gta_georef_dataset)
+       ├─ level1    level 0 with units harmonised to tonnes (gta_level1)
+       └─ level2   level 0 raised to the nominal catch (gta_georef_dataset)
 ```
 
 Each raw dataset has its folder in `R/tunaatlas_scripts/pre-harmonization/<tRFMO>/<type>/<dataset>/`,

@@ -159,7 +159,7 @@ gta_create_levels <- function(harmonised, files = character(0), options = gta_de
     opts <- o$options
     opts$recap_each_step <- recap_each_step
     if (!is.null(o$nominal)) opts$keynominal <- o$nominal
-    res <- gta_georef_dataset(o$datasets, opts, con = con, entity = NULL, data_dir = "data")
+    res <- gta_georef_dataset(o$datasets, opts, con = con, entity = NULL, data_dir = "data") # the function creating all the data
     write_outputs(res$georef_dataset, o$id)
   }
   if ("level0" %in% steps) result$level0 <- georef(options$level0)
