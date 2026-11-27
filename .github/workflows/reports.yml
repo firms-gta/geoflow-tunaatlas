@@ -417,7 +417,8 @@ jobs:
             else
               echo ":x: The comparison failed: see the step \"Compare with the earlier run\"."
             fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"   # also in this log
+          echo "Summary of the run page: $(wc -c < "$GITHUB_STEP_SUMMARY") bytes"
           rm -f site/run_comparison_summary.md   # not a page of the site
 
       - name: Archive the summary
