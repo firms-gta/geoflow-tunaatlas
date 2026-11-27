@@ -68,6 +68,27 @@ jobs:
             -w /home/rstudio/geoflow-tunaatlas --entrypoint Rscript \
             "$GTA_IMAGE" -e 'testthat::test_local(stop_on_failure = TRUE)'
 
+      - name: Documentation and raw dataset reports up to date
+        # Same checks as the manual pre-commit hooks gta-roxygen and
+        # rawdata-reports: regenerated in the image from the checkout, then
+        # compared with what is committed
+        run: |
+          P=/home/rstudio/geoflow-tunaatlas
+          docker run --rm --network none --user root \
+            -v "$PWD/R":"$P/R" -v "$PWD/man":"$P/man" -v "$PWD/NAMESPACE":"$P/NAMESPACE" \
+            -v "$PWD/DESCRIPTION":"$P/DESCRIPTION":ro -v "$PWD/workflow":"$P/workflow":ro \
+            -v "$PWD/config":"$P/config":ro \
+            -w "$P" --entrypoint Rscript "$GTA_IMAGE" -e '
+              roxygen2::roxygenise()
+              source("workflow/launchers/rawdata_reports.R")
+              invisible(update_rawdata_reports(render = FALSE))'
+          sudo chown -R "$(id -u):$(id -g)" R man NAMESPACE
+          new_man=$(git ls-files --others --exclude-standard man)
+          if ! git diff --exit-code --stat -- man NAMESPACE 'R/tunaatlas_scripts/pre-harmonization/*report_*.Rmd' || [[ -n "$new_man" ]]; then
+            echo "::error::Not up to date: run roxygen2::roxygenise() and/or update_rawdata_reports(render = FALSE) (or pre-commit run --hook-stage manual), then commit man/, NAMESPACE and the reports. ${new_man}"
+            exit 1
+          fi
+
       - name: gta package R CMD check
         # Builds the gta package and checks it (no PDF manual): no error,
         # warning or note allowed

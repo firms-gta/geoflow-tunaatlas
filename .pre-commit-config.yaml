@@ -1,6 +1,15 @@
-# Hooks run on the staged files at each `git commit`.
+# Two kinds of hooks:
+# * at each `git commit`, for everyone: fast checks that need no R package
+#   (R files parse, configuration paths, secrets, end of files, merge
+#   conflicts, large files);
+# * by hand (stage "manual"): the R checks that need the renv library of the
+#   project (raw dataset tests and reports, roxygen documentation, package
+#   tests). They do not block a commit; the CI runs them on dev and master.
+#   Run them before pushing:  pre-commit run --hook-stage manual
+#   (on every file:           pre-commit run --hook-stage manual --all-files)
 # Install: pip install pre-commit && pre-commit install
-# Run on every file by hand: pre-commit run --all-files
+# R is called through tests/rscript.sh: the R of the RStudio session when
+# there is one, otherwise the Rscript of the PATH.
 # Same hook versions as CWP.dataset, so both repositories share one cache.
 repos:
   # R: every staged R file must parse. Run with --vanilla so that .Rprofile
@@ -12,7 +21,7 @@ repos:
         name: R files parse
         language: system
         entry: >-
-          Rscript --vanilla -e 'ok <- TRUE; for (f in commandArgs(TRUE))
+          tests/rscript.sh --vanilla -e 'ok <- TRUE; for (f in commandArgs(TRUE))
           tryCatch(parse(f), error = function(e) {
           message(f, ": ", conditionMessage(e)); ok <<- FALSE });
           quit(status = as.integer(!ok))'
@@ -31,7 +40,8 @@ repos:
       - id: rawdata-tests
         name: raw datasets give their expected outputs
         language: system
-        entry: Rscript tests/test_rawdata.R
+        stages: [manual]
+        entry: tests/rscript.sh tests/test_rawdata.R
         pass_filenames: false
         files: '^(R/[^/]+\.R$|DESCRIPTION$|NAMESPACE$|R/tunaatlas_scripts/pre-harmonization/|R/sardara_functions/|config/entities/entities_raw_|tests/(test_rawdata\.R|expected/rawdata/|sample_data/))'
       # The report_*.Rmd of the raw datasets copy the code of their core
@@ -40,8 +50,9 @@ repos:
       - id: rawdata-reports
         name: raw dataset reports match their core functions
         language: system
+        stages: [manual]
         entry: >-
-          Rscript -e 'source("workflow/launchers/rawdata_reports.R");
+          tests/rscript.sh -e 'source("workflow/launchers/rawdata_reports.R");
           invisible(update_rawdata_reports(render = FALSE))'
         pass_filenames: false
         files: '^(R/[^/]+\.R$|DESCRIPTION$|NAMESPACE$|R/tunaatlas_scripts/pre-harmonization/|config/entities/entities_raw_|workflow/launchers/rawdata_reports\.R$)'
@@ -50,7 +61,8 @@ repos:
       - id: gta-roxygen
         name: gta documentation and NAMESPACE up to date
         language: system
-        entry: bash -c 'Rscript -e "roxygen2::roxygenise()" >/dev/null 2>&1 && git diff --quiet -- man NAMESPACE && test -z "$(git ls-files --others --exclude-standard man)" || { echo "Run roxygen2::roxygenise() and stage man/ and NAMESPACE"; exit 1; }'
+        stages: [manual]
+        entry: bash -c 'tests/rscript.sh -e "roxygen2::roxygenise()" >/dev/null 2>&1 || { echo "roxygen2::roxygenise() failed (is the renv library of the project available to this R?)"; exit 1; }; git diff --quiet -- man NAMESPACE && test -z "$(git ls-files --others --exclude-standard man)" || { echo "Run roxygen2::roxygenise() and stage man/ and NAMESPACE"; exit 1; }'
         pass_filenames: false
         files: '^(R/[^/]+\.R$|DESCRIPTION$|NAMESPACE$|man/)'
 
@@ -59,7 +71,8 @@ repos:
       - id: gta-tests
         name: gta package tests pass
         language: system
-        entry: Rscript -e 'testthat::test_local(stop_on_failure = TRUE, reporter = "summary")'
+        stages: [manual]
+        entry: tests/rscript.sh -e 'testthat::test_local(stop_on_failure = TRUE, reporter = "summary")'
         pass_filenames: false
         files: '^(R/[^/]+\.R$|DESCRIPTION$|NAMESPACE$|tests/testthat|tests/sample_data/|config/entities/)'
 
